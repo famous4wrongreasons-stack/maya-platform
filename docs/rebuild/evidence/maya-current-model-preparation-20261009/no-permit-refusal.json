@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-09T21:39:56.141970+00:00",
+  "exitCode": 1,
+  "refusal": "core_broker_explicit_permit",
+  "keyPromptOpened": false,
+  "permitCreated": false,
+  "claimCreated": false,
+  "brokerReportCreated": false,
+  "paidCalls": 0,
+  "qualification": "MISSING_PERMIT_REFUSAL_BEFORE_CREDENTIAL_ADMISSION"
+}

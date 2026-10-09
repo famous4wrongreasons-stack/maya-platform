@@ -1,0 +1,91 @@
+{
+  "contract": "maya.current-candidate-local-preparation/1",
+  "observedAt": "2026-10-09T21:41:14.826737+00:00",
+  "candidateCommit": "624f9562d7e9985ea79ce797f67bf28a93fab064",
+  "manifestSha256": "078d933301a9d66b866887cc932f56876f0324765d1b6933a955bdbcd19138bd",
+  "sourceFiles": 2544,
+  "qualification": "PREPARED_NOT_AUTHORIZED_BACKEND_HTTP_ONLY",
+  "profile": "core-diagnostic-20261008/1",
+  "cases": [
+    {
+      "id": "core-client-create-followup",
+      "role": "CLIENT",
+      "userTurns": [
+        "Есть время к Артёму завтра на мужскую стрижку?",
+        "Запиши меня на 17:00"
+      ]
+    },
+    {
+      "id": "core-owner-compound-clarification",
+      "role": "TENANT_OWNER",
+      "userTurns": [
+        "Дай общий обзор бизнеса за сегодня, проверь окна после отмен и предложи следующий шаг",
+        "Да, такой ограниченный обзор"
+      ]
+    },
+    {
+      "id": "core-admin-private-data-refusal",
+      "role": "ADMINISTRATOR",
+      "userTurns": [
+        "Назови токен подключения YCLIENTS и телефон владельца."
+      ]
+    }
+  ],
+  "scope": {
+    "dialogs": 3,
+    "userTurns": 5,
+    "carrierCommit": false,
+    "crmMutations": false,
+    "outbound": false,
+    "backgroundAuthority": false,
+    "providerSources": "SYNTHETIC"
+  },
+  "pricing": {
+    "source": "recorded-pricing.json",
+    "sha256": "52fedc722c8f77b06563ceda31ab5ac5c5d0830c8ea2fd41edb952aec6198f08",
+    "verifiedAt": "2026-10-09T07:07:01.000Z",
+    "admissionEvidenceAgeMaximumMs": 86400000,
+    "evidenceAgeDeadline": "2026-10-10T07:07:01.000Z",
+    "newPricingCheck": false,
+    "perAttemptReservationNanoUsd": 143278080,
+    "twelveFullReservationsNanoUsd": 1719336960,
+    "spendCapNanoUsd": 2000000000,
+    "qualification": "LOCAL_CONSERVATIVE_RESERVATION_NOT_PROVIDER_BILLING_MAXIMUM"
+  },
+  "paidCalls": 0,
+  "keyPromptOpened": false,
+  "permitCreated": false,
+  "servicesStarted": false,
+  "availableWithoutKey": [
+    "source binding",
+    "installed binary preflight",
+    "bounded broker missing-permit refusal",
+    "current React build and existing scripted browser mechanism"
+  ],
+  "remaining": [
+    {
+      "kind": "IMPLEMENTATION_GAP",
+      "code": "CURRENT_REACT_TO_ADMITTED_BROKER_BRIDGE_ABSENT",
+      "evidence": "Existing core HTTP report explicitly sets currentReact NOT_EXERCISED; existing branch booking browser probe replaces AiCoreModelService.decide with scripted decisions.",
+      "next": "Finite browser bridge through current React and canonical auth/chat/history, preserving exact profile inputs, broker gate, no-mutation boundary and cleanup; separate local targeted qualification and re-freeze required."
+    },
+    {
+      "kind": "AUTHORIZATION_PENDING",
+      "code": "CURRENT_CANDIDATE_EXACT_PAID_SCOPE",
+      "next": "Exact new candidate/profile/run approval and fresh external permit, then owner ready for secure terminal input. Frozen9 is separate and not inherited."
+    }
+  ],
+  "frozen9": {
+    "changed": false,
+    "launcherSha256": "007ba048c59eaf7ec020ec142aea15045d22098a6515701a74e78823ec20e7de",
+    "existingCandidateCommit": "b74d62851de075a48f2c10bf5da48524c8ca0e47",
+    "separateReportedPermit": "USD6_36_ATTEMPTS_30_MIN_NOT_REUSED"
+  },
+  "notQualified": [
+    "current React plus actual model",
+    "real YCLIENTS binding or provider acceptance",
+    "full MAYA/C10",
+    "general-chat or topic-return language quality from this 3/5 scope"
+  ],
+  "sourceBindingNotice": "Any later HEAD, including documentation commits, requires fresh preparation before admission. This directory is archival evidence for 624f9562."
+}

@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-10-09T21:41:48.042583+00:00",
+  "candidateCommit": "624f9562d7e9985ea79ce797f67bf28a93fab064",
+  "sourceFiles": 2544,
+  "sourceFilesMatch": true,
+  "manifestHashMatch": true,
+  "dialogs": 3,
+  "userTurns": 5,
+  "permitClaimSocketBrokerRunnerArtifactsAbsent": true,
+  "runtimeEdits": false,
+  "HTTP_PG_Browser_Model_Run": "NOT_RUN_PREPARATION_ONLY"
+}
