@@ -16,6 +16,12 @@ import { AiToolRuntimeService } from './ai-tool-runtime.service';
 import { PersonalClientContextService } from '../appointments/personal-client-context.service';
 import type { AiReadWidgetTriggerPort } from './ai-read-widget-trigger.port';
 
+const SCOPED_READ_TOOLS = [
+  'staff.schedule.read',
+  'operations.journal.read',
+  'catalog.services.read',
+];
+
 const IDEMPOTENCY_KEY = '59f04d18-c04a-4f1d-a529-345fe6f2a65d';
 
 describe('AiToolRuntimeService', () => {
@@ -30,8 +36,8 @@ describe('AiToolRuntimeService', () => {
     membershipStatus: 'active',
   };
 
-  describe.each(['staff.schedule.read', 'operations.journal.read'])(
-    'finite current employee day READ scope %s',
+  describe.each(SCOPED_READ_TOOLS)(
+    'finite current employee READ scope %s',
     (dayTool) => {
       const scope = (): StaffScheduleReadScope => ({
         branchId: 'branch-a',
@@ -367,7 +373,7 @@ describe('AiToolRuntimeService', () => {
           const h = fixture();
           let value: unknown = scope();
           let name = dayTool;
-          if (kind === 'wrong-tool') name = 'catalog.services.read';
+          if (kind === 'wrong-tool') name = 'business.rules.read';
           if (kind === 'catalog-staff') name = 'catalog.staff.read';
           if (kind === 'missing-staff')
             value = { branchId: 'branch-a', sourceRevision: 'a'.repeat(64) };
@@ -376,7 +382,11 @@ describe('AiToolRuntimeService', () => {
           if (kind === 'different-id')
             value = {
               ...scope(),
-              staffSource: { ...scope().staffSource, externalStaffId: '72' },
+              staffSource: {
+                ...scope().staffSource,
+                externalStaffId:
+                  dayTool === 'catalog.services.read' ? '' : '72',
+              },
             };
           if (kind === 'array-provider')
             value = {

@@ -37,6 +37,140 @@ describe('AiToolHandlerService output minimization', () => {
     jest.useRealTimers();
   });
 
+  describe('bound employee service catalog [synthetic CRM owner]', () => {
+    function fixture() {
+      const scope: StaffScheduleReadScope = {
+        branchId: 'branch-a',
+        sourceRevision: 'a'.repeat(64),
+        staffSource: {
+          provider: 'yclients',
+          staffId: 'local-staff',
+          externalStaffId: '71',
+          branchId: 'branch-a',
+          timezone: 'Europe/Moscow',
+          sourceHash: 'b'.repeat(64),
+        },
+      };
+      const configured = jest.fn().mockResolvedValue({
+        id: scope.branchId,
+        sourceRevision: scope.sourceRevision,
+        timezone: 'Europe/Moscow',
+      });
+      const staffSource = jest.fn().mockResolvedValue(scope.staffSource);
+      const snapshot = {
+        contract: 'maya.service-catalog.read/1',
+        source: 'external_crm',
+        scope: 'public_booking_catalog',
+        as_of: '2026-10-09T12:00:00.000Z',
+        catalog_exhaustive: false,
+        services: [
+          {
+            id: '81',
+            name: 'Стрижка',
+            price: null,
+            price_min: 1000,
+            price_max: 2000,
+            duration_minutes: null,
+            currency: null,
+            category: null,
+            limitations: [
+              'price_is_range',
+              'duration_not_observed',
+              'currency_not_configured',
+            ],
+          },
+        ],
+      };
+      const catalog = jest.fn().mockResolvedValue(snapshot),
+        legacy = jest.fn();
+      const service = createService({
+        crmService: {
+          resolveConfiguredBookingBranch: configured,
+          resolveStaffScheduleSource: staffSource,
+          readServiceCatalog: catalog,
+          getServices: legacy,
+        } as unknown as CrmService,
+      });
+      const actor: AiToolPrincipal = {
+        ...principal,
+        staffScheduleReadSource: scope,
+      };
+      return {
+        scope,
+        configured,
+        staffSource,
+        snapshot,
+        catalog,
+        legacy,
+        actor,
+        run: () =>
+          service.execute(
+            'catalog.services.read',
+            actor,
+            {},
+            'staff-services-read',
+          ),
+      };
+    }
+    it('passes only the trusted source to the owner and preserves ranges/unknowns with a private witness', async () => {
+      const f = fixture();
+      await expect(f.run()).resolves.toEqual({
+        ...f.snapshot,
+        read_scope: {
+          contract: 'maya.staff-service-catalog.read/1',
+          branch_id: f.scope.branchId,
+          source_revision: f.scope.sourceRevision,
+          source_hash: f.scope.staffSource!.sourceHash,
+          staff_id: '71',
+        },
+      });
+      expect(f.catalog).toHaveBeenCalledWith(principal.tenantId, {
+        source: f.scope.staffSource,
+      });
+      expect(f.legacy).not.toHaveBeenCalled();
+    });
+    it.each(['before', 'after'])(
+      'refuses current source drift %s owner read',
+      async (when) => {
+        const f = fixture();
+        if (when === 'before') f.configured.mockResolvedValue(null);
+        else
+          f.catalog.mockImplementation(() => {
+            f.configured.mockResolvedValue(null);
+            return Promise.resolve(f.snapshot);
+          });
+        await expect(f.run()).rejects.toThrow(ConflictException);
+        expect(f.catalog).toHaveBeenCalledTimes(when === 'before' ? 0 : 1);
+        expect(f.legacy).not.toHaveBeenCalled();
+      },
+    );
+    it('preserves owner Forbidden without fallback', async () => {
+      const f = fixture();
+      f.staffSource.mockRejectedValue(new ForbiddenException());
+      await expect(f.run()).rejects.toBeInstanceOf(ForbiddenException);
+      expect(f.catalog).not.toHaveBeenCalled();
+    });
+    it('rejects a public company marker as an employee-service witness', async () => {
+      const f = fixture();
+      f.actor.staffScheduleReadSource = {
+        branchId: f.scope.branchId,
+        sourceRevision: f.scope.sourceRevision,
+        publicProjection: 'company_profile',
+      };
+      await expect(f.run()).rejects.toThrow(ConflictException);
+      expect(f.catalog).not.toHaveBeenCalled();
+      expect(f.configured).not.toHaveBeenCalled();
+    });
+    it('keeps unscoped general catalog calls and their existing shape unchanged', async () => {
+      const f = fixture();
+      delete f.actor.staffScheduleReadSource;
+      await expect(f.run()).resolves.toEqual(f.snapshot);
+      expect(f.catalog).toHaveBeenCalledWith(principal.tenantId);
+      expect(f.configured).not.toHaveBeenCalled();
+      expect(f.staffSource).not.toHaveBeenCalled();
+    });
+  });
+
   describe('bound public company profile [synthetic CRM owner]', () => {
     function fixture() {
       const scope: StaffScheduleReadScope = {

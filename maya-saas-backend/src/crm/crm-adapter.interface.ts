@@ -518,7 +518,10 @@ export interface CRMAdapter {
   ): Promise<CrmCompanyProfile | null>;
   getServices(tenantId: string): Promise<ServiceItem[]>;
   /** Fresh observed catalog facts, before legacy numeric defaults. Not a mutation quote. */
-  readServiceCatalog?(tenantId: string): Promise<ServiceCatalogRead>;
+  readServiceCatalog?(
+    tenantId: string,
+    options?: Readonly<{ staffId: string }>,
+  ): Promise<ServiceCatalogRead>;
   /** Exact goods metadata, separate price meanings/units; not stock or a write quote. */
   /** Finite receipt port. YCLIENTS transport is implemented but its undocumented
    * selected-store/type permission scopes remain fail-closed. Never a generic write port. */

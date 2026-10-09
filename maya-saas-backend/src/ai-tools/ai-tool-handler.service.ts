@@ -290,7 +290,7 @@ export class AiToolHandlerService {
       case 'clients.no-show-risk.read':
         return this.readNoShowRiskClients(principal, args);
       case 'catalog.services.read':
-        return this.readServices(principal.tenantId);
+        return this.readServices(principal);
       case 'catalog.service.rename.preview':
         return this.crmService.previewServiceRenameForActor(
           principal.tenantId,
@@ -552,8 +552,36 @@ export class AiToolHandlerService {
     return value;
   }
 
-  private async readServices(tenantId: string) {
-    return this.crmService.readServiceCatalog(tenantId);
+  private async readServices(principal: AiToolPrincipal) {
+    const scope = principal.staffScheduleReadSource;
+    if (!scope) return this.crmService.readServiceCatalog(principal.tenantId);
+    await this.assertStaffScheduleReadScope(
+      principal,
+      'catalog.services.read',
+      {},
+      scope,
+    );
+    const source = scope.staffSource!; // Closed scope parser above requires the exact staff witness.
+    const catalog = await this.crmService.readServiceCatalog(
+      principal.tenantId,
+      { source },
+    );
+    await this.assertStaffScheduleReadScope(
+      principal,
+      'catalog.services.read',
+      {},
+      scope,
+    );
+    return {
+      ...catalog,
+      read_scope: {
+        contract: 'maya.staff-service-catalog.read/1',
+        branch_id: scope.branchId,
+        source_revision: scope.sourceRevision,
+        source_hash: source.sourceHash,
+        staff_id: source.externalStaffId,
+      },
+    };
   }
 
   private async listOwnAppointments(principal: AiToolPrincipal) {

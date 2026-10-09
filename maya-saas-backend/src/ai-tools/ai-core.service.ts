@@ -1,4 +1,9 @@
 import {
+  employeeServiceTask,
+  readEmployeeServices,
+  EMPLOYEE_SERVICES_UNAVAILABLE,
+} from './employee-service-read';
+import {
   employeeJournalTask,
   readEmployeeJournal,
 } from './employee-journal-read';
@@ -271,6 +276,7 @@ type AiCoreCompletion = {
   financialPeriodReply?: true;
   employeeScheduleReply?: true;
   employeeJournalReply?: true;
+  employeeServicesReply?: true;
   publicCompanyReply?: true;
   biReport?: Awaited<ReturnType<C9Orchestrator['explainFinancialReport']>>;
   lifecycle?: Awaited<ReturnType<C9Orchestrator['checkClientReturn']>>;
@@ -2257,6 +2263,132 @@ export class AiCoreService {
             );
           }
         }
+        const requestedEmployeeServices = decision.semanticPlan?.tasks.some(
+          (task) =>
+            ['services.list', 'services.price'].includes(task.intent) &&
+            task.permission.status === 'allowed' &&
+            Object.hasOwn(task.entities, 'employee'),
+        );
+        if (requestedEmployeeServices) {
+          const task = employeeServiceTask(decision.semanticPlan ?? null);
+          let presented: { reply: string; status: 'verified' | 'blocked' } = {
+            reply:
+              'Уточните одного мастера и отдельно запросите его услуги или цену одной услуги.',
+            status: 'blocked',
+          };
+          if (
+            task &&
+            this.crm &&
+            step === 0 &&
+            toolsUsed.length === 0 &&
+            maxToolSteps >= 2 &&
+            allowedNames.has('catalog.staff.read') &&
+            allowedNames.has('catalog.services.read')
+          ) {
+            try {
+              presented = await readEmployeeServices({
+                actor: toolUser,
+                task,
+                nameReferences: sanitized.nameReferences,
+                unresolvedReferences:
+                  decision.semanticPlan!.context.unresolved_references,
+                crm: this.crm,
+                read: async (name, args, staffScheduleReadScope) => {
+                  const execution = this.record(
+                    await this.executeChatTool(
+                      dto,
+                      toolUser,
+                      name,
+                      {
+                        surface: dto.surface,
+                        arguments: args,
+                        idempotencyKey: this.toolIdempotencyKey(
+                          tenantId,
+                          user.userId,
+                          dto.requestId,
+                          toolsUsed.length,
+                          name,
+                        ),
+                      },
+                      { suppressWidgetTrigger: true, staffScheduleReadScope },
+                    ),
+                  );
+                  toolsUsed.push({
+                    name,
+                    status:
+                      typeof execution.status === 'string'
+                        ? execution.status
+                        : 'unknown',
+                    execution_id:
+                      typeof execution.execution_id === 'string'
+                        ? execution.execution_id
+                        : null,
+                  });
+                  if (
+                    execution.status === 'completed' &&
+                    execution.stale !== true
+                  )
+                    toolResults.push({
+                      name,
+                      result: this.sanitizeToolResult(execution.result),
+                    });
+                  return execution;
+                },
+              });
+              if (presented.status === 'verified') {
+                task.requires_clarification = false;
+                task.clarification_question = null;
+                decision.semanticPlan!.context.unresolved_references = [];
+              }
+            } catch (error) {
+              const code =
+                error instanceof HttpException
+                  ? this.record(this.record(error.getResponse()).error).code
+                  : null;
+              if (
+                !(error instanceof HttpException) ||
+                ![409, 503].includes(error.getStatus()) ||
+                typeof code !== 'string' ||
+                ![
+                  'booking_branch_source_unavailable',
+                  'staff_schedule_source_unavailable',
+                  'staff_schedule_read_source_changed',
+                  'service_catalog_source_unavailable',
+                  'ai_tool_staff_schedule_source_changed',
+                  'ai_tool_idempotency_conflict',
+                ].includes(code)
+              )
+                throw error;
+              toolResults.length = 0;
+              presented = EMPLOYEE_SERVICES_UNAVAILABLE;
+            }
+          }
+          return this.complete(
+            user,
+            dto,
+            brain,
+            sanitized.redacted,
+            toolsUsed,
+            decisions,
+            {
+              reply: presented.reply,
+              source: 'safe_fallback',
+              action: null,
+              employeeServicesReply: true,
+              grounding: this.groundingReport(
+                {
+                  evidenceToolNames: ['catalog.services.read'],
+                  fallbackDomain: 'staff_services',
+                  closedForAccess: false,
+                  strictNumbers: true,
+                },
+                presented.status,
+                toolResults,
+              ),
+            },
+            toolResults,
+          );
+        }
         const employeeSchedule = decision.semanticPlan
           ? employeeScheduleTask(decision.semanticPlan)
           : null;
@@ -3793,6 +3925,7 @@ export class AiCoreService {
               if (
                 response.employeeScheduleReply ||
                 response.employeeJournalReply ||
+                response.employeeServicesReply ||
                 response.publicCompanyReply
               )
                 throw error;
@@ -3806,6 +3939,7 @@ export class AiCoreService {
     if (
       (response.employeeScheduleReply ||
         response.employeeJournalReply ||
+        response.employeeServicesReply ||
         response.publicCompanyReply) &&
       response.grounding?.status === 'verified' &&
       readTurn &&
@@ -3846,6 +3980,7 @@ export class AiCoreService {
       !response.financialPeriodReply &&
       !response.employeeScheduleReply &&
       !response.employeeJournalReply &&
+      !response.employeeServicesReply &&
       !response.publicCompanyReply &&
       grounding.status === 'verified' &&
       toolResults.length > 0

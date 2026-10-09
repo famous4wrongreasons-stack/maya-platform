@@ -27,6 +27,7 @@ import {
   requireBookableServiceFacts,
   bookingServiceFactsFingerprint,
   BOOKING_FACTS_EVIDENCE_PREFIX,
+  SERVICE_CATALOG_READ_CONTRACT,
   type ServiceCatalogRead,
 } from './service-catalog-read';
 import { resolveAvailabilityCalendar } from './availability-calendar.service';
@@ -1098,8 +1099,146 @@ export class CrmService {
   }
 
   /** Tenant scope and current adapter ownership stay here; no public/mutation DTO change. */
-  async readServiceCatalog(tenantId: string): Promise<ServiceCatalogRead> {
+  async readServiceCatalog(
+    tenantId: string,
+    options?: Readonly<{ source: StaffScheduleSource }>,
+  ): Promise<ServiceCatalogRead> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    if (options !== undefined) {
+      const raw = options?.source;
+      // Exact server metadata only. Capture before any await; missing scope
+      // must never widen an employee request to the general catalog.
+      if (
+        !options ||
+        typeof options !== 'object' ||
+        Array.isArray(options) ||
+        Object.keys(options).length !== 1 ||
+        !Object.hasOwn(options, 'source') ||
+        !raw ||
+        typeof raw !== 'object' ||
+        Array.isArray(raw) ||
+        Object.keys(raw).length !== 6 ||
+        Object.keys(raw).some(
+          (key) =>
+            ![
+              'provider',
+              'staffId',
+              'branchId',
+              'externalStaffId',
+              'timezone',
+              'sourceHash',
+            ].includes(key),
+        ) ||
+        typeof raw.provider !== 'string' ||
+        !['yclients', 'altegio'].includes(raw.provider) ||
+        [raw.staffId, raw.branchId, raw.externalStaffId].some(
+          (value) =>
+            typeof value !== 'string' ||
+            !value.length ||
+            value.length > 128 ||
+            value.trim() !== value ||
+            [...value].some((character) => {
+              const code = character.charCodeAt(0);
+              return code < 32 || code === 127;
+            }),
+        ) ||
+        !isUsableTimezone(raw.timezone) ||
+        typeof raw.sourceHash !== 'string' ||
+        raw.sourceHash.length !== 64 ||
+        !/^[a-f0-9]{64}$/u.test(raw.sourceHash)
+      )
+        throw this.staffScheduleSourceUnavailable();
+      const source = Object.freeze({ ...raw });
+      const metadata = async <T>(read: () => Promise<T>): Promise<T> => {
+        try {
+          return await read();
+        } catch (error) {
+          if (
+            error instanceof BadRequestException ||
+            error instanceof NotFoundException ||
+            error instanceof ConflictException ||
+            error instanceof ServiceUnavailableException
+          )
+            throw this.staffScheduleSourceUnavailable();
+          // Tenant/current authority failures retain their original refusal.
+          throw error;
+        }
+      };
+      const current = () =>
+        metadata(() =>
+          this.resolveStaffScheduleSource(
+            scopedTenantId,
+            source.externalStaffId,
+            source,
+          ),
+        );
+      const loadAdapter = () =>
+        metadata(() => this.getAdapterForTenant(scopedTenantId));
+      await current();
+      const adapter = await loadAdapter();
+      const revalidate = async () => {
+        if ((await loadAdapter()) !== adapter)
+          throw this.staffScheduleSourceUnavailable();
+        // Recheck after the adapter lookup's own metadata awaits.
+        await current();
+      };
+      await revalidate();
+      const unavailable = (): never => {
+        throw new ServiceUnavailableException({
+          error: { code: 'service_catalog_source_unavailable' },
+        });
+      };
+      if (!adapter.readServiceCatalog) unavailable();
+      let result: ServiceCatalogRead;
+      try {
+        const returned = await adapter.readServiceCatalog!(scopedTenantId, {
+          staffId: source.externalStaffId,
+        });
+        if (
+          !returned ||
+          returned.contract !== SERVICE_CATALOG_READ_CONTRACT ||
+          !['external_crm', 'synthetic'].includes(returned.source) ||
+          !['public_booking_catalog', 'active_services'].includes(
+            returned.scope,
+          ) ||
+          typeof returned.as_of !== 'string' ||
+          !Number.isFinite(Date.parse(returned.as_of)) ||
+          returned.catalog_exhaustive !== false ||
+          !Array.isArray(returned.services)
+        )
+          unavailable();
+        // Capture only the existing public contract before metadata awaits.
+        // Native validation owns raw prices/IDs; this copy prevents a shared
+        // adapter holder from substituting those facts after its GET completed.
+        result = structuredClone({
+          contract: returned.contract,
+          source: returned.source,
+          scope: returned.scope,
+          as_of: returned.as_of,
+          catalog_exhaustive: returned.catalog_exhaustive,
+          services: returned.services.map((item) => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            price_min: item.price_min,
+            price_max: item.price_max,
+            duration_minutes: item.duration_minutes,
+            currency: item.currency,
+            category: item.category,
+            limitations: [...item.limitations],
+          })),
+        });
+      } catch (error) {
+        if (
+          error instanceof ForbiddenException ||
+          error instanceof UnauthorizedException
+        )
+          throw error;
+        return unavailable();
+      }
+      await revalidate();
+      return result;
+    }
     if (
       (await this.getCalendarSource(scopedTenantId)) === CalendarSource.INTERNAL
     )

@@ -693,30 +693,98 @@ export class YclientsCRMAdapter implements CRMAdapter {
   }
 
   /** One fresh public READ; no cached/defaulted ServiceOffering or management fallback. */
-  async readServiceCatalog(tenantId: string): Promise<ServiceCatalogRead> {
+  async readServiceCatalog(
+    tenantId: string,
+    options?: Readonly<{ staffId: string }>,
+  ): Promise<ServiceCatalogRead> {
     void tenantId;
-    const response = await this.request<{
-      services?: YclientsServiceApiItem[];
-    }>(`book_services/${this.getCompanyId()}`);
-    if (!Array.isArray(response.data?.services))
+    const scoped = options !== undefined;
+    const unavailable = (): never => {
+      throw new ServiceUnavailableException({
+        error: { code: 'service_catalog_source_unavailable' },
+      });
+    };
+    const exactId = (value: unknown): boolean =>
+      (typeof value === 'number' &&
+        Number.isSafeInteger(value) &&
+        value > 0 &&
+        value < 1e15) ||
+      (typeof value === 'string' &&
+        value.length <= 15 &&
+        value.trim() === value &&
+        /^[1-9]\d{0,14}$/u.test(value));
+    if (
+      scoped &&
+      (!options ||
+        typeof options !== 'object' ||
+        Array.isArray(options) ||
+        Object.keys(options).length !== 1 ||
+        !Object.hasOwn(options, 'staffId') ||
+        typeof options.staffId !== 'string' ||
+        !exactId(options.staffId) ||
+        !exactId(this.settings.companyId))
+    )
+      unavailable();
+    const query = scoped
+      ? new URLSearchParams({ staff_id: options.staffId })
+      : undefined;
+    // Capture declared currency before provider await for the scoped read.
+    const scopedCurrency =
+      typeof this.settings.currency === 'string' &&
+      this.settings.currency.length === 3 &&
+      /^[A-Z]{3}$/u.test(this.settings.currency)
+        ? this.settings.currency
+        : null;
+    let response: YclientsResponse<{ services?: YclientsServiceApiItem[] }>;
+    try {
+      response = await this.request<{ services?: YclientsServiceApiItem[] }>(
+        `book_services/${this.getCompanyId()}`,
+        scoped ? { query } : undefined,
+      );
+    } catch (error) {
+      if (scoped) unavailable();
+      throw error;
+    }
+    if (
+      scoped &&
+      (!response ||
+        typeof response !== 'object' ||
+        Array.isArray(response) ||
+        response.success !== true)
+    )
+      unavailable();
+    if (!Array.isArray(response.data?.services)) {
+      if (scoped) unavailable();
       throw new Error('service_catalog_source_unavailable');
+    }
     const asOf = new Date().toISOString();
     // Currency is a declared tenant setting here, not an observed provider default.
-    const currency =
-      typeof this.settings.currency === 'string' &&
-      /^[A-Z]{3}$/.test(this.settings.currency)
+    const currency = scoped
+      ? scopedCurrency
+      : typeof this.settings.currency === 'string' &&
+          /^[A-Z]{3}$/.test(this.settings.currency)
         ? this.settings.currency
         : null;
     const nonnegative = (v: unknown): number | null =>
       typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : null;
     const services = response.data.services.map((service) => {
+      if (
+        scoped &&
+        (!service ||
+          typeof service !== 'object' ||
+          Array.isArray(service) ||
+          !exactId(service.id))
+      )
+        unavailable();
       const id = String(service?.id ?? '');
       if (
         !service ||
         !/^[1-9]\d{0,14}$/.test(id) ||
         typeof service.title !== 'string'
-      )
+      ) {
+        if (scoped) unavailable();
         throw new Error('service_catalog_identity_unavailable');
+      }
       const minimum = nonnegative(service.price_min),
         maximum = nonnegative(service.price_max);
       const ordered =
@@ -749,7 +817,13 @@ export class YclientsCRMAdapter implements CRMAdapter {
         limitations,
       };
     });
-    assertCatalogIdentities(services);
+    if (scoped) {
+      try {
+        assertCatalogIdentities(services);
+      } catch {
+        unavailable();
+      }
+    } else assertCatalogIdentities(services);
     return {
       contract: SERVICE_CATALOG_READ_CONTRACT,
       source: 'external_crm',

@@ -31,7 +31,7 @@ const invalid = (): never => {
   });
 };
 
-/** Copy the closed catalog/schedule/journal witness so caller mutation cannot change its hash. */
+/** Copy the closed catalog/schedule/journal/service witness so caller mutation cannot change its hash. */
 export function staffScheduleReadScope(
   name: string,
   args: Readonly<Record<string, unknown>>,
@@ -63,7 +63,11 @@ export function staffScheduleReadScope(
     });
   }
   if (
-    !['staff.schedule.read', 'operations.journal.read'].includes(name) ||
+    ![
+      'staff.schedule.read',
+      'operations.journal.read',
+      'catalog.services.read',
+    ].includes(name) ||
     keys.length !== 3 ||
     keys.some(
       (key) => !['branchId', 'sourceRevision', 'staffSource'].includes(key),
@@ -79,7 +83,9 @@ export function staffScheduleReadScope(
     !id(source.staffId) ||
     source.branchId !== value.branchId ||
     !id(source.externalStaffId) ||
-    args.staff_id !== source.externalStaffId ||
+    (name === 'catalog.services.read'
+      ? Object.keys(args).length !== 0
+      : args.staff_id !== source.externalStaffId) ||
     !isUsableTimezone(source.timezone) ||
     !hash(source.sourceHash) ||
     Object.keys(source).some(
