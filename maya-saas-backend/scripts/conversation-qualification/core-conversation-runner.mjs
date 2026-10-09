@@ -31,6 +31,10 @@ import { coreConversationResources } from './core-conversation-resources.mjs';
 import { CORE_RECORDED_REPLAY_QUALIFICATION } from './core-recorded-replay.mjs';
 import { summarizeCoreUnionReport } from './core-conversation-assessment.mjs';
 import { summarizeCoreFullOfflineReport } from './core-full-offline-report.mjs';
+import {
+  scoreCoreFullOfflineReport,
+  incompleteCoreFullOfflineScore,
+} from './core-full-offline-score.mjs';
 const { values } = parseArgs({
   options: {
     prepare: { type: 'boolean' },
@@ -488,12 +492,68 @@ try {
     report.semanticStatus = summary.semanticStatus;
     report.coverage = summary.coverage;
     process.exitCode = summary.exitCode;
+    if (profile.id === CORE_OFFLINE_PROFILE) {
+      const scored = scoreCoreFullOfflineReport(httpReport, reportBinding);
+      fs.writeFileSync(
+        path.join(output, 'semantic-score.json'),
+        JSON.stringify(scored, null, 2) + '\n',
+        { mode: 0o600 },
+      );
+      report.legacyReplaySemanticStatus = summary.semanticStatus;
+      report.fullOfflineSemanticScore = {
+        qualification: scored.qualification,
+        expectationSha256: scored.expectationSha256,
+        scoredTurns: scored.scoredTurns,
+        counts: scored.counts,
+        criticalSafety: scored.criticalSafety,
+        rawHttpReportHash: scored.rawHttpReportHash,
+      };
+      report.semanticStatus = scored.semanticStatus;
+      report.status = scored.status;
+      process.exitCode = scored.exitCode;
+    }
   }
 } catch (error) {
   report.status = 'failed';
   report.failure = error.message;
   process.exitCode = 1;
 } finally {
+  if (profile.id === CORE_OFFLINE_PROFILE && !report.fullOfflineSemanticScore) {
+    // A stopped transport still needs an honest 81-row audit. Missing attempts
+    // become insufficient evidence, never substituted responses or successes.
+    const partial = path.join(output, 'http-report.json');
+    if (fs.existsSync(partial)) {
+      try {
+        const stat = fs.lstatSync(partial);
+        assert.ok(
+          stat.isFile() &&
+            !stat.isSymbolicLink() &&
+            stat.size <= 8 * 1024 * 1024,
+        );
+        const scored = scoreCoreFullOfflineReport(
+          JSON.parse(fs.readFileSync(partial, 'utf8')),
+          {
+            manifestSha256,
+            candidateCommit: manifest.candidateCommit,
+            cases: manifest.cases,
+          },
+        );
+        fs.writeFileSync(
+          path.join(output, 'semantic-score.json'),
+          JSON.stringify(incompleteCoreFullOfflineScore(scored), null, 2) +
+            '\n',
+          { mode: 0o600 },
+        );
+        report.partialSemanticScore = {
+          scoredTurns: scored.scoredTurns,
+          counts: scored.counts,
+          criticalSafety: scored.criticalSafety,
+        };
+      } catch {
+        report.partialSemanticScore = { status: 'UNCONFIRMED' };
+      }
+    }
+  }
   if (stopBroker) {
     try {
       await stopBroker();

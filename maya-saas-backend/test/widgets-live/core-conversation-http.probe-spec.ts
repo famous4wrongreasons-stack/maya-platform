@@ -13,6 +13,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import request from 'supertest';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
+import { AiCoreService } from '../../src/ai-tools/ai-core.service';
 import type { AiCoreModelInput } from '../../src/ai-tools/ai-core.types';
 import { AiToolPolicyService } from '../../src/ai-tools/ai-tool-policy.service';
 import { OWNER_REVIEW_QUESTION } from '../../src/ai-tools/owner-review-plan';
@@ -39,6 +40,11 @@ import {
 } from './support/core-full-offline-fixtures';
 import { occupancyFixtureEdge } from './support/c9-occupancy-fixture-edge';
 import { assertProofDatabase } from './support/proof-db-guard';
+import {
+  captureCoreFullOfflineAudit,
+  sanitizeCoreFullOfflineAuditValue,
+  projectCoreFullOfflinePublicCompany,
+} from './support/core-full-offline-audit';
 
 const nativeRequire = createRequire(__filename);
 const { replayPilot, sha256 } = nativeRequire(
@@ -136,6 +142,51 @@ const rawFetch = globalThis.fetch;
 const hash = (value: unknown) => sha256(JSON.stringify(value));
 const fileHash = (file: string) =>
   createHash('sha256').update(readFileSync(file)).digest('hex');
+const auditRecord = (value: unknown): Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+function offlineSelection(value: unknown, tenantId: string) {
+  const resolution = auditRecord(value),
+    receipt = auditRecord(resolution.receipt),
+    envelope = auditRecord(receipt.envelope),
+    body = auditRecord(envelope.body),
+    provenance = auditRecord(envelope.provenance);
+  const groups = Array.isArray(body.groups) ? body.groups : [];
+  const slots = groups.flatMap((group) => {
+    const rows = auditRecord(group).slots;
+    return Array.isArray(rows)
+      ? rows.map((value) => {
+          const slot = auditRecord(value);
+          return {
+            start: auditRecord(slot.start).value ?? null,
+            end: auditRecord(slot.end).value ?? null,
+          };
+        })
+      : [];
+  });
+  return {
+    matched: resolution.matched === true,
+    contract: typeof envelope.contract === 'string' ? envelope.contract : null,
+    receiptMatches:
+      typeof receipt.widget_id === 'string' &&
+      receipt.widget_id.length > 0 &&
+      envelope.widget_id === receipt.widget_id,
+    kind: typeof envelope.kind === 'string' ? envelope.kind : null,
+    sourceCapability:
+      typeof provenance.source_capability === 'string'
+        ? provenance.source_capability
+        : null,
+    tenantMatches: envelope.tenant_id === tenantId,
+    shownCount: typeof body.shown_count === 'number' ? body.shown_count : null,
+    exactReview: hasExactReviewedSlot(value, {
+      tenantId,
+      timezone: 'Europe/Moscow',
+      start: typeof slots[0]?.start === 'string' ? slots[0].start : '',
+    }),
+    slots,
+  };
+}
 const safeDiagnosticCode = (value: unknown) =>
   typeof value === 'string' &&
   /^(?:ai_core|ai_model|conversation|core)_[a-z0-9_:-]{1,72}$/.test(value)
@@ -230,6 +281,10 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
   const wireObservations: Record<string, unknown>[] = [];
   const policyObservations: Record<string, unknown>[] = [];
   const responses: Record<string, unknown>[] = [];
+  const offlineCompletions = new Map<
+    string,
+    ReturnType<typeof captureCoreFullOfflineAudit>
+  >();
   const preflights: Record<string, unknown>[] = [];
   const replayRecords: Record<string, unknown>[] = [];
   let result: ReplayResult | null = null;
@@ -543,6 +598,30 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
     });
     const model = http.app.get(AiCoreModelService),
       decide = model.decide.bind(model);
+    if (profile.id === CORE_OFFLINE_PROFILE) {
+      // Read-only observation of the existing owner at its actual completion
+      // boundary. No decision/result/history is replaced by this diagnostic.
+      const core = http.app.get<{
+        complete(...args: unknown[]): Promise<unknown>;
+      }>(AiCoreService);
+      const complete = core.complete.bind(core);
+      jest.spyOn(core, 'complete').mockImplementation(async (...args) => {
+        if (active && turn > 0) {
+          const snapshot = captureCoreFullOfflineAudit(args, {
+            tenantId: active.tenant.id,
+            userId: active.user.id,
+            privateValues: active.privateValues,
+          });
+          offlineCompletions.set(`${active.item.id}:${turn}`, snapshot);
+          append('offline-completion-audit.jsonl', {
+            caseId: active.item.id,
+            turn,
+            ...snapshot,
+          });
+        }
+        return complete(...args);
+      });
+    }
     jest
       .spyOn(model, 'decide')
       .mockImplementation(async (input: AiCoreModelInput) => {
@@ -861,6 +940,15 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       financeReads,
       forbidden,
       replayRecords,
+      ...(profile?.id === CORE_OFFLINE_PROFILE
+        ? {
+            legacyFiniteAssessments: [...semanticAssessments].map(
+              ([key, assessment]) => ({ key, ...assessment }),
+            ),
+            legacyAssessmentPolicy:
+              'RECORDED_NON_BLOCKING_FULL_OFFLINE_SCORE_IS_SEPARATE',
+          }
+        : {}),
       result,
     });
     gate?.close();
@@ -1352,6 +1440,176 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       financeReads,
     });
   }
+  async function currentOfflineSourceFacts(source: CandidateSource) {
+    const where = { tenantId: source.tenant.id };
+    const [
+      member,
+      services,
+      staff,
+      ownClient,
+      appointments,
+      c7,
+      c8,
+      branding,
+      policy,
+    ] = await Promise.all([
+      db.prisma.membership.findUniqueOrThrow({
+        where: { userId_tenantId: { ...where, userId: source.user.id } },
+      }),
+      db.prisma.internalService.findMany({
+        where,
+        select: {
+          name: true,
+          price: true,
+          currency: true,
+          durationMinutes: true,
+        },
+      }),
+      db.prisma.internalProvider.findMany({
+        where,
+        select: { displayName: true },
+      }),
+      db.prisma.client.findFirst({
+        where: { ...where, userId: source.user.id },
+        select: { id: true },
+      }),
+      db.prisma.appointment.findMany({
+        where,
+        select: {
+          mayaClientId: true,
+          startAt: true,
+          endAt: true,
+          status: true,
+        },
+      }),
+      db.prisma.measurementRevision.findMany({
+        where,
+        select: {
+          state: true,
+          periodFrom: true,
+          periodTo: true,
+          timezone: true,
+          valuesJson: true,
+          completeness: true,
+          qualification: true,
+        },
+      }),
+      db.prisma.c8ResultRevision.findMany({
+        where,
+        select: {
+          state: true,
+          ruleKey: true,
+          ruleVersion: true,
+          periodFrom: true,
+          periodTo: true,
+          valuesJson: true,
+          completeness: true,
+          qualification: true,
+        },
+      }),
+      db.prisma.brandingSettings.findUnique({
+        where: { tenantId: source.tenant.id },
+        select: { appName: true, contactDetailsJson: true },
+      }),
+      db.prisma.tenantBusinessConfigurationRevision.findFirst({
+        where: { ...where, namespace: 'c8_valuation' },
+        orderBy: { revision: 'desc' },
+        select: { revision: true, encryptedContent: true },
+      }),
+    ]);
+    const external = ['booking', 'personal', 'bi', 'lifecycle'].includes(
+      source.item.group,
+    )
+      ? null
+      : coreFullOfflineExternalFacts(source);
+    const contacts = auditRecord(branding?.contactDetailsJson);
+    const content = policy?.encryptedContent
+      ? auditRecord(JSON.parse(db.encryption.decrypt(policy.encryptedContent)))
+      : {};
+    const rules = Array.isArray(content.dormancyRules)
+      ? content.dormancyRules
+      : [];
+    const today = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Moscow',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date());
+    return {
+      actor: {
+        role: member.role,
+        sameTenant: member.tenantId === source.tenant.id,
+        sameActor: member.userId === source.user.id,
+        membershipActive: member.status === 'active',
+      },
+      facts: {
+        qualification: 'CURRENT_SYNTHETIC_SOURCE_SNAPSHOT_NOT_MODEL_INPUT',
+        timezone: 'Europe/Moscow',
+        today,
+        tomorrow: String(source.clockBinding.tomorrow),
+        staff: external
+          ? external.getStaff(source.tenant.id).map(({ name }) => ({ name }))
+          : staff.map(({ displayName }) => ({ name: displayName })),
+        services: external
+          ? external
+              .getServices(source.tenant.id)
+              .map(({ name, price, currency, duration_minutes }) => ({
+                name,
+                price,
+                currency,
+                durationMinutes: duration_minutes,
+              }))
+          : services,
+        company: {
+          name: branding?.appName ?? null,
+          address: contacts.address ?? null,
+          businessHours: contacts.businessHours ?? null,
+        },
+        ownAppointments: appointments
+          .filter(
+            (row) => ownClient !== null && row.mayaClientId === ownClient.id,
+          )
+          .map((row) => ({
+            start: row.startAt.toISOString(),
+            end: row.endAt.toISOString(),
+            status: row.status,
+          })),
+        otherClientAppointmentCount: appointments.filter(
+          (row) =>
+            row.mayaClientId !== null && row.mayaClientId !== ownClient?.id,
+        ).length,
+        occupied: source.occupied,
+        c7Published: c7.some((row) => row.state === 'PUBLISHED'),
+        c8Published: c8.some((row) => row.state === 'PUBLISHED'),
+        c7Scopes: c7.map((row) => ({
+          periodFrom: row.periodFrom.toISOString(),
+          periodTo: row.periodTo.toISOString(),
+          timezone: row.timezone,
+          values: row.valuesJson,
+          completeness: row.completeness,
+          qualification: row.qualification,
+        })),
+        c8Results: c8.map((row) => ({
+          ...row,
+          periodFrom: row.periodFrom.toISOString(),
+          periodTo: row.periodTo.toISOString(),
+        })),
+        c8Rule: rules.map((value) => {
+          const rule = auditRecord(value);
+          return {
+            ruleKey: rule.ruleKey,
+            ruleVersion: policy?.revision,
+            thresholdDays:
+              auditRecord(rule.elapsed).unit === 'day'
+                ? auditRecord(rule.elapsed).count
+                : null,
+            comparison: rule.comparison,
+            evidence: rule.evidence,
+          };
+        }),
+      },
+    };
+  }
   async function seedOffline(fx: ReturnType<typeof fixturesForHttp>) {
     expect(manifest.cases).toHaveLength(48);
     expect(
@@ -1792,7 +2050,13 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               const assessment = semanticAssessments.get(`${caseId}:${turn}`);
               if (!assessment)
                 throw new Error('core_semantic_observation_missing');
-              return assessment;
+              // The closed synthetic 48 corpus audits every actual follow-up.
+              // Legacy prose-equality checks are retained separately; they may
+              // not skip a later correction whose selector/source facts changed.
+              // Transport, unknown response and business-effect guards still stop.
+              return profile.id === CORE_OFFLINE_PROFILE
+                ? { status: 'ungraded' as const, failedCheckIds: [] }
+                : assessment;
             },
           }
         : {}),
@@ -2007,6 +2271,60 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
               businessHashUnchanged: before === after,
               businessWrites: writes,
             };
+            let offlineAudit: Record<string, unknown> | null = null;
+            if (profile.id === CORE_OFFLINE_PROFILE) {
+              const current = await currentOfflineSourceFacts(source);
+              const completion = offlineCompletions.get(`${caseId}:${turn}`);
+              offlineAudit = {
+                qualification: 'SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY',
+                ...(completion ?? {
+                  semanticPlans: [],
+                  toolResults: [],
+                  completeness: {
+                    status: expectedRevoked ? 'complete' : 'incomplete',
+                    reasons: expectedRevoked ? [] : ['completion_not_observed'],
+                  },
+                }),
+                actor: {
+                  ...current.actor,
+                  ...(completion?.actor ?? {}),
+                  membershipActive: current.actor.membershipActive,
+                },
+                selection: offlineSelection(
+                  answer.resolution,
+                  source.tenant.id,
+                ),
+                sourceFacts: {
+                  ...auditRecord(
+                    sanitizeCoreFullOfflineAuditValue(
+                      current.facts,
+                      source.privateValues,
+                    ),
+                  ),
+                  company: projectCoreFullOfflinePublicCompany(
+                    current.facts.company,
+                    source.privateValues,
+                  ),
+                },
+                coordination: observation.coordination,
+                recommendation: observation.recommendation,
+                financialEvidenceCount: observation.financialEvidenceCount,
+                persistedCoordination: observation.persistedCoordination,
+                effects: {
+                  businessHashUnchanged: before === after,
+                  businessWrites: writes,
+                  forbidden: [...forbidden],
+                  outboundCalls: forbidden.filter((value) =>
+                    /notification|outbound|send|delivery/i.test(value),
+                  ).length,
+                },
+                expectedRefusal: null,
+                historyUnchanged: null,
+              };
+              Object.assign(observation, { audit: offlineAudit });
+              if (!expectedRevoked)
+                append('offline-turn-audit.jsonl', observation);
+            }
             // Preserve actual failure and reply before any assertion/replay validation.
             responses.push(observation);
             append('actual-http-turns.jsonl', observation);
@@ -2054,6 +2372,13 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
                 expectedRefusal,
                 historyUnchanged: true,
               });
+              if (offlineAudit) {
+                Object.assign(offlineAudit, {
+                  expectedRefusal,
+                  historyUnchanged: true,
+                });
+                append('offline-turn-audit.jsonl', observation);
+              }
               append('offline-expected-refusals.jsonl', {
                 caseId,
                 turn,

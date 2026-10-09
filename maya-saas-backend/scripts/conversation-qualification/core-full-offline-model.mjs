@@ -140,13 +140,31 @@ function select(item, turn, input, people) {
   const id = item.id,
     { today, tomorrow } = dates(input);
   const person = (name) => people[name] ?? name;
+  const bookingEmployee = (name) => {
+    // A current correction wins. Earlier user-message aliases are intentionally
+    // not resolvable by AiCore's current request owner; carry the freshly
+    // projected server semantic preference instead of replaying that old alias.
+    if (new RegExp(PERSON).test(item.userTurns[turn - 1])) return person(name);
+    const prior = input.semantic_plan?.tasks;
+    if (
+      turn > 1 &&
+      Array.isArray(prior) &&
+      prior.length === 1 &&
+      ['booking.find_availability', 'booking.create_own'].includes(
+        prior[0]?.intent,
+      ) &&
+      typeof prior[0]?.entities?.employee === 'string'
+    )
+      return prior[0].entities.employee;
+    return person(name);
+  };
   const booking = (first, second, service, highRisk = false) => {
     const exactCreate = highRisk && turn === 2;
     if (highRisk && turn === 3)
       return clarify(
         'booking.create_own',
         {
-          employee: person(first),
+          employee: bookingEmployee(first),
           services: [service],
           date: tomorrow,
           time: '19:00',
@@ -154,7 +172,7 @@ function select(item, turn, input, people) {
         'Текстовое подтверждение не завершает запись. Проверьте доступный вариант в карточке и подтвердите его там.',
         'TEXT_IS_NOT_BOOKING_COMMIT',
       );
-    const employee = person(turn === 3 ? second : first);
+    const employee = bookingEmployee(turn === 3 ? second : first);
     const day =
       highRisk ||
       id === 'core-client-create-followup' ||
