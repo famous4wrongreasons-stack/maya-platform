@@ -1,0 +1,91 @@
+{
+  "contract": "maya.saved-provider-usage-reconciliation/1",
+  "createdAt": "2026-10-09T00:52:38.242Z",
+  "source": {
+    "path": "docs/rebuild/evidence/local-actual-model-20261008/broker/model-responses.jsonl",
+    "sha256": "a06c69f84c6733a3ff33c2b5e97e4a1e3058c26776534a781192e02a7f2a0620",
+    "evidenceCommit": "856323e7f643dc596a77f5354eaeec03ba18655d",
+    "testedCandidate": "5cc0b7178ccdbf3d6cdb50be5de3f3cd7a43dbf5"
+  },
+  "providerRequests": 3,
+  "providerResponses": 3,
+  "rows": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "providerStatus": 200,
+      "contentSha256": "3854d927eb513d2dc94a611f3ad191b03d6bef6ea13dd7f5dc276b5a6542a609",
+      "prompt_tokens": 14504,
+      "completion_tokens": 321,
+      "total_tokens": 14825,
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 14504,
+      "reproducedPeakEstimateUsd": "0.02041644",
+      "reproducedOffPeakEstimateUsd": "0.01020822"
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "providerStatus": 200,
+      "contentSha256": "d147c066f5cc572ebfdb935cb159d0631a5e814ce4313934c09af264be55d503",
+      "prompt_tokens": 14746,
+      "completion_tokens": 326,
+      "total_tokens": 15072,
+      "prompt_cache_hit_tokens": 640,
+      "prompt_cache_miss_tokens": 14106,
+      "reproducedPeakEstimateUsd": "0.01993904",
+      "reproducedOffPeakEstimateUsd": "0.00996952"
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "providerStatus": 200,
+      "contentSha256": "57b720e5e0f724e8135b0cc3d86f48bafd9a56006a67337d4f51663bfd94d6c4",
+      "prompt_tokens": 20424,
+      "completion_tokens": 370,
+      "total_tokens": 20794,
+      "prompt_cache_hit_tokens": 640,
+      "prompt_cache_miss_tokens": 19784,
+      "reproducedPeakEstimateUsd": "0.02760824",
+      "reproducedOffPeakEstimateUsd": "0.01380412"
+    }
+  ],
+  "totals": {
+    "prompt_tokens": 49674,
+    "completion_tokens": 1017,
+    "total_tokens": 50691,
+    "prompt_cache_hit_tokens": 1280,
+    "prompt_cache_miss_tokens": 48394
+  },
+  "cost": {
+    "reservedUsd": "0.33911196",
+    "reservationIsBilling": false,
+    "reproducedPeakEstimateUsd": "0.06796372",
+    "reproducedOffPeakEstimateUsd": "0.03398186",
+    "conservativeNoCachePeakEstimateUsd": "0.069597",
+    "rates": {
+      "peakMissNanoUsdPerToken": 1320,
+      "peakHitNanoUsdPerToken": 44,
+      "peakOutputNanoUsdPerToken": 3960,
+      "offPeakMultiplier": 0.5
+    },
+    "rateProvenance": {
+      "checkedInPreviousRunAt": "2026-10-08T23:02:42.000Z",
+      "pricingObservation": "docs/rebuild/evidence/local-actual-model-20261008/pricing-observation.json",
+      "snapshotExplicitlyContains": [
+        "peakMissNanoUsdPerToken",
+        "peakOutputNanoUsdPerToken"
+      ],
+      "cacheHitAndOffPeakRates": "REPRODUCE_PREVIOUS_RECORDED_ESTIMATE_NOT_INDEPENDENTLY_REVERIFIED_NOW",
+      "freshPricingFetch": false
+    },
+    "billingVerified": false,
+    "accountBalanceQueried": false
+  },
+  "rejectedFourthRequest": {
+    "bytes": 99820,
+    "capBytes": 98304,
+    "beforeProvider": true
+  },
+  "newProviderCalls": 0
+}

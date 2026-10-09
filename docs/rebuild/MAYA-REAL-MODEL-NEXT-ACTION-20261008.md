@@ -1,5 +1,12 @@
 # Переход к реальной модели: конкретный пакет на 2026-10-08
 
+**Новый handoff 2026-10-09:** [usage reconciliation и bounded retest preparation](MAYA-MODEL-USAGE-AND-RETEST-PREPARATION-20261009.md).
+Frozen candidate `0d90de11710e7212286a7e74755c8a12b55d116b` сохранён отдельной
+branch. A — existing 3/5, без нового разрешения; B — proposed первые 6 frozen
+follow-ups / 13 ходов, пока blocked на finite profile/fixtures. Ночью paid
+runner/permit/claim/key prompt не создавались. Подробная token/cost таблица
+отделяет recorded estimate от резерва и непроверенного account billing.
+
 **Актуальный результат: один разрешённый локальный actual-model run выполнен и
 закрыт.** [Фактические ответы, остановка и cleanup](MAYA-LOCAL-ACTUAL-MODEL-RESULT-20261008.md):
 3 ответа DeepSeek, затем четвёртый запрос отклонён локально по размеру 99 820 >

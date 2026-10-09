@@ -1,0 +1,19 @@
+{
+  "contract": "maya.retest-preparation-evidence/1",
+  "status": "PREPARED_NOT_AUTHORIZED",
+  "frozenCandidate": "0d90de11710e7212286a7e74755c8a12b55d116b",
+  "files": {
+    "candidate-source-manifest.json": {
+      "sha256": "9835ff59f46e3458a74aab49199de7604de85e1a344fe84d96e35bf8be36c857",
+      "bytes": 355174
+    },
+    "retest-plan.json": {
+      "sha256": "f72b2d96e3087076dd3eb796086e050f76652f4c0687fe2dd9a7f83d0056b7d8",
+      "bytes": 26337
+    },
+    "usage-reconciliation.json": {
+      "sha256": "6e795a9ff405ea53d3600c5f5c83c23481a4a50971a125e6ad9852bbc36d26e8",
+      "bytes": 3138
+    }
+  }
+}
