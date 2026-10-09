@@ -1,0 +1,69 @@
+{
+  "codeCommit": "84eedcb65820ebe063ca14cd5a8217e53187dcb3",
+  "files": {
+    "maya-saas-backend/src/ai-tools/ai-core.employee-journal.spec.ts": {
+      "sha256": "4001a88c09a262e157c31861cb3662e40142614f200508ad920eb34d5349222c",
+      "bytes": 16078
+    },
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": {
+      "sha256": "8bcecef5f4501f5955aa7afd043f3eb1639f52953f349591657fdeb50fee12f7",
+      "bytes": 359779
+    },
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts": {
+      "sha256": "fadc04f085363b537e04eb9b8c5016c46204397870a6c3bae60f28e1134968df",
+      "bytes": 134617
+    },
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts": {
+      "sha256": "c8a23cc80ad723af193d94a59efa3413aabb3fb42f018c06e153cc09742ef9e7",
+      "bytes": 156757
+    },
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts": {
+      "sha256": "d06775e1af64782b87294f0bf29c924227554c3c2b7cdff05f74748e30664ecf",
+      "bytes": 60647
+    },
+    "maya-saas-backend/src/ai-tools/employee-journal-read.spec.ts": {
+      "sha256": "9fcd6553bd8356f145931fa6619965dfa92adc7d74d8fec908fc732f607cba32",
+      "bytes": 16542
+    },
+    "maya-saas-backend/src/ai-tools/employee-journal-read.ts": {
+      "sha256": "043863f0ef7b8208f79d28bc42435afa4ff9d16605913a9f15cc003f4e4ab623",
+      "bytes": 11541
+    },
+    "maya-saas-backend/src/ai-tools/staff-schedule-read-scope.ts": {
+      "sha256": "737e607c551f038f799d24f5d53c862ee0e7aa9730a3bfccdf0d894972cce2df",
+      "bytes": 3083
+    },
+    "maya-saas-backend/src/analytics/operations-analytics.journal-source.spec.ts": {
+      "sha256": "3d10e1669a7d2e8b5e6b3dfc1a32d79f387ee8f5e1fe8631e5e04ad1bf839195",
+      "bytes": 8279
+    },
+    "maya-saas-backend/src/analytics/operations-analytics.service.ts": {
+      "sha256": "d0faf25b55d90031163f0948a8caff56c8125c4b1a19ece486b7d129008e742a",
+      "bytes": 106579
+    },
+    "maya-saas-backend/src/business-facts/appointment-period.journal-source.spec.ts": {
+      "sha256": "9afcca43bcb2367c04c9b2b56668c5d8243f45ac7a30fd1b32287ddadf523ca0",
+      "bytes": 4683
+    },
+    "maya-saas-backend/src/business-facts/appointment-period.reader.ts": {
+      "sha256": "4bff17dd5b1dd0d5568d0c449b712d28dd3bc725bfa010274feeac9c0c1d231a",
+      "bytes": 9719
+    },
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": {
+      "sha256": "f02e10866e3e833ef1c420ba8c217602c50cc06b0913d6c3b310bce8ff64280e",
+      "bytes": 166301
+    },
+    "maya-saas-backend/src/crm/adapters/yclients-journal-source.spec.ts": {
+      "sha256": "9acef94c16be229dfd759ee55f2b3754ac9ad8422e365ec9513f63d5d13756c2",
+      "bytes": 2931
+    },
+    "maya-saas-backend/src/crm/crm.journal-source.spec.ts": {
+      "sha256": "ce4e5b6de91cccaaae012d1134725755d00cd52e225e67347b3894eaa6c62daf",
+      "bytes": 9549
+    },
+    "maya-saas-backend/src/crm/crm.service.ts": {
+      "sha256": "42a9cbd35bbad7240d1ce999186a8940e2af744e7c9a4ce57a74a4b3cf57bcd0",
+      "bytes": 228016
+    }
+  }
+}

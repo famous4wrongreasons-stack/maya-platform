@@ -1,0 +1,15 @@
+[Nest] 31366  - 10/09/2026, 5:42:23 PM    WARN [AppointmentPeriodReader] journal read for 2026-10-09T07:00:00.000Z..2026-10-10T06:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 31366  - 10/09/2026, 5:42:24 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-17T21:00:00.000Z..2026-08-18T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 31366  - 10/09/2026, 5:42:24 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-17T21:00:00.000Z..2026-08-18T20:59:59.999Z); they are not counted
+[Nest] 31366  - 10/09/2026, 5:42:24 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-20T00:00:00.000Z..2026-08-17T23:59:59.999Z); they are not counted
+[Nest] 31366  - 10/09/2026, 5:42:24 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-17T00:00:00.000Z..2026-08-17T23:59:59.999Z); they are not counted
+[Nest] 31366  - 10/09/2026, 5:42:24 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-19T00:00:00.000Z..2026-08-16T23:59:59.999Z); they are not counted
+[Nest] 31366  - 10/09/2026, 5:42:26 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-10-09T07:00:00.000Z..2026-10-10T06:59:59.999Z); they are not counted
+[Nest] 31366  - 10/09/2026, 5:42:26 PM    WARN [AppointmentPeriodReader] journal read for 2026-10-09T07:00:00.000Z..2026-10-10T06:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+
+Test Suites: 16 passed, 16 total
+Tests:       554 passed, 554 total
+Snapshots:   0 total
+Time:        3.157 s
+Ran all test suites within paths "src/crm/crm.journal-source.spec.ts", "src/business-facts/appointment-period.journal-source.spec.ts", "src/analytics/operations-analytics.journal-source.spec.ts", "src/business-facts/journal-consolidation.spec.ts", "src/crm/crm.staff-schedule-source.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/ai-tools/employee-journal-read.spec.ts", "src/ai-tools/ai-core.employee-journal.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/ai-tools/employee-schedule-read.spec.ts", "src/ai-tools/ai-core.employee-schedule.spec.ts", "src/ai-tools/ai-core.personal-appointments-source-trace.spec.ts", "src/crm/client-appointment-read.service.spec.ts", "src/crm/client-appointment-read.architecture.spec.ts", "src/orchestration/c9.conversation-reads.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-employee-journal-combined-20261009-r2.json

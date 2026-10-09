@@ -1274,3 +1274,15 @@ same-run replay and metadata drift. Independent review verified all 1840 Git-bou
 source hashes and preserved failed attempts. All three owned clusters stopped.
 Scripted model/synthetic transport only; no live provider/model/browser/A17 or full
 dialogue acceptance. Remaining29, frozen9/handoff and overall MAYA/C10 status unchanged.
+
+### 2026-10-09 — existing employee journal owner wiring
+
+[Employee journal owner checkpoint](MAYA-EMPLOYEE-JOURNAL-OWNER-WIRING-20261009.md)
+implements runtime `84eedcb65820ebe063ca14cd5a8217e53187dcb3`: one unambiguous employee,
+one branch-local day, existing journal READ via C9, source/authority/adapter rechecks
+and bounded PII-free presentation with explicit incomplete/truncated status.
+**19 local suites / 875 tests, scoped+production types, narrow lint and independent
+review PASS.** Native malformed record loss and paid-only completed wording are
+qualified without new Client authority. New journal HTTP/PG/browser/live-provider
+acceptance is not issued. Original two-Sasha cases, remaining29, frozen9/handoff and
+overall MAYA/C10 status remain unchanged; no background autonomy.

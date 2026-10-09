@@ -1,0 +1,32 @@
+[Nest] 29975  - 10/09/2026, 5:39:53 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-17T21:00:00.000Z..2026-08-18T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 29975  - 10/09/2026, 5:39:53 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-17T21:00:00.000Z..2026-08-18T20:59:59.999Z); they are not counted
+[Nest] 29975  - 10/09/2026, 5:39:53 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-20T00:00:00.000Z..2026-08-17T23:59:59.999Z); they are not counted
+[Nest] 29975  - 10/09/2026, 5:39:53 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-17T00:00:00.000Z..2026-08-17T23:59:59.999Z); they are not counted
+[Nest] 29975  - 10/09/2026, 5:39:53 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-19T00:00:00.000Z..2026-08-16T23:59:59.999Z); they are not counted
+[Nest] 29975  - 10/09/2026, 5:39:53 PM    WARN [AppointmentPeriodReader] journal read for 2026-10-09T07:00:00.000Z..2026-10-10T06:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+FAIL src/analytics/operations-analytics.journal-source.spec.ts
+  ● day journal source ownership › preserves truncation and unavailable attendance rather than proving zero
+
+    expect(received).toBeNull()
+
+    Received: 0
+
+      211 |     expect(result.completeness.appointments.status).toBe('incomplete');
+      212 |     expect(result.attendance.state).not.toBe('measured');
+    > 213 |     expect(result.attendance.arrived).toBeNull();
+          |                                       ^
+      214 |   });
+      215 |
+      216 |   it('rejects a provider row belonging to a different employee in the period reader', async () => {
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-source.spec.ts:213:39)
+
+[Nest] 29975  - 10/09/2026, 5:39:53 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-10-09T07:00:00.000Z..2026-10-10T06:59:59.999Z); they are not counted
+[Nest] 29975  - 10/09/2026, 5:39:53 PM    WARN [AppointmentPeriodReader] journal read for 2026-10-09T07:00:00.000Z..2026-10-10T06:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+
+Test Suites: 1 failed, 4 passed, 5 total
+Tests:       1 failed, 84 passed, 85 total
+Snapshots:   0 total
+Time:        1.154 s
+Ran all test suites within paths "src/crm/crm.journal-source.spec.ts", "src/business-facts/appointment-period.journal-source.spec.ts", "src/analytics/operations-analytics.journal-source.spec.ts", "src/business-facts/journal-consolidation.spec.ts", "src/crm/crm.staff-schedule-source.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-employee-journal-owners-20261009-r1.json

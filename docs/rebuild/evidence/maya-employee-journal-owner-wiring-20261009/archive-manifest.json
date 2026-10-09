@@ -1,0 +1,89 @@
+{
+  "contract": "maya.employee-journal-owner-evidence/1",
+  "files": {
+    "independent-review.json": {
+      "sha256": "b5b608a117c618ef537b2a9e0d780a203dd4728a04e0497b0332ff545420fad3",
+      "bytes": 1941
+    },
+    "maya-employee-journal-combined-20261009-r2.json": {
+      "sha256": "7f72c0635cad08c806cb4ae6be8e94de3e6d09274ce4e5ca2bbb70cd7c881c89",
+      "bytes": 271872
+    },
+    "maya-employee-journal-combined-20261009-r2.log": {
+      "sha256": "5c0f34916547c2eca7488cdf0e17d35accae71c0a97afe50ceec8aeb655e1080",
+      "bytes": 2713
+    },
+    "maya-employee-journal-final-20261009-r3.json": {
+      "sha256": "b88311ef31e89f9bf2b025ca853e3277d99cfa0fd69fa002a2ee3ff9e226ae76",
+      "bytes": 430649
+    },
+    "maya-employee-journal-final-20261009-r3.log": {
+      "sha256": "e88b8a68f1ec6afdb58dbeb088cfa04573790a432ac9f08f4e13a0d4854e74f0",
+      "bytes": 2848
+    },
+    "maya-employee-journal-lint-20261009-final.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-employee-journal-lint-20261009-r1.log": {
+      "sha256": "c27fde82e5edc9eacfdc7545432765e97f7c3c696a85e1426e1c2436f60f914c",
+      "bytes": 694
+    },
+    "maya-employee-journal-lint-20261009-r2.log": {
+      "sha256": "86b2111ebc11251c0c105c6eb53fe1fcf22f921efbe0274af57b84fc7a7413d0",
+      "bytes": 325
+    },
+    "maya-employee-journal-lint-fix-20261009-r2.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-employee-journal-lint-fix-20261009.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-employee-journal-owners-20261009-r1.json": {
+      "sha256": "31263270855bb079119af831958627e19c3911232fdc14691271e192b8343f46",
+      "bytes": 41190
+    },
+    "maya-employee-journal-owners-20261009-r1.log": {
+      "sha256": "e2044f6feea2a298ddd0088e8a849e03c00f38cb10db12597f0201ec58d004c3",
+      "bytes": 2894
+    },
+    "maya-employee-journal-production-types-20261009-final.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-employee-journal-production-types-20261009-r2.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-employee-journal-regression-20261009-r1.json": {
+      "sha256": "a6666cc640d5b4a01e4683b8ddb20db58fe8964015ec02e2d9d7bd2b4287f025",
+      "bytes": 157545
+    },
+    "maya-employee-journal-regression-20261009-r1.log": {
+      "sha256": "a80ff91a8b1bc3df0139b1c237206684a965edf783de52f51ef839919056611d",
+      "bytes": 339
+    },
+    "maya-employee-journal-spec-types-20261009-r1.log": {
+      "sha256": "d42171b06394e660ad08b9171fee6ae1938808f82be2ef688b83e37dd1f6b3e0",
+      "bytes": 19653
+    },
+    "maya-employee-journal-spec-types-20261009-r2.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-employee-journal-types-20261009-r1.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-employee-journal-types-20261009.json": {
+      "sha256": "fb26c9628710dffeeabf83d4892010e4229abb19c1053e5f685bb4fdf47278bf",
+      "bytes": 1688
+    },
+    "source-files.json": {
+      "sha256": "8428b28c14f27fc809eb6bae8a72e4a34e75f943ed1de2229e146e69c7c39ce0",
+      "bytes": 2996
+    }
+  }
+}

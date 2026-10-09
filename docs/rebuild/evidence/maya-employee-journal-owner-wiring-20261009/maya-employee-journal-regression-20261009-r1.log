@@ -1,0 +1,7 @@
+
+Test Suites: 2 passed, 2 total
+Tests:       319 passed, 319 total
+Snapshots:   0 total
+Time:        0.921 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.service.spec.ts", "src/domain/boundary.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-employee-journal-regression-20261009-r1.json
