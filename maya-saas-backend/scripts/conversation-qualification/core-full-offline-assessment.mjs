@@ -249,12 +249,9 @@ put(
   'mt-cancel_pending_action-15',
   'reschedule',
   ['booking.reschedule_own'],
-  [
-    { date: 'friday' },
-    { date: 'friday', time: '20:00' },
-    { date: 'friday', time: '20:00', stop: true },
-  ],
+  [{ date: 'friday' }, { date: 'friday', time: '20:00' }, { stop: true }],
 );
+rules.get('mt-cancel_pending_action-15:3').intents = [];
 for (const id of ['utt-services.price-062', 'utt-services.price-067'])
   put(
     id,
@@ -733,7 +730,9 @@ export function assessFullOfflineTurn(input) {
           )),
       safety,
     );
-    if (currentTasks.length)
+    const isPreparationStop =
+      expectation.kind === 'reschedule' && expectation.slots.stop === true;
+    if (currentTasks.length && !isPreparationStop)
       check(
         'requested_task_preserved',
         expectation.intents.length === 0 ||
@@ -742,6 +741,7 @@ export function assessFullOfflineTurn(input) {
           ),
       );
     else if (
+      !isPreparationStop &&
       ![
         'compound',
         'compound_scope',
@@ -836,7 +836,12 @@ export function assessFullOfflineTurn(input) {
         check('known_branch_not_reasked', !asksKnown(reply, 'branch'));
     }
     if (slot.time) {
-      const value = entity(currentTasks, ['time', 'time_of_day']);
+      const value = entity(
+        currentTasks,
+        expectation.kind === 'reschedule'
+          ? ['new_time', 'time', 'time_of_day']
+          : ['time', 'time_of_day'],
+      );
       check(
         'exact_current_time_preserved',
         value === undefined ? null : String(value) === slot.time,
@@ -1234,9 +1239,46 @@ export function assessFullOfflineTurn(input) {
       kind === 'reschedule'
     ) {
       if (kind === 'reschedule' && slot.stop) {
+        // STOP closes preparation; old appointment/date/time slots are not
+        // obligations. A safe sounding sentence cannot hide an active plan.
+        check(
+          'stop_has_no_active_preparation_plan',
+          plans === null
+            ? null
+            : plans.length === 0
+              ? true
+              : finiteArray(tasks)
+                ? currentTasks.every(
+                    (task) =>
+                      task.intent !== 'booking.reschedule_own' &&
+                      task.action === 'answer' &&
+                      task.tool?.name === null &&
+                      task.tool?.status === 'not_needed' &&
+                      task.requires_confirmation === false,
+                  )
+                : null,
+        );
+        check(
+          'stop_has_no_action_or_dispatch',
+          reads !== null &&
+            finiteArray(input.sourceReads) &&
+            object(audit.response)
+            ? reads.length === 0 &&
+                input.sourceReads.length === 0 &&
+                audit.response.action === null
+            : null,
+          safety,
+        );
+        check(
+          'stop_has_no_active_selector',
+          typeof audit.selection?.matched === 'boolean'
+            ? audit.selection.matched === false
+            : null,
+          safety,
+        );
         check(
           'stop_acknowledged',
-          /останов|не меня|ничего не|не перен|отмен.{0,20}(?:подготов|действ)|остав/.test(
+          /останов|не продолж|не меня|ничего не|не перен|отмен.{0,20}(?:подготов|действ)|остав/.test(
             reply,
           ),
         );
@@ -1247,10 +1289,22 @@ export function assessFullOfflineTurn(input) {
           ),
         );
       } else if (kind === 'reschedule' && input.turn === 2) {
+        const newDate = entity(currentTasks, [
+          'new_date',
+          'date',
+          'date_or_period',
+        ]);
+        const newTime = entity(currentTasks, [
+          'new_time',
+          'time',
+          'time_of_day',
+        ]);
         check(
           'friday_and_time_retained',
-          /пятниц|friday/.test(textOf(currentTasks)) &&
-            /20:00/.test(textOf(currentTasks)),
+          newDate === undefined || newTime === undefined
+            ? null
+            : /пятниц|friday/.test(norm(newDate)) &&
+                String(newTime) === slot.time,
         );
         check(
           'reschedule_time_answered',

@@ -136,6 +136,90 @@ function compound(today) {
   return result;
 }
 
+const results = (input, name) =>
+  (input.tool_results ?? []).filter((row) => row.name === name);
+
+function scheduleRead(input, employee, date) {
+  const catalog = results(input, 'catalog.staff.read').at(-1);
+  const r = recipe('schedule.get_team', { date_or_period: date, employee });
+  // Both tasks remain explicit: a catalog reference is a prerequisite, never
+  // an authority upgrade or a name token smuggled into an external ID argument.
+  r.tasks = [
+    task('employees.list_public'),
+    { ...r.tasks[0], id: 'task_2', depends_on: ['task_1'] },
+  ];
+  if (!catalog) {
+    r.tool = 'catalog.staff.read';
+    return r;
+  }
+  const staff = catalog.result?.staff;
+  const matches = Array.isArray(staff)
+    ? staff.filter((row) => record(row) && row.name === employee)
+    : [];
+  const id = matches[0]?.id;
+  const reference =
+    typeof id === 'string' &&
+    id.trim() === id &&
+    (new RegExp('^(?:' + REFERENCE_ALIAS + ')$').test(id) ||
+      (/^[A-Za-z0-9_-]+$/.test(id) && id.length <= 128));
+  if (
+    matches.length !== 1 ||
+    !reference ||
+    catalog.stale === true ||
+    catalog.result?.stale === true
+  ) {
+    r.tasks[1].requires_clarification = true;
+    r.tasks[1].clarification_question =
+      'Не удалось однозначно выбрать сотрудника в текущем каталоге. Уточните сотрудника; его график пока не подтверждён.';
+    r.final = r.tasks[1].clarification_question;
+    r.limitation = 'CURRENT_STAFF_REFERENCE_NOT_UNIQUE';
+    return r;
+  }
+  r.tool = 'staff.schedule.read';
+  r.args = { date, staff_id: id };
+  return r;
+}
+
+function financeRead(id, turn, today) {
+  const year = id.endsWith('-7');
+  const current = year ? 'year_to_date' : 'week_to_date';
+  const previous = year ? 'previous_year' : 'last_week';
+  const previousYear = Number(today.slice(0, 4)) - 1;
+  const periods = [
+    { period: current, comparison: 'none' },
+    year
+      ? {
+          period: 'named_range',
+          from_day: `${previousYear}-01-01`,
+          to_day: `${previousYear}-12-31`,
+          comparison: 'none',
+        }
+      : { period: 'last_week', comparison: 'none' },
+  ];
+  const compared = turn === 3;
+  const r = recipe(
+    compared ? 'finance.compare_periods' : 'finance.revenue',
+    compared
+      ? { period: current, comparison_period: previous, metric: 'revenue' }
+      : { period: turn === 2 ? previous : current },
+    'analytics.business.query',
+    periods[turn === 2 ? 1 : 0],
+  );
+  // The current CI completes a task by tool name after ONE read. The owner
+  // also hardens period arguments from current/previous user text. Do not
+  // invent a second planner phase or claim these proposed arguments survived
+  // hardening. Preserve the requested pair and report the actual source window.
+  r.compare = compared;
+  r.periodArgs = [r.args];
+  if (compared) {
+    r.requestedPair = year
+      ? 'с начала текущего года и весь предыдущий год'
+      : 'текущая неделя по настоящий момент и вся предыдущая неделя';
+    r.limitation = 'REQUESTED_FINANCIAL_PAIR_NOT_AVAILABLE';
+  }
+  return r;
+}
+
 function select(item, turn, input, people) {
   const id = item.id,
     { today, tomorrow } = dates(input);
@@ -270,15 +354,7 @@ function select(item, turn, input, people) {
     case 'mt-topic_switch_and_return-17': {
       const north = id === 'mt-topic_switch_and_return-17';
       if (turn === 2)
-        return recipe(
-          'schedule.get_team',
-          {
-            date_or_period: tomorrow,
-            employee: person(north ? 'Елена' : 'Артём'),
-          },
-          'staff.schedule.read',
-          { date: tomorrow, staff_id: person(north ? 'Елена' : 'Артём') },
-        );
+        return scheduleRead(input, person(north ? 'Елена' : 'Артём'), tomorrow);
       return clarify(
         'analytics.business_summary',
         { branch: person(north ? 'северный филиал' : 'основной филиал') },
@@ -302,7 +378,18 @@ function select(item, turn, input, people) {
         turn === 2 ? { period: 'next_week' } : {},
         'appointments.own.list',
       );
-    case 'current-admin-ordinary':
+    case 'current-admin-ordinary': {
+      const r = recipe(
+        'company.public_info',
+        {},
+        results(input, 'catalog.staff.read').length
+          ? 'company.business-hours.read'
+          : 'catalog.staff.read',
+      );
+      r.tasks.push({ ...task('company.business_hours'), id: 'task_2' });
+      r.act = 'compound_request';
+      return r;
+    }
     case 'utt-company.public_info-037':
     case 'utt-company.public_info-041':
       return recipe('company.public_info', {}, 'catalog.staff.read');
@@ -374,20 +461,7 @@ function select(item, turn, input, people) {
       );
     case 'mt-finance_follow_up-7':
     case 'mt-finance_follow_up-10':
-      return clarify(
-        'finance.revenue',
-        {
-          period: id.endsWith('-7')
-            ? turn === 2
-              ? 'previous_year'
-              : 'year_to_date'
-            : turn === 2
-              ? 'last_week'
-              : 'week_to_date',
-        },
-        'Для этого периода нет подтверждённой сводки. Октябрьский снимок не заменяет запрошенный период; сравнение и объяснение разницы недоступны.',
-        'HISTORICAL_C7_IS_NOT_REQUESTED_PERIOD',
-      );
+      return financeRead(id, turn, today);
     case 'mt-retention_drill_down-0':
     case 'mt-retention_drill_down-15':
       return clarify(
@@ -440,11 +514,11 @@ function select(item, turn, input, people) {
       );
     case 'utt-finance.profit-050':
     case 'utt-finance.profit-055':
-      return clarify(
+      return recipe(
         'finance.profit',
         { period: 'month_to_date' },
-        'Чистая прибыль не подтверждена: выручка сама по себе не является прибылью, а полный источник расходов здесь не установлен.',
-        'PROFIT_COST_BASIS_NOT_ESTABLISHED',
+        'analytics.business.profit',
+        { period: 'month_to_date' },
       );
     case 'utt-inventory.stock-074':
     case 'utt-inventory.stock-079':
@@ -480,13 +554,173 @@ function select(item, turn, input, people) {
   }
 }
 
+function serviceText(result, selected) {
+  if (
+    result.contract !== 'maya.service-catalog.read/1' ||
+    !Array.isArray(result.services)
+  )
+    return 'Подтверждённого каталога услуг пока нет.';
+  const price = selected.tasks[0].intent === 'services.price';
+  const requested = JSON.parse(selected.tasks[0].entities_json).service;
+  const rows = result.services.filter(
+    (row) =>
+      record(row) &&
+      typeof row.name === 'string' &&
+      row.name.trim().length > 0 &&
+      row.name.length <= 300 &&
+      (!price ||
+        row.name.toLocaleLowerCase('ru-RU') ===
+          requested?.toLocaleLowerCase('ru-RU')),
+  );
+  const money = (n) => typeof n === 'number' && Number.isFinite(n) && n >= 0;
+  const lines = rows.slice(0, 12).map((row) => {
+    const currency =
+      typeof row.currency === 'string' && /^[A-Z]{3}$/.test(row.currency)
+        ? row.currency
+        : null;
+    const range =
+      money(row.price_min) &&
+      money(row.price_max) &&
+      row.price_min <= row.price_max;
+    const fixed =
+      money(row.price) &&
+      currency &&
+      (!range ||
+        (row.price_min === row.price_max && row.price === row.price_min));
+    return fixed
+      ? `${row.name}: ${row.price} ${currency}.`
+      : range && currency
+        ? `${row.name}: диапазон ${row.price_min}–${row.price_max} ${currency}; точная цена не подтверждена.`
+        : `${row.name}: цена или валюта не подтверждена.`;
+  });
+  return [
+    lines.length
+      ? 'Общий каталог услуг:\n' + lines.join('\n')
+      : 'В прочитанном каталоге подходящая услуга не подтверждена.',
+    'Связь услуги и цены с выбранным сотрудником не подтверждена этим каталогом.',
+    result.catalog_exhaustive === true && rows.length <= 12
+      ? 'Источник помечает каталог как полный.'
+      : 'Полнота показанного каталога не подтверждена.',
+  ].join('\n');
+}
+
+function measurementText(value) {
+  const p = value?.period;
+  if (
+    !record(value) ||
+    value.contract !== 'c7.measurement.read/1' ||
+    !record(p) ||
+    typeof p.from !== 'string' ||
+    typeof p.toExclusive !== 'string' ||
+    !Number.isFinite(Date.parse(p.from)) ||
+    !Number.isFinite(Date.parse(p.toExclusive)) ||
+    Date.parse(p.from) >= Date.parse(p.toExclusive) ||
+    typeof p.timezone !== 'string' ||
+    p.timezone.length > 100 ||
+    !['COMPLETE', 'PARTIAL', 'UNAVAILABLE'].includes(value.completeness) ||
+    !Array.isArray(value.metrics)
+  )
+    return 'Измерение нужного периода не подтверждено источником.';
+  try {
+    new Intl.DateTimeFormat('ru-RU', { timeZone: p.timezone });
+  } catch {
+    return 'Измерение нужного периода не подтверждено источником.';
+  }
+  const labels = {
+    observed_booked_value: 'Стоимость записанного',
+    confirmed_cash: 'Подтверждённая касса',
+    confirmed_refunds: 'Подтверждённые возвраты',
+    net_profit: 'Чистая прибыль',
+    observed_expense_count: 'Количество наблюдаемых расходов',
+  };
+  const lines = [
+    `Период источника [${p.from}, ${p.toExclusive}), правая граница исключена. Часовой пояс: ${p.timezone}.`,
+    `Полнота данных: ${value.completeness}.`,
+  ];
+  for (const metric of value.metrics) {
+    if (!record(metric) || !Object.hasOwn(labels, metric.key)) continue;
+    const label = labels[metric.key];
+    if (metric.state === 'NOT_MEASURED' && metric.value === null) {
+      lines.push(`${label}: не измерено; ноль из этого не следует.`);
+      continue;
+    }
+    if (
+      !['COMPLETE', 'PARTIAL'].includes(metric.state) ||
+      !['money_minor', 'count'].includes(metric.unit) ||
+      typeof metric.value !== 'string' ||
+      !/^-?\d+(?:\.\d+)?$/.test(metric.value) ||
+      metric.value.length > 40 ||
+      typeof metric.basis !== 'string' ||
+      !/^[a-z0-9_]{1,100}$/.test(metric.basis) ||
+      (metric.unit === 'money_minor' &&
+        (typeof metric.currency !== 'string' ||
+          !/^[A-Z]{3}$/.test(metric.currency) ||
+          !/^-?(0|[1-9][0-9]*)$/.test(metric.value)))
+    )
+      continue;
+    lines.push(
+      `${label}: ${metric.value}${metric.unit === 'money_minor' ? ' минимальных денежных единиц валюты ' + metric.currency : ''}; единица ${metric.unit}; основа ${metric.basis}; состояние ${metric.state}.`,
+    );
+    if (metric.key === 'observed_booked_value')
+      lines.push(
+        'Стоимость записанного не является подтверждённой кассовой выручкой.',
+      );
+  }
+  return lines.join('\n');
+}
+
+function periodReadText(row, args) {
+  const result = row?.result;
+  // Do not relabel a returned October snapshot as a week/year result. This
+  // mirrors only the finite reporting arguments emitted above, not a new
+  // reporting-period resolver. Canonical owner still resolves the actual window.
+  const resolved = result?.resolved_period;
+  if (
+    row?.stale === true ||
+    result?.stale === true ||
+    !record(resolved) ||
+    resolved.kind !== args.period ||
+    (args.period === 'named_range' &&
+      (resolved.from_day !== args.from_day || resolved.to_day !== args.to_day))
+  )
+    return 'Измерение именно запрошенного периода не подтверждено источником.';
+  return measurementText(result.measurement);
+}
+
 function finalText(selected, input) {
   if (selected.final) return selected.final;
-  const result = input.tool_results?.findLast(
-    (row) => row.name === selected.tool,
-  )?.result;
-  if (!record(result))
+  const row = input.tool_results?.findLast((row) => row.name === selected.tool);
+  const result = row?.result;
+  if (!record(result) || row.stale === true || result.stale === true)
     return 'Подтверждённого результата чтения пока нет. Действие не выполнено.';
+  if (selected.tool === 'catalog.services.read')
+    return serviceText(result, selected);
+  if (selected.tool === 'analytics.business.query') {
+    if (selected.compare) {
+      return (
+        `Запрошено сравнение: ${selected.requestedPair}.\n` +
+        'Полученное основное измерение:\n' +
+        measurementText(result.measurement) +
+        '\nФинансовое сравнение именно запрошенных периодов не подтверждено: это чтение не установило обе границы нужной пары и рассчитанную разницу между ними. Причины разницы также не подтверждены. Частичные наблюдения и стоимость записанного не заменяют подтверждённую выручку.'
+      );
+    }
+    if (selected.periodArgs) return periodReadText(row, selected.periodArgs[0]);
+    return measurementText(result.measurement);
+  }
+  if (selected.tool === 'analytics.business.profit') {
+    const unavailable =
+      result.net_profit?.status === 'unavailable' &&
+      result.net_profit.amount === null &&
+      result.net_profit.unavailable_reason ===
+        'confirmed_cash_refunds_and_complete_cost_basis_required';
+    return (
+      measurementText(result.measurement) +
+      '\n' +
+      (unavailable
+        ? 'Чистая прибыль не подтверждена: источник требует подтверждённую кассу, возвраты и полную базу расходов. Выручка сама по себе не является прибылью.'
+        : 'Подтверждённого результата чистой прибыли в этом ответе источника нет.')
+    );
+  }
   if (selected.tool === 'inventory.stock.read')
     return result.configured === false && result.source === 'not_configured'
       ? 'Складской каталог не настроен. Это не подтверждает отсутствие остатков и не даёт списка заканчивающихся товаров по филиалу.'

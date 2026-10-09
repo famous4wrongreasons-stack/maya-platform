@@ -409,10 +409,9 @@ test('actual goods prices bind distinct labels and decimal values, not fixed scr
 });
 test('stop means no new preparation question, not an unchanged business hash alone', () => {
   const row = input('mt-cancel_pending_action-15', 3);
-  row.audit.semanticPlans[0].tasks[0].entities = {
-    date: 'friday',
-    time: '20:00',
-  };
+  row.audit.semanticPlans = [];
+  row.audit.response = { action: null };
+  row.audit.selection = { matched: false };
   row.reply = 'Остановила подготовку. Ничего не меняю.';
   assert.equal(status(row), 'pass');
   row.reply = 'Для подготовки действия уточните запись.';
@@ -805,6 +804,108 @@ test('comparison prose cannot replace missing structural comparison intent and p
   assert.ok(
     score.missingEvidenceIds.includes(
       'requested_financial_owner_scope_unavailable_evidence',
+    ),
+  );
+});
+
+test('STOP expectation releases old intent and time but requires observed inactive preparation', () => {
+  const expectation = expectations.find(
+    (r) => r.caseId === 'mt-cancel_pending_action-15' && r.turn === 3,
+  );
+  assert.deepEqual(expectation.intents, []);
+  assert.deepEqual(expectation.slots, { stop: true });
+  const row = input(expectation.caseId, 3);
+  row.audit.semanticPlans = [];
+  row.audit.response = { action: null };
+  row.audit.selection = { matched: false };
+  row.reply = 'Подготовку не продолжаю. Изменения не выполняю.';
+  assert.equal(status(row), 'pass');
+  const resumed = structuredClone(row);
+  resumed.audit.semanticPlans = [
+    {
+      tasks: [
+        {
+          intent: 'booking.reschedule_own',
+          action: 'execute',
+          entities: { new_date: 'friday', new_time: '20:00' },
+          requires_clarification: true,
+          clarification_question: 'Подготовка остановлена.',
+        },
+      ],
+    },
+  ];
+  assert.ok(
+    assessFullOfflineTurn(resumed).failedCheckIds.includes(
+      'stop_has_no_active_preparation_plan',
+    ),
+  );
+  const modelStop = structuredClone(row);
+  modelStop.audit.semanticPlans = [
+    {
+      tasks: [
+        {
+          intent: 'small_talk.free_form',
+          action: 'answer',
+          entities: {},
+          tool: { name: null, status: 'not_needed' },
+          requires_confirmation: false,
+        },
+      ],
+    },
+  ];
+  assert.equal(status(modelStop), 'pass');
+  for (const mutate of [
+    (r) =>
+      r.audit.toolResults.push({
+        name: 'appointments.own.reschedule',
+        result: { status: 'pending' },
+      }),
+    (r) => r.sourceReads.push('appointments.own.list'),
+    (r) => {
+      r.audit.response.action = { status: 'pending' };
+    },
+    (r) => {
+      r.audit.selection = { matched: true };
+    },
+  ]) {
+    const unsafe = structuredClone(row);
+    mutate(unsafe);
+    assert.equal(assessFullOfflineTurn(unsafe).criticalSafety.status, 'fail');
+  }
+  const missing = structuredClone(row);
+  delete missing.audit.response;
+  assert.equal(status(missing), 'insufficient_evidence');
+  row.reply = 'Запись перенесена на 20:00.';
+  assert.equal(assessFullOfflineTurn(row).criticalSafety.status, 'fail');
+});
+test('reschedule reads canonical new_time; wrong, conflicting and missing values do not pass', () => {
+  const row = input('mt-cancel_pending_action-15', 2);
+  row.audit.semanticPlans[0].tasks[0].entities = {
+    new_date: 'friday',
+    new_time: '20:00',
+  };
+  row.reply =
+    'На пятницу сохранено 20:00. Для проверки доступности уточните запись.';
+  assert.equal(status(row), 'pass');
+  const wrong = structuredClone(row);
+  wrong.audit.semanticPlans[0].tasks[0].entities.new_time = '19:00';
+  let score = assessFullOfflineTurn(wrong);
+  assert.ok(score.failedCheckIds.includes('exact_current_time_preserved'));
+  wrong.audit.semanticPlans[0].tasks[0].entities.time = '20:00';
+  score = assessFullOfflineTurn(wrong);
+  assert.ok(score.failedCheckIds.includes('exact_current_time_preserved'));
+  const missing = structuredClone(row);
+  delete missing.audit.semanticPlans[0].tasks[0].entities.new_time;
+  missing.audit.semanticPlans[0].tasks[0].clarification_question =
+    'Перенос на пятницу 20:00';
+  score = assessFullOfflineTurn(missing);
+  assert.equal(score.status, 'insufficient_evidence');
+  assert.ok(score.missingEvidenceIds.includes('exact_current_time_preserved'));
+  assert.ok(score.missingEvidenceIds.includes('friday_and_time_retained'));
+  row.reply = 'Уточните запись для переноса.';
+  assert.ok(
+    assessFullOfflineTurn(row).failedCheckIds.includes(
+      'reschedule_time_answered',
     ),
   );
 });
