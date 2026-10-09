@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-10-09T22:02:33.937893+00:00",
+  "runs": [
+    {
+      "run": "r1-transform-failed",
+      "sourceCommit": "44cb24e7da87a3fda56e67d0485552870eaea748",
+      "pgCtlStatus": 3,
+      "postmasterPidAbsent": true
+    },
+    {
+      "run": "r2",
+      "sourceCommit": "82dcad6feb049cdf407e6d67f75944ee32898d8c",
+      "pgCtlStatus": 3,
+      "postmasterPidAbsent": true
+    },
+    {
+      "run": "r3",
+      "sourceCommit": "1bad667c0196ff139db9f9413bab0206aec71dc0",
+      "pgCtlStatus": 3,
+      "postmasterPidAbsent": true
+    }
+  ]
+}

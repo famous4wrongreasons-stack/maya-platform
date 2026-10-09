@@ -1,0 +1,32 @@
+{
+  "reviewer": "independent_review",
+  "mode": "READ_ONLY_NO_EXECUTION_OR_EDITS",
+  "result": "QUALIFIED_PASS",
+  "sourceCommit": "1bad667c0196ff139db9f9413bab0206aec71dc0",
+  "r3ManifestSha256": "80ddb2943bde2ca640becb5afbae3d0845d7a6d07167817b45277d59ff540cd3",
+  "sourceHashesVerifiedAgainstGitAndCurrent": 2551,
+  "uiLogins": 3,
+  "visibleHttp201": 5,
+  "browserHttpJournalJoin": true,
+  "businessWrites": 0,
+  "upstreamCalls": 0,
+  "ownerC9Revision": 1,
+  "ownerC9EvidenceCount": 2,
+  "ownedGroupsAbsent": 7,
+  "cleanup": "PG_BROKER_CHROME_REPORTS_POSITIVE_AND_ROOT_OS_CHECKS",
+  "closedFindings": [
+    "Visible button predicate type",
+    "Failure evidence before JSON/render assertions",
+    "Current attempted turn identity",
+    "Cancellation during cleanup cannot report completed",
+    "Independent cleanup finalizers despite rejection",
+    "Opened fd bounded identity checks",
+    "Failure report distinguishes attempted UI from rendered completion",
+    "Chrome exit required before successful finish"
+  ],
+  "launcherNoApproval": "REFUSED_BEFORE_BROKER_TTY_CLAIM",
+  "positivePaidTTYPath": "NOT_RUN",
+  "realModelOrProviderAcceptance": false,
+  "qualification": "STUB_TRANSPORT_PASS_NOT_LINGUISTIC_OR_FULL_PRODUCT_ACCEPTANCE",
+  "freshPrepareAfterDocsRequired": true
+}

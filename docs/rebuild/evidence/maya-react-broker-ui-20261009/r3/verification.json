@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-10-09T22:00:06.365691+00:00",
+  "candidateCommit": "1bad667c0196ff139db9f9413bab0206aec71dc0",
+  "verifiedSourceFiles": 2551,
+  "uiLogins": 3,
+  "uiMessagesAndRenderedReplies": 5,
+  "joinedBrowserHttpRequestIdsAndReplies": true,
+  "brokerCalls": 5,
+  "upstreamCalls": 0,
+  "businessWrites": 0,
+  "businessSnapshotsUnchanged": true,
+  "pgCtlStatus": 3,
+  "recordedOwnedPidsAbsent": [
+    75907,
+    75797,
+    75618,
+    75651,
+    75702,
+    75726,
+    75765,
+    75841,
+    76288
+  ],
+  "groupsAbsent": 7,
+  "frozen9LauncherSha256": "007ba048c59eaf7ec020ec142aea15045d22098a6515701a74e78823ec20e7de",
+  "qualification": "CURRENT_REACT_STUB_TRANSPORT_NOT_REAL_MODEL_OR_PROVIDER_ACCEPTANCE"
+}

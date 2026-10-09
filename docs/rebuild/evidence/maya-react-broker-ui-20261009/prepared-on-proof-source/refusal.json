@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-10-09T21:58:50.684883+00:00",
+  "candidateCommit": "1bad667c0196ff139db9f9413bab0206aec71dc0",
+  "command": "/private/tmp/maya-ui-1bad-20261009-r1/launch.command",
+  "exitCode": 1,
+  "reason": "MISSING_EXTERNAL_APPROVAL_HANDOFF_BEFORE_BROKER",
+  "keyPromptOpened": false,
+  "servicesStarted": false,
+  "credentialsLoaded": false,
+  "paidCalls": 0,
+  "permitClaimBrokerRunnerArtifactsAbsent": true,
+  "directCause": {
+    "code": "ENOENT",
+    "file": "approved-run.json"
+  }
+}

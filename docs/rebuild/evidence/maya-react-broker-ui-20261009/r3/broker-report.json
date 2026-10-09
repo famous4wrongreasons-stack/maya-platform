@@ -1,0 +1,200 @@
+{
+  "contract": "maya.core-conversation-broker/1",
+  "mode": "DRY_HTTP",
+  "runId": "c57ea5b7-bad2-4c23-af98-a429aaf269a5",
+  "candidateCommit": "1bad667c0196ff139db9f9413bab0206aec71dc0",
+  "profile": "core-react-diagnostic-20261009/1",
+  "limitsSha256": "754a7d2ba93f07c263330496c8675854ba6b245dae19c612062523c5d655b9e1",
+  "manifestSha256": "80ddb2943bde2ca640becb5afbae3d0845d7a6d07167817b45277d59ff540cd3",
+  "paidAuthorized": false,
+  "credentialsLoaded": false,
+  "upstreamCalls": 0,
+  "upstreamCountMeaning": "attempts started; delivery may be unknown",
+  "startedAt": "2026-10-09T21:57:30.130Z",
+  "expiresAt": "2026-10-09T22:07:30.130Z",
+  "requests": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "bytes": 69071,
+      "bodySha256": "16d0766196467d28af2edf5e20483141dd06588b0a432a527544f80973ce92cd",
+      "status": 200
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "bytes": 70032,
+      "bodySha256": "e593a335faf1503e8f3c2ec6abf0903fc673d9689344f3552c07bc22ee419725",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "bytes": 93197,
+      "bodySha256": "a64d86ad049b7ef03ddf1b6c9540088c9d66f7cd449e11b6355e5dd7715f0b96",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "bytes": 97917,
+      "bodySha256": "7dc1cf3a8c908f03249486656ec837f32c0ca5f507aeacea827b84a48e345b6e",
+      "status": 200
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "bytes": 80825,
+      "bodySha256": "490fa0e2c1d06d4fa375a76837a8df83fe3682516813c3fcc1f488fb85df774a",
+      "status": 200
+    }
+  ],
+  "rejections": [],
+  "stopped": true,
+  "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+  "recordedReplay": true,
+  "usageValidation": "OFFLINE_SYNTHETIC_NOT_ACTUAL_USAGE",
+  "replayFixture": "synthetic-accept-20261009",
+  "recordedResponses": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "archiveRecordNumber": 1,
+      "sourceAttemptWithinTurn": 1,
+      "scenario": "synthetic-accept",
+      "origin": "RECORDED_ACTUAL_RESPONSE_WITH_DECLARED_BINDING",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": "9aa9059911ff38dbaaeff389b78a1a973fdbf2c9d093da58758b3a3f940dfd91",
+      "archiveSha256": "0392af917672c73eff7b127cb449bf95cc1d64f7f09e36358d631e4c964b3b0c",
+      "replacedArchiveContentSha256": null,
+      "returnedContentSha256": "e61e6f112a0cc7860b5f4c81834e55ada76a460bb075b1294b87d22121824ee9",
+      "historicalUsageNotCurrentBilling": {
+        "prompt_tokens": 14412,
+        "completion_tokens": 312,
+        "total_tokens": 14724,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 13388
+      },
+      "binding": {
+        "policy": "CURRENT_REQUEST_ALIAS_AND_BUSINESS_TOMORROW_RELATIVE_OFFSETS",
+        "aliasSource": "exact_current_sanitized_user_request",
+        "aliasSha256": "69e8ef405608a4928158a26898abceac3df12b17dadb55ff5ad8836f4ab1d723",
+        "nowUtc": "2026-10-09T21:57:33.461Z",
+        "timezone": "Europe/Moscow",
+        "originalBusinessTomorrow": "2026-10-10",
+        "currentBusinessTomorrow": "2026-10-11",
+        "originalDate": "2026-10-10",
+        "reboundDate": "2026-10-11",
+        "recordedDayOffset": 0
+      },
+      "currentProviderCalls": 0
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "archiveRecordNumber": 2,
+      "sourceAttemptWithinTurn": 1,
+      "scenario": "synthetic-accept",
+      "origin": "RECORDED_ACTUAL_RESPONSE_WITH_DECLARED_BINDING",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": "13ca73bdaa062f402f2da7d3383dc0e771987966fc88e249895215b61d1e7b72",
+      "archiveSha256": "0392af917672c73eff7b127cb449bf95cc1d64f7f09e36358d631e4c964b3b0c",
+      "replacedArchiveContentSha256": null,
+      "returnedContentSha256": "825c01dcc28fc5974ba06f9f87bb03a3f0be961d0f5c810ab4bac4b9c9fe5ae2",
+      "historicalUsageNotCurrentBilling": {
+        "prompt_tokens": 14643,
+        "completion_tokens": 320,
+        "total_tokens": 14963,
+        "prompt_cache_hit_tokens": 2816,
+        "prompt_cache_miss_tokens": 11827
+      },
+      "binding": {
+        "policy": "CURRENT_REQUEST_ALIAS_AND_BUSINESS_TOMORROW_RELATIVE_OFFSETS",
+        "aliasSource": "exact_current_sanitized_semantic_plan_employee",
+        "aliasSha256": "4696f981ae072b4bc1d1c5a4680a34b6b020532b7ead6e184de1b4f276ca5d2a",
+        "nowUtc": "2026-10-09T21:57:34.065Z",
+        "timezone": "Europe/Moscow",
+        "originalBusinessTomorrow": "2026-10-10",
+        "currentBusinessTomorrow": "2026-10-11",
+        "originalDate": "2026-10-10",
+        "reboundDate": "2026-10-11",
+        "recordedDayOffset": 0
+      },
+      "currentProviderCalls": 0
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "archiveRecordNumber": 3,
+      "sourceAttemptWithinTurn": 1,
+      "scenario": "synthetic-accept",
+      "origin": "RECORDED_ACTUAL_RESPONSE_WITH_DECLARED_BINDING",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": "98e43eb53959cea4b05ea968ed625dc86678b797ecda59d5d95b54be2066fbf0",
+      "archiveSha256": "0392af917672c73eff7b127cb449bf95cc1d64f7f09e36358d631e4c964b3b0c",
+      "replacedArchiveContentSha256": null,
+      "returnedContentSha256": "98e43eb53959cea4b05ea968ed625dc86678b797ecda59d5d95b54be2066fbf0",
+      "historicalUsageNotCurrentBilling": {
+        "prompt_tokens": 19429,
+        "completion_tokens": 386,
+        "total_tokens": 19815,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 18405
+      },
+      "binding": null,
+      "currentProviderCalls": 0
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "archiveRecordNumber": 4,
+      "sourceAttemptWithinTurn": 1,
+      "scenario": "synthetic-accept",
+      "origin": "SCRIPTED_SYNTHETIC_CONTINUATION",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": null,
+      "archiveSha256": null,
+      "replacedArchiveContentSha256": "1b83b4341efc4cef4f5dd3ec7ce990cefb772fbb2a34274d01bf3392c93c0540",
+      "returnedContentSha256": "bcd35f79a0ac097ea6c7162de3f18d70a82b8e738c94a455fa554cac586c5bcc",
+      "historicalUsageNotCurrentBilling": null,
+      "binding": null,
+      "currentProviderCalls": 0
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "archiveRecordNumber": 5,
+      "sourceAttemptWithinTurn": 1,
+      "scenario": "synthetic-accept",
+      "origin": "RECORDED_ACTUAL_RESPONSE_WITH_DECLARED_BINDING",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": "b9f7c06f026071ffc093beb0e054006b193c7dfd99450e4fdfd06bc01410599c",
+      "archiveSha256": "0392af917672c73eff7b127cb449bf95cc1d64f7f09e36358d631e4c964b3b0c",
+      "replacedArchiveContentSha256": null,
+      "returnedContentSha256": "b9f7c06f026071ffc093beb0e054006b193c7dfd99450e4fdfd06bc01410599c",
+      "historicalUsageNotCurrentBilling": {
+        "prompt_tokens": 16716,
+        "completion_tokens": 175,
+        "total_tokens": 16891,
+        "prompt_cache_hit_tokens": 4736,
+        "prompt_cache_miss_tokens": 11980
+      },
+      "binding": null,
+      "currentProviderCalls": 0
+    }
+  ],
+  "port": 51674,
+  "stopReason": "SIGTERM",
+  "connectionsAtStop": 0,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-09T21:58:00.318Z",
+  "stats": {
+    "dialogs": 3,
+    "turns": 5,
+    "attempts": 5,
+    "inputTokens": 431522,
+    "outputTokens": 6000,
+    "reservedNanoUsd": 593369040,
+    "halted": false
+  }
+}
