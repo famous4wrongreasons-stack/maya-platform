@@ -1,0 +1,25 @@
+[
+  {
+    "url": "https://mayaos.ru/",
+    "curlExitCode": 0,
+    "httpStatus": "200",
+    "error": "",
+    "bodySha256": "e54bb67ffbac7d0b155b1fd4a5408806a86d51e96b35bfbea21219cb659c786b",
+    "bytes": 1344,
+    "title": [
+      "MAYA"
+    ],
+    "scripts": [
+      "./m/fbb827ac775afc21/entry/main.js"
+    ]
+  },
+  {
+    "url": "https://mayaos.ru/api/health",
+    "curlExitCode": 0,
+    "httpStatus": "502",
+    "error": "",
+    "bodySha256": "23e7ca5a62415394228183a6432ba80eca5cf81391e8fa69674a0dd56225f67b",
+    "bytes": 52,
+    "body": "{\"message\":\"MAYA server is temporarily unavailable\"}"
+  }
+]

@@ -1,0 +1,145 @@
+[
+  {
+    "environment": "PUBLIC LIVE UI",
+    "request": "Открыть MAYA и перезагрузить страницу",
+    "actualAnswer": "Вход в MAYA; Найдите свой бизнес",
+    "source": "HTTP 200, actual Chrome initial/reload, legacy shell module graph",
+    "status": "PASS",
+    "scope": "Signed-out entry only"
+  },
+  {
+    "environment": "PUBLIC LIVE UI",
+    "request": "Мужская Эстетика → Найти",
+    "actualAnswer": "Нет связи — повторить",
+    "source": "Actual GET /api/mobile/pwa/search: HTTP 502; MAYA server is temporarily unavailable",
+    "status": "FAIL",
+    "scope": "One exact public business search; no login or CRM operation"
+  },
+  {
+    "environment": "PUBLIC LIVE UI",
+    "request": "Общий разговор и продолжение с реальной моделью",
+    "actualAnswer": null,
+    "source": null,
+    "status": "NOT RUN",
+    "blocker": "No admitted authenticated runtime; RAM key absent for unused bounded frozen9; no new paid profile authorized"
+  },
+  {
+    "environment": "PUBLIC LIVE UI",
+    "request": "Прочитать реальные данные YCLIENTS выбранного бизнеса/филиала",
+    "actualAnswer": null,
+    "source": null,
+    "status": "NOT RUN",
+    "blocker": "Public finder 502; no current authenticated tenant/branch/source session or deployed source binding established"
+  },
+  {
+    "environment": "PUBLIC LIVE UI",
+    "request": "Создать/перенести/отменить настоящую запись",
+    "actualAnswer": null,
+    "source": null,
+    "status": "NOT RUN",
+    "blocker": "Current tenant/branch/test Client/write authority and separate bounded live-write plan absent; historical permits not reused"
+  },
+  {
+    "environment": "LOCAL CURRENT REACT + REAL HTTP/PG; SCRIPTED MODEL / SYNTHETIC CRM",
+    "request": "Хочу записаться",
+    "actualAnswer": "Выберите услугу для записи.",
+    "source": "Existing chat + current synthetic catalog; service selected in actual React before snapshot",
+    "status": "PASS",
+    "scope": "Mechanics only; not live model/provider acceptance",
+    "snapshot": "success-selection"
+  },
+  {
+    "environment": "LOCAL CURRENT REACT + REAL HTTP/PG; SCRIPTED MODEL / SYNTHETIC CRM",
+    "request": "Продолжим запись после повторного входа",
+    "actualAnswer": "Выберите мастера. Услугу и остальные пожелания сохранила.",
+    "source": "Persisted preferences; fresh selector, no restored confirmation authority",
+    "status": "PASS",
+    "scope": "Mechanics only; not live model/provider acceptance",
+    "snapshot": "success-resumed"
+  },
+  {
+    "environment": "LOCAL CURRENT REACT + REAL HTTP/PG; SCRIPTED MODEL / SYNTHETIC CRM",
+    "request": "Что такое тайм-менеджмент?",
+    "actualAnswer": "Тайм-менеджмент — это планирование своего времени.",
+    "source": "Exact scripted answer; zero provider reads and booking effects",
+    "status": "PASS",
+    "scope": "Mechanics only; not live model/provider acceptance",
+    "snapshot": "success-general",
+    "intellectualAcceptance": "NOT RUN"
+  },
+  {
+    "environment": "LOCAL CURRENT REACT + REAL HTTP/PG; SCRIPTED MODEL / SYNTHETIC CRM",
+    "request": "Объясни проще",
+    "actualAnswer": "Тайм-менеджмент — это планирование своего времени.",
+    "source": "Same exact scripted answer again; no inference about real conversational quality",
+    "status": "PASS",
+    "scope": "Mechanics only; not live model/provider acceptance",
+    "snapshot": "success-general-follow-up",
+    "intellectualAcceptance": "NOT RUN"
+  },
+  {
+    "environment": "LOCAL CURRENT REACT + REAL HTTP/PG; SCRIPTED MODEL / SYNTHETIC CRM",
+    "request": "Вернёмся к записи",
+    "actualAnswer": "На 2026-10-12 в 14:30 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.",
+    "source": "Fresh synthetic native availability for retained exact service/staff/day/time",
+    "status": "PASS",
+    "scope": "Mechanics only; not live model/provider acceptance",
+    "snapshot": "success-topic-return"
+  },
+  {
+    "environment": "LOCAL CURRENT REACT + REAL HTTP/PG; SCRIPTED MODEL / SYNTHETIC CRM",
+    "request": "Нет, в 15:00",
+    "actualAnswer": "На 2026-10-12 в 15:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.",
+    "source": "Fresh exact 15:00 synthetic slot; canonical preview only",
+    "status": "PASS",
+    "scope": "Mechanics only; not live model/provider acceptance",
+    "snapshot": "success-preview"
+  },
+  {
+    "environment": "LOCAL CURRENT REACT + REAL HTTP/PG; SCRIPTED MODEL / SYNTHETIC CRM",
+    "request": "Подтвердить запись",
+    "actualAnswer": "Запись подтверждена.",
+    "source": "One canonical ActionExecution SUCCEEDED, one synthetic booking POST; no external write",
+    "status": "PASS",
+    "scope": "Mechanics only; not live model/provider acceptance",
+    "snapshot": "success-result"
+  },
+  {
+    "environment": "LOCAL CURRENT REACT + REAL HTTP/PG; SCRIPTED MODEL / SYNTHETIC CRM",
+    "request": "Подтвердить запись при потере ответа",
+    "actualAnswer": "Результат пока не подтверждён. Не отправляйте повторно.",
+    "source": "Canonical UNKNOWN after single synthetic dispatch",
+    "status": "PASS",
+    "scope": "Mechanics only; not live model/provider acceptance",
+    "snapshot": "unknown-before"
+  },
+  {
+    "environment": "LOCAL CURRENT REACT + REAL HTTP/PG; SCRIPTED MODEL / SYNTHETIC CRM",
+    "request": "Проверить результат после подтверждающего чтения",
+    "actualAnswer": "Запись подтверждена.",
+    "source": "Same action resolves SUCCEEDED from synthetic authoritative readback; no second booking POST",
+    "status": "PASS",
+    "scope": "Mechanics only; not live model/provider acceptance",
+    "snapshot": "unknown-confirmed",
+    "uiIssue": "Older UNKNOWN warning remains visible adjacent to confirmation"
+  },
+  {
+    "environment": "LOCAL CURRENT REACT + REAL HTTP/PG; SCRIPTED MODEL / SYNTHETIC CRM",
+    "request": "Подтвердить устаревший вариант",
+    "actualAnswer": "Данные изменились с момента показа. Откройте актуальную версию.",
+    "source": "handle_stale at gate11; zero booking actions/POSTs",
+    "status": "PASS",
+    "scope": "Mechanics only; not live model/provider acceptance",
+    "snapshot": "stale-result"
+  },
+  {
+    "environment": "LOCAL CURRENT REACT + REAL HTTP/PG; SCRIPTED MODEL / SYNTHETIC CRM",
+    "request": "Перезагрузить и войти заново",
+    "actualAnswer": "Предыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.",
+    "source": "Existing persisted timeline and canonical receipt; no automatic mutation/control restoration",
+    "status": "PASS",
+    "scope": "Mechanics only; not live model/provider acceptance",
+    "snapshot": "success-reload",
+    "uiIssue": "Incomplete-response warning also visible; no full visual acceptance"
+  }
+]

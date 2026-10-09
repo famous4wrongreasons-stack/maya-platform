@@ -1,0 +1,19 @@
+{
+  "checkedAt": "2026-10-09T21:33:50.658244+00:00",
+  "recordedPublicChromeAndJestPids": [
+    {
+      "pid": 60346,
+      "absent": true
+    },
+    {
+      "pid": 62297,
+      "absent": true
+    },
+    {
+      "pid": 60798,
+      "absent": true
+    }
+  ],
+  "visibleJestOrPgCtlCommands": [],
+  "localChromeCleanup": "Browser child returned after owned cleanup; no explicit local Chrome PID in artifact. Do not claim whole OS-group census."
+}

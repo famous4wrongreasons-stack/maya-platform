@@ -1,0 +1,23 @@
+{
+  "verifiedAt": "2026-10-09T21:33:29.682545+00:00",
+  "candidateCommit": "4c477c0af99031072a4fab9427013b33611697fa",
+  "sourceBindingsVerified": 1820,
+  "sourceBytesStillMatch": true,
+  "pgStatusExit": 3,
+  "pgPidAbsent": true,
+  "jestTests": 1,
+  "jestFailed": 0,
+  "checkpoints": 43,
+  "realModelCallsObservedByFixture": 0,
+  "scriptedDecisions": 33,
+  "syntheticBookingPostsByScenario": {
+    "success": 1,
+    "unknown": 1,
+    "stale": 0
+  },
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "publicUiSearchStatus": "FAIL",
+  "publicUiSearchHttpStatus": 502,
+  "remaining": "Authenticated live model/CRM and deployed Git binding NOT RUN; public shell differs from current React."
+}

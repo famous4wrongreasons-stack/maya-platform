@@ -1,0 +1,210 @@
+{
+  "qualification": "PUBLIC_SIGNED_OUT_BUSINESS_SEARCH_ONLY",
+  "url": "https://mayaos.ru/",
+  "status": "observed",
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/entry/main.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/dom/host.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/net/session.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/renderer/render.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/shell/shell.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/shell/intents.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/shell/voice-state.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/voice/capture.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/dom/composer.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/dom/fullscreen.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/dom/nav.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/dom/signin.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/dom/timeline.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/dom/voice-control.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/net/client.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/renderer/kinds.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/renderer/cells.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/renderer/tables.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/routes/registry.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/shell/conversation.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/shell/deeplink.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/integrity/h7.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/shell/view.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/voice/wav.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/net/endpoint.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/m/fbb827ac775afc21/src/net/project.js",
+      "allowed": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/mobile/pwa/search",
+      "allowed": true
+    }
+  ],
+  "snapshots": {},
+  "modelCalls": 0,
+  "crmMutations": 0,
+  "chromePid": 62297,
+  "before": {
+    "text": "MAYA\nВход в MAYA\nНайдите свой бизнес\nНазвание или город\n\nНапример: Мужская Эстетика\n\nНайти\nМоего бизнеса ещё нет\nДругой способ входа",
+    "controls": [
+      {
+        "tag": "INPUT",
+        "name": "Название или город"
+      },
+      {
+        "tag": "BUTTON",
+        "name": "Найти"
+      },
+      {
+        "tag": "BUTTON",
+        "name": "Моего бизнеса ещё нет"
+      },
+      {
+        "tag": "BUTTON",
+        "name": "Другой способ входа"
+      }
+    ]
+  },
+  "after": {
+    "text": "MAYA\nВход в MAYA\nНайдите свой бизнес\n\nНет связи — повторить\n\nНазвание или город\n\nНапример: Мужская Эстетика\n\nНайти\nМоего бизнеса ещё нет\nДругой способ входа",
+    "controls": [
+      {
+        "tag": "BUTTON",
+        "name": "Повторить"
+      },
+      {
+        "tag": "INPUT",
+        "name": "Название или город"
+      },
+      {
+        "tag": "BUTTON",
+        "name": "Найти"
+      },
+      {
+        "tag": "BUTTON",
+        "name": "Моего бизнеса ещё нет"
+      },
+      {
+        "tag": "BUTTON",
+        "name": "Другой способ входа"
+      }
+    ]
+  },
+  "api": [
+    {
+      "method": "GET",
+      "status": 502,
+      "responseBody": "{\"message\":\"MAYA server is temporarily unavailable\"}"
+    }
+  ],
+  "ownedBrowserClosed": true
+}

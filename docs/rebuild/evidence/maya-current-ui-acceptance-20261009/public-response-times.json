@@ -1,0 +1,13 @@
+{
+  "responseDates": {
+    "entry": [
+      "date: Fri, 09 Oct 2026 21:28:03 GMT"
+    ],
+    "health": [
+      "date: Fri, 09 Oct 2026 21:28:15 GMT"
+    ]
+  },
+  "searchQuery": "Мужская Эстетика",
+  "searchUrl": "https://mayaos.ru/api/mobile/pwa/search?q=%D0%9C%D1%83%D0%B6%D1%81%D0%BA%D0%B0%D1%8F%20%D0%AD%D1%81%D1%82%D0%B5%D1%82%D0%B8%D0%BA%D0%B0",
+  "searchTimeQualification": "Executed after local browser flow, before process-cleanup checkedAt; no exact wall-clock timestamp was saved by browser helper."
+}

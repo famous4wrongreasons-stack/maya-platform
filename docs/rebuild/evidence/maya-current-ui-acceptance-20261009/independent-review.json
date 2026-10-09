@@ -1,0 +1,41 @@
+{
+  "reviewer": "/root/independent_review",
+  "mode": "read-only source/evidence/screenshots, no tests or services",
+  "matrix": {
+    "publicEntryReload": "PASS display only",
+    "publicBusinessSearch": "FAIL HTTP502 and visible no-connection",
+    "liveChatModelCrmBooking": "NOT RUN",
+    "localSyntheticMechanics": "PASS"
+  },
+  "sourceHashesIndependentlyVerified": 1820,
+  "localCheckpoints": 43,
+  "scriptedDecisions": 33,
+  "syntheticBookingPostCounts": [
+    1,
+    1,
+    0
+  ],
+  "setupActionsExcluded": 9,
+  "uiFinding": "UNKNOWN warning remains next to CONFIRMED until reload; pinned header overlaps old timeline. Full visual/coherent UI acceptance not granted.",
+  "unknownAndConfirmedDomCounts": {
+    "before": [
+      1,
+      0
+    ],
+    "confirmed": [
+      1,
+      1
+    ],
+    "result": [
+      1,
+      1
+    ],
+    "reload": [
+      0,
+      1
+    ]
+  },
+  "cleanupScope": "Two recorded public Chrome PIDs, Jest PID, PG status3/pidabsent; no whole local Chrome group census",
+  "manifestSha256": "8f061b73aa589c48d04fe9e866f1df42fc9b7321528ce72552925360c3995aeb",
+  "publicSearchSha256": "277ab7f1a49c61d2541a561af094df5fb7e3c2cbe00328632c02c93c09319e5e"
+}

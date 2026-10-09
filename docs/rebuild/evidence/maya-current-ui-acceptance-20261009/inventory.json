@@ -1,0 +1,62 @@
+{
+  "observedAt": "2026-10-09T21:30:32.228592+00:00",
+  "developmentCheckout": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-pricing-semantic-integration",
+  "developmentHead": "4c477c0af99031072a4fab9427013b33611697fa",
+  "generalChatEvidenceCommit": "14a9679c",
+  "pausedSearchWorkCommit": "4c477c0af99031072a4fab9427013b33611697fa",
+  "production": {
+    "entry": "https://mayaos.ru/",
+    "entryStatus": 200,
+    "loadedEntry": "/m/fbb827ac775afc21/entry/main.js",
+    "interface": "legacy headless-shell DOM entry, distinct from current maya-carrier-react bundle",
+    "backendHealthStatus": 502,
+    "backendMessage": "MAYA server is temporarily unavailable",
+    "backendCommit": "UNKNOWN",
+    "credentialsRead": false,
+    "loginAttempted": false,
+    "paidRequests": 0,
+    "crmWrites": 0
+  },
+  "existingLocalNodeProcesses": [
+    {
+      "pid": 6477,
+      "port": 8770,
+      "root": "/Users/stanislavmosin/Desktop/Projects/maya-web",
+      "role": "separate Next.js website, not current carrier"
+    },
+    {
+      "pid": 14982,
+      "root": "/Users/stanislavmosin/Desktop/Projects/maya-platform/maya-saas-backend",
+      "observedListeningPort": null
+    },
+    {
+      "pid": 24050,
+      "root": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/maya-platform",
+      "observedListeningPort": null
+    }
+  ],
+  "foreignSourceMetadata": [
+    {
+      "root": "/Users/stanislavmosin/Desktop/Projects/maya-web",
+      "head": "24007c43c57314f1a55e14fab1db6e74b4adb0e7",
+      "dirty": true,
+      "edited": false
+    },
+    {
+      "root": "/Users/stanislavmosin/Desktop/Projects/maya-platform",
+      "head": "6b245f0605ef5458abb4b05e38e8fdfe1fb10325",
+      "dirty": true,
+      "edited": false
+    },
+    {
+      "root": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/maya-platform",
+      "head": "98dc6121b714c51bedb70e396f5ad35cd0f9c346",
+      "dirty": false,
+      "edited": false
+    }
+  ],
+  "priorGeneralChatClustersStopped": 3,
+  "realModelBlocker": "Parent reports unused owner-approved frozen9 ($6 / 36 requests / 30min); RAM key absent. No key prompt opened; frozen candidate/manifest not rebound to development HEAD.",
+  "realBookingBlocker": "No current authenticated tenant/branch/test Client/write-authority acceptance context and separate bounded live-write plan. Historical permits not reused.",
+  "frozenLauncherSha256": "007ba048c59eaf7ec020ec142aea15045d22098a6515701a74e78823ec20e7de"
+}
