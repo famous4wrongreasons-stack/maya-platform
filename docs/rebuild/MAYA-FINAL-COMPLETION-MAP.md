@@ -2,7 +2,9 @@
 
 Date: 2026-10-05. Verified base: `dff728e85a97841dd72bd290992b888344780780` on `codex/maya-controlled-integration-20260930`; current local completion branch: `codex/maya-final-completion-20261005`. The rows include the local changes described below. This is a product completion map, not release authorization.
 
-## Latest qualified development checkpoint — 2026-10-08
+## Latest qualified development checkpoint — 2026-10-09
+
+Latest conversational correction: [recorded-response corrective checkpoint](MAYA-MODEL-CORRECTIVE-CHECKPOINT-20261009.md), runtime `8d9f30c4`, tested `b9665758`. Source-qualified exact-time acknowledgment and lossless property-schema packing fix the two observed actual-run defects. **422 targeted tests, 10 replay tests, types/lint/K3 and 5 current HTTP turns PASS**. Owner confirmation yields one C9 response with exact persisted revision/evidence; the historical BI qualification remains. Three archived responses plus two explicitly synthetic continuations, zero new provider/CRM calls or business effects. The original three-call paid failure and the first offline oracle failure remain archived. No new real-model acceptance, complete booking receipt, multi-company migration, background C10, website or release claim.
 
 Latest actual OCR continuation: [executable local photo recognition](MAYA-GOODS-PHOTO-ACTUAL-OCR-CHECKPOINT-20261008.md), runtime `b56ea887fcda770fb988db0e69904b7e95029242`. Actual synthetic pixels → installed Apple Vision RU/EN → bounded provisional rows, through existing authenticated upload and current React. **133 backend tests / seven suites, eight shell + ten React tests, types/lint/builds/contracts/K3; six actual HTTP/PG/current React checkpoints PASS**. Changed pixels change rows; blank/malformed/revoked refuse; no parser spy, model/provider call or business workflow. Opt-in Mac profile, default disabled, narrow flat five-column grammar; Linux runtime and real-document quality remain open. No C10, schema/retention or website authority.
 

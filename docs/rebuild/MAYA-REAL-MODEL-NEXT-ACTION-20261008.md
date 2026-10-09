@@ -4,8 +4,14 @@
 закрыт.** [Фактические ответы, остановка и cleanup](MAYA-LOCAL-ACTUAL-MODEL-RESULT-20261008.md):
 3 ответа DeepSeek, затем четвёртый запрос отклонён локально по размеру 99 820 >
 98 304 байт. Качественная приёмка не пройдена, повторное разрешение отсутствует.
-Следующий шаг — локальное исправление context size и booking follow-up, без
-нового ключа и без повторного платного запуска.
+**Локальное исправление завершено 2026-10-09:**
+[corrective checkpoint](MAYA-MODEL-CORRECTIVE-CHECKPOINT-20261009.md), tested
+`b9665758`. 422 targeted tests, 10 replay tests и 5 HTTP ходов PASS с recorded/
+synthetic outputs; проблемный actual HTTP request теперь 96 092 байта при
+неизменном cap и полном наборе tools. Время признаётся выбранным, owner
+confirmation создаёт сохранённую C9 revision 1. Новый ключ/permit/paid run не
+использовались. Следующая real-model приёмка требует отдельного разрешения;
+локальный replay не выдаётся за неё.
 
 **Текущий путь — локальный Mac, по решению владельца.**
 [Локальный checkpoint и secure handoff](MAYA-LOCAL-MODEL-CHECKPOINT-20261008.md):

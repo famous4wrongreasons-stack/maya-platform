@@ -1,0 +1,172 @@
+{
+  "contract": "maya.core-conversation-broker/1",
+  "mode": "DRY_HTTP",
+  "runId": "2fbb872f-a552-419e-8d37-7406a7096dd8",
+  "candidateCommit": "b9665758ffe0c8748d30f8847d648b6ee11b1763",
+  "manifestSha256": "90149fede078e5b3509b33c2733a881bfb08897f9861118f55a66ef02c09777a",
+  "paidAuthorized": false,
+  "credentialsLoaded": false,
+  "upstreamCalls": 0,
+  "upstreamCountMeaning": "attempts started; delivery may be unknown",
+  "startedAt": "2026-10-09T00:41:40.190Z",
+  "expiresAt": "2026-10-09T00:51:40.190Z",
+  "requests": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "bytes": 68037,
+      "bodySha256": "d95aae7363722428969508c0af8e0e77c20dd1f5b47e36cd4396a5a5fd3c5dfd",
+      "status": 200
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "bytes": 68998,
+      "bodySha256": "5b8316f03d52b600fb7b8d850bca47ea0a94bb8fda9bf1e660031eed1c613db6",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "bytes": 92132,
+      "bodySha256": "a2085fedc804e52d29056dfcae85a09eeceeaa247a07a38e56942614adde8aef",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "bytes": 96092,
+      "bodySha256": "8b68dc653c5712c43f78210244ab9a2e66ea022f764e8a22a2269c8fb7693b8b",
+      "status": 200
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "bytes": 79791,
+      "bodySha256": "c7274955257aadeb61ff66a218ec7cd7fdaaaca987628c9ccfbf4bc318624553",
+      "status": 200
+    }
+  ],
+  "rejections": [],
+  "stopped": true,
+  "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+  "recordedReplay": true,
+  "recordedResponses": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "origin": "RECORDED_ACTUAL_RESPONSE_WITH_DECLARED_BINDING",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": "3854d927eb513d2dc94a611f3ad191b03d6bef6ea13dd7f5dc276b5a6542a609",
+      "archiveSha256": "a06c69f84c6733a3ff33c2b5e97e4a1e3058c26776534a781192e02a7f2a0620",
+      "returnedContentSha256": "4adc248183ed3692944a2642d1d8af97eadf3f06b965fea402278dd071f58a2d",
+      "historicalUsageNotCurrentBilling": {
+        "prompt_tokens": 14504,
+        "completion_tokens": 321,
+        "total_tokens": 14825,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 14504
+      },
+      "binding": {
+        "policy": "CURRENT_REQUEST_ALIAS_AND_BUSINESS_TOMORROW_RELATIVE_OFFSETS",
+        "aliasSource": "exact_current_sanitized_user_request",
+        "aliasSha256": "f8484b93fa27f062ea01c882413e9304e712867b46ff4ac20b409c76f8eb62c2",
+        "nowUtc": "2026-10-09T00:41:42.687Z",
+        "timezone": "Europe/Moscow",
+        "originalBusinessTomorrow": "2026-10-10",
+        "currentBusinessTomorrow": "2026-10-10",
+        "originalDate": "2026-10-09",
+        "reboundDate": "2026-10-09",
+        "recordedDayOffset": -1,
+        "firstWrongDayPreserved": true
+      },
+      "currentProviderCalls": 0
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "origin": "RECORDED_ACTUAL_RESPONSE_WITH_DECLARED_BINDING",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": "d147c066f5cc572ebfdb935cb159d0631a5e814ce4313934c09af264be55d503",
+      "archiveSha256": "a06c69f84c6733a3ff33c2b5e97e4a1e3058c26776534a781192e02a7f2a0620",
+      "returnedContentSha256": "110bcdf1f4808c5aa39c6bfbf014af97654cba5bf9cee7a79495a52c69f0a029",
+      "historicalUsageNotCurrentBilling": {
+        "prompt_tokens": 14746,
+        "completion_tokens": 326,
+        "total_tokens": 15072,
+        "prompt_cache_hit_tokens": 640,
+        "prompt_cache_miss_tokens": 14106
+      },
+      "binding": {
+        "policy": "CURRENT_REQUEST_ALIAS_AND_BUSINESS_TOMORROW_RELATIVE_OFFSETS",
+        "aliasSource": "exact_current_sanitized_semantic_plan_employee",
+        "aliasSha256": "16c4b899c2d833fec1c692a5b4df233f807c059c0c09f941337bb64ea3537797",
+        "nowUtc": "2026-10-09T00:41:43.026Z",
+        "timezone": "Europe/Moscow",
+        "originalBusinessTomorrow": "2026-10-10",
+        "currentBusinessTomorrow": "2026-10-10",
+        "originalDate": "2026-10-10",
+        "reboundDate": "2026-10-10",
+        "recordedDayOffset": 0,
+        "firstWrongDayPreserved": true
+      },
+      "currentProviderCalls": 0
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "origin": "RECORDED_ACTUAL_RESPONSE_WITH_DECLARED_BINDING",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": "57b720e5e0f724e8135b0cc3d86f48bafd9a56006a67337d4f51663bfd94d6c4",
+      "archiveSha256": "a06c69f84c6733a3ff33c2b5e97e4a1e3058c26776534a781192e02a7f2a0620",
+      "returnedContentSha256": "ab446ec693a0ac221afe9ca629e04bf78642b5f1cf53b64a9d39b1e3df52711e",
+      "historicalUsageNotCurrentBilling": {
+        "prompt_tokens": 20424,
+        "completion_tokens": 370,
+        "total_tokens": 20794,
+        "prompt_cache_hit_tokens": 640,
+        "prompt_cache_miss_tokens": 19784
+      },
+      "binding": null,
+      "currentProviderCalls": 0
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "origin": "SCRIPTED_SYNTHETIC_CONTINUATION",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": null,
+      "archiveSha256": null,
+      "returnedContentSha256": "a0003779adfa1d7f29a65405a2b415e581d28ea5b9785cbea54b28dbeeb337fd",
+      "historicalUsageNotCurrentBilling": null,
+      "binding": null,
+      "currentProviderCalls": 0
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "origin": "SCRIPTED_SYNTHETIC_CONTINUATION",
+      "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+      "originalContentSha256": null,
+      "archiveSha256": null,
+      "returnedContentSha256": "02013234abc715154f01f5ea5a3c0bf6149d94941a44dbd6bbd1362805aa4f7f",
+      "historicalUsageNotCurrentBilling": null,
+      "binding": null,
+      "currentProviderCalls": 0
+    }
+  ],
+  "port": 51830,
+  "stopReason": "SIGTERM",
+  "connectionsAtStop": 0,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-09T00:42:07.159Z",
+  "stats": {
+    "dialogs": 3,
+    "turns": 5,
+    "attempts": 5,
+    "inputTokens": 425530,
+    "outputTokens": 6000,
+    "reservedNanoUsd": 585459600,
+    "halted": false
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "a": {
+    "candidateCommit": "8d9f30c4b03af10be5b324eb078f9200fb546290",
+    "status": "failed",
+    "checkedAt": "2026-10-09T00:43:05.740Z",
+    "brokerPidState": "absent",
+    "groupStates": {
+      "initdb": "absent",
+      "pg-start": "absent",
+      "createdb": "absent",
+      "migrations": "absent",
+      "conversation": "absent",
+      "pg-stop": "absent"
+    },
+    "postmasterPidAbsent": true,
+    "runnerClusterStopped": true,
+    "runnerBrokerClosed": true,
+    "sourcesUnchanged": true
+  },
+  "b": {
+    "candidateCommit": "b9665758ffe0c8748d30f8847d648b6ee11b1763",
+    "status": "passed-ungraded",
+    "checkedAt": "2026-10-09T00:43:05.743Z",
+    "brokerPidState": "absent",
+    "groupStates": {
+      "initdb": "absent",
+      "pg-start": "absent",
+      "createdb": "absent",
+      "migrations": "absent",
+      "conversation": "absent",
+      "pg-stop": "absent"
+    },
+    "postmasterPidAbsent": true,
+    "runnerClusterStopped": true,
+    "runnerBrokerClosed": true,
+    "sourcesUnchanged": true
+  }
+}

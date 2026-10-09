@@ -1,0 +1,196 @@
+{
+  "contract": "maya.local-model-corrective-evidence/1",
+  "createdAt": "2026-10-09T00:43:05.747Z",
+  "runtimeCommit": "8d9f30c4b03af10be5b324eb078f9200fb546290",
+  "testedCandidate": "b9665758ffe0c8748d30f8847d648b6ee11b1763",
+  "actualPaidFailureEvidenceCommit": "856323e7f643dc596a77f5354eaeec03ba18655d",
+  "qualification": "RECORDED_RESPONSE_REPLAY_WITH_DECLARED_BINDING_AND_SYNTHETIC_CONTINUATIONS_NOT_MODEL_QUALITY",
+  "providerCalls": 0,
+  "liveCrmCalls": 0,
+  "files": {
+    "checks/final-specs.log": {
+      "bytes": 258,
+      "sha256": "6b687b1cab148db0906aba36e858f960d43ff369a3ca3cdfbbab2ecf08c2fcd2"
+    },
+    "checks/k3.log": {
+      "bytes": 7873,
+      "sha256": "ac417a602e6a928bfc26d6082fe1bd715f735be5a31d917a44d5895f8ba216f1"
+    },
+    "checks/lint.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "checks/planner-green.log": {
+      "bytes": 388,
+      "sha256": "ae259caad730f2c1c2c2abdd92ebc2b9e3367a60be3877962b9e58a54493b963"
+    },
+    "checks/planner-red.log": {
+      "bytes": 18232,
+      "sha256": "b2298a0d7494a702d86743844d77d67c7c63e9e8f9ab064e00c771649bd89b08"
+    },
+    "checks/probe-lint.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "checks/recorded-replay-unit.log": {
+      "bytes": 1102,
+      "sha256": "11fad459d9d8e4f47336eeb77a1431e53e1fdc3f4bc04d6970ae8e851cdf2aab"
+    },
+    "checks/targeted-jest.log": {
+      "bytes": 440,
+      "sha256": "1259dfbeaee30b327270d5c8c3ba2018d947f5b58740976caf6c9d15dd5a0283"
+    },
+    "checks/types.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "cleanup.json": {
+      "bytes": 1028,
+      "sha256": "393a172ec9f4292a5664f8ed140395aeda8839ee97b0848f7d31f89904027765"
+    },
+    "http-a/actual-http-turns.jsonl": {
+      "bytes": 12806,
+      "sha256": "2fce136a2dee0ba480d247412476ae9fb889e19ba81bbac225ebafc6063a7c40"
+    },
+    "http-a/actual-model-responses.jsonl": {
+      "bytes": 5195,
+      "sha256": "05138c366e9788cc2d57503ce6bc0daf5b8c6b1b3efd1f41accdc9b754fc8e6e"
+    },
+    "http-a/broker-ledger.jsonl": {
+      "bytes": 1974,
+      "sha256": "dbbcdd10e751dac542739fad781bcf69f75c0a10c54c3e7235ddc23364665446"
+    },
+    "http-a/broker-report.json": {
+      "bytes": 6085,
+      "sha256": "c603153070ce31beb23db22a2411c637585370d5f2a3001b72958a706c96abf7"
+    },
+    "http-a/broker.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "http-a/candidate-manifest.json": {
+      "bytes": 355174,
+      "sha256": "a662f7264022bb286aaba6523c0cf456cdb26f7e5d65c4a0163cd7ce000c82d0"
+    },
+    "http-a/conversation-jest.json": {
+      "bytes": 2827,
+      "sha256": "e8521d514c7daa7d6d272583bcbbc53df04a958d71ef67446fc541edbd5830f7"
+    },
+    "http-a/conversation.log": {
+      "bytes": 1408,
+      "sha256": "ed58d2354f8872e4508b64abcc341c909777f0ebf1546f2d55b41b8d6a24bfd6"
+    },
+    "http-a/fixture-preflight.json": {
+      "bytes": 1843,
+      "sha256": "8aab307233e4171a99c2236da66aba25eef1598238496e1d755a58bd440aaa24"
+    },
+    "http-a/http-report.json": {
+      "bytes": 33426,
+      "sha256": "593227e2ccb4d5319ab27db8f783bbf40204634e376e5ed38ed38df0a8c95e4c"
+    },
+    "http-a/http-response-journal.jsonl": {
+      "bytes": 4987,
+      "sha256": "82df588d5fa7c61b4918f85cd60183ae4d6f2b8fd8c60ba0f184b45b169fd710"
+    },
+    "http-a/model-responses.jsonl": {
+      "bytes": 8421,
+      "sha256": "623487cdc190d1ec2c43acf3b38dd6734e5464703622fdf67519894618a445d7"
+    },
+    "http-a/pg-stop.log": {
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    "http-a/replay-binding.json": {
+      "bytes": 1052,
+      "sha256": "695448f04a92efd15a4707bf5cf1345699c5d712aa5f6c8ccaa1f8dc2b49e06f"
+    },
+    "http-a/replay-records.jsonl": {
+      "bytes": 1714,
+      "sha256": "f77c965a9b572f7c4ca05a367c75508eea2684bba51abd3adef949a168554d92"
+    },
+    "http-a/runner-budget-ledger.jsonl": {
+      "bytes": 1974,
+      "sha256": "5a85c45006aa700a367caad25e9abb78183f15a687e2710313c0e244e92cb581"
+    },
+    "http-a/runner-report.json": {
+      "bytes": 2649,
+      "sha256": "6ac3ba8cc86d7c9a9856b846147dd391b828a95eb5ec700e45084a3897db4060"
+    },
+    "http-a/serialized-attempts.jsonl": {
+      "bytes": 860,
+      "sha256": "0019c84814ed263bc0320edfc1831d537de5fa115c094a465ae47d0f190ef28d"
+    },
+    "http-b/actual-http-turns.jsonl": {
+      "bytes": 14011,
+      "sha256": "ff37f2f1206d98c44732a87c8b3a902a7d4dc87c62af1c6123e0d5c56ba202fb"
+    },
+    "http-b/actual-model-responses.jsonl": {
+      "bytes": 6133,
+      "sha256": "dbd01939b45627d8a04e94b9e0c4807f7356fcf045f6310c928ec22afa23f9a6"
+    },
+    "http-b/broker-ledger.jsonl": {
+      "bytes": 2256,
+      "sha256": "005f38b8a49770f6135764e5334ac7bca53adc2579eff08e6688bf16b9334340"
+    },
+    "http-b/broker-report.json": {
+      "bytes": 6815,
+      "sha256": "86d35b0d1e8d2b47caf4ac12b55e233d374e332445d0c4803bcb4e15aa503717"
+    },
+    "http-b/broker.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "http-b/candidate-manifest.json": {
+      "bytes": 355174,
+      "sha256": "90149fede078e5b3509b33c2733a881bfb08897f9861118f55a66ef02c09777a"
+    },
+    "http-b/conversation-jest.json": {
+      "bytes": 1415,
+      "sha256": "1948936dacd30199303f43698b221d01068ce3f61d70bb4b1d97aa93a6a83669"
+    },
+    "http-b/conversation.log": {
+      "bytes": 611,
+      "sha256": "36b83c4f4c644fcb99d57b97b3c8bb404aece22c108127bc1ae5edb382f66d6b"
+    },
+    "http-b/fixture-preflight.json": {
+      "bytes": 1843,
+      "sha256": "4589a850ae0e8298c628213ea54a6574356eb482d6f57c452c3d2b2c05bd85a8"
+    },
+    "http-b/http-report.json": {
+      "bytes": 41102,
+      "sha256": "b80e11d9cea90690e19918657ba903e31d719201acb9336bb0cf32480cf49606"
+    },
+    "http-b/http-response-journal.jsonl": {
+      "bytes": 5441,
+      "sha256": "e35537fb12a806be9d19b9785f54b382c3234c76ec9138a7bb3cddf313a2b51e"
+    },
+    "http-b/model-responses.jsonl": {
+      "bytes": 9750,
+      "sha256": "1ae0175a74beecdadeb6bfa0dfdb066afa58d149985216d070e5575280841742"
+    },
+    "http-b/pg-stop.log": {
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    "http-b/replay-binding.json": {
+      "bytes": 1052,
+      "sha256": "4d7b6556b42da4af5a1ab2b42248cd3cdb2bca0687a1afc6d7e9e7add9e36ddd"
+    },
+    "http-b/replay-records.jsonl": {
+      "bytes": 4902,
+      "sha256": "274e65ee44b405a7ee586b0a2bd21edfe47ffea6da808aa4430e8b8891b5fb87"
+    },
+    "http-b/runner-budget-ledger.jsonl": {
+      "bytes": 2256,
+      "sha256": "e7c8f31a3030d346827f58601c8403284830607d3352e6942cc5398e72397418"
+    },
+    "http-b/runner-report.json": {
+      "bytes": 2615,
+      "sha256": "5935641eed630aa830e0ef96135c8b6b9731cbbd895e52eecefb16f8807e0284"
+    },
+    "http-b/serialized-attempts.jsonl": {
+      "bytes": 1076,
+      "sha256": "340dbe0e8009506161f50d5c3f44aa15bec55b2b77d3f577d2cbd7b02916539c"
+    }
+  }
+}

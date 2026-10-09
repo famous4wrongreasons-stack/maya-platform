@@ -1,0 +1,16 @@
+{"event":"opened","mode":"OFFLINE_SYNTHETIC_ONLY","manifestSha256":"a662f7264022bb286aaba6523c0cf456cdb26f7e5d65c4a0163cd7ce000c82d0","candidateCommit":"8d9f30c4b03af10be5b324eb078f9200fb546290","profile":"core-diagnostic-20261008/1","limitsSha256":"754a7d2ba93f07c263330496c8675854ba6b245dae19c612062523c5d655b9e1","limits":{"model":"deepseek-v4-pro","dialogs":3,"turns":5,"attempts":12,"inputTokens":1228800,"outputTokens":24576,"outputPerAttempt":2048,"spendNanoUsd":2000000000,"durationMs":600000,"timeoutMs":30000,"intervalMs":6000,"requestBytes":98304,"responseBytes":1048576,"inputNanoUsdPerToken":1320,"outputNanoUsdPerToken":3960,"pricingStatus":"CURRENT_PRICE_EVIDENCE_REQUIRED_FOR_ADMISSION","concurrency":1},"startedAt":1791504171228,"paidAuthorized":false}
+{"event":"dialog","number":1}
+{"event":"turn","number":1}
+{"event":"reserved","attempt":1,"at":1791504172226,"bytes":68037,"input":72133,"output":1200,"nanoUsd":99967560,"totalInput":72133,"totalOutput":1200,"totalNanoUsd":99967560}
+{"event":"response","attempt":1,"status":200}
+{"event":"turn","number":2}
+{"event":"reserved","attempt":2,"at":1791504178254,"bytes":68998,"input":73094,"output":1200,"nanoUsd":101236080,"totalInput":145227,"totalOutput":2400,"totalNanoUsd":201203640}
+{"event":"response","attempt":2,"status":200}
+{"event":"dialog","number":2}
+{"event":"turn","number":3}
+{"event":"reserved","attempt":3,"at":1791504184281,"bytes":92132,"input":96228,"output":1200,"nanoUsd":131772960,"totalInput":241455,"totalOutput":3600,"totalNanoUsd":332976600}
+{"event":"response","attempt":3,"status":200}
+{"event":"turn","number":4}
+{"event":"reserved","attempt":4,"at":1791504190308,"bytes":96092,"input":100188,"output":1200,"nanoUsd":137000160,"totalInput":341643,"totalOutput":4800,"totalNanoUsd":469976760}
+{"event":"response","attempt":4,"status":200}
+{"event":"closed","dialogs":2,"turns":4,"attempts":4,"inputTokens":341643,"outputTokens":4800,"reservedNanoUsd":469976760,"halted":false}

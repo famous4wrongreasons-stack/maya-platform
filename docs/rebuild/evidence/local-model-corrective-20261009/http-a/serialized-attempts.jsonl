@@ -1,0 +1,4 @@
+{"caseId":"core-client-create-followup","turn":1,"bytes":68037,"bodySha256":"722ab51ddc8b58dd0f7c81d6985f8cb65ea16018e835d313895a2cf39c1d679f","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"core-client-create-followup","turn":2,"bytes":68998,"bodySha256":"9273028bc8542fa273119296000be894fdd9373d4b97b47eceb88473bb825284","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"core-owner-compound-clarification","turn":1,"bytes":92132,"bodySha256":"da49ddba390f63600ae4352cb89779f15c626af5121848998e1ade7c94067ab0","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"core-owner-compound-clarification","turn":2,"bytes":96092,"bodySha256":"8d0dfde15c724728b03b3991b3647b18d441e1c39c339fb2e2939f107b72e57f","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
