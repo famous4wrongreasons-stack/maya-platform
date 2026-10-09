@@ -1,0 +1,13 @@
+widgets-live: proof database maya_widget_gate_proof_employeejournal_75c410c3897f on 127.0.0.1:51623 (local)
+[33m[Nest] 69119  - [39m10/09/2026, 6:21:35 PM [33m   WARN[39m [38;5;3m[YclientsCRMAdapter] [39m[33mgetJournal: record fetch truncated (page_limit_reached) after 2 pages; absence conclusions are not allowed[39m
+[33m[Nest] 69119  - [39m10/09/2026, 6:21:35 PM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-11-01T04:00:00.000Z..2026-11-02T04:59:59.999Z is truncated (page_limit_reached); absence conclusions are not allowed[39m
+PASS test/widgets-live/employee-journal-read-restart.probe-spec.ts
+  employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM]
+    ✓ qualifies only actual scoped READ results, survives restart, and refuses source/authority drift (1321 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        2.185 s, estimated 6 s
+Ran all test suites within paths "test/widgets-live/employee-journal-read-restart.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-journal-calendar-http-20261009-r1/resume-jest.json

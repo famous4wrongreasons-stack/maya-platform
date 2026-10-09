@@ -1,0 +1,285 @@
+{
+  "contract": "maya.journal-calendar.independent-evidence-review/1",
+  "reviewer": "independent_review",
+  "verdict": "QUALIFIED_PASS_NO_BLOCKING_FINDING",
+  "sourceHead": "bad0a002e286d78fd9e1332cee3b666380cb203a",
+  "method": {
+    "readOnlySourceAndPublicArtifactReview": true,
+    "testsOrServicesStartedByReviewer": false,
+    "privateSavedReceiptRead": false,
+    "privateCredentialsOrPgPathsCopied": false,
+    "repoOrHistoricalEvidenceEdited": false
+  },
+  "sourceBinding": {
+    "count": 1862,
+    "eachBlobIndependentlyComparedToExactGit": true,
+    "mismatches": [],
+    "backendRelativePathPrefix": "maya-saas-backend/",
+    "digest": "9c5a228a8786a28d39b8cdc61c098298facc0171b9af5d128a7ed03234ac9678",
+    "digestIndependentlyRecomputed": true,
+    "manifestSha256": "b56a3f418a7201febb246bfa88063025f49c57f855e6cb22d844cdbc5bad8b65",
+    "componentFiveFileHashesMatchCandidate": true,
+    "productionHashes": {
+      "maya-saas-backend/src/ai-tools/ai-core.service.ts": "bd164a412c826582a51352b36c92749fb448dd7736013c78b716116263749744",
+      "maya-saas-backend/src/ai-tools/employee-journal-read.ts": "d0a5cbfd6964bc475577feccb76ec916e3348eff054892895bc1b8d3c7564950"
+    },
+    "sourceReviewSha256": "7226316bc7e6251e348e8f4e8dcbce9d2bd0874c25767a44d8bf331b695f9685"
+  },
+  "componentEvidence": {
+    "unitPassed": 959,
+    "suitesPassed": 19,
+    "failed": 0,
+    "pending": 0,
+    "driverPassed": 4,
+    "checks": [
+      {
+        "check": "driver",
+        "exitCode": 0
+      },
+      {
+        "check": "unit",
+        "exitCode": 0
+      },
+      {
+        "check": "scoped-types",
+        "exitCode": 0
+      },
+      {
+        "check": "production-types",
+        "exitCode": 0
+      },
+      {
+        "check": "lint",
+        "exitCode": 0
+      },
+      {
+        "check": "diff-check",
+        "exitCode": 0
+      }
+    ],
+    "sourceUnchanged": true,
+    "qualification": "Existing reports/logs inspected; no reviewer execution. Scoped types cover five changed TS files; production types cover production project. The separately documented broader old test-constructor type error is not claimed fixed."
+  },
+  "actualEvidence": {
+    "prepare": {
+      "jestTestsPassed": 1,
+      "passingAssertions": 396,
+      "chatRequests": 14,
+      "scriptedPlannerCalls": 13,
+      "syntheticNativeGetCalls": 18
+    },
+    "resume": {
+      "jestTestsPassed": 1,
+      "passingAssertions": 326,
+      "chatRequests": 9,
+      "scriptedPlannerCalls": 8,
+      "syntheticNativeGetCalls": 10
+    },
+    "totalChatRequests": 23,
+    "chatStatusCounts": {
+      "201": 20,
+      "403": 2,
+      "401": 1
+    },
+    "additionalDirectTool403": 2,
+    "scriptedPlannerCalls": 21,
+    "syntheticNativeGetCalls": 28,
+    "unexpectedCalls": 0,
+    "roleBoundarySummaryRowsExcludedFromChatCount": true
+  },
+  "joins": {
+    "originalReceiptMatchesPrepareReplayAndRestartReplay": true,
+    "exactReceiptFields": [
+      "runHash",
+      "workHash",
+      "executionHash",
+      "taskKey",
+      "inputHash",
+      "resultHash"
+    ],
+    "baseRunHash": "03fe2f147fadf954b319242597ceb741190e00dedde624aac3fe7625800eeef8",
+    "continuationReceiptMatchesItsReplay": true,
+    "continuationReceiptSha256": "8a7c4ae6997f69a07e8356513c841553fe863bdac230232a6915c036752f1ff0",
+    "continuationRunHash": "bb8ddca81f7687e6e709b24ed748751b829e16db35c71b376e53aab8b072d343",
+    "allFourPendingContextHashesMatchRestoredEvidence": true,
+    "continuationCurrentTenantAndActor": true,
+    "newSettledC9Reads": 2,
+    "tasks": [
+      "catalog.staff.read",
+      "operations.journal.read"
+    ],
+    "freshCanonicalPeriodReads": 1,
+    "replayNativeAndPeriodReadsAdded": 0,
+    "replyAndSourceScopeAssertions": "Exact run tenant -> two SETTLED C9 works -> owned actor AiToolExecution -> decrypted read_scope/source/date/timezone/completeness; reviewed production probe executes the join. Reviewer checked public hash correlation without opening the private saved receipt.",
+    "graphQualification": "Base replay graph equals its own before/after snapshot; restart graph equals final saved prepare graph. Early prepare graph differs legitimately because later prepare cases add C9 reads; no false equality of these different snapshots."
+  },
+  "calendar": {
+    "controlledInputs": {
+      "before": "2026-11-01T03:59:59.000Z",
+      "after": "2026-11-01T04:00:01.000Z"
+    },
+    "timezone": "America/New_York",
+    "preservedDate": "2026-11-01",
+    "recalculatingTomorrowWouldBe": "2026-11-02",
+    "from": "2026-11-01T04:00:00.000Z",
+    "toInclusive": "2026-11-02T04:59:59.999Z",
+    "inclusiveHoursIndependentlyCalculated": 25.0,
+    "savedContextHash": "4c48073b65131bb43a0b8152d784b88f336cadadc87b9e47fb96595cd6d0d2d7",
+    "qualification": "The actual helper receives controlled civil now only for the declared synthetic tenants. System/auth/retention clocks are not rewritten. This is not natural wall-clock midnight or naturally elapsed DST testing.",
+    "resultCompleteness": "INCOMPLETE_NATIVE_PAGINATION_VISIBLE_NOT_FULL_JOURNAL_ACCEPTANCE",
+    "fullNameOnlyHasNoDateOrBranch": true,
+    "modelToolArgsDoNotSupplyActualReadScope": true
+  },
+  "driftRefusals": {
+    "variants": [
+      "integration_updatedAt_source_revision",
+      "branch_timezone",
+      "same_company_branch_binding"
+    ],
+    "allAfterPendingRestoreAndRestart": true,
+    "eachHttpStatus": 201,
+    "eachGrounding": "blocked",
+    "eachNativeAndPeriodReadsAdded": 0,
+    "eachC9GraphUnchanged": true,
+    "qualification": "Source variant changes integration metadata revision; this particular variant is not an actual replacement-company cutover."
+  },
+  "authorityAndPrivacy": {
+    "staffChat": "Server closed-access 201/blocked with zero planner calls; direct tool403.",
+    "clientChat": "201/not_required with actual parser denied F/unavailable/nonadvertised journal, scripted denial prose and no read; direct tool403. Not natural-language or server-authored refusal acceptance.",
+    "otherControls": [
+      "foreign tenant branch/run/history isolation",
+      "restricted branch refusal",
+      "unique missing provider link refuses without false empty",
+      "ambiguous base roster does not resolve by dropping the unlinked candidate",
+      "membership revoked during catalog read stops journal",
+      "subsequent observed HTTP401 without new read",
+      "same-key source revision drift refuses cached response",
+      "private sentinel exclusion in planner input/public reply/decrypted public tool projection",
+      "canonical attendance unknown remains null; provider completed status is not an arrival fact"
+    ]
+  },
+  "effectsAndCleanup": {
+    "businessHashUnchanged": "d65d65a3f01b5612578f291de018adf72329c8372b1fdcfc68c736fc5472d05a",
+    "observedBusinessFamilies": [
+      "Client",
+      "Appointment",
+      "ActionExecution",
+      "AiApprovalRequest",
+      "Opportunity",
+      "AgentTask",
+      "InboxItem",
+      "MarketingDeliveryAttempt"
+    ],
+    "boundedRecorderMutationAssertions": true,
+    "expectedPersistence": [
+      "Timeline",
+      "C9",
+      "AiToolExecution"
+    ],
+    "controlledConfigMembershipMutationsAreNotBusinessReadEffects": true,
+    "clusterStopped": true,
+    "sourceUnchanged": true,
+    "parentCleanupObservation": {
+      "pgStatusExitCode": 3,
+      "postmasterPidAbsent": true
+    },
+    "restartObservation": {
+      "applicationPidChanged": true,
+      "postgresStartedChanged": true,
+      "graphHashUnchanged": "d96bc986e16338d47e0151ad5138ecf25b6b42034c722f016d37d0178981f617"
+    },
+    "qualification": "Cleanup metadata read from saved manifest and parent verification, not rerun by reviewer. Restart PID/time checks are probe-owned; private receipt was not read. No universal business-write, process-group, or OS egress census claim."
+  },
+  "documentation": {
+    "path": "docs/rebuild/MAYA-JOURNAL-CALENDAR-CONTINUATION-20261009.md",
+    "reviewedSha256": "41da2a710026315d6d283c2855a130694e8d1cfabc74396ef3a2254787b5894b",
+    "blockingOverclaims": [],
+    "minorWordingResolved": "Restrict the statement about two linked Sasha candidates per tenant to the four new calendar-continuation tenants; inherited base ambiguity control intentionally contains one unlinked candidate.",
+    "unresolvedWordingFindings": []
+  },
+  "limits": [
+    "Real local HTTP/auth/C9/runtime/CRM adapter and isolated PostgreSQL, but scripted planner and finite synthetic native GET transport.",
+    "Positive continuation proves preserved date, selected staff and scoped partial journal READ; it does not prove complete journal, attendance or availability.",
+    "Original 81 turns were not rerun or reclassified: 57 PASS / 0 semantic_fail / 12 unsupported / 10 insufficient / 2 clarification_pending remains the earlier baseline.",
+    "No live provider/model, browser, production binding, full MAYA/C10, closed-profile or broader readiness acceptance.",
+    "Initial RED and failed gate evidence remain immutable; final scoped types do not waive the old broad test-constructor error."
+  ],
+  "publicArtifacts": [
+    {
+      "name": "manifest.json",
+      "bytes": 232571,
+      "sha256": "b56a3f418a7201febb246bfa88063025f49c57f855e6cb22d844cdbc5bad8b65"
+    },
+    {
+      "name": "prepare-observations.json",
+      "bytes": 23782,
+      "sha256": "6b697a85a5334d629d1ff2eda3007945a78fb945c07d8f7aed5ee1b83352b922"
+    },
+    {
+      "name": "resume-observations.json",
+      "bytes": 18954,
+      "sha256": "d867684e84fd0d79c9c16d1a344f76f8d074fbdc46a19e5db5af122047bb8456"
+    },
+    {
+      "name": "prepare-jest.json",
+      "bytes": 1434,
+      "sha256": "df8811d585017f8c882eff9e9ce988db1bdc1d629261a8ee60bd20c1f4a2c408"
+    },
+    {
+      "name": "resume-jest.json",
+      "bytes": 1434,
+      "sha256": "c11727f914216c9798f1b139c6b89aed057e12c9ffdd713870cc318d35f35c1f"
+    },
+    {
+      "name": "source-and-cleanup-verification.json",
+      "bytes": 1003,
+      "sha256": "f2d937134a8798fdc8603b647ab3d7258b42c0946bc6d95c0969f3248855a3ae"
+    },
+    {
+      "name": "maya-journal-calendar-r2-20261009-checks.json",
+      "bytes": 5983,
+      "sha256": "551e54184ff9b346feb29d0cc3dbe29736d5db11ca569d28f7f5ae17fb854caf"
+    },
+    {
+      "name": "maya-journal-calendar-r2-20261009-unit.json",
+      "bytes": 476440,
+      "sha256": "03fc59e8e98065afa968bb4a5ae84ffa3d199d8842b2e6eb342c43fd9eb960ce"
+    },
+    {
+      "name": "maya-journal-calendar-independent-source-review-20261009.json",
+      "bytes": 9510,
+      "sha256": "7226316bc7e6251e348e8f4e8dcbce9d2bd0874c25767a44d8bf331b695f9685"
+    },
+    {
+      "name": "maya-journal-calendar-r2-20261009-driver.log",
+      "bytes": 480,
+      "sha256": "32d19f423c9ad7c64cc844aa7f2ec4758998db961ba1dc1ee0a1076566001fe0"
+    },
+    {
+      "name": "maya-journal-calendar-r2-20261009-unit.log",
+      "bytes": 3966,
+      "sha256": "8afb7a959c6a8968aead71c0848f525b0a0945d2b541e58aa82f5cba0f506442"
+    },
+    {
+      "name": "maya-journal-calendar-r2-20261009-scoped-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "maya-journal-calendar-r2-20261009-production-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "maya-journal-calendar-r2-20261009-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "maya-journal-calendar-r2-20261009-diff-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "blockers": []
+}

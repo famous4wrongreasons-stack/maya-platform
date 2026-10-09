@@ -1,0 +1,129 @@
+{
+  "contract": "maya.journal-calendar.component-checks/1",
+  "baseSha": "ca70076b35afc4aaa299b8bfe9bb34f2954c7723",
+  "sourceFiles": {
+    "maya-saas-backend/src/ai-tools/ai-core.employee-journal-continuation.spec.ts": "393a7c601e376813258f7fc54859fb282374934c5a673877960662c3ea19b348",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "bd164a412c826582a51352b36c92749fb448dd7736013c78b716116263749744",
+    "maya-saas-backend/src/ai-tools/employee-journal-read.spec.ts": "2f4152a93f0cea8f206431a97fd8e4495779c48b3ae8ac6a2c2bd5e711660d56",
+    "maya-saas-backend/src/ai-tools/employee-journal-read.ts": "d0a5cbfd6964bc475577feccb76ec916e3348eff054892895bc1b8d3c7564950",
+    "maya-saas-backend/test/widgets-live/employee-journal-read-restart.probe-spec.ts": "054cd8f6680619aee053ee501d03342debae3938441a15cd2197457056bca28a"
+  },
+  "sourceUnchanged": true,
+  "checks": [
+    {
+      "check": "driver",
+      "exitCode": 0,
+      "seconds": 0.082,
+      "command": [
+        "/usr/local/bin/node",
+        "--test",
+        "scripts/employee-journal-read-proof.test.mjs"
+      ],
+      "log": "maya-journal-calendar-r2-20261009-driver.log"
+    },
+    {
+      "check": "unit",
+      "exitCode": 0,
+      "seconds": 2.378,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "src/ai-tools/ai-core.employee-journal-continuation.spec.ts",
+        "src/ai-tools/ai-core.employee-journal.spec.ts",
+        "src/ai-tools/employee-journal-read.spec.ts",
+        "src/ai-tools/ai-core.reviews-calendar.spec.ts",
+        "src/ai-tools/reviews-calendar-read.spec.ts",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "src/ai-tools/ai-tool-runtime.service.spec.ts",
+        "src/ai-tools/ai-tool-handler.service.spec.ts",
+        "src/ai-tools/ai-tool-registry.service.spec.ts",
+        "src/ai-tools/staff-schedule-command.service.spec.ts",
+        "src/crm/crm.journal-source.spec.ts",
+        "src/crm/crm.staff-schedule-source.spec.ts",
+        "src/crm/adapters/yclients-journal-source.spec.ts",
+        "src/business-facts/appointment-period.journal-source.spec.ts",
+        "src/business-facts/journal-consolidation.spec.ts",
+        "src/analytics/operations-analytics.journal-source.spec.ts",
+        "src/conversation-intelligence/conversation-intelligence.service.spec.ts",
+        "src/conversation-intelligence/semantic-slot-normalization.spec.ts",
+        "src/conversation-intelligence/conversation-capability.spec.ts",
+        "--json",
+        "--outputFile=/private/tmp/maya-journal-calendar-r2-20261009-unit.json"
+      ],
+      "log": "maya-journal-calendar-r2-20261009-unit.log"
+    },
+    {
+      "check": "scoped-types",
+      "exitCode": 0,
+      "seconds": 6.289,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "/private/tmp/maya-journal-calendar-r2-20261009-types.json",
+        "--incremental",
+        "false"
+      ],
+      "log": "maya-journal-calendar-r2-20261009-scoped-types.log"
+    },
+    {
+      "check": "production-types",
+      "exitCode": 0,
+      "seconds": 6.733,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "log": "maya-journal-calendar-r2-20261009-production-types.log"
+    },
+    {
+      "check": "lint",
+      "exitCode": 0,
+      "seconds": 5.047,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/eslint/bin/eslint.js",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-core.employee-journal-continuation.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-core.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/employee-journal-read.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/employee-journal-read.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/test/widgets-live/employee-journal-read-restart.probe-spec.ts"
+      ],
+      "log": "maya-journal-calendar-r2-20261009-lint.log"
+    },
+    {
+      "check": "diff-check",
+      "exitCode": 0,
+      "seconds": 0.022,
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-core.employee-journal-continuation.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-core.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/employee-journal-read.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/employee-journal-read.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/test/widgets-live/employee-journal-read-restart.probe-spec.ts"
+      ],
+      "log": "maya-journal-calendar-r2-20261009-diff-check.log"
+    }
+  ],
+  "limits": [
+    "Component/unit synthetic sources only",
+    "Component checks do not establish HTTP/PG, restart, real provider/model or full MAYA acceptance",
+    "Original81 and two clarification_pending outcomes preserved; baseline ca70076b35afc4aaa299b8bfe9bb34f2954c7723"
+  ]
+}

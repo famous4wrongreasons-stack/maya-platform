@@ -1,0 +1,123 @@
+{
+  "contract": "maya.journal-calendar.independent-source-review/1",
+  "reviewer": "independent_review",
+  "reviewedAtUtc": "2026-10-09T18:17:57.402424+00:00",
+  "baselineCommit": "ca70076b35afc4aaa299b8bfe9bb34f2954c7723",
+  "binding": "CURRENT_UNCOMMITTED_BYTES_AFTER_DATE_QUESTION_CONTINUATION_GUARD",
+  "verdict": "QUALIFIED_SOURCE_REVIEW_NO_REMAINING_BLOCKER",
+  "blockers": [],
+  "reviewedProductionFiles": [
+    {
+      "path": "maya-saas-backend/src/ai-tools/employee-journal-read.ts",
+      "sha256": "d0a5cbfd6964bc475577feccb76ec916e3348eff054892895bc1b8d3c7564950",
+      "size": 18986,
+      "baselineSha256": "043863f0ef7b8208f79d28bc42435afa4ff9d16605913a9f15cc003f4e4ab623"
+    },
+    {
+      "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+      "sha256": "bd164a412c826582a51352b36c92749fb448dd7736013c78b716116263749744",
+      "size": 389827,
+      "baselineSha256": "7a5ac764bf2bcc2f57032d3db346841b4ad8f6437fc8160e8ac39fe6b4850d78"
+    }
+  ],
+  "scope": "Read-only review of the two production files, with existing Timeline, CI, CRM/runtime and prior journal probe as references. No tests, services, HTTP, PG, provider, model, credentials, website or desktop actions executed. Only this new review JSON written.",
+  "findingsClosed": [
+    {
+      "id": "P2_DATE_CORRECTION_DROPS_SCOPE_PIN",
+      "counterexample": "Pending employee clarification retains branch A; fresh date-only correction also names employee; same-branch source changes while awaiting planner. Old carry dropped pin on changed date and could read replacement source.",
+      "closure": "Carry retains branch/TZ/sourceRevision guard while date changes, unless branch is explicitly replaced or unresolved. readEmployeeJournal checks current configured branch/revision/timezone before catalog and journal.",
+      "references": [
+        "employee-journal-read.ts:145",
+        "employee-journal-read.ts:386"
+      ]
+    },
+    {
+      "id": "P2_PENDING_WITHOUT_EMPLOYEE_FALLS_THROUGH",
+      "counterexample": "Pending employee-specific request followed by period-only correction without employee could miss employeeJournalTask and reach generic whole-team journal.",
+      "closure": "employeeJournalContinuationTask admits missing employee only for a finite previous journal clarification and current clarification_answer/correction. AiCore captures this before replacing activeSemanticPlan and uses it in the finite interceptor. Missing employee becomes catalog-bound clarification, never a journal read.",
+      "references": [
+        "employee-journal-read.ts:164",
+        "ai-core.service.ts:1246",
+        "ai-core.service.ts:2636"
+      ]
+    },
+    {
+      "id": "P2_LEGACY_OR_INVALID_DATE_PENDING_ESCAPE",
+      "counterexample": "The same no-employee escape remained when previous server question was DATE_QUESTION, including legacy relative-period restoration.",
+      "closure": "DATE_QUESTION is now in the exact finite pending-question whitelist alongside EMPLOYEE_QUESTION and CALENDAR_CHANGED. This controls the clarification path and grants no new access.",
+      "references": [
+        "employee-journal-read.ts:175",
+        "ai-core.service.ts:4639"
+      ]
+    }
+  ],
+  "positiveBoundaries": [
+    "Closed six-field server-only witness stays outside model semantic entities and tool arguments; existing encrypted erasable context stores it.",
+    "Strict calendar round-trip rejects impossible ISO dates before retention; source revision is exact64 lowerhex, branch id is bounded/trimmed/control-free, timezone validated.",
+    "Only successful nonstale scoped catalog can establish date/branch preferences; unavailable or malformed catalog cannot mint witness.",
+    "Current configured branch/name/timezone/source revision is checked at restore; same retained scope is rechecked after planner before catalog; existing runtime still owns current membership/policy/source validation around fresh/cache/replay reads.",
+    "Restricted branch403 precedes retained-anchor mismatch. Source drift does not choose a replacement company or staff.",
+    "Explicit current date corrections are preserved; missing/replaced branch stays unresolved. No staff identity is selected from a retained calendar or by first-match/provider-link availability.",
+    "Legacy unanchored relative journal period is removed and asked again; old tomorrow is not re-evaluated against a later clock.",
+    "Existing STOP/null/foreign/erased/expired/bounded-window barriers remain unchanged. New context is tied to the current Timeline principal, not a fabricated epoch/version.",
+    "Witness is included in the new finite completion fingerprint; old replies without marker retain their old fingerprint. No immutable old completion rewrite.",
+    "Generic journal behavior is not broadly widened: missing employee is accepted by the new interceptor only for matching finite pending context."
+  ],
+  "limits": [
+    "Static source review only. Component tests, HTTP continuation, controlled input clock/DST and actual app/PG restart outcomes require their separate observed evidence.",
+    "No natural elapsed-midnight or general model-language acceptance inferred.",
+    "Existing 22 nonpending gaps and original corpus scores are not reclassified by this source review.",
+    "Broader dialogue acts/new topics and generic all-team journal remain outside this finite continuation contract; stale/unknown source still refuses.",
+    "Probe and new continuation spec are being authored separately and are not declared independently qualified in this review."
+  ],
+  "nextSafeMissingLink": {
+    "choice": "Exact current branch public address for original utt-company.public_info-037 and utt-company.public_info-041",
+    "classification": "Demonstrated scripted-plan/source-fixture preparation gaps; no new product capability or model-quality claim.",
+    "existingOwnerPath": "Validated singleton company.public_info with branch and address field → existing scoped catalog.staff.read(publicProjection company_profile) → current CRM.getCompanyProfile/native owner → existing C9 completion and deterministic publicCompanyProfileReply.",
+    "evidence": [
+      {
+        "path": "maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.mjs",
+        "line": 402,
+        "finding": "Both frozen cases currently produce entities:{} despite explicit branch in unchanged user text."
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+        "line": 1471,
+        "finding": "Existing scoped public-company interceptor requires a branch preference or unresolved branch marker; the current scripted plan misses this path."
+      },
+      {
+        "path": "maya-saas-backend/test/widgets-live/support/core-full-offline-fixtures.ts",
+        "line": 150,
+        "finding": "Both cases only set branchName; they do not add canonical company-to-branch attribution."
+      },
+      {
+        "path": "maya-saas-backend/test/widgets-live/support/current-candidate-sources.ts",
+        "line": 171,
+        "finding": "Base binding is intentionally supplied only for occupancy; booking-group public cases remain unbound."
+      },
+      {
+        "path": "maya-saas-backend/src/ai-tools/public-consultation-presentation.ts",
+        "line": 32,
+        "finding": "Existing presenter validates exact public_scope/source revision and branch, handles missing fields truthfully, and labels replay as saved."
+      }
+    ],
+    "boundedPlan": [
+      "Keep original two user texts, roles, corpus rows, historical raw and expected goal immutable.",
+      "First prove the current two diagnostic seams locally: explicit user branch absent from the scripted semantic plan and absent canonical source binding.",
+      "Only the two selected fixture cases may receive explicit synthetic canonical company/branch setup and source facts. Use the existing setup/owner pattern; do not add fallback to other cases or production.",
+      "Script the current request branch preference through actual sanitizer/parser/CI and request address; tool arguments remain server-owned. This is a corrected synthetic semantic recipe, not an assertion that a real model extracts it.",
+      "Observe actual current CRM public profile under the chosen branch, and independently join returned C9 run/work to encrypted execution result public_scope(company,branch,source revision). Compare address against source facts, not response-derived oracle values.",
+      "Use existing public-company HTTP/restart owner path for missing/foreign/ambiguous/mismatched-source and current-revoked negatives plus saved-result replay. All setup writes remain before no-write baseline.",
+      "Only after actual source-bound results and a justified oracle projection may a new full81 run report a delta; label any improvement as enabled synthetic source/recipe coverage, not a newly implemented address capability."
+    ],
+    "outOfScope": [
+      "No live/provider/model/website calls or new roles/schema/retention/autonomy.",
+      "No expansion of closed review or journal paths.",
+      "No cash/gross substitution, undefined retention ranking or pricing mutation lane."
+    ],
+    "blockers": [
+      "Without a declared current company↔branch binding, honest source-unavailable remains correct; do not erase that negative globally.",
+      "Current generic branch_address_binding oracle is not enough on its own; exact persisted source receipt should support any completion claim."
+    ]
+  }
+}

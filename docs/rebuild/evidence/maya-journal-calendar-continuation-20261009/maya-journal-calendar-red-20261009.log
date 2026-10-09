@@ -1,0 +1,58 @@
+FAIL src/ai-tools/employee-journal-read.spec.ts
+  ● employee journal existing owners [synthetic component] › keeps the requested civil day across employee clarification and midnight in Europe/Moscow
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "2026-10-10"
+    Received: "tomorrow"
+
+      184 |     expect(pending.reply).toContain('полное имя');
+      185 |     expect(f.read.mock.calls.map(([name]) => name)).toEqual(['catalog.staff.read']);
+    > 186 |     expect(f.task.entities.period).toBe(date);
+          |                                    ^
+      187 |     expect(f.task.entities.branch).toBe(f.branch.name);
+      188 |     f.catalog.result.staff[0].name = 'Артём Иванов';
+      189 |     f.task.entities.employee = 'Артём Иванов';
+
+      at ai-tools/employee-journal-read.spec.ts:186:36
+
+  ● employee journal existing owners [synthetic component] › keeps the requested civil day across employee clarification and midnight in Europe/Berlin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "2026-03-29"
+    Received: "tomorrow"
+
+      184 |     expect(pending.reply).toContain('полное имя');
+      185 |     expect(f.read.mock.calls.map(([name]) => name)).toEqual(['catalog.staff.read']);
+    > 186 |     expect(f.task.entities.period).toBe(date);
+          |                                    ^
+      187 |     expect(f.task.entities.branch).toBe(f.branch.name);
+      188 |     f.catalog.result.staff[0].name = 'Артём Иванов';
+      189 |     f.task.entities.employee = 'Артём Иванов';
+
+      at ai-tools/employee-journal-read.spec.ts:186:36
+
+  ● employee journal existing owners [synthetic component] › keeps the requested civil day across employee clarification and midnight in Europe/Berlin
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "2026-10-25"
+    Received: "tomorrow"
+
+      184 |     expect(pending.reply).toContain('полное имя');
+      185 |     expect(f.read.mock.calls.map(([name]) => name)).toEqual(['catalog.staff.read']);
+    > 186 |     expect(f.task.entities.period).toBe(date);
+          |                                    ^
+      187 |     expect(f.task.entities.branch).toBe(f.branch.name);
+      188 |     f.catalog.result.staff[0].name = 'Артём Иванов';
+      189 |     f.task.entities.employee = 'Артём Иванов';
+
+      at ai-tools/employee-journal-read.spec.ts:186:36
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 46 skipped, 49 total
+Snapshots:   0 total
+Time:        0.269 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/employee-journal-read.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-journal-calendar-red-20261009.json

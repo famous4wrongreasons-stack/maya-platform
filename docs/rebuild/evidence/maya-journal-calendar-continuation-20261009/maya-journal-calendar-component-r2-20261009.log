@@ -1,0 +1,436 @@
+FAIL src/ai-tools/ai-core.employee-journal-continuation.spec.ts
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › retains the original branch day across midnight/DST: Europe/Moscow
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "verified"
+    Received: "blocked"
+
+      444 |       f.setModel({ employee: 'Алексей Первый' });
+      445 |       const response = await f.chat('Алексей Первый');
+    > 446 |       expect(response.grounding.status).toBe('verified');
+          |                                         ^
+      447 |       expect(f.execute.mock.calls.map((call) => call[1])).toEqual([
+      448 |         'catalog.staff.read',
+      449 |         'catalog.staff.read',
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:446:41
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › retains the original branch day across midnight/DST: America/New_York
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "verified"
+    Received: "blocked"
+
+      444 |       f.setModel({ employee: 'Алексей Первый' });
+      445 |       const response = await f.chat('Алексей Первый');
+    > 446 |       expect(response.grounding.status).toBe('verified');
+          |                                         ^
+      447 |       expect(f.execute.mock.calls.map((call) => call[1])).toEqual([
+      448 |         'catalog.staff.read',
+      449 |         'catalog.staff.read',
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:446:41
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › clears the saved branch/day on current revision mismatch before a new source READ
+
+    expect(received).not.toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      481 |       const restored = await f.restore(saved);
+      482 |       expect(restored.calendar).toBeUndefined();
+    > 483 |       expect(restored.plan?.tasks[0].entities).not.toHaveProperty('period');
+          |                                                    ^
+      484 |       expect(restored.plan?.tasks[0].entities).not.toHaveProperty('branch');
+      485 |       expect(restored.plan?.tasks[0].clarification_question).toBe(
+      486 |         EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:483:52
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › clears the saved branch/day on current branch mismatch before a new source READ
+
+    expect(received).not.toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      481 |       const restored = await f.restore(saved);
+      482 |       expect(restored.calendar).toBeUndefined();
+    > 483 |       expect(restored.plan?.tasks[0].entities).not.toHaveProperty('period');
+          |                                                    ^
+      484 |       expect(restored.plan?.tasks[0].entities).not.toHaveProperty('branch');
+      485 |       expect(restored.plan?.tasks[0].clarification_question).toBe(
+      486 |         EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:483:52
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › clears the saved branch/day on current timezone mismatch before a new source READ
+
+    expect(received).not.toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      481 |       const restored = await f.restore(saved);
+      482 |       expect(restored.calendar).toBeUndefined();
+    > 483 |       expect(restored.plan?.tasks[0].entities).not.toHaveProperty('period');
+          |                                                    ^
+      484 |       expect(restored.plan?.tasks[0].entities).not.toHaveProperty('branch');
+      485 |       expect(restored.plan?.tasks[0].clarification_question).toBe(
+      486 |         EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:483:52
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › clears the saved branch/day on current name mismatch before a new source READ
+
+    expect(received).not.toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      481 |       const restored = await f.restore(saved);
+      482 |       expect(restored.calendar).toBeUndefined();
+    > 483 |       expect(restored.plan?.tasks[0].entities).not.toHaveProperty('period');
+          |                                                    ^
+      484 |       expect(restored.plan?.tasks[0].entities).not.toHaveProperty('branch');
+      485 |       expect(restored.plan?.tasks[0].clarification_question).toBe(
+      486 |         EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:483:52
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › clears the saved branch/day on current unavailable mismatch before a new source READ
+
+    expect(received).not.toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      481 |       const restored = await f.restore(saved);
+      482 |       expect(restored.calendar).toBeUndefined();
+    > 483 |       expect(restored.plan?.tasks[0].entities).not.toHaveProperty('period');
+          |                                                    ^
+      484 |       expect(restored.plan?.tasks[0].entities).not.toHaveProperty('branch');
+      485 |       expect(restored.plan?.tasks[0].clarification_question).toBe(
+      486 |         EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:483:52
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › propagates foreign/revoked current source authority without using retained context
+
+    expect(received).rejects.toBeInstanceOf()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"calendar": undefined, "dto": {"conversationId": "conversation-current", "messages": [{"content": "Алексей Первый", "role": "user"}], "requestId": "restore_journal_context_123", "surface": "web"}, "plan": null}
+
+      505 |       new ForbiddenException('foreign_tenant'),
+      506 |     );
+    > 507 |     await expect(f.restore(f.saved().semanticContext)).rejects.toBeInstanceOf(
+          |           ^
+      508 |       ForbiddenException,
+      509 |     );
+      510 |     expect(f.execute).toHaveBeenCalledTimes(1);
+
+      at expect (../../../maya-development-integration/maya-saas-backend/node_modules/expect/build/index.js:2116:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:507:11)
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker impossible-date
+
+    expect(received).not.toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      541 |     const restored = await f.restore(context);
+      542 |     expect(restored.calendar).toBeUndefined();
+    > 543 |     expect(restored.plan?.tasks[0].entities).not.toHaveProperty('period');
+          |                                                  ^
+      544 |     expect(restored.plan?.tasks[0].clarification_question).toBe(
+      545 |       EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+      546 |     );
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:543:50
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker new-version
+
+    expect(received).not.toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      541 |     const restored = await f.restore(context);
+      542 |     expect(restored.calendar).toBeUndefined();
+    > 543 |     expect(restored.plan?.tasks[0].entities).not.toHaveProperty('period');
+          |                                                  ^
+      544 |     expect(restored.plan?.tasks[0].clarification_question).toBe(
+      545 |       EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+      546 |     );
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:543:50
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker extra-epoch
+
+    expect(received).not.toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      541 |     const restored = await f.restore(context);
+      542 |     expect(restored.calendar).toBeUndefined();
+    > 543 |     expect(restored.plan?.tasks[0].entities).not.toHaveProperty('period');
+          |                                                  ^
+      544 |     expect(restored.plan?.tasks[0].clarification_question).toBe(
+      545 |       EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+      546 |     );
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:543:50
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker bad-revision
+
+    expect(received).not.toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      541 |     const restored = await f.restore(context);
+      542 |     expect(restored.calendar).toBeUndefined();
+    > 543 |     expect(restored.plan?.tasks[0].entities).not.toHaveProperty('period');
+          |                                                  ^
+      544 |     expect(restored.plan?.tasks[0].clarification_question).toBe(
+      545 |       EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+      546 |     );
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:543:50
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker newline-revision
+
+    expect(received).not.toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      541 |     const restored = await f.restore(context);
+      542 |     expect(restored.calendar).toBeUndefined();
+    > 543 |     expect(restored.plan?.tasks[0].entities).not.toHaveProperty('period');
+          |                                                  ^
+      544 |     expect(restored.plan?.tasks[0].clarification_question).toBe(
+      545 |       EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+      546 |     );
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:543:50
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker wrong-task
+
+    expect(received).not.toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      541 |     const restored = await f.restore(context);
+      542 |     expect(restored.calendar).toBeUndefined();
+    > 543 |     expect(restored.plan?.tasks[0].entities).not.toHaveProperty('period');
+          |                                                  ^
+      544 |     expect(restored.plan?.tasks[0].clarification_question).toBe(
+      545 |       EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+      546 |     );
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:543:50
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker foreign-branch
+
+    expect(received).not.toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      541 |     const restored = await f.restore(context);
+      542 |     expect(restored.calendar).toBeUndefined();
+    > 543 |     expect(restored.plan?.tasks[0].entities).not.toHaveProperty('period');
+          |                                                  ^
+      544 |     expect(restored.plan?.tasks[0].clarification_question).toBe(
+      545 |       EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+      546 |     );
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:543:50
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker invalid-zone
+
+    expect(received).not.toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      541 |     const restored = await f.restore(context);
+      542 |     expect(restored.calendar).toBeUndefined();
+    > 543 |     expect(restored.plan?.tasks[0].entities).not.toHaveProperty('period');
+          |                                                  ^
+      544 |     expect(restored.plan?.tasks[0].clarification_question).toBe(
+      545 |       EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+      546 |     );
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:543:50
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › removes a legacy relative period without a trusted branch-day anchor
+
+    expect(received).not.toHaveProperty(path)
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      556 |     const restored = await f.restore(context);
+      557 |     expect(restored.calendar).toBeUndefined();
+    > 558 |     expect(restored.plan?.tasks[0].entities).not.toHaveProperty('period');
+          |                                                  ^
+      559 |     expect(restored.plan?.tasks[0].clarification_question).toBe(
+      560 |       EMPLOYEE_JOURNAL_DATE_QUESTION,
+      561 |     );
+
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:558:50)
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › lets fresh explicit period win while retaining only the matching branch source fence
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      619 |           restored.calendar,
+      620 |         ),
+    > 621 |       ).toBe(key === 'period');
+          |         ^
+      622 |       expect(current.tasks[0].entities[key]).toBe(value);
+      623 |       expect(
+      624 |         current.tasks[0].entities[key === 'period' ? 'branch' : 'period'],
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:621:9
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › lets fresh explicit branch win while retaining only the matching branch source fence
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "2026-10-11"
+    Received: undefined
+
+      623 |       expect(
+      624 |         current.tasks[0].entities[key === 'period' ? 'branch' : 'period'],
+    > 625 |       ).toBe(key === 'period' ? 'Набережная' : '2026-10-11');
+          |         ^
+      626 |     },
+      627 |   );
+      628 |
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:625:9
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not re-carry explicitly replaced or unresolved period without a concrete value
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "period"
+    Received array: []
+
+      648 |         ).toBe(false);
+      649 |         expect(current.tasks[0].entities).not.toHaveProperty(key);
+    > 650 |         expect(current.context.unresolved_references).toContain(key);
+          |                                                       ^
+      651 |       }
+      652 |     },
+      653 |   );
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:650:55
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not re-carry explicitly replaced or unresolved branch without a concrete value
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: "branch"
+    Received array: []
+
+      648 |         ).toBe(false);
+      649 |         expect(current.tasks[0].entities).not.toHaveProperty(key);
+    > 650 |         expect(current.context.unresolved_references).toContain(key);
+          |                                                       ^
+      651 |       }
+      652 |     },
+      653 |   );
+
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:650:55
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › a date-only correction with a direct journal proposal cannot widen the pending employee selection to the whole team
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Не удалось однозначно выбрать сотрудника в текущем каталоге филиала. Уточните его полное имя; журнал пока не подтверждён."
+    Received: "Ваши данные получены, но собрать по ним ответ не удалось. Загляните в раздел «Записи» или повторите вопрос чуть позже."
+
+      659 |     f.proposeJournal();
+      660 |     const response = await f.chat('Нет, на 15 октября');
+    > 661 |     expect(response.reply).toBe(EMPLOYEE_JOURNAL_EMPLOYEE_QUESTION);
+          |                            ^
+      662 |     expect(response.grounding.status).toBe('blocked');
+      663 |     expect(response.action).toBeNull();
+      664 |     expect(f.execute.mock.calls.map((call) => call[1])).toEqual([
+
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:661:28)
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › a date-only answer to the server date question cannot dispatch a whole-team journal without an employee
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Не удалось однозначно выбрать сотрудника в текущем каталоге филиала. Уточните его полное имя; журнал пока не подтверждён."
+    Received: "Ваши данные получены, но собрать по ним ответ не удалось. Загляните в раздел «Записи» или повторите вопрос чуть позже."
+
+      706 |     f.proposeJournal();
+      707 |     const response = await f.chat('На 15 октября');
+    > 708 |     expect(response.reply).toBe(EMPLOYEE_JOURNAL_EMPLOYEE_QUESTION);
+          |                            ^
+      709 |     expect(response.grounding.status).toBe('blocked');
+      710 |     expect(response.action).toBeNull();
+      711 |     expect(f.execute.mock.calls.map((call) => call[1])).toEqual([
+
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:708:28)
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › retains the old source fence for a date-only correction if the source changes while planning
+
+    expect(received).toBe(expected) // Object.is equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Источник или часовой пояс филиала изменился. Укажите дату, филиал и полное имя сотрудника заново для проверки журнала.
+    + Журнал на 15.10.2026: Алексей Первый.
+    + Филиал: Набережная. Часовой пояс: Europe/Moscow.
+    + В подтверждённом срезе записей нет.
+    + Источник: прочитанный журнал CRM. Имена и контакты клиентов не раскрываются; присутствие и свободные окна этим ответом не подтверждаются.
+
+      742 |     });
+      743 |     const response = await f.chat('Алексей Первый, на 15 октября');
+    > 744 |     expect(response.reply).toBe(EMPLOYEE_JOURNAL_CALENDAR_CHANGED);
+          |                            ^
+      745 |     expect(response.grounding.status).toBe('blocked');
+      746 |     expect(f.execute.mock.calls.map((call) => call[1])).toEqual([
+      747 |       'catalog.staff.read',
+
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:744:28)
+
+Test Suites: 1 failed, 1 total
+Tests:       24 failed, 7 passed, 31 total
+Snapshots:   0 total
+Time:        0.57 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.employee-journal-continuation.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-journal-calendar-component-r2-20261009.json

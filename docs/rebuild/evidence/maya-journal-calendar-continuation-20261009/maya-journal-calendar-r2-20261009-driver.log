@@ -1,0 +1,12 @@
+✔ owned journal proof strips ambient production/provider/model settings (0.4205ms)
+✔ owned journal proof refuses shared, remote, credentialed and ambiguous databases (2.621625ms)
+✔ finite sequence restarts its own PG between distinct prepare/resume processes (0.405042ms)
+✔ finite runner rejects shell-sensitive cluster paths and default PG port (0.63325ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 40.096166

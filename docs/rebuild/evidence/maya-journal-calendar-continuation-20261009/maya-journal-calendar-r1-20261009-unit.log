@@ -1,0 +1,580 @@
+FAIL src/ai-tools/ai-core.employee-journal-continuation.spec.ts
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › persists branch-local tomorrow and only the finite employee question after an ambiguous catalog
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:397:20)
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › retains the original branch day across midnight/DST: Europe/Moscow
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:442:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › retains the original branch day across midnight/DST: America/New_York
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:442:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › clears the saved branch/day on current revision mismatch before a new source READ
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:473:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › clears the saved branch/day on current branch mismatch before a new source READ
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:473:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › clears the saved branch/day on current timezone mismatch before a new source READ
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:473:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › clears the saved branch/day on current name mismatch before a new source READ
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:473:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › clears the saved branch/day on current unavailable mismatch before a new source READ
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:473:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › propagates foreign/revoked current source authority without using retained context
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:503:5)
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker impossible-date
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:524:5
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker new-version
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:524:5
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker extra-epoch
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:524:5
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker bad-revision
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:524:5
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker newline-revision
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:524:5
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker wrong-task
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:524:5
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker foreign-branch
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:524:5
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not restore malformed marker invalid-zone
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:524:5
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › removes a legacy relative period without a trusted branch-day anchor
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:551:5)
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not search past a timeline null barrier
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:568:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not search past a timeline erased barrier
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:568:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not search past a timeline foreign barrier
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:568:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not search past a timeline stop barrier
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:568:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › a real STOP completion stores a null context and blocks the old journal preference
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:594:5)
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › lets fresh explicit period win while retaining only the matching branch source fence
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:608:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › lets fresh explicit branch win while retaining only the matching branch source fence
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:608:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not re-carry explicitly replaced or unresolved period without a concrete value
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:633:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › does not re-carry explicitly replaced or unresolved branch without a concrete value
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at ai-tools/ai-core.employee-journal-continuation.spec.ts:633:7
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › a date-only correction with a direct journal proposal cannot widen the pending employee selection to the whole team
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:657:5)
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › a date-only answer to the server date question cannot dispatch a whole-team journal without an employee
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:697:19)
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › retains the old source fence for a date-only correction if the source changes while planning
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:731:5)
+
+  ● AiCore journal calendar continuation [actual parser, synthetic owners] › changes the completion fingerprint for a changed marker revision while plan/reply remain identical
+
+    ai_core_required_tool_missing
+
+      1276 |         ) === null
+      1277 |       ) {
+    > 1278 |         throw new Error('ai_core_required_tool_missing');
+           |               ^
+      1279 |       }
+      1280 |       return { toolCall: null, semanticPlan };
+      1281 |     }
+
+      at AiCoreModelService.validatePlanningResponse (ai-tools/ai-core-model.service.ts:1278:15)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:157:19)
+      at AiCoreService.chat (ai-tools/ai-core.service.ts:1107:43)
+      at Object.<anonymous> (ai-tools/ai-core.employee-journal-continuation.spec.ts:754:5)
+
+PASS src/conversation-intelligence/conversation-intelligence.service.spec.ts
+PASS src/ai-tools/staff-schedule-command.service.spec.ts
+PASS src/conversation-intelligence/conversation-capability.spec.ts
+PASS src/conversation-intelligence/semantic-slot-normalization.spec.ts
+PASS src/ai-tools/ai-core.employee-journal.spec.ts
+PASS src/ai-tools/ai-core.reviews-calendar.spec.ts
+PASS src/ai-tools/ai-core.service.spec.ts
+PASS src/crm/adapters/yclients-journal-source.spec.ts
+FAIL src/ai-tools/employee-journal-read.spec.ts
+  ● employee journal existing owners [synthetic component] › cannot retain a calendar from a malformed catalog
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"branchId": "branch-current", "date": "2026-10-11", "sourceRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "taskId": "journal", "timezone": "Europe/Moscow", "version": "maya.journal-calendar-preference/1"}
+
+      243 |       if (kind === 'malformed') f.catalog.result.staff[0].id = '';
+      244 |       expect((await f.run()).status).toBe('blocked');
+    > 245 |       expect(f.retainCalendar).not.toHaveBeenCalled();
+          |                                    ^
+      246 |       expect(f.task.entities.period).toBe('tomorrow');
+      247 |       expect(f.read).toHaveBeenCalledTimes(1);
+      248 |     },
+
+      at ai-tools/employee-journal-read.spec.ts:245:36
+
+PASS src/ai-tools/ai-tool-runtime.service.spec.ts
+PASS src/ai-tools/ai-tool-handler.service.spec.ts
+PASS src/business-facts/journal-consolidation.spec.ts
+[Nest] 66356  - 10/09/2026, 9:17:03 PM    WARN [AppointmentPeriodReader] journal read for 2026-08-17T21:00:00.000Z..2026-08-18T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 66356  - 10/09/2026, 9:17:03 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-17T21:00:00.000Z..2026-08-18T20:59:59.999Z); they are not counted
+[Nest] 66356  - 10/09/2026, 9:17:03 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-20T00:00:00.000Z..2026-08-17T23:59:59.999Z); they are not counted
+[Nest] 66356  - 10/09/2026, 9:17:03 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-08-17T00:00:00.000Z..2026-08-17T23:59:59.999Z); they are not counted
+[Nest] 66356  - 10/09/2026, 9:17:03 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-05-19T00:00:00.000Z..2026-08-16T23:59:59.999Z); they are not counted
+PASS src/crm/crm.journal-source.spec.ts
+PASS src/crm/crm.staff-schedule-source.spec.ts
+PASS src/analytics/operations-analytics.journal-source.spec.ts
+PASS src/business-facts/appointment-period.journal-source.spec.ts
+[Nest] 66356  - 10/09/2026, 9:17:04 PM    WARN [AppointmentPeriodReader] journal read for 2026-10-09T07:00:00.000Z..2026-10-10T06:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+[Nest] 66356  - 10/09/2026, 9:17:04 PM     LOG [AppointmentPeriodReader] provider returned 1 record(s) outside the requested period (2026-10-09T07:00:00.000Z..2026-10-10T06:59:59.999Z); they are not counted
+[Nest] 66356  - 10/09/2026, 9:17:04 PM    WARN [AppointmentPeriodReader] journal read for 2026-10-09T07:00:00.000Z..2026-10-10T06:59:59.999Z is truncated (unknown); absence conclusions are not allowed
+PASS src/ai-tools/ai-tool-registry.service.spec.ts
+PASS src/ai-tools/reviews-calendar-read.spec.ts
+
+Test Suites: 2 failed, 17 passed, 19 total
+Tests:       32 failed, 927 passed, 959 total
+Snapshots:   0 total
+Time:        2.557 s, estimated 3 s
+Ran all test suites within paths "src/ai-tools/ai-core.employee-journal-continuation.spec.ts", "src/ai-tools/ai-core.employee-journal.spec.ts", "src/ai-tools/employee-journal-read.spec.ts", "src/ai-tools/ai-core.reviews-calendar.spec.ts", "src/ai-tools/reviews-calendar-read.spec.ts", "src/ai-tools/ai-core.service.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/ai-tool-registry.service.spec.ts", "src/ai-tools/staff-schedule-command.service.spec.ts", "src/crm/crm.journal-source.spec.ts", "src/crm/crm.staff-schedule-source.spec.ts", "src/crm/adapters/yclients-journal-source.spec.ts", "src/business-facts/appointment-period.journal-source.spec.ts", "src/business-facts/journal-consolidation.spec.ts", "src/analytics/operations-analytics.journal-source.spec.ts", "src/conversation-intelligence/conversation-intelligence.service.spec.ts", "src/conversation-intelligence/semantic-slot-normalization.spec.ts", "src/conversation-intelligence/conversation-capability.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-journal-calendar-r1-20261009-unit.json

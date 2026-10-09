@@ -1,0 +1,189 @@
+{
+  "contract": "maya.journal-calendar.evidence-archive/1",
+  "sourceHead": "bad0a002e286d78fd9e1332cee3b666380cb203a",
+  "baseline": "ca70076b35afc4aaa299b8bfe9bb34f2954c7723",
+  "rawFailuresPreserved": true,
+  "privateFixtureReceiptsExcluded": true,
+  "files": {
+    "http/r1/createdb.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "http/r1/initdb.log": {
+      "sha256": "1f1c23704f15382a5d9317b7ef145007107fb50f8bf31de0a237bd7c8b51886e",
+      "bytes": 954
+    },
+    "http/r1/manifest.json": {
+      "sha256": "b56a3f418a7201febb246bfa88063025f49c57f855e6cb22d844cdbc5bad8b65",
+      "bytes": 232571
+    },
+    "http/r1/migrations.log": {
+      "sha256": "a2412b1e1cf2383e792ecec1c657621bd1a3ce25ddc125bcfa9509095bd74f00",
+      "bytes": 14730
+    },
+    "http/r1/pg-restart.log": {
+      "sha256": "9ef731a428a2a894d429522b5cd0bbfa6bcdef3df39eef24448df53641ff4b47",
+      "bytes": 1345
+    },
+    "http/r1/pg-start.log": {
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    "http/r1/pg-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "http/r1/postgres.log": {
+      "sha256": "fd53a47c24a4bec3699a64f8b3de43192a83ebbab0a36020e50cddba5d1722e8",
+      "bytes": 1246
+    },
+    "http/r1/prepare-jest.json": {
+      "sha256": "df8811d585017f8c882eff9e9ce988db1bdc1d629261a8ee60bd20c1f4a2c408",
+      "bytes": 1434
+    },
+    "http/r1/prepare-observations.json": {
+      "sha256": "6b697a85a5334d629d1ff2eda3007945a78fb945c07d8f7aed5ee1b83352b922",
+      "bytes": 23782
+    },
+    "http/r1/prepare.log": {
+      "sha256": "4d98cf14fa044bbe6d48bb067825a27c244b11b9f9618742fef531b7b72b4f59",
+      "bytes": 1181
+    },
+    "http/r1/resume-jest.json": {
+      "sha256": "c11727f914216c9798f1b139c6b89aed057e12c9ffdd713870cc318d35f35c1f",
+      "bytes": 1434
+    },
+    "http/r1/resume-observations.json": {
+      "sha256": "d867684e84fd0d79c9c16d1a344f76f8d074fbdc46a19e5db5af122047bb8456",
+      "bytes": 18954
+    },
+    "http/r1/resume.log": {
+      "sha256": "1876d9b60fbc210c6761a47c96b1d35857c024aa4c8f101f1ecc106d216d0ac1",
+      "bytes": 1185
+    },
+    "http/r1/source-and-cleanup-verification.json": {
+      "sha256": "f2d937134a8798fdc8603b647ab3d7258b42c0946bc6d95c0969f3248855a3ae",
+      "bytes": 1003
+    },
+    "maya-journal-calendar-checks-20261009.py": {
+      "sha256": "0db7ef2bf2b4b717238dec7de5e858217c3108a5b0ab591d6ef8c2ec02c23ef1",
+      "bytes": 4255
+    },
+    "maya-journal-calendar-component-r2-20261009.json": {
+      "sha256": "36444b96d70f2fe14fee595bccad94daba76df7a24e9be297b59099b9f78c3a0",
+      "bytes": 52193
+    },
+    "maya-journal-calendar-component-r2-20261009.log": {
+      "sha256": "e81e6723a2a3ca5b5a19e03445b5930234bc104f533c380bcba4a8fe5c961962",
+      "bytes": 20934
+    },
+    "maya-journal-calendar-component-r3-20261009.json": {
+      "sha256": "ce92c3e7e9ac0f7afc31a51d8fb11422fa2011afa72fa6a28aad44d1b243c1d0",
+      "bytes": 16756
+    },
+    "maya-journal-calendar-component-r3-20261009.log": {
+      "sha256": "8adb12892a58c0277eebc06687155c2d283025625a98e2945e192d1aec4278a6",
+      "bytes": 326
+    },
+    "maya-journal-calendar-core-r1-20261009.json": {
+      "sha256": "7e1033fcab4d063ba66182948d41fc763650278202f0eba7fe4c21d160605be1",
+      "bytes": 34699
+    },
+    "maya-journal-calendar-core-r1-20261009.log": {
+      "sha256": "95e1afbc72828b65c8ed625ca5bfd397cf1fd06e4ad47eb1b04bcf8734191297",
+      "bytes": 355
+    },
+    "maya-journal-calendar-independent-evidence-review-20261009.json": {
+      "sha256": "5dd16f1a1187290ce86f91f74ba84e69d14d2093a77e1bbe7036d76afba31e6b",
+      "bytes": 11664
+    },
+    "maya-journal-calendar-independent-source-review-20261009.json": {
+      "sha256": "7226316bc7e6251e348e8f4e8dcbce9d2bd0874c25767a44d8bf331b695f9685",
+      "bytes": 9510
+    },
+    "maya-journal-calendar-r1-20261009-checks.json": {
+      "sha256": "740e0f3646e161b2834aca4f17c4309418b6839f416e45d7e2a4f926d4328b36",
+      "bytes": 5982
+    },
+    "maya-journal-calendar-r1-20261009-diff-check.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-journal-calendar-r1-20261009-driver.log": {
+      "sha256": "2254cf1adc7a09f8f7eb1cd9e9c258715766f6f978fbd9f136ad249c421c2596",
+      "bytes": 480
+    },
+    "maya-journal-calendar-r1-20261009-lint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-journal-calendar-r1-20261009-production-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-journal-calendar-r1-20261009-scoped-types.log": {
+      "sha256": "f32a6f1855c4656b34bfa4baf63f70575f7fb4bd5e7d621917bb4e9f212bc3cd",
+      "bytes": 99
+    },
+    "maya-journal-calendar-r1-20261009-types.json": {
+      "sha256": "447ddeedc98b7398e3c662821bcce02599aa64d3ccb60ceb57ff361abbecb29d",
+      "bytes": 3596
+    },
+    "maya-journal-calendar-r1-20261009-unit.json": {
+      "sha256": "6957af151f8a49be61bbe27ff06c84f25aef0af8c0ed20892b8db0ee047f6dbc",
+      "bytes": 543327
+    },
+    "maya-journal-calendar-r1-20261009-unit.log": {
+      "sha256": "727aa680270360d35458c3817c3282448b9cc1d5b3dcb826262422c3f8f2e7f1",
+      "bytes": 28953
+    },
+    "maya-journal-calendar-r2-20261009-checks.json": {
+      "sha256": "551e54184ff9b346feb29d0cc3dbe29736d5db11ca569d28f7f5ae17fb854caf",
+      "bytes": 5983
+    },
+    "maya-journal-calendar-r2-20261009-diff-check.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-journal-calendar-r2-20261009-driver.log": {
+      "sha256": "32d19f423c9ad7c64cc844aa7f2ec4758998db961ba1dc1ee0a1076566001fe0",
+      "bytes": 480
+    },
+    "maya-journal-calendar-r2-20261009-lint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-journal-calendar-r2-20261009-production-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-journal-calendar-r2-20261009-scoped-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-journal-calendar-r2-20261009-types.json": {
+      "sha256": "1c03cf0dc67b201c9611908cf980669ea2f7a5485242fc22b9816aecad7f4c6f",
+      "bytes": 1222
+    },
+    "maya-journal-calendar-r2-20261009-unit.json": {
+      "sha256": "03fc59e8e98065afa968bb4a5ae84ffa3d199d8842b2e6eb342c43fd9eb960ce",
+      "bytes": 476440
+    },
+    "maya-journal-calendar-r2-20261009-unit.log": {
+      "sha256": "8afb7a959c6a8968aead71c0848f525b0a0945d2b541e58aa82f5cba0f506442",
+      "bytes": 3966
+    },
+    "maya-journal-calendar-red-20261009.json": {
+      "sha256": "14c5e4a33b84c8c25700547e0545cf830a0b5858bf321eeaadd479d7ed1f3631",
+      "bytes": 28303
+    },
+    "maya-journal-calendar-red-20261009.log": {
+      "sha256": "df691c8d346979f5928c5343a8ed4e8b0539f811983454bc0eb7efb363456335",
+      "bytes": 2808
+    },
+    "preserved-surfaces.json": {
+      "sha256": "a35267abc733bebea81cdef8b7fe9d30292bace147c5f43bf36c77d9db508b10",
+      "bytes": 1067
+    }
+  }
+}

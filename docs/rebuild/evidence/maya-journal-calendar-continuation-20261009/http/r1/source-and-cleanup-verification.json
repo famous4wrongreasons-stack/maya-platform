@@ -1,0 +1,28 @@
+{
+  "contract": "maya.journal-calendar.source-cleanup-verification/1",
+  "sourceHead": "bad0a002e286d78fd9e1332cee3b666380cb203a",
+  "sourceBindingCount": 1862,
+  "allExactGitBindingsMatch": true,
+  "manifestSha256": "b56a3f418a7201febb246bfa88063025f49c57f855e6cb22d844cdbc5bad8b65",
+  "sourceUnchanged": true,
+  "pgStatusExitCode": 3,
+  "postmasterPidAbsent": true,
+  "businessHashUnchanged": true,
+  "chatRequests": 23,
+  "chatStatusCounts": {
+    "201": 20,
+    "403": 2,
+    "401": 1
+  },
+  "scriptedModelCalls": 21,
+  "syntheticNativeGetCalls": 28,
+  "unexpectedCalls": 0,
+  "original81Rerun": false,
+  "original81StatusesUnchanged": true,
+  "limits": [
+    "Controlled civil input, not natural wall-clock midnight",
+    "Real HTTP/auth/C9 and isolated PostgreSQL; synthetic native transport and scripted planner",
+    "No full journal completeness claim: positive continuation is explicitly incomplete",
+    "Business effect census is bounded observed families, not OS-level egress census"
+  ]
+}

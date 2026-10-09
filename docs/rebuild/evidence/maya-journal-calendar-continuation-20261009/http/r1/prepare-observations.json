@@ -1,0 +1,511 @@
+{
+  "contract": "synthetic-employee-journal-read-observations/1",
+  "stage": "prepare",
+  "sourceHead": "bad0a002e286d78fd9e1332cee3b666380cb203a",
+  "sourceBindingsDigest": "9c5a228a8786a28d39b8cdc61c098298facc0171b9af5d128a7ed03234ac9678",
+  "realHttpAuth": true,
+  "realC9AndRuntime": true,
+  "realNativeAdapter": true,
+  "planning": "SCRIPTED_JSON_THROUGH_ACTUAL_PLANNER_VALIDATOR",
+  "syntheticTransport": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "browserAcceptance": false,
+  "utterances": [
+    "Покажи записи Артёма на завтра",
+    "Покажи записи Саши на завтра"
+  ],
+  "realAnalyticsAndPeriodReader": true,
+  "c9ReadsPerPositive": 2,
+  "nativeGetCountIsNotC9ReadCount": true,
+  "isolatedUtterancesOnly": false,
+  "supplementalCalendarContinuation": {
+    "initialUtterance": "Покажи записи Саши на завтра",
+    "clarificationUtterance": "Саша Иванов",
+    "variants": [
+      "midnight",
+      "source",
+      "timezone",
+      "branch"
+    ],
+    "controlledCivilInputOnly": true,
+    "originalCorpusModified": false
+  },
+  "fullDialogueReclassification": false,
+  "full48Reclassification": false,
+  "calendarQualification": "CONTROLLED_CIVIL_INPUT_TO_REAL_JOURNAL_HELPER_ONLY_AUTH_TIMERS_AND_RETENTION_USE_REAL_CLOCK",
+  "prepareReplay": {
+    "runHash": "03fe2f147fadf954b319242597ceb741190e00dedde624aac3fe7625800eeef8",
+    "graphHashUnchanged": "89978caf57ec1ef2224ab98cb4f8c46f3a4724327fff08b97df5d8a5edd05420"
+  },
+  "missingLink": {
+    "uniquePublicName": true,
+    "journalReadsAdded": 0
+  },
+  "ambiguity": {
+    "candidateWithLink": 1,
+    "candidateWithoutLink": 1,
+    "journalReadsAdded": 0
+  },
+  "foreignRun": {
+    "status": 400,
+    "runHash": "03fe2f147fadf954b319242597ceb741190e00dedde624aac3fe7625800eeef8"
+  },
+  "foreignHistory": {
+    "status": 200,
+    "isolated": true
+  },
+  "businessHash": "d65d65a3f01b5612578f291de018adf72329c8372b1fdcfc68c736fc5472d05a",
+  "transport": [
+    {
+      "tenantHash": "99b1a633f0aaf1742202ae2c603adbe7c72100210134d2d0455214e8639fb425",
+      "resource": "staff"
+    },
+    {
+      "tenantHash": "99b1a633f0aaf1742202ae2c603adbe7c72100210134d2d0455214e8639fb425",
+      "resource": "records",
+      "staffId": "71",
+      "date": "2026-10-11",
+      "page": 1
+    },
+    {
+      "tenantHash": "99b1a633f0aaf1742202ae2c603adbe7c72100210134d2d0455214e8639fb425",
+      "resource": "services"
+    },
+    {
+      "tenantHash": "99b1a633f0aaf1742202ae2c603adbe7c72100210134d2d0455214e8639fb425",
+      "resource": "categories"
+    },
+    {
+      "tenantHash": "99b1a633f0aaf1742202ae2c603adbe7c72100210134d2d0455214e8639fb425",
+      "resource": "schedule",
+      "staffId": "71",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "99b1a633f0aaf1742202ae2c603adbe7c72100210134d2d0455214e8639fb425",
+      "resource": "schedule",
+      "staffId": "72",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "99b1a633f0aaf1742202ae2c603adbe7c72100210134d2d0455214e8639fb425",
+      "resource": "schedule",
+      "staffId": "73",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "99b1a633f0aaf1742202ae2c603adbe7c72100210134d2d0455214e8639fb425",
+      "resource": "schedule",
+      "staffId": "74",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "99b1a633f0aaf1742202ae2c603adbe7c72100210134d2d0455214e8639fb425",
+      "resource": "records",
+      "staffId": "72",
+      "date": "2026-10-11",
+      "page": 1
+    },
+    {
+      "tenantHash": "99b1a633f0aaf1742202ae2c603adbe7c72100210134d2d0455214e8639fb425",
+      "resource": "records",
+      "staffId": "72",
+      "date": "2026-10-11",
+      "page": 2
+    },
+    {
+      "tenantHash": "99b1a633f0aaf1742202ae2c603adbe7c72100210134d2d0455214e8639fb425",
+      "resource": "schedule",
+      "staffId": "71",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "99b1a633f0aaf1742202ae2c603adbe7c72100210134d2d0455214e8639fb425",
+      "resource": "schedule",
+      "staffId": "72",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "99b1a633f0aaf1742202ae2c603adbe7c72100210134d2d0455214e8639fb425",
+      "resource": "schedule",
+      "staffId": "73",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "99b1a633f0aaf1742202ae2c603adbe7c72100210134d2d0455214e8639fb425",
+      "resource": "schedule",
+      "staffId": "74",
+      "date": "2026-10-11"
+    },
+    {
+      "tenantHash": "c0b6beabfec155d2fed7274a908f50ebc031c611fa29dc4fe43d018296ff87c7",
+      "resource": "staff"
+    },
+    {
+      "tenantHash": "1c9c1c3b2cb7c21d0cde434d909cfcadbdbe1c2f702e104380f1d5fce7d979fb",
+      "resource": "staff"
+    },
+    {
+      "tenantHash": "6b56bd8558607d4042ad5c63b5fd2eee118eb96802202e06234f7e1dc160ea1b",
+      "resource": "staff"
+    },
+    {
+      "tenantHash": "1c5692e94d32ecebd4e1a8bebc05ce255c23d744f3e147ec0e1ff4cf6ed38cfa",
+      "resource": "staff"
+    }
+  ],
+  "modelCalls": 13,
+  "unexpected": [],
+  "checkpoints": [
+    {
+      "requestHash": "51282e9f1d215836a42802670a8fe76fe5b16c80a8c616596361f29311e2485a",
+      "text": "Покажи записи Артёма на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Журнал на 11.10.2026: Артём.\nФилиал: основной филиал. Часовой пояс: Pacific/Kiritimati.\nЗаписи из полученного среза: 10:00–10:30 — Мужская стрижка (отмечена завершённой в CRM); 11:00–11:30 — Мужская стрижка (подтверждена).\nИсточник: прочитанный журнал CRM. Имена и контакты клиентов не раскрываются; присутствие и свободные окна этим ответом не подтверждаются.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "51282e9f1d215836a42802670a8fe76fe5b16c80a8c616596361f29311e2485a",
+      "text": "Покажи записи Артёма на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Сохранённый результат проверки. Журнал на 11.10.2026: Артём.\nФилиал: основной филиал. Часовой пояс: Pacific/Kiritimati.\nЗаписи из полученного среза: 10:00–10:30 — Мужская стрижка (отмечена завершённой в CRM); 11:00–11:30 — Мужская стрижка (подтверждена).\nИсточник: прочитанный журнал CRM. Имена и контакты клиентов не раскрываются; присутствие и свободные окна этим ответом не подтверждаются.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "58119434b5c873ba9e6cb9797aa5fb37c7b8d3d8ffffdb68ee0647da95504d3e",
+      "text": "Покажи записи Саши на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось однозначно выбрать сотрудника в текущем каталоге филиала. Уточните его полное имя; журнал пока не подтверждён.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "d6806d99cb181e36d2fcb016ca558b5df4b04f64b45cba1b57c95ae4cead44dc",
+      "text": "Покажи сотрудников и записи Саши Иванова на завтра в «основной филиал»",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Журнал на 11.10.2026: Саша Иванов.\nФилиал: основной филиал. Часовой пояс: Pacific/Kiritimati.\nИсточник прочитан не полностью; отсутствие других записей не подтверждено.\nЗаписи из полученного среза: 10:00–10:30 — Мужская стрижка (отмечена завершённой в CRM); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена); 11:00–11:30 — Мужская стрижка (подтверждена).\nПоказана только часть полученных записей.\nИсточник: прочитанный журнал CRM. Имена и контакты клиентов не раскрываются; присутствие и свободные окна этим ответом не подтверждаются.",
+      "grounding": "verified",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "0cd87dd2446e278f8de01fdabd2d78013e26e5dff7f68ee107294b56fcf1ac97",
+      "text": "Покажи записи Елены на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось подтвердить актуальный источник журнала и связь мастера с филиалом. Проверка пока недоступна; актуальные записи сейчас не подтверждены.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "1f4c50d225b44945d243166865e6181af36767f392bfc8b8f47d9f55310805d5",
+      "text": "Покажи записи Артёма на завтра",
+      "status": 201,
+      "modelCalls": 0,
+      "reply": "Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "boundary": "ordinary_chat_premodel_staff_access_refusal",
+      "replyOrigin": "SERVER_CLOSED_ACCESS_FALLBACK",
+      "languageAcceptance": false,
+      "serverAuthoredDeterministicRefusal": true,
+      "role": "staff",
+      "status": 201,
+      "providerReadsAdded": 0,
+      "clientIdentityGranted": false
+    },
+    {
+      "boundary": "direct_registered_tool_http_only",
+      "role": "staff",
+      "managerJournalStatus": 403,
+      "providerReadsAdded": 0,
+      "clientIdentityGranted": false
+    },
+    {
+      "requestHash": "ef021029717b59cf46f0019e72481b5118106388278634586b0e18dd7d81a9be",
+      "text": "Покажи записи Артёма на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Журнал сотрудников недоступен вашей роли.",
+      "grounding": "not_required",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "boundary": "ordinary_chat_parsed_permission_denied",
+      "replyOrigin": "SCRIPTED_DENIAL_PROSE",
+      "languageAcceptance": false,
+      "serverAuthoredDeterministicRefusal": false,
+      "role": "client",
+      "status": 201,
+      "providerReadsAdded": 0,
+      "clientIdentityGranted": false
+    },
+    {
+      "boundary": "direct_registered_tool_http_only",
+      "role": "client",
+      "managerJournalStatus": 403,
+      "providerReadsAdded": 0,
+      "clientIdentityGranted": false
+    },
+    {
+      "requestHash": "1665c5785cd0e771c2f139d6de568db297f291f18bf2696bd55900309f7b3a95",
+      "text": "Покажи записи Артёма на завтра в «другой филиал»",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось подтвердить актуальный источник журнала и связь мастера с филиалом. Проверка пока недоступна; актуальные записи сейчас не подтверждены.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "0b4fc945ed30bb0df597b48dd846ed7d29fdbbdc591b0c9dd2099c859b92c3f6",
+      "text": "Foreign tenant branch preference (synthetic ID omitted)",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось подтвердить актуальную связь сотрудника с филиалом и его журнал записей. Уточните сотрудника и филиал или повторите проверку после обновления источника.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "44df8ab1de16b6d48d8753248f2b78cde866b8a6100dd665ffd73b0755cfc3ce",
+      "text": "Покажи записи Артёма на завтра",
+      "status": 403,
+      "modelCalls": 1,
+      "reply": null,
+      "grounding": null,
+      "errorCode": null,
+      "errorMessage": "staff_schedule_branch_forbidden"
+    },
+    {
+      "requestHash": "92c2f9d7ca9e3108a90f3d3e9dc8d30f8fa29487e3fc8f7afeedf748f2514014",
+      "text": "Покажи записи Саши на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось однозначно выбрать сотрудника в текущем каталоге филиала. Уточните его полное имя; журнал пока не подтверждён.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "852ed39cab4c9065a00ca2c2a25edbef6d5b81582b0436df9a7eca8e54df5e67",
+      "text": "Покажи записи Саши на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось однозначно выбрать сотрудника в текущем каталоге филиала. Уточните его полное имя; журнал пока не подтверждён.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "dc9e86aa91966728aae3a03feb68aea96dddeb3ed1a479d38981063a72d9c525",
+      "text": "Покажи записи Саши на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось однозначно выбрать сотрудника в текущем каталоге филиала. Уточните его полное имя; журнал пока не подтверждён.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    },
+    {
+      "requestHash": "70d1a055a0e99ea8efb599a8bf974da144d5fad5499e1b75466e5f913bca3873",
+      "text": "Покажи записи Саши на завтра",
+      "status": 201,
+      "modelCalls": 1,
+      "reply": "Не удалось однозначно выбрать сотрудника в текущем каталоге филиала. Уточните его полное имя; журнал пока не подтверждён.",
+      "grounding": "blocked",
+      "errorCode": null,
+      "errorMessage": null
+    }
+  ],
+  "deniedPlans": [
+    {
+      "role": "client",
+      "intent": "operations.journal_day",
+      "permission": "denied",
+      "dataClass": "F",
+      "toolStatus": "not_available",
+      "advertisedJournal": false,
+      "replyOrigin": "SCRIPTED_DENIAL_PROSE",
+      "languageAcceptance": false,
+      "serverAuthoredDeterministicRefusal": false
+    }
+  ],
+  "sourceReceipts": [
+    {
+      "runHash": "03fe2f147fadf954b319242597ceb741190e00dedde624aac3fe7625800eeef8",
+      "staffId": "71",
+      "partial": false,
+      "references": [
+        {
+          "workHash": "1c4e13341e52c0a019d5fc4668287a650d72b54a55a61556870973bd51b64287",
+          "executionHash": "0be321add188431cc663dba3bcca99a226e543d0ae07dd7b5779cdc680b87a8c",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "50456afa87a58ee50b531f57536dcf48fab3b2624e4c0a9c45255aca215f0fdf",
+          "resultHash": "8882acfc5c2421cd728dd64175e511c58969563989ee455ca64968ebaeb0d03a"
+        },
+        {
+          "workHash": "3bdcd41a470b51f094cfddec871e3d851fe0770166575e72cf0af5ba0ac90b50",
+          "executionHash": "fc1fe1696ae638ba50c61826b868ab6f199f1d1040d3f5b1665794fdda84182e",
+          "taskKey": "operations.journal.read",
+          "inputHash": "273c5eb2737dc32db4cedd984318b5da7c7ff383cf0b4c09737c068b4bfb8894",
+          "resultHash": "f074951faa79175889261cdf8121927e039c4fa7fa1d66ca298d9ca25b9ee1ea"
+        }
+      ]
+    },
+    {
+      "runHash": "03fe2f147fadf954b319242597ceb741190e00dedde624aac3fe7625800eeef8",
+      "staffId": "71",
+      "partial": false,
+      "references": [
+        {
+          "workHash": "1c4e13341e52c0a019d5fc4668287a650d72b54a55a61556870973bd51b64287",
+          "executionHash": "0be321add188431cc663dba3bcca99a226e543d0ae07dd7b5779cdc680b87a8c",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "50456afa87a58ee50b531f57536dcf48fab3b2624e4c0a9c45255aca215f0fdf",
+          "resultHash": "8882acfc5c2421cd728dd64175e511c58969563989ee455ca64968ebaeb0d03a"
+        },
+        {
+          "workHash": "3bdcd41a470b51f094cfddec871e3d851fe0770166575e72cf0af5ba0ac90b50",
+          "executionHash": "fc1fe1696ae638ba50c61826b868ab6f199f1d1040d3f5b1665794fdda84182e",
+          "taskKey": "operations.journal.read",
+          "inputHash": "273c5eb2737dc32db4cedd984318b5da7c7ff383cf0b4c09737c068b4bfb8894",
+          "resultHash": "f074951faa79175889261cdf8121927e039c4fa7fa1d66ca298d9ca25b9ee1ea"
+        }
+      ]
+    },
+    {
+      "runHash": "cbbbf6838c378cb6d9c2348c34443de88c6fa2d12ae1b59328ef2fb8ff98211a",
+      "staffId": "72",
+      "partial": true,
+      "references": [
+        {
+          "workHash": "8a87742849d9d1af3555eb6a01004b114b5f1d3afbfdd0b42e20246b19c87ae7",
+          "executionHash": "0f623666f817e763588dac0eecd6f07c76939bef7dea63e2c1f2f1ca9afbbaef",
+          "taskKey": "catalog.staff.read",
+          "inputHash": "50456afa87a58ee50b531f57536dcf48fab3b2624e4c0a9c45255aca215f0fdf",
+          "resultHash": "8882acfc5c2421cd728dd64175e511c58969563989ee455ca64968ebaeb0d03a"
+        },
+        {
+          "workHash": "1acaef5d9f719e631bbbdff3335b761c7bf508fea82ed6b1627b6522e923263e",
+          "executionHash": "03d8a3aac5675e42de6d68ff7580791b59752851800fae99b76102acdfc26666",
+          "taskKey": "operations.journal.read",
+          "inputHash": "a0df805340f777016ca68ab8af8943973d6a6e74a33a15f14079bac95b02a9e2",
+          "resultHash": "f9a32019b8340e322d0db9364aa0b1306f546188b5919fea21392134c18e2de4"
+        }
+      ]
+    }
+  ],
+  "calendarInputs": [
+    {
+      "tenantHash": "c0b6beabfec155d2fed7274a908f50ebc031c611fa29dc4fe43d018296ff87c7",
+      "variant": "midnight",
+      "now": "2026-11-01T03:59:59.000Z",
+      "qualification": "PASSTHROUGH_REAL_HELPER_EXPLICIT_CIVIL_NOW_ARGUMENT_ONLY"
+    },
+    {
+      "tenantHash": "1c9c1c3b2cb7c21d0cde434d909cfcadbdbe1c2f702e104380f1d5fce7d979fb",
+      "variant": "source",
+      "now": "2026-11-01T03:59:59.000Z",
+      "qualification": "PASSTHROUGH_REAL_HELPER_EXPLICIT_CIVIL_NOW_ARGUMENT_ONLY"
+    },
+    {
+      "tenantHash": "6b56bd8558607d4042ad5c63b5fd2eee118eb96802202e06234f7e1dc160ea1b",
+      "variant": "timezone",
+      "now": "2026-11-01T03:59:59.000Z",
+      "qualification": "PASSTHROUGH_REAL_HELPER_EXPLICIT_CIVIL_NOW_ARGUMENT_ONLY"
+    },
+    {
+      "tenantHash": "1c5692e94d32ecebd4e1a8bebc05ce255c23d744f3e147ec0e1ff4cf6ed38cfa",
+      "variant": "branch",
+      "now": "2026-11-01T03:59:59.000Z",
+      "qualification": "PASSTHROUGH_REAL_HELPER_EXPLICIT_CIVIL_NOW_ARGUMENT_ONLY"
+    }
+  ],
+  "periodReads": [],
+  "continuationReceipts": [
+    {
+      "variant": "midnight",
+      "phase": "pendingBeforeRestart",
+      "goalCompleted": false,
+      "civilNow": "2026-11-01T03:59:59.000Z",
+      "date": "2026-11-01",
+      "timezone": "America/New_York",
+      "linkedAmbiguousCandidates": 2,
+      "catalogC9Reads": 1,
+      "journalReads": 0,
+      "tenantHash": "c0b6beabfec155d2fed7274a908f50ebc031c611fa29dc4fe43d018296ff87c7",
+      "parentHash": "fb1c18efd6140445980122ee3552ccc864bd4585fa6a3f32c48729714c21999b",
+      "contextHash": "4c48073b65131bb43a0b8152d784b88f336cadadc87b9e47fb96595cd6d0d2d7",
+      "markerHash": "c1e8d6fbd097b36b5cf1264ab2c188953fd7eb31430ad42eece611ff791ae347",
+      "catalogWorkHash": "b64d2066464d260eef5ef0b990702dfb11f7168034d8b2fdb7d4c91c2d9ed004",
+      "catalogInputHash": "271089f4487defa7b5baab7580e9ae79aa1cae8dcbae7f92526b79b9d8b12669"
+    },
+    {
+      "variant": "source",
+      "phase": "pendingBeforeRestart",
+      "goalCompleted": false,
+      "civilNow": "2026-11-01T03:59:59.000Z",
+      "date": "2026-11-01",
+      "timezone": "America/New_York",
+      "linkedAmbiguousCandidates": 2,
+      "catalogC9Reads": 1,
+      "journalReads": 0,
+      "tenantHash": "1c9c1c3b2cb7c21d0cde434d909cfcadbdbe1c2f702e104380f1d5fce7d979fb",
+      "parentHash": "9acf4f4c982cdb3e4ee980819166571acec6da720372e392569b133159976a2e",
+      "contextHash": "9dacc051c7844420de3f906d88f87d502c755fc3e4c1751e22b960c88762667e",
+      "markerHash": "fe6fc91946e32a92ff1b9bfa0e76b72bb8232f15c917084e4e086b1bcb7aae4b",
+      "catalogWorkHash": "a197ed866b6d64a20c6c4b0c73998c0bdb2063488c6bc74939bafa52c596a4e1",
+      "catalogInputHash": "4438751f12218be6af5b621a02358512b9e57f35092356cb0baa54832ce832a8"
+    },
+    {
+      "variant": "timezone",
+      "phase": "pendingBeforeRestart",
+      "goalCompleted": false,
+      "civilNow": "2026-11-01T03:59:59.000Z",
+      "date": "2026-11-01",
+      "timezone": "America/New_York",
+      "linkedAmbiguousCandidates": 2,
+      "catalogC9Reads": 1,
+      "journalReads": 0,
+      "tenantHash": "6b56bd8558607d4042ad5c63b5fd2eee118eb96802202e06234f7e1dc160ea1b",
+      "parentHash": "1741bad2ffd5cc75a4ba659e91d9280b1b3eee46978b0c0814181da23438dd74",
+      "contextHash": "4bded0f9ac9215f239da971459886fd4f472e88495b76edece60a773480476c7",
+      "markerHash": "7a4cd876e97bd71f41a2d53c3a34d60533763ad985e8e9ba18048656b55f0f39",
+      "catalogWorkHash": "ed2673edfb1d28ad0b1d6dd1266a48f2178c966ea3fd68e339367b048e6fb4fb",
+      "catalogInputHash": "bc6adb5cdd29a43c6554ba83bfbedc230fd88d74928be99935913fc2ca61726b"
+    },
+    {
+      "variant": "branch",
+      "phase": "pendingBeforeRestart",
+      "goalCompleted": false,
+      "civilNow": "2026-11-01T03:59:59.000Z",
+      "date": "2026-11-01",
+      "timezone": "America/New_York",
+      "linkedAmbiguousCandidates": 2,
+      "catalogC9Reads": 1,
+      "journalReads": 0,
+      "tenantHash": "1c5692e94d32ecebd4e1a8bebc05ce255c23d744f3e147ec0e1ff4cf6ed38cfa",
+      "parentHash": "7db15ea8654e0d1baf9eba294b39a3da795f0a42ffa613de446aad64268f7786",
+      "contextHash": "474a3c8af778e207d88cb9e4f8a6b252050e8a9e0b7e31d973fd6336a92d31ac",
+      "markerHash": "505a7a12947b261baa84e1ccda26713a3e1f36bcf3f86eeec0382587772b87ed",
+      "catalogWorkHash": "4ba408ba09944ab3fac92d8b946f2cf97e3331bd634ccbbb9847c02a47302c36",
+      "catalogInputHash": "0592b7abc14c263e89a0ab57d023fe79bee130e8bd3677bdfd341f170ac518e8"
+    }
+  ]
+}

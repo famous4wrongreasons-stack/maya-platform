@@ -1,0 +1,31 @@
+{
+  "baseline": "ca70076b35afc4aaa299b8bfe9bb34f2954c7723",
+  "sourceHead": "bad0a002e286d78fd9e1332cee3b666380cb203a",
+  "changedFiles": [
+    "maya-saas-backend/src/ai-tools/ai-core.employee-journal-continuation.spec.ts",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+    "maya-saas-backend/src/ai-tools/employee-journal-read.spec.ts",
+    "maya-saas-backend/src/ai-tools/employee-journal-read.ts",
+    "maya-saas-backend/test/widgets-live/employee-journal-read-restart.probe-spec.ts"
+  ],
+  "original81CorpusScriptsFixturesEvaluatorChanged": false,
+  "frozen": {
+    "maya-conversation-batch": {
+      "head": "b74d62851de075a48f2c10bf5da48524c8ca0e47",
+      "clean": true
+    },
+    "maya-union-handoff": {
+      "head": "3faa0c4f8934c8c67a8fc564936c3f8070ce8a67",
+      "clean": true
+    }
+  },
+  "launcherSha256": "007ba048c59eaf7ec020ec142aea15045d22098a6515701a74e78823ec20e7de",
+  "originalScore": {
+    "pass": 57,
+    "semanticFail": 0,
+    "unsupported": 12,
+    "insufficient": 10,
+    "clarificationPending": 2
+  },
+  "full81Rerun": false
+}
