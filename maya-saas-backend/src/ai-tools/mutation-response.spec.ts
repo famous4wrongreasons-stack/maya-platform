@@ -10,6 +10,8 @@ import { ConfigService } from '@nestjs/config';
 import { UserRole } from '../common/domain.enums';
 import captures from './fixtures/deepseek-v4-pro-followup-failures.json';
 import type { AiCoreModelInput } from './ai-core.types';
+import { ConversationIntelligenceService } from '../conversation-intelligence/conversation-intelligence.service';
+import type { ConversationEntities } from '../conversation-intelligence/conversation-intelligence.types';
 
 const model = new AiCoreModelService(new ConfigService());
 const input: AiCoreModelInput = {
@@ -49,6 +51,140 @@ const parse = (
       ],
     },
   ).semanticPlan;
+
+describe('bounded reschedule preference clarification', () => {
+  const plan = (
+    entities: ConversationEntities = {
+      new_date: 'friday',
+      new_time: '20:00',
+    },
+    intent = 'booking.reschedule_own',
+  ) => {
+    const result = new ConversationIntelligenceService().validatePlan(
+      {
+        parent_request: 'Давай на 20:00',
+        tasks: [{ intent, entities, confidence: 1 }],
+      },
+      UserRole.CLIENT,
+      [
+        'appointments.own.reschedule',
+        'appointments.own.create',
+        'appointments.own.cancel',
+      ],
+    );
+    if (!result) throw new Error('Expected validated reschedule test plan');
+    return result;
+  };
+
+  it('repeats the validated request date/time as unverified preferences while asking which appointment', () => {
+    const current = plan();
+    current.tasks[0].clarification_question = 'Уже перенесено, слот свободен.';
+    const before = JSON.stringify(current);
+    const reply = mutationClarification(current);
+    expect(reply).toContain('Пожелание для переноса: пятница, 20:00.');
+    expect(reply).toContain('Возможность переноса ещё не проверена.');
+    expect(reply).toContain('уточните запись.');
+    expect(reply).toContain('Подтверждённого результата выполнения пока нет.');
+    expect(reply).not.toMatch(/Уже перенесено|слот свободен|сохранила/);
+    expect(JSON.stringify(current)).toBe(before);
+  });
+
+  it('reflects a corrected time without carrying an older preference or changing the plan', () => {
+    const current = plan({ new_date: 'friday', new_time: '21:00' });
+    const before = JSON.stringify(current);
+    expect(mutationClarification(current)).toContain('пятница, 21:00');
+    expect(mutationClarification(current)).not.toContain('20:00');
+    expect(JSON.stringify(current)).toBe(before);
+  });
+
+  it('asks for absent new time/date while repeating only a finite known preference', () => {
+    const withoutTime = mutationClarification(plan({ new_date: 'tomorrow' }));
+    expect(withoutTime).toContain('Пожелание для переноса: завтра.');
+    expect(withoutTime).toContain('уточните запись, новое время.');
+    const withoutDate = mutationClarification(plan({ new_time: '20:00' }));
+    expect(withoutDate).toContain('Пожелание для переноса: 20:00.');
+    expect(withoutDate).toContain('уточните запись, новую дату.');
+  });
+
+  it('accepts exact valid ISO days without resolving weekdays or relative dates to an instant', () => {
+    for (const [value, label] of [
+      ['2028-02-29', '2028-02-29'],
+      ['сегодня', 'сегодня'],
+      ['пятницу', 'пятница'],
+    ]) {
+      const reply = mutationClarification(
+        plan({ new_date: value, new_time: '20:00' }),
+      );
+      expect(reply).toContain(`Пожелание для переноса: ${label}, 20:00.`);
+      expect(reply).not.toMatch(/(?:Z|[+-]0[0-9]:00)\b/);
+    }
+  });
+
+  it('does not echo malformed dates, invalid times, arbitrary prose or private appointment/staff references', () => {
+    for (const value of [
+      '2026-02-30',
+      '2026-13-01',
+      '2026-10-09T20:00:00Z',
+      'PRIVATE_DAY_VALUE',
+    ]) {
+      const reply = mutationClarification(
+        plan({ new_date: value, new_time: '20:00' }),
+      );
+      expect(reply).not.toContain(value);
+      expect(reply).toContain('Пожелание для переноса: 20:00.');
+      expect(reply).toContain('новую дату');
+    }
+    for (const value of ['24:00', '20:60', '20:00 PRIVATE_VALUE', 'вечером']) {
+      const reply = mutationClarification(
+        plan({ new_date: 'friday', new_time: value }),
+      );
+      expect(reply).not.toContain(value);
+      expect(reply).toContain('Пожелание для переноса: пятница.');
+      expect(reply).toContain('новое время');
+    }
+    const privatePlan = plan({
+      appointment: 'PRIVATE_APPOINTMENT',
+      new_employee: 'PRIVATE_EMPLOYEE',
+      new_date: 'PRIVATE_DAY_VALUE',
+    });
+    expect(mutationClarification(privatePlan)).not.toMatch(/PRIVATE_/);
+    expect(mutationClarification(privatePlan)).not.toContain('Пожелание');
+  });
+
+  it('keeps denied and unavailable actions on their existing refusal path', () => {
+    const denied = plan();
+    denied.tasks[0].permission.status = 'denied';
+    expect(mutationClarification(denied)).toBe(
+      'Для этого действия нужен подтверждённый клиентский доступ.',
+    );
+    const unavailable = plan();
+    unavailable.tasks[0].tool.status = 'not_available';
+    expect(mutationClarification(unavailable)).toBe(
+      'Это действие сейчас недоступно. Подтверждённого результата выполнения нет.',
+    );
+  });
+
+  it('does not specialize other intents or multiple tasks', () => {
+    for (const intent of ['booking.create_own', 'booking.cancel_own']) {
+      const current = plan({}, intent);
+      expect(mutationClarification(current)).not.toContain('Пожелание');
+    }
+    const multiple = plan();
+    multiple.tasks.push({ ...multiple.tasks[0], id: 'independent-other-task' });
+    expect(mutationClarification(multiple)).toBe(
+      'Для подготовки действия уточните запись. Подтверждённого результата выполнения пока нет.',
+    );
+  });
+
+  it('does not present an unresolved date or time as a retained preference', () => {
+    const current = plan();
+    current.context.unresolved_references = ['new_date', 'new_time'];
+    const reply = mutationClarification(current);
+    expect(reply).not.toContain('Пожелание');
+    expect(reply).not.toContain('20:00');
+    expect(reply).toContain('уточните запись, новую дату, новое время.');
+  });
+});
 
 describe('captured follow-up semantic and evidence regressions', () => {
   it('grades the exact final capture as ambiguous proposal language, not proof of completed booking', () => {

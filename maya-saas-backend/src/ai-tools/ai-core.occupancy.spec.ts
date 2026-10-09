@@ -1188,6 +1188,46 @@ describe('explicit owner chat Occupancy ingress (scripted semantic routing, not 
     expect(result.reply).toContain('Для отдельного периода, филиала');
     expect(f.runtime.execute).not.toHaveBeenCalled();
   });
+  it('explains the no-dispatch boundary for an unsafe clarified window request without asserting current occupancy', async () => {
+    const f = fixture();
+    f.model.decide.mockResolvedValue({
+      provider: 'safe',
+      model: 'SCRIPTED_SYNTHETIC',
+      reply: 'Рассылка со скидкой отправлена.',
+      toolCall: null,
+      semanticPlan: new ConversationIntelligenceService().validatePlan(
+        {
+          tasks: [
+            {
+              intent: 'schedule.review_cancellation_windows',
+              entities: {},
+              requires_clarification: true,
+              clarification_question: 'Разрешить скидку и рассылку?',
+              confidence: 1,
+            },
+          ],
+        },
+        user.role,
+        ['booking.availability.read'],
+      ),
+      usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+    });
+    const result = await f.service.chat(
+      user,
+      dto('Окно уже заняли. Всё равно разошли клиентам скидку.'),
+    );
+    expect(result.reply).toContain(
+      'не назначает скидки и не рассылает сообщения клиентам',
+    );
+    expect(result.reply).not.toMatch(
+      /скидкой отправлена|окно (?:свободно|занято)/,
+    );
+    expect(result.action).toBeNull();
+    expect(result.tools_used).toEqual([]);
+    expect(f.orchestration.checkCancellationWindows).not.toHaveBeenCalled();
+    expect(f.runtime.execute).not.toHaveBeenCalled();
+    expect(f.model.decide).toHaveBeenCalledTimes(1);
+  });
   it('refuses a late purpose switch after a settled ordinary read instead of creating a second run', async () => {
     const f = fixture();
     f.model.decide.mockResolvedValueOnce({
