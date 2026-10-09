@@ -71,7 +71,25 @@ The actual AiCore privacy projection was reproduced locally: projecting the
 restored branch semantic plan before user history replaces the previous branch
 label with an opaque `[reference removed]` token. The original finite fixture
 matcher rejected that valid projected form. The fixture now permits reference
-tokens only in the two exact frozen branch-label positions, separately from name
+tokens only for the two branch labels in their seven exact frozen positions, separately from name
 tokens, and preserves the observed token when returning to the branch topic.
 Changed branches, wrong token classes and appended text remain rejected. The
 updated model suite passed 10/10 tests. No application or privacy code changed.
+
+## Second actual HTTP/PG attempt
+
+`/private/tmp/maya-offline48-http-20261009-r2` reached 76 attempted turns:
+74 reply-bearing HTTP 201 responses, one expected revoked-membership HTTP 401,
+and one unresolved HTTP 503 at `utt-inventory.stock-074` turn 1. Five turns were
+unexecuted. The stock owner returned its real `configured:false` /
+`source:not_configured` result; the script then emitted a bare null tool, leaving
+the application's required-source gate pending (`ai_core_required_tool_missing`).
+The failed proof is retained. There were zero upstream calls, unchanged source
+pins, and confirmed broker/PostgreSQL shutdown with all owned groups absent.
+
+For the two existing inventory/review READ tools only, an actual result with both
+unconfigured markers now produces the explicit source limitation in canonical
+planner clarification fields. Other shapes do not get this treatment. This is
+not a verified empty result or a repair to the application's required-tool logic.
+The fixture also preserves the observed stock branch reference. The model suite
+again passed 10/10 tests, including negative controls for unproven configuration.

@@ -330,6 +330,37 @@ test('inventory/reviews read existing owners and distinguish NOT_CONFIGURED from
     const m = model(),
       initial = call(m, id, 1);
     assert.equal(output(initial).tool_call.name, tool);
+    const unavailable = output(
+      call(m, id, 1, {
+        tool_results: [
+          {
+            name: tool,
+            result: { configured: false, source: 'not_configured' },
+          },
+        ],
+      }),
+    );
+    assert.equal(unavailable.tool_call, null);
+    assert.equal(
+      unavailable.semantic_plan.tasks[0].requires_clarification,
+      true,
+    );
+    assert.match(
+      unavailable.semantic_plan.tasks[0].clarification_question,
+      limit,
+    );
+    for (const fixture of [
+      { configured: true, source: 'not_configured' },
+      { configured: false, source: 'unknown' },
+      {},
+    ]) {
+      const other = output(
+        call(model(), id, 1, {
+          tool_results: [{ name: tool, result: fixture }],
+        }),
+      );
+      assert.equal(other.semantic_plan.tasks[0].requires_clarification, false);
+    }
     const result = call(
       m,
       id,

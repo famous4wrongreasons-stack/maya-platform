@@ -432,7 +432,7 @@ function select(item, turn, input, people) {
     case 'utt-inventory.stock-079':
       return recipe(
         'inventory.stock',
-        { branch: 'основной филиал', low_stock_only: true },
+        { branch: person('основной филиал'), low_stock_only: true },
         'inventory.stock.read',
         { low_stock_only: true },
         null,
@@ -557,6 +557,27 @@ export function createCoreFullOfflineModel({ cases }) {
           const toolResults = input.tool_results ?? [];
           requireThat(Array.isArray(toolResults));
           const complete = toolResults.some((r) => r.name === selected.tool);
+          const result = toolResults.findLast(
+            (r) => r.name === selected.tool,
+          )?.result;
+          // An actual unconfigured registry cannot settle the requested scope.
+          // Represent that limitation in the canonical planner clarification
+          // fields; a bare null tool still leaves the application's required
+          // source gate pending. Do not manufacture a configured/empty result.
+          if (
+            ['inventory.stock.read', 'reviews.list.read'].includes(
+              selected.tool,
+            ) &&
+            record(result) &&
+            result.configured === false &&
+            result.source === 'not_configured'
+          ) {
+            selected.tasks[0].requires_clarification = true;
+            selected.tasks[0].clarification_question = finalText(
+              selected,
+              input,
+            );
+          }
           let call =
             selected.tool && !complete
               ? {
