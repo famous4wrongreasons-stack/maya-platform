@@ -1,0 +1,33 @@
+{
+  "contract": "maya.public-company.independent-source-review/1",
+  "reviewer": "/root/independent_review",
+  "codeSha": "f8327626979e09696c8d93e8573d72667eb2ae85",
+  "verdict": "NO_REMAINING_SOURCE_BLOCKERS",
+  "reviewedSha256": {
+    "src/ai-tools/ai-core.service.ts": "1c43eb4c8007847938979ac3c82788595bec8eaf7f18d386eb38f464526b1daf",
+    "src/ai-tools/public-consultation-presentation.ts": "0e129d4a098785aa3747cfa7902ed5a210f620e7381a70339e922667e578a519",
+    "src/ai-tools/ai-tool-handler.service.ts": "0155603f0233fbfd8d64325ebea5d66f00b2c3fca6dd4329473b53a382a57b1b",
+    "src/ai-tools/staff-schedule-read-scope.ts": "41c9379a7107eba4986e69be159bd8161c68b804cf585105619e882791caf151",
+    "src/crm/crm.service.ts": "2f424ed65beb2aba7ec16873068aa690913d1af770ed257ce192c87264fc5bef",
+    "src/crm/adapters/yclients-crm.adapter.ts": "7762201bde96587408700083000ec9d9e092b679930f0268ac9501ec95173d95",
+    "src/crm/crm-adapter.interface.ts": "569b165001c6c0fa5992b07db825029fd410dfdb78990693324163960290d7ce"
+  },
+  "resolvedFindings": [
+    "Native generated title no longer presented as a scoped source fact; missing title preserved in detail and discovery fallback, genuine same-shaped provider title retained",
+    "Cached missing-field responses carry saved-result label and observed-profile wording",
+    "Verified absence carries evidence and requires C9 COMPLETED finalization",
+    "Configured source unavailable does not re-ask an already explicit branch"
+  ],
+  "checksReviewed": [
+    "Current source/company/captured adapter before and after native read",
+    "Private projection participates in existing authority/cache hash; no role or tool expansion",
+    "Compound/unsupported field fails closed without tenant branding or staff roster fallback",
+    "Legacy discovery and ordinary staff catalog behavior preserved",
+    "Final two changed hashes differ only by Prettier formatting from independently reviewed bytes"
+  ],
+  "limits": [
+    "Read-only source review; reviewer did not run tests or services",
+    "No actual public-company HTTP/PG/persistence/restart/provider/model qualification",
+    "Previous journal/full48 evidence remains bound to 4f88e8178e337d9f4d4b6740acbce1685e97a92e"
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "contract": "maya.public-company.evidence-archive/1",
+  "files": {
+    "checkpoint.json": {
+      "sha256": "a01eff3cb8c234c1e43b0a2a34592922c51a6ca77859dad8a0a6d7459d362f5e",
+      "bytes": 5021
+    },
+    "independent-review.json": {
+      "sha256": "87fe6dbf84e06f0445f822d5a25e80956e91450e8ecc096ea6461c9d1254de73",
+      "bytes": 2224
+    },
+    "maya-public-company-before-format-crm-adapter.interface.ts.txt": {
+      "sha256": "9193cde58750abf6322d263c86fe576d889777d56b5f0b0783f64d295cac4fcd",
+      "bytes": 27834
+    },
+    "maya-public-company-before-format-yclients-crm.adapter.ts.txt": {
+      "sha256": "dfe1c12a7ef131769e8c39a92bdd0141eca6818b293c607663ef7f90c9102b99",
+      "bytes": 166765
+    },
+    "maya-public-company-checks-20261009.py": {
+      "sha256": "1e956cea43fd19eee7ca3407ceed92c5039e167a569563bef92ed753f0c9b1b7",
+      "bytes": 3567
+    },
+    "maya-public-company-final-20261009-checks.json": {
+      "sha256": "ad3641c88e72174fbf9bb9d96a220c6c7bd29c1a0a8216aafe6029b4c4f01e0d",
+      "bytes": 8565
+    },
+    "maya-public-company-final-20261009-diff-check.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-public-company-final-20261009-format-only.json": {
+      "sha256": "f7c810a6052dd5cb9b6d689b2afdf01264ae11281c885bceb466723dd8199358",
+      "bytes": 659
+    },
+    "maya-public-company-final-20261009-lint-r2.json": {
+      "sha256": "08ebe7468d0127353c0735e8d78150055028342c2a2670297d1ee77c1ff42407",
+      "bytes": 2105
+    },
+    "maya-public-company-final-20261009-lint-r2.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-public-company-final-20261009-lint.log": {
+      "sha256": "4e66e3b269326428af6c49202f4703e60257c136eb5dad077ee4526a6a70b833",
+      "bytes": 918
+    },
+    "maya-public-company-final-20261009-production-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-public-company-final-20261009-scoped-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-public-company-final-20261009-types.json": {
+      "sha256": "6384da979a5dbc751151f87a8ab4183ba1e72953bb2cb52be4b467454b2254f9",
+      "bytes": 1382
+    },
+    "maya-public-company-final-20261009-unit.json": {
+      "sha256": "6fc474326553e73e87c46601191afe1c4fe168443b0407ecc96fcc203588f5ae",
+      "bytes": 414799
+    },
+    "maya-public-company-final-20261009-unit.log": {
+      "sha256": "2e5769b7f8ed1c9b2c7d3c411bf940eb65ca38bf745ba51e0be3c4996d9942a9",
+      "bytes": 1939
+    },
+    "maya-public-company-unit-20261009-r1.json": {
+      "sha256": "2d17f46543f9ceb7ea8f70516c2e130321b5f3b2c0133805fec08562fe4d8436",
+      "bytes": 154540
+    },
+    "maya-public-company-unit-20261009-r1.log": {
+      "sha256": "61bfc38ee7ac9786f1ba7f2c3614684d2d47b18ca7b7901ed14942180bcb276f",
+      "bytes": 491
+    }
+  }
+}

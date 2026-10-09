@@ -1,0 +1,7 @@
+
+Test Suites: 5 passed, 5 total
+Tests:       296 passed, 296 total
+Snapshots:   0 total
+Time:        1.257 s
+Ran all test suites within paths "src/ai-tools/ai-core.public-company.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/ai-tools/ai-tool-runtime.service.spec.ts", "src/ai-tools/public-consultation-presentation.spec.ts", "src/crm/crm.company-profile-source.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-public-company-unit-20261009-r1.json

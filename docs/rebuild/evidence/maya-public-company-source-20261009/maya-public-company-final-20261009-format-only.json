@@ -1,0 +1,17 @@
+{
+  "files": [
+    {
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "testedSha256": "dfe1c12a7ef131769e8c39a92bdd0141eca6818b293c607663ef7f90c9102b99",
+      "finalSha256": "7762201bde96587408700083000ec9d9e092b679930f0268ac9501ec95173d95",
+      "onlyPrettierFormatting": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm-adapter.interface.ts",
+      "testedSha256": "9193cde58750abf6322d263c86fe576d889777d56b5f0b0783f64d295cac4fcd",
+      "finalSha256": "569b165001c6c0fa5992b07db825029fd410dfdb78990693324163960290d7ce",
+      "onlyPrettierFormatting": true
+    }
+  ],
+  "otherTestedFilesUnchanged": true
+}

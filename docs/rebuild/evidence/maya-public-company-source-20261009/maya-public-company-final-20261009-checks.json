@@ -1,0 +1,134 @@
+{
+  "contract": "maya.public-company.component-checks/1",
+  "baseSha": "56a0777f56f99e01d11ea34be421f4f1911d6ed2",
+  "sourceFiles": {
+    "maya-saas-backend/src/ai-tools/ai-core.public-company.spec.ts": "3f373475640008368a635ddfd3a87743e3aa0dddd90a41413347e03ab8302c74",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "1c43eb4c8007847938979ac3c82788595bec8eaf7f18d386eb38f464526b1daf",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts": "edaa7481c4d67e5b99129729d4a122690b50803c9099456d65fc549ed3bdb29b",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts": "0155603f0233fbfd8d64325ebea5d66f00b2c3fca6dd4329473b53a382a57b1b",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts": "4a7089813dc6f1e8866b1fb79a45fadf49e93f1feeb6e5a3bfb2c6cb25e79719",
+    "maya-saas-backend/src/ai-tools/public-consultation-presentation.spec.ts": "aca1c08aa90a683d79e00c37a8ac9a2d080d2153073f11226c499795743d2880",
+    "maya-saas-backend/src/ai-tools/public-consultation-presentation.ts": "0e129d4a098785aa3747cfa7902ed5a210f620e7381a70339e922667e578a519",
+    "maya-saas-backend/src/ai-tools/staff-schedule-read-scope.ts": "41c9379a7107eba4986e69be159bd8161c68b804cf585105619e882791caf151",
+    "maya-saas-backend/src/crm/adapters/yclients-company-profile-source.spec.ts": "97661f5b3ec44c2e36d12608bad6fb4f8e4f2aaaaadfd23438ce8919a53b4a52",
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": "dfe1c12a7ef131769e8c39a92bdd0141eca6818b293c607663ef7f90c9102b99",
+    "maya-saas-backend/src/crm/crm-adapter.interface.ts": "9193cde58750abf6322d263c86fe576d889777d56b5f0b0783f64d295cac4fcd",
+    "maya-saas-backend/src/crm/crm.company-profile-source.spec.ts": "f4f2415b6334265632c5f570f884682cfdcfeda21f2bb72662fc1c762bd2a565",
+    "maya-saas-backend/src/crm/crm.service.ts": "2f424ed65beb2aba7ec16873068aa690913d1af770ed257ce192c87264fc5bef"
+  },
+  "sourceUnchanged": true,
+  "checks": [
+    {
+      "check": "unit",
+      "exitCode": 0,
+      "seconds": 2.979,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "src/ai-tools/ai-core.public-company.spec.ts",
+        "src/ai-tools/ai-tool-handler.service.spec.ts",
+        "src/ai-tools/ai-tool-runtime.service.spec.ts",
+        "src/ai-tools/public-consultation-presentation.spec.ts",
+        "src/crm/crm.company-profile-source.spec.ts",
+        "src/crm/adapters/yclients-company-profile-source.spec.ts",
+        "src/ai-tools/ai-core.service.spec.ts",
+        "src/ai-tools/ai-core.employee-journal.spec.ts",
+        "src/ai-tools/ai-core.employee-schedule.spec.ts",
+        "src/crm/crm.service.spec.ts",
+        "src/crm/adapters/yclients-crm.adapter.spec.ts",
+        "--json",
+        "--outputFile=/private/tmp/maya-public-company-final-20261009-unit.json"
+      ],
+      "log": "maya-public-company-final-20261009-unit.log"
+    },
+    {
+      "check": "scoped-types",
+      "exitCode": 0,
+      "seconds": 4.971,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "/private/tmp/maya-public-company-final-20261009-types.json",
+        "--incremental",
+        "false"
+      ],
+      "log": "maya-public-company-final-20261009-scoped-types.log"
+    },
+    {
+      "check": "production-types",
+      "exitCode": 0,
+      "seconds": 7.053,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "log": "maya-public-company-final-20261009-production-types.log"
+    },
+    {
+      "check": "lint",
+      "exitCode": 1,
+      "seconds": 7.657,
+      "command": [
+        "/usr/local/bin/node",
+        "--max-old-space-size=1536",
+        "node_modules/eslint/bin/eslint.js",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-core.public-company.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-core.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/public-consultation-presentation.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/public-consultation-presentation.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/staff-schedule-read-scope.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/crm/adapters/yclients-company-profile-source.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/crm/crm-adapter.interface.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/crm/crm.company-profile-source.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/crm/crm.service.ts"
+      ],
+      "log": "maya-public-company-final-20261009-lint.log"
+    },
+    {
+      "check": "diff-check",
+      "exitCode": 0,
+      "seconds": 0.02,
+      "command": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-core.public-company.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-core.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/public-consultation-presentation.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/public-consultation-presentation.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/ai-tools/staff-schedule-read-scope.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/crm/adapters/yclients-company-profile-source.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/crm/crm-adapter.interface.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/crm/crm.company-profile-source.spec.ts",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/crm/crm.service.ts"
+      ],
+      "log": "maya-public-company-final-20261009-diff-check.log"
+    }
+  ],
+  "limits": [
+    "Component/unit synthetic sources only",
+    "No public-company HTTP/PG, restart, live provider/model or A17 activation proof",
+    "Previous journal/full48 source binding stays 4f88e8178e337d9f4d4b6740acbce1685e97a92e"
+  ]
+}

@@ -1,0 +1,12 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts
+  483:25  error  Replace `await·this.readCompanyOptions(preserveMissingTitle)).find(⏎······(company)·=>·company.id·===·String(companyId),⏎····` with `⏎······await·this.readCompanyOptions(preserveMissingTitle)⏎····).find((company)·=>·company.id·===·String(companyId)`  prettier/prettier
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-offline48-semantics/maya-saas-backend/src/crm/crm-adapter.interface.ts
+  514:22  error  Insert `⏎····`                prettier/prettier
+  515:1   error  Insert `··`                   prettier/prettier
+  516:3   error  Replace `}>` with `··}>,⏎··`  prettier/prettier
+
+✖ 4 problems (4 errors, 0 warnings)
+  4 errors and 0 warnings potentially fixable with the `--fix` option.
+

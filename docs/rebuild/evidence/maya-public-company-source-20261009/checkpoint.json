@@ -1,0 +1,111 @@
+{
+  "contract": "maya.public-company.source-checkpoint/1",
+  "codeSha": "f8327626979e09696c8d93e8573d72667eb2ae85",
+  "parentSha": "56a0777f56f99e01d11ea34be421f4f1911d6ed2",
+  "qualification": "COMPONENT_ONLY",
+  "sourceFiles": {
+    "maya-saas-backend/src/ai-tools/ai-core.public-company.spec.ts": {
+      "sha256": "3f373475640008368a635ddfd3a87743e3aa0dddd90a41413347e03ab8302c74",
+      "bytes": 12818,
+      "testedSha256": "3f373475640008368a635ddfd3a87743e3aa0dddd90a41413347e03ab8302c74"
+    },
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": {
+      "sha256": "1c43eb4c8007847938979ac3c82788595bec8eaf7f18d386eb38f464526b1daf",
+      "bytes": 370380,
+      "testedSha256": "1c43eb4c8007847938979ac3c82788595bec8eaf7f18d386eb38f464526b1daf"
+    },
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.spec.ts": {
+      "sha256": "edaa7481c4d67e5b99129729d4a122690b50803c9099456d65fc549ed3bdb29b",
+      "bytes": 138564,
+      "testedSha256": "edaa7481c4d67e5b99129729d4a122690b50803c9099456d65fc549ed3bdb29b"
+    },
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts": {
+      "sha256": "0155603f0233fbfd8d64325ebea5d66f00b2c3fca6dd4329473b53a382a57b1b",
+      "bytes": 157774,
+      "testedSha256": "0155603f0233fbfd8d64325ebea5d66f00b2c3fca6dd4329473b53a382a57b1b"
+    },
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts": {
+      "sha256": "4a7089813dc6f1e8866b1fb79a45fadf49e93f1feeb6e5a3bfb2c6cb25e79719",
+      "bytes": 62338,
+      "testedSha256": "4a7089813dc6f1e8866b1fb79a45fadf49e93f1feeb6e5a3bfb2c6cb25e79719"
+    },
+    "maya-saas-backend/src/ai-tools/public-consultation-presentation.spec.ts": {
+      "sha256": "aca1c08aa90a683d79e00c37a8ac9a2d080d2153073f11226c499795743d2880",
+      "bytes": 8014,
+      "testedSha256": "aca1c08aa90a683d79e00c37a8ac9a2d080d2153073f11226c499795743d2880"
+    },
+    "maya-saas-backend/src/ai-tools/public-consultation-presentation.ts": {
+      "sha256": "0e129d4a098785aa3747cfa7902ed5a210f620e7381a70339e922667e578a519",
+      "bytes": 7815,
+      "testedSha256": "0e129d4a098785aa3747cfa7902ed5a210f620e7381a70339e922667e578a519"
+    },
+    "maya-saas-backend/src/ai-tools/staff-schedule-read-scope.ts": {
+      "sha256": "41c9379a7107eba4986e69be159bd8161c68b804cf585105619e882791caf151",
+      "bytes": 3521,
+      "testedSha256": "41c9379a7107eba4986e69be159bd8161c68b804cf585105619e882791caf151"
+    },
+    "maya-saas-backend/src/crm/adapters/yclients-company-profile-source.spec.ts": {
+      "sha256": "97661f5b3ec44c2e36d12608bad6fb4f8e4f2aaaaadfd23438ce8919a53b4a52",
+      "bytes": 5636,
+      "testedSha256": "97661f5b3ec44c2e36d12608bad6fb4f8e4f2aaaaadfd23438ce8919a53b4a52"
+    },
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": {
+      "sha256": "7762201bde96587408700083000ec9d9e092b679930f0268ac9501ec95173d95",
+      "bytes": 166764,
+      "testedSha256": "dfe1c12a7ef131769e8c39a92bdd0141eca6818b293c607663ef7f90c9102b99"
+    },
+    "maya-saas-backend/src/crm/crm-adapter.interface.ts": {
+      "sha256": "569b165001c6c0fa5992b07db825029fd410dfdb78990693324163960290d7ce",
+      "bytes": 27847,
+      "testedSha256": "9193cde58750abf6322d263c86fe576d889777d56b5f0b0783f64d295cac4fcd"
+    },
+    "maya-saas-backend/src/crm/crm.company-profile-source.spec.ts": {
+      "sha256": "f4f2415b6334265632c5f570f884682cfdcfeda21f2bb72662fc1c762bd2a565",
+      "bytes": 14965,
+      "testedSha256": "f4f2415b6334265632c5f570f884682cfdcfeda21f2bb72662fc1c762bd2a565"
+    },
+    "maya-saas-backend/src/crm/crm.service.ts": {
+      "sha256": "2f424ed65beb2aba7ec16873068aa690913d1af770ed257ce192c87264fc5bef",
+      "bytes": 233821,
+      "testedSha256": "2f424ed65beb2aba7ec16873068aa690913d1af770ed257ce192c87264fc5bef"
+    }
+  },
+  "unit": {
+    "passedTests": 838,
+    "totalTests": 838,
+    "passedSuites": 11,
+    "totalSuites": 11
+  },
+  "checks": {
+    "scopedTypes": "PASS",
+    "productionTypes": "PASS",
+    "initialLint": "FAIL_4_PRETTIER_ERRORS",
+    "finalLint": "PASS",
+    "diffCheck": "PASS"
+  },
+  "formatOnlyCorrection": "maya-public-company-final-20261009-format-only.json",
+  "priorEvidenceArchiveVerification": {
+    "sourceSha": "56a0777f56f99e01d11ea34be421f4f1911d6ed2",
+    "journalManifestFiles": 79,
+    "full48ManifestFiles": 109,
+    "sha256AndByteLengthVerified": true
+  },
+  "priorHttpProof": {
+    "sourceSha": "4f88e8178e337d9f4d4b6740acbce1685e97a92e",
+    "notReusedToQualifyThisDelta": true,
+    "turns": 81,
+    "pass": 54,
+    "fail": 0,
+    "unsupported": 14,
+    "insufficient": 13,
+    "remaining": 27
+  },
+  "limits": [
+    "No new public-company HTTP/PG/restart proof",
+    "No actual A17 activation, live provider or real-model acceptance",
+    "Frozen48 corpus/fixtures and remaining27 unchanged",
+    "Existing one-company branch binding only; no multi-company schema decision",
+    "No website, production, phone, background authority, CRM mutation or outbound notification change",
+    "Source/component proof is not MAYA/C10 completion"
+  ]
+}
