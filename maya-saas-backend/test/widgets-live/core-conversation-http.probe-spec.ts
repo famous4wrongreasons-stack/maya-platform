@@ -44,6 +44,7 @@ import {
   captureCoreFullOfflineAudit,
   sanitizeCoreFullOfflineAuditValue,
   projectCoreFullOfflinePublicCompany,
+  createCoreFullOfflinePublicCompanyRecorder,
 } from './support/core-full-offline-audit';
 
 const nativeRequire = createRequire(__filename);
@@ -275,6 +276,7 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
   const caseSources = new Map<string, CandidateSource>();
   const actualRepliesByCase = new Map<string, string[]>();
   const financeDays = new Map<string, string>();
+  const observedCompanyProfiles = createCoreFullOfflinePublicCompanyRecorder();
   const forbidden: string[] = [];
   const financeReads: Array<{ route: string; company: string }> = [];
   const modelObservations: Record<string, unknown>[] = [];
@@ -573,14 +575,24 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
             : {}),
           getCompanyProfile: () => {
             read('company');
-            return Promise.resolve({
+            const returned = {
               id: source.company,
               title: 'Синтетический салон',
               address: 'Синтетический адрес',
               schedule: '10:00–20:00',
               timezone: 'Europe/Moscow',
               logo_url: null,
-            });
+            };
+            if (profile.id === CORE_OFFLINE_PROFILE)
+              observedCompanyProfiles.record(
+                {
+                  tenantId: source.tenant.id,
+                  companyId: source.company,
+                  provider: 'yclients',
+                },
+                returned,
+              );
+            return Promise.resolve(returned);
           },
           getFinancialSummary: (
             params: Parameters<
@@ -1523,6 +1535,11 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
       ? null
       : coreFullOfflineExternalFacts(source);
     const contacts = auditRecord(branding?.contactDetailsJson);
+    const observedCompany = observedCompanyProfiles.snapshot({
+      tenantId: source.tenant.id,
+      companyId: source.company,
+      provider: 'yclients',
+    });
     const content = policy?.encryptedContent
       ? auditRecord(JSON.parse(db.encryption.decrypt(policy.encryptedContent)))
       : {};
@@ -1560,10 +1577,15 @@ describe('Core conversation [actual HTTP, bounded broker, development diagnostic
                 durationMinutes: duration_minutes,
               }))
           : services,
-        company: {
+        company: observedCompany?.company ?? {
           name: branding?.appName ?? null,
           address: contacts.address ?? null,
           businessHours: contacts.businessHours ?? null,
+        },
+        companyProvenance: observedCompany?.provenance ?? {
+          qualification: 'CURRENT_TENANT_BRANDING_SNAPSHOT_NOT_CRM_READ',
+          source: 'tenant_branding',
+          reader: 'BrandingSettings.contactDetailsJson',
         },
         ownAppointments: appointments
           .filter(

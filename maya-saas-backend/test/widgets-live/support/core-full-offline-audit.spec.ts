@@ -4,6 +4,7 @@ import { runInNewContext } from 'node:vm';
 import {
   captureCoreFullOfflineAudit,
   projectCoreFullOfflinePublicCompany,
+  createCoreFullOfflinePublicCompanyRecorder,
   sanitizeCoreFullOfflineAuditValue,
 } from './core-full-offline-audit';
 
@@ -20,6 +21,115 @@ const scope = {
 };
 const hash = (value: string) =>
   'sha256:' + createHash('sha256').update(value).digest('hex');
+
+describe('actual fixture public company observation', () => {
+  const binding = {
+    tenantId: 'tenant-one',
+    companyId: '88101',
+    provider: 'yclients' as const,
+  };
+  const profile = () => ({
+    id: binding.companyId,
+    title: 'Источник компании',
+    address: 'Адрес из фактического профиля',
+    schedule: '09:30–18:45',
+    private: 'SECRET_SENTINEL',
+  });
+
+  it('has no CRM snapshot before an actual return and isolates tenant/company/provider bindings', () => {
+    const recorder = createCoreFullOfflinePublicCompanyRecorder();
+    expect(recorder.snapshot(binding)).toBeNull();
+    recorder.record(binding, profile());
+    expect(
+      recorder.snapshot({ ...binding, tenantId: 'tenant-two' }),
+    ).toBeNull();
+    expect(recorder.snapshot({ ...binding, companyId: '88102' })).toBeNull();
+    const foreign = {
+      ...binding,
+      provider: 'internal',
+    } as unknown as Parameters<typeof recorder.snapshot>[0];
+    expect(() => recorder.snapshot(foreign)).toThrow(
+      'core_full_offline_public_company_binding_refused',
+    );
+    expect(() =>
+      recorder.record(binding, { ...profile(), id: '88102' }),
+    ).toThrow('core_full_offline_public_company_source_refused');
+    expect(recorder.snapshot(binding)).toEqual({
+      company: {
+        name: 'Источник компании',
+        address: 'Адрес из фактического профиля',
+        businessHours: '09:30–18:45',
+      },
+      provenance: {
+        qualification: 'LAST_OBSERVED_FIXTURE_PROFILE_NOT_AUTHORITY',
+        source: 'external_crm',
+        reader: 'CRMAdapter.getCompanyProfile',
+        provider: 'yclients',
+        tenantHash: hash(binding.tenantId),
+        companyHash: hash(binding.companyId),
+        observationSequence: 1,
+        contentHash: hash(
+          JSON.stringify({
+            name: 'Источник компании',
+            address: 'Адрес из фактического профиля',
+            businessHours: '09:30–18:45',
+          }),
+        ),
+      },
+    });
+    expect(JSON.stringify(recorder.snapshot(binding))).not.toMatch(
+      /SECRET_SENTINEL|tenant-one|88101/,
+    );
+  });
+
+  it('records null schedule as unknown, never substitutes a default closing time', () => {
+    const recorder = createCoreFullOfflinePublicCompanyRecorder();
+    recorder.record(binding, { ...profile(), schedule: null });
+    const observed = recorder.snapshot(binding);
+    expect(observed?.company.businessHours).toBeNull();
+    expect(projectCoreFullOfflinePublicCompany(observed?.company, [])).toEqual({
+      name: 'Источник компании',
+      address: 'Адрес из фактического профиля',
+      businessHours: null,
+    });
+    expect(() =>
+      recorder.record(binding, { ...profile(), schedule: '' }),
+    ).toThrow('core_full_offline_public_company_source_refused');
+  });
+
+  it('changes only after another actual return; caller mutation and changed-current binding cannot reuse it', () => {
+    const recorder = createCoreFullOfflinePublicCompanyRecorder();
+    const returned = profile();
+    recorder.record(binding, returned);
+    const first = recorder.snapshot(binding)!;
+    returned.address = 'Новый адрес источника';
+    returned.schedule = '11:00–16:00';
+    expect(recorder.snapshot(binding)?.company.address).toBe(
+      first.company.address,
+    );
+    const snapshot = recorder.snapshot(binding)!;
+    snapshot.company.address = 'Подмена из audit consumer';
+    expect(recorder.snapshot(binding)?.company.address).toBe(
+      first.company.address,
+    );
+    expect(
+      recorder.snapshot({ ...binding, companyId: 'new-current-company' }),
+    ).toBeNull();
+    recorder.record(binding, returned);
+    const second = recorder.snapshot(binding)!;
+    expect(second.company).toEqual({
+      name: returned.title,
+      address: returned.address,
+      businessHours: returned.schedule,
+    });
+    expect(second.provenance.observationSequence).toBe(2);
+    expect(second.provenance.contentHash).not.toBe(
+      first.provenance.contentHash,
+    );
+    expect(first.company.address).toBe('Адрес из фактического профиля');
+  });
+});
+
 function args(
   decisions: unknown[] = [],
   toolResults: unknown[] = [],

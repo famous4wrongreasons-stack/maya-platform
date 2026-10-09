@@ -309,6 +309,105 @@ export function projectCoreFullOfflinePublicCompany(
   };
 }
 
+type PublicCompanyBinding = {
+  tenantId: string;
+  companyId: string;
+  provider: 'yclients';
+};
+type ObservedPublicCompany = {
+  company: {
+    name: string | null;
+    address: string | null;
+    businessHours: string | null;
+  };
+  provenance: {
+    qualification: 'LAST_OBSERVED_FIXTURE_PROFILE_NOT_AUTHORITY';
+    source: 'external_crm';
+    reader: 'CRMAdapter.getCompanyProfile';
+    provider: 'yclients';
+    tenantHash: string;
+    companyHash: string;
+    observationSequence: number;
+    contentHash: string;
+  };
+};
+
+/** Observes only actual fixture adapter returns, never calls CRM or supplies
+ * an expected reply. A snapshot is last-observed evidence, not proof that this
+ * turn read the source; the separate actual tool-evidence gate remains required. */
+export function createCoreFullOfflinePublicCompanyRecorder() {
+  const observations = new Map<string, ObservedPublicCompany>();
+  let sequence = 0;
+  const key = (binding: PublicCompanyBinding) => {
+    if (
+      !plain(binding) ||
+      Reflect.ownKeys(binding).length !== 3 ||
+      ownValue(binding, 'provider') !== 'yclients' ||
+      !['tenantId', 'companyId'].every((field) => {
+        const value = ownValue(binding, field);
+        return (
+          typeof value === 'string' &&
+          value.length > 0 &&
+          value.length <= 128 &&
+          value.trim() === value
+        );
+      })
+    )
+      throw new Error('core_full_offline_public_company_binding_refused');
+    return JSON.stringify([
+      binding.tenantId,
+      binding.companyId,
+      binding.provider,
+    ]);
+  };
+  return {
+    record(binding: PublicCompanyBinding, returned: unknown): void {
+      const identity = key(binding);
+      if (!plain(returned) || ownValue(returned, 'id') !== binding.companyId)
+        throw new Error('core_full_offline_public_company_source_refused');
+      const fields = ['title', 'address', 'schedule'].map((field) =>
+        ownValue(returned, field),
+      );
+      if (
+        !fields.every(
+          (value) =>
+            value === null ||
+            (typeof value === 'string' &&
+              value.trim().length > 0 &&
+              value.length <= 1000),
+        )
+      )
+        throw new Error('core_full_offline_public_company_source_refused');
+      if (!observations.has(identity) && observations.size >= 48)
+        throw new Error('core_full_offline_public_company_bound_refused');
+      const [name, address, businessHours] = fields as Array<string | null>;
+      const company = { name, address, businessHours };
+      observations.set(identity, {
+        company,
+        provenance: {
+          qualification: 'LAST_OBSERVED_FIXTURE_PROFILE_NOT_AUTHORITY',
+          source: 'external_crm',
+          reader: 'CRMAdapter.getCompanyProfile',
+          provider: binding.provider,
+          tenantHash: reference(binding.tenantId),
+          companyHash: reference(binding.companyId),
+          observationSequence: ++sequence,
+          contentHash: reference(JSON.stringify(company)),
+        },
+      });
+    },
+    snapshot(binding: PublicCompanyBinding): ObservedPublicCompany | null {
+      const observed = observations.get(key(binding));
+      return observed
+        ? {
+            company: { ...observed.company },
+            provenance: { ...observed.provenance },
+          }
+        : null;
+    },
+  };
+}
+
 export function captureCoreFullOfflineAudit(
   args: readonly unknown[],
   scope: CoreFullOfflineAuditScope,
