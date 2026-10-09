@@ -1,0 +1,243 @@
+{
+  "contract": "maya.offline48.followup-checkpoint-evidence/1",
+  "runtimeCommit": "6f76d4750644aba6d3ec3f81a6019fdf3aa47b9d",
+  "qualification": "SYNTHETIC_SCRIPTED_ACTUAL_HTTP_NOT_ACCEPTANCE",
+  "previousRawUnchanged": true,
+  "entries": [
+    {
+      "path": "ACTUAL-81-TURN-AUDIT.md",
+      "sha256": "4ecc6ba8224627b52de63b8518f116ef0a26ca9db8a46eec86af43a64c194a8f",
+      "bytes": 56980
+    },
+    {
+      "path": "checks/maya-occupancy-no-dispatch-20261009-r1.json",
+      "sha256": "6a4a68ec19e1ad0a8f4a7f9846109d71d352d9dcb1186854dfbc6e5806f5e578",
+      "bytes": 27765
+    },
+    {
+      "path": "checks/maya-occupancy-no-dispatch-20261009-r1.log",
+      "sha256": "10a9ea4341384881fcb4a4540b70cfe9e9ba1ece8fb61665602c8cec2e810af9",
+      "bytes": 286
+    },
+    {
+      "path": "checks/maya-occupancy-no-dispatch-lint-20261009.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-occupancy-no-dispatch-types-20261009.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-offline48-followup-final-types-20261009.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-offline48-followup-pure-20261009.log",
+      "sha256": "9d56ecf9eba0fbac77f9830f4b30c0f945366a6d5190e5a429c8eeb32a468f03",
+      "bytes": 6403
+    },
+    {
+      "path": "checks/maya-offline48-public-company-types-20261009.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-offline48-public-company-unit-20261009.log",
+      "sha256": "856dca8c630b40ee4b443ad7c1b5351831773a5d61d681d88019426205bca43b",
+      "bytes": 142
+    },
+    {
+      "path": "checks/maya-public-company-lint-20261009-r1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-public-info-assessment-20261009.log",
+      "sha256": "cff640d3bb7c21c5748a07f96c843329c16190d5f67743eb759c45245ae9f233",
+      "bytes": 3883
+    },
+    {
+      "path": "checks/maya-reschedule-clarification-20261009.json",
+      "sha256": "a9927b2b9e65ededd64a9e17ac938aed3e8d1208ace8ddb0000c815a806447cb",
+      "bytes": 8070
+    },
+    {
+      "path": "checks/maya-reschedule-clarification-20261009.log",
+      "sha256": "b2f3b9b4a1f1e2ef60d98a0227521ce4502c550d7e75c422a6557bef9bcaa2b7",
+      "bytes": 232
+    },
+    {
+      "path": "checks/maya-reschedule-clarification-lint-20261009.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "checks/maya-reschedule-clarification-r2-20261009.json",
+      "sha256": "5c20c9a1b8fd0c0c5ab4b2656ea936704ccd5c5bb631e306ef2867941fbb5770",
+      "bytes": 8070
+    },
+    {
+      "path": "checks/maya-reschedule-clarification-r2-20261009.log",
+      "sha256": "85f1abc64045b29fd855c3340504f990423360e8d55d9ce09aafcae48a171a97",
+      "bytes": 250
+    },
+    {
+      "path": "checks/maya-reschedule-clarification-types-20261009.log",
+      "sha256": "88f5ac19a0b019ad62235bf0c373324f36f8b252e04e540d447f2f6dc0c9f04c",
+      "bytes": 557
+    },
+    {
+      "path": "checks/maya-reschedule-clarification-types-r2-20261009.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "full-http-r1/actual-http-turns.jsonl",
+      "sha256": "664cf970e11abe66009077421cd7aba603470e2b26f743140ba46f708f27c3d9",
+      "bytes": 846406
+    },
+    {
+      "path": "full-http-r1/actual-model-responses.jsonl",
+      "sha256": "dd34722cede51e71d492b820178b35d6f189a47b23eacde06b921fe18a8748a7",
+      "bytes": 116871
+    },
+    {
+      "path": "full-http-r1/broker-ledger.jsonl",
+      "sha256": "0b6de59368d0882691ca634e09d4a3144f7db323f1a7db67309888d674690571",
+      "bytes": 27021
+    },
+    {
+      "path": "full-http-r1/broker-report.json",
+      "sha256": "b6db1219d768a20f3e8702f4210d7c05da76779d488bf632fdd8f536f521bb6d",
+      "bytes": 108021
+    },
+    {
+      "path": "full-http-r1/broker.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "full-http-r1/candidate-manifest.json",
+      "sha256": "e83d412d10f9af17905403b4c685322a382fb62c1327ca449201ce1aebc99837",
+      "bytes": 391551
+    },
+    {
+      "path": "full-http-r1/conversation-jest.json",
+      "sha256": "eb5408c511aa7370352c9921facf33c85d593e232c2a5e8666e1c60b00a2847b",
+      "bytes": 1418
+    },
+    {
+      "path": "full-http-r1/conversation.log",
+      "sha256": "40fbb17aa585385154b77589592fe7cb5030988eeb5137f24ea08705afcdd4c4",
+      "bytes": 616
+    },
+    {
+      "path": "full-http-r1/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "full-http-r1/http-report.json",
+      "sha256": "a90d6bbdb32a3aaa97b3b9446f02aa59d37facbf2decfadac9585ae26af4bf17",
+      "bytes": 1880897
+    },
+    {
+      "path": "full-http-r1/http-response-journal.jsonl",
+      "sha256": "af14fcee0febd82ff0ab55151dee0e2ac5d3865730ee7428817152b8db0d816f",
+      "bytes": 58029
+    },
+    {
+      "path": "full-http-r1/initdb.log",
+      "sha256": "925084f4eb894e5ce4d2eaf9f0896356c13cae3b505d3536e340c59acf806a6a",
+      "bytes": 972
+    },
+    {
+      "path": "full-http-r1/migrations.log",
+      "sha256": "3266f642350024ee6b7ff31fc2de3a0760c64a9e215c72587e6364f8b2a61737",
+      "bytes": 14720
+    },
+    {
+      "path": "full-http-r1/model-responses.jsonl",
+      "sha256": "6bc8bb80ea9c504bc12f1cc6244d141498fd7499f45c56a600c35b3bb7bb5623",
+      "bytes": 172709
+    },
+    {
+      "path": "full-http-r1/offline-completion-audit.jsonl",
+      "sha256": "69a35ba90e64049c0adef7e0bb0b67334b5c30744c3a9da6bd9d1447adf4ea73",
+      "bytes": 339928
+    },
+    {
+      "path": "full-http-r1/offline-expected-refusals.jsonl",
+      "sha256": "7f4d27f489ee3ff630281cbe715b621978de1609795e476c6362fea52c2cefc9",
+      "bytes": 163
+    },
+    {
+      "path": "full-http-r1/offline-source-snapshots.json",
+      "sha256": "84c841f431fa3bacc27026fe7b50cb2899233256ff5e90a5da66260e5a2ba872",
+      "bytes": 148186
+    },
+    {
+      "path": "full-http-r1/offline-source-transitions.jsonl",
+      "sha256": "3dada5242ccfd857337226be005b64e68f7e7b9839767b892bbee159bc5957e1",
+      "bytes": 187
+    },
+    {
+      "path": "full-http-r1/offline-turn-audit.jsonl",
+      "sha256": "19115fe3f0fa07366ede71bff91c1c90b9ce5cd6f92d36eba9c3533df0908126",
+      "bytes": 846537
+    },
+    {
+      "path": "full-http-r1/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "full-http-r1/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "full-http-r1/postgres.log",
+      "sha256": "d7a7f1c5379ca27822e6f0e911989178c6c198723a37ef8b46d9bf9931315b38",
+      "bytes": 1246
+    },
+    {
+      "path": "full-http-r1/replay-binding.json",
+      "sha256": "d4374b7d98dd587e8a183401a2896f589aad0d6ddd076f8d58a6fd6e897cdfd4",
+      "bytes": 20207
+    },
+    {
+      "path": "full-http-r1/replay-records.jsonl",
+      "sha256": "eef450268da355d22ffa694c08612f454a3f44fa42016c2a209d64b2af8beb27",
+      "bytes": 57751
+    },
+    {
+      "path": "full-http-r1/runner-budget-ledger.jsonl",
+      "sha256": "152044901340881ecb67a1196de008727682cca16b72aae43cf4f2ff17e7d32e",
+      "bytes": 27199
+    },
+    {
+      "path": "full-http-r1/runner-report.json",
+      "sha256": "a81d3ead7516e1a71bd66030d89e5c44e4780a31259c71c426a5c101b4303cae",
+      "bytes": 3764
+    },
+    {
+      "path": "full-http-r1/semantic-score.json",
+      "sha256": "67b05a28b8c0b79aeb35f724de338e222fe62c220a2cc7c4cf8c6a32abb31aa1",
+      "bytes": 1276205
+    },
+    {
+      "path": "full-http-r1/serialized-attempts.jsonl",
+      "sha256": "76ffe9ab9ef201912393dcc91af67e95e507695ddb9c9da682301a751358b8d9",
+      "bytes": 22411
+    },
+    {
+      "path": "previous-delta.json",
+      "sha256": "ccf5e944a873a69d82db82b1d58a958896de5c4a4914cbac65433318935e2d58",
+      "bytes": 1474
+    }
+  ]
+}

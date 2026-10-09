@@ -1,0 +1,6 @@
+Test Suites: 1 passed, 1 total
+Tests:       48 passed, 48 total
+Snapshots:   0 total
+Time:        0.645 s
+Ran all test suites within paths "src/ai-tools/ai-core.occupancy.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-occupancy-no-dispatch-20261009-r1.json

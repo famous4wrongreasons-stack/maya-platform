@@ -1,0 +1,6 @@
+src/ai-tools/mutation-response.spec.ts(78,5): error TS18047: 'current' is possibly 'null'.
+src/ai-tools/mutation-response.spec.ts(153,5): error TS18047: 'denied' is possibly 'null'.
+src/ai-tools/mutation-response.spec.ts(158,5): error TS18047: 'unavailable' is possibly 'null'.
+src/ai-tools/mutation-response.spec.ts(170,5): error TS18047: 'multiple' is possibly 'null'.
+src/ai-tools/mutation-response.spec.ts(170,30): error TS18047: 'multiple' is possibly 'null'.
+src/ai-tools/mutation-response.spec.ts(178,5): error TS18047: 'current' is possibly 'null'.

@@ -1,0 +1,62 @@
+{
+  "qualification": "ACTUAL_NEW_RUN_COMPARISON_NOT_RESCORING",
+  "beforeRuntime": "a454e7782d80d64cbe1499e6cee3e1e9465ce3db",
+  "afterRuntime": "6f76d4750644aba6d3ec3f81a6019fdf3aa47b9d",
+  "before": {
+    "pass": 45,
+    "semantic_fail": 17,
+    "unsupported": 10,
+    "insufficient_evidence": 9
+  },
+  "after": {
+    "pass": 49,
+    "semantic_fail": 13,
+    "unsupported": 10,
+    "insufficient_evidence": 9
+  },
+  "all45PriorPassPreserved": true,
+  "changes": [
+    {
+      "caseId": "current-booking-negative",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "pass",
+      "failedCheckIds": [],
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "pass",
+      "failedCheckIds": [],
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "current-occupancy-negative",
+      "turn": 1,
+      "before": "semantic_fail",
+      "after": "pass",
+      "failedCheckIds": [],
+      "missingEvidenceIds": []
+    },
+    {
+      "caseId": "mt-cancel_pending_action-15",
+      "turn": 2,
+      "before": "semantic_fail",
+      "after": "pass",
+      "failedCheckIds": [],
+      "missingEvidenceIds": []
+    }
+  ],
+  "improvementClassification": {
+    "product": [
+      "current-booking-negative:1",
+      "current-occupancy-negative:1",
+      "mt-cancel_pending_action-15:2"
+    ],
+    "fixture_and_evaluator": [
+      "current-admin-ordinary:1"
+    ]
+  }
+}
