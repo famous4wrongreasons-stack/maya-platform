@@ -1,0 +1,31 @@
+{
+  "contract": "maya.conversation-coverage-evidence/1",
+  "sourceCommit": "b74d62851de075a48f2c10bf5da48524c8ca0e47",
+  "qualification": "READ_ONLY_CORPUS_PROPOSAL_NO_EXECUTION_AUTHORITY",
+  "mainDocument": {
+    "path": "docs/rebuild/MAYA-CONVERSATION-COVERAGE-PROPOSAL-20261009.md",
+    "sha256": "ee5aed60ee99c21664c2cf83887a31abbe0bc4ae10fb98e0877a3f512c20b716"
+  },
+  "files": {
+    "corpus-inventory.json": {
+      "sha256": "1236a85b9b493c6d59552aa2709166548c646dfaafd75b4257931ac8bef5095b",
+      "bytes": 10868
+    },
+    "frozen-proposal.json": {
+      "sha256": "7e3e94694b98c9ad56f7aa7f7ff63a835058621d3ca159b4458421da95399ba8",
+      "bytes": 41107
+    },
+    "independent-review.md": {
+      "sha256": "fd5e34ab65812063b86e77c42373b61df26aad1b1993b49a40fe7e85426a84e0",
+      "bytes": 6106
+    },
+    "verification.json": {
+      "sha256": "0cb00afd3a743eed2bbcfb39cf8e18a44524e5950d541ff6f2ead9509542edca",
+      "bytes": 1337
+    }
+  },
+  "frozen9ScopeChanged": false,
+  "runtimeChanged": false,
+  "paidOrPermitOrKeyPrompt": false,
+  "networkOrServicesRun": false
+}

@@ -1,0 +1,470 @@
+{
+  "sourceHashes": {
+    "maya-saas-backend/datasets/conversation-intelligence/utterances.jsonl": "0b2e206773386a96de0c6829c4db8d12f40f6f0c7d5fdcdb2f1b74426a3154df",
+    "maya-saas-backend/datasets/conversation-intelligence/multi-turn.jsonl": "afe3c2143cd4bacd62e52a4acff54205bcf341b6c8d7304a06db9f9ac8b331cc",
+    "maya-saas-backend/datasets/conversation-intelligence/adversarial.jsonl": "e1a666a89d9f22c319cb069c950e10e96b70616b9c3c548897055df44de2101a",
+    "maya-saas-backend/datasets/conversation-intelligence/contrastive.jsonl": "e5d43393313345758f7b45d86d22aefb54572dfd8c45de11782aa7bce6010295",
+    "maya-saas-backend/datasets/conversation-intelligence/core-union-20261009.json": "2832b5837a1b01a4d0fe6e58f8c8811f318a7402ab2e7052ebb8a8a6f7b9c4ca",
+    "maya-saas-backend/datasets/conversation-intelligence/current-candidate-development-20261007.json": "6913f69c29a33cf42c1a9c03ea5dfde6bd7dd2f7ee1e1142977f55fbfc6ea996"
+  },
+  "inventory": {
+    "utterances": {
+      "rows": 11352,
+      "familyIds": 946,
+      "splitCounts": {
+        "train": 9108,
+        "dev": 1116,
+        "test": 1128
+      },
+      "devRows": 1116,
+      "devFamilyIds": 93,
+      "devRoles": {
+        "client": 129,
+        "owner": 453,
+        "admin": 417,
+        "employee": 117
+      },
+      "familySplitOverlap": false,
+      "devStyles": {
+        "formal": 93,
+        "neutral": 93,
+        "conversational": 93,
+        "slang": 93,
+        "short": 93,
+        "verbose": 93,
+        "typo": 93,
+        "contextual": 93,
+        "polite": 93,
+        "command": 93,
+        "question": 93,
+        "indirect": 93
+      },
+      "devDomains": {
+        "analytics": {
+          "owner": 24,
+          "admin": 24,
+          "client": 0,
+          "employee": 0
+        },
+        "bonuses": {
+          "owner": 24,
+          "admin": 0,
+          "client": 0,
+          "employee": 0
+        },
+        "booking": {
+          "owner": 18,
+          "admin": 18,
+          "client": 66,
+          "employee": 18
+        },
+        "branches": {
+          "owner": 6,
+          "admin": 6,
+          "client": 0,
+          "employee": 0
+        },
+        "certificates": {
+          "owner": 3,
+          "admin": 3,
+          "client": 3,
+          "employee": 3
+        },
+        "clients": {
+          "owner": 60,
+          "admin": 60,
+          "client": 0,
+          "employee": 0
+        },
+        "company": {
+          "owner": 13,
+          "admin": 13,
+          "client": 9,
+          "employee": 13
+        },
+        "employees": {
+          "owner": 30,
+          "admin": 30,
+          "client": 0,
+          "employee": 24
+        },
+        "finance": {
+          "owner": 48,
+          "admin": 36,
+          "client": 0,
+          "employee": 0
+        },
+        "forecasting": {
+          "owner": 6,
+          "admin": 6,
+          "client": 0,
+          "employee": 0
+        },
+        "general_business_questions": {
+          "owner": 9,
+          "admin": 9,
+          "client": 9,
+          "employee": 9
+        },
+        "inventory": {
+          "owner": 6,
+          "admin": 6,
+          "client": 0,
+          "employee": 0
+        },
+        "kpi": {
+          "owner": 6,
+          "admin": 6,
+          "client": 0,
+          "employee": 0
+        },
+        "messaging": {
+          "owner": 6,
+          "admin": 6,
+          "client": 0,
+          "employee": 0
+        },
+        "notifications": {
+          "owner": 18,
+          "admin": 18,
+          "client": 0,
+          "employee": 0
+        },
+        "payments": {
+          "owner": 6,
+          "admin": 6,
+          "client": 0,
+          "employee": 0
+        },
+        "products": {
+          "owner": 6,
+          "admin": 6,
+          "client": 0,
+          "employee": 0
+        },
+        "recommendations": {
+          "owner": 6,
+          "admin": 6,
+          "client": 0,
+          "employee": 0
+        },
+        "referrals": {
+          "owner": 3,
+          "admin": 3,
+          "client": 3,
+          "employee": 3
+        },
+        "reports": {
+          "owner": 6,
+          "admin": 6,
+          "client": 0,
+          "employee": 0
+        },
+        "retention": {
+          "owner": 6,
+          "admin": 6,
+          "client": 0,
+          "employee": 0
+        },
+        "reviews": {
+          "owner": 24,
+          "admin": 24,
+          "client": 0,
+          "employee": 0
+        },
+        "sales": {
+          "owner": 6,
+          "admin": 6,
+          "client": 0,
+          "employee": 0
+        },
+        "schedule": {
+          "owner": 32,
+          "admin": 32,
+          "client": 0,
+          "employee": 8
+        },
+        "services": {
+          "owner": 39,
+          "admin": 39,
+          "client": 9,
+          "employee": 9
+        },
+        "settings": {
+          "owner": 8,
+          "admin": 8,
+          "client": 0,
+          "employee": 8
+        },
+        "small_talk": {
+          "owner": 9,
+          "admin": 9,
+          "client": 9,
+          "employee": 9
+        },
+        "subscriptions": {
+          "owner": 6,
+          "admin": 6,
+          "client": 6,
+          "employee": 6
+        },
+        "support": {
+          "owner": 9,
+          "admin": 9,
+          "client": 15,
+          "employee": 3
+        },
+        "tasks": {
+          "owner": 10,
+          "admin": 10,
+          "client": 0,
+          "employee": 4
+        }
+      },
+      "exactUniqueTexts": 10443,
+      "allDomains": {
+        "analytics": {
+          "owner": 198,
+          "admin": 198,
+          "client": 0,
+          "employee": 0
+        },
+        "bonuses": {
+          "owner": 165,
+          "admin": 33,
+          "client": 33,
+          "employee": 33
+        },
+        "booking": {
+          "owner": 165,
+          "admin": 165,
+          "client": 561,
+          "employee": 165
+        },
+        "branches": {
+          "owner": 66,
+          "admin": 66,
+          "client": 0,
+          "employee": 0
+        },
+        "certificates": {
+          "owner": 33,
+          "admin": 33,
+          "client": 33,
+          "employee": 33
+        },
+        "churn": {
+          "owner": 132,
+          "admin": 132,
+          "client": 0,
+          "employee": 0
+        },
+        "clients": {
+          "owner": 462,
+          "admin": 462,
+          "client": 0,
+          "employee": 0
+        },
+        "company": {
+          "owner": 110,
+          "admin": 110,
+          "client": 66,
+          "employee": 110
+        },
+        "employees": {
+          "owner": 363,
+          "admin": 363,
+          "client": 33,
+          "employee": 165
+        },
+        "finance": {
+          "owner": 594,
+          "admin": 330,
+          "client": 0,
+          "employee": 0
+        },
+        "forecasting": {
+          "owner": 66,
+          "admin": 66,
+          "client": 0,
+          "employee": 0
+        },
+        "general_business_questions": {
+          "owner": 99,
+          "admin": 99,
+          "client": 99,
+          "employee": 99
+        },
+        "inventory": {
+          "owner": 66,
+          "admin": 66,
+          "client": 0,
+          "employee": 0
+        },
+        "kpi": {
+          "owner": 66,
+          "admin": 66,
+          "client": 0,
+          "employee": 0
+        },
+        "loyalty": {
+          "owner": 33,
+          "admin": 33,
+          "client": 33,
+          "employee": 33
+        },
+        "messaging": {
+          "owner": 66,
+          "admin": 66,
+          "client": 0,
+          "employee": 0
+        },
+        "notifications": {
+          "owner": 132,
+          "admin": 132,
+          "client": 0,
+          "employee": 0
+        },
+        "payments": {
+          "owner": 132,
+          "admin": 132,
+          "client": 0,
+          "employee": 0
+        },
+        "products": {
+          "owner": 66,
+          "admin": 66,
+          "client": 0,
+          "employee": 0
+        },
+        "recommendations": {
+          "owner": 66,
+          "admin": 66,
+          "client": 0,
+          "employee": 0
+        },
+        "referrals": {
+          "owner": 33,
+          "admin": 33,
+          "client": 33,
+          "employee": 33
+        },
+        "reports": {
+          "owner": 132,
+          "admin": 132,
+          "client": 0,
+          "employee": 0
+        },
+        "retention": {
+          "owner": 66,
+          "admin": 66,
+          "client": 0,
+          "employee": 0
+        },
+        "reviews": {
+          "owner": 198,
+          "admin": 198,
+          "client": 0,
+          "employee": 0
+        },
+        "sales": {
+          "owner": 66,
+          "admin": 66,
+          "client": 0,
+          "employee": 0
+        },
+        "schedule": {
+          "owner": 286,
+          "admin": 286,
+          "client": 0,
+          "employee": 88
+        },
+        "services": {
+          "owner": 297,
+          "admin": 297,
+          "client": 99,
+          "employee": 99
+        },
+        "settings": {
+          "owner": 88,
+          "admin": 88,
+          "client": 0,
+          "employee": 88
+        },
+        "small_talk": {
+          "owner": 99,
+          "admin": 99,
+          "client": 99,
+          "employee": 99
+        },
+        "subscriptions": {
+          "owner": 33,
+          "admin": 33,
+          "client": 33,
+          "employee": 33
+        },
+        "support": {
+          "owner": 99,
+          "admin": 99,
+          "client": 165,
+          "employee": 33
+        },
+        "tasks": {
+          "owner": 154,
+          "admin": 154,
+          "client": 0,
+          "employee": 88
+        }
+      },
+      "domainsAbsentFromDev": [
+        "churn",
+        "loyalty"
+      ],
+      "allIntentCount": 86,
+      "devIntentCount": 74
+    },
+    "multiTurn": {
+      "rows": 1050,
+      "familyIds": 175,
+      "splitCounts": {
+        "train": 864,
+        "dev": 96,
+        "test": 90
+      },
+      "devRows": 96,
+      "devFamilyIds": 16,
+      "devRoles": {
+        "owner": 42,
+        "admin": 12,
+        "client": 42
+      },
+      "familySplitOverlap": false,
+      "devArchetypes": {
+        "retention_drill_down": 12,
+        "topic_switch_and_return": 12,
+        "ambiguous_entity_resolution": 12,
+        "high_risk_confirmation": 12,
+        "booking_carry_over": 24,
+        "finance_follow_up": 18,
+        "cancel_pending_action": 6
+      }
+    },
+    "adversarial.jsonl": {
+      "rows": 600,
+      "splits": {
+        "test": 600
+      },
+      "selected": 0,
+      "reason": "all test; preserve held-out split"
+    },
+    "contrastive.jsonl": {
+      "rows": 600,
+      "splits": {
+        "test": 600
+      },
+      "selected": 0,
+      "reason": "all test; preserve held-out split"
+    }
+  },
+  "capabilityReadinessNote": "All 1116 dev utterance labels say ready; labels are not current HTTP/tool/source availability evidence."
+}

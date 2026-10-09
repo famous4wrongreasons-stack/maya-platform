@@ -1,0 +1,40 @@
+{
+  "sourceCommit": "b74d62851de075a48f2c10bf5da48524c8ca0e47",
+  "proposalSha256": "7e3e94694b98c9ad56f7aa7f7ff63a835058621d3ca159b4458421da95399ba8",
+  "dialogs": 48,
+  "userTurns": 81,
+  "familyRefs": 33,
+  "frozenSmokeSourceAndPreparedManifestUnchanged": true,
+  "runtimeFilesChanged": false,
+  "networkOrServicesExecuted": false,
+  "newPermitOrPrompt": false,
+  "sourcePinsVerified": 6,
+  "directJSONLRowsSelectedFromDev": 24,
+  "testRowsSelected": 0,
+  "costProjection": {
+    "basis": "two archived pilots; no new pricing lookup or spending authorization",
+    "providerResponsesObserved": 9,
+    "inputTokensObserved": 151827,
+    "outputTokensObserved": 2801,
+    "scenarios": [
+      {
+        "providerResponses": 81,
+        "historicalPeakObservedCacheUsd": 1.6786297440000002,
+        "historicalPeakNoCacheUsd": 1.9035324,
+        "maxBodyOutputReservationUsd": 11.60552448
+      },
+      {
+        "providerResponses": 98,
+        "historicalPeakObservedCacheUsd": 2.0309347520000003,
+        "historicalPeakNoCacheUsd": 2.3030392,
+        "maxBodyOutputReservationUsd": 14.041251840000001
+      },
+      {
+        "providerResponses": 162,
+        "historicalPeakObservedCacheUsd": 3.3572594880000004,
+        "historicalPeakNoCacheUsd": 3.8070648,
+        "maxBodyOutputReservationUsd": 23.21104896
+      }
+    ]
+  }
+}
