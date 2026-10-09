@@ -1,0 +1,28 @@
+PASS src/ai-tools/ai-core.public-company.spec.ts
+  explicit branch public company [actual parser, synthetic source]
+    ✓ withholds verified profile after C9 finalization denied (18 ms)
+    ✓ withholds verified profile after C9 finalization INCOMPLETE (36 ms)
+    ✓ withholds verified profile after C9 finalization STOPPED (1 ms)
+    ✓ retains missing-field evidence and refuses incomplete C9 finalization (1 ms)
+    ✓ uses one existing C9 tool and exact private source marker for tenant_owner (1 ms)
+    ✓ uses one existing C9 tool and exact private source marker for client (1 ms)
+    ✓ does not read or silently enrich unknown branch
+    ✓ does not read or silently enrich foreign branch (1 ms)
+    ✓ does not read or silently enrich unconfigured branch
+    ✓ clarifies unsupported requested-branch shape {"compound":true} before any read (1 ms)
+    ✓ clarifies unsupported requested-branch shape {"unresolved":true} before any read
+    ✓ clarifies unsupported requested-branch shape {"field":"phone"} before any read (1 ms)
+    ✓ propagates branch membership denial without profile reads
+    ✓ withholds stale receipt instead of using model prose (1 ms)
+    ✓ withholds old-branding receipt instead of using model prose
+    ✓ withholds wrong-source receipt instead of using model prose (1 ms)
+    ✓ distinguishes cached source from a fresh observation (1 ms)
+    ✓ retains controlled source refusal or revoked authority 409 (1 ms)
+    ✓ retains controlled source refusal or revoked authority 403 (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       19 passed, 19 total
+Snapshots:   0 total
+Time:        0.518 s, estimated 1 s
+Ran all test suites within paths "src/ai-tools/ai-core.public-company.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-public-branch-supplemental-r2-20261009-unit.json

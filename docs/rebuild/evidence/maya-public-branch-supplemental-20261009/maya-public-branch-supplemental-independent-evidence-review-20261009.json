@@ -1,0 +1,317 @@
+{
+  "contract": "maya.public-branch-supplemental.independent-evidence-review/1",
+  "verdict": "QUALIFIED_PASS_NO_BLOCKING_FINDING",
+  "sourceHead": "73f29d3c7721fc7dd328ff97055704fda4835aa9",
+  "baseline": "b25edb2f9914721b8862a371aaa49a7c48d09991",
+  "previousBaseline": "ca70076b35afc4aaa299b8bfe9bb34f2954c7723",
+  "reviewer": "independent_review",
+  "method": {
+    "readOnlySourceAndPublicEvidence": true,
+    "testsServicesNetworkOrModelStarted": false,
+    "privateRestartReceiptOpened": false,
+    "privateCredentialOrPgPathCopied": false,
+    "repoOrOldEvidenceEdited": false
+  },
+  "source": {
+    "exactGitBlobCountIndependentlyVerified": 1863,
+    "mismatches": [],
+    "bindingDigest": "519e953ff0664ebd5c1eeb2a3bb210fcbe2c1b975a714fbd6ee65f1b31b861c2",
+    "digestIndependentlyRecomputed": true,
+    "manifestSha256": "0d7d79bc97420fc1dd7c7ef40cf9315f84b3a16fd426ab522020f8ccb4a422ef",
+    "sourceUnchanged": true,
+    "sourceReviewSha256": "8dc63a1650cf66775f008412fa43e9f846b0ab6ef91f361fef4f1411506fbded",
+    "changedPathsFromBaseline": [
+      "maya-saas-backend/scripts/public-company-read-proof.mjs",
+      "maya-saas-backend/test/widgets-live/public-company-read-restart.probe-spec.ts"
+    ],
+    "originalCorpusScriptFixturesEvaluatorUnchanged": true,
+    "datasetSha256": "9c8db1420c489169a474b04dd43933110461fe3630e3ada2fb0e8dc40e7eb15b"
+  },
+  "counts": {
+    "prepareAssertions": 1392,
+    "resumeAssertions": 508,
+    "jestTests": 2,
+    "chatRequests": 35,
+    "chatStatuses": {
+      "201": 32,
+      "403": 2,
+      "401": 1
+    },
+    "scriptedPlannerCalls": 34,
+    "syntheticNativeGetCalls": 12,
+    "unexpectedCalls": 0,
+    "additionalA22ClientDirect403": 1,
+    "sourceReceiptOccurrences": {
+      "prepare": 14,
+      "resume": 3
+    },
+    "uniqueSupplementalUtterances": 2,
+    "distinctSupplementalFamilies": 1,
+    "supplementalPositiveFreshReads": 2,
+    "supplementalImmediateReplays": 2,
+    "supplementalRestartReplays": 2,
+    "supplementalMissingMismatchRefusals": 4,
+    "supplementalSourceRevisionRefusals": 2
+  },
+  "caseJoins": [
+    {
+      "caseId": "utt-company.public_info-037",
+      "originalSourceRowSha256": "71783d08af20d161d23e02de6748a5e07b5ed717d687af28e83651873bd3a674",
+      "utteranceHash": "388f604ae70c8bf1f475aaaf9b77fe50cd2e2091beaa7027eb0b4255b185a281",
+      "parentHash": "accd52cdf1e3a091db302239f53a81bfb3037eb5528cfeb989ed2f04abc29ad9",
+      "completionHash": "e3fbe43beeed3b946e699cc0ccff2d00041c99eddb4d84d6e7062fb532a35ca8",
+      "exactEvidenceHash": "2686c35c1539fa5932bce7f3700b0a1a57c88b0f73e883d0b441890d0a3c9dcb",
+      "evidence": {
+        "runHash": "a52571f84d6fb935fa4edb9774c15e0cbf015963fe62fe73cfe2f5986872f9c1",
+        "workHash": "1c41ed953bd6f714df98f59df00d79411433f357b005fd309fb811ca477e5169",
+        "executionHash": "a09adda94dcc3c104b9601d2fe4602f43ba1170849040db065dda75a9c676a21",
+        "actorHash": "130f42eb8a0eaa6815e427288e137589cb2875334514de64e7ea7ed8eae075df",
+        "authorityHash": "cea4ee32f2744e70906c236541dc8f92e2845e14e6f2d7fbfd678253d142f003",
+        "inputHash": "8276472f687aa90fcf61e91d692690ef144468bc13326fd7e446324af6745506",
+        "resultHash": "849fdc9c9a44cbfdf5d2534948bc36f2506e55b71ff0f7c59e4abe33edf26359",
+        "workResultHash": "4e8c7fa27e88f68709f7282e48cc7bb23638b8ff1fdbd2f77201dc7874f59b17",
+        "publicScopeHash": "850e60e06e6b28192ce7161791657f6622adf8ee3b5981830792a6936f7926b9",
+        "publicProfileHash": "e8fc730cc9c3d529ad356beabc37471fd827c0ddd932df597cbf007e07673701"
+      },
+      "sameReceiptInPrepareFreshAndCacheAndRestart": true,
+      "independentlyMatchedPublicSourceReceiptOccurrences": {
+        "prepare": 2,
+        "resume": 1
+      },
+      "nativeProfileHashObserved": true,
+      "savedHistoryParentAndCompletionChecksPassed": true,
+      "missingBindingAndMismatchedCompanyBothRefuseBeforeRead": true,
+      "sourceRevisionDriftRefusesPreservingOldResult": true
+    },
+    {
+      "caseId": "utt-company.public_info-041",
+      "originalSourceRowSha256": "645e728407459ff68d9d5bf2b6677a4114a322ae8a51b65e3cc8028101c1ad5d",
+      "utteranceHash": "d9d4b957f73559d9b1ed51ef6666810cda2277824102118ecd02f5a58aaf7675",
+      "parentHash": "b416bf967ca6201df118cdb7b727a1878c01852706b3aa42276f12d1969e76d0",
+      "completionHash": "e3fbe43beeed3b946e699cc0ccff2d00041c99eddb4d84d6e7062fb532a35ca8",
+      "exactEvidenceHash": "dda8113d7443ecf44f1acff765c1e8c09213af913edeaca3ced4c9ffa26fdaa0",
+      "evidence": {
+        "runHash": "dd2c2ec84d4ae015d97cb391539782d4ddf7d29473a0f6f870919d7545668b89",
+        "workHash": "e4f9c31e875ea8052d59ebe4103dc33d7b06225ea838aab0d58fa228cb8fda94",
+        "executionHash": "3c50893d2ce0a8ac1a11ef9b60d47ef6a9f03976d12ba8df9154553c76480cd8",
+        "actorHash": "130f42eb8a0eaa6815e427288e137589cb2875334514de64e7ea7ed8eae075df",
+        "authorityHash": "cea4ee32f2744e70906c236541dc8f92e2845e14e6f2d7fbfd678253d142f003",
+        "inputHash": "8276472f687aa90fcf61e91d692690ef144468bc13326fd7e446324af6745506",
+        "resultHash": "849fdc9c9a44cbfdf5d2534948bc36f2506e55b71ff0f7c59e4abe33edf26359",
+        "workResultHash": "930b913e92898f7ebb20891b9fce54d1c41aa1fda0759f6092f5ce0d31e4ff32",
+        "publicScopeHash": "850e60e06e6b28192ce7161791657f6622adf8ee3b5981830792a6936f7926b9",
+        "publicProfileHash": "e8fc730cc9c3d529ad356beabc37471fd827c0ddd932df597cbf007e07673701"
+      },
+      "sameReceiptInPrepareFreshAndCacheAndRestart": true,
+      "independentlyMatchedPublicSourceReceiptOccurrences": {
+        "prepare": 2,
+        "resume": 1
+      },
+      "nativeProfileHashObserved": true,
+      "savedHistoryParentAndCompletionChecksPassed": true,
+      "missingBindingAndMismatchedCompanyBothRefuseBeforeRead": true,
+      "sourceRevisionDriftRefusesPreservingOldResult": true
+    }
+  ],
+  "proofMeaning": {
+    "branchExtraction": "Declared scripted semantic output through actual planner validation; not actual model extraction.",
+    "boundSource": "Separate synthetic bound CLIENT tenant, current configured company/branch/revision -> native supplied profile -> owned execution -> exact C9 work-result receipt -> current principal user turn/versioned encrypted completion.",
+    "currentAuthority": "Exact CLIENT membership, C9 principal tenant/user/membership and parent principalProofHash==run.authorityHash checked by actual probe. Public hash joins independently verified; private raw restart material was not opened.",
+    "completionLookupFix": "Restart same-key replay passes exact saved historyAssistantTurnId, retaining bounded3 scan and exact decrypted parent/reply/hash/version checks. No widened search.",
+    "savedReply": "Immediate and restarted cached answers carry saved-result label; no new provider source observation claimed.",
+    "sourceChange": "Supplemental same-key refusal changes integration metadata revision. Inherited separate existing probe also changes actual company binding during native await and withholds captured facts.",
+    "privateBoundary": "Model-input/private result/history sentinel assertions and original A22 direct CLIENT403 retained; public profile does not grant client identity or internal settings access."
+  },
+  "restartAndReplay": {
+    "observation": {
+      "applicationPidChanged": true,
+      "postgresStartedChanged": true,
+      "graphHashUnchanged": "951e75f359cd8dbde9d5090be67fe3f6ff584b4ac7e0ef4b9c425b01b3394842"
+    },
+    "inheritedReplay": {
+      "runHash": "705021a028874975d521d53e3a4ad687068c785c9090554e75b06309c2c7a1d8",
+      "graphHashUnchanged": "951e75f359cd8dbde9d5090be67fe3f6ff584b4ac7e0ef4b9c425b01b3394842",
+      "providerReadsAdded": 0
+    },
+    "supplementalExactRunWorkExecutionInputResultAndParentJoin": true,
+    "supplementalReplayNativeReadsAdded": 0,
+    "graphStableAcrossEachReplayAndSavedPrepareToRestart": true,
+    "qualification": "Probe compares real separately spawned application PID and PostgreSQL start time. Reviewer inspected safe public booleans and source assertions, not private receipt values."
+  },
+  "otherControls": {
+    "inheritedCompanyCutover": {
+      "status": 201,
+      "providerReadsAdded": 1,
+      "previousCompany": 99402,
+      "currentCompany": 99412,
+      "sameOwnedTenant": true,
+      "capturedPublicFactsWithheld": true
+    },
+    "revocation": {
+      "duringReadStatus": 403,
+      "priorReadStatus": 401,
+      "duringReadProviderReads": 1,
+      "afterRevocationProviderReads": 0
+    },
+    "foreignHistoryAndRun": {
+      "historyStatus": 200,
+      "historyIsolated": true,
+      "runStatus": 400
+    },
+    "clientInternalGuidance": {
+      "status": 403,
+      "privateFactsWithheld": true,
+      "providerReadsAdded": 0
+    },
+    "missingProfile": {
+      "status": 201,
+      "nativeGets": 2,
+      "c9ReadAttempts": 1,
+      "detailStatus": 404,
+      "discovery": "EXACT_EMPTY",
+      "publicFactsWithheld": true
+    },
+    "sourceRefusals": {
+      "ambiguity": true,
+      "unknownBranch": true,
+      "foreignBranch": true,
+      "nonconfiguredBranch": true,
+      "missingBinding": true,
+      "compoundPreserved": true,
+      "branchRestrictedStatus": 403,
+      "providerReadsAdded": 0
+    }
+  },
+  "effectsAndCleanup": {
+    "observedBusinessHashUnchanged": "6511ad21c014b0f0290af9fb407f9c4850196485e82e65c099ed77623d34dd16",
+    "claim": "OBSERVED_SCOPED_FAMILIES_AFTER_FIXTURE_SETUP",
+    "a22SetupBeforeCensus": true,
+    "expectedTimelineC9ExecutionWrites": true,
+    "controlledIntegrationMembershipMutationsNotClaimedAbsent": true,
+    "clusterStopped": true,
+    "savedParentOsObservation": {
+      "pgStatusExitCode": 3,
+      "postmasterPidAbsent": true
+    },
+    "cleanupReexecutedByReviewer": false,
+    "universalBusinessWritesOrOsEgressCensusClaimed": false
+  },
+  "original81": {
+    "rerun": false,
+    "reclassified": false,
+    "denominator": 81,
+    "counts": {
+      "pass": 57,
+      "semanticFail": 0,
+      "unsupported": 12,
+      "insufficient": 10,
+      "clarificationPending": 2
+    },
+    "qualification": "Two supplemental goals completed under stated extraction/source prerequisites, not +2 PASS in original81 and not two independent families."
+  },
+  "limitations": [
+    "Scripted planner and finite synthetic native transport; no real model/provider/browser/production/MAYA/C10 acceptance.",
+    "Original37/41 omissions and source setup were deliberately corrected only in separate supplemental scenarios. This is not demonstrated repair of natural-language model understanding.",
+    "Unknown/missing binding remains refusal; no tenant-branding fallback, guessed branch/company mapping or Client identity grant.",
+    "Metadata revision drift is qualified separately from inherited actual-company cutover.",
+    "A22 setup and expected persistence exist; no blanket zero database writes claim.",
+    "Cleanup is evidenced by completed run manifest and saved parent OS checks, not a new reviewer process census."
+  ],
+  "publicArtifacts": [
+    {
+      "name": "manifest.json",
+      "bytes": 232701,
+      "sha256": "0d7d79bc97420fc1dd7c7ef40cf9315f84b3a16fd426ab522020f8ccb4a422ef",
+      "copiedArchiveBytesMatch": true
+    },
+    {
+      "name": "prepare-observations.json",
+      "bytes": 34753,
+      "sha256": "49040b7f99e921079dc031dfa3200aebfb398f1913d3694eef210a9752fc91b3",
+      "copiedArchiveBytesMatch": true
+    },
+    {
+      "name": "resume-observations.json",
+      "bytes": 14129,
+      "sha256": "c18444416d5264de348e4c40030bed2dd08dc0e63e337aa118d92a0c786033db",
+      "copiedArchiveBytesMatch": true
+    },
+    {
+      "name": "prepare-jest.json",
+      "bytes": 1417,
+      "sha256": "bdd7494f5eeab563c3295fcb602ebd03a1d0ea3fed113f1aa7565bea4269101f",
+      "copiedArchiveBytesMatch": true
+    },
+    {
+      "name": "resume-jest.json",
+      "bytes": 1415,
+      "sha256": "9507f9db15add3438bc890b66c6786c510c17b5fa19cddff2eaad052d74e3a0a",
+      "copiedArchiveBytesMatch": true
+    },
+    {
+      "name": "source-and-cleanup-verification.json",
+      "bytes": 1433,
+      "sha256": "891af758e37f119339abf3dc67748da79213062beb2e1240ef141e4465f13911",
+      "copiedArchiveBytesMatch": true
+    },
+    {
+      "name": "maya-public-branch-supplemental-r2-20261009-checks.json",
+      "bytes": 3032,
+      "sha256": "77a10f504e1bda9b9e1adb3ba77dc8bfd2a357be6251afc2f381c73778c45f97"
+    },
+    {
+      "name": "maya-public-branch-supplemental-r2-20261009-unit.log",
+      "bytes": 1862,
+      "sha256": "a4251000c0032cace198a1ae6bd124ff8c582de2d801d7aed1c67a8e6fe91845"
+    },
+    {
+      "name": "maya-public-branch-supplemental-r2-20261009-driver.log",
+      "bytes": 496,
+      "sha256": "6ee927fc2c8518afd2fa02a3e230d3f4956e0dcf2730e9b948229143b61385a5"
+    }
+  ],
+  "blockers": [],
+  "documentation": {
+    "path": "docs/rebuild/MAYA-PUBLIC-BRANCH-SUPPLEMENTAL-20261009.md",
+    "sha256": "fb845d4cfde163d082ab59c5c3585f7129bcd957a2767a947db743f8dc07fb81",
+    "verdict": "CONSISTENT_WITH_QUALIFIED_EVIDENCE",
+    "precisionEditsResolved": [
+      "Fresh supplemental requests versus replay run creation",
+      "API history rather than browser/UI proof",
+      "Client names/phones rather than all public contact information",
+      "Source drift withholds old facts"
+    ],
+    "nextGapQualification": "Exact pre-existing C8 two-calendar-month rule route is conditional proposed product integration only; no baseline30day substitution, named/full cohort, regularity/ranking, new policy or implementation claim.",
+    "remainingBlockers": []
+  },
+  "componentEvidence": {
+    "unitTestsPassed": 19,
+    "unitSuitesPassed": 1,
+    "driverTestsPassed": 4,
+    "checks": [
+      {
+        "check": "driver",
+        "exitCode": 0
+      },
+      {
+        "check": "unit",
+        "exitCode": 0
+      },
+      {
+        "check": "scoped-types",
+        "exitCode": 0
+      },
+      {
+        "check": "lint",
+        "exitCode": 0
+      },
+      {
+        "check": "diff-check",
+        "exitCode": 0
+      }
+    ],
+    "twoSourceHashesMatchReviewedCandidate": true,
+    "checksSha256": "77a10f504e1bda9b9e1adb3ba77dc8bfd2a357be6251afc2f381c73778c45f97",
+    "qualification": "Existing reports and log summaries inspected, no reviewer execution."
+  }
+}

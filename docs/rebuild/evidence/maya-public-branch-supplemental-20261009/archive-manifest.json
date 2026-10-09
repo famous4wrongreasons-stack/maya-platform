@@ -1,0 +1,155 @@
+{
+  "contract": "maya.public-branch-supplemental.evidence-archive/1",
+  "sourceHead": "73f29d3c7721fc7dd328ff97055704fda4835aa9",
+  "baseline": "b25edb2f9914721b8862a371aaa49a7c48d09991",
+  "previousBaseline": "ca70076b35afc4aaa299b8bfe9bb34f2954c7723",
+  "originalDenominator": 81,
+  "originalScoresUnchanged": true,
+  "privateFixtureReceiptsExcluded": true,
+  "files": {
+    "http/r1/createdb.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "http/r1/initdb.log": {
+      "sha256": "ec21e9ded2d9e7e72c0968f152f841cfca0b5a207e4e42ce06f32a045c570579",
+      "bytes": 950
+    },
+    "http/r1/manifest.json": {
+      "sha256": "0d7d79bc97420fc1dd7c7ef40cf9315f84b3a16fd426ab522020f8ccb4a422ef",
+      "bytes": 232701
+    },
+    "http/r1/migrations.log": {
+      "sha256": "74625401425cd4084fbefb4f25c5c444fe5bb9eba5d39580ea135f3462cd5911",
+      "bytes": 14728
+    },
+    "http/r1/pg-restart.log": {
+      "sha256": "daade0292d7baead051312b216f81d4f1382a94f1b8e9c89319c161db2a0a4cf",
+      "bytes": 1345
+    },
+    "http/r1/pg-start.log": {
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    "http/r1/pg-stop.log": {
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    "http/r1/postgres.log": {
+      "sha256": "5d1b7c88550ab2c0c5a6fd006159d3f934bc3499c733a8a1bf23e8820311915a",
+      "bytes": 1246
+    },
+    "http/r1/prepare-jest.json": {
+      "sha256": "bdd7494f5eeab563c3295fcb602ebd03a1d0ea3fed113f1aa7565bea4269101f",
+      "bytes": 1417
+    },
+    "http/r1/prepare-observations.json": {
+      "sha256": "49040b7f99e921079dc031dfa3200aebfb398f1913d3694eef210a9752fc91b3",
+      "bytes": 34753
+    },
+    "http/r1/prepare.log": {
+      "sha256": "e5a49bba9d9bd8cca8729f496f06d453ff0bcdacc4a2fb4177c899101d8589db",
+      "bytes": 702
+    },
+    "http/r1/resume-jest.json": {
+      "sha256": "9507f9db15add3438bc890b66c6786c510c17b5fa19cddff2eaad052d74e3a0a",
+      "bytes": 1415
+    },
+    "http/r1/resume-observations.json": {
+      "sha256": "c18444416d5264de348e4c40030bed2dd08dc0e63e337aa118d92a0c786033db",
+      "bytes": 14129
+    },
+    "http/r1/resume.log": {
+      "sha256": "8f44285772709e48c3813939033e66fe98a0301adee163ccc4cc26cb4bd4f4b9",
+      "bytes": 705
+    },
+    "http/r1/source-and-cleanup-verification.json": {
+      "sha256": "891af758e37f119339abf3dc67748da79213062beb2e1240ef141e4465f13911",
+      "bytes": 1433
+    },
+    "maya-next-real-gap-after-public-20261009.md": {
+      "sha256": "2d015636f46397df3b5ea410217856161c677d3759881359d26b82b734d3f713",
+      "bytes": 5176
+    },
+    "maya-public-branch-supplemental-checks-20261009.py": {
+      "sha256": "c5f393db6de5e60243a6b169d05ea77c49d135c8b093d19210d5fd43d98854dc",
+      "bytes": 3126
+    },
+    "maya-public-branch-supplemental-independent-evidence-review-20261009.json": {
+      "sha256": "69cc6c3bee96f7a6d9a695078ad8f53c72efd966af8fd5abeb41252df9f95a42",
+      "bytes": 14209
+    },
+    "maya-public-branch-supplemental-independent-source-review-20261009.json": {
+      "sha256": "8dc63a1650cf66775f008412fa43e9f846b0ab6ef91f361fef4f1411506fbded",
+      "bytes": 3681
+    },
+    "maya-public-branch-supplemental-r1-20261009-checks.json": {
+      "sha256": "0e44d02b56156e1e7b8daf82b2641b6233be99c2d02acaed4f200538edc92e23",
+      "bytes": 3032
+    },
+    "maya-public-branch-supplemental-r1-20261009-diff-check.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-public-branch-supplemental-r1-20261009-driver.log": {
+      "sha256": "a3f3d897cd8c1c93a771f0187c35ff46086f5c4d164fa72fce71a59a3a0d5a61",
+      "bytes": 497
+    },
+    "maya-public-branch-supplemental-r1-20261009-lint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-public-branch-supplemental-r1-20261009-scoped-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-public-branch-supplemental-r1-20261009-types.json": {
+      "sha256": "ba7e5f8c15ad5164415e6212144f198b0a42f3f33db2c6ac015adfaf42829326",
+      "bytes": 624
+    },
+    "maya-public-branch-supplemental-r1-20261009-unit.json": {
+      "sha256": "b02e8e4121e445dfb993416d7d70a6b7a5f49708e039e6220f09f982b056e997",
+      "bytes": 10037
+    },
+    "maya-public-branch-supplemental-r1-20261009-unit.log": {
+      "sha256": "fda989e11ddd708505792c5f58f4e6ea455db63e7eb8f355c6c9fea958a9306a",
+      "bytes": 1840
+    },
+    "maya-public-branch-supplemental-r2-20261009-checks.json": {
+      "sha256": "77a10f504e1bda9b9e1adb3ba77dc8bfd2a357be6251afc2f381c73778c45f97",
+      "bytes": 3032
+    },
+    "maya-public-branch-supplemental-r2-20261009-diff-check.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-public-branch-supplemental-r2-20261009-driver.log": {
+      "sha256": "6ee927fc2c8518afd2fa02a3e230d3f4956e0dcf2730e9b948229143b61385a5",
+      "bytes": 496
+    },
+    "maya-public-branch-supplemental-r2-20261009-lint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-public-branch-supplemental-r2-20261009-scoped-types.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "maya-public-branch-supplemental-r2-20261009-types.json": {
+      "sha256": "ba7e5f8c15ad5164415e6212144f198b0a42f3f33db2c6ac015adfaf42829326",
+      "bytes": 624
+    },
+    "maya-public-branch-supplemental-r2-20261009-unit.json": {
+      "sha256": "4b0317e522c6c20de839bccd68f686fe2e0d472c69476e114f018349a4e6326a",
+      "bytes": 10037
+    },
+    "maya-public-branch-supplemental-r2-20261009-unit.log": {
+      "sha256": "a4251000c0032cace198a1ae6bd124ff8c582de2d801d7aed1c67a8e6fe91845",
+      "bytes": 1862
+    },
+    "preserved-surfaces.json": {
+      "sha256": "d9fec8de0d0ebc6beab287d87692eb2725e55ef77ce0aee308e9c879bf345b5e",
+      "bytes": 637
+    }
+  }
+}

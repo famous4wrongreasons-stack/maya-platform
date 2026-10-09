@@ -1,0 +1,58 @@
+{
+  "contract": "maya.public-branch-supplemental.independent-source-review/1",
+  "sourceHead": "73f29d3c7721fc7dd328ff97055704fda4835aa9",
+  "baseCommit": "b25edb2f9914721b8862a371aaa49a7c48d09991",
+  "earlierOriginal81Checkpoint": "ca70076b35afc4aaa299b8bfe9bb34f2954c7723",
+  "verdict": "QUALIFIED_SOURCE_PASS_NO_REMAINING_BLOCKER",
+  "reviewerExecution": "READ_ONLY_NO_TESTS_SERVICES_NETWORK",
+  "files": [
+    {
+      "path": "maya-saas-backend/scripts/public-company-read-proof.mjs",
+      "bytes": 11090,
+      "sha256": "e66811cee9601b6477fdd9380ac8e70908a961d5795281b1d1e9716e39c36c68",
+      "matchesExactGit": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/public-company-read-restart.probe-spec.ts",
+      "bytes": 66376,
+      "sha256": "529076386463e553effc5c336b4b4638be87e116f4362839aa1f87146dabff18",
+      "matchesExactGit": true
+    }
+  ],
+  "sourceChanges": "Exactly existing probe plus driver dataset binding. No production, original corpus, scripted offline model, fixtures, evaluator or old evidence edits.",
+  "caseBindings": {
+    "ids": [
+      "utt-company.public_info-037",
+      "utt-company.public_info-041"
+    ],
+    "role": "CLIENT",
+    "distinctFamilyCount": 1,
+    "family": "historical-single:company.public_info:3",
+    "originalDatasetSha256": "9c8db1420c489169a474b04dd43933110461fe3630e3ada2fb0e8dc40e7eb15b",
+    "qualification": "Separate declared scripted extraction and bound synthetic tenant; not model understanding or original81 reclassification."
+  },
+  "receiptProof": [
+    "Exactly one COMPLETED current-CLIENT C9 run and SETTLED TOOL_READ catalog.staff.read",
+    "Exact work.resultJson receipt contract/executionId/inputHash/completedAt/capability/businessQualification and c9Hash(work-result/1) equality",
+    "Execution owner actor/tenant/completed/read, response executionId equality, decrypted exact salon/public_scope vs independently observed native fixture profile and current configured branch/sourceRevision/company",
+    "Persisted current same-principal parent and encrypted versioned completion/plan/hash identity",
+    "Same-client same-conversation history, immediate cache and restarted same-request receipt equality with graph unchanged",
+    "Missing binding and mismatched company: no native read, no C9 graph growth or AiToolExecution",
+    "Metadata source revision change refuses old same-key result; retained old source result remains immutable",
+    "Private sentinel/model/result/history exclusion and existing A22 direct CLIENT403 retained"
+  ],
+  "fixedFinding": {
+    "severity": "P2",
+    "issue": "Latest3 assistant scan before encrypted parent filtering could miss an older037 saved completion on deduped restart replay after041",
+    "fix": "Pass optional expectedAssistantId through supplementalEvidence to supplementalCompletion, and use saved historyAssistantTurnId in resumed replay",
+    "closure": "Confirmed exact current bytes; take3 unchanged and exact decoded parent/text/version/hash assertions preserved."
+  },
+  "limits": [
+    "Only source review in this artifact; actual HTTP result needs independent evidence followup.",
+    "Provider and planner finite scripted substitutes. No model-quality/live-provider/browser acceptance.",
+    "Source-change supplemental tests metadata revision, not additional company switch; original inherited company-cutover test separately retained.",
+    "A22 fixture setup precedes observed no-write baseline; expected timeline/C9/execution writes and controlled config mutations remain.",
+    "Two same-family examples are not two independent domain families. Original81 denominator/statuses unchanged."
+  ],
+  "blockers": []
+}

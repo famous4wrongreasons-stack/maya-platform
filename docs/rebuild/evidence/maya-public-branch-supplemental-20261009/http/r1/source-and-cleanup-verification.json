@@ -1,0 +1,42 @@
+{
+  "contract": "maya.public-branch-supplemental.source-cleanup-verification/1",
+  "sourceHead": "73f29d3c7721fc7dd328ff97055704fda4835aa9",
+  "baseline": "b25edb2f9914721b8862a371aaa49a7c48d09991",
+  "previousBaseline": "ca70076b35afc4aaa299b8bfe9bb34f2954c7723",
+  "sourceBindingCount": 1863,
+  "allExactGitBindingsMatch": true,
+  "manifestSha256": "0d7d79bc97420fc1dd7c7ef40cf9315f84b3a16fd426ab522020f8ccb4a422ef",
+  "sourceUnchanged": true,
+  "pgStatusExitCode": 3,
+  "postmasterPidAbsent": true,
+  "businessHashUnchanged": true,
+  "chatRequests": 35,
+  "chatStatusCounts": {
+    "201": 32,
+    "403": 2,
+    "401": 1
+  },
+  "scriptedModelCalls": 34,
+  "syntheticNativeGetCalls": 12,
+  "unexpectedCalls": 0,
+  "supplementalSameReceiptAndParentAfterRestart": true,
+  "changedFiles": [
+    "maya-saas-backend/scripts/public-company-read-proof.mjs",
+    "maya-saas-backend/test/widgets-live/public-company-read-restart.probe-spec.ts"
+  ],
+  "original81CorpusModelFixturesEvaluatorChanged": false,
+  "original81Rerun": false,
+  "originalDenominator": 81,
+  "originalCounts": {
+    "pass": 57,
+    "semanticFail": 0,
+    "unsupported": 12,
+    "insufficient": 10,
+    "clarificationPending": 2
+  },
+  "limits": [
+    "Separate scripted extraction and synthetic bound source, not actual language understanding",
+    "Two exact utterances, one family",
+    "No live provider/model/production/website or full MAYA/C10 acceptance"
+  ]
+}
