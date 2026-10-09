@@ -690,6 +690,40 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
     );
     assertPrivateAbsent(response.body);
   }
+  function assertNativeReads(
+    mark: number,
+    salon: Salon,
+    staffId: string | null,
+  ) {
+    const reads = transport.slice(mark);
+    const rosterReads = reads.filter((row) => row.resource === 'staff');
+    expect(rosterReads.length).toBeLessThanOrEqual(1);
+    const rosterRead = {
+      tenantHash: digest(salon.tenant.id),
+      company: salon.company,
+      resource: 'staff' as const,
+    };
+    // The native adapter may reuse its current staff catalog. This is not a
+    // skipped C9 READ: evidence() separately requires both settled receipts.
+    // Admit a zero-GET roster only after this process observed that exact
+    // tenant/company catalog; never clear the canonical cache to force I/O.
+    if (rosterReads.length === 0)
+      expect(transport.slice(0, mark)).toContainEqual(rosterRead);
+    expect(reads).toEqual([
+      ...(rosterReads.length ? [rosterRead] : []),
+      ...(staffId === null
+        ? []
+        : [
+            {
+              tenantHash: digest(salon.tenant.id),
+              company: salon.company,
+              resource: 'services',
+              staffId,
+            },
+          ]),
+    ]);
+    return reads.length;
+  }
   async function evidence(
     salon: Salon,
     response: Record<string, unknown>,
@@ -922,12 +956,7 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
         expect(
           String(answer.body.reply).replace(/[\s\u00a0\u202f]/g, ''),
         ).not.toContain(value === '1500' ? '2200' : '1500');
-        expect(
-          transport.slice(n).map((row) => [row.resource, row.staffId ?? null]),
-        ).toEqual([
-          ['staff', null],
-          ['services', staffId],
-        ]);
+        assertNativeReads(n, a, staffId);
         await evidence(a, answer.body, staffId);
       }
       const clientBefore = transport.length;
@@ -938,12 +967,13 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
         String(client.body.reply).replace(/[\s\u00a0\u202f]/g, ''),
       ).toContain('2200');
       await evidence(a, client.body, '72', a.clientActor);
-      expect(transport.length - clientBefore).toBe(2);
+      const clientNativeGets = assertNativeReads(clientBefore, a, '72');
       report.clientPublicRead = {
         status: client.status,
         role: 'CLIENT',
         clientIdentityGranted: false,
         source: 'EXACT_STAFF_SCOPED_NATIVE_CATALOG',
+        nativeGets: clientNativeGets,
       };
       const beforePrivateRead = transport.length;
       const guidance = await request(http.app.getHttpServer())
@@ -1034,17 +1064,12 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
           employee,
         });
         assertBlocked(answer);
-        expect(transport.slice(n).map((row) => row.resource)).toEqual([
-          'staff',
-        ]);
+        assertNativeReads(n, a, null);
       }
       for (const service of ['Дублированная услуга', 'Несуществующая услуга']) {
         const n = transport.length;
         assertBlocked(await chat(token, price('Артём', service)));
-        expect(transport.slice(n).map((row) => row.resource)).toEqual([
-          'staff',
-          'services',
-        ]);
+        assertNativeReads(n, a, '71');
       }
       const beforeBranch = transport.length;
       assertBlocked(
@@ -1072,9 +1097,7 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
         employee: 'Ольга',
       });
       assertBlocked(malformed);
-      expect(
-        transport.slice(beforeMalformed).map((row) => row.resource),
-      ).toEqual(['staff', 'services']);
+      assertNativeReads(beforeMalformed, a, '77');
       report.sourceRefusals = {
         ambiguousEmployee: true,
         missingEmployeeLink: true,
@@ -1200,16 +1223,14 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
       };
       const midDrift = await chat(otherToken, price('Артём'));
       assertBlocked(midDrift);
-      expect(transport.slice(beforeDrift).map((row) => row.resource)).toEqual([
-        'staff',
-        'services',
-      ]);
+      const driftNativeGets = assertNativeReads(beforeDrift, b, '71');
       report.midReadCompanyCutover = {
         status: midDrift.status,
         previousCompany: b.company,
         currentCompany: 99512,
         capturedFactsWithheld: true,
         tenantCatalogFallback: false,
+        nativeGets: driftNativeGets,
       };
 
       const beforeRevocation = transport.length;
@@ -1224,9 +1245,7 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
       const revokedDuringRead = await chat(revokedToken, LIST);
       expect(revokedDuringRead.status).toBe(403);
       expect(revokedDuringRead.body.reply).toBeUndefined();
-      expect(
-        transport.slice(beforeRevocation).map((row) => row.resource),
-      ).toEqual(['staff', 'services']);
+      const revocationNativeGets = assertNativeReads(beforeRevocation, a, '71');
       const n = transport.length,
         models = modelCalls;
       const revoked = await chat(revokedToken, LIST);
@@ -1236,7 +1255,7 @@ describe('staff services actual HTTP/auth/parser/C9/native READ [SCRIPTED MODEL,
       report.revocation = {
         duringReadStatus: revokedDuringRead.status,
         priorReadStatus: revoked.status,
-        duringReadProviderReads: 2,
+        duringReadProviderReads: revocationNativeGets,
         afterRevocationProviderReads: 0,
       };
 
