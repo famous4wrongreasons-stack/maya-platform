@@ -16,7 +16,14 @@ import {
 } from './employee-service-read';
 import {
   employeeJournalTask,
+  employeeJournalContinuationTask,
   readEmployeeJournal,
+  carryEmployeeJournalCalendarPreference,
+  journalCalendarPreference,
+  EMPLOYEE_JOURNAL_EMPLOYEE_QUESTION,
+  EMPLOYEE_JOURNAL_DATE_QUESTION,
+  EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+  type JournalCalendarPreference,
 } from './employee-journal-read';
 import {
   bindServiceRenameChat,
@@ -620,6 +627,10 @@ const STAFF_SURFACE_ROLES = new Set<UserRole>([
 
 @Injectable()
 export class AiCoreService {
+  private readonly journalCalendarPreferences = new WeakMap<
+    AiCoreChatDto,
+    JournalCalendarPreference
+  >();
   private readonly bookingPreferenceSources = new WeakMap<
     AiCoreChatDto,
     { branchId: string; sourceRevision: string }
@@ -1232,6 +1243,18 @@ export class AiCoreService {
           decision.semanticPlan ?? null,
           activeSemanticPlan,
         );
+        const continuedEmployeeJournal = employeeJournalContinuationTask(
+          decision.semanticPlan ?? null,
+          activeSemanticPlan,
+        );
+        if (
+          !carryEmployeeJournalCalendarPreference(
+            decision.semanticPlan ?? null,
+            activeSemanticPlan,
+            this.journalCalendarPreferences.get(dto),
+          )
+        )
+          this.journalCalendarPreferences.delete(dto);
         if (decision.semanticPlan) {
           activeSemanticPlan = decision.semanticPlan;
           if (this.semanticPlanNeedsNoData(activeSemanticPlan)) {
@@ -2613,7 +2636,8 @@ export class AiCoreService {
           ? employeeScheduleTask(decision.semanticPlan)
           : null;
         const employeeJournal = decision.semanticPlan
-          ? employeeJournalTask(decision.semanticPlan)
+          ? (employeeJournalTask(decision.semanticPlan) ??
+            continuedEmployeeJournal)
           : null;
         const employeeDayTask = employeeSchedule ?? employeeJournal;
         const employeeDayTool = employeeJournal
@@ -2647,6 +2671,15 @@ export class AiCoreService {
                 unresolvedReferences:
                   decision.semanticPlan!.context.unresolved_references,
                 crm: this.crm,
+                ...(employeeJournal
+                  ? {
+                      retainedCalendar:
+                        this.journalCalendarPreferences.get(dto),
+                      retainCalendar: (calendar: JournalCalendarPreference) => {
+                        this.journalCalendarPreferences.set(dto, calendar);
+                      },
+                    }
+                  : {}),
                 read: async (name, args, staffScheduleReadScope) => {
                   const execution = this.record(
                     await this.executeChatTool(
@@ -4283,11 +4316,18 @@ export class AiCoreService {
       // the current complete response unchanged; never splice an old reply into
       // fresh action or widget fields. Reconciliation may append a new answer.
       const lastPlan = semanticPlans.at(-1);
+      const journalCalendar = lastPlan
+        ? journalCalendarPreference(
+            this.journalCalendarPreferences.get(dto),
+            lastPlan,
+          )
+        : null;
       let semanticContext =
         response.action || !lastPlan
           ? null
           : {
               version: 'maya.chat-semantic-context/1',
+              ...(journalCalendar ? { journalCalendar } : {}),
               ...(response.ownerReviewClarification &&
               (isOwnerReviewTaskSet(lastPlan) ||
                 isSingleLifecycleTaskSet(lastPlan))
@@ -4334,7 +4374,19 @@ export class AiCoreService {
                     task.clarification_question ===
                       reviewRatingQuestion(task.entities.period)
                       ? task.clarification_question
-                      : null,
+                      : response.employeeJournalReply &&
+                          task.intent === 'operations.journal_day' &&
+                          task.requires_clarification &&
+                          [
+                            EMPLOYEE_JOURNAL_EMPLOYEE_QUESTION,
+                            EMPLOYEE_JOURNAL_DATE_QUESTION,
+                            EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+                          ].includes(task.clarification_question ?? '') &&
+                          (task.clarification_question !==
+                            EMPLOYEE_JOURNAL_EMPLOYEE_QUESTION ||
+                            journalCalendar !== null)
+                        ? task.clarification_question
+                        : null,
                 })),
                 context: lastPlan.context,
               },
@@ -4343,6 +4395,9 @@ export class AiCoreService {
         semanticContext = null;
       const transcriptProjection = {
         semanticPlan: semanticContext?.plan ?? null,
+        // A new source preference is a new immutable completion revision.
+        // Existing replies without this marker retain their original fingerprint.
+        ...(journalCalendar ? { journalCalendar } : {}),
         reply: response.reply,
         source: response.source,
         actionStatus: response.action?.status ?? null,
@@ -4537,6 +4592,56 @@ export class AiCoreService {
     }
     const { saved, savedDate, plan } = selected;
     const fallback = selected !== latest ? latest.plan : null;
+    const journalTask = plan.tasks.at(-1);
+    if (journalTask?.intent === 'operations.journal_day') {
+      const calendar = journalCalendarPreference(saved.journalCalendar, plan);
+      let current = false;
+      if (calendar && this.crm) {
+        try {
+          const branch = await this.crm.resolveConfiguredBookingBranch(
+            this.requireTenant(user),
+          );
+          current =
+            branch !== null &&
+            branch.id === calendar.branchId &&
+            branch.timezone === calendar.timezone &&
+            branch.sourceRevision === calendar.sourceRevision &&
+            branch.name === journalTask.entities.branch;
+        } catch (error) {
+          if (!isBookingSourceUnavailable(error)) throw error;
+        }
+      }
+      if (calendar && current)
+        this.journalCalendarPreferences.set(dto, calendar);
+      else if (saved.journalCalendar !== undefined) {
+        // Retained preferences from a different source are not current choices.
+        delete journalTask.entities.period;
+        delete journalTask.entities.branch;
+        journalTask.requires_clarification = true;
+        journalTask.clarification_question = EMPLOYEE_JOURNAL_CALENDAR_CHANGED;
+        plan.context.unresolved_references = [
+          ...new Set([
+            ...plan.context.unresolved_references,
+            'period',
+            'branch',
+          ]),
+        ];
+      } else if (
+        typeof journalTask.entities.period === 'string' &&
+        ['today', 'tomorrow', 'сегодня', 'завтра'].includes(
+          journalTask.entities.period,
+        )
+      ) {
+        // A legacy relative period has no confirmed branch-day anchor. Do not
+        // resolve it again using a later clock or the tenant's different zone.
+        delete journalTask.entities.period;
+        journalTask.requires_clarification = true;
+        journalTask.clarification_question = EMPLOYEE_JOURNAL_DATE_QUESTION;
+        plan.context.unresolved_references = [
+          ...new Set([...plan.context.unresolved_references, 'period']),
+        ];
+      }
+    }
     const timezone = await this.resolveBusinessTimezone(
       this.requireTenant(user),
     );

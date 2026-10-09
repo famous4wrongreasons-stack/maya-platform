@@ -14,7 +14,12 @@ import {
   CrmProvider,
   UserRole,
 } from '../../src/common/domain.enums';
-import { decodeChatReply } from '../../src/widgets/stores/chat-reply-codec';
+import {
+  chatReplyId,
+  decodeChatCompletion,
+  decodeChatReply,
+  isChatReply,
+} from '../../src/widgets/stores/chat-reply-codec';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import {
   bootHttp,
@@ -26,6 +31,8 @@ import { assertProofDatabase } from './support/proof-db-guard';
 // Keep AppModule bootstrap ahead of the existing CRM owner import cycle.
 import { CrmService } from '../../src/crm/crm.service';
 import { TenantContextService } from '../../src/tenancy/tenant-context.service';
+import * as employeeJournalOwner from '../../src/ai-tools/employee-journal-read';
+import { AppointmentPeriodReader } from '../../src/business-facts/appointment-period.reader';
 
 const stage = process.env.JEST_EMPLOYEE_JOURNAL_STAGE;
 const receipt = process.env.JEST_EMPLOYEE_JOURNAL_RECEIPT;
@@ -48,6 +55,14 @@ const receiptFile: string = receipt;
 const BRANCH_TIMEZONE = 'Pacific/Kiritimati';
 const TENANT_TIMEZONE = 'Pacific/Honolulu';
 const BRANCH_NAME = 'основной филиал';
+const CONTROLLED_TIMEZONE = 'America/New_York';
+const CIVIL_BEFORE = '2026-11-01T03:59:59.000Z';
+const CIVIL_AFTER = '2026-11-01T04:00:01.000Z';
+const ORIGINAL_CIVIL_DAY = '2026-11-01';
+const DST_FROM = '2026-11-01T04:00:00.000Z';
+const DST_TO_INCLUSIVE = '2026-11-02T04:59:59.999Z';
+const VARIANTS = ['midnight', 'source', 'timezone', 'branch'] as const;
+type JournalVariant = (typeof VARIANTS)[number];
 const TOKEN = 'employee-journal-synthetic-no-credential';
 const PRIVATE_FIXTURE = [
   'PRIVATE_SYNTHETIC_CLIENT',
@@ -78,6 +93,7 @@ type Salon = {
   branchId: string;
   otherBranchId: string;
   company: number;
+  journalVariant?: JournalVariant;
 };
 type Scenario = {
   text: string;
@@ -85,6 +101,7 @@ type Scenario = {
   employee: string;
   branch?: string;
   compound?: boolean;
+  followup?: boolean;
 };
 const EXACT: Scenario = {
   text: 'Покажи записи Артёма на завтра',
@@ -109,6 +126,23 @@ const OTHER_BRANCH: Scenario = {
   employee: 'Артём',
   branch: 'другой филиал',
 };
+const FULL_NAME_ONLY: Scenario = {
+  text: 'Саша Иванов',
+  employee: 'Саша Иванов',
+  followup: true,
+};
+type PendingJournal = {
+  variant: JournalVariant;
+  tenantId: string;
+  conversationId: string;
+  userTurnId: string;
+  assistantTurnId: string;
+  reply: string;
+  contextHash: string;
+  markerHash: string;
+  sourceRevision: string;
+  graph: string;
+};
 type Saved = {
   contract: 'synthetic-employee-journal-read-proof/1';
   database: string;
@@ -125,6 +159,7 @@ type Saved = {
   runId: string;
   graph: string;
   business: string;
+  pendingJournals: PendingJournal[];
 };
 
 describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, SYNTHETIC CRM]', () => {
@@ -149,6 +184,10 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
     partial: boolean;
     references: Record<string, unknown>[];
   }> = [];
+  const pendingJournals: PendingJournal[] = [];
+  const continuationReceipts: Record<string, unknown>[] = [];
+  const calendarInputs: Record<string, unknown>[] = [];
+  const periodReads: Record<string, unknown>[] = [];
   const report: Record<string, unknown> = {
     contract: 'synthetic-employee-journal-read-observations/1',
     stage,
@@ -166,9 +205,18 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
     realAnalyticsAndPeriodReader: true,
     c9ReadsPerPositive: 2,
     nativeGetCountIsNotC9ReadCount: true,
-    isolatedUtterancesOnly: true,
+    isolatedUtterancesOnly: false,
+    supplementalCalendarContinuation: {
+      initialUtterance: AMBIGUOUS.text,
+      clarificationUtterance: FULL_NAME_ONLY.text,
+      variants: VARIANTS,
+      controlledCivilInputOnly: true,
+      originalCorpusModified: false,
+    },
     fullDialogueReclassification: false,
     full48Reclassification: false,
+    calendarQualification:
+      'CONTROLLED_CIVIL_INPUT_TO_REAL_JOURNAL_HELPER_ONLY_AUTH_TIMERS_AND_RETENTION_USE_REAL_CLOCK',
   };
   const respond = (data: unknown) =>
     new Response(JSON.stringify({ success: true, data }), { status: 200 });
@@ -183,6 +231,8 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
       assert.equal(saved.sourceBindingsDigest, sourceBindingsDigest);
       assert.notEqual(saved.pid, process.pid);
       salons.push(...saved.salons);
+      assert.equal(saved.pendingJournals.length, VARIANTS.length);
+      pendingJournals.push(...saved.pendingJournals);
     }
     // No original fetch fallback: every non-enumerated call fails before I/O.
     jest.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
@@ -228,6 +278,9 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
           match[2],
         );
       if (slot && Number(slot[1]) === salon.company && !url.search) {
+        expect(slot[3]).toBe(
+          salon.journalVariant ? ORIGINAL_CIVIL_DAY : tomorrow(),
+        );
         const member = roster.find((row) => String(row.id) === slot[2]);
         assert.ok(member);
         transport.push({
@@ -251,8 +304,8 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
         const partial = staffId === '72';
         expect(['71', '72']).toContain(staffId);
         expect(query).toEqual({
-          start_date: tomorrow(),
-          end_date: tomorrow(),
+          start_date: salon.journalVariant ? ORIGINAL_CIVIL_DAY : tomorrow(),
+          end_date: salon.journalVariant ? ORIGINAL_CIVIL_DAY : tomorrow(),
           staff_id: staffId,
           count: '200',
           page: String(page),
@@ -319,6 +372,70 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
     db = await bootFixtureContext();
     http = await bootHttp();
     http.app.get(ConfigService).set('AI_CORE_MAX_TOOL_STEPS', '2');
+    const actualJournalOwner = employeeJournalOwner.readEmployeeJournal;
+    jest
+      .spyOn(employeeJournalOwner, 'readEmployeeJournal')
+      .mockImplementation((input) => {
+        const salon = salons.find(
+          (row) => row.tenant.id === input.actor.tenantId,
+        );
+        if (!salon?.journalVariant) return actualJournalOwner(input);
+        const now = stage === 'prepare' ? CIVIL_BEFORE : CIVIL_AFTER;
+        calendarInputs.push({
+          tenantHash: digest(salon.tenant.id),
+          variant: salon.journalVariant,
+          now,
+          qualification:
+            'PASSTHROUGH_REAL_HELPER_EXPLICIT_CIVIL_NOW_ARGUMENT_ONLY',
+        });
+        return actualJournalOwner({ ...input, now: new Date(now) });
+      });
+    const periodOwner = http.app.get(AppointmentPeriodReader);
+    const actualPeriodRead = periodOwner.readProviderJournal.bind(periodOwner);
+    jest
+      .spyOn(periodOwner, 'readProviderJournal')
+      .mockImplementation(async (...args) => {
+        const salon = salons.find((row) => row.tenant.id === args[0]);
+        if (!salon?.journalVariant) return actualPeriodRead(...args);
+        expect(salon.journalVariant).toBe('midnight');
+        expect(args[1]).toEqual({
+          from: DST_FROM,
+          to: DST_TO_INCLUSIVE,
+          timezone: CONTROLLED_TIMEZONE,
+        });
+        expect(args[2]?.providerId).toBe('72');
+        expect(args[2]?.source).toMatchObject({
+          branchId: salon.branchId,
+          externalStaffId: '72',
+          timezone: CONTROLLED_TIMEZONE,
+        });
+        expect(Date.parse(args[1].to) - Date.parse(args[1].from) + 1).toBe(
+          25 * 3600000,
+        );
+        const result = await actualPeriodRead(...args);
+        periodReads.push({
+          tenantHash: digest(salon.tenant.id),
+          variant: salon.journalVariant,
+          from: args[1].from,
+          toInclusive: args[1].to,
+          timezone: args[1].timezone,
+          staffId: args[2]?.providerId,
+          sourceHash: args[2]?.source?.sourceHash,
+          actualResultHash: digest(result),
+          qualification:
+            'PASSTHROUGH_CANONICAL_PERIOD_READER_NATIVE_SYNTHETIC_GET',
+        });
+        return result;
+      });
+    const civilDate = (instant: string) =>
+      new Intl.DateTimeFormat('en-CA', {
+        timeZone: CONTROLLED_TIMEZONE,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date(instant));
+    expect(civilDate(CIVIL_BEFORE)).toBe('2026-10-31');
+    expect(civilDate(CIVIL_AFTER)).toBe(ORIGINAL_CIVIL_DAY);
     const model = http.app.get(AiCoreModelService);
     const parser = model as unknown as {
       validatePlanningResponse(
@@ -340,7 +457,11 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
       const planned = parser.validatePlanningResponse(
         JSON.stringify({
           semantic_plan: {
-            dialogue_act: active.compound ? 'compound_request' : 'request',
+            dialogue_act: active.followup
+              ? 'clarification_answer'
+              : active.compound
+                ? 'compound_request'
+                : 'request',
             tasks: [
               ...(active.compound
                 ? [
@@ -357,7 +478,7 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
                 intent: 'operations.journal_day',
                 entities: {
                   employee: active.employee,
-                  period: 'tomorrow',
+                  ...(active.followup ? {} : { period: 'tomorrow' }),
                   ...(active.branch ? { branch: active.branch } : {}),
                 },
                 depends_on: active.compound ? ['catalog'] : [],
@@ -424,6 +545,9 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
     report.checkpoints = checkpoints;
     report.deniedPlans = deniedPlans;
     report.sourceReceipts = sourceReceipts;
+    report.calendarInputs = calendarInputs;
+    report.periodReads = periodReads;
+    report.continuationReceipts = continuationReceipts;
     try {
       writeFileSync(
         path.join(outputDirectory, `${stage}-observations.json`),
@@ -458,7 +582,10 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
       >`SELECT pg_postmaster_start_time()::text AS value`
     )[0].value;
   }
-  async function seed(company: number): Promise<Salon> {
+  async function seed(
+    company: number,
+    journalVariant?: JournalVariant,
+  ): Promise<Salon> {
     const fx = fixturesForHttp(db, http);
     const tenant = await fx.tenant(
       'Employee journal synthetic',
@@ -486,7 +613,7 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
       data: {
         tenantId: tenant.id,
         name: BRANCH_NAME,
-        timezone: BRANCH_TIMEZONE,
+        timezone: journalVariant ? CONTROLLED_TIMEZONE : BRANCH_TIMEZONE,
       },
     });
     const other = await db.prisma.branch.create({
@@ -522,8 +649,9 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
           active: true,
         },
       });
-      // Deliberately unlinked: one ambiguous Sasha and the uniquely named Elena.
-      if (member.id === 73 || member.id === 74) continue;
+      // The original tenants keep one ambiguous Sasha unlinked. Calendar
+      // variants link both Sashas; the uniquely named Elena remains unlinked.
+      if ((!journalVariant && member.id === 73) || member.id === 74) continue;
       await db.prisma.staffProviderLink.create({
         data: {
           tenantId: tenant.id,
@@ -560,6 +688,7 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
       branchId: branch.id,
       otherBranchId: other.id,
       company,
+      ...(journalVariant ? { journalVariant } : {}),
     };
     salons.push(salon);
     return salon;
@@ -608,7 +737,11 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
       errorMessage,
     });
     expect(modelCalls - beforeModels).toBeLessThanOrEqual(1);
-    return { status: result.status, body: object(result.body) };
+    return {
+      status: result.status,
+      body: object(result.body),
+      modelCalls: modelCalls - beforeModels,
+    };
   }
   function sanitizedReply(value: string) {
     const privateValues = [
@@ -765,11 +898,13 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
     response: { status: number; body: Record<string, unknown> },
     staff = roster[0],
     partial = false,
+    date = tomorrow(),
+    timezone = BRANCH_TIMEZONE,
   ) {
     expect(response.status).toBe(201);
     expect(response.body.action).toBeNull();
     expect(object(response.body.grounding).status).toBe('verified');
-    const [year, month, day] = tomorrow().split('-');
+    const [year, month, day] = date.split('-');
     expect(response.body.reply).toContain(
       `Журнал на ${day}.${month}.${year}: ${staff.name}.`,
     );
@@ -777,7 +912,7 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
     expect(response.body.reply).toContain(SERVICE);
     expect(response.body.reply).toContain('отмечена завершённой в CRM');
     expect(response.body.reply).toContain(`Филиал: ${BRANCH_NAME}`);
-    expect(response.body.reply).toContain(`Часовой пояс: ${BRANCH_TIMEZONE}`);
+    expect(response.body.reply).toContain(`Часовой пояс: ${timezone}`);
     expect(response.body.reply).toContain(
       'присутствие и свободные окна этим ответом не подтверждаются',
     );
@@ -858,13 +993,15 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
           appointments_returned: partial ? 100 : 2,
           appointments_truncated: partial,
           completeness: { status: partial ? 'incomplete' : 'complete' },
-          date: tomorrow(),
+          date: salon.journalVariant ? ORIGINAL_CIVIL_DAY : tomorrow(),
           read_scope: {
             contract: 'maya.employee-journal-read/1',
             branch_id: salon.branchId,
             staff_id: staffId,
             source_hash: current.sourceHash,
-            timezone: BRANCH_TIMEZONE,
+            timezone: salon.journalVariant
+              ? CONTROLLED_TIMEZONE
+              : BRANCH_TIMEZONE,
           },
         });
       }
@@ -903,11 +1040,190 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
     });
     return coordination.run_id;
   }
+  async function persistedCompletion(
+    salon: Salon,
+    response: Record<string, unknown>,
+  ) {
+    const userTurn = object(response.user_turn);
+    assert.ok(
+      typeof userTurn.turnId === 'string' &&
+        typeof userTurn.conversationId === 'string',
+    );
+    const now = new Date();
+    const parent = await db.prisma.widgetTimelineTurn.findFirstOrThrow({
+      where: {
+        id: userTurn.turnId,
+        tenantId: salon.tenant.id,
+        conversationId: userTurn.conversationId,
+        role: 'user',
+        channel: 'pwa',
+        erasedAt: null,
+        retentionUntil: { gt: now },
+      },
+    });
+    const candidates = await db.prisma.widgetTimelineTurn.findMany({
+      where: {
+        tenantId: salon.tenant.id,
+        conversationId: parent.conversationId,
+        principalProofHash: parent.principalProofHash,
+        role: 'assistant',
+        channel: 'pwa',
+        turnIndex: { gt: parent.turnIndex },
+        erasedAt: null,
+        retentionUntil: { gt: now },
+      },
+      orderBy: { turnIndex: 'desc' },
+      take: 3,
+    });
+    const matched = candidates.flatMap((stored) => {
+      if (stored.textContent === null || !isChatReply(stored.textContent))
+        return [];
+      const completion = decodeChatCompletion(
+        db.encryption,
+        stored.textContent,
+      );
+      return completion.parentId === parent.id &&
+        completion.text === response.reply
+        ? [{ stored, completion }]
+        : [];
+    });
+    expect(matched).toHaveLength(1);
+    const { stored, completion } = matched[0];
+    expect(stored.id).toBe(
+      chatReplyId(salon.tenant.id, `${parent.id}:${completion.completionHash}`),
+    );
+    for (const value of [TOKEN, ...PRIVATE_FIXTURE])
+      expect(JSON.stringify(completion)).not.toContain(value);
+    return { parent, stored, completion };
+  }
+  async function pendingEvidence(
+    salon: Salon,
+    response: {
+      status: number;
+      body: Record<string, unknown>;
+      modelCalls: number;
+    },
+  ) {
+    assert.ok(salon.journalVariant);
+    expect(response.status).toBe(201);
+    expect(response.modelCalls).toBe(1);
+    expect(object(response.body.grounding).status).toBe('blocked');
+    expect(response.body.action).toBeNull();
+    expect(response.body.resolution).toBeUndefined();
+    expect(response.body.reply).toBe(
+      employeeJournalOwner.EMPLOYEE_JOURNAL_EMPLOYEE_QUESTION,
+    );
+    expect(response.body.tools_used).toEqual([
+      expect.objectContaining({
+        name: 'catalog.staff.read',
+        status: 'completed',
+      }),
+    ]);
+    const coordination = object(response.body.coordination);
+    expect(coordination.state).toBe('COMPLETED');
+    assert.ok(typeof coordination.run_id === 'string');
+    const works = await db.prisma.c9WorkReceipt.findMany({
+      where: { tenantId: salon.tenant.id, runId: coordination.run_id },
+    });
+    expect(works).toHaveLength(1);
+    expect(works[0]).toMatchObject({
+      taskKey: 'catalog.staff.read',
+      kind: 'TOOL_READ',
+      state: 'SETTLED',
+    });
+    const ref = object(works[0].resultJson);
+    expect(ref.sourceType).toBe('AiToolExecution');
+    assert.ok(typeof ref.executionId === 'string');
+    const execution = await db.prisma.aiToolExecution.findUniqueOrThrow({
+      where: { id: ref.executionId },
+    });
+    expect(execution).toMatchObject({
+      tenantId: salon.tenant.id,
+      actorUserId: salon.owner.id,
+      toolName: 'catalog.staff.read',
+      status: 'completed',
+    });
+    const { parent, stored, completion } = await persistedCompletion(
+      salon,
+      response.body,
+    );
+    const context = object(completion.semanticContext),
+      plan = object(context.plan);
+    expect(context.version).toBe('maya.chat-semantic-context/1');
+    assert.ok(Array.isArray(plan.tasks));
+    expect(plan.tasks).toHaveLength(1);
+    const task = object(plan.tasks[0]);
+    expect(task.intent).toBe('operations.journal_day');
+    expect(task.requires_clarification).toBe(true);
+    expect(task.clarification_question).toBe(
+      employeeJournalOwner.EMPLOYEE_JOURNAL_EMPLOYEE_QUESTION,
+    );
+    expect(object(task.entities)).toMatchObject({
+      employee: 'Саша',
+      period: ORIGINAL_CIVIL_DAY,
+      branch: BRANCH_NAME,
+    });
+    expect(object(plan.context).journalCalendar).toBeUndefined();
+    const branch = await http.app.get(TenantContextService).runAsAuthPrincipal(
+      {
+        tenantId: salon.tenant.id,
+        userId: salon.owner.id,
+        role: salon.owner.role,
+      },
+      () =>
+        http.app
+          .get(CrmService)
+          .resolveConfiguredBookingBranch(salon.tenant.id),
+    );
+    assert.ok(branch);
+    const marker = object(context.journalCalendar);
+    expect(marker).toEqual({
+      version: 'maya.journal-calendar-preference/1',
+      taskId: task.id,
+      date: ORIGINAL_CIVIL_DAY,
+      branchId: salon.branchId,
+      timezone: CONTROLLED_TIMEZONE,
+      sourceRevision: branch.sourceRevision,
+    });
+    const pending: PendingJournal = {
+      variant: salon.journalVariant,
+      tenantId: salon.tenant.id,
+      conversationId: parent.conversationId,
+      userTurnId: parent.id,
+      assistantTurnId: stored.id,
+      reply: completion.text,
+      contextHash: digest(context),
+      markerHash: digest(marker),
+      sourceRevision: branch.sourceRevision,
+      graph: await graph(salon.tenant.id),
+    };
+    pendingJournals.push(pending);
+    continuationReceipts.push({
+      variant: pending.variant,
+      phase: 'pendingBeforeRestart',
+      goalCompleted: false,
+      civilNow: CIVIL_BEFORE,
+      date: ORIGINAL_CIVIL_DAY,
+      timezone: CONTROLLED_TIMEZONE,
+      linkedAmbiguousCandidates: 2,
+      catalogC9Reads: 1,
+      journalReads: 0,
+      tenantHash: digest(salon.tenant.id),
+      parentHash: digest(parent.id),
+      contextHash: pending.contextHash,
+      markerHash: pending.markerHash,
+      catalogWorkHash: digest(works[0].id),
+      catalogInputHash: execution.inputHash,
+    });
+  }
   it('qualifies only actual scoped READ results, survives restart, and refuses source/authority drift', async () => {
     if (stage === 'prepare') {
       expect(tomorrow()).not.toBe(tomorrow(TENANT_TIMEZONE));
       const a = await seed(99301),
         b = await seed(99302);
+      const calendarSalons: Salon[] = [];
+      for (const [index, variant] of VARIANTS.entries())
+        calendarSalons.push(await seed(99303 + index, variant));
       const token = await login(a),
         foreignToken = await login(b),
         restrictedToken = await login(a, a.restricted);
@@ -1060,6 +1376,29 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
       expect(turns.every((turn) => !turn.textContent?.includes('10:00'))).toBe(
         true,
       );
+      for (const salon of calendarSalons) {
+        expect(
+          await db.prisma.staffProviderLink.count({
+            where: {
+              tenantId: salon.tenant.id,
+              provider: CrmProvider.YCLIENTS,
+              unlinkedAt: null,
+              externalId: { in: ['72', '73'] },
+              staff: { active: true, branchId: salon.branchId },
+            },
+          }),
+        ).toBe(2);
+        const beforeJournal = transport.filter(
+          (row) => row.resource === 'records',
+        ).length;
+        const beforePeriods = periodReads.length;
+        const pending = await chat(await login(salon), AMBIGUOUS);
+        await pendingEvidence(salon, pending);
+        expect(
+          transport.filter((row) => row.resource === 'records'),
+        ).toHaveLength(beforeJournal);
+        expect(periodReads).toHaveLength(beforePeriods);
+      }
       expect(await business()).toBe(before);
       noWrites(mark);
       assert.ok(typeof first.body.reply === 'string');
@@ -1079,6 +1418,7 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
         runId,
         graph: await graph(a.tenant.id),
         business: before,
+        pendingJournals,
       };
       writeFileSync(receiptFile, JSON.stringify(saved) + '\n', {
         mode: 0o600,
@@ -1177,6 +1517,201 @@ describe('employee journal actual HTTP/auth/CI/C9/native READ [SCRIPTED MODEL, S
         status: drift.status,
         readsAdded: transport.length - beforeDrift,
       };
+      // Separate source bindings keep the original A revocation/cache controls
+      // untouched. Only the semantic civil-date input crosses midnight.
+      for (const pending of pendingJournals) {
+        const salon = salons.find((row) => row.tenant.id === pending.tenantId);
+        assert.ok(salon?.journalVariant);
+        expect(salon.journalVariant).toBe(pending.variant);
+        expect(await graph(salon.tenant.id)).toBe(pending.graph);
+        const actorToken = await login(salon);
+        const beforeRestore = { reads: transport.length, models: modelCalls };
+        const restored = await request(http.app.getHttpServer())
+          .get('/api/ai/conversation')
+          .set('Authorization', `Bearer ${actorToken}`);
+        expect(restored.status).toBe(200);
+        expect(object(restored.body).conversationId).toBe(
+          pending.conversationId,
+        );
+        const restoredTurns = object(restored.body).turns;
+        assert.ok(Array.isArray(restoredTurns));
+        expect(
+          restoredTurns.some(
+            (row: unknown) =>
+              object(row).id === pending.assistantTurnId &&
+              object(row).text === pending.reply,
+          ),
+        ).toBe(true);
+        const stored = await persistedCompletion(salon, {
+          user_turn: {
+            turnId: pending.userTurnId,
+            conversationId: pending.conversationId,
+          },
+          reply: pending.reply,
+        });
+        expect(stored.stored.id).toBe(pending.assistantTurnId);
+        expect(digest(stored.completion.semanticContext)).toBe(
+          pending.contextHash,
+        );
+        expect(
+          digest(object(stored.completion.semanticContext).journalCalendar),
+        ).toBe(pending.markerHash);
+        expect(transport).toHaveLength(beforeRestore.reads);
+        expect(modelCalls).toBe(beforeRestore.models);
+        if (pending.variant === 'source') {
+          const integration = await db.prisma.crmIntegration.findUniqueOrThrow({
+            where: { tenantId: salon.tenant.id },
+          });
+          await db.prisma.crmIntegration.update({
+            where: { tenantId: salon.tenant.id },
+            data: {
+              updatedAt: new Date(integration.updatedAt.getTime() + 1000),
+            },
+          });
+        } else if (pending.variant === 'timezone') {
+          await db.prisma.branch.update({
+            where: { id: salon.branchId },
+            data: { timezone: 'America/Chicago' },
+          });
+        } else if (pending.variant === 'branch') {
+          await db.prisma.crmIntegration.update({
+            where: { tenantId: salon.tenant.id },
+            data: {
+              settingsJson: {
+                companyId: salon.company,
+                branchBinding: {
+                  contract: 'maya.crm-branch-binding/1',
+                  companyId: salon.company,
+                  branchId: salon.otherBranchId,
+                },
+              },
+            },
+          });
+        }
+        const nextRequestId = randomUUID();
+        const beforeContinuation = {
+          reads: transport.length,
+          periods: periodReads.length,
+        };
+        const continued = await chat(
+          actorToken,
+          FULL_NAME_ONLY,
+          nextRequestId,
+          pending.conversationId,
+        );
+        expect(continued.modelCalls).toBe(1);
+        if (pending.variant !== 'midnight') {
+          expect(continued.status).toBe(201);
+          expect(object(continued.body.grounding).status).toBe('blocked');
+          expect(continued.body.action).toBeNull();
+          expect(continued.body.resolution).toBeUndefined();
+          expect(continued.body.tools_used ?? []).toEqual([]);
+          expect(continued.body.reply).toBe(
+            employeeJournalOwner.EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+          );
+          expect(transport).toHaveLength(beforeContinuation.reads);
+          expect(periodReads).toHaveLength(beforeContinuation.periods);
+          expect(await graph(salon.tenant.id)).toBe(pending.graph);
+          continuationReceipts.push({
+            variant: pending.variant,
+            phase: 'changedBindingRefusedAfterRestart',
+            civilNow: CIVIL_AFTER,
+            previousContextHash: pending.contextHash,
+            status: continued.status,
+            nativeReadsAdded: 0,
+            periodReadsAdded: 0,
+            noJournalFactsExposed: true,
+          });
+          continue;
+        }
+        assertPositive(
+          continued,
+          roster[1],
+          true,
+          ORIGINAL_CIVIL_DAY,
+          CONTROLLED_TIMEZONE,
+        );
+        const runId = await evidence(salon, continued.body, '72', true);
+        const sourceHash = digest(sourceReceipts.at(-1));
+        expect(periodReads.length - beforeContinuation.periods).toBe(1);
+        expect(
+          transport
+            .slice(beforeContinuation.reads)
+            .filter((row) => row.resource === 'records'),
+        ).toEqual(
+          [1, 2].map((page) => ({
+            tenantHash: digest(salon.tenant.id),
+            resource: 'records',
+            staffId: '72',
+            date: ORIGINAL_CIVIL_DAY,
+            page,
+          })),
+        );
+        const completed = await persistedCompletion(salon, continued.body);
+        expect(completed.parent.principalProofHash).toBe(
+          stored.parent.principalProofHash,
+        );
+        const completedPlan = object(
+          object(completed.completion.semanticContext).plan,
+        );
+        assert.ok(Array.isArray(completedPlan.tasks));
+        expect(completedPlan.tasks).toHaveLength(1);
+        const completedTask = object(completedPlan.tasks[0]);
+        expect(completedTask.requires_clarification).toBe(false);
+        expect(object(completedTask.entities)).toMatchObject({
+          employee: 'Саша Иванов',
+          period: ORIGINAL_CIVIL_DAY,
+          branch: BRANCH_NAME,
+        });
+        expect(continued.body.reply).not.toContain('02.11.2026');
+        const beforeReplay = {
+          reads: transport.length,
+          periods: periodReads.length,
+          graph: await graph(salon.tenant.id),
+        };
+        expect(beforeReplay.graph).not.toBe(pending.graph);
+        const replayed = await chat(
+          actorToken,
+          FULL_NAME_ONLY,
+          nextRequestId,
+          pending.conversationId,
+        );
+        assertPositive(
+          replayed,
+          roster[1],
+          true,
+          ORIGINAL_CIVIL_DAY,
+          CONTROLLED_TIMEZONE,
+        );
+        expect(await evidence(salon, replayed.body, '72', true)).toBe(runId);
+        expect(digest(sourceReceipts.at(-1))).toBe(sourceHash);
+        expect(transport).toHaveLength(beforeReplay.reads);
+        expect(periodReads).toHaveLength(beforeReplay.periods);
+        expect(await graph(salon.tenant.id)).toBe(beforeReplay.graph);
+        continuationReceipts.push({
+          variant: pending.variant,
+          phase: 'fullNameOnlyAfterRestartAndMidnight',
+          goalCompleted: true,
+          sourceCompleteness:
+            'INCOMPLETE_NATIVE_PAGINATION_VISIBLE_NOT_FULL_JOURNAL_ACCEPTANCE',
+          civilBefore: CIVIL_BEFORE,
+          civilAfter: CIVIL_AFTER,
+          originalDate: ORIGINAL_CIVIL_DAY,
+          recalculatingTomorrowWouldBe: '2026-11-02',
+          timezone: CONTROLLED_TIMEZONE,
+          actualPeriod: periodReads.at(-1),
+          sourceReceiptHash: sourceHash,
+          currentTenantAndActor: true,
+          c9ReadCount: 2,
+          freshPeriodReads: 1,
+          replayNativeReads: 0,
+          replaySameC9Run: true,
+          pendingContextHash: pending.contextHash,
+          newUserTurnHash: digest(completed.parent.id),
+        });
+      }
+      expect(await business()).toBe(saved.business);
+      noWrites(mark);
     }
   });
 });

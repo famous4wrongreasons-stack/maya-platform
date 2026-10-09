@@ -3,8 +3,10 @@ import { UserRole } from '../common/domain.enums';
 import { ConversationIntelligenceService } from '../conversation-intelligence/conversation-intelligence.service';
 import type { CrmService } from '../crm/crm.service';
 import {
+  EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
   employeeJournalReply,
   employeeJournalTask,
+  type JournalCalendarPreference,
   readEmployeeJournal,
 } from './employee-journal-read';
 import type { StaffScheduleReadScope } from './staff-schedule-read-scope';
@@ -134,6 +136,7 @@ function fixture(twoTasks = false) {
     Promise.resolve(name === 'catalog.staff.read' ? catalog : journal),
   );
   const nameReferences = new Map<string, string>();
+  const retainCalendar = jest.fn<void, [JournalCalendarPreference]>();
   return {
     actor,
     branch,
@@ -146,7 +149,11 @@ function fixture(twoTasks = false) {
     journal,
     read,
     nameReferences,
-    run: () =>
+    retainCalendar,
+    run: (
+      now = new Date('2026-10-09T22:30:00.000Z'),
+      retainedCalendar?: JournalCalendarPreference,
+    ) =>
       readEmployeeJournal({
         actor,
         task,
@@ -154,7 +161,9 @@ function fixture(twoTasks = false) {
         read,
         nameReferences,
         unresolvedReferences: plan.context.unresolved_references,
-        now: new Date('2026-10-09T22:30:00.000Z'),
+        now,
+        retainCalendar,
+        retainedCalendar,
       }),
     present: () =>
       employeeJournalReply({
@@ -168,6 +177,115 @@ function fixture(twoTasks = false) {
 }
 
 describe('employee journal existing owners [synthetic component]', () => {
+  it.each([
+    [
+      'Europe/Moscow',
+      '2026-10-09T20:59:00.000Z',
+      '2026-10-09T21:01:00.000Z',
+      '2026-10-10',
+    ],
+    [
+      'Europe/Berlin',
+      '2026-03-28T22:59:00.000Z',
+      '2026-03-28T23:01:00.000Z',
+      '2026-03-29',
+    ],
+    [
+      'Europe/Berlin',
+      '2026-10-24T21:59:00.000Z',
+      '2026-10-24T22:01:00.000Z',
+      '2026-10-25',
+    ],
+  ])(
+    'keeps the requested civil day across employee clarification and midnight in %s',
+    async (timezone, before, after, date) => {
+      const f = fixture();
+      f.branch.timezone = timezone;
+      f.source.timezone = timezone;
+      f.journal.result.timezone = timezone;
+      f.journal.result.read_scope.timezone = timezone;
+      f.catalog.result.staff.push({ id: '72', name: 'Артём' });
+      const pending = await f.run(new Date(before));
+      expect(pending.status).toBe('blocked');
+      expect(pending.reply).toContain('полное имя');
+      expect(f.read.mock.calls.map(([name]) => name)).toEqual([
+        'catalog.staff.read',
+      ]);
+      expect(f.task.entities.period).toBe(date);
+      expect(f.task.entities.branch).toBe(f.branch.name);
+      expect(f.retainCalendar).toHaveBeenCalledWith({
+        version: 'maya.journal-calendar-preference/1',
+        taskId: f.task.id,
+        date,
+        branchId: f.branch.id,
+        timezone,
+        sourceRevision: f.branch.sourceRevision,
+      });
+      f.catalog.result.staff[0].name = 'Артём Иванов';
+      f.task.entities.employee = 'Артём Иванов';
+      f.journal.result.staff_scope.name = 'Артём Иванов';
+      f.journal.result.date = date;
+      const answer = await f.run(new Date(after));
+      expect(answer.status).toBe('verified');
+      expect(f.read).toHaveBeenLastCalledWith(
+        'operations.journal.read',
+        { date, staff_id: '71' },
+        f.scope,
+      );
+    },
+  );
+  it.each(['stale', 'failed', 'malformed'])(
+    'cannot retain a calendar from a %s catalog',
+    async (kind) => {
+      const f = fixture();
+      if (kind === 'stale') Object.assign(f.catalog, { stale: true });
+      if (kind === 'failed') f.catalog.status = 'failed';
+      if (kind === 'malformed')
+        Object.assign(f.catalog, { result: { staff: null } });
+      expect((await f.run()).status).toBe('blocked');
+      expect(f.retainCalendar).not.toHaveBeenCalled();
+      expect(f.task.entities.period).toBe('tomorrow');
+      expect(f.read).toHaveBeenCalledTimes(1);
+    },
+  );
+  it.each(['2026-02-29', '2026-04-31', '2026-11-01\n'])(
+    'rejects impossible or malformed calendar date %s before catalog',
+    async (date) => {
+      const f = fixture();
+      f.task.entities.period = date;
+      expect((await f.run()).status).toBe('blocked');
+      expect(f.read).not.toHaveBeenCalled();
+      expect(f.retainCalendar).not.toHaveBeenCalled();
+    },
+  );
+  it.each(['branchId', 'timezone', 'sourceRevision'] as const)(
+    'invalidates retained %s before catalog and requires fresh scope',
+    async (field) => {
+      const f = fixture();
+      const calendar: JournalCalendarPreference = {
+        version: 'maya.journal-calendar-preference/1',
+        taskId: f.task.id,
+        date: '2026-10-11',
+        branchId: f.branch.id,
+        timezone: f.branch.timezone,
+        sourceRevision: f.branch.sourceRevision,
+        [field]: 'changed',
+      };
+      const answer = await f.run(undefined, calendar);
+      expect(answer).toEqual({
+        status: 'blocked',
+        reply: EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+      });
+      expect(f.task.entities.period).toBeUndefined();
+      expect(f.task.entities.branch).toBeUndefined();
+      expect(f.read).not.toHaveBeenCalled();
+      expect(f.retainCalendar).not.toHaveBeenCalled();
+      f.actor.branchId = 'forbidden';
+      await expect(f.run(undefined, calendar)).rejects.toBeInstanceOf(
+        ForbiddenException,
+      );
+    },
+  );
   it.each([false, true])(
     'reads exactly current catalog then employee journal in branch timezone (dependency=%s)',
     async (two) => {

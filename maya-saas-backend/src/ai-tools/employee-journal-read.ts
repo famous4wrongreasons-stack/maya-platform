@@ -10,11 +10,181 @@ import {
   bookingPreferenceDate,
 } from './booking-catalog-binding';
 import type { StaffScheduleReadScope } from './staff-schedule-read-scope';
+import { isUsableTimezone } from '../tenants/salon-timezone';
+
+export const EMPLOYEE_JOURNAL_EMPLOYEE_QUESTION =
+  'Не удалось однозначно выбрать сотрудника в текущем каталоге филиала. Уточните его полное имя; журнал пока не подтверждён.';
+export const EMPLOYEE_JOURNAL_DATE_QUESTION =
+  'На какую одну дату показать журнал выбранного сотрудника?';
+export const EMPLOYEE_JOURNAL_CALENDAR_CHANGED =
+  'Источник или часовой пояс филиала изменился. Укажите дату, филиал и полное имя сотрудника заново для проверки журнала.';
+
+/** Preferences retained inside the existing erasable semantic context. This is
+ * not a receipt or authority: every continuation still reads current owners. */
+export type JournalCalendarPreference = Readonly<{
+  version: 'maya.journal-calendar-preference/1';
+  taskId: string;
+  date: string;
+  branchId: string;
+  timezone: string;
+  sourceRevision: string;
+}>;
+
+export function isJournalDate(value: unknown): value is string {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value))
+    return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return (
+    Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value
+  );
+}
+
+export function journalCalendarPreference(
+  value: unknown,
+  plan: ConversationSemanticPlan,
+): JournalCalendarPreference | null {
+  const saved = record(value),
+    task = plan.tasks.at(-1);
+  if (
+    !task ||
+    task.intent !== 'operations.journal_day' ||
+    task.permission.status !== 'allowed' ||
+    task.tool.name !== 'operations.journal.read' ||
+    ![1, 2].includes(plan.tasks.length) ||
+    Object.keys(saved).sort().join(',') !==
+      'branchId,date,sourceRevision,taskId,timezone,version' ||
+    saved.version !== 'maya.journal-calendar-preference/1' ||
+    saved.taskId !== task.id ||
+    !isJournalDate(saved.date) ||
+    saved.date !== task.entities.period ||
+    typeof task.entities.branch !== 'string' ||
+    !task.entities.branch.trim() ||
+    task.entities.branch.startsWith('[name removed]') ||
+    typeof saved.branchId !== 'string' ||
+    !saved.branchId.trim() ||
+    saved.branchId !== saved.branchId.trim() ||
+    [...saved.branchId].some(
+      (c) => c.charCodeAt(0) <= 31 || c.charCodeAt(0) === 127,
+    ) ||
+    saved.branchId.length > 128 ||
+    !isUsableTimezone(saved.timezone) ||
+    saved.timezone !== saved.timezone.trim() ||
+    typeof saved.sourceRevision !== 'string' ||
+    saved.sourceRevision.length !== 64 ||
+    !/^[a-f0-9]{64}$/.test(saved.sourceRevision)
+  )
+    return null;
+  return Object.freeze({
+    version: 'maya.journal-calendar-preference/1',
+    taskId: task.id,
+    date: saved.date,
+    branchId: saved.branchId,
+    timezone: saved.timezone,
+    sourceRevision: saved.sourceRevision,
+  });
+}
+
+/** One employee clarification may carry a current, server-pinned calendar.
+ * Fresh period/branch corrections win; no employee identity is restored here. */
+export function carryEmployeeJournalCalendarPreference(
+  current: ConversationSemanticPlan | null,
+  previous: ConversationSemanticPlan | null,
+  calendar: JournalCalendarPreference | undefined,
+): boolean {
+  if (
+    !current ||
+    !previous ||
+    !['clarification_answer', 'correction'].includes(current.dialogue_act)
+  )
+    return false;
+  const task = employeeJournalContinuationTask(current, previous),
+    old = previous.tasks.at(-1);
+  if (!task || !old) return false;
+  if (old.clarification_question === EMPLOYEE_JOURNAL_CALENDAR_CHANGED) {
+    for (const key of ['period', 'branch']) {
+      if (!Object.hasOwn(task.entities, key))
+        current.context.unresolved_references = [
+          ...new Set([...current.context.unresolved_references, key]),
+        ];
+    }
+    if (
+      current.context.unresolved_references.some((key) =>
+        ['period', 'branch'].includes(key),
+      )
+    ) {
+      task.requires_clarification = true;
+      task.clarification_question = EMPLOYEE_JOURNAL_CALENDAR_CHANGED;
+    }
+    return false;
+  }
+  if (
+    !calendar ||
+    !journalCalendarPreference(calendar, previous) ||
+    !old.requires_clarification ||
+    old.clarification_question !== EMPLOYEE_JOURNAL_EMPLOYEE_QUESTION
+  )
+    return false;
+  for (const key of ['period', 'branch']) {
+    if (
+      current.context.replaced_slots.includes(key) &&
+      !Object.hasOwn(task.entities, key)
+    )
+      current.context.unresolved_references = [
+        ...new Set([...current.context.unresolved_references, key]),
+      ];
+    if (
+      !Object.hasOwn(task.entities, key) &&
+      !current.context.unresolved_references.includes(key)
+    ) {
+      task.entities[key] = old.entities[key];
+      current.context.carried_slots = [
+        ...new Set([...current.context.carried_slots, key]),
+      ];
+    }
+  }
+  return (
+    task.entities.branch === old.entities.branch &&
+    !current.context.replaced_slots.includes('branch') &&
+    !current.context.unresolved_references.some((key) =>
+      ['period', 'branch'].includes(key),
+    )
+  );
+}
 
 /** Exact existing employee journal task, optionally preceded by its public catalog READ.
  * This consumes a validated plan; it does not detect intent or grant access. */
 export function employeeJournalTask(
   plan: ConversationSemanticPlan | null,
+): ConversationSemanticTask | null {
+  return journalTaskShape(plan, true);
+}
+
+/** A date-only correction to a pending employee question must not widen into
+ * the separate whole-team journal. Missing employee stays unresolved. */
+export function employeeJournalContinuationTask(
+  current: ConversationSemanticPlan | null,
+  previous: ConversationSemanticPlan | null,
+): ConversationSemanticTask | null {
+  const old = previous?.tasks.at(-1);
+  if (
+    !current ||
+    !['clarification_answer', 'correction'].includes(current.dialogue_act) ||
+    !old ||
+    old.intent !== 'operations.journal_day' ||
+    !old.requires_clarification ||
+    ![
+      EMPLOYEE_JOURNAL_EMPLOYEE_QUESTION,
+      EMPLOYEE_JOURNAL_DATE_QUESTION,
+      EMPLOYEE_JOURNAL_CALENDAR_CHANGED,
+    ].includes(old.clarification_question ?? '')
+  )
+    return null;
+  return journalTaskShape(current, false);
+}
+
+function journalTaskShape(
+  plan: ConversationSemanticPlan | null,
+  requireEmployee: boolean,
 ): ConversationSemanticTask | null {
   if (
     !plan ||
@@ -38,8 +208,9 @@ export function employeeJournalTask(
     task.tool.status !== 'ready' ||
     task.tool.name !== 'operations.journal.read' ||
     task.requires_confirmation ||
-    typeof task.entities.employee !== 'string' ||
-    !task.entities.employee.trim() ||
+    ((requireEmployee || Object.hasOwn(task.entities, 'employee')) &&
+      (typeof task.entities.employee !== 'string' ||
+        !task.entities.employee.trim())) ||
     Object.keys(task.entities).some(
       (key) => !['employee', 'period', 'branch'].includes(key),
     ) ||
@@ -197,6 +368,8 @@ export async function readEmployeeJournal(input: {
     scope: StaffScheduleReadScope,
   ) => Promise<unknown>;
   now?: Date;
+  retainedCalendar?: JournalCalendarPreference;
+  retainCalendar?: (calendar: JournalCalendarPreference) => void;
 }): Promise<{ reply: string; status: 'verified' | 'blocked' }> {
   const tenantId = input.actor.tenantId!;
   if (
@@ -204,13 +377,28 @@ export async function readEmployeeJournal(input: {
     !input.task.entities.branch
   )
     return {
-      reply: 'Уточните филиал, для которого проверить журнал сотрудника.',
+      reply:
+        input.task.clarification_question === EMPLOYEE_JOURNAL_CALENDAR_CHANGED
+          ? EMPLOYEE_JOURNAL_CALENDAR_CHANGED
+          : 'Уточните филиал, для которого проверить журнал сотрудника.',
       status: 'blocked',
     };
   const branch = await input.crm.resolveConfiguredBookingBranch(tenantId);
   if (!branch) return unavailable;
   if (input.actor.branchId && input.actor.branchId !== branch.id)
     throw new ForbiddenException('staff_schedule_branch_forbidden');
+  if (
+    input.retainedCalendar &&
+    (branch.id !== input.retainedCalendar.branchId ||
+      branch.timezone !== input.retainedCalendar.timezone ||
+      branch.sourceRevision !== input.retainedCalendar.sourceRevision)
+  ) {
+    delete input.task.entities.period;
+    delete input.task.entities.branch;
+    input.task.requires_clarification = true;
+    input.task.clarification_question = EMPLOYEE_JOURNAL_CALENDAR_CHANGED;
+    return { reply: EMPLOYEE_JOURNAL_CALENDAR_CHANGED, status: 'blocked' };
+  }
   if (Object.hasOwn(input.task.entities, 'branch')) {
     const preference = input.task.entities.branch;
     if (typeof preference !== 'string' || !preference.trim())
@@ -235,11 +423,14 @@ export async function readEmployeeJournal(input: {
     branch.timezone,
     input.now,
   );
-  if (!date)
+  if (!date || !isJournalDate(date)) {
+    input.task.requires_clarification = true;
+    input.task.clarification_question = EMPLOYEE_JOURNAL_DATE_QUESTION;
     return {
-      reply: 'На какую одну дату показать журнал выбранного сотрудника?',
+      reply: EMPLOYEE_JOURNAL_DATE_QUESTION,
       status: 'blocked',
     };
+  }
   const catalogScope = {
     branchId: branch.id,
     sourceRevision: branch.sourceRevision,
@@ -255,14 +446,26 @@ export async function readEmployeeJournal(input: {
     employee: input.task.entities.employee,
     nameReferences: input.nameReferences,
   });
-  if (bound.kind !== 'resolved')
-    return {
-      reply:
-        bound.reason === 'staff_ambiguous_or_missing'
-          ? 'Не удалось однозначно выбрать сотрудника в текущем каталоге филиала. Уточните его полное имя; журнал пока не подтверждён.'
-          : unavailable.reply,
-      status: 'blocked',
-    };
+  // A malformed/stale/failed catalog cannot establish a retained branch day.
+  if (bound.kind === 'unresolved' && bound.reason === 'source_unavailable')
+    return unavailable;
+  input.task.entities.period = date;
+  input.task.entities.branch = branch.name;
+  input.retainCalendar?.(
+    Object.freeze({
+      version: 'maya.journal-calendar-preference/1',
+      taskId: input.task.id,
+      date,
+      branchId: branch.id,
+      timezone: branch.timezone,
+      sourceRevision: branch.sourceRevision,
+    }),
+  );
+  if (bound.kind !== 'resolved') {
+    input.task.requires_clarification = true;
+    input.task.clarification_question = EMPLOYEE_JOURNAL_EMPLOYEE_QUESTION;
+    return { reply: EMPLOYEE_JOURNAL_EMPLOYEE_QUESTION, status: 'blocked' };
+  }
   const source = await input.crm.resolveStaffScheduleSource(
     tenantId,
     bound.staff.id,
