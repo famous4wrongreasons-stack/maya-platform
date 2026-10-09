@@ -258,12 +258,32 @@ export class TimelineStore {
       // Completion arrival order is not request order: a slow old request may
       // finish after a newer STOP. Keep immutable outcomes, but recover context
       // by the parent user turn. Unknown lineage is a conservative barrier.
-      const projected: { order: number; context: unknown }[] = [];
+      const projected: { order: number; arrival: number; context: unknown }[] =
+        [];
       const seenParents = new Set<string>();
       const oldestCompletion = rows.at(-1)?.turnIndex ?? current.turnIndex;
       for (const row of rows) {
-        const barrier = () =>
-          projected.push({ order: row.turnIndex, context: null });
+        const barrier = async () => {
+          // A READ may create an empty assistant execution row before its chat
+          // completion. Anchor an unknown parent at the latest preceding USER,
+          // a conservative upper bound, rather than at assistant arrival time.
+          // This keeps a same-request tool row behind its later valid reply,
+          // while erased/late outcomes cannot cross a newer user's STOP.
+          const latestParent = await tx.widgetTimelineTurn.findFirst({
+            where: scoped(tenantId, {
+              conversationId,
+              role: 'user',
+              turnIndex: { lt: row.turnIndex },
+            }),
+            orderBy: { turnIndex: 'desc' },
+            select: { turnIndex: true },
+          });
+          projected.push({
+            order: latestParent?.turnIndex ?? row.turnIndex,
+            arrival: row.turnIndex,
+            context: null,
+          });
+        };
         if (
           row.channel !== 'pwa' ||
           row.principalProofHash !== principalProofHash ||
@@ -272,14 +292,14 @@ export class TimelineStore {
           !row.textContent ||
           !isChatReply(row.textContent)
         ) {
-          barrier();
+          await barrier();
           continue;
         }
         let completion: ReturnType<typeof decodeChatCompletion>;
         try {
           completion = decodeChatCompletion(encryption, row.textContent);
         } catch {
-          barrier();
+          await barrier();
           continue;
         }
         // Rows are newest first, so only the last immutable revision per parent
@@ -304,15 +324,16 @@ export class TimelineStore {
           // window. Never recover a parent older than a full window's edge.
           (rows.length === 8 && parent.turnIndex < oldestCompletion)
         ) {
-          barrier();
+          await barrier();
           continue;
         }
         projected.push({
           order: parent.turnIndex,
+          arrival: row.turnIndex,
           context: completion.semanticContext ?? null,
         });
       }
-      projected.sort((a, b) => b.order - a.order);
+      projected.sort((a, b) => b.order - a.order || b.arrival - a.arrival);
       const contexts: unknown[] = [];
       for (const item of projected) {
         contexts.push(item.context);

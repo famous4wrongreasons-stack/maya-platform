@@ -55,12 +55,19 @@ describe('retained conversation context window', () => {
     const tx = {
       $executeRaw: jest.fn().mockResolvedValue(1),
       widgetTimelineTurn: {
-        findFirst: jest.fn(({ where }: { where: { id: string } }) =>
-          Promise.resolve(
-            where.id === 'current'
-              ? currentTurn
-              : (parents.find((value) => value.id === where.id) ?? null),
-          ),
+        findFirst: jest.fn(
+          ({ where }: { where: { id?: string; turnIndex?: { lt: number } } }) =>
+            Promise.resolve(
+              where.id === 'current'
+                ? currentTurn
+                : where.id
+                  ? (parents.find((value) => value.id === where.id) ?? null)
+                  : (parents
+                      .filter(
+                        (value) => value.turnIndex < (where.turnIndex?.lt ?? 0),
+                      )
+                      .sort((a, b) => b.turnIndex - a.turnIndex)[0] ?? null),
+            ),
         ),
         findMany: jest.fn().mockResolvedValue(rows),
       },
@@ -111,6 +118,43 @@ describe('retained conversation context window', () => {
     );
   });
 
+  it('keeps an ordinary READ completion after its empty same-request assistant execution row', async () => {
+    const f = fixture(
+      [
+        completion('read', 3),
+        {
+          ...completion('tool-row', 2),
+          textContent: null,
+        } as unknown as typeof row,
+      ],
+      [parent('read', 1)],
+    );
+    expect(await f.read()).toEqual(window([context, null]));
+  });
+  it('keeps a later malformed completion ahead of an older valid sibling', async () => {
+    const f = fixture(
+      [
+        { ...completion('bad', 4), textContent: 'maya.chat-reply/1:malformed' },
+        completion('read', 3),
+      ],
+      [parent('read', 1)],
+    );
+    expect(await f.read()).toEqual(window([null]));
+  });
+  it('anchors an erased STOP at its user turn even when an older request completes later', async () => {
+    const f = fixture(
+      [
+        completion('old', 6),
+        {
+          ...completion('stop', 4),
+          textContent: null,
+          erasedAt: now,
+        } as unknown as typeof row,
+      ],
+      [parent('old', 1), parent('stop', 3)],
+    );
+    expect(await f.read()).toEqual(window([null]));
+  });
   it('keeps STOP before a late completion of an older request, without rewriting either outcome', async () => {
     const rows = [completion('old', 5), completion('stop', 4, null)];
     const f = fixture(rows, [parent('old', 1), parent('stop', 3)]);
@@ -141,7 +185,7 @@ describe('retained conversation context window', () => {
     );
     expect(await f.read()).toEqual(window([null]));
     expect(f.tx.widgetTimelineTurn.findMany).toHaveBeenCalledTimes(1);
-    expect(f.tx.widgetTimelineTurn.findFirst).toHaveBeenCalledTimes(2);
+    expect(f.tx.widgetTimelineTurn.findFirst).toHaveBeenCalledTimes(3);
   });
 
   it('does not revive an older revision of a stopped parent', async () => {
