@@ -1,0 +1,9 @@
+ts-jest[config] (WARN) 
+    The "ts-jest" config option "isolatedModules" is deprecated and will be removed in v30.0.0. Please use "isolatedModules: true" in /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/tsconfig.json instead, see https://www.typescriptlang.org/tsconfig/#isolatedModules
+  
+Test Suites: 1 passed, 1 total
+Tests:       19 passed, 19 total
+Snapshots:   0 total
+Time:        0.285 s, estimated 1 s
+Ran all test suites within paths "test/widgets-live/support/core-full-offline-fixtures.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-full-offline-fixtures-20261009-final.json

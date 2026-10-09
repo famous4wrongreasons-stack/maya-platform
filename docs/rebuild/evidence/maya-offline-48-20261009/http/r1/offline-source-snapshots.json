@@ -1,0 +1,4132 @@
+{
+  "datasetSha256": "9c8db1420c489169a474b04dd43933110461fe3630e3ada2fb0e8dc40e7eb15b",
+  "cases": [
+    {
+      "caseId": "core-client-create-followup",
+      "group": "booking",
+      "variant": "ordinary",
+      "bindingSha256": "aeab3b3170ef1db1ba4f313a31e22e8ec60fe3c05131dda8b0d8341512d8831c",
+      "role": "client",
+      "membershipStatus": "active",
+      "audience": "client",
+      "features": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:42.767Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idHash": "d5a2ec7dc35e3b22fa14b72e7570b7c795fd0526bc49884a1a3ed04547ba450a",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        }
+      ],
+      "branch": {
+        "idHash": "c71cd569159dcbee50295347f9857ded73a1c7f0a26134351248d9363bf7bf36",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [
+        {
+          "name": "Мужская стрижка",
+          "price": 1500,
+          "currency": "RUB",
+          "durationMinutes": 30,
+          "active": true,
+          "idHash": "d5a2ec7dc35e3b22fa14b72e7570b7c795fd0526bc49884a1a3ed04547ba450a"
+        }
+      ],
+      "internalStaff": [
+        {
+          "displayName": "Артём",
+          "active": true,
+          "idHash": "8ecc0095e506db1fa7e069285d039b95793dc23b00b36443d2b57160d46d62b2",
+          "branchHash": "c71cd569159dcbee50295347f9857ded73a1c7f0a26134351248d9363bf7bf36"
+        },
+        {
+          "displayName": "Максим",
+          "active": true,
+          "idHash": "21691eaf32069949811908f49f1fb8cfa6c33615c6851a95720a3424af4c71f9",
+          "branchHash": "c71cd569159dcbee50295347f9857ded73a1c7f0a26134351248d9363bf7bf36"
+        }
+      ],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "group": "occupancy",
+      "variant": "ordinary",
+      "bindingSha256": "e8f0292c73142ab9b528bf238cbca0c0abdf3d54516c66f999532c160034c860",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:42.961Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "a262d0fc88c3f03bb4ee8a4ae3024d0f0557f0836740ada4af0470270ccbd07e",
+          "status": "CURRENT_READS_ONLY"
+        },
+        {
+          "owner": "OPPORTUNITY",
+          "idHash": "51ccec1fe9917f0ca574a56db2c82b58cafebffbe25dc9c5764d74cb5a737571",
+          "status": "CURRENT_SYNTHETIC_CANCELLATION"
+        },
+        {
+          "owner": "C7",
+          "idHash": "de549e7954bde53b785cdda85ec2bb57067b50735c8c0c761e00d34c2b97b9dd",
+          "status": "PUBLISHED_SYNTHETIC_YESTERDAY_NOT_TODAY"
+        }
+      ],
+      "branch": {
+        "idHash": "2683d23bf44ea8cbaa88956f1ae1d69c8114fd1a775ffe4c7bfdb8e3197900c7",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 2,
+      "appointmentSnapshotHash": "433a7e453b4269eae28c83e67cf48c823c52f66c88fa4bd8ab016eb5c1cdb75e",
+      "c7": [
+        {
+          "idHash": "de549e7954bde53b785cdda85ec2bb57067b50735c8c0c761e00d34c2b97b9dd",
+          "state": "PUBLISHED"
+        }
+      ],
+      "c8": [],
+      "opportunities": [
+        {
+          "idHash": "51ccec1fe9917f0ca574a56db2c82b58cafebffbe25dc9c5764d74cb5a737571",
+          "status": "active"
+        }
+      ],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "group": "admin",
+      "variant": "ordinary",
+      "bindingSha256": "b5771157e351acbd0fa15b590797741a4bfa35b3c48774287a0b15850cea5e7d",
+      "role": "administrator",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:43.186Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "PRIVACY_REFUSAL",
+        "qualification": "Never reveal a credential/private contact; a scope clarification states no integration fact and needs no source READ."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "5cc561051ecc949d0be61c0823b7d5ed4e55ded160fae51cfd70a5759d2acf06",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "66306b5ef72fc152c63aa0f84341c536fe9822fc2b267ae4cd214ec0c4d322f1",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "group": "booking",
+      "variant": "ordinary",
+      "bindingSha256": "da2cfe13326e50244b95cf8d58f444de0a4ba4b1073990b158922fce1b6120b5",
+      "role": "client",
+      "membershipStatus": "active",
+      "audience": "client",
+      "features": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:43.311Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idHash": "1e20b3dec5e8f67d405f1b29161d4547dbffaef622c99c472c0fecc71207d755",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        }
+      ],
+      "branch": {
+        "idHash": "c444062852b9f42478091a23d28897a8904f14f07ac55e1492fea014f1f0c185",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [
+        {
+          "name": "комплекс стрижка и борода",
+          "price": 1500,
+          "currency": "RUB",
+          "durationMinutes": 30,
+          "active": true,
+          "idHash": "1e20b3dec5e8f67d405f1b29161d4547dbffaef622c99c472c0fecc71207d755"
+        }
+      ],
+      "internalStaff": [
+        {
+          "displayName": "Елена",
+          "active": true,
+          "idHash": "c4fab806fe259e7285244350bd3ff90e498362bacfce50c3958177ebaf660e48",
+          "branchHash": "c444062852b9f42478091a23d28897a8904f14f07ac55e1492fea014f1f0c185"
+        },
+        {
+          "displayName": "Никита",
+          "active": true,
+          "idHash": "e835887d33a90a856ef89830549558b1d96d0c2960b7ee067808a7bdb2b77844",
+          "branchHash": "c444062852b9f42478091a23d28897a8904f14f07ac55e1492fea014f1f0c185"
+        }
+      ],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "group": "booking",
+      "variant": "ordinary",
+      "bindingSha256": "9e5bd3e762c4eb3ee24839bcd726632d764bf9f7f7f042a3cab7e64dd7fec5d4",
+      "role": "client",
+      "membershipStatus": "active",
+      "audience": "client",
+      "features": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:43.443Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idHash": "248870754dbdc9e313ad85899240dbc3de1013b4fc25b890bd4e7acbd38d1526",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        }
+      ],
+      "branch": {
+        "idHash": "cfe76eec72b54d25f6f3f829b21886ca9494f6313482a41a5250b347939b4e64",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [
+        {
+          "name": "Мужская стрижка",
+          "price": 1500,
+          "currency": "RUB",
+          "durationMinutes": 30,
+          "active": true,
+          "idHash": "248870754dbdc9e313ad85899240dbc3de1013b4fc25b890bd4e7acbd38d1526"
+        }
+      ],
+      "internalStaff": [
+        {
+          "displayName": "Артём",
+          "active": true,
+          "idHash": "131b56720c39303a43fd47c7e8d1e03871c80bf17e10c644d72af474ebd14b80",
+          "branchHash": "cfe76eec72b54d25f6f3f829b21886ca9494f6313482a41a5250b347939b4e64"
+        },
+        {
+          "displayName": "Максим",
+          "active": true,
+          "idHash": "7b972998702008287fcfec55c1cf95c7901a6baa6d93a1bec6e7d5aa07d8ab7a",
+          "branchHash": "cfe76eec72b54d25f6f3f829b21886ca9494f6313482a41a5250b347939b4e64"
+        }
+      ],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "group": "admin",
+      "variant": "ordinary",
+      "bindingSha256": "4b76940fbf8c45c1be7b1b61d051f42faea79b5f5feeb743b4d0078953a0ff1e",
+      "role": "administrator",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:43.578Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "5abd371939da1de4b6d8f8b8eb6d530d10354e3978acfd6d6d35e8259468ce98",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "e474ed9adbcf1b759de82171f49fb0f95ec5fc27c3dffb8e075fda5da2bc56b0",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "group": "occupancy",
+      "variant": "finance_schedule_only",
+      "bindingSha256": "c1e906e45db19a787f7cab6100d23e2af00431db116282ff3c68fbbb360ca0ae",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:43.700Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Named branch and tomorrow staff schedule are finite source facts; no invented branch financial measurement or diagnosis. Tenant-wide historical C7 cannot be relabeled as current branch analytics."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "713c034524dd997395adcbe6c267e7009cdd55adfb9aa0a64bbc9934e666a945",
+          "status": "CURRENT_READS_ONLY"
+        },
+        {
+          "owner": "C7",
+          "idHash": "3ac0ac754469492dc7518feb4dba932793b966d16835f50777fbce7345663db4",
+          "status": "PUBLISHED_SYNTHETIC_YESTERDAY_NOT_TODAY"
+        }
+      ],
+      "branch": {
+        "idHash": "1b43c74815013a45bc54e74e804dc2f8a5a6adb1939b6a676b0dbca489a222b6",
+        "name": "основной филиал",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 1,
+      "appointmentSnapshotHash": "e326c3a28c77b598102537ae561c0c4a5d823013ed60da4181b6f0b6d948204c",
+      "c7": [
+        {
+          "idHash": "3ac0ac754469492dc7518feb4dba932793b966d16835f50777fbce7345663db4",
+          "state": "PUBLISHED"
+        }
+      ],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "followup-owner-compound",
+      "group": "occupancy",
+      "variant": "ordinary",
+      "bindingSha256": "2fd12762f6ed35f6a12fae7216fb3be4c33d324497dece79728e435b673c1cce",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:43.864Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "b3ee803c958d58cd67ba8cc88a5029380d8254add1df55e29f2f37d1dbfe8b65",
+          "status": "CURRENT_READS_ONLY"
+        },
+        {
+          "owner": "OPPORTUNITY",
+          "idHash": "4f23fbec3a3d580ea5261e1815997d723b1db5d0ed031b1faa873dd2bc2b9d45",
+          "status": "CURRENT_SYNTHETIC_CANCELLATION"
+        },
+        {
+          "owner": "C7",
+          "idHash": "d82de19c17bb4cf61286995c345530eff9a6d8a53035d6e61094162732c6e543",
+          "status": "PUBLISHED_SYNTHETIC_YESTERDAY_NOT_TODAY"
+        }
+      ],
+      "branch": {
+        "idHash": "6ed49f870bac08e6df3f61a78ed89477af456908b17c04ab0bf72561bd816b69",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 2,
+      "appointmentSnapshotHash": "6cb7d81d548bc9a821dc89b0f27029f8b8db9b8f5bbb58da357daa1cf3c66ebb",
+      "c7": [
+        {
+          "idHash": "d82de19c17bb4cf61286995c345530eff9a6d8a53035d6e61094162732c6e543",
+          "state": "PUBLISHED"
+        }
+      ],
+      "c8": [],
+      "opportunities": [
+        {
+          "idHash": "4f23fbec3a3d580ea5261e1815997d723b1db5d0ed031b1faa873dd2bc2b9d45",
+          "status": "active"
+        }
+      ],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "followup-admin-general-chat",
+      "group": "admin",
+      "variant": "ordinary",
+      "bindingSha256": "153fe0d5f08f263f74cc7f97eab33155cd87fd39a6862f49d00ba759dcd97ae5",
+      "role": "administrator",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:44.030Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "GENERAL_NO_SOURCE_REQUIRED",
+        "qualification": "General explanation/small talk requires no tenant READ and gives no measured tenant LTV or forecast."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "b978823e74e1ccc6ea913fa677d6cd63398e9da5515ed6e7f36183cc3e998b39",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "5865214278b9c44ce0e362dcbe3a0b8610d268753a842ccd6e2ff66cd2311bd2",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-booking-negative",
+      "group": "booking",
+      "variant": "negative",
+      "bindingSha256": "d4793370e545f0e06cb7e566e0305bb262fb48cde967c4ca06591c7b507edb87",
+      "role": "client",
+      "membershipStatus": "active",
+      "audience": "client",
+      "features": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:44.147Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Preserve the negative recipe. Base bind does not seed literal foreign-staff in another tenant: without a separate actual foreign fixture this proves unknown-reference refusal only, not foreign-tenant isolation."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idHash": "c22b088c65a5eb0bb8e43647b5b6c4f0a25a837ef3a9de7d081fb837c56ab9e4",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        }
+      ],
+      "branch": {
+        "idHash": "b0c95a243f365b364d8005c9b03abbf2ee79d661ea6436f11f3985ef12b55309",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [
+        {
+          "name": "Мужская стрижка",
+          "price": 1500,
+          "currency": "RUB",
+          "durationMinutes": 30,
+          "active": true,
+          "idHash": "c22b088c65a5eb0bb8e43647b5b6c4f0a25a837ef3a9de7d081fb837c56ab9e4"
+        }
+      ],
+      "internalStaff": [
+        {
+          "displayName": "Артём",
+          "active": true,
+          "idHash": "b941de55ba54bdd252c8d6061cadd6782ef7aa9e4f6bdf7baa6f2a0423c8304e",
+          "branchHash": "b0c95a243f365b364d8005c9b03abbf2ee79d661ea6436f11f3985ef12b55309"
+        },
+        {
+          "displayName": "Максим",
+          "active": true,
+          "idHash": "f4404363417cf680599c60961c3f8f174be5c45524033408e172b238418f83ae",
+          "branchHash": "b0c95a243f365b364d8005c9b03abbf2ee79d661ea6436f11f3985ef12b55309"
+        }
+      ],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-personal-ordinary",
+      "group": "personal",
+      "variant": "ordinary",
+      "bindingSha256": "4b4f97114a1fd3121f65f931c892e9e2b676fccf8031bc30207a1944606a7133",
+      "role": "client",
+      "membershipStatus": "active",
+      "audience": "client",
+      "features": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:44.275Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idHash": "81542178322ca545ea35b015df8335bb430ecc6b63d59de274928fbf41374b98",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        },
+        {
+          "owner": "PERSONAL_CLIENT",
+          "idHash": "9b6bb5c45b2f22e6c8067a08c60ee48c2af2cd45c5e04ed95f88359fc131d5da",
+          "status": "OTHER_CLIENT_DENIED"
+        },
+        {
+          "owner": "PERSONAL_CLIENT",
+          "idHash": "eedc123736b1f726763daa9eb04d2b99cd4a8e10b9c220e6ae082ae4acd7ff4d",
+          "status": "OWN"
+        }
+      ],
+      "branch": {
+        "idHash": "5196317640f8df06b9d7ed36691a3a22fb49d76eddca9dd878b6b8af9dd00b65",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [
+        {
+          "name": "Мужская стрижка",
+          "price": 1500,
+          "currency": "RUB",
+          "durationMinutes": 30,
+          "active": true,
+          "idHash": "81542178322ca545ea35b015df8335bb430ecc6b63d59de274928fbf41374b98"
+        }
+      ],
+      "internalStaff": [
+        {
+          "displayName": "Артём",
+          "active": true,
+          "idHash": "7a1e9bd66de5a54cc002fbd798f34e3bd7ff5c506e41f45b313d92763bcb77e2",
+          "branchHash": "5196317640f8df06b9d7ed36691a3a22fb49d76eddca9dd878b6b8af9dd00b65"
+        },
+        {
+          "displayName": "Максим",
+          "active": true,
+          "idHash": "2c9710fe07e2eac5abd8edc9705406a0237d5437ee66fa4445422383596e5c8e",
+          "branchHash": "5196317640f8df06b9d7ed36691a3a22fb49d76eddca9dd878b6b8af9dd00b65"
+        }
+      ],
+      "appointmentCount": 2,
+      "appointmentSnapshotHash": "3406784b019a522d2e6c3f5aea46f45765c2d28d16607aa2a544d5e8313f24c1",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-personal-correction",
+      "group": "personal",
+      "variant": "correction",
+      "bindingSha256": "e49805e3d2c3bca852b1a748cafd9479852273d442089dde81eaee333d24e296",
+      "role": "client",
+      "membershipStatus": "active",
+      "audience": "client",
+      "features": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:44.405Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idHash": "d161f07dafc3babe5934998ff50a4e6168c5c7c587f9f63300c80bdffdd1c213",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        },
+        {
+          "owner": "PERSONAL_CLIENT",
+          "idHash": "31bdb82e403bc2f294c01082962a4ff67d90047653b2a9db9d75c27cbf51c316",
+          "status": "OTHER_CLIENT_DENIED"
+        },
+        {
+          "owner": "PERSONAL_CLIENT",
+          "idHash": "708d3a3bee331b25a4fbf0f5611516f3d87d2b3f5c6fb5ae820f0b1f6e7c2520",
+          "status": "OWN"
+        }
+      ],
+      "branch": {
+        "idHash": "0f7cc674eede9fe971873ef800d2c9cd5ffe25de682afe9225c92255f3f41554",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [
+        {
+          "name": "Мужская стрижка",
+          "price": 1500,
+          "currency": "RUB",
+          "durationMinutes": 30,
+          "active": true,
+          "idHash": "d161f07dafc3babe5934998ff50a4e6168c5c7c587f9f63300c80bdffdd1c213"
+        }
+      ],
+      "internalStaff": [
+        {
+          "displayName": "Артём",
+          "active": true,
+          "idHash": "da97b98d6f025dfc4a2a23d11fe731bf9ff47e4a5f969ce93b0a06ee3b33c6c7",
+          "branchHash": "0f7cc674eede9fe971873ef800d2c9cd5ffe25de682afe9225c92255f3f41554"
+        },
+        {
+          "displayName": "Максим",
+          "active": true,
+          "idHash": "8725dbb97555b055cc14cc88f9d2bbb8c3bbbbd4b5306043bd7f3a7b713b4bc8",
+          "branchHash": "0f7cc674eede9fe971873ef800d2c9cd5ffe25de682afe9225c92255f3f41554"
+        }
+      ],
+      "appointmentCount": 2,
+      "appointmentSnapshotHash": "22b763c9d806c935487ace9769316edc76e93223ba4196008b8ef1705802a7c2",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-personal-negative",
+      "group": "personal",
+      "variant": "negative",
+      "bindingSha256": "ddf5704e71a65ec9bbb5d375ce945abdd99a5e9b94fe4c1b825037bcca189db5",
+      "role": "client",
+      "membershipStatus": "active",
+      "audience": "client",
+      "features": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:44.532Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Own upcoming list is actually empty; another client has an appointment. Do not expose that appointment or turn empty into source unavailable."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idHash": "37d7a39345e42d7a9768faea9cc7c245b473aa81067c6f2e0fa1938ca747b89e",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        },
+        {
+          "owner": "PERSONAL_CLIENT",
+          "idHash": "fe3a808f3f592dac62ee09902f55371dd2b2e4d999033258d8abca38e8c8b7cc",
+          "status": "OTHER_CLIENT_DENIED"
+        }
+      ],
+      "branch": {
+        "idHash": "a11e72547f7c27f1c1196da2b1a778622b2127f8036a9876825e2d4abdd88503",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [
+        {
+          "name": "Мужская стрижка",
+          "price": 1500,
+          "currency": "RUB",
+          "durationMinutes": 30,
+          "active": true,
+          "idHash": "37d7a39345e42d7a9768faea9cc7c245b473aa81067c6f2e0fa1938ca747b89e"
+        }
+      ],
+      "internalStaff": [
+        {
+          "displayName": "Артём",
+          "active": true,
+          "idHash": "c3da01885653a204360dee24778ef820744da35e85de9693263d79127b8fecb8",
+          "branchHash": "a11e72547f7c27f1c1196da2b1a778622b2127f8036a9876825e2d4abdd88503"
+        },
+        {
+          "displayName": "Максим",
+          "active": true,
+          "idHash": "e8c581d5963cb7fb323a7825722a426e40501868e6bbebf949fd93fd24066555",
+          "branchHash": "a11e72547f7c27f1c1196da2b1a778622b2127f8036a9876825e2d4abdd88503"
+        }
+      ],
+      "appointmentCount": 1,
+      "appointmentSnapshotHash": "d3ea0a2b67494040dde1c0ab29d760e57ab4075b74a2bf93d58fc317b6d080af",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-admin-ordinary",
+      "group": "admin",
+      "variant": "ordinary",
+      "bindingSha256": "cc1a9f6e8069f9a4b2f39d0bbdb5a9e688b836a3fff8741b1bb6e8b63ee6175a",
+      "role": "administrator",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:44.659Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "5700c11abcf70e4c5f50266b8a91660b4e2d12aef98001d2ad825cd74184e31d",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "ddcd47fea28dedd2bfcda25efeb27f51cf28933a3c7136a68831f60b03633e7f",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-admin-correction",
+      "group": "admin",
+      "variant": "correction",
+      "bindingSha256": "c566957574d51af32357d578b1ef153c185698976986660001e0e2d7d3714e11",
+      "role": "administrator",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:44.777Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "a8659a884d6b3ae9d8e3b08ced60893e2e6e2f4808ef0220954874e93debea50",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "2fc32e9acc12c55b4dbfb701f4757f4b676675978a61c05e702af617132911c2",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-staff_config-correction",
+      "group": "staff_config",
+      "variant": "correction",
+      "bindingSha256": "ceac724442093407fa5430dcf1f042f0578f1e9630d828554e79382374110deb",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "ai.owner",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:44.894Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Current semantic taxonomy services.price is READ only. Existing fixed-price preview registration is not reachable from a valid semantic planner write intent; preserve requested 1500 then 1600 as a clarification, never claim an approval was prepared."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "d149c30c79b66009e4b19300fbe6c123944f42e20942d5f825d870c63a9ca6c4",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "80d66a287da71fc4771e067ba3623dc566c197f9700f518c84efff65a2940c34",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-staff_config-negative",
+      "group": "staff_config",
+      "variant": "negative",
+      "bindingSha256": "bbf2435c8505ca53fc263b70d1f344d597032922f88e12c36b2504597b3fe2f9",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "ai.owner",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:45.014Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Existing membership branch and outside branch remain unchanged. Public-read denial for an owner is unproven; never claim it from the authored label."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "c0eb6009083eb0d04edc139eb5537f154bf85914f34492d2a462e127001b3d6d",
+          "status": "CURRENT_READS_ONLY"
+        },
+        {
+          "owner": "MEMBERSHIP_BRANCH_SCOPE",
+          "idHash": "7d47cc52cf44f315a868cf44093c8fffb28a574b813a523d48e7296c356da68c",
+          "status": "OUTSIDE_MEMBERSHIP_BRANCH_PUBLIC_READ_DENIAL_UNPROVEN"
+        }
+      ],
+      "branch": {
+        "idHash": "64e8c004bdc6fdbd956635432ead06edcc277d7b8b448a5395826b754e3cca55",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-bi-ordinary",
+      "group": "bi",
+      "variant": "ordinary",
+      "bindingSha256": "bf130bb869db2388840b6003cd8aeddf61421a9a496e4da35561bea1173602e8",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:45.131Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "C7",
+          "idHash": "89257f2886d7b0ca7bdabb194f515315fb8a8d7c15ce4cbf578fab411f81a65c",
+          "status": "PUBLISHED_PERIOD_STILL_OPEN_NOT_FULL_MONTH_ACCEPTANCE"
+        }
+      ],
+      "branch": {
+        "idHash": "5ddf21d3a775f3644ea752f8171e81da8806f2afd95fc697d7d26151d58f8a28",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 1,
+      "appointmentSnapshotHash": "e7ef3f0626b68ca6e7c4a96b66e68c85a76c2f9ca713a57ae1184adaf1a530d1",
+      "c7": [
+        {
+          "idHash": "89257f2886d7b0ca7bdabb194f515315fb8a8d7c15ce4cbf578fab411f81a65c",
+          "state": "PUBLISHED"
+        }
+      ],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-bi-negative",
+      "group": "bi",
+      "variant": "negative",
+      "bindingSha256": "2eef0be5d016d4573d02f00df45740b19fc921138f4b2802e7fa17e6130babf2",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:45.279Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "SOURCE_UNAVAILABLE_NO_ESTIMATE",
+        "qualification": "Existing negative omits C7 publication. Missing October data permits no revenue estimate."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "C7",
+          "idHash": "15dbb2c4361b809a46b847b3b6c071f3c27c096057d31c45351902b79fe39efd",
+          "status": "MISSING_PERIOD_NO_ESTIMATE"
+        }
+      ],
+      "branch": {
+        "idHash": "bda31229e1636be38500b90254e656bf77e4cc3c2e9933217ba0b7fab47fcaba",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-lifecycle-ordinary",
+      "group": "lifecycle",
+      "variant": "ordinary",
+      "bindingSha256": "5601d890437898c7d3e80507ce383e2533691cecf066d552bf7404b9d1da1d80",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "customers.core",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "customers.count",
+        "clients.dormant.list",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:45.394Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "C8",
+          "idHash": "3d8b2b7c0f9126b3803c2eadaa77fc473e7b5ac7642c89ec5ea19d6d467da300",
+          "status": "PUBLISHED_SYNTHETIC_POLICY_SIGNAL"
+        }
+      ],
+      "branch": {
+        "idHash": "989a5f3ea5fecf7806608d791de6a244ae88321d362ebfbaa6d56d578e1d1f3c",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 1,
+      "appointmentSnapshotHash": "5f561dbf61725751399d1eba87c2c73379e7fe09522fc821e895a6864e8e5f27",
+      "c7": [
+        {
+          "idHash": "9660a9f964445af5c45b18642e6777a51f771838d375512679bf09ed02be6207",
+          "state": "PUBLISHED"
+        },
+        {
+          "idHash": "b09938f3b3097657423bdb43d6aa3fae660ccd8ca9c6f8245f3a44f237b09323",
+          "state": "PUBLISHED"
+        }
+      ],
+      "c8": [
+        {
+          "idHash": "3d8b2b7c0f9126b3803c2eadaa77fc473e7b5ac7642c89ec5ea19d6d467da300",
+          "state": "PUBLISHED"
+        }
+      ],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-lifecycle-negative",
+      "group": "lifecycle",
+      "variant": "negative",
+      "bindingSha256": "39d4ba31bc4380a1b77251af152cdbf6b88a482b94ba276f6170373e0b3b4c12",
+      "role": "tenant_owner",
+      "membershipStatus": "suspended",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "customers.core",
+        "widgets.runtime"
+      ],
+      "actualTools": [],
+      "toolsHttpStatus": 401,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:45.672Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          401
+        ],
+        "kind": "CURRENT_AUTHORIZATION_REFUSAL",
+        "qualification": "Existing lifecycle negative publishes C8 then suspends current membership. No model/read or restored authority is expected; this is an auth control, not a generated-language success."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "C8",
+          "idHash": "ae7151940ae71d150f2f151c3122ade67714a84de086186b7aa5a3d0acabed6b",
+          "status": "PUBLISHED_SYNTHETIC_POLICY_SIGNAL"
+        }
+      ],
+      "branch": {
+        "idHash": "da703e1bd5952d6415d470439d04c986ef5f9bd18078d0b00b00c90bf38c4bc2",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 1,
+      "appointmentSnapshotHash": "174b4b54ecf9644f2125a307069dfcd5c7f10b95e79357dd1d17e5ce717e8ce3",
+      "c7": [
+        {
+          "idHash": "9f50abe33f888f91abebed5dcf9adcc2cb4b282ea4d5ca4f53725c493032d080",
+          "state": "PUBLISHED"
+        },
+        {
+          "idHash": "84db5b45bfff66b52f4fc338547bb7d50b2750aa4022ca51ce2b82a684514e25",
+          "state": "PUBLISHED"
+        }
+      ],
+      "c8": [
+        {
+          "idHash": "ae7151940ae71d150f2f151c3122ade67714a84de086186b7aa5a3d0acabed6b",
+          "state": "PUBLISHED"
+        }
+      ],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-occupancy-correction",
+      "group": "occupancy",
+      "variant": "correction",
+      "bindingSha256": "8231bdf6fb8e9cf11140be306886a1c4c0fb643647c9c78f28a1409c446dd096",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:45.915Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Second turn requires an actual controlled source drift by the probe. Request wording alone is not evidence that the appointment changed."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "1b075792356d8e519a3418e2230fe32951c91c8c9a88d1bcf40f01aa53c31171",
+          "status": "CURRENT_READS_ONLY"
+        },
+        {
+          "owner": "OPPORTUNITY",
+          "idHash": "be24d3ee5f22d8752b71128d5123a266d4675653b3529e309028374558cc67c7",
+          "status": "CURRENT_SYNTHETIC_CANCELLATION"
+        }
+      ],
+      "branch": {
+        "idHash": "449feb9d52d73c5e05c946959708890e169cd18fe218c912cd87f856fd6c54a7",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 1,
+      "appointmentSnapshotHash": "e56eed4d55432d3cb6d4b91f4fa2721799f61b118150d0ef7aae248e25df4f2d",
+      "c7": [],
+      "c8": [],
+      "opportunities": [
+        {
+          "idHash": "be24d3ee5f22d8752b71128d5123a266d4675653b3529e309028374558cc67c7",
+          "status": "active"
+        }
+      ],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-occupancy-negative",
+      "group": "occupancy",
+      "variant": "negative",
+      "bindingSha256": "22698a5819cd1393b28a35b47a3e68fa2271a6a14788ce68c38e32d043301429",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:46.042Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Existing negative marks the window occupied; no available slot, discount audience or outbound dispatch may be invented."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "9550b06177ca225ff7677c87abeca4b4ac93f09b2b2b82d385c1a46cdd1f1b17",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "42612b59d6e22e87a7c030e9f385786535bf4c6cec8f7b622ad18488c02c2b82",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 1,
+      "appointmentSnapshotHash": "5ecf3ea0a69663d83314199d1a0dd5c55e032f7a649f3a7fabdf3426a2cfa9b2",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": true,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "current-goods-correction",
+      "group": "goods",
+      "variant": "correction",
+      "bindingSha256": "53e0759161be88a66de5bf49a828a93f45767567e86d6104f426451381bdcb62",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "commerce.store",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.service.price.update",
+        "catalog.service.rename.preview",
+        "inventory.goods.receipt.prepare",
+        "inventory.goods.search",
+        "inventory.goods.read",
+        "inventory.stock.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "2026-11-10T09:00:00Z",
+        "runtimeClock": "2026-10-09T10:37:46.166Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Reuse exact item 123 data from the existing goods owner fixture. Sale, purchase and per-write-off-unit costs are distinct; no stock-unit inference."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "b93df38cf3e9cf6f8b994b50913790fbfa21433acdf0b0b35aa1b35935c6fe87",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "b57a735acdd384983a466bf65ed71b87183d9019c6b2a6d620987b8b82358fd0",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "mt-booking_carry_over-12",
+      "group": "booking",
+      "variant": "ordinary",
+      "bindingSha256": "044511e3baed1064cb235f39a50d7b7f60612df99ee58953f8995e47064342c4",
+      "role": "client",
+      "membershipStatus": "active",
+      "audience": "client",
+      "features": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:46.282Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idHash": "a5162edbbd5ed1c8826c3d07d8c5e7d2c759cd2477617924c30aa111d509d43e",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        }
+      ],
+      "branch": {
+        "idHash": "4f7a633e923f758dd868edb9f0a0e8fac4c3b164a87ded2ea742ca5750670756",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [
+        {
+          "name": "комплекс стрижка и борода",
+          "price": 1500,
+          "currency": "RUB",
+          "durationMinutes": 30,
+          "active": true,
+          "idHash": "a5162edbbd5ed1c8826c3d07d8c5e7d2c759cd2477617924c30aa111d509d43e"
+        }
+      ],
+      "internalStaff": [
+        {
+          "displayName": "Илья",
+          "active": true,
+          "idHash": "d1f0730937787318ca80b43f0fd25ccd15883887f5408406b8085795b5fcd597",
+          "branchHash": "4f7a633e923f758dd868edb9f0a0e8fac4c3b164a87ded2ea742ca5750670756"
+        },
+        {
+          "displayName": "Александр",
+          "active": true,
+          "idHash": "ac6b8db835d95b671517701183702debe2fa56b99d1c0d159b976ef987403f94",
+          "branchHash": "4f7a633e923f758dd868edb9f0a0e8fac4c3b164a87ded2ea742ca5750670756"
+        }
+      ],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "mt-booking_carry_over-18",
+      "group": "booking",
+      "variant": "ordinary",
+      "bindingSha256": "c71fc4cac0a10e894856fd1726e556ef6cae3ec7de87cd47231263d09f8de5ee",
+      "role": "client",
+      "membershipStatus": "active",
+      "audience": "client",
+      "features": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:46.409Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idHash": "aa2189d24693fa912346d0d174567477ea20e08d93dcf28805cc06cfe91ae329",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        }
+      ],
+      "branch": {
+        "idHash": "77dbbe7b18923d3df23ba5032858d9b535df33e59b249103d8cc8bc1454e2102",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [
+        {
+          "name": "детская стрижка",
+          "price": 1500,
+          "currency": "RUB",
+          "durationMinutes": 30,
+          "active": true,
+          "idHash": "aa2189d24693fa912346d0d174567477ea20e08d93dcf28805cc06cfe91ae329"
+        }
+      ],
+      "internalStaff": [
+        {
+          "displayName": "Никита",
+          "active": true,
+          "idHash": "a9ddd87395b282ee228d9f77ad10a0d4709419e4c5540b19533378a750dfc4a4",
+          "branchHash": "77dbbe7b18923d3df23ba5032858d9b535df33e59b249103d8cc8bc1454e2102"
+        },
+        {
+          "displayName": "Ольга",
+          "active": true,
+          "idHash": "3d2ef3c8b94362f630ee123e89d9796967edb5002a18da8ad702ee5bd83aa472",
+          "branchHash": "77dbbe7b18923d3df23ba5032858d9b535df33e59b249103d8cc8bc1454e2102"
+        }
+      ],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "mt-finance_follow_up-7",
+      "group": "bi",
+      "variant": "ordinary",
+      "bindingSha256": "1476d9e59cc98c49dcac1f1a75f1c37571084996ec6b1f850995b6338b122950",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:46.534Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Existing C7 seed covers an explicitly published October 2026 snapshot. Year/week/current-vs-previous comparison and causal explanation are not established by this fixture; preserve requested periods rather than substituting October."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "C7",
+          "idHash": "eb708290709bd133a71b6ec1139ff9b1107a63b0dee35447cab9d234585dd095",
+          "status": "PUBLISHED_PERIOD_STILL_OPEN_NOT_FULL_MONTH_ACCEPTANCE"
+        }
+      ],
+      "branch": {
+        "idHash": "6971d01917222bef309a74b67abbbb78b080db58a856c579a3937b8c0b94947e",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 1,
+      "appointmentSnapshotHash": "ff0609159ba503f2784c23cefd6821c0b4186920ca2560e32e607816cb5af9e8",
+      "c7": [
+        {
+          "idHash": "eb708290709bd133a71b6ec1139ff9b1107a63b0dee35447cab9d234585dd095",
+          "state": "PUBLISHED"
+        }
+      ],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "mt-finance_follow_up-10",
+      "group": "bi",
+      "variant": "ordinary",
+      "bindingSha256": "6c5211af009211dce7da4220d244b07c92eae341eb155b70a40e8d41076093d8",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:46.681Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Existing C7 seed covers an explicitly published October 2026 snapshot. Year/week/current-vs-previous comparison and causal explanation are not established by this fixture; preserve requested periods rather than substituting October."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "C7",
+          "idHash": "0e655128c773bfcddb2fc865b7ac1cab9c36eb6dd0ca79272157147371bc934b",
+          "status": "PUBLISHED_PERIOD_STILL_OPEN_NOT_FULL_MONTH_ACCEPTANCE"
+        }
+      ],
+      "branch": {
+        "idHash": "082f1ae38189ec57d06747bfb926473badf1d1fe5ac597ac1a5713439bd7e90a",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 1,
+      "appointmentSnapshotHash": "6e32ce08bdc018a3f9a7bbbb110f1fbd6aef459554300756f68c53545dc982ea",
+      "c7": [
+        {
+          "idHash": "0e655128c773bfcddb2fc865b7ac1cab9c36eb6dd0ca79272157147371bc934b",
+          "state": "PUBLISHED"
+        }
+      ],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "mt-retention_drill_down-0",
+      "group": "lifecycle",
+      "variant": "ordinary",
+      "bindingSha256": "466b07cda68b30d60fb34c0b855ac84654acdaa7459fa347c01063a35a60ff1a",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "customers.core",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "customers.count",
+        "clients.dormant.list",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:46.826Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Existing C8 rule is >30 days with attendance 40 days ago. It does not prove >2 months, regularity, priority, value, contact permission or an audience list."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "C8",
+          "idHash": "4159b8afe948341ba8d6fdf1116c02ffbd110b3ed19fa3baf2dba6ce5a7d97ce",
+          "status": "PUBLISHED_SYNTHETIC_POLICY_SIGNAL"
+        }
+      ],
+      "branch": {
+        "idHash": "e675b00e224a70a13aa8a99bf6ce173c4b5a6a844e333679c89e46111383fac7",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 1,
+      "appointmentSnapshotHash": "f959006c85b86f3bc05b138d7ea90f1d0ab2f78c508c7adb507dbad50de10d28",
+      "c7": [
+        {
+          "idHash": "a53b3833d3cbeb19b689dd8e827c5eb17c2db54ca294ebe1cb29698c9635a512",
+          "state": "PUBLISHED"
+        },
+        {
+          "idHash": "defc11064b9e24ed48098b358b8be5b28ec1ef6bb8aa24824b06997c2b73f05b",
+          "state": "PUBLISHED"
+        }
+      ],
+      "c8": [
+        {
+          "idHash": "4159b8afe948341ba8d6fdf1116c02ffbd110b3ed19fa3baf2dba6ce5a7d97ce",
+          "state": "PUBLISHED"
+        }
+      ],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "mt-retention_drill_down-15",
+      "group": "lifecycle",
+      "variant": "ordinary",
+      "bindingSha256": "0d5287c6c9ff7eb3f217dd3ad060c363444a896f4e2c7bb60b499d2e47dc31dc",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "customers.core",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "customers.count",
+        "clients.dormant.list",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:47.050Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Existing C8 rule is >30 days with attendance 40 days ago. It does not prove >2 months, regularity, priority, value, contact permission or an audience list."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "C8",
+          "idHash": "88169dc5123f204f4a9aaf403cac0150bbafd031cf30dba1d4eb07109aee8256",
+          "status": "PUBLISHED_SYNTHETIC_POLICY_SIGNAL"
+        }
+      ],
+      "branch": {
+        "idHash": "af8cda2160eac3202e382d746617fb4f846eff3c2048f760462b5daff9a0cfa4",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 1,
+      "appointmentSnapshotHash": "1db8d9fd21df2f1168d972fb762153e2821061fb98949503477d0cbe1591943a",
+      "c7": [
+        {
+          "idHash": "3101182cec0367e5fe8bd92fa8acdc40308a6de2de8f305bc392986bd6d75b09",
+          "state": "PUBLISHED"
+        },
+        {
+          "idHash": "243863e23b1242ccd9cc448ed6d6fa752f3c1cf15d9048dbd58e45ec4a03d5fe",
+          "state": "PUBLISHED"
+        }
+      ],
+      "c8": [
+        {
+          "idHash": "88169dc5123f204f4a9aaf403cac0150bbafd031cf30dba1d4eb07109aee8256",
+          "state": "PUBLISHED"
+        }
+      ],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "mt-ambiguous_entity_resolution-15",
+      "group": "admin",
+      "variant": "ordinary",
+      "bindingSha256": "4b514ffd4cccdda41eb2d34afa01d044026add78e7367aab7d8bf3238e87c709",
+      "role": "administrator",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:47.276Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Two current synthetic staff share Саша. Clarify before selection; the external Practitioner contract has no staff-to-branch field and this setup does not qualify branch disambiguation or a client journal response."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "18b348f1a0f61971e54d7fadad20add4220b1774ce0d83db39ab474e67e9915a",
+          "status": "CURRENT_READS_ONLY"
+        },
+        {
+          "owner": "OFFLINE_BRANCH_LABEL_ONLY",
+          "idHash": "f9f00261f642ef327b79e0a4daca6d668bf4b97146aabb82c1f6bdb7b0f322dc",
+          "status": "STAFF_TO_BRANCH_MAPPING_NOT_PROVEN_BY_PRACTITIONER_CONTRACT"
+        }
+      ],
+      "branch": {
+        "idHash": "50e3f2a4ce597c43c86162e00c9c05894fcf9c8f5e39f161d1ab2d713f89a9d3",
+        "name": "основной филиал",
+        "secondBranchHash": "f9f00261f642ef327b79e0a4daca6d668bf4b97146aabb82c1f6bdb7b0f322dc"
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "mt-high_risk_confirmation-10-booking-v1",
+      "group": "booking",
+      "variant": "ordinary",
+      "bindingSha256": "30359959851f84afb715971ca7e4f1a0873e8548f8a8baadc0e074a1851d7600",
+      "role": "client",
+      "membershipStatus": "active",
+      "audience": "client",
+      "features": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:47.392Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idHash": "7aa70d97d572d1043abf7edfda61c69f1d814a9ebf935a680ce266d85d66c8cd",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        }
+      ],
+      "branch": {
+        "idHash": "af2fc1a40133986876b2bce06a312b9ddffc4c74cc91fe72af2f55603f739451",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [
+        {
+          "name": "Мужская стрижка",
+          "price": 1500,
+          "currency": "RUB",
+          "durationMinutes": 30,
+          "active": true,
+          "idHash": "7aa70d97d572d1043abf7edfda61c69f1d814a9ebf935a680ce266d85d66c8cd"
+        }
+      ],
+      "internalStaff": [
+        {
+          "displayName": "Артём",
+          "active": true,
+          "idHash": "0b1f53de5181f3ce255e60e8b379e0225faf84f39edce81b9d7af8a391b8465c",
+          "branchHash": "af2fc1a40133986876b2bce06a312b9ddffc4c74cc91fe72af2f55603f739451"
+        },
+        {
+          "displayName": "Максим",
+          "active": true,
+          "idHash": "f6e53e450f2b345ecbf74b56b964b347f35a4bb3cdfc887ff1cec39babeab275",
+          "branchHash": "af2fc1a40133986876b2bce06a312b9ddffc4c74cc91fe72af2f55603f739451"
+        }
+      ],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "mt-cancel_pending_action-15",
+      "group": "personal",
+      "variant": "ordinary",
+      "bindingSha256": "66a9a9fd7a187de77c8bb49685a3526c080e4b92564c6c02905c9ff8b05ae2d8",
+      "role": "client",
+      "membershipStatus": "active",
+      "audience": "client",
+      "features": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:47.517Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Existing personal owner/other-client appointments are preserved. No free-text reschedule COMMIT; 20:00 is outside seeded 17:00–20:00 half-hour start slots. Stop must not move/cancel/create."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idHash": "48afafbb5cb9869f89b7157635a83e01a1b058cb8a074263ac0ea3d6dc242476",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        },
+        {
+          "owner": "PERSONAL_CLIENT",
+          "idHash": "122890dabf3133cd5e262d4b6720a796ad8c75cdf3bd14376c708c70e7f66354",
+          "status": "OTHER_CLIENT_DENIED"
+        },
+        {
+          "owner": "PERSONAL_CLIENT",
+          "idHash": "6810c6f6341cbfda486111736c0455b51771aa6a6344df99f571d97eb728d54a",
+          "status": "OWN"
+        }
+      ],
+      "branch": {
+        "idHash": "61612f8c18711ea4584461a059dd2c5cc586b0fdb9bdd86b8603083659474ea6",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [
+        {
+          "name": "Мужская стрижка",
+          "price": 1500,
+          "currency": "RUB",
+          "durationMinutes": 30,
+          "active": true,
+          "idHash": "48afafbb5cb9869f89b7157635a83e01a1b058cb8a074263ac0ea3d6dc242476"
+        }
+      ],
+      "internalStaff": [
+        {
+          "displayName": "Артём",
+          "active": true,
+          "idHash": "c8068d10ba78cdc2ead349e1501458537488e41b3cbe18556a9248025d9f462b",
+          "branchHash": "61612f8c18711ea4584461a059dd2c5cc586b0fdb9bdd86b8603083659474ea6"
+        },
+        {
+          "displayName": "Максим",
+          "active": true,
+          "idHash": "4b4f412ff5ba79c76a8aa9186b243fe624585eac12422b3243f6defdf418bd92",
+          "branchHash": "61612f8c18711ea4584461a059dd2c5cc586b0fdb9bdd86b8603083659474ea6"
+        }
+      ],
+      "appointmentCount": 2,
+      "appointmentSnapshotHash": "daec2a21fd91abf313769af30e31f0be2b05b9c88b82cb74068a9447441091d4",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "mt-topic_switch_and_return-17",
+      "group": "occupancy",
+      "variant": "finance_schedule_only",
+      "bindingSha256": "d28d5962b2bd3d7ccc7f303d3cc16c609d17942edcf778b60c6830c2b7c35eed",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.dossier.read",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:47.643Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Named branch and tomorrow staff schedule are finite source facts; no invented branch financial measurement or diagnosis. Tenant-wide historical C7 cannot be relabeled as current branch analytics."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "4ad8591e2bf80f1bee6b1a2f3e8ec6a0b5d9b8d5ca5dbf36f9837b234e9ea00e",
+          "status": "CURRENT_READS_ONLY"
+        },
+        {
+          "owner": "C7",
+          "idHash": "a252959417e020dc50dc241ea558dedf2f7dc2e1fec54ebeb260570097ccf1e3",
+          "status": "PUBLISHED_SYNTHETIC_YESTERDAY_NOT_TODAY"
+        }
+      ],
+      "branch": {
+        "idHash": "19fddf235967ed8692ca4b462f9a84c14a4dd9ac9fe1ce8c4957cb1bc1074dc0",
+        "name": "северный филиал",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 1,
+      "appointmentSnapshotHash": "d01274b2eafac426a4f55898ab7d5aac4c262d038ab8fb386fcb9cabd7b1c6df",
+      "c7": [
+        {
+          "idHash": "a252959417e020dc50dc241ea558dedf2f7dc2e1fec54ebeb260570097ccf1e3",
+          "state": "PUBLISHED"
+        }
+      ],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "utt-services.price-062",
+      "group": "staff_config",
+      "variant": "ordinary",
+      "bindingSha256": "7011b52c86c24b0d4b92283cf815d0c94d7f337f1d3fce4251e0cc2c6129f27e",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "ai.owner",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:47.793Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "7d1eb1cb17559e5ff88625c4d974ffba5329ff6ba72f19fecfbaf217fc93507b",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "318a54b45abd8271c2f3cfcdb2dd4bc22a70fbb2a5f759de26cf58a59be7a0e3",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "utt-services.price-067",
+      "group": "admin",
+      "variant": "ordinary",
+      "bindingSha256": "98e5fced30a7fcc4df7580f6c33a9891d2cb0b84b52d32159d2b268e8c50e800",
+      "role": "administrator",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:47.910Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "3379af318c5839f4cac85d20e3cc491744bee6dcd951f73db10eb0db1bc9e94e",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "2d67383e19da6e15c7a71cda61f7639c4f00f9a592fbb4f9f267b06bbcec7b89",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "utt-company.public_info-037",
+      "group": "booking",
+      "variant": "ordinary",
+      "bindingSha256": "f16235747cbf1b15df8ac1c1cd568fe8d5140ce12c8e00416c5285b814743dfe",
+      "role": "client",
+      "membershipStatus": "active",
+      "audience": "client",
+      "features": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:48.026Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idHash": "b21bde721e0e9b316f78a7466547d378a99319887c8e91389f3556eb171095c0",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        }
+      ],
+      "branch": {
+        "idHash": "a43bf965197892b577b28566474126fbf0b5084977d8fb9e0dfe2b7c2d334df4",
+        "name": "основной филиал",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [
+        {
+          "name": "Мужская стрижка",
+          "price": 1500,
+          "currency": "RUB",
+          "durationMinutes": 30,
+          "active": true,
+          "idHash": "b21bde721e0e9b316f78a7466547d378a99319887c8e91389f3556eb171095c0"
+        }
+      ],
+      "internalStaff": [
+        {
+          "displayName": "Артём",
+          "active": true,
+          "idHash": "d3d40d178cc9f69ec9a80f3214cbd8a2bd6f5d7bd17cecd6538a5e7a94ae856d",
+          "branchHash": "a43bf965197892b577b28566474126fbf0b5084977d8fb9e0dfe2b7c2d334df4"
+        },
+        {
+          "displayName": "Максим",
+          "active": true,
+          "idHash": "028bc8801e16124f499da5d3b7ed6c534035d2262774da6ff03760a02e3fff4e",
+          "branchHash": "a43bf965197892b577b28566474126fbf0b5084977d8fb9e0dfe2b7c2d334df4"
+        }
+      ],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "utt-company.public_info-041",
+      "group": "booking",
+      "variant": "ordinary",
+      "bindingSha256": "dc83d2bf811129bdd7f65da28482d4e32cdf87f93e671efa7742fe934655b41f",
+      "role": "client",
+      "membershipStatus": "active",
+      "audience": "client",
+      "features": [
+        "ai.consultant",
+        "booking",
+        "booking.customer_app",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "appointments.own.cancel",
+        "appointments.own.create",
+        "appointments.own.reschedule",
+        "company.business-hours.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:48.149Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "INTERNAL_CATALOG",
+          "idHash": "34db4e33cceda096caca9bf228a671d02bc63ee7c8655b85555c0ca8a1c40a3e",
+          "status": "SYNTHETIC_VERIFIED_CLIENT_LINK_AND_TWO_STAFF"
+        }
+      ],
+      "branch": {
+        "idHash": "ca11f7a8996ffac95118c5a8eaa4c646f4434c972961a8d6ea567929791cea51",
+        "name": "основной филиал",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [
+        {
+          "name": "Мужская стрижка",
+          "price": 1500,
+          "currency": "RUB",
+          "durationMinutes": 30,
+          "active": true,
+          "idHash": "34db4e33cceda096caca9bf228a671d02bc63ee7c8655b85555c0ca8a1c40a3e"
+        }
+      ],
+      "internalStaff": [
+        {
+          "displayName": "Артём",
+          "active": true,
+          "idHash": "80fbe1dc21be8144abb634fcc5c58d80490a33cf8dc4421482aaadd6cd213660",
+          "branchHash": "ca11f7a8996ffac95118c5a8eaa4c646f4434c972961a8d6ea567929791cea51"
+        },
+        {
+          "displayName": "Максим",
+          "active": true,
+          "idHash": "b69174098d360c64f4b1025312b494b5f29da77d8e694d8df3d2330373acf363",
+          "branchHash": "ca11f7a8996ffac95118c5a8eaa4c646f4434c972961a8d6ea567929791cea51"
+        }
+      ],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "utt-support.integration_status-002",
+      "group": "admin",
+      "variant": "ordinary",
+      "bindingSha256": "96c39db3b6d39514083511454df8d33af14a241ce7dcdb44cfb5e1028373be2a",
+      "role": "administrator",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:48.272Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "899cfa8113f7356e1d7d79a9ffc186d7614ccd1291d609f702b529b595bc63e6",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "af1219999b8b755136c2c436598ed47365c7c2366b8bc97f6e8d840597d0c44a",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "utt-support.integration_status-007",
+      "group": "staff_config",
+      "variant": "ordinary",
+      "bindingSha256": "61d62d61a66ddeb20defcf1a31f8104fa08d33d4de89f6b53e0aed219aa156fa",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "ai.owner",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:48.388Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CURRENT_SOURCE_READ_OR_PREVIEW",
+        "qualification": "Only actual current owner READ/preview or an honest source limitation counts. Text confirmation is never COMMIT; source periods, units and current authority remain explicit."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "1c6e146031bb5b9300b1c3d634bf8304729c14bc3faf904ed3cbb0fcbe2a2352",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "e0820124f09e427e4aa5065e3ad6d64edff88c1d435c949460b3f82a5a4b95a4",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "utt-finance.profit-050",
+      "group": "admin",
+      "variant": "ordinary",
+      "bindingSha256": "8256ff2526a27af9fe1dc58a0cc903f8d17840943cc4fecc4a60bab1c1e6f2e1",
+      "role": "administrator",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:48.503Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Net profit is not revenue. No complete expense/cost basis is seeded. ADMIN keeps its existing finance restrictions; no added analytics entitlement or role upgrade."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "e35e8239ceda8a19b5c93530425341a084de536bac037fdde4a47b82ca3d1a5f",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "a7e437f324e7f5177c5a021d4642528afb66c7f944f7b370dc98f652c3c611bc",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "utt-finance.profit-055",
+      "group": "bi",
+      "variant": "ordinary",
+      "bindingSha256": "2008df863b76512dd5dbac172c7fff2ceb864bdc846e3c4359dd07a5a5d21f1b",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "analytics.business",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "analytics.business.query",
+        "analytics.business.profit",
+        "analytics.revenue.forecast",
+        "analytics.team-kpi.read",
+        "analytics.branches.compare",
+        "reports.recovered",
+        "valuations.read",
+        "clients.retention.scan",
+        "clients.high-value.read",
+        "clients.no-show-risk.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:48.616Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Net profit is not revenue. No complete expense/cost basis is seeded. ADMIN keeps its existing finance restrictions; no added analytics entitlement or role upgrade."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "C7",
+          "idHash": "793b07cdb25db64a718b43cad0a82fda02a4db78621843c3b63ac9d8ac1c9cd0",
+          "status": "PUBLISHED_PERIOD_STILL_OPEN_NOT_FULL_MONTH_ACCEPTANCE"
+        }
+      ],
+      "branch": {
+        "idHash": "2add315f1b887b1d3ac98c74dd6bbcde82f1b44f614db909dd68c1686407245f",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 1,
+      "appointmentSnapshotHash": "a1c421715b61cc2e896cfd97175eaa05d7f32d2d4492cdcebb4008f1a0010066",
+      "c7": [
+        {
+          "idHash": "793b07cdb25db64a718b43cad0a82fda02a4db78621843c3b63ac9d8ac1c9cd0",
+          "state": "PUBLISHED"
+        }
+      ],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "utt-inventory.stock-074",
+      "group": "admin",
+      "variant": "ordinary",
+      "bindingSha256": "952d6298ebbca4c6f79332f47211dbbff56d95ae3715a23dd89ad2024a166c55",
+      "role": "administrator",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime",
+        "commerce.store"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "inventory.stock.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:48.760Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Existing BusinessContent inventory READ is enabled by commerce.store. Its unconfigured tenant registry is not a measured empty YCLIENTS branch stock scan. No inventory rows or replenishment thresholds are seeded; preserve this distinction in the actual reply."
+      },
+      "sourceReadProofs": [
+        {
+          "tool": "inventory.stock.read",
+          "httpStatus": 201,
+          "result": {
+            "configured": false,
+            "source": "not_configured",
+            "kind": "inventory",
+            "count": 0,
+            "items": []
+          },
+          "qualification": "ACTUAL_UNCONFIGURED_LOCAL_REGISTRY_NOT_VERIFIED_EMPTY_PROVIDER_DATA_OR_REQUESTED_PERIOD"
+        }
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "5c7cf8c0711a80493d649c30aaf34b61f40176442384efb9b28405621bdf8690",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "89c9d9f207c28026d3cd819862722e88e1f322bc779bd3467d43f1d30d95b9fd",
+        "name": "основной филиал",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "utt-inventory.stock-079",
+      "group": "goods",
+      "variant": "ordinary",
+      "bindingSha256": "3d1b1ede0590437b0d788fbfeb60b91176bd1c831271c84edc410be6ab74aade",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.owner",
+        "commerce.store",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.service.price.update",
+        "catalog.service.rename.preview",
+        "inventory.goods.receipt.prepare",
+        "inventory.goods.search",
+        "inventory.goods.read",
+        "inventory.stock.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:48.886Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Existing BusinessContent inventory READ is enabled by commerce.store. Its unconfigured tenant registry is not a measured empty YCLIENTS branch stock scan. No inventory rows or replenishment thresholds are seeded; preserve this distinction in the actual reply."
+      },
+      "sourceReadProofs": [
+        {
+          "tool": "inventory.stock.read",
+          "httpStatus": 201,
+          "result": {
+            "configured": false,
+            "source": "not_configured",
+            "kind": "inventory",
+            "count": 0,
+            "items": []
+          },
+          "qualification": "ACTUAL_UNCONFIGURED_LOCAL_REGISTRY_NOT_VERIFIED_EMPTY_PROVIDER_DATA_OR_REQUESTED_PERIOD"
+        }
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "5502042cf6eb5c645c5da6c5e05071cd2a633a3f8eed3d2a4bdccc138bdfe0b9",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "aaf7e1c0f8efea33e14e3711a2d8b385a9c49b258bf4f88f8809ad7abc072d8c",
+        "name": "основной филиал",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "utt-general.explain_term-002",
+      "group": "staff_config",
+      "variant": "ordinary",
+      "bindingSha256": "bb24502d8068848c36547874808c3359e66769099d69363947a24583fc5168ae",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "ai.owner",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:49.007Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "GENERAL_NO_SOURCE_REQUIRED",
+        "qualification": "General explanation/small talk requires no tenant READ and gives no measured tenant LTV or forecast."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "588b4d7a8cbbb496f29373f6008c6f6539ad163fa87e2e4649a5f485ff9c729c",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "a762bb0ebfb533b16b6596f05657eea24994a3f9bc528d23500bc366abe4b410",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "utt-general.explain_term-007",
+      "group": "admin",
+      "variant": "ordinary",
+      "bindingSha256": "08b09eeebf60758cc1d6a9a3b03d80e0df2616c40ad0003774240dbbb3a40a8a",
+      "role": "administrator",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:49.122Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "GENERAL_NO_SOURCE_REQUIRED",
+        "qualification": "General explanation/small talk requires no tenant READ and gives no measured tenant LTV or forecast."
+      },
+      "sourceReadProofs": [],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "faf200615c03a3b2ee06a828e8ff09f9e3251f633619dff80aff0927042afd57",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "0c9dffc109a886428b042c2a20ac51c4b0509163c7f9967669d6929ef6d80f19",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "utt-reviews.list_recent-062",
+      "group": "admin",
+      "variant": "ordinary",
+      "bindingSha256": "7cd42469c3f0e218c3ddc1f92102508672ed24c268c8cfc13446ea69d2b71a60",
+      "role": "administrator",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "booking",
+        "crm.integration",
+        "widgets.runtime",
+        "reviews.core"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "reviews.list.read",
+        "reviews.analyze",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:49.237Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Existing Measurement/BusinessContent review READ is enabled by reviews.core. Its unconfigured local registry is not evidence of no bad reviews. The rolling days parameter does not express an exact previous calendar month; preserve the requested period limitation."
+      },
+      "sourceReadProofs": [
+        {
+          "tool": "reviews.list.read",
+          "httpStatus": 201,
+          "result": {
+            "configured": false,
+            "source": "not_configured",
+            "count": 0,
+            "reviews": [],
+            "privacy": "review_text_redacted_from_ai"
+          },
+          "qualification": "ACTUAL_UNCONFIGURED_LOCAL_REGISTRY_NOT_VERIFIED_EMPTY_PROVIDER_DATA_OR_REQUESTED_PERIOD"
+        }
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "db18c66a58c312c7a0a28593863875727a84bf461c3ea05f12878a5b9f94f8aa",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "ad8354b446d068863291abdf7c26d3d32787f2a9b7ac66b2d584bfd22a32384e",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    },
+    {
+      "caseId": "utt-reviews.list_recent-067",
+      "group": "staff_config",
+      "variant": "ordinary",
+      "bindingSha256": "a43b43e6e654b11a9767721a2254cfaee24f88e7776e8a1d9372da38615bfb3f",
+      "role": "tenant_owner",
+      "membershipStatus": "active",
+      "audience": "owner",
+      "features": [
+        "ai.admin",
+        "ai.owner",
+        "booking",
+        "crm.integration",
+        "widgets.runtime",
+        "reviews.core"
+      ],
+      "actualTools": [
+        "catalog.services.read",
+        "catalog.service.price.update",
+        "booking.availability.read",
+        "booking.group-availability.read",
+        "appointments.own.list",
+        "catalog.staff.read",
+        "catalog.service.rename.preview",
+        "reviews.list.read",
+        "reviews.analyze",
+        "clients.dossier.read",
+        "staff.schedule.read",
+        "staff.schedule.own.read",
+        "operations.journal.read",
+        "staff.schedule.update",
+        "company.business-hours.read",
+        "business.rules.read",
+        "settings.read",
+        "settings.update",
+        "support.integration-status.read"
+      ],
+      "toolsHttpStatus": 200,
+      "clock": {
+        "authoredClock": "ACTUAL_EXECUTION_CLOCK_BOUND_ONCE",
+        "runtimeClock": "2026-10-09T10:37:49.369Z",
+        "mode": "REAL_APP_AND_PG_CLOCKS_RELATIVE_FIXTURE_DATES_BOUND_EXPLICITLY",
+        "businessTimezone": "Europe/Moscow",
+        "tomorrow": "2026-10-10",
+        "absoluteOctoberPeriod": "2026-10-01/2026-10-31",
+        "absolutePeriodNotShifted": true,
+        "corpusTurnsUnchanged": true
+      },
+      "expectedBoundary": {
+        "businessEffectsAllowed": false,
+        "httpStatuses": [
+          201
+        ],
+        "kind": "CLARIFICATION_OR_EXPLICIT_LIMITATION",
+        "qualification": "Existing Measurement/BusinessContent review READ is enabled by reviews.core. Its unconfigured local registry is not evidence of no bad reviews. The rolling days parameter does not express an exact previous calendar month; preserve the requested period limitation."
+      },
+      "sourceReadProofs": [
+        {
+          "tool": "reviews.list.read",
+          "httpStatus": 201,
+          "result": {
+            "configured": false,
+            "source": "not_configured",
+            "count": 0,
+            "reviews": [],
+            "privacy": "review_text_redacted_from_ai"
+          },
+          "qualification": "ACTUAL_UNCONFIGURED_LOCAL_REGISTRY_NOT_VERIFIED_EMPTY_PROVIDER_DATA_OR_REQUESTED_PERIOD"
+        }
+      ],
+      "sourceRefs": [
+        {
+          "owner": "CRM_SYNTHETIC_YCLIENTS_EDGE",
+          "idHash": "d63f906648017076cc5b97654b742863ab2bbf47726506a6bb2f37207e64cfad",
+          "status": "CURRENT_READS_ONLY"
+        }
+      ],
+      "branch": {
+        "idHash": "ff1e8d448801534e02bde3e6e20fde6aa25a627caca9ff0fd64f543930783d5c",
+        "name": "Synthetic authorized branch",
+        "secondBranchHash": null
+      },
+      "internalCatalog": [],
+      "internalStaff": [],
+      "appointmentCount": 0,
+      "appointmentSnapshotHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "c7": [],
+      "c8": [],
+      "opportunities": [],
+      "inventoryCount": 0,
+      "reviewCount": 0,
+      "occupied": false,
+      "qualification": "SYNTHETIC_FIXTURE_SETUP_WITH_CURRENT_OWNERS_NOT_DIALOGUE_OR_MODEL_ACCEPTANCE"
+    }
+  ]
+}

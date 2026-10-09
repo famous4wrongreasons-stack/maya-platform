@@ -1,0 +1,10 @@
+START initdb
+PASS initdb
+START pg-start
+PASS pg-start
+START createdb
+PASS createdb
+START migrations
+PASS migrations
+START conversation
+{"status":"failed","clusterStopped":true,"output":"/private/tmp/maya-offline48-http-20261009-r2","manifestSha256":"cb18b0103684f6360407100b8311bda8f596c1f79f8cdad42c82386daf419934","qualification":"SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"}

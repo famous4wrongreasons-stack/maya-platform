@@ -1,0 +1,18 @@
+✔ exact 48/81 corpus pin is mandatory; no mutated text, subset, ordering or gold additions (0.837375ms)
+✔ 47 model-eligible cases/80 turns each have a finite authored plan; revoked case has zero model eligibility (15.27275ms)
+✔ exact role/text/surface/date/turn guards refuse, latch, and never echo payloads (1.550417ms)
+✔ aliases bind only exact frozen name slots and relative date uses current Moscow clock (0.641708ms)
+✔ restored branch references stay opaque at exact frozen positions on topic switches (0.806916ms)
+✔ a completed tool is not dispatched again and missing current tool is an explicit limitation (0.420083ms)
+✔ compound carries requested today and only explicit acceptance selects empty bounded entities (0.478959ms)
+✔ price READ preserves unreachable-preview finding; year/retention/profit requests never become October facts (0.9315ms)
+✔ inventory/reviews read existing owners and distinguish NOT_CONFIGURED from empty verified requested scope (0.546709ms)
+✔ bounded repeated phases, backward context, oversize request and attempted mutation of evidence refuse safely (1.082083ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 59.499208

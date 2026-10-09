@@ -1,0 +1,629 @@
+{
+  "contract": "maya.offline48.evidence/1",
+  "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+  "finalRuntimeSourceCommit": "f06c5e14aa3867d69892f10299706c7da9c856e9",
+  "actualProviderCalls": 0,
+  "httpAttempts": {
+    "r1": "failed",
+    "r2": "failed",
+    "r3": "completed-with-semantic-failures"
+  },
+  "files": [
+    {
+      "path": "http/r1/actual-http-turns.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/actual-http-turns.jsonl",
+      "bytes": 39692,
+      "sha256": "31858948c28a844af1c46b392291004a958975f3042454d1fef03c5c4d0989f5",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/actual-model-responses.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/actual-model-responses.jsonl",
+      "bytes": 15713,
+      "sha256": "ac84aad23669a476f7d24e4305a81a3cce1dfbf6ea239a869970a1125275aa82",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/broker-ledger.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/broker-ledger.jsonl",
+      "bytes": 4187,
+      "sha256": "35442e60f59130258c1f1c2eda135ae0b8edc81bf11abca43fc5aa741f93131e",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/broker-report.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/broker-report.json",
+      "bytes": 13531,
+      "sha256": "14ce597f339cec38bc21642de15addcf090d66091a920ebc4985c214ddfd8be4",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/broker.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/broker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/candidate-manifest.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/candidate-manifest.json",
+      "bytes": 389980,
+      "sha256": "071dc60ebfba6c0e80d71995f289730b2119cc6b709ec2e6a2307d4e3d1acd89",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/conversation-jest.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/conversation-jest.json",
+      "bytes": 2720,
+      "sha256": "e51316ea3d3fa82520b3300a679ae06672ea57c59021053fe1335f17ab46cd3a",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/conversation.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/conversation.log",
+      "bytes": 1867,
+      "sha256": "7d84f97acb447818f9feaa4872ef3821e3245ca212721fc6712eca7e9cb1ba79",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/createdb.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/http-report.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/http-report.json",
+      "bytes": 267026,
+      "sha256": "64ebf031aed72a22c4dadad84a6fd08a8a0fe018d1d9cae9e524c978440b3cbe",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/http-response-journal.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/http-response-journal.jsonl",
+      "bytes": 9425,
+      "sha256": "f95fc6d06267b97690b61972a818dd554cc1d6db25c101913b3672685d7e191e",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/initdb.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/initdb.log",
+      "bytes": 884,
+      "sha256": "d71bebefc262a40378da88d07483a1aa04a4b953a649f54b506d299492e7994d",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/migrations.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/migrations.log",
+      "bytes": 14720,
+      "sha256": "f8f57e6cac46b463eb450c0aa6c4e62ed8d6caf3de350237a8e5b139618ca708",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/model-responses.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/model-responses.jsonl",
+      "bytes": 21480,
+      "sha256": "e15b645db2ed5dd94d95a1dec7fc68aa7ddfa6aeedee41313aea003204640a37",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/offline-source-snapshots.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/offline-source-snapshots.json",
+      "bytes": 148186,
+      "sha256": "cb93f3ddaed1894223627f12b4886b8c478d31cabf31dab8cb55e0271a09f0fa",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/pg-start.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/pg-stop.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/postgres.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/postgres.log",
+      "bytes": 1246,
+      "sha256": "b231efb4522b682a333f5ba8e02b2aabb3116a54ab184b6cfedd50d147dbbb4e",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/replay-binding.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/replay-binding.json",
+      "bytes": 20207,
+      "sha256": "e3771079f4058f8fcad82cd397870cc72a7223ff5951131c59965c88c7e9ab54",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/replay-records.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/replay-records.jsonl",
+      "bytes": 9258,
+      "sha256": "96aad6636b22d26e1adb5eb4ceae015bd31215452a284f68044ec2171d0de4ca",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/runner-budget-ledger.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/runner-budget-ledger.jsonl",
+      "bytes": 4401,
+      "sha256": "790554748259ecb424eb1a974b10cf59ba25da7cb9e5e1bb06e8ed8bd2cbb7b3",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/runner-report.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/runner-report.json",
+      "bytes": 2779,
+      "sha256": "0a9726e74106766c9451cbdf79fcce9a3fa95f9bbf3dcb453155601d10202724",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/serialized-attempts.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1/serialized-attempts.jsonl",
+      "bytes": 3003,
+      "sha256": "3d815c190d980036ce94d3fa05e0f624656439a551502a5f3a0c80278462821b",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r1/console.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r1-console.log",
+      "bytes": 372,
+      "sha256": "368167bb20b8b7030ae050a059f5a20976cbbd440652f741cc66ec569d9c63a4",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/actual-http-turns.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/actual-http-turns.jsonl",
+      "bytes": 205935,
+      "sha256": "738e74259eb409cd26cef10fd6e20e13eb48957afcd00de613d571b36f11dbed",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/actual-model-responses.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/actual-model-responses.jsonl",
+      "bytes": 88457,
+      "sha256": "66cec8cb79380d4e1701f0040626bbbaf11c49771173163e1d5c1b2c2a510b4b",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/broker-ledger.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/broker-ledger.jsonl",
+      "bytes": 22043,
+      "sha256": "236d302e5ca77cbe03a5d03902e23877c7ef9d1321fa7b8fbf470b66973baedf",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/broker-report.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/broker-report.json",
+      "bytes": 85147,
+      "sha256": "23e009c901c871f1cbe7fd76d08b2c51e702ed6f33c38dbe9267460e78803049",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/broker.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/broker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/candidate-manifest.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/candidate-manifest.json",
+      "bytes": 389980,
+      "sha256": "cb18b0103684f6360407100b8311bda8f596c1f79f8cdad42c82386daf419934",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/conversation-jest.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/conversation-jest.json",
+      "bytes": 2721,
+      "sha256": "ea249a6186b1656c21c25b0297064f11d435b0dc2b07d3203df4ebc11adfebdd",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/conversation.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/conversation.log",
+      "bytes": 1903,
+      "sha256": "ade0bf8080bee02980093518ac076dd338050020e547e4c8df475f538e93d917",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/createdb.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/http-report.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/http-report.json",
+      "bytes": 704951,
+      "sha256": "98478d2248ced5520585e2961d84026fb86771db756d91bb932e6220677c5bf1",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/http-response-journal.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/http-response-journal.jsonl",
+      "bytes": 51186,
+      "sha256": "52f1febc86bece478751ea039cae32210f0d8d7cfbcb90fe129de5dffd843b92",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/initdb.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/initdb.log",
+      "bytes": 884,
+      "sha256": "5b2261cd3fa977ff56e9894a8f8977acff45f0643d6cfbd4d2e88bd1a62f7796",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/migrations.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/migrations.log",
+      "bytes": 15588,
+      "sha256": "e09812ae3a83f746b76c517b4e097f8ea7295ced90c2cab68a8a460786722f44",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/model-responses.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/model-responses.jsonl",
+      "bytes": 132177,
+      "sha256": "1e13579f4551d204aae65458b19d9441dee295dc5a2c0b7c67d718eae8094a57",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/offline-expected-refusals.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/offline-expected-refusals.jsonl",
+      "bytes": 163,
+      "sha256": "7f4d27f489ee3ff630281cbe715b621978de1609795e476c6362fea52c2cefc9",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/offline-source-snapshots.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/offline-source-snapshots.json",
+      "bytes": 148186,
+      "sha256": "be292900e08282c8a1679c62aefcc2735372e3393e40bccd9ec293565fd4f8de",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/offline-source-transitions.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/offline-source-transitions.jsonl",
+      "bytes": 187,
+      "sha256": "3dada5242ccfd857337226be005b64e68f7e7b9839767b892bbee159bc5957e1",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/pg-start.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/pg-stop.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/postgres.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/postgres.log",
+      "bytes": 1246,
+      "sha256": "93440b8947fdfa9b81f80c6c0c3df55c675d1e2ce994cb7720dcf10794f7500c",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/replay-binding.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/replay-binding.json",
+      "bytes": 20207,
+      "sha256": "96983ed41de873eecba782738dcaf286746e183fe70ae0aee8a8ae1d9c6fe7a9",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/replay-records.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/replay-records.jsonl",
+      "bytes": 50965,
+      "sha256": "eb7dc3c5014b0a98bf4e99ad1606e75a49fb7981d68603a1f22219638e0dc56e",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/runner-budget-ledger.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/runner-budget-ledger.jsonl",
+      "bytes": 22192,
+      "sha256": "fdefbcfeeec701664456b510d1808e5c5aa877881f47ee5dc04e84ab475a06eb",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/runner-report.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/runner-report.json",
+      "bytes": 2779,
+      "sha256": "d19036bdfafe3fbba57f0721db28f6f78fb3171dd8f8af9440a15be37058d7f6",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/serialized-attempts.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2/serialized-attempts.jsonl",
+      "bytes": 17791,
+      "sha256": "1a7cc57ed277b6f6fb218c9eb9abced3f02a9977232c364c9f21f9468423e869",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r2/console.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r2-console.log",
+      "bytes": 372,
+      "sha256": "36429496de0cd0a539f7733b0d29b470cf0120c1cddae5ad602fce02b56d8209",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/actual-http-turns.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/actual-http-turns.jsonl",
+      "bytes": 217473,
+      "sha256": "ebce7e3a3c87cc8cff0dda22b97d86d01b74d9e7164bceb50dab54eb4065a70c",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/actual-model-responses.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/actual-model-responses.jsonl",
+      "bytes": 97469,
+      "sha256": "202f564bea3a6fda7b38cf8289307e0a0519c452a381c9d37f3c543dafe3e41c",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/broker-ledger.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/broker-ledger.jsonl",
+      "bytes": 24260,
+      "sha256": "d471eb33793df7e6fbc93f1605ddba7972d9ccbfcfa8ff1a6a4aacf05a2a2eb0",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/broker-report.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/broker-report.json",
+      "bytes": 94258,
+      "sha256": "4392b7e03a85e782c83761f959d8ca886f7a6eb21823d18fe59df567fb7d82c0",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/broker.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/broker.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/candidate-manifest.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/candidate-manifest.json",
+      "bytes": 389980,
+      "sha256": "16f1e2374efe02db9be5b0a5870a68e7c395f56541d17a481779bdbfd957269a",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/conversation-jest.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/conversation-jest.json",
+      "bytes": 1411,
+      "sha256": "d956a6abeb9ef3998db7555146dfc8a0d054ae7016bdf9ec8332cc67aadceeb3",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/conversation.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/conversation.log",
+      "bytes": 607,
+      "sha256": "d2ca7051ebaa87690b13551f1bdc3fe740d961b477f737190e6e8ee493a5ae4a",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/createdb.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/http-report.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/http-report.json",
+      "bytes": 744311,
+      "sha256": "2c00700ad8a8b37f69c90219a9aa2b0b500c01a3e916e3d6d03c73ba480bb3b0",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/http-response-journal.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/http-response-journal.jsonl",
+      "bytes": 54340,
+      "sha256": "d5ed3571917c3a502b11920625f7fa71155dbef965a5157fd4033465d8e0bb62",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/initdb.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/initdb.log",
+      "bytes": 884,
+      "sha256": "3d2bc31a2c16c8d2867967441d9138fbe771e31a6bc1620c424fb864345b7e09",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/migrations.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/migrations.log",
+      "bytes": 14720,
+      "sha256": "72109c85303ab30b5aaca32a89887fae2cbfd46bb8a49db9ad5e3211290f2b0e",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/model-responses.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/model-responses.jsonl",
+      "bytes": 145975,
+      "sha256": "da1ed1fe4a66a02ac5ce567f301e189cee5cad0c11e14a0525f98ebf537cb25e",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/offline-expected-refusals.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/offline-expected-refusals.jsonl",
+      "bytes": 163,
+      "sha256": "7f4d27f489ee3ff630281cbe715b621978de1609795e476c6362fea52c2cefc9",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/offline-source-snapshots.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/offline-source-snapshots.json",
+      "bytes": 148186,
+      "sha256": "f1b18f0911cbdb49006e5572758c497cf7e0d96fc586f19007c1407fbb2eedd5",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/offline-source-transitions.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/offline-source-transitions.jsonl",
+      "bytes": 187,
+      "sha256": "3dada5242ccfd857337226be005b64e68f7e7b9839767b892bbee159bc5957e1",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/pg-start.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/pg-stop.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/postgres.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/postgres.log",
+      "bytes": 1246,
+      "sha256": "700543599ad795b18466d9a7c53d82b67ec62ad0829cadb37d3f629369632cf1",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/replay-binding.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/replay-binding.json",
+      "bytes": 20207,
+      "sha256": "0c12731b4173e34da362aae9a0406b4fb6b2da6edb28f12497983461483e8d24",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/replay-records.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/replay-records.jsonl",
+      "bytes": 54365,
+      "sha256": "3c6eb4f1f572d7c4b5560b406713e415b7a96d64d95548f17ae4b520ecf63701",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/runner-budget-ledger.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/runner-budget-ledger.jsonl",
+      "bytes": 24409,
+      "sha256": "bb1a3f5a8579d5d093cefa58a024bf48e054fa1c0eaac9dbeb4d076a54f273b0",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/runner-report.json",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/runner-report.json",
+      "bytes": 3120,
+      "sha256": "2d0070b2f0ad30eaa2f04f90e1b122fd4572e6a66304d1aa97a10f49f66c2bbf",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/serialized-attempts.jsonl",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3/serialized-attempts.jsonl",
+      "bytes": 19700,
+      "sha256": "58e9f2e3be01c254327acb19acef9a0bfe4cdd1041378e82283ee3420a61cda0",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "http/r3/console.log",
+      "sourcePath": "/private/tmp/maya-offline48-http-20261009-r3-console.log",
+      "bytes": 398,
+      "sha256": "8acc9e4b05fa319d873fde898b97e2ef04e19f14a62fd979ec631676e94e344d",
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "checks/maya-offline48-node-final-20261009.log",
+      "sourcePath": "/private/tmp/maya-offline48-node-final-20261009.log",
+      "bytes": 10275,
+      "sha256": "742ed643083fb8775b7d7ea4e724854d0f5fbf038d0b16b16dd0b3aa09208da5",
+      "qualification": "LOCAL_CHECK_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "checks/maya-offline48-fixtures-final-20261009.log",
+      "sourcePath": "/private/tmp/maya-offline48-fixtures-final-20261009.log",
+      "bytes": 663,
+      "sha256": "6979de065e42161075a4cd9d0addac1624e845cf6193af44cbbcf4a35da61ef9",
+      "qualification": "LOCAL_CHECK_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "checks/maya-full-offline-fixtures-20261009-final.json",
+      "sourcePath": "/private/tmp/maya-full-offline-fixtures-20261009-final.json",
+      "bytes": 10373,
+      "sha256": "8b98d87fad4d223d64ed43a973f1f2392c77b514b8b3c0aef552592f6a6dccb8",
+      "qualification": "LOCAL_CHECK_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "checks/maya-offline48-broker-context-tests-20261009.log",
+      "sourcePath": "/private/tmp/maya-offline48-broker-context-tests-20261009.log",
+      "bytes": 728,
+      "sha256": "2296c887a48bdc30fac847e8e13646b44d772abac431c56f319ea141385d316c",
+      "qualification": "LOCAL_CHECK_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "checks/maya-offline48-typecheck-r1-20261009.log",
+      "sourcePath": "/private/tmp/maya-offline48-typecheck-r1-20261009.log",
+      "bytes": 2057,
+      "sha256": "b8ad80b91c0e85e57401fe2a8117e1c4d0f7c796604ab046de8545c5f75f14ce",
+      "qualification": "LOCAL_CHECK_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "checks/maya-offline48-typecheck-r2-20261009.log",
+      "sourcePath": "/private/tmp/maya-offline48-typecheck-r2-20261009.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualification": "LOCAL_CHECK_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "checks/maya-offline48-eslint-r1-20261009.log",
+      "sourcePath": "/private/tmp/maya-offline48-eslint-r1-20261009.log",
+      "bytes": 5660,
+      "sha256": "8290b5b45624f456bab7fb7e50231c15901075395e3deb782caaf2175555fae5",
+      "qualification": "LOCAL_CHECK_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "checks/maya-offline48-eslint-typescript-20261009.log",
+      "sourcePath": "/private/tmp/maya-offline48-eslint-typescript-20261009.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "qualification": "LOCAL_CHECK_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "checks/maya-offline48-model-r2-20261009.log",
+      "sourcePath": "/private/tmp/maya-offline48-model-r2-20261009.log",
+      "bytes": 1237,
+      "sha256": "0b5131017c6a843fd79724ff1afcc29ce5a9df3fcea1d1018a62db51ec9fa10e",
+      "qualification": "LOCAL_CHECK_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "checks/maya-offline48-model-r3-20261009.log",
+      "sourcePath": "/private/tmp/maya-offline48-model-r3-20261009.log",
+      "bytes": 1239,
+      "sha256": "f030236a4fc0e1ac6e3344807ba50399ca2c78f463cd8a496ae283a9e2271b74",
+      "qualification": "LOCAL_CHECK_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "checks/maya-full-offline-fixtures-20261009.json",
+      "sourcePath": "/tmp/maya-full-offline-fixtures-20261009.json",
+      "bytes": 64087,
+      "sha256": "6724a19541a33220dbf3cf4242249dd7615cdac07176c526b02a2d8ac7a4a932",
+      "qualification": "LOCAL_CHECK_NOT_MODEL_QUALITY"
+    },
+    {
+      "path": "checks/maya-full-offline-fixtures-20261009-green.json",
+      "sourcePath": "/tmp/maya-full-offline-fixtures-20261009-green.json",
+      "bytes": 10373,
+      "sha256": "0ba88bb2dc11e6b829caf1899cb6f55496c5b04ac5721a6817faa2ede5c1e2c8",
+      "qualification": "LOCAL_CHECK_NOT_MODEL_QUALITY"
+    }
+  ]
+}

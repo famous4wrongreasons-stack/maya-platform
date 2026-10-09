@@ -1,0 +1,1 @@
+{"caseId":"current-lifecycle-negative","turn":1,"expectedRefusal":{"httpStatus":401,"code":"membership_revoked"},"historyUnchanged":true,"noBusinessEffects":true}

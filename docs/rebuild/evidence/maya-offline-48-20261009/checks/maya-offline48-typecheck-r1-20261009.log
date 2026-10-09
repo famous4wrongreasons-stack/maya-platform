@@ -1,0 +1,12 @@
+test/widgets-live/core-conversation-http.probe-spec.ts(608,64): error TS2345: Argument of type 'CoreConversationProfileId' is not assignable to parameter of type '"core-union-20261009/1" | "core-offline-48-20261009/1"'.
+  Type '"core-diagnostic-20261008/1"' is not assignable to type '"core-union-20261009/1" | "core-offline-48-20261009/1"'.
+test/widgets-live/core-conversation-http.probe-spec.ts(1778,63): error TS2345: Argument of type 'CoreConversationProfileId' is not assignable to parameter of type '"core-union-20261009/1" | "core-offline-48-20261009/1"'.
+  Type '"core-diagnostic-20261008/1"' is not assignable to type '"core-union-20261009/1" | "core-offline-48-20261009/1"'.
+test/widgets-live/core-conversation-http.probe-spec.ts(2067,70): error TS2345: Argument of type 'CoreConversationProfileId' is not assignable to parameter of type '"core-union-20261009/1" | "core-offline-48-20261009/1"'.
+  Type '"core-diagnostic-20261008/1"' is not assignable to type '"core-union-20261009/1" | "core-offline-48-20261009/1"'.
+test/widgets-live/core-conversation-http.probe-spec.ts(2076,70): error TS2345: Argument of type 'CoreConversationProfileId' is not assignable to parameter of type '"core-union-20261009/1" | "core-offline-48-20261009/1"'.
+  Type '"core-diagnostic-20261008/1"' is not assignable to type '"core-union-20261009/1" | "core-offline-48-20261009/1"'.
+test/widgets-live/core-conversation-http.probe-spec.ts(2088,70): error TS2345: Argument of type 'CoreConversationProfileId' is not assignable to parameter of type '"core-union-20261009/1" | "core-offline-48-20261009/1"'.
+  Type '"core-diagnostic-20261008/1"' is not assignable to type '"core-union-20261009/1" | "core-offline-48-20261009/1"'.
+test/widgets-live/core-conversation-http.probe-spec.ts(2214,67): error TS2345: Argument of type 'CoreConversationProfileId' is not assignable to parameter of type '"core-union-20261009/1" | "core-offline-48-20261009/1"'.
+  Type '"core-diagnostic-20261008/1"' is not assignable to type '"core-union-20261009/1" | "core-offline-48-20261009/1"'.

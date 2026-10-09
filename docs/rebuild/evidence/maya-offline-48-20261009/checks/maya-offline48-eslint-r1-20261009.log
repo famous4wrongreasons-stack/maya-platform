@@ -1,0 +1,39 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/candidate-broker-server.mjs
+  0:0  error  Parsing error: /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/candidate-broker-server.mjs was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/candidate-broker-server.test.mjs
+  0:0  error  Parsing error: /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/candidate-broker-server.test.mjs was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-conversation-broker.mjs
+  0:0  error  Parsing error: /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-conversation-broker.mjs was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-conversation-runner.mjs
+  0:0  error  Parsing error: /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-conversation-runner.mjs was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.mjs
+  0:0  error  Parsing error: /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.mjs was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.test.mjs
+  0:0  error  Parsing error: /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-full-offline-model.test.mjs was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-full-offline-report.mjs
+  0:0  error  Parsing error: /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-full-offline-report.mjs was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-full-offline-report.test.mjs
+  0:0  error  Parsing error: /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-full-offline-report.test.mjs was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-offline-profile.test.mjs
+  0:0  error  Parsing error: /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-offline-profile.test.mjs was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-offline-refusal.test.mjs
+  0:0  error  Parsing error: /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/core-offline-refusal.test.mjs was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/current-candidate-budget.mjs
+  0:0  error  Parsing error: /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/current-candidate-budget.mjs was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/replay.mjs
+  0:0  error  Parsing error: /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-full-offline/maya-saas-backend/scripts/conversation-qualification/replay.mjs was not found by the project service. Consider either including it in the tsconfig.json or including it in allowDefaultProject
+
+✖ 12 problems (12 errors, 0 warnings)
+

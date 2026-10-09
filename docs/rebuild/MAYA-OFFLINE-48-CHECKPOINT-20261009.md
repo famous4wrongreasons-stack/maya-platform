@@ -1,6 +1,7 @@
 # 48/81 offline implementation — resumed checkpoint
 
-Status: **SCRIPTED SYNTHETIC, HTTP/PG PROOF PENDING, NOT MODEL ACCEPTANCE**.
+Status: **SCRIPTED SYNTHETIC HTTP/PG COMPLETED WITH ONE SEMANTIC FAILURE;
+NOT MODEL ACCEPTANCE**.
 Resumed from `863d1f80bac056dd354973f8f8b54fa72c9216b1` in the isolated
 `maya-full-offline` worktree. The frozen 9/18 candidate and its prepared handoff
 remain unchanged. No desktop input, credential access or paid run is part of
@@ -15,6 +16,37 @@ authorization, owners and source fixtures. Live mode, admission, permits and
 credential input remain rejected for this profile. Only its local scripted
 transport has zero inter-attempt delay; paid profiles retain 6000 ms.
 
+The final serial HTTP/PG proof executed all **48 dialogs / 81 turns**: **80 HTTP
+201 replies and one expected HTTP 401**, no unresolved, dependent-skipped or
+unexecuted turns. Source commit:
+`f06c5e14aa3867d69892f10299706c7da9c856e9`. The HTTP Jest gate passed; the runner
+deliberately exited **2 / completed-with-semantic-failures**. Finite per-turn
+assessments were **12 pass / 1 fail / 67 ungraded**. This is executable diagnostic
+coverage, not a 48-domain functional pass.
+
+The useful occupancy path returned an actual explanation of a saved cancellation
+window, two evidence entries and persisted proposal version 1. After the declared
+fixture appointment transition before turn 2, the actual second response marked
+the opportunity **CLOSED**, with no current free window. The revoked-membership
+case returned 401 with no assistant reply, model/serializer/broker/source calls,
+history change or business effect. Every attempted turn retained an unchanged
+business hash and an empty business-writes list. No CRM mutation or notification
+was executed by a tested chat request.
+
+The one finite failure was `core-client-create-followup` turn 2,
+`explicit_time_has_current_selection`: after “Запиши меня на 17:00”, the actual
+reply requested an exact catalog staff name and produced no current selection.
+This scripted follow-up failure remains visible; it does not establish a defect
+in a real model or real booking acceptance.
+
+All 93 provider-shaped responses were local scripted output: **zero upstream
+calls, zero credentials loaded, zero billing**. There were 88 application model
+decisions and 93 serialized attempts; these are distinct from the 81 HTTP turns.
+Three turns had no model decision at all (revocation, the first occupancy request
+and one deterministic profit limitation). All six owned process groups were
+absent, broker closed, PostgreSQL stopped, postmaster PID absent and source pins
+unchanged. The three attempts ran one at a time and are all preserved.
+
 The exact predeclared revoked-membership case expects an actual HTTP 401,
 without a fabricated assistant reply, history advance, model call or source
 call. Other HTTP failures stop the run. Semantic failures may skip only later
@@ -27,6 +59,9 @@ count alone cannot establish completion.
 - 92 Node tests passed across profile, scripted transport, strict report,
   refusal, replay, usage and finite assessment suites.
 - 19 fixture Jest tests passed; 6 candidate broker loopback tests passed.
+- The final modified scripted transport suite passed 10/10 tests after the two
+  runtime fixture corrections below. This overlaps the original aggregate and
+  must not be added to it as ten independent new tests.
 - Widgets-live TypeScript check passed after fixing six profile-union narrowing
   errors. Scoped lint of the three changed TypeScript files passed.
 - The attempted combined MJS/TypeScript lint did not pass: 12 MJS files were
@@ -35,6 +70,9 @@ count alone cannot establish completion.
 - Independent source review found no remaining material blocker; its report
   hardening finding was fixed and covered by regression tests. The reviewer ran
   no services, network or tests.
+- [Final independent artifact review](MAYA-OFFLINE-48-REVIEW-20261009.md)
+  confirmed all 2482 runtime source pins against both source files and Git,
+  matching closed reservation ledgers, complete accounting and cleanup evidence.
 
 ## Limits that remain explicit
 
@@ -45,6 +83,12 @@ the declared controlled occupancy transition are fixture writes outside the
 per-turn business-effects baseline. The `sourceReads` count covers the synthetic
 adapter, not every SQL query or source owner.
 
+The occupancy correction is a fresh request in the same conversation: it creates
+a new run after source invalidation and preserves the prior revision unchanged.
+The second turn exits on the appointment state, with no provider availability
+read. This proof does not establish replay, restart, React presentation or live
+branch/YCLIENTS behavior.
+
 Current C7 October facts do not establish current-week/year measurements; the
 existing C8 30-day rule does not establish a two-month ranking. Goods item 123
 does not establish a stock scan. Missing review/inventory configuration does not
@@ -52,10 +96,27 @@ establish a verified empty list. The current price-update semantic route is
 unreachable through the canonical intent mapping; the script records this as a
 limitation and uses the actual catalog read, without fabricating a preview.
 
-The execution guard was removed after wiring and local checks. A single bounded,
-serial local HTTP/PG proof is the next step. Until its raw evidence is recorded,
-this checkpoint does not establish executable coverage of all 48 cases, model
-quality, real YCLIENTS integration, broad MAYA completion or C10 completion.
+The execution guard was removed after wiring and local checks. This checkpoint
+does not establish model quality, real YCLIENTS integration, broad MAYA
+completion or C10 completion. No background initiator was enabled and no schema,
+retention, deployment, push or merge was introduced.
+
+## Raw evidence
+
+[Evidence manifest](evidence/maya-offline-48-20261009/manifest.json) pins 88
+unchanged raw files (5,100,422 bytes), including all failed and final HTTP runs,
+initial failed checks and subsequent successful checks. Manifest SHA-256:
+`af1acceb1e3b80b6a14e21eb2a048873c2b5e3be39f43609b41b08d52208bc80`.
+
+- [Final runner report](evidence/maya-offline-48-20261009/http/r3/runner-report.json),
+  SHA-256 `2d0070b2f0ad30eaa2f04f90e1b122fd4572e6a66304d1aa97a10f49f66c2bbf`.
+- [Final actual HTTP report](evidence/maya-offline-48-20261009/http/r3/http-report.json),
+  SHA-256 `2c00700ad8a8b37f69c90219a9aa2b0b500c01a3e916e3d6d03c73ba480bb3b0`.
+- [Final broker report](evidence/maya-offline-48-20261009/http/r3/broker-report.json),
+  SHA-256 `4392b7e03a85e782c83761f959d8ca886f7a6eb21823d18fe59df567fb7d82c0`.
+
+Raw synthetic logs and historical provider-shaped labels are retained verbatim;
+the enclosing **SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY** qualification is mandatory.
 
 ## First actual HTTP/PG attempt
 

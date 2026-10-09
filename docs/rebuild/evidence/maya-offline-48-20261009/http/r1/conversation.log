@@ -1,0 +1,31 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_96a0e5b5daaf on 127.0.0.1:50864 (local)
+[33m[Nest] 75430  - [39m10/09/2026, 10:37:53 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_http_503 (попытка 1)[39m
+[33m[Nest] 75430  - [39m10/09/2026, 10:37:53 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core stage failed: deepseek:tool_plan:deepseek_http_503 (попытка 2)[39m
+[33m[Nest] 75430  - [39m10/09/2026, 10:37:53 AM [33m   WARN[39m [38;5;3m[AiCoreModelService] [39m[33mAI Core provider failed: deepseek:deepseek_http_503[39m
+FAIL test/widgets-live/core-conversation-http.probe-spec.ts (14.932 s)
+  Core conversation [actual HTTP, bounded broker, development diagnostic only]
+    ✕ replays exactly the selected frozen dialogs and retains actual HTTP replies before qualification (3780 ms)
+
+  ● Core conversation [actual HTTP, bounded broker, development diagnostic only] › replays exactly the selected frozen dialogs and retains actual HTTP replies before qualification
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "completed"
+    Received: "stopped"
+
+      2308 |     });
+      2309 |     if (profile.id === CORE_OFFLINE_PROFILE) {
+    > 2310 |       expect(result.executionStatus).toBe('completed');
+           |                                      ^
+      2311 |       expect([
+      2312 |         'replayed_ungraded',
+      2313 |         'completed_with_semantic_failures',
+
+      at Object.<anonymous> (widgets-live/core-conversation-http.probe-spec.ts:2310:38)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        14.951 s
+Ran all test suites.
+Test results written to: ../../../../../../../../private/tmp/maya-offline48-http-20261009-r1/conversation-jest.json

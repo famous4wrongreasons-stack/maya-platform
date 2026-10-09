@@ -1,0 +1,374 @@
+{
+  "contract": "maya.core-conversation-broker/1",
+  "mode": "DRY_HTTP",
+  "runId": "daa60e63-0edf-4697-aba8-8b4c9f4e8bac",
+  "candidateCommit": "211febbe7ad0cebf8ae20bc6dfc4677badded2bd",
+  "profile": "core-offline-48-20261009/1",
+  "limitsSha256": "ff91ce64466f0be97326464d1aaa5e0494484e0c6dcd46dc0f6972e072456cd1",
+  "manifestSha256": "071dc60ebfba6c0e80d71995f289730b2119cc6b709ec2e6a2307d4e3d1acd89",
+  "paidAuthorized": false,
+  "credentialsLoaded": false,
+  "upstreamCalls": 0,
+  "upstreamCountMeaning": "attempts started; delivery may be unknown",
+  "startedAt": "2026-10-09T10:37:37.970Z",
+  "expiresAt": "2026-10-09T11:07:37.970Z",
+  "requests": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "bytes": 68687,
+      "bodySha256": "d1b85171f69d4e02269623dbba29586cd657f1969cff956886f55c08fc33e564",
+      "status": 200
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "bytes": 69644,
+      "bodySha256": "bc9e536ffd35266aae6317800010c09fe27992606533e501af8b3a6693559e9a",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "bytes": 92782,
+      "bodySha256": "896d1347c668312111d75e5444196124795c971374a7daf910222804d48f0d92",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "bytes": 97455,
+      "bodySha256": "fa1e1eedee6c91fbe0e96b867cded99ff37b5c1cb0a8ca9e07a85f8404c52454",
+      "status": 200
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "bytes": 80441,
+      "bodySha256": "029ca26bde6d1a261968877da085a53eeb7661dca3c767850911554540b241ef",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 1,
+      "bytes": 68795,
+      "bodySha256": "f5181f271a7292a1ff68c6a169df712693e361574be40f64558998dac4406ad1",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 2,
+      "bytes": 69754,
+      "bodySha256": "8075f6bceb9103c43bce8d45a46998f9dbde9a4c19ed3dd236e4b9ae1d40da84",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-carry-over",
+      "turn": 3,
+      "bytes": 69830,
+      "bodySha256": "f49d831fb583c01c49b494ad6338d4d3b760d4cc19e09c168f04ec1a8129ddb9",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 1,
+      "bytes": 68687,
+      "bodySha256": "7cf3e402a0d7e21aceeeeddda9dae1a866f98201fbde128e19c561038d72b80b",
+      "status": 200
+    },
+    {
+      "caseId": "followup-client-entity-correction",
+      "turn": 2,
+      "bytes": 69685,
+      "bodySha256": "8f78b9aeeb36ba984483c30f4e7b5621e25b72f693215e1c8a7fc9fc0675c2b3",
+      "status": 200
+    },
+    {
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "turn": 1,
+      "bytes": 80499,
+      "bodySha256": "ba82d240b17128080f5e0428ca13a142a73a7041617575088f996fd6fa4b8778",
+      "status": 200
+    },
+    {
+      "caseId": "followup-owner-topic-switch",
+      "turn": 1,
+      "bytes": 93029,
+      "bodySha256": "832a8f9271d7825546717d2e6d4c293723f2cfa8b339953577f753ac473bd044",
+      "status": 200
+    }
+  ],
+  "rejections": [
+    {
+      "code": "candidate_attempt_unresolved"
+    },
+    {
+      "code": "dry_broker_closed_or_busy"
+    }
+  ],
+  "stopped": true,
+  "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+  "recordedReplay": false,
+  "usageValidation": "OFFLINE_SYNTHETIC_NOT_ACTUAL_USAGE",
+  "replayFixture": null,
+  "scriptedResponses": [
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "d1b85171f69d4e02269623dbba29586cd657f1969cff956886f55c08fc33e564",
+      "contentSha256": "363b13dd005c7ee88b1d8027712b0c14d57be4814c4478114ab59dd862fe4e1e",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "appointments.own.create",
+      "emittedTool": "appointments.own.create",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.create_own"
+      ],
+      "inputSha256": "bc9e536ffd35266aae6317800010c09fe27992606533e501af8b3a6693559e9a",
+      "contentSha256": "0030875141a140066296ea56af385f4400e77e437d3ea07ea66e4d82d6c147d3",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "analytics.business_summary",
+        "schedule.review_cancellation_windows",
+        "analytics.recommendations"
+      ],
+      "inputSha256": "896d1347c668312111d75e5444196124795c971374a7daf910222804d48f0d92",
+      "contentSha256": "5def1f577c873bd929d78220c74781558db00771615df3879225c7a48c61940a",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "analytics.business_summary",
+        "schedule.review_cancellation_windows",
+        "analytics.recommendations"
+      ],
+      "inputSha256": "fa1e1eedee6c91fbe0e96b867cded99ff37b5c1cb0a8ca9e07a85f8404c52454",
+      "contentSha256": "4348bbc67d2e3277eae57d75a77ec189b874f1f46001f2297221becaa67b514e",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "PRIVATE_DATA_REFUSAL",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "small_talk.free_form"
+      ],
+      "inputSha256": "029ca26bde6d1a261968877da085a53eeb7661dca3c767850911554540b241ef",
+      "contentSha256": "02013234abc715154f01f5ea5a3c0bf6149d94941a44dbd6bbd1362805aa4f7f",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-client-carry-over",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "f5181f271a7292a1ff68c6a169df712693e361574be40f64558998dac4406ad1",
+      "contentSha256": "18d278c68739ef3355abd4c946b05071fb9ef95dfd5e2441dc7af5696ab91bba",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-client-carry-over",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "8075f6bceb9103c43bce8d45a46998f9dbde9a4c19ed3dd236e4b9ae1d40da84",
+      "contentSha256": "3b0eca65b98b15e854228f31d0e36e72c487b890d2d7bad5b61d9a9d5708127c",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-client-carry-over",
+      "turn": 3,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "f49d831fb583c01c49b494ad6338d4d3b760d4cc19e09c168f04ec1a8129ddb9",
+      "contentSha256": "2deca6078403e846c2db4f434cb77a0d033f33992baf6366b7fd757e3f042a93",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-client-entity-correction",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "7cf3e402a0d7e21aceeeeddda9dae1a866f98201fbde128e19c561038d72b80b",
+      "contentSha256": "7e8b7c3aae40fd38c934c9d302eb60f6e9dee0acec842ac66258659454f72ac9",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-client-entity-correction",
+      "turn": 2,
+      "phase": "tool_planning",
+      "requestedTool": "booking.availability.read",
+      "emittedTool": "booking.availability.read",
+      "limitation": null,
+      "coverage": "SCRIPTED_PATH_ONLY",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "8f78b9aeeb36ba984483c30f4e7b5621e25b72f693215e1c8a7fc9fc0675c2b3",
+      "contentSha256": "fa9f0114c7138abbcc7dbfd04844f7c9a1af53d045921c284250a5540eb2b0ef",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-admin-typo-ambiguous-period",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "PAST_RANGE_IS_NOT_FUTURE_AVAILABILITY",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "booking.find_availability"
+      ],
+      "inputSha256": "ba82d240b17128080f5e0428ca13a142a73a7041617575088f996fd6fa4b8778",
+      "contentSha256": "97cd115968cec3d662c64bcd2e67c0f19c8e243a57acafb56c15f2cd708b8217",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    },
+    {
+      "qualification": "SCRIPTED_SYNTHETIC_NOT_MODEL_QUALITY",
+      "caseId": "followup-owner-topic-switch",
+      "turn": 1,
+      "phase": "tool_planning",
+      "requestedTool": null,
+      "emittedTool": null,
+      "limitation": "NO_BRANCH_FINANCIAL_MEASUREMENT",
+      "coverage": "SCOPED_LIMITATION",
+      "observedToolNames": [],
+      "intendedTaskIntents": [
+        "analytics.business_summary"
+      ],
+      "inputSha256": "832a8f9271d7825546717d2e6d4c293723f2cfa8b339953577f753ac473bd044",
+      "contentSha256": "c07205b8ca5e13b3631c31f0feec8c87caf117ea06e751380aab45451653db54",
+      "actualProviderCalls": 0,
+      "actualBilling": false,
+      "corpusGoldUsed": false,
+      "modelHistoryPolicy": "CANONICAL_USER_ONLY_WITH_SERVER_SEMANTIC_CONTINUATION"
+    }
+  ],
+  "port": 50870,
+  "stopReason": "SIGTERM",
+  "connectionsAtStop": 0,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-09T10:37:53.394Z",
+  "stats": {
+    "dialogs": 7,
+    "turns": 13,
+    "attempts": 13,
+    "inputTokens": 1076776,
+    "outputTokens": 15600,
+    "reservedNanoUsd": 0,
+    "halted": true
+  }
+}

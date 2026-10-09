@@ -1,0 +1,14 @@
+✔ concurrent stop callers join request drain and gate closure; owned listeners remain until full stop (8.233667ms)
+✔ two sequential brokers report readiness and close without accumulating process listeners (3.246291ms)
+✔ onListen failure rejects ready and drains before closed; onReady is withheld (0.392917ms)
+✔ stop before the listen callback joins pending startup and never announces ready (0.23375ms)
+✔ synchronous listen failure settles both lifecycle promises and removes only owned listeners (0.172708ms)
+✔ validated frozen case/turn context reaches offline reservation before dispatch (1.916ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 51.63075
