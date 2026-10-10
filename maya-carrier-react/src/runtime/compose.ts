@@ -17,6 +17,7 @@
 // `completeTelegram` would read null in the other, and every login would fail as
 // `callback_unsolicited`. The shell composes at module scope and so does this.
 
+import { createLocalCrmSetup } from '../../../maya-chat-shell/src/shell/local-crm-setup.ts';
 import { createPersonalBooking } from '../../../maya-chat-shell/src/shell/personal-booking.ts';
 import { createNet } from '../../../maya-chat-shell/src/net/session.ts';
 import { createShellRuntime } from '../../../maya-chat-shell/src/shell/shell.ts';
@@ -195,6 +196,9 @@ export const conversation = runtime.conversation;
 export const goodsPhoto = runtime.goodsPhoto;
 export const privacy = runtime.privacy;
 export const widgets = runtime.widgetPort;
+export const localCrmSetupEnabled = (window.location.protocol === 'http:' || window.location.protocol === 'https:') &&
+  ['127.0.0.1', 'localhost'].includes(window.location.hostname) && new URLSearchParams(window.location.search).get('local_crm_setup') === '1';
+export const localCrmSetup = createLocalCrmSetup({ enabled: localCrmSetupEnabled, transport: net.transport, session, newAbort, newId: () => crypto.randomUUID() });
 export const personalBooking = createPersonalBooking({ transport: net.transport, widgets, session, newAbort });
 
 /**
@@ -204,6 +208,7 @@ export const personalBooking = createPersonalBooking({ transport: net.transport,
 export const landFragment = (): void => void runtime.landFragment();
 
 export const dispose = (): void => {
+  localCrmSetup.dispose();
   personalBooking.dispose();
   voiceMachine.dispose();
   runtime.dispose();

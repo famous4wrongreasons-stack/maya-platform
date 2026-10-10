@@ -1,0 +1,39 @@
+{
+  "contract": "maya.local-crm-setup.checkpoint/1",
+  "baseCommit": "63b1f849af37cb82d65a6f0eb58b578675411dba",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "classification": "development candidate; not a complete/live connection path",
+  "checks": {
+    "runtimeBuild": "PASS",
+    "reactBuildGate": "PASS, 26 source files, zero refusals",
+    "reactTypecheck": "PASS, 26 carrier files + 28 runtime modules",
+    "targetedTests": {
+      "command": "node --test maya-chat-shell/test/local-crm-setup.test.mjs maya-chat-shell/test/history-erasure-net.test.mjs",
+      "pass": 24,
+      "fail": 0,
+      "newSetupCases": 12,
+      "sharedTransportRegressionCases": 12
+    },
+    "browser": "PASS after correcting probe assertion to allow embedded data/about resources; actual HTTP requests remained same loopback origin; existing happy mock returned 404 for setup GET; no setup POST"
+  },
+  "executedEffects": {
+    "realProviderCalls": 0,
+    "modelCalls": 0,
+    "credentialConfiguration": false,
+    "activation": false,
+    "databaseImport": false,
+    "websiteChanges": false,
+    "pushMergeDeploy": false
+  },
+  "blockers": [
+    "Existing activation owner does not atomically bind activation/import to displayed source revision; activation removed from adapter.",
+    "Write uncertainty latch is in-memory; restart lacks a terminal A17 operation receipt. Live/restart recovery not accepted.",
+    "No isolated real owner backend/session/credentials configured."
+  ],
+  "acceptance": {
+    "liveYclients": "NOT_ISSUED",
+    "completeConnectionPath": "NOT_ISSUED",
+    "fullMayaC10": "NOT_ISSUED"
+  },
+  "independentReview": "Local development checkpoint acceptable after source fixes; live credential setup NOT_ISSUED"
+}

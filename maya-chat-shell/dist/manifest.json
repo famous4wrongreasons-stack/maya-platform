@@ -16,6 +16,7 @@
     "src/integrity/h7.ts",
     "src/net/booking-reasons.ts",
     "src/net/client.ts",
+    "src/net/crm-setup.ts",
     "src/net/endpoint.ts",
     "src/net/goods-photo.ts",
     "src/net/personal.ts",
@@ -33,6 +34,7 @@
     "src/shell/dom-port.ts",
     "src/shell/goods-photo.ts",
     "src/shell/intents.ts",
+    "src/shell/local-crm-setup.ts",
     "src/shell/personal-booking.ts",
     "src/shell/ports.ts",
     "src/shell/privacy.ts",
@@ -68,7 +70,11 @@
       },
       {
         "path": "src/net/client.ts",
-        "sha256": "6260f9d15f2ae7f5b81ca526ee4240349f9f6e0c8954c9374223469cee6e128b"
+        "sha256": "c24f0774647ffb80eb083560bfcae6cb104d30ff2ccd41958375b8b306e50ea0"
+      },
+      {
+        "path": "src/net/crm-setup.ts",
+        "sha256": "8fb7a8a2a7529526ad17f0e47c2cfa377dbdbff022a8b52f4cfb3ce9355ab2bd"
       },
       {
         "path": "src/net/endpoint.ts",
@@ -92,7 +98,7 @@
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "a28fc5315a5f8493640b193000cfe03d2afe5bb52b7c18993ddf78645e4c3e45"
+        "sha256": "e07f5e08e83e97e2a85ac2390917a8b68050a2d98908564c1f602c441941289d"
       },
       {
         "path": "src/renderer/cells.ts",
@@ -135,6 +141,10 @@
         "sha256": "75137a7b7e8abb4258f83a8427fb6226c3f0a0188bda2d810c7b356da4a4c693"
       },
       {
+        "path": "src/shell/local-crm-setup.ts",
+        "sha256": "a5ee019e0a932a6f8eba0423d6cf8b739a17cad23ca1c51c0f40703594f56f86"
+      },
+      {
         "path": "src/shell/personal-booking.ts",
         "sha256": "496a632a9719b3c14be71d74062040bf0179d9ee07c59e1325a1f78ef957755e"
       },
@@ -160,8 +170,8 @@
       }
     ]
   },
-  "bytes": 578247,
-  "digest": "e2c351e9eeb406fe287bbe944f586a390673f67d3ad670d60cc6be3c1b95663e",
+  "bytes": 592118,
+  "digest": "827222decc20881c109a8d42881a120569ddc49d05a291b68451b8aa57c1d9ef",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -169,8 +179,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "b0a2cb083a431502767ae6f07e6c0329cd32ef2ac0d2e2a50121b06eddd39380",
-    "modulePath": "m/b0a2cb083a431502/",
+    "digest": "d927e97cf0ec2888b4329c3985812c8c1e9557547fa7f74052b94a870c0a7694",
+    "modulePath": "m/d927e97cf0ec2888/",
     "files": [
       {
         "path": "entry/main.js",
@@ -229,8 +239,13 @@
       },
       {
         "path": "src/net/client.js",
-        "sha256": "662b6949bf24ca8ba4648073d817ce2042b881245c5770677991ebd15bc2c2e9",
-        "bytes": 32999
+        "sha256": "aa262d51dbfa719239d23c31bf504c5c574dd2368cb7ca3198b84303274a4601",
+        "bytes": 34392
+      },
+      {
+        "path": "src/net/crm-setup.js",
+        "sha256": "f25277949397c9b81850e365a5c8d67397623b203a84dd18bcb8e37d7c9c3283",
+        "bytes": 2405
       },
       {
         "path": "src/net/endpoint.js",
@@ -318,6 +333,11 @@
         "bytes": 47706
       },
       {
+        "path": "src/shell/local-crm-setup.js",
+        "sha256": "3a87f9dfff226b4bf6971eae83ba1592b0a9b3a17fa9bb339d9ce373f9b4778f",
+        "bytes": 6979
+      },
+      {
         "path": "src/shell/personal-booking.js",
         "sha256": "354de1f62f550519c0540c66cc0940b19802260368e9cfa0f65ae92c93171179",
         "bytes": 12451
@@ -363,7 +383,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "27fc0abf9a0ac3cde1bf43f4d19b22f1642ba2105e02792776924a177c85e8c9",
+      "sha256": "2cbc3cb3e971f09fdd64fd24ab9833de9e72e94642105527dbb5a2af4912710a",
       "bytes": 1344
     },
     "assets": [

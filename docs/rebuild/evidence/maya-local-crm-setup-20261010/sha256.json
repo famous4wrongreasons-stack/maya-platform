@@ -1,0 +1,18 @@
+{
+  "maya-carrier-react/src/App.tsx": "3f8b20ceb403c06070e1d57b436fa18b046553402f6a79a6748fccde410d96f7",
+  "maya-carrier-react/src/runtime/compose.ts": "ea1a09901a837f6149fa4362fe0e5f24b5a836d216cd541d0ad9babc57bb5b16",
+  "maya-carrier-react/src/setup/LocalCrmSetup.tsx": "d719f12e7b7b49c1f8f27ddc2903da8e53014428ea98d0a512043e2ecd9ccdbe",
+  "maya-carrier-react/test/local-crm-setup-browser-probe.mjs": "d62875642ec08fd971b01a559895ca80eca3e106862756ecc28ceec9a10b5542",
+  "maya-chat-shell/build.mjs": "c029fe8362f925cde5da723eb5713cbe173537e9c15fc30b0247306dfa88e500",
+  "maya-chat-shell/dist/manifest.json": "510a3f6bf1a23e29dcf56b587b0ad30714ba9bcee711fb9c895448302076c607",
+  "maya-chat-shell/src/net/client.ts": "c24f0774647ffb80eb083560bfcae6cb104d30ff2ccd41958375b8b306e50ea0",
+  "maya-chat-shell/src/net/types.ts": "e07f5e08e83e97e2a85ac2390917a8b68050a2d98908564c1f602c441941289d",
+  "maya-chat-shell/src/net/crm-setup.ts": "8fb7a8a2a7529526ad17f0e47c2cfa377dbdbff022a8b52f4cfb3ce9355ab2bd",
+  "maya-chat-shell/src/shell/local-crm-setup.ts": "a5ee019e0a932a6f8eba0423d6cf8b739a17cad23ca1c51c0f40703594f56f86",
+  "maya-chat-shell/test/local-crm-setup.test.mjs": "9e3f7749c3aecb44bea72c85a6d77d13422325931928b2b3649040690d7f9e40",
+  "docs/rebuild/evidence/maya-local-crm-setup-20261010/checks.json": "36592f204631193330ac43639ebe05a4650c8b478899e2abaadb3a19433b845f",
+  "docs/rebuild/evidence/maya-local-crm-setup-20261010/desktop.png": "97b20cd2a00da9b71daf675f46313e0a7bae4e1a08a43e5cfdf006450cda1a57",
+  "docs/rebuild/evidence/maya-local-crm-setup-20261010/mobile.png": "cab2ee4e1187d0f1f7f4d84046cc6b2d0608b3be997c50b99684915c9d70a685",
+  "docs/rebuild/evidence/maya-local-crm-setup-20261010/summary.json": "aaf4a5281f7059b1f39e7f7e761a82892f8475430934fb38517f91e21ed6ebf8",
+  "docs/rebuild/evidence/maya-local-crm-setup-20261010/independent-review.json": "bff76b24e2a68202c0c1f96168874404d137fa819129d4f84c1e8c2121550c4b"
+}

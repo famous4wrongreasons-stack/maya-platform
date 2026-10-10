@@ -229,6 +229,8 @@ export const P1_PATHS = [
   '/mobile/pwa/search',
   '/widgets/intent',
   '/widgets/resolve',
+  '/integrations/crm',
+  '/integrations/crm/connect',
   '/branches',
   '/services',
   '/staff',

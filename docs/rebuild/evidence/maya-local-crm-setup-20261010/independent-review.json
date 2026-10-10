@@ -1,0 +1,18 @@
+{
+  "reviewer": "/root/independent_review",
+  "mode": "read-only; no tests or mutations by reviewer",
+  "disposition": "Local development checkpoint acceptable after fixes; no remaining source blocker for that limited scope",
+  "findingsResolved": [
+    "Activation removed from new path/transport/port/UI; no empty-body activation can dispatch.",
+    "In-memory write latch installed before stage dispatch; cleared only after exact successful response under active generation; load/close/signout/late stale response cannot clear it."
+  ],
+  "boundaries": [
+    "Live credential setup acceptance NOT_ISSUED.",
+    "Full reload loses in-memory uncertainty latch; metadata GET is not a terminal operation receipt.",
+    "One existing 401 refresh may repeat exact same body/key; no transport/UNKNOWN/server retry."
+  ],
+  "reviewedFiles": {
+    "maya-chat-shell/src/shell/local-crm-setup.ts": "a5ee019e0a932a6f8eba0423d6cf8b739a17cad23ca1c51c0f40703594f56f86",
+    "maya-carrier-react/src/setup/LocalCrmSetup.tsx": "d719f12e7b7b49c1f8f27ddc2903da8e53014428ea98d0a512043e2ecd9ccdbe"
+  }
+}

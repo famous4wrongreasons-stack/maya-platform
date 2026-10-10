@@ -6,10 +6,11 @@
 // the runtime clears the timeline, aborts the flight and resets the shell on that transition, and a
 // component that survived it would be holding a copy of something that no longer exists.
 
-import { useEffect, useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { ChatScreen } from './chat/ChatScreen.tsx';
 import { SignIn } from './signin/SignIn.tsx';
-import { conversation, landFragment, session } from './runtime/compose.ts';
+import { LocalCrmSetup } from './setup/LocalCrmSetup.tsx';
+import { conversation, landFragment, localCrmSetupEnabled, session } from './runtime/compose.ts';
 import { usePortView } from './runtime/useView.ts';
 import { tokens } from './identity/tokens.ts';
 
@@ -68,10 +69,13 @@ export function App() {
   const dark = useDark();
   const sessionView = usePortView(session);
   const chat = usePortView(conversation);
+  const [setupClosed, setSetupClosed] = useState(false);
+  useEffect(() => { if (!sessionView.signedIn) setSetupClosed(false); }, [sessionView.signedIn]);
   useVisibleViewport();
   useLandedFragment();
 
   const t = tokens(dark);
   if (!sessionView.signedIn) return <SignIn t={t} reason={sessionView.reason} />;
+  if (localCrmSetupEnabled && !setupClosed) return <LocalCrmSetup t={t} onClose={() => setSetupClosed(true)} />;
   return <ChatScreen t={t} view={chat} />;
 }

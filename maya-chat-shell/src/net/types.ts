@@ -369,6 +369,30 @@ export type Outcome<T, F> =
 // Explicit personal booking: request-local, already verified profile.
 export interface PersonalChoice { readonly id: string; readonly name: string }
 export interface PersonalBranch extends PersonalChoice { readonly timezone: string | null }
+
+// Local owner setup: only public connection metadata crosses the network boundary.
+export interface CrmSetupConnection {
+  readonly id: string; readonly tenantId: string; readonly updatedAt: string;
+  readonly provider: 'yclients' | 'other'; readonly status: 'pending_activation' | 'active' | 'other';
+  readonly hasCredentials: boolean; readonly companyId: string | null; readonly branchId: string | null;
+}
+export interface CrmSetupSnapshot {
+  readonly connection: CrmSetupConnection | null;
+  readonly counts: { readonly services: number | null; readonly staff: number | null } | null;
+}
+export interface CrmSetupInput { readonly apiToken: string; readonly companyId: string; readonly branchId: string }
+export interface CrmSetupBody {
+  readonly provider: 'yclients'; readonly apiToken: string;
+  readonly settingsJson: { readonly companyId: number; readonly branchBinding: {
+    readonly contract: 'maya.crm-branch-binding/1'; readonly companyId: number; readonly branchId: string;
+  } };
+}
+export interface CrmSetupFailure { readonly reason: 'forbidden' | 'invalid' | 'unavailable' | 'uncertain' }
+export interface CrmSetupTransport {
+  crmSetupStatus(signal: AbortSignal): Promise<Outcome<CrmSetupSnapshot, CrmSetupFailure>>;
+  crmSetupStage(input: CrmSetupInput, key: string, signal: AbortSignal): Promise<Outcome<CrmSetupSnapshot, CrmSetupFailure>>;
+  personalBranches(signal: AbortSignal): Promise<Outcome<readonly PersonalBranch[], PersonalFailure>>;
+}
 export interface PersonalSlot { readonly start: string; readonly staffId: string; readonly branchId: string | null }
 export interface PersonalSelection { readonly staffId: string; readonly serviceIds: readonly string[]; readonly start: string; readonly branchId?: string; readonly previewFactsHash?: string }
 export interface PersonalPreview {

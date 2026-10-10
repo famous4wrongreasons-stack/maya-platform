@@ -1,0 +1,23 @@
+{
+  "contract": "maya.local-crm-setup.ui-only/1",
+  "profile": "existing happy mock",
+  "actualBackend": false,
+  "actualYclients": false,
+  "modelCalls": 0,
+  "setupCalls": [
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm",
+      "status": 404
+    }
+  ],
+  "noAutomaticSetupRead": true,
+  "noSetupPosts": true,
+  "activationAbsent": true,
+  "blockedStatusIsTruthful": true,
+  "closeReturnsToChat": true,
+  "sizes": [
+    "1280x1100",
+    "390x844"
+  ]
+}

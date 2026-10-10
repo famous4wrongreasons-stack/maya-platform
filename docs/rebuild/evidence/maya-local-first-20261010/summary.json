@@ -23,7 +23,7 @@
     "worktreeEnvFilesPresent": false,
     "storedRealTenantApiToken": "unknown; no real local tenant DB/session established"
   },
-  "uploadedFile": "Classified separately in private scratch outside Git as potentially sensitive YCLIENTS material; intended credential type and validity unconfirmed; no file bytes/values/hashes/transfer metadata included here; no configuration performed",
+  "uploadedFile": "Subsequent bounded content review: architectural review of MAYA, not a credential bundle; preliminary long-reference classifier was a false positive. No explicit company ID, partner-token or user-token fields found. Private file remains outside Git; no bytes, values, hashes or transfer metadata archived; no configuration performed.",
   "serverLane": "paused by owner; not a local acceptance gate",
   "liveYclientsAcceptance": false,
   "fullMayaC10Acceptance": false
