@@ -1,0 +1,18 @@
+✔ macOS injected encoding metadata has a finite exception, not general environment inheritance (1.539666ms)
+✔ environment construction ignores inherited credentials, loaders, proxies and DB (0.9225ms)
+✔ runtime validator accepts explicit local development; production HTTP prohibition remains intact (92.08925ms)
+✔ profile refuses altered scheduler, external DB, reused key or provider environment (1.528167ms)
+✔ admits exact standard onboarding/password routes for existing owners (0.136875ms)
+✔ direct-backend fence rejects other owners, ambiguous routes, query and body variants (0.075791ms)
+✔ web relay and direct backend reject cross-origin effects before Origin is dropped (0.065625ms)
+✔ fresh owned PG plan omits seeds/fixtures and migrations use controlled empty cwd (1.832458ms)
+✔ private state cannot be existing or enter the repository through a symlink (0.763083ms)
+✔ restart metadata requires the exact completed launcher session and unchanged committed source (1.302375ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 148.628917
