@@ -1,0 +1,23 @@
+{
+  "args": [
+    "ssh",
+    "-vv",
+    "-i",
+    "/Users/stanislavmosin/.ssh/yandex_bot",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "UpdateHostKeys=no",
+    "-o",
+    "ConnectTimeout=8",
+    "-o",
+    "ConnectionAttempts=1",
+    "-o",
+    "ProxyCommand=ssh -vv -i /Users/stanislavmosin/.ssh/beget_deploy -o BatchMode=yes -o StrictHostKeyChecking=yes -o UpdateHostKeys=no -o ConnectTimeout=8 -o ConnectionAttempts=1 -W %h:%p mocine3388@prime.beget.com",
+    "botadmin@api.mayaos.ru",
+    "python3 -B -"
+  ],
+  "stdinFile": "collector.py"
+}

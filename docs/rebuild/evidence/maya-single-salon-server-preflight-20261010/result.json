@@ -1,0 +1,50 @@
+{
+  "contract": "maya.single-salon-readonly-preflight-result/1",
+  "status": "BLOCKED_TRANSPORT_NO_CURRENT_METADATA",
+  "startedAt": "2026-10-10T09:52:58.854295+00:00",
+  "finishedAt": "2026-10-10T09:53:06.882919+00:00",
+  "sourceCommit": "6226282e5b1240c9ed9db082909a7eb395d51dc5",
+  "logicalConnectionAttempts": 1,
+  "seconds": 8.028,
+  "route": "Mac -> existing Beget SSH stdio forward -> api.mayaos.ru",
+  "currentFacts": {
+    "begetAuthentication": "confirmed",
+    "forwardChannelOpenConfirmation": "not_observed",
+    "targetSshBanner": "not_observed_separately_from_single_proxy_banner",
+    "targetAuthentication": "not_observed",
+    "collectorExecution": "not_observed",
+    "tenantBranchCompanyBinding": "not_observed",
+    "runtimeMetadata": "not_observed"
+  },
+  "historicalCandidateOnly": {
+    "observedOn": "2026-10-05",
+    "tenantId": "cmsuavtar0003bjyrfngxsne6",
+    "integrationId": "cmsuavtcq0007bjyrpr1z68yi",
+    "provider": "yclients",
+    "companyId": "503759",
+    "branchId": "cmsuavtaz0005bjyr8nyrxdat",
+    "timezone": "Europe/Moscow",
+    "current": false
+  },
+  "databaseQueryExecuted": false,
+  "remoteFilesChanged": false,
+  "configurationChanged": false,
+  "serviceRestarted": false,
+  "providerCalls": 0,
+  "modelCalls": 0,
+  "bookingActions": 0,
+  "messagesSent": 0,
+  "credentialsReadByCollector": false,
+  "sshAuthentication": "existing identity references used by SSH; no key bytes read/copied by collector",
+  "rawDebugRetained": false,
+  "hostKeysAcceptedOrChanged": false,
+  "followupConnectionAttempts": 0,
+  "blocker": "Existing Beget route did not establish observed target authentication or metadata: exit255 after8.028s. Timing is consistent with the configured timeout, but the broad classifier does not establish the terminal cause. Forwarding/network/firewall/target sshd cause not distinguished.",
+  "nextAction": "An operator with an already working server session or management console returns the same bounded read-only metadata projection; no route switch or retry performed here.",
+  "timeoutClassification": {
+    "rawMarker": true,
+    "qualified": false,
+    "timingConsistentWithConfiguredLimit": true,
+    "reason": "Broad regex timed out|timeout can match ConnectTimeout=8 in ProxyCommand diagnostic. Raw stderr was not retained; exact terminal cause is unresolved."
+  }
+}
