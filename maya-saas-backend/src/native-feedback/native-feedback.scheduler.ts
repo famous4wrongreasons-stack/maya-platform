@@ -3,7 +3,9 @@ import {
   Logger,
   OnModuleDestroy,
   OnModuleInit,
+  Optional,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { CommunicationDeliveryService } from '../communication-delivery';
@@ -23,8 +25,13 @@ export class NativeFeedbackScheduler implements OnModuleInit, OnModuleDestroy {
     private readonly context: TenantContextService,
     private readonly store: NativeFeedbackStore,
     private readonly delivery: CommunicationDeliveryService,
+    @Optional() private readonly config?: ConfigService,
   ) {}
   onModuleInit() {
+    if (
+      this.config?.get<string>('NATIVE_FEEDBACK_SCHEDULER_ENABLED') === 'false'
+    )
+      return;
     this.first = setTimeout(() => void this.tick(), 90000);
     this.first.unref();
     this.timer = setInterval(() => void this.tick(), 60000);

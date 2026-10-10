@@ -3,7 +3,9 @@ import {
   Logger,
   OnModuleInit,
   OnModuleDestroy,
+  Optional,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import { canonicalUtcTransaction } from '../prisma/canonical-utc-transaction';
@@ -24,8 +26,14 @@ export class TeamCommunicationsScheduler
     private readonly context: TenantContextService,
     private readonly store: TeamMessageStore,
     private readonly delivery: CommunicationDeliveryService,
+    @Optional() private readonly config?: ConfigService,
   ) {}
   onModuleInit() {
+    if (
+      this.config?.get<string>('TEAM_COMMUNICATIONS_SCHEDULER_ENABLED') ===
+      'false'
+    )
+      return;
     this.first = setTimeout(() => void this.tick(), 90000);
     this.first.unref();
     this.timer = setInterval(() => void this.tick(), 60000);
