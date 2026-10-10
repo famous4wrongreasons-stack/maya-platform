@@ -1167,3 +1167,156 @@ describe('qualified install explicit same-key recovery', () => {
     },
   );
 });
+
+describe('local owner-approved YCLIENTS login lowers through the same A17 owner', () => {
+  const partner = 'SYNTHETIC_PARTNER_AUTH_123',
+    token = 'SYNTHETIC_USER_AUTH_123';
+  const saved = Object.fromEntries(
+    [
+      'MAYA_LOCAL_YCLIENTS_USER_AUTH',
+      'MAYA_LOCAL_YCLIENTS_READ_PROFILE',
+      'NODE_ENV',
+      'YCLIENTS_PARTNER_TOKEN',
+    ].map((k) => [k, process.env[k]]),
+  );
+  const dtoFor = (f: ReturnType<typeof fixture>) => ({
+    provider: CrmProvider.YCLIENTS,
+    expectedVersion: crmConfigurationVersion(f.current),
+    settingsJson: {
+      companyId: 42,
+      branchBinding: {
+        contract: 'maya.crm-branch-binding/1',
+        companyId: 42,
+        branchId: 'branch-a',
+      },
+    },
+    yclientsLogin: {
+      login: 'owner@example.invalid',
+      password: 'Synthetic Auth Password',
+    },
+  });
+  beforeEach(() => {
+    process.env.MAYA_LOCAL_YCLIENTS_USER_AUTH = 'owner_login_v1';
+    process.env.MAYA_LOCAL_YCLIENTS_READ_PROFILE = 'read_setup_v1';
+    process.env.NODE_ENV = 'development';
+    process.env.YCLIENTS_PARTNER_TOKEN = partner;
+  });
+  afterEach(() => {
+    jest.restoreAllMocks();
+    for (const [k, v] of Object.entries(saved)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
+  });
+  it('encrypts only exchanged token; login/password never reach command, receipt or current status', async () => {
+    const send = jest
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify({ success: true, data: { user_token: token } }),
+        ),
+      );
+    const f = fixture(),
+      dto = dtoFor(f),
+      secret = dto.yclientsLogin;
+    const result = await f.run(() =>
+      f.canonical.installQualifiedCrmCredentials(
+        TENANT,
+        { userId: OWNER },
+        dto,
+        REQUEST,
+      ),
+    );
+    expect(result).toMatchObject({
+      status: 'SUCCEEDED',
+      receipt: { phase: 'installed' },
+    });
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(f.crm.previewCredentials).toHaveBeenCalledWith(
+      CrmProvider.YCLIENTS,
+      token,
+      expect.any(Object),
+      null,
+    );
+    expect(f.current.encryptedApiToken).toBe(`synthetic:${token}`);
+    expect(secret).toEqual({ login: '', password: '' });
+    expect(dto.yclientsLogin).toBeUndefined();
+    for (const text of [JSON.stringify(f.input), JSON.stringify(result)]) {
+      expect(text).not.toContain('owner@example.invalid');
+      expect(text).not.toContain('Synthetic Auth Password');
+    }
+    expect(f.ingress.createExecution).toHaveBeenCalledTimes(1);
+  });
+  it.each([
+    'foreign-branch',
+    'revoked-member',
+    'stale-CAS',
+    'production',
+    'no-opt-in',
+    'bad-key',
+    'ambiguous-input',
+    'foreign-tenant',
+  ])('%s refuses before provider auth and clears credentials', async (kind) => {
+    const send = jest.spyOn(globalThis, 'fetch'),
+      f = fixture(),
+      dto = dtoFor(f),
+      secret = dto.yclientsLogin;
+    if (kind === 'foreign-branch')
+      f.db.branch.findFirst.mockResolvedValue(null as never);
+    if (kind === 'revoked-member')
+      f.db.membership.findUnique.mockResolvedValue({
+        role: 'tenant_owner',
+        status: 'suspended',
+        user: { status: 'active' },
+      } as never);
+    if (kind === 'stale-CAS') dto.expectedVersion = 'f'.repeat(64);
+    if (kind === 'production') process.env.NODE_ENV = 'production';
+    if (kind === 'no-opt-in') delete process.env.MAYA_LOCAL_YCLIENTS_USER_AUTH;
+    if (kind === 'ambiguous-input') Object.assign(dto, { apiToken: token });
+    await expect(
+      f.run(() =>
+        f.canonical.installQualifiedCrmCredentials(
+          kind === 'foreign-tenant' ? 'tenant-b' : TENANT,
+          { userId: OWNER },
+          dto,
+          kind === 'bad-key' ? 'invalid' : REQUEST,
+        ),
+      ),
+    ).rejects.toThrow();
+    expect(send).not.toHaveBeenCalled();
+    expect(f.ingress.createExecution).not.toHaveBeenCalled();
+    expect(secret).toEqual({ login: '', password: '' });
+  });
+  it('wrong password remains NOT_OBSERVED; no credential persistence and no retry', async () => {
+    const send = jest
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response('{}', { status: 401 }));
+    const f = fixture(),
+      dto = dtoFor(f),
+      secret = dto.yclientsLogin;
+    await expect(
+      f.run(() =>
+        f.canonical.installQualifiedCrmCredentials(
+          TENANT,
+          { userId: OWNER },
+          dto,
+          REQUEST,
+        ),
+      ),
+    ).rejects.toThrow();
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(f.ingress.createExecution).not.toHaveBeenCalled();
+    expect(f.crm.previewCredentials).not.toHaveBeenCalled();
+    expect(secret).toEqual({ login: '', password: '' });
+    expect(
+      await f.run(() =>
+        f.canonical.crmOperationStatus(
+          TENANT,
+          { userId: OWNER },
+          'install',
+          REQUEST,
+        ),
+      ),
+    ).toMatchObject({ status: 'NOT_OBSERVED' });
+  });
+});

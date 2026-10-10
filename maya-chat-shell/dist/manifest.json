@@ -75,7 +75,7 @@
       },
       {
         "path": "src/net/crm-setup.ts",
-        "sha256": "4b61612ed740e363028f71813bfa7bd82a0ef292df47db16b659bcd19910c401"
+        "sha256": "08fe2d15cfd7df071cb41976bfd905fae34570b4751342ff06ffe59d8b9a696f"
       },
       {
         "path": "src/net/endpoint.ts",
@@ -103,7 +103,7 @@
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "eb031c7dec23747f9a5f9c95305ba5d59803278b71e6d2fbd300f21cc81e48f7"
+        "sha256": "857c605a26d874714f545acc651c6205e05e66e9a2e74b4de807c266061f1cd8"
       },
       {
         "path": "src/renderer/cells.ts",
@@ -147,7 +147,7 @@
       },
       {
         "path": "src/shell/local-crm-setup.ts",
-        "sha256": "eab3e310dd2f88c4f55b9f03438b6f80c5cf38cdd77aeaab7620bf04e0642546"
+        "sha256": "c0f53db01c250f60d8c3117f651dc9b2eaa39ba62098239ea7ed5a29788d7a4a"
       },
       {
         "path": "src/shell/personal-booking.ts",
@@ -175,8 +175,8 @@
       }
     ]
   },
-  "bytes": 622338,
-  "digest": "c0f39b2e545458d56515f8c60f438d4dba421e2cefd2fab47e48d246d15ea5c1",
+  "bytes": 623857,
+  "digest": "c659e676b02877de6c1894e13b70b338e630e1fc1df732deeadd9ced837c4383",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -184,8 +184,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "deb9232425b83a43b9d792b766b884f68a10daf1257897d4ae92cbcca5595b39",
-    "modulePath": "m/deb9232425b83a43/",
+    "digest": "8669489d1d51a003be4e312e7b864bc3cfe10678dbd6433f7572c89a24079f30",
+    "modulePath": "m/8669489d1d51a003/",
     "files": [
       {
         "path": "entry/main.js",
@@ -249,8 +249,8 @@
       },
       {
         "path": "src/net/crm-setup.js",
-        "sha256": "26c2dcb871844d209bfb7b40cb1c2109d8eef9bec373ed01ab91e1dc86d92a8e",
-        "bytes": 4793
+        "sha256": "ee1f477cea525d60a728dd367a367cbf8ef2e355eddc7325348ac9e7b7ad4cba",
+        "bytes": 5472
       },
       {
         "path": "src/net/endpoint.js",
@@ -344,8 +344,8 @@
       },
       {
         "path": "src/shell/local-crm-setup.js",
-        "sha256": "9040cd852c66ce089dcdc5beed91652a81c5dc85243865ce9badf3fbfbbc9963",
-        "bytes": 14939
+        "sha256": "d98937b087b4283af3303fa58a678255b5fa6e29f26ac82bdb2f55e3a51128a2",
+        "bytes": 15520
       },
       {
         "path": "src/shell/personal-booking.js",
@@ -393,7 +393,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "c08cd78a9603fefb0af1971d4c7abb1d35b76f74c7407c8efba703fbe4001348",
+      "sha256": "0695b956242a7342fa91a93a19b07d7a1720d6dcdbe071159fa585aed56bbfbd",
       "bytes": 1344
     },
     "assets": [

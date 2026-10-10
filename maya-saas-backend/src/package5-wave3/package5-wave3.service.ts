@@ -543,6 +543,78 @@ export class Package5Wave3ShadowService {
     return facts;
   }
 
+  /** Shared pre-exchange target checks; provider credentials are not an authority source. */
+  async assertCrmLoginTarget(
+    tenantId: string,
+    actor: Package5Wave3Actor,
+    command: Pick<
+      Extract<Package5Wave3Command, { operation: 'install_crm_credentials' }>,
+      'provider' | 'settingsJson' | 'baseUrl' | 'expectedVersion'
+    >,
+  ) {
+    const scoped = this.tenantContext.assertTenantId(tenantId);
+    await this.assertCrmOperationActor(scoped, actor);
+    if (
+      command.provider !== 'yclients' ||
+      !normalizeCrmBranchBinding(
+        command.settingsJson?.branchBinding,
+        command.settingsJson?.companyId,
+      )
+    )
+      throw new BadRequestException('Exact YCLIENTS branch binding required');
+    await this.crmInstallTarget(scoped, command);
+  }
+
+  private async crmInstallTarget(
+    tenantId: string,
+    command: Pick<
+      Extract<Package5Wave3Command, { operation: 'install_crm_credentials' }>,
+      'provider' | 'settingsJson' | 'baseUrl' | 'expectedVersion'
+    >,
+    db: PrismaClient | Tx = this.prisma,
+  ) {
+    const binding = normalizeCrmBranchBinding(
+      command.settingsJson?.branchBinding,
+      command.settingsJson?.companyId,
+    );
+    if (
+      binding &&
+      (!['yclients', 'altegio'].includes(command.provider) ||
+        !(await db.branch.findFirst({
+          where: { id: binding.branchId, tenantId },
+          select: { id: true },
+        })))
+    )
+      throw new NotFoundException('CRM branch binding target not found');
+    const existing = await db.crmIntegration.findUnique({
+      where: { tenantId },
+    });
+    if ('expectedVersion' in command)
+      assertCrmConfiguration(existing, command.expectedVersion ?? null);
+    const existingSettings =
+      existing?.settingsJson &&
+      typeof existing.settingsJson === 'object' &&
+      !Array.isArray(existing.settingsJson)
+        ? (existing.settingsJson as Record<string, unknown>)
+        : {};
+    if (
+      'expectedVersion' in command &&
+      (!existing ||
+        existing.provider !== command.provider ||
+        (existing.baseUrl ?? null) !== (command.baseUrl ?? null) ||
+        wave3Hash(existingSettings.companyId ?? null) !==
+          wave3Hash(command.settingsJson?.companyId ?? null) ||
+        wave3Hash(existingSettings.branchBinding ?? null) !==
+          wave3Hash(command.settingsJson?.branchBinding ?? null))
+    ) {
+      const imported =
+        Boolean(existingSettings.acceptedImportSnapshotHash) ||
+        (await this.hasCrmIdentityHistory(tenantId, db));
+      if (imported) this.refuseCrmIdentityMigration();
+    }
+    return { existing, existingSettings };
+  }
+
   async assertCrmOperationActor(tenantId: string, actor: Package5Wave3Actor) {
     const scoped = this.tenantContext.assertTenantId(tenantId);
     await this.resolveActor(scoped, actor, {
@@ -877,50 +949,16 @@ export class Package5Wave3ShadowService {
       };
     }
     if (command.operation === 'install_crm_credentials') {
-      const binding = normalizeCrmBranchBinding(
-        command.settingsJson?.branchBinding,
-        command.settingsJson?.companyId,
-      );
-      if (
-        binding &&
-        (!['yclients', 'altegio'].includes(command.provider) ||
-          !(await db.branch.findFirst({
-            where: { id: binding.branchId, tenantId },
-            select: { id: true },
-          })))
-      )
-        throw new NotFoundException('CRM branch binding target not found');
       if (
         !/^[0-9a-f]{64}$/.test(command.credentialFingerprint) ||
         !command.encryptedApiToken.trim()
       )
         throw new BadRequestException('Credential boundary material invalid');
-      const existing = await db.crmIntegration.findUnique({
-        where: { tenantId },
-      });
-      if ('expectedVersion' in command)
-        assertCrmConfiguration(existing, command.expectedVersion ?? null);
-      const existingSettings =
-        existing?.settingsJson &&
-        typeof existing.settingsJson === 'object' &&
-        !Array.isArray(existing.settingsJson)
-          ? (existing.settingsJson as Record<string, unknown>)
-          : {};
-      if (
-        'expectedVersion' in command &&
-        (!existing ||
-          existing.provider !== command.provider ||
-          (existing.baseUrl ?? null) !== (command.baseUrl ?? null) ||
-          wave3Hash(existingSettings.companyId ?? null) !==
-            wave3Hash(command.settingsJson?.companyId ?? null) ||
-          wave3Hash(existingSettings.branchBinding ?? null) !==
-            wave3Hash(command.settingsJson?.branchBinding ?? null))
-      ) {
-        const imported =
-          Boolean(existingSettings.acceptedImportSnapshotHash) ||
-          (await this.hasCrmIdentityHistory(tenantId, db));
-        if (imported) this.refuseCrmIdentityMigration();
-      }
+      const { existing, existingSettings } = await this.crmInstallTarget(
+        tenantId,
+        command,
+        db,
+      );
       if (
         existing?.provider === command.provider &&
         existing.status === 'pending_activation' &&

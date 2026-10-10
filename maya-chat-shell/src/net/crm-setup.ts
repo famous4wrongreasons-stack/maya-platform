@@ -1,14 +1,24 @@
 // A17 public metadata only. Never pass previews, warnings, raw errors or credentials to the UI.
-import type { CrmSetupBody, CrmSetupInstall, CrmSetupSnapshot, CrmOperationLocator, CrmOperationStatus } from './types.ts';
+import type { CrmSetupBody, CrmSetupCredential, CrmSetupInstall, CrmSetupSnapshot, CrmOperationLocator, CrmOperationStatus } from './types.ts';
 const object = (v: unknown): Record<string, unknown> | null => v !== null && typeof v === 'object' && !Array.isArray(v) ? v as Record<string, unknown> : null;
 const text = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length <= 512;
 const company = (v: unknown): string | null => (typeof v === 'number' || typeof v === 'string') && /^[1-9]\d{0,15}$/.test(String(v)) && Number.isSafeInteger(Number(v)) ? String(v) : null;
 const count = (v: unknown): number | null => typeof v === 'number' && Number.isSafeInteger(v) && v >= 0 ? v : null;
 export const crmSetupKey = (key: string): boolean => typeof key === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(key);
+export function crmSetupCredential(input: CrmSetupCredential): CrmSetupCredential | null {
+  if (!input) return null;
+  if (input.yclientsLogin !== undefined) {
+    const v = input.yclientsLogin;
+    if (input.apiToken !== undefined || !v || typeof v !== 'object' || Object.keys(v).length !== 2 || typeof v.login !== 'string' || !v.login.trim() || v.login.length > 254 || /[\r\n\0]/.test(v.login) || typeof v.password !== 'string' || !v.password || v.password.length > 1024 || /\0/.test(v.password)) return null;
+    return { yclientsLogin: { login: v.login.trim(), password: v.password } };
+  }
+  return typeof input.apiToken === 'string' && input.apiToken.trim().length > 0 && input.apiToken.length <= 4096 ? { apiToken: input.apiToken.trim() } : null;
+}
 export function crmSetupBody(input: CrmSetupInstall): CrmSetupBody | null {
-  if (!input || !(input.expectedVersion === null || crmConfigVersion(input.expectedVersion)) || typeof input.apiToken !== 'string' || input.apiToken.trim().length === 0 || input.apiToken.length > 4096 || typeof input.companyId !== 'string' || company(input.companyId) === null || !text(input.branchId)) return null;
+  const credential = crmSetupCredential(input);
+  if (!credential || !(input.expectedVersion === null || crmConfigVersion(input.expectedVersion)) || typeof input.companyId !== 'string' || company(input.companyId) === null || !text(input.branchId)) return null;
   const companyId = Number(input.companyId);
-  return { provider: 'yclients', apiToken: input.apiToken.trim(), expectedVersion: input.expectedVersion, settingsJson: { companyId, branchBinding: { contract: 'maya.crm-branch-binding/1', companyId, branchId: input.branchId } } };
+  return { provider: 'yclients', ...credential, expectedVersion: input.expectedVersion, settingsJson: { companyId, branchBinding: { contract: 'maya.crm-branch-binding/1', companyId, branchId: input.branchId } } };
 }
 export function projectCrmSetup(raw: unknown): CrmSetupSnapshot | null {
   const value = object(raw);

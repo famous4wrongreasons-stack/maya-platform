@@ -25,7 +25,7 @@ const same = (a: CrmSetupConnection | null, b: CrmSetupConnection | null): boole
 const uncertain = 'Результат действия ещё не подтверждён. Проверьте сохранённую операцию. Автоматического повтора не будет.';
 const diagnosticNotice = (failure: CrmSetupFailure): string => {
   switch (failure.diagnostic) {
-    case 'crm_credentials_rejected': return 'YCLIENTS отклонил проверку доступа. Нужно проверить токен и его права на выбранную компанию.';
+    case 'crm_credentials_rejected': return 'YCLIENTS отклонил проверку доступа. Проверьте данные входа или пользовательский токен и доступ к выбранной компании.';
     case 'crm_company_not_found': return 'Выбранная компания YCLIENTS не найдена или недоступна для этого токена.';
     case 'crm_provider_unreachable': return 'Не удалось получить ответ YCLIENTS: сервис временно недоступен.';
     case 'crm_platform_configuration_error': return 'На сервере MAYA не настроен доступ к YCLIENTS. Требуется проверить серверную настройку.';
@@ -136,7 +136,12 @@ export function createLocalCrmSetup(deps: {
     async stage(input, confirmed) {
       if (!current.canStage || !confirmed || !allowed()) return;
       const companyId = input.companyId.trim();
-      if (!/^[1-9]\d{0,15}$/.test(companyId) || !Number.isSafeInteger(Number(companyId)) || !current.branches.some(b => b.id === input.branchId) || !input.apiToken.trim() || input.apiToken.length > 4096) { publish({ notice: 'Укажите пользовательский токен, корректный ID компании и доступный филиал.' }); return; }
+      // Local presence/copy check only. The transport owns strict wire validation.
+      const credential = input?.yclientsLogin && input.apiToken === undefined && typeof input.yclientsLogin.login === 'string' && input.yclientsLogin.login.trim() && typeof input.yclientsLogin.password === 'string' && input.yclientsLogin.password
+        ? { yclientsLogin: { login: input.yclientsLogin.login, password: input.yclientsLogin.password } }
+        : input?.yclientsLogin === undefined && typeof input.apiToken === 'string' && input.apiToken.trim()
+          ? { apiToken: input.apiToken.trim() } : null;
+      if (!/^[1-9]\d{0,15}$/.test(companyId) || !Number.isSafeInteger(Number(companyId)) || !current.branches.some(b => b.id === input.branchId) || !credential) { publish({ notice: 'Укажите данные входа YCLIENTS или пользовательский токен, корректный ID компании и доступный филиал.' }); return; }
       const version = serial, previous = current.connection;
       publish({ phase: 'staging', busy: true, stagedCounts: null, notice: '' });
       try {
@@ -144,7 +149,7 @@ export function createLocalCrmSetup(deps: {
         const pending = begin('install');
         if (!active(version)) return;
         if (!pending) { fail({ reason: 'unavailable' }); return; }
-        const result = await deps.transport.crmSetupStage({ apiToken: input.apiToken, companyId, branchId: input.branchId, expectedVersion: previous?.configVersion ?? null }, pending.requestId, abort.signal);
+        const result = await deps.transport.crmSetupStage({ ...credential, companyId, branchId: input.branchId, expectedVersion: previous?.configVersion ?? null }, pending.requestId, abort.signal);
         if (!active(version)) return;
         if (!result.ok) { fail(result.failure); return; }
         complete(result.value, pending, previous, companyId, input.branchId);

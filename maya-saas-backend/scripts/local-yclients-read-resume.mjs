@@ -103,7 +103,7 @@ function verifyHistoricalGitSource(initial, candidate, approvedCommit) {
   assert.ok(jsonEqual(historicalSchema, initial.files.map(row => row.path).filter(schemaPath).sort()), 'historical_schema_capture_incomplete');
 }
 
-export function resumePlan(env, state, pgBin, minutes, output, diagnosticNoProvider = false) {
+export function resumePlan(env, state, pgBin, minutes, output, diagnosticNoProvider = false, allowUserAuth = false) {
   assert.ok(Number.isSafeInteger(minutes) && minutes >= 1 && minutes <= 15, 'session_window_refused');
   assertProfileEnvironment(env);
   assert.ok(env.MAYA_LOCAL_ONBOARDING_STATE === state, 'saved_state_mismatch');
@@ -118,10 +118,13 @@ export function resumePlan(env, state, pgBin, minutes, output, diagnosticNoProvi
     args[logIndex + 1] = path.join(output, 'postgres.log');
     return { ...spec, args };
   });
-  return { ...plan, setup };
+  assert.equal(typeof allowUserAuth, 'boolean');
+  assert.ok(!diagnosticNoProvider || !allowUserAuth);
+  return { ...plan, setup, providerAdmission: allowUserAuth ? 'explicit_setup_auth_and_reads_only' : plan.providerAdmission };
 }
-export function resumeEnvironment(saved, partner, diagnosticNoProvider = false) {
+export function resumeEnvironment(saved, partner, diagnosticNoProvider = false, allowUserAuth = false) {
   assert.equal(typeof diagnosticNoProvider, 'boolean');
+  assert.ok(!diagnosticNoProvider || !allowUserAuth);
   assertProfileEnvironment(saved);
   const env = { ...saved };
   delete env.MAYA_LOCAL_ONBOARDING_PROFILE;
@@ -132,7 +135,7 @@ export function resumeEnvironment(saved, partner, diagnosticNoProvider = false) 
     keys: Object.fromEntries(PRIVATE_KEYS.map(key => [key, saved[key]])),
     apiPort: Number(saved.PORT), origin: saved.CORS_ALLOWED_ORIGINS,
     stateDirectory: saved.MAYA_LOCAL_ONBOARDING_STATE,
-  }, runtimeCredential(diagnosticNoProvider, partner));
+  }, runtimeCredential(diagnosticNoProvider, partner), allowUserAuth);
 }
 export function ownedDirectoryIdentity(directory, expected) {
   assertPrivateCwd(directory);
@@ -205,7 +208,7 @@ export function releaseResume(claim) {
 
 export async function main(args) {
   const { values } = parseArgs({ args, strict: true, options: {
-    run: { type: 'boolean' }, 'diagnostic-no-provider': { type: 'boolean' }, state: { type: 'string' }, output: { type: 'string' },
+    run: { type: 'boolean' }, 'allow-user-auth': { type: 'boolean' }, 'diagnostic-no-provider': { type: 'boolean' }, state: { type: 'string' }, output: { type: 'string' },
     'restart-receipt': { type: 'string' }, 'restart-receipt-sha256': { type: 'string' },
     'session-manifest-sha256': { type: 'string' }, 'private-state-sha256': { type: 'string' },
     'approved-source-commit': { type: 'string' }, minutes: { type: 'string', default: '15' },
@@ -214,6 +217,8 @@ export async function main(args) {
   if (!values.run) { process.stdout.write('Prepared only. Explicit --run with pinned completed stage-0 state, restart receipt and approved source resumes the same database and existing keys. No service or credential prompt started.\n'); return; }
   assert.equal(process.platform, 'darwin');
   const diagnosticNoProvider = values['diagnostic-no-provider'] === true;
+  const allowUserAuth = values['allow-user-auth'] === true;
+  assert.ok(!diagnosticNoProvider || !allowUserAuth);
   if (!diagnosticNoProvider) { assert.equal(process.stdin.isTTY, true, 'owner_terminal_required'); assert.equal(process.stderr.isTTY, true, 'owner_terminal_required'); }
   assert.ok(typeof values.state === 'string' && path.isAbsolute(values.state), 'state_required');
   const state = fs.realpathSync(values.state); assert.equal(state, values.state); assertPrivateCwd(state);
@@ -234,7 +239,7 @@ export async function main(args) {
   const env = privateState.environment; assertProfileEnvironment(env);
   assert.ok(initial.landingUrl === env.CORS_ALLOWED_ORIGINS + '/__local-onboarding' && receipt.landingUrl === initial.landingUrl, 'saved_origin_mismatch');
   const output = externalStatePath(values.output, repo);
-  const plan = resumePlan(env, state, values['pg-bin'], Number(values.minutes), output, diagnosticNoProvider);
+  const plan = resumePlan(env, state, values['pg-bin'], Number(values.minutes), output, diagnosticNoProvider, allowUserAuth);
   const stateIdentity = ownedDirectoryIdentity(state), clusterIdentity = ownedDirectoryIdentity(plan.cluster);
   const directoriesUnchanged = () => { ownedDirectoryIdentity(state, stateIdentity); ownedDirectoryIdentity(plan.cluster, clusterIdentity); };
   assertClusterStopped(state); const pgpassHash = checkPgpass(state, env);
@@ -281,7 +286,7 @@ export async function main(args) {
       partner = await promptPartnerToken({ timeoutMs: plan.promptDeadlineMs, signal: abort.signal });
       control.terminate = null;
     }
-    runtimeEnv = resumeEnvironment(env, partner, diagnosticNoProvider); partner = undefined;
+    runtimeEnv = resumeEnvironment(env, partner, diagnosticNoProvider, allowUserAuth); partner = undefined;
     report.diagnostic.credentialAccepted = !diagnosticNoProvider;
     assert.ok(inputsUnchanged() && jsonEqual(readSourceBinding(), source), 'resume_inputs_or_source_changed'); assert.equal(control.cancelled, null);
     phase = 'runtime'; report.status = 'backend_starting'; diagnosticStage(report.diagnostic, 'backend_starting'); save();

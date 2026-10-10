@@ -36,6 +36,8 @@ export async function start() {
     assert.ok(args.length === 0 || (args.length === 1 && args[0] === '--diagnostic-no-provider'));
     const diagnostic = args.length === 1;
     assertRealReadEnvironment(process.env, true);
+    const allowUserAuth = process.env.MAYA_LOCAL_YCLIENTS_USER_AUTH === 'owner_login_v1';
+    assert.ok(!diagnostic || !allowUserAuth);
     assert.equal(process.env.YCLIENTS_PARTNER_TOKEN === PUBLIC_DIAGNOSTIC_PARTNER, diagnostic);
     code = 'private_state_refused';
     assertPrivateCwd(process.cwd());
@@ -47,7 +49,7 @@ export async function start() {
       const integration = await prisma.crmIntegration.findUnique({ where: { tenantId: request.user.tenantId }, select: { provider: true, baseUrl: true, settingsJson: true } });
       assert.ok(integration?.provider === 'yclients' && !integration.baseUrl && companyId(integration.settingsJson?.companyId), 'Current YCLIENTS company required');
       return integration.settingsJson.companyId;
-    }, Date.now, trace);
+    }, Date.now, trace, { allowUserAuth });
     globalThis.fetch = guard.fetch;
     enter('app_importing', 'app_import_failed');
     require('reflect-metadata');
@@ -67,7 +69,7 @@ export async function start() {
     app.use((request, response, next) => {
       const boundary = localBrowserBoundary(request.headers, origin, `127.0.0.1:${process.env.PORT}`);
       const diagnosticRoute = request.method === 'GET' && ['/api/health', '/api/health/ready'].includes(request.originalUrl);
-      const reason = !boundary ? 'local_onboarding_origin_refused' : diagnostic ? (diagnosticRoute ? null : 'local_yclients_diagnostic_route_disabled') : realReadIngress(request.method, request.originalUrl, request.headers, request.body, origin);
+      const reason = !boundary ? 'local_onboarding_origin_refused' : diagnostic ? (diagnosticRoute ? null : 'local_yclients_diagnostic_route_disabled') : realReadIngress(request.method, request.originalUrl, request.headers, request.body, origin, allowUserAuth);
       traceHttpRequest(request, response, trace, reason);
       if (reason) { response.status(403).json({ error: { code: reason }, message: 'Этот локальный профиль допускает только явно разрешённые действия.' }); return; }
       guard.run(request, response, next);
@@ -80,7 +82,7 @@ export async function start() {
     assert.equal(guard.counters.calls, 0, 'Startup provider dispatch forbidden');
     assert.equal(guard.counters.refused, 0, 'Startup provider attempt forbidden');
     send(runtimeStatus('runtime_ready', 'completed'));
-    send({ type: 'ready', contract: 'maya.local-yclients-read/1', origin: `http://127.0.0.1:${process.env.PORT}`, providerAdmission: diagnostic ? 'diagnostic_network_closed' : 'explicit_setup_reads_only' });
+    send({ type: 'ready', contract: 'maya.local-yclients-read/1', origin: `http://127.0.0.1:${process.env.PORT}`, providerAdmission: diagnostic ? 'diagnostic_network_closed' : allowUserAuth ? 'explicit_setup_auth_and_reads_only' : 'explicit_setup_reads_only' });
   } catch (error) {
     send(runtimeStatus(stage, 'failed', code, error));
     await stop().catch(() => {});

@@ -442,3 +442,25 @@ test('signout while saving the recovery locator prevents dispatch but preserves 
   assert.equal(f.writes.length, 0); assert.deepEqual(pending.read(), locator());
   assert.equal(f.port.view().canStage, false); f.port.dispose();
 });
+
+test('login credentials lower once to the same qualified endpoint and never enter projected view/pending identity', async () => {
+  const loginInput={companyId:'12345',branchId:'branch-owned',yclientsLogin:{login:'owner@example.invalid',password:'Synthetic Auth 42'}};
+  await wire(()=>response(completionRaw()),async(transport,calls)=>{
+    const result=await transport.crmSetupStage({...loginInput,expectedVersion:null},key,signal());
+    assert.equal(result.ok,true); assert.equal(calls.length,1);
+    const body=JSON.parse(calls[0].body);
+    assert.deepEqual(body.yclientsLogin,loginInput.yclientsLogin); assert.equal(body.apiToken,undefined);
+    assert.equal(body.settingsJson.branchBinding.branchId,'branch-owned');
+    assert.equal(JSON.stringify(result).includes(loginInput.yclientsLogin.password),false);
+  });
+  const f=fixture(); await f.port.load(); await f.port.stage(loginInput,true);
+  assert.equal(JSON.stringify(f.port.view()).includes(loginInput.yclientsLogin.password),false);
+});
+test('ambiguous login/token or malformed login fails locally without credential transport', async()=>{
+  await wire(()=>{throw Error('must not dispatch');},async(transport,calls)=>{
+    for(const yclientsLogin of [{login:'',password:'x'}, {login:'a',password:''}, {login:'a',password:'b',extra:'x'}]) {
+      const result=await transport.crmSetupStage({companyId:'12345',branchId:'branch-owned',yclientsLogin,expectedVersion:null},key,signal());assert.equal(result.ok,false);
+    }
+    const result=await transport.crmSetupStage({...install,yclientsLogin:{login:'a',password:'b'}},key,signal());assert.equal(result.ok,false);assert.equal(calls.length,0);
+  });
+});

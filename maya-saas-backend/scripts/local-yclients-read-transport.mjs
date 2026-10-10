@@ -1,15 +1,17 @@
 // Transparent finite guard around native adapter fetch, not a provider simulator.
 // Only the test supplies a synthetic nativeFetch. Runtime captures real fetch once.
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { companyId } from './local-yclients-read-profile.mjs';
+import { companyId, loginShape } from './local-yclients-read-profile.mjs';
 
 export const READ_LIMITS = Object.freeze({ requestCalls: 64, sessionCalls: 256, requestMs: 120000, fetchMs: 20000, responseBytes: 2 * 1024 * 1024, teamMembers: 50 });
 const fail = reason => { const error = new Error('Local YCLIENTS read refused: ' + reason); error.code = 'LOCAL_YCLIENTS_READ_REFUSED'; throw error; };
-export function admittedProviderRead(raw, init, selectedCompany) {
+export function admittedProviderRead(raw, init, selectedCompany, allowUserAuth = false) {
   if (!(typeof raw === 'string' || raw instanceof URL)) return null;
   let url; try { url = new URL(String(raw)); } catch { return null; }
-  if (url.origin !== 'https://api.yclients.com' || url.username || url.password || url.hash || /[\\%]/.test(String(raw)) || (init?.method ?? 'GET') !== 'GET' || init?.body != null) return null;
+  if (url.origin !== 'https://api.yclients.com' || url.username || url.password || url.hash || /[\\%]/.test(String(raw))) return null;
   if (!companyId(selectedCompany)) return null;
+  if (allowUserAuth === true && url.pathname === '/api/v1/auth' && !url.search && init?.method === 'POST' && typeof init.body === 'string') return 'auth';
+  if ((init?.method ?? 'GET') !== 'GET' || init?.body != null) return null;
   if (url.pathname === '/api/v1/companies' && url.search === '?my=1') return 'companies';
   if (url.search) return null;
   const id = String(selectedCompany);
@@ -32,13 +34,16 @@ export function validateTeamResponse(payload, headers, selectedCompany) {
   if (ids.some(id => !companyId(id)) || new Set(ids.map(String)).size !== ids.length) fail('incomplete_team');
   if (!companyId(selectedCompany) || payload.data.some(item => Object.hasOwn(item, 'company_id') && String(item.company_id) !== String(selectedCompany))) fail('foreign_company_team');
 }
-export function createReadTransport(nativeFetch, resolveCompany, clock = Date.now, trace = () => {}) {
+export function createReadTransport(nativeFetch, resolveCompany, clock = Date.now, trace = () => {}, { allowUserAuth = false } = {}) {
   const context = new AsyncLocalStorage();
   const counters = { calls: 0, refused: 0, routes: {} };
   function run(request, response, next) {
     const controller = new AbortController();
-    const scope = { request, active: true, calls: 0, deadline: clock() + READ_LIMITS.requestMs, poisoned: false, selected: null, controller };
-    const close = () => { scope.active = false; controller.abort(); };
+    const scope = { request, active: true, calls: 0, deadline: clock() + READ_LIMITS.requestMs, poisoned: false, authenticated: false, selected: null, controller };
+    const close = () => {
+      scope.active = false; controller.abort();
+      if (request.body?.yclientsLogin && typeof request.body.yclientsLogin === 'object') { request.body.yclientsLogin.login = ''; request.body.yclientsLogin.password = ''; delete request.body.yclientsLogin; }
+    };
     response.once('finish', close); response.once('close', close);
     return context.run(scope, next);
   }
@@ -55,8 +60,14 @@ export function createReadTransport(nativeFetch, resolveCompany, clock = Date.no
       if (!scope.active || clock() >= scope.deadline) fail('request_finished');
       if (!companyId(selected) || (scope.selected !== null && String(selected) !== scope.selected)) fail('company_changed');
       scope.selected = String(selected);
-      route = admittedProviderRead(raw, init, selected) ?? 'unlisted';
+      route = admittedProviderRead(raw, init, selected, allowUserAuth) ?? 'unlisted';
       if (route === 'unlisted' || scope.calls >= READ_LIMITS.requestCalls || counters.calls >= READ_LIMITS.sessionCalls) fail('scope_or_budget');
+      if (route === 'auth') {
+        const login = scope.request.body?.yclientsLogin;
+        let outgoing; try { outgoing = JSON.parse(init.body); } catch { fail('auth_body'); }
+        if (scope.request.originalUrl !== '/api/integrations/crm/connect' || !loginShape(login) || !loginShape(outgoing) || outgoing.login !== login.login.trim() || outgoing.password !== login.password || scope.authenticated || (counters.routes.auth ?? 0) >= 3) fail('explicit_single_auth_required');
+        scope.authenticated = true;
+      }
       scope.calls++; counters.calls++; counters.routes[route] = (counters.routes[route] ?? 0) + 1;
       const remaining = Math.min(READ_LIMITS.fetchMs, scope.deadline - clock());
       const signals = [scope.controller.signal, AbortSignal.timeout(Math.max(1, remaining))];
@@ -77,7 +88,7 @@ export function createReadTransport(nativeFetch, resolveCompany, clock = Date.no
         for (;;) {
           const part = await reader.read(); if (part.done) break;
           bytes += part.value.byteLength;
-          if (bytes > READ_LIMITS.responseBytes || !scope.active || clock() >= scope.deadline) fail('response_bound');
+          if (bytes > (route === 'auth' ? 65536 : READ_LIMITS.responseBytes) || !scope.active || clock() >= scope.deadline) fail('response_bound');
           chunks.push(part.value);
         }
       } catch (error) { await reader.cancel().catch(() => {}); throw error; }

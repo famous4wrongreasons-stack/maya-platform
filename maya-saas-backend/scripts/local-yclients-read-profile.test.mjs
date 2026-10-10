@@ -192,3 +192,45 @@ test('refused provider methods are closed and observer failure cannot alter thei
   emit({ type: 'forged', contract: 'forged', sequence: 60, elapsedMs: 9999, surface: 'provider', route: 'companies', method: 'GET', stage: 'entered', status: null, code: null });
   assert.equal(events[0].sequence, 1); assert.equal(events[0].elapsedMs, 0); assert.equal(events[0].type, 'read-trace');
 });
+
+test('owner-approved login is explicit and cannot broaden the default read profile', () => {
+  const authBody = { provider: 'yclients', yclientsLogin: { login: 'owner@example.invalid', password: 'Synthetic Auth 42' }, expectedVersion: null, settingsJson: settings };
+  assert.notEqual(realReadIngress('POST', '/api/integrations/crm/connect', headers, authBody, origin), null);
+  assert.equal(realReadIngress('POST', '/api/integrations/crm/connect', headers, authBody, origin, true), null);
+  for (const changed of [{...authBody,apiToken:'SYNTHETIC_USER_ONLY_123'}, {...authBody,yclientsLogin:{...authBody.yclientsLogin, userId:1}}, {...authBody,yclientsLogin:{...authBody.yclientsLogin,password:''}}]) assert.notEqual(realReadIngress('POST','/api/integrations/crm/connect',headers,changed,origin,true),null);
+  const env=realReadEnvironment({},options,'SYNTHETIC_PARTNER_ONLY_123',true);
+  assert.equal(env.MAYA_LOCAL_YCLIENTS_USER_AUTH,'owner_login_v1');
+  assert.doesNotThrow(()=>assertRealReadEnvironment(env,true));
+  assert.throws(()=>assertRealReadEnvironment({...env,MAYA_LOCAL_YCLIENTS_USER_AUTH:'anything'}));
+  assert.equal(realReadEnvironment({MAYA_LOCAL_YCLIENTS_USER_AUTH:'owner_login_v1'},options).MAYA_LOCAL_YCLIENTS_USER_AUTH,undefined);
+});
+test('auth transport: exact current request only, at most one exchange, finite safe trace, cleanup', async () => {
+  const req=request({body:{...body(),apiToken:undefined,yclientsLogin:{login:' owner@example.invalid ',password:'Synthetic Auth 42'}}});
+  const init={method:'POST',body:JSON.stringify({login:'owner@example.invalid',password:'Synthetic Auth 42'})};
+  const events=[], response=new EventEmitter(); let calls=0;
+  const transport=createReadTransport(async()=>{calls++;return reply({user_token:'SYNTHETIC_USER_ONLY_123'});},async()=>424242,Date.now,event=>events.push(event),{allowUserAuth:true});
+  await transport.run(req,response,async()=>{
+    assert.equal((await transport.fetch(source('auth'),init)).status,200);
+    await assert.rejects(transport.fetch(source('auth'),init));
+    response.emit('finish'); assert.equal(req.body.yclientsLogin,undefined);
+  });
+  assert.equal(calls,1); assert.ok(events.every(event=>Object.keys(event).sort().join(',') === 'code,method,route,stage,status,surface'));
+  assert.ok(events.some(event=>event.route==='auth' && event.stage==='completed'));
+  assert.equal(JSON.stringify(events).includes('owner@example.invalid'),false);
+  assert.equal(JSON.stringify(events).includes('SYNTHETIC_USER_ONLY_123'),false);
+});
+test('auth cannot run without opt-in, from activation, with substituted password or after three attempts',async()=>{
+  const init={method:'POST',body:JSON.stringify({login:'owner@example.invalid',password:'Synthetic Auth 42'})};
+  const req=()=>request({body:{...body(),yclientsLogin:{login:'owner@example.invalid',password:'Synthetic Auth 42'}}});
+  const send=async()=>reply({user_token:'SYNTHETIC_USER_ONLY_123'});
+  const closed=createReadTransport(send,async()=>424242);
+  await closed.run(req(),new EventEmitter(),()=>assert.rejects(closed.fetch(source('auth'),init)));
+  for (const request of [{...req(),originalUrl:'/api/integrations/crm/activate'}, {...req(),body:{...body(),yclientsLogin:{login:'owner@example.invalid',password:'DIFFERENT'}}}]) {
+    const t=createReadTransport(send,async()=>424242,Date.now,()=>{},{allowUserAuth:true});
+    await t.run(request,new EventEmitter(),()=>assert.rejects(t.fetch(source('auth'),init))); assert.equal(t.counters.calls,0);
+  }
+  const t=createReadTransport(send,async()=>424242,Date.now,()=>{},{allowUserAuth:true});
+  for(let i=0;i<3;i++) await t.run(req(),new EventEmitter(),()=>t.fetch(source('auth'),init));
+  await t.run(req(),new EventEmitter(),()=>assert.rejects(t.fetch(source('auth'),init))); assert.equal(t.counters.calls,3);
+  for(const url of [source('auth?x=1'),'https://other.invalid/api/v1/auth',source('records/424242')]) assert.equal(admittedProviderRead(url,init,424242,true),null);
+});

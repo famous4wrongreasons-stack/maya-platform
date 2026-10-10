@@ -23,7 +23,7 @@ export function runtimeStatus(stage, outcome = 'entered', code = null, error) {
 
 // First 64 closed events only. Relative timing is diagnostic, never request identity.
 export const READ_TRACE_LIMIT = 64;
-const TRACE_ROUTES = Object.freeze(['connect', 'activate', 'operation', 'companies', 'company', 'book_services', 'services', 'categories', 'team', 'unlisted']);
+const TRACE_ROUTES = Object.freeze(['auth', 'connect', 'activate', 'operation', 'companies', 'company', 'book_services', 'services', 'categories', 'team', 'unlisted']);
 const CONNECTION_FAILURE_CODES = Object.freeze(['crm_credentials_rejected', 'crm_company_not_found', 'crm_provider_unreachable', 'crm_platform_configuration_error', 'crm_connection_failed']);
 const TRACE_CODES = Object.freeze([...CONNECTION_FAILURE_CODES, 'provider_response_read', 'provider_http_error', 'provider_rejected', 'provider_scope_refused', 'provider_transport_unavailable', 'response_closed', 'local_onboarding_origin_refused', 'local_yclients_diagnostic_route_disabled', 'local_yclients_read_route_disabled']);
 export function projectReadTrace(message) {

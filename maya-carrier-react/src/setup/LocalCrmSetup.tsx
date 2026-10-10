@@ -8,6 +8,11 @@ export function LocalCrmSetup({ t, onClose }: { readonly t: Tokens; readonly onC
   const view = usePortView(localCrmSetup);
   const tokenInput = useRef<HTMLInputElement | null>(null);
   const [hasToken, setHasToken] = useState(false);
+  const loginInput = useRef<HTMLInputElement | null>(null);
+  const passwordInput = useRef<HTMLInputElement | null>(null);
+  const [credentialMode, setCredentialMode] = useState<'token' | 'login'>('token');
+  const [hasLogin, setHasLogin] = useState(false);
+  const [hasPassword, setHasPassword] = useState(false);
   const [companyId, setCompanyId] = useState('');
   const [branchId, setBranchId] = useState('');
   const [stageConfirmed, setStageConfirmed] = useState(false);
@@ -16,9 +21,9 @@ export function LocalCrmSetup({ t, onClose }: { readonly t: Tokens; readonly onC
   const activationHelpId = useId();
 
   useEffect(() => {
-    const input = tokenInput.current;
+    const inputs = [tokenInput.current, loginInput.current, passwordInput.current];
     return () => {
-      if (input) input.value = '';
+      for (const input of inputs) if (input) input.value = '';
       localCrmSetup.close();
     };
   }, []);
@@ -27,11 +32,12 @@ export function LocalCrmSetup({ t, onClose }: { readonly t: Tokens; readonly onC
   const editable = view.canStage && !view.busy;
   const selectedBranch = view.branches.find((branch) => branch.id === branchId);
   const connectedBranch = view.branches.find((branch) => branch.id === connection?.branchId);
-  const canStage = editable && hasToken && companyId.trim().length > 0 && !!selectedBranch && stageConfirmed;
+  const hasCredential = credentialMode === 'token' ? hasToken : hasLogin && hasPassword;
+  const canStage = editable && hasCredential && companyId.trim().length > 0 && !!selectedBranch && stageConfirmed;
   const canActivate = view.canActivate && !view.busy && activationConfirmed;
   const stageHelp = view.busy ? 'Дождитесь завершения текущего запроса.'
     : !view.canStage ? view.phase === 'idle' ? 'Сначала загрузите филиалы.' : view.notice || 'Сохранение сейчас недоступно. Проверьте подключение и результат.'
-    : !hasToken ? 'Введите пользовательский API-токен YCLIENTS.'
+    : !hasCredential ? credentialMode === 'token' ? 'Введите пользовательский API-токен YCLIENTS, не токен партнёра.' : 'Введите логин и пароль вашей учётной записи YCLIENTS.'
     : !companyId.trim() ? 'Укажите ID компании YCLIENTS.'
     : !selectedBranch ? 'Выберите филиал MAYA.'
     : !stageConfirmed ? 'Подтвердите проверку и сохранение подключения.'
@@ -56,8 +62,8 @@ export function LocalCrmSetup({ t, onClose }: { readonly t: Tokens; readonly onC
     : 'Сервер подтвердил завершение исходного запроса.';
 
   const clearDraft = (): void => {
-    if (tokenInput.current) tokenInput.current.value = '';
-    setHasToken(false);
+    for (const input of [tokenInput.current, loginInput.current, passwordInput.current]) if (input) input.value = '';
+    setHasToken(false); setHasLogin(false); setHasPassword(false);
     setStageConfirmed(false);
     setActivationConfirmed(false);
   };
@@ -67,11 +73,13 @@ export function LocalCrmSetup({ t, onClose }: { readonly t: Tokens; readonly onC
     void localCrmSetup.load();
   };
   const stage = (): void => {
-    if (!canStage || !tokenInput.current) return;
-    const apiToken = tokenInput.current.value;
+    if (!canStage) return;
+    const credential = credentialMode === 'login'
+      ? { yclientsLogin: { login: loginInput.current?.value ?? '', password: passwordInput.current?.value ?? '' } }
+      : { apiToken: tokenInput.current?.value ?? '' };
     clearDraft();
     // The secret is handed directly to the port and is never retained in React state.
-    void localCrmSetup.stage({ apiToken, companyId, branchId }, true);
+    void localCrmSetup.stage({ ...credential, companyId, branchId }, true);
   };
   const activate = (): void => {
     if (!canActivate) return;
@@ -113,15 +121,38 @@ export function LocalCrmSetup({ t, onClose }: { readonly t: Tokens; readonly onC
 
         <section aria-label="Проверка и сохранение подключения" style={{ marginTop: 28 }}>
           <h3 style={{ fontSize: 18 }}>1. Проверить и сохранить подключение</h3>
-          <p>Введите пользовательский API-токен YCLIENTS. Он очистится из формы при отправке или закрытии настройки.</p>
+          <p>Войдите в свою учётную запись YCLIENTS или укажите отдельный пользовательский API-токен. Данные очистятся из формы при отправке или закрытии настройки.</p>
+          <div role="group" aria-label="Способ подключения YCLIENTS">
+            {(['token', 'login'] as const).map(mode => <button key={mode} type="button" aria-pressed={credentialMode === mode} disabled={!editable}
+              onClick={() => { clearDraft(); setCredentialMode(mode); }}
+              style={{ margin: '4px 8px 4px 0', padding: 12, border: '1px solid', borderRadius: 12, color: t.ink, background: 'transparent', font: 'inherit' }}>
+              {mode === 'login' ? 'Войти в YCLIENTS' : 'У меня есть токен пользователя'}
+            </button>)}
+          </div>
+          <div hidden={credentialMode !== 'login'}>
+            <p>Нужны логин и пароль YCLIENTS, не MAYA. Локальный сервер отправит их только в официальный API YCLIENTS для получения пользовательского токена. Логин и пароль не сохраняются и не записываются в журнал.</p>
+            <label style={{ display: 'block', margin: '16px 0' }}>Логин YCLIENTS (телефон или email)
+              <input ref={loginInput} type="text" autoComplete="off" spellCheck={false} disabled={!editable || credentialMode !== 'login'} aria-label="Логин YCLIENTS"
+                onChange={(event) => { setHasLogin(event.target.value.trim().length > 0); setStageConfirmed(false); }}
+                style={{ display: 'block', width: '100%', boxSizing: 'border-box', marginTop: 8, padding: 12, border: '1px solid', borderRadius: 12, color: t.ink, background: 'transparent', font: 'inherit' }} />
+            </label>
+            <label style={{ display: 'block', margin: '16px 0' }}>Пароль YCLIENTS
+              <input ref={passwordInput} type="password" autoComplete="off" spellCheck={false} disabled={!editable || credentialMode !== 'login'} aria-label="Пароль YCLIENTS"
+                onChange={(event) => { setHasPassword(event.target.value.length > 0); setStageConfirmed(false); }}
+                style={{ display: 'block', width: '100%', boxSizing: 'border-box', marginTop: 8, padding: 12, border: '1px solid', borderRadius: 12, color: t.ink, background: 'transparent', font: 'inherit' }} />
+            </label>
+          </div>
           <p>Токен сохраняется в зашифрованном виде в базе сервера MAYA, к которому подключена эта форма.</p>
           <p>Партнёрский токен настраивается отдельно на сервере. Эта форма его не запрашивает.</p>
+          <div hidden={credentialMode !== 'token'}>
           <label style={{ display: 'block', margin: '16px 0' }}>
             Пользовательский API-токен
-            <input ref={tokenInput} type="password" autoComplete="off" spellCheck={false} disabled={!editable} aria-label="Пользовательский API-токен YCLIENTS"
+            <input ref={tokenInput} type="password" autoComplete="off" spellCheck={false} disabled={!editable || credentialMode !== 'token'} aria-label="Пользовательский API-токен YCLIENTS"
               onChange={(event) => { setHasToken(event.target.value.length > 0); setStageConfirmed(false); setActivationConfirmed(false); }}
               style={{ display: 'block', width: '100%', boxSizing: 'border-box', marginTop: 8, padding: 12, border: '1px solid', borderRadius: 12, color: t.ink, background: 'transparent', font: 'inherit' }} />
           </label>
+          </div>
+          <p>ID компании — номер салона в адресе YCLIENTS, а не ID партнёрского кабинета.</p>
           <label style={{ display: 'block', margin: '16px 0' }}>
             ID компании YCLIENTS
             <input type="text" inputMode="numeric" autoComplete="off" value={companyId} disabled={!editable} aria-label="ID компании YCLIENTS"
@@ -142,7 +173,7 @@ export function LocalCrmSetup({ t, onClose }: { readonly t: Tokens; readonly onC
           <button type="button" role="checkbox" aria-checked={stageConfirmed} disabled={!editable}
             onClick={() => setStageConfirmed(!stageConfirmed)}
             style={{ display: 'block', width: '100%', padding: 12, textAlign: 'left', border: '1px solid', borderRadius: 12, background: 'transparent', color: t.ink, font: 'inherit' }}>
-            {stageConfirmed ? '✓ ' : '○ '}{resumingInstall ? resubmitting ? 'Разрешаю повторно отправить указанные компанию, филиал и токен в рамках той же операции подключения.' : 'Разрешаю продолжить исходное сохранение подключения с повторно введёнными компанией, филиалом и токеном.' : 'Разрешаю проверить токен в YCLIENTS и сохранить подключение с зашифрованным токеном на этом сервере.'} Активация и импорт требуют отдельного согласия.
+            {stageConfirmed ? '✓ ' : '○ '}{resumingInstall ? resubmitting ? 'Разрешаю повторно отправить указанные компанию, филиал и данные подключения в рамках той же операции подключения.' : 'Разрешаю продолжить исходное сохранение подключения с повторно введёнными компанией, филиалом и данными подключения.' : 'Разрешаю авторизацию и проверку указанных данных в YCLIENTS, затем сохранение подключения с зашифрованным пользовательским токеном на этом сервере.'} Активация и импорт требуют отдельного согласия.
           </button>
           <button type="button" disabled={!canStage} aria-describedby={stageHelp ? stageHelpId : undefined} onClick={stage}
             style={{ marginTop: 12, padding: '12px 16px', border: 0, borderRadius: 12, background: t.accent, color: t.accentOn, font: 'inherit', opacity: canStage ? 1 : 0.5 }}>

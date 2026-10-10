@@ -425,8 +425,9 @@ export interface CrmSetupSnapshot {
   readonly connection: CrmSetupConnection | null;
   readonly counts: { readonly services: number | null; readonly staff: number | null } | null;
 }
-export interface CrmSetupInput { readonly apiToken: string; readonly companyId: string; readonly branchId: string }
-export interface CrmSetupInstall extends CrmSetupInput { readonly expectedVersion: string | null }
+export type CrmSetupCredential = { readonly apiToken: string; readonly yclientsLogin?: never } | { readonly apiToken?: never; readonly yclientsLogin: { readonly login: string; readonly password: string } };
+export type CrmSetupInput = CrmSetupCredential & { readonly companyId: string; readonly branchId: string };
+export type CrmSetupInstall = CrmSetupInput & { readonly expectedVersion: string | null };
 export interface CrmOperationLocator { readonly operation: 'install' | 'activate'; readonly requestId: string }
 export interface CrmOperationReceipt extends CrmOperationLocator {
   readonly phase: 'installed' | 'activated' | 'import_confirmed'; readonly configVersion: string;
@@ -439,8 +440,8 @@ export interface CrmOperationStatus extends CrmOperationLocator {
   readonly current: { readonly configVersion: string | null; readonly matchesCurrentVersion: boolean };
 }
 export interface CrmSetupCompletion { readonly snapshot: CrmSetupSnapshot; readonly operation: CrmOperationStatus }
-export interface CrmSetupBody {
-  readonly provider: 'yclients'; readonly apiToken: string; readonly expectedVersion: string | null;
+export type CrmSetupBody = CrmSetupCredential & {
+  readonly provider: 'yclients'; readonly expectedVersion: string | null;
   readonly settingsJson: { readonly companyId: number; readonly branchBinding: {
     readonly contract: 'maya.crm-branch-binding/1'; readonly companyId: number; readonly branchId: string;
   } };

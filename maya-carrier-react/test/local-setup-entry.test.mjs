@@ -88,7 +88,8 @@ test('empty or refused branch read stays qualified; it cannot enable stage or ac
     const p = render(m.LocalCrmSetup, { onClose() {} });
     if (phase === 'ready') assert.match(p.text, /Доступных филиалов нет/);
     else assert.match(p.text, /Доступ к настройке подключения не подтверждён/);
-    assert.equal(p.buttons.some(el => 'aria-pressed' in el.attrs), false);
+    const branchGroup = findAll(p.root, el => el.attrs['aria-label'] === 'Филиал MAYA для подключения')[0];
+    assert.equal(findAll(branchGroup, el => el.tag === 'button').length, 0);
     for (const name of ['Проверить и сохранить подключение', 'Активировать и импортировать']) assert.ok('disabled' in p.buttons.find(el => textOf(el) === name).attrs);
   }
   assert.deepEqual(m.fixture.calls, []);

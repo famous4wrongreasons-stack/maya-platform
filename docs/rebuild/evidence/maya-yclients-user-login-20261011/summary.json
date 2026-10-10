@@ -1,0 +1,100 @@
+{
+  "contract": "maya.local-yclients-user-login-proof/1",
+  "baseCommit": "4c8aecec45f3bd6148814ff33ea6b5766a6d6412",
+  "scope": "Explicit local-only user authorization through existing A17 connect; no new endpoint/schema/production release",
+  "tests": {
+    "auth_and_qualified_A17": {
+      "passed": 63,
+      "failed": 0
+    },
+    "launcher": {
+      "passed": 51,
+      "failed": 0
+    },
+    "carrier_full": {
+      "passed": 136,
+      "failed": 0
+    },
+    "browser": {
+      "status": "PASS",
+      "checks": 40,
+      "cleanup": {
+        "staticHostStopped": true,
+        "ownedBrowserStopped": true,
+        "profileRemoved": true
+      }
+    },
+    "http_pg": {
+      "status": "passed",
+      "matrixCases": 20,
+      "userLogin": {
+        "actualHttp": true,
+        "actualPostgreSQL": true,
+        "syntheticProvider": true,
+        "realAuthorizationCalls": 0,
+        "authCalls": 2,
+        "installed": true,
+        "activation": false,
+        "credentialLeak": false
+      },
+      "isolatedDatabaseStopped": true
+    },
+    "backend_crm_wave3": {
+      "passed": 1385,
+      "failed": 9,
+      "preExistingFailuresReproducedAtBase": true,
+      "failure": "Two unchanged suites require absent assertRescheduleBranchWitness; baseline 9 FAIL/61 PASS"
+    },
+    "runtime_full": {
+      "passed": 710,
+      "failed": 1,
+      "skipped": 7,
+      "preExistingFailureReproducedAtBase": true,
+      "failure": "build.selftest old fixture PATHS sets: same four fetch-shape mismatches at base"
+    }
+  },
+  "realProviderAuthorizationCalls": 0,
+  "realProviderBusinessWrites": 0,
+  "ownerDatabaseMutations": 0,
+  "productionChanged": false,
+  "certified": false,
+  "realConnectionAccepted": false,
+  "rawReceipts": {
+    "backend_targeted": {
+      "localPath": "/tmp/maya-auth-unit-tests.txt",
+      "sha256": "4ca737f7b003880ce7dadec74c8aaa29823d3622d1cd63f0181435befc4a5843"
+    },
+    "backend_crm_wave3": {
+      "localPath": "/tmp/maya-auth-backend-regression.txt",
+      "sha256": "5603eec9e183059a47f70f21da9d4e7b5b8ff0f0b2bed976472b730ecfc042cc"
+    },
+    "backend_baseline": {
+      "localPath": "/private/tmp/maya-auth-baseline-20261011/baseline-tests.log",
+      "sha256": "bf5b51886a53e51b13eae11196e96f4c7f9f5198e355f0f5e44ce4b93fdc58e5"
+    },
+    "runtime_full": {
+      "localPath": "/tmp/maya-auth-runtime-full.txt",
+      "sha256": "230291b4b4a87bac6de4b4ea5d318a245dd770c3af08f62d875644daa68e2a01"
+    },
+    "runtime_baseline": {
+      "localPath": "/private/tmp/maya-auth-baseline-20261011/runtime-baseline-02.log",
+      "sha256": "85a39388bacabcff65cce2805920beb3354e40442d8c6996e30df887aa81e387"
+    },
+    "carrier_full": {
+      "localPath": "/tmp/maya-auth-carrier-full.txt",
+      "sha256": "0950f2c966e840519580a33ca3bb95116e2b4364176ab195b6ad5340cbe769b5"
+    },
+    "launcher": {
+      "localPath": "/tmp/maya-auth-launcher-tests-20261011.txt",
+      "sha256": "bf33fcbf9fedf1806d2f9692a49d7836b3f2d6f3dec89d9b6db53403fd78ff15"
+    },
+    "browser": {
+      "localPath": "/private/tmp/maya-local-setup-entry-user-auth-20261011-02/report.json",
+      "sha256": "9098cd54a65ebf9604e66880dbf193cbc97731081bdf560907dc4c280a0bfb35"
+    },
+    "http_pg": {
+      "localPath": "/private/tmp/maya-auth-http-pg-20261011-02/matrix.json",
+      "sha256": "2a231cb8655c0cf219e615cd06aaa8c44fb697d07e5ffb377fca9a3926aff0c2"
+    }
+  }
+}

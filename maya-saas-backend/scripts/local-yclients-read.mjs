@@ -38,7 +38,7 @@ export const LOCAL_READ_HEADERS = Object.freeze({
   'Cache-Control': 'no-store',
 });
 const PREPARATION_MS = 15 * 60000;
-const ROUTE_KINDS = Object.freeze(['companies', 'company', 'book_services', 'services', 'categories', 'team']);
+const ROUTE_KINDS = Object.freeze(['auth', 'companies', 'company', 'book_services', 'services', 'categories', 'team']);
 const LAUNCHER_STAGES = Object.freeze(['preparing', 'waiting_input', 'credential_accepted', 'backend_starting', 'web_starting', 'ready', 'stopping', 'stopped']);
 const FAILURE_CODES = Object.freeze(['preflight_refused', 'relay_start_failed', 'session_cancelled', 'preparation_stage_failed', 'preparation_timeout', 'input_timeout', 'input_cancelled', 'input_invalid', 'child_boot_failed', 'child_boot_timeout', 'child_exit_unexpected', 'runtime_status_invalid', 'runtime_summary_missing', 'cleanup_failed', 'source_changed', ...RUNTIME_CODES]);
 const safeFailure = code => Object.assign(new Error('Local setup-read operation stopped'), { diagnosticCode: code });

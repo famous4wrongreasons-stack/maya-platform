@@ -160,7 +160,7 @@ async function main() {
     assert.equal(await page.fill(companyInput, String(input.companyId)), true);
     await named(page, input.branchName + ' · Europe/Moscow');
     assert.equal(await page.eval(`(${button('Проверить и сохранить подключение')}).disabled`), true, 'Explicit consent required');
-    await click(page, 'Q.all("button[role=checkbox]").find(el => Q.name(el).includes("Разрешаю проверить токен"))', 'installation consent');
+    await click(page, 'Q.all("button[role=checkbox]").find(el => Q.name(el).includes("Разрешаю авторизацию и проверку"))', 'installation consent');
     await named(page, 'Проверить и сохранить подключение');
     assert.equal(await page.eval(`(${tokenInput}).value`), '', 'Token cleared at submission');
     await until(() => guard.droppedUnregisteredRequests === 1, 'request dropped before backend registration');
@@ -260,7 +260,7 @@ async function main() {
       assert.equal(await page.fill(companyInput, String(scope.companyId)), true);
       await named(page, scope.branchName + ' · Europe/Moscow');
       assert.equal(await page.eval(`(${button('Проверить и сохранить подключение')}).disabled`), true, 'Refusal-case stage still requires consent');
-      await click(page, 'Q.all("button[role=checkbox]").find(el => Q.name(el).includes("Разрешаю проверить токен"))', 'refusal-case installation consent');
+      await click(page, 'Q.all("button[role=checkbox]").find(el => Q.name(el).includes("Разрешаю авторизацию и проверку"))', 'refusal-case installation consent');
       await named(page, 'Проверить и сохранить подключение');
       const refused = await until(() => page.apiRequests('/integrations/crm/connect').find(row => row.finishedAt), 'actual classified provider refusal');
       assert.equal(refused.status, 400);

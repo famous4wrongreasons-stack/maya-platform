@@ -43,8 +43,8 @@ export const localCrmSetup = {
   },
   async stage(input, confirmed) {
     record('stage');
-    fixture.stageInputMatched = confirmed === true && input.apiToken === 'SYNTHETIC-USER-TOKEN' && input.companyId === '123' && input.branchId === 'synthetic-branch';
-    fixture.tokenClearedBeforeStage = document.querySelector('input[aria-label="Пользовательский API-токен YCLIENTS"]').value === '';
+    fixture.stageInputMatched = confirmed === true && (input.apiToken === 'SYNTHETIC-USER-TOKEN' || (input.apiToken === undefined && input.yclientsLogin?.login === 'crm@example.invalid' && input.yclientsLogin.password === 'Synthetic CRM 42')) && input.companyId === '123' && input.branchId === 'synthetic-branch';
+    fixture.tokenClearedBeforeStage = ['Пользовательский API-токен YCLIENTS','Логин YCLIENTS','Пароль YCLIENTS'].every(label => document.querySelector('input[aria-label="'+label+'"]').value === '');
     if (!fixture.stageInputMatched) throw new Error('Unexpected synthetic stage input');
     setup.set({ ...setup.view(), phase: 'ready', connection: { tenantId: 'synthetic-tenant', provider: 'yclients', status: 'pending_activation', hasCredentials: true, companyId: '123', branchId: 'synthetic-branch', configVersion: 'a'.repeat(64) }, canActivate: true, notice: 'Подключение сохранено. Активация и импорт требуют отдельного подтверждения.' });
   },

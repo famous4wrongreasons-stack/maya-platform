@@ -1,3 +1,7 @@
+import {
+  exchangeYclientsUserCredential,
+  validYclientsLogin,
+} from '../crm/yclients-user-auth';
 import { ActionExecutionState } from '@prisma/client';
 import {
   assertCrmConfiguration,
@@ -202,83 +206,128 @@ export class Package5Wave3CanonicalCutoverService {
     dto: QualifiedConnectCrmIntegrationDto,
     idempotencyKey?: string,
   ) {
-    const requestId = crmOperationRequestId(idempotencyKey);
-    const expectedVersion = crmExpectedVersion(dto.expectedVersion, true);
-    const token = dto.apiToken?.trim();
-    if (!token)
-      throw new BadRequestException({
-        message: 'Explicit credential required for installation',
-        error: { code: 'crm_credential_required' },
-      });
-    // Qualified request material is self-contained, never merged with a later connection.
-    const settings = normalizeCrmProviderSettings(
-      dto.provider,
-      dto.settingsJson ?? {},
-    );
-    const command: Package5Wave3Command = {
-      operation: 'install_crm_credentials',
-      sourceIntentRef: requestId,
-      expectedVersion,
-      provider: dto.provider,
-      encryptedApiToken: this.encryption.encrypt(token),
-      credentialFingerprint: this.encryption.opaqueReference(
-        'package5.wave3.crm-credential',
-        `${dto.provider}\0${token}`,
-      ),
-      baseUrl: null,
-      settingsJson: settings,
-    };
-    let prepared = await this.planner.build(
-      tenantId,
-      actor,
-      command,
-      'execute',
-    );
-    if (prepared.existingExecution?.state !== ActionExecutionState.SUCCEEDED) {
-      // Provider observation is ephemeral and occurs before AE admission. Failure
-      // here intentionally remains NOT_OBSERVED; recovery never invents a receipt.
-      await this.crm.previewCredentials(dto.provider, token, settings, null);
-      const current = await this.prisma.crmIntegration.findUnique({
-        where: { tenantId },
-      });
-      if (crmConfigurationVersion(current) !== expectedVersion) {
-        // A same-key caller may have committed while this original preview was
-        // awaiting transport. Re-read exactly that owner receipt once; changed
-        // actor/material/expired payload still refuse in the existing planner.
-        const observed = await this.planner.build(
-          tenantId,
-          actor,
-          command,
-          'execute',
-        );
-        if (
-          observed.existingExecution?.state !== ActionExecutionState.SUCCEEDED
-        )
-          assertCrmConfiguration(current, expectedVersion);
-        prepared = observed;
+    const login = dto.yclientsLogin;
+    delete dto.yclientsLogin;
+    try {
+      const requestId = crmOperationRequestId(idempotencyKey);
+      const expectedVersion = crmExpectedVersion(dto.expectedVersion, true);
+      let token = dto.apiToken?.trim();
+      if (login && (dto.apiToken !== undefined || !validYclientsLogin(login))) {
+        throw new BadRequestException({
+          message: 'Choose exactly one credential source',
+          error: { code: 'crm_credentials_rejected' },
+        });
+      }
+      if (!login && !token)
+        throw new BadRequestException({
+          message: 'Explicit credential required for installation',
+          error: { code: 'crm_credential_required' },
+        });
+      // Qualified request material is self-contained, never merged with a later connection.
+      const settings = normalizeCrmProviderSettings(
+        dto.provider,
+        dto.settingsJson ?? {},
+      );
+      if (login) {
+        try {
+          // Local owner-approved exchange only. No production authentication expansion.
+          if (
+            process.env.MAYA_LOCAL_YCLIENTS_USER_AUTH !== 'owner_login_v1' ||
+            process.env.MAYA_LOCAL_YCLIENTS_READ_PROFILE !== 'read_setup_v1' ||
+            process.env.NODE_ENV !== 'development'
+          )
+            throw new BadRequestException({
+              message: 'Explicit local user-login session required',
+              error: { code: 'crm_platform_configuration_error' },
+            });
+          await this.planner.assertCrmLoginTarget(tenantId, actor, {
+            provider: dto.provider,
+            settingsJson: settings,
+            expectedVersion,
+            baseUrl: null,
+          });
+          token = await exchangeYclientsUserCredential(
+            login,
+            process.env.YCLIENTS_PARTNER_TOKEN ?? '',
+          );
+        } finally {
+          login.login = '';
+          login.password = '';
+        }
+      }
+      if (!token) throw new BadRequestException('Credential required');
+      const command: Package5Wave3Command = {
+        operation: 'install_crm_credentials',
+        sourceIntentRef: requestId,
+        expectedVersion,
+        provider: dto.provider,
+        encryptedApiToken: this.encryption.encrypt(token),
+        credentialFingerprint: this.encryption.opaqueReference(
+          'package5.wave3.crm-credential',
+          `${dto.provider}\0${token}`,
+        ),
+        baseUrl: null,
+        settingsJson: settings,
+      };
+      let prepared = await this.planner.build(
+        tenantId,
+        actor,
+        command,
+        'execute',
+      );
+      if (
+        prepared.existingExecution?.state !== ActionExecutionState.SUCCEEDED
+      ) {
+        // Provider observation is ephemeral and occurs before AE admission. Failure
+        // here intentionally remains NOT_OBSERVED; recovery never invents a receipt.
+        await this.crm.previewCredentials(dto.provider, token, settings, null);
+        const current = await this.prisma.crmIntegration.findUnique({
+          where: { tenantId },
+        });
+        if (crmConfigurationVersion(current) !== expectedVersion) {
+          // A same-key caller may have committed while this original preview was
+          // awaiting transport. Re-read exactly that owner receipt once; changed
+          // actor/material/expired payload still refuse in the existing planner.
+          const observed = await this.planner.build(
+            tenantId,
+            actor,
+            command,
+            'execute',
+          );
+          if (
+            observed.existingExecution?.state !== ActionExecutionState.SUCCEEDED
+          )
+            assertCrmConfiguration(current, expectedVersion);
+          prepared = observed;
+        }
+      }
+      await this.executor.execute(prepared);
+      const outcome = await this.crmOperationStatus(
+        tenantId,
+        actor,
+        'install',
+        requestId,
+      );
+      const current = await this.crm.getIntegrationStatus(tenantId);
+      await this.planner.assertCrmOperationActor(tenantId, actor);
+      const configVersion = current.connection?.configVersion ?? null;
+      return {
+        ...outcome,
+        configured: current.configured,
+        connection: current.connection,
+        current: {
+          configVersion,
+          matchesCurrentVersion:
+            outcome.receipt !== null &&
+            outcome.receipt.configVersion === configVersion,
+        },
+      };
+    } finally {
+      if (login && typeof login === 'object') {
+        login.login = '';
+        login.password = '';
       }
     }
-    await this.executor.execute(prepared);
-    const outcome = await this.crmOperationStatus(
-      tenantId,
-      actor,
-      'install',
-      requestId,
-    );
-    const current = await this.crm.getIntegrationStatus(tenantId);
-    await this.planner.assertCrmOperationActor(tenantId, actor);
-    const configVersion = current.connection?.configVersion ?? null;
-    return {
-      ...outcome,
-      configured: current.configured,
-      connection: current.connection,
-      current: {
-        configVersion,
-        matchesCurrentVersion:
-          outcome.receipt !== null &&
-          outcome.receipt.configVersion === configVersion,
-      },
-    };
   }
 
   async activateQualifiedCrmIntegration(

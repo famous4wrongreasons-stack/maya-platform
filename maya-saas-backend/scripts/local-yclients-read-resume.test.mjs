@@ -185,3 +185,18 @@ test('PG and state directory replacement is refused before any lifecycle command
     assert.throws(() => ownedDirectoryIdentity(directory, identity));
   } finally { fs.rmSync(temp, { recursive: true, force: true }); }
 });
+
+test('same-database resume explicitly opts into user auth without changing saved environment; diagnostic forbids it', () => {
+  const saved=savedEnvironment(), snapshot=JSON.stringify(saved), partner='SYNTHETIC_PARTNER_ONLY_123';
+  const plan=resumePlan(saved,state,'/owned/bin',15,output,false,true);
+  assert.equal(plan.providerAdmission,'explicit_setup_auth_and_reads_only');
+  assert.deepEqual(plan.setup.map(row=>row.name),['backend-build','react-build','pg-start']);
+  const env=resumeEnvironment(saved,partner,false,true);
+  assert.equal(env.MAYA_LOCAL_YCLIENTS_USER_AUTH,'owner_login_v1');
+  assert.equal(env.DATABASE_URL,saved.DATABASE_URL);
+  for(const key of PRIVATE_KEYS) assert.equal(env[key],saved[key]);
+  assert.equal(JSON.stringify(saved),snapshot);
+  assert.equal(resumeEnvironment(saved,partner).MAYA_LOCAL_YCLIENTS_USER_AUTH,undefined);
+  assert.throws(()=>resumeEnvironment(saved,partner,true,true));
+  assert.throws(()=>resumePlan(saved,state,'/owned/bin',15,output,true,true));
+});

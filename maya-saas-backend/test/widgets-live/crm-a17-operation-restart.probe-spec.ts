@@ -23,6 +23,7 @@ import {
 import { CrmAdapterFactory } from '../../src/crm/crm-adapter.factory';
 import { YclientsCRMAdapter } from '../../src/crm/adapters/yclients-crm.adapter';
 import { CrmService } from '../../src/crm/crm.service';
+import { EncryptionService } from '../../src/encryption/encryption.service';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import {
   bootHttp,
@@ -83,6 +84,7 @@ const { realReadIngress, companyId: validCompanyId } = nativeRequire(
     headers: ExpressRequest['headers'],
     body: unknown,
     origin: string,
+    allowUserAuth?: boolean,
   ): string | null;
   companyId(this: void, value: unknown): boolean;
 };
@@ -105,6 +107,7 @@ const { createReadTransport } = nativeRequire(
     resolveCompany: (request: ProfileRequest) => Promise<unknown>,
     clock: () => number,
     trace: (value: Record<string, unknown>) => void,
+    options?: { allowUserAuth: boolean },
   ): ReadTransport;
 };
 const { createReadTrace, projectReadTrace, traceHttpRequest } = nativeRequire(
@@ -174,6 +177,7 @@ const sourceFiles = [
   'src/crm/dto/crm-operation.dto.ts',
   'src/crm/crm-configuration-version.ts',
   'src/crm/crm.service.ts',
+  'src/crm/yclients-user-auth.ts',
   'src/crm/crm-request.errors.ts',
   'src/crm/crm-provider-settings.ts',
   'src/crm/adapters/yclients-crm.adapter.ts',
@@ -262,6 +266,39 @@ describe('A17 exact configuration and persisted operation recovery through actua
             ? input.href
             : input.url,
       );
+      if (
+        url.origin === origin &&
+        url.pathname === '/api/v1/auth' &&
+        !url.search &&
+        init?.method === 'POST'
+      ) {
+        expect(new Headers(init.headers).get('authorization')).toBe(
+          'Bearer SYNTHETIC_A17_PARTNER',
+        );
+        expect(init.redirect).toBe('error');
+        assert.equal(typeof init.body, 'string');
+        const credentials = object(JSON.parse(init.body as string));
+        expect(credentials.login).toBe('auth-fixture@example.invalid');
+        expect(Object.keys(credentials).sort()).toEqual(['login', 'password']);
+        expect(['Synthetic Correct 42', 'Synthetic Incorrect 42']).toContain(
+          credentials.password,
+        );
+        providerReads.push('auth');
+        return Promise.resolve(
+          credentials.password === 'Synthetic Correct 42'
+            ? new Response(
+                JSON.stringify({
+                  success: true,
+                  data: { user_token: 'SYNTHETIC_A17_V1' },
+                }),
+                { status: 200 },
+              )
+            : new Response(
+                JSON.stringify({ error: 'PRIVATE_FAILURE_DETAIL' }),
+                { status: 401 },
+              ),
+        );
+      }
       if (
         url.origin !== origin ||
         init?.method !== 'GET' ||
@@ -384,6 +421,7 @@ describe('A17 exact configuration and persisted operation recovery through actua
       },
       Date.now,
       trace,
+      { allowUserAuth: true },
     );
     jest.spyOn(globalThis, 'fetch').mockImplementation(readTransport.fetch);
     http = await bootHttp(undefined, (app) => {
@@ -412,6 +450,7 @@ describe('A17 exact configuration and persisted operation recovery through actua
                 incoming.headers,
                 incoming.body,
                 expectedOrigin,
+                true,
               );
           traceHttpRequest(incoming, response, trace, reason);
           if (reason) {
@@ -1902,11 +1941,116 @@ describe('A17 exact configuration and persisted operation recovery through actua
     };
   };
 
+  const proveOwnerLogin = async () => {
+    const keys = [
+      'MAYA_LOCAL_YCLIENTS_USER_AUTH',
+      'MAYA_LOCAL_YCLIENTS_READ_PROFILE',
+      'NODE_ENV',
+      'YCLIENTS_PARTNER_TOKEN',
+    ];
+    const original = Object.fromEntries(keys.map((k) => [k, process.env[k]]));
+    const owner = await createTenant('Synthetic explicit CRM user login'),
+      bearer = await login(owner),
+      key = randomUUID();
+    const before = await durable(owner.tenantId),
+      start = providerReads.length;
+    const makeBody = (password: string) => {
+      const body: Record<string, unknown> = connectBody(owner.branchId, null);
+      delete body.apiToken;
+      return {
+        ...body,
+        yclientsLogin: { login: 'auth-fixture@example.invalid', password },
+      };
+    };
+    const events: Record<string, unknown>[] = [];
+    matrixTrace = createReadTrace((event) => events.push(object(event)));
+    try {
+      process.env.MAYA_LOCAL_YCLIENTS_USER_AUTH = 'owner_login_v1';
+      process.env.MAYA_LOCAL_YCLIENTS_READ_PROFILE = 'read_setup_v1';
+      process.env.NODE_ENV = 'development';
+      process.env.YCLIENTS_PARTNER_TOKEN = 'SYNTHETIC_A17_PARTNER';
+      const wrong = await post(
+        bearer,
+        'install',
+        key,
+        makeBody('Synthetic Incorrect 42'),
+      );
+      expect(wrong.status).toBe(400);
+      expect(wrong.body).toMatchObject({
+        error: { code: 'crm_credentials_rejected' },
+      });
+      expect(await durable(owner.tenantId)).toEqual(before);
+      expect((await getOperation(bearer, 'install', key)).body).toMatchObject({
+        status: 'NOT_OBSERVED',
+      });
+      expect(providerReads.slice(start)).toEqual(['auth']);
+      const result = await post(
+        bearer,
+        'install',
+        key,
+        makeBody('Synthetic Correct 42'),
+      );
+      expect(result.status).toBe(201);
+      receiptOf(result.body, 'install', key);
+      const stored = await durable(owner.tenantId);
+      expect(stored.executions).toHaveLength(1);
+      expect(stored.mutations).toHaveLength(1);
+      expect(stored.integration?.status).toBe('pending_activation');
+      const connection = await db.prisma.crmIntegration.findUniqueOrThrow({
+        where: { tenantId: owner.tenantId },
+        select: { encryptedApiToken: true },
+      });
+      expect(connection.encryptedApiToken).not.toContain('SYNTHETIC_A17_V1');
+      expect(
+        http.app.get(EncryptionService).decrypt(connection.encryptedApiToken),
+      ).toBe('SYNTHETIC_A17_V1');
+      const durableText = JSON.stringify(stored),
+        responseText = JSON.stringify(result.body),
+        traceText = JSON.stringify(events);
+      for (const text of [durableText, responseText, traceText])
+        for (const excluded of [
+          'auth-fixture@example.invalid',
+          'Synthetic Correct 42',
+          'Synthetic Incorrect 42',
+          'SYNTHETIC_A17_V1',
+          'PRIVATE_FAILURE_DETAIL',
+        ])
+          expect(text).not.toContain(excluded);
+      const readCount = providerReads.length;
+      expect((await getOperation(bearer, 'install', key)).body).toMatchObject({
+        status: 'SUCCEEDED',
+      });
+      expect(providerReads).toHaveLength(readCount);
+      await noUnrelatedEffects(owner.tenantId);
+      checks.push(
+        'Actual HTTP/PG user login: wrong password stays NOT_OBSERVED; explicit same-key correction installs encrypted user token once; status reads do not authenticate again; no credential in receipt, durable evidence or trace',
+      );
+      observations.userLogin = {
+        actualHttp: true,
+        actualPostgreSQL: true,
+        syntheticProvider: true,
+        realAuthorizationCalls: 0,
+        authCalls: 2,
+        installed: true,
+        activation: false,
+        credentialLeak: false,
+        events,
+      };
+    } finally {
+      matrixTrace = undefined;
+      for (const [k, v] of Object.entries(original)) {
+        if (v === undefined) delete process.env[k];
+        else process.env[k] = v;
+      }
+    }
+  };
+
   it('pins versions, loses committed responses, and restores only existing A17 outcomes after actual restart', async () => {
     let passed = false;
     try {
       if (stage === 'matrix') {
         await provePreAdmission400Matrix();
+        await proveOwnerLogin();
       } else if (stage === 'prepare') {
         const owner = await createTenant('Synthetic A17 recovery');
         const otherOwner = await addUser(owner, UserRole.TENANT_OWNER);
