@@ -1,0 +1,27 @@
+{
+  "contract": "maya.known-route-readonly-qualification/1",
+  "sourceCommit": "af3045ab",
+  "parentThread": "01a10b14-bd01-7513-8d9f-86c0c75010f5",
+  "authorization": "Follow-up explicitly permits existing Beget route/host metadata and reachability of known backend only; conditional direct attempt requires prior operational documentation of same target/account/hostkey.",
+  "status": "BEGET_TO_KNOWN_BACKEND_TCP_CONNECT_TIMEOUT",
+  "currentMappingEstablished": false,
+  "networkBoundary": "prime.beget.ru -> 89.169.160.55 TCP port22",
+  "causeBeyondBoundary": "not_established; no proof of firewall, target sshd or application state",
+  "routeCommand": "ip -j route get 89.169.160.55 failed with PermissionError; no route table observed",
+  "directAttemptPerformed": false,
+  "directRouteAssessment": {
+    "existingDeployment": "maya-saas-backend/deploy/vps/deploy.sh uses Beget ProxyCommand to botadmin@api.mayaos.ru",
+    "knownBackend": "api.mayaos.ru / 89.169.160.55",
+    "historicalDirectInAGENTS": "botadmin@111.88.148.206 is a different target; not treated as same-host fallback",
+    "priorQualification": "docs/rebuild/MAYA-REAL-MODEL-NEXT-ACTION-20261008.md does not establish direct same-target route",
+    "conclusion": "No documented same-target direct route established by inspected operational sources; conditional direct attempt not performed."
+  },
+  "nextMinimalAction": "Use an existing authenticated console/session for backend 89.169.160.55 to run the already prepared READ ONLY mapping.sql and report current release identity; or provide the already working exact same-target direct route without credentials. No network reconfiguration requested.",
+  "remoteFilesOrConfigChanged": false,
+  "servicesRestarted": false,
+  "providerRequests": 0,
+  "modelRequests": 0,
+  "businessMutations": 0,
+  "websiteActions": 0,
+  "additionalAttemptsPlanned": false
+}

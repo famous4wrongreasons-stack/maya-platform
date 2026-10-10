@@ -1,0 +1,21 @@
+{
+  "args": [
+    "ssh",
+    "-v",
+    "-i",
+    "/Users/stanislavmosin/.ssh/beget_deploy",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "UpdateHostKeys=no",
+    "-o",
+    "ConnectionAttempts=1",
+    "-o",
+    "ConnectTimeout=8",
+    "mocine3388@prime.beget.com",
+    "python3 -B -"
+  ],
+  "stdinFile": "collector.py"
+}

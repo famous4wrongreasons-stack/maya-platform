@@ -1,0 +1,18 @@
+{
+  "contract": "maya.beget-route-readonly-attempt/1",
+  "startedAt": "2026-10-10T09:59:30.267844+00:00",
+  "authorization": "Parent continuation: same read-only scope, existing Beget route and only known backend address/port; no scan or changes",
+  "outerDeadlineSeconds": 30,
+  "collectorSha256": "225ae426553d80c76d674207bf8553a9e4f3f1250dc477480c06d78ff622d5d6",
+  "networkAttemptsToBeget": 1,
+  "targetAuthenticationAttempted": false,
+  "status": "route_metadata_observed",
+  "exitCode": 0,
+  "finishedAt": "2026-10-10T09:59:42.225275+00:00",
+  "seconds": 11.957,
+  "stdoutBytes": 525,
+  "stderrBytes": 5115,
+  "begetAuthenticated": true,
+  "rawSshDebugRetained": false,
+  "terminalErrorClasses": []
+}
