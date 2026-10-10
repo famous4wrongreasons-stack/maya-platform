@@ -1,0 +1,23 @@
+{
+  "contract": "maya.c9-occupancy-owned-cluster/1",
+  "database": "REDACTED_EPHEMERAL_SYNTHETIC_RUNTIME",
+  "port": "REDACTED_EPHEMERAL_SYNTHETIC_RUNTIME",
+  "cluster": "REDACTED_EPHEMERAL_SYNTHETIC_RUNTIME",
+  "mode": "crm-a17-pre-ae400-http-matrix",
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "matrix"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "clusterStopped": true
+}

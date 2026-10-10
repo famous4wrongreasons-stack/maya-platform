@@ -1,0 +1,38 @@
+✔ public projection drops raw previews/secrets and requires a valid configVersion (1.186958ms)
+✔ operation projection binds the exact locator and refuses unqualified import success (0.394167ms)
+✔ wire sends versioned closed bodies and exact operation GET without authority in query (13.761291ms)
+✔ invalid fields, versions and locators do no authorization or I/O (0.348541ms)
+✔ 401 refresh is bounded and keeps the exact operation key and versioned write body (0.757791ms)
+✔ lost, malformed, conflict and server write results never automatically resend (1.798416ms)
+✔ known setup diagnostics survive as closed codes without changing write uncertainty or retrying (1.033042ms)
+✔ diagnosed failure retains the exact pending operation and blocks submit until an explicit recovery read (1.337667ms)
+✔ disabled composition, viewing and subscribing trigger no transport or pending write (0.133958ms)
+✔ explicit load reads only; stage requires consent, current branch and a persisted locator before dispatch (0.264125ms)
+✔ activation needs separate consent and pins the reviewed configVersion through canonical import receipt (0.119042ms)
+✔ configVersion drift with unchanged timestamp and removed branches refuse before either write (0.204417ms)
+✔ a foreign tenant completion cannot replace the reviewed owner connection (0.123792ms)
+✔ another CRM provider cannot be staged or activated (0.053333ms)
+✔ uncertain write survives close/signout/re-entry; only explicit NOT_OBSERVED read enables consented same-key resend (0.173625ms)
+✔ NOT_OBSERVED after runtime restart uses freshly re-entered material with the saved operation key (0.160083ms)
+✔ NOT_OBSERVED activation requires a new explicit consent and preserves the existing key (0.120625ms)
+✔ NOT_OBSERVED same-key retry still rejects configuration drift after explicit receipt read (0.098042ms)
+✔ new runtime after response loss recovers the same completed locator without a write (0.124084ms)
+✔ READY install after restart continues only by explicit consent using the original key (0.104333ms)
+✔ a refused READY continuation retains the original locator and never starts a replacement operation (0.078959ms)
+✔ READY activation confirmation resumes its same key and current receipt version without token (0.105542ms)
+✔ READY receipt for an older configuration cannot authorize activation of the replacement (0.075416ms)
+✔ UNAVAILABLE, unknown receipt read or malformed saved locator never permits a write (0.131ms)
+✔ URL locator save refusal or exception stops before POST (0.101167ms)
+✔ failure clearing a completed locator preserves uncertainty and blocks a new operation (0.080125ms)
+✔ double submit is single flight; signout aborts and ignores a late completion, keeping recovery locator (0.10925ms)
+✔ current owner revocation during preflight prevents dispatch (0.118625ms)
+✔ close during the final preflight publication prevents a stale-generation write (0.231708ms)
+✔ signout while saving the recovery locator prevents dispatch but preserves that locator (0.081375ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 124.82225

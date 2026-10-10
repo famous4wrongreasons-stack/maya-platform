@@ -1,0 +1,300 @@
+{
+  "contract": "maya.a17-exact-profile-actual-proof-summary/1",
+  "status": "QUALIFIED_PASS",
+  "candidateCommit": "b46e3d09748d6e38549fcaeb3cb0565077f77345",
+  "completedStages": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "react-web-build",
+    "prepare",
+    "pg-restart",
+    "resume"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "sourceFilesBound": 42,
+  "sourceUnchanged": true,
+  "gitBlobsMatched": true,
+  "workingTreeClean": true,
+  "currentReact": {
+    "checkpoints": [
+      "initial",
+      "loaded",
+      "install-lost",
+      "install-reloaded",
+      "not-observed",
+      "installed",
+      "activation-lost",
+      "reload",
+      "recovered",
+      "provider-denied-result",
+      "provider-denied-observed",
+      "company-unavailable-result",
+      "company-unavailable-observed",
+      "company-malformed-title-result",
+      "company-malformed-title-observed"
+    ],
+    "passwordLogins": 9,
+    "chatOrWidgetRequests": 0,
+    "installReceiptAndCurrentVersionVerified": true,
+    "responseLostAfterActualActivationCommit": true,
+    "sameLocatorReloadWithoutResend": true,
+    "exactRecoveredReceipt": true,
+    "refusals": [
+      {
+        "case": "provider-denied",
+        "httpStatus": 400,
+        "code": "crm_credentials_rejected",
+        "providerReads": 1,
+        "providerRoute": "companies",
+        "operationHash": "5884d8d8f794e2343e34b92514b5b5c1b4d70bbe286b583767a8793b01da0e13",
+        "receiptStatus": "NOT_OBSERVED",
+        "sameLocatorReload": true,
+        "recoveryProviderReads": 0,
+        "integrations": 0,
+        "executions": 0,
+        "mutations": 0
+      },
+      {
+        "case": "company-unavailable",
+        "httpStatus": 400,
+        "code": "crm_company_not_found",
+        "providerReads": 1,
+        "providerRoute": "companies",
+        "operationHash": "d9f1beb85f72b94ad94166e55653bbe150edb04acb4c40a287d1a69272ff128e",
+        "receiptStatus": "NOT_OBSERVED",
+        "sameLocatorReload": true,
+        "recoveryProviderReads": 0,
+        "integrations": 0,
+        "executions": 0,
+        "mutations": 0
+      },
+      {
+        "case": "company-malformed-title",
+        "httpStatus": 400,
+        "code": "crm_connection_failed",
+        "providerReads": 1,
+        "providerRoute": "companies",
+        "operationHash": "b221f3e1e0057ddde195f86094bbfa5f1bbfe1077f235aa5369ef349005e2ae8",
+        "receiptStatus": "NOT_OBSERVED",
+        "sameLocatorReload": true,
+        "recoveryProviderReads": 0,
+        "integrations": 0,
+        "executions": 0,
+        "mutations": 0
+      }
+    ],
+    "guardsBlocked": 0,
+    "guardsErrors": 0,
+    "activationBeforeInstall": {
+      "consentDisabled": true,
+      "consentChecked": false,
+      "actionDisabled": true,
+      "hasHelp": true,
+      "canonicalSharedHelp": true
+    },
+    "activationInstalledBeforeConsent": {
+      "consentDisabled": false,
+      "consentChecked": false,
+      "actionDisabled": true,
+      "hasHelp": false,
+      "canonicalSharedHelp": false
+    },
+    "activationAfterExplicitConsent": {
+      "consentDisabled": false,
+      "consentChecked": true,
+      "actionDisabled": false,
+      "hasHelp": false,
+      "canonicalSharedHelp": false
+    },
+    "refusalActivationHelp": [
+      {
+        "case": "provider-denied",
+        "refused": {
+          "consentDisabled": true,
+          "consentChecked": false,
+          "actionDisabled": true,
+          "hasHelp": true,
+          "canonicalSharedHelp": true
+        },
+        "observed": {
+          "consentDisabled": true,
+          "consentChecked": false,
+          "actionDisabled": true,
+          "hasHelp": true,
+          "canonicalSharedHelp": true
+        }
+      },
+      {
+        "case": "company-unavailable",
+        "refused": {
+          "consentDisabled": true,
+          "consentChecked": false,
+          "actionDisabled": true,
+          "hasHelp": true,
+          "canonicalSharedHelp": true
+        },
+        "observed": {
+          "consentDisabled": true,
+          "consentChecked": false,
+          "actionDisabled": true,
+          "hasHelp": true,
+          "canonicalSharedHelp": true
+        }
+      },
+      {
+        "case": "company-malformed-title",
+        "refused": {
+          "consentDisabled": true,
+          "consentChecked": false,
+          "actionDisabled": true,
+          "hasHelp": true,
+          "canonicalSharedHelp": true
+        },
+        "observed": {
+          "consentDisabled": true,
+          "consentChecked": false,
+          "actionDisabled": true,
+          "hasHelp": true,
+          "canonicalSharedHelp": true
+        }
+      }
+    ]
+  },
+  "http": {
+    "prepareChecks": [
+      "Exact setup-read ingress runs before controllers; OTP, chat, widgets, missing operation key and foreign origin cannot reach provider or AE",
+      "Actual install commit survives HTTP response loss; operation GET performs no provider read or repeat mutation",
+      "Activation and atomic import commit once; final operation receipt survives discarded response",
+      "Replacement during real native verification refuses stale activation; old reviewed version refuses before provider reads",
+      "Real import writes roll back after a test-only post-projection throw; explicit same-key continuation finishes the original confirm once",
+      "HTTP request lost before forwarding leaves no registration or credential; NOT_OBSERVED never clears original locator",
+      "Original preview still running and explicit same-ID retry converge to one durable install; first admitted material refuses later changed credentials",
+      "Canonical ingress durably admits READY before a labelled test-only delivery failure; no row seeding or mutation",
+      "Exact profile rejects stale install source before native reads; native 403 produces safe credential refusal and no admitted operation",
+      "Current React form uses explicit load/install/activation, clears credential, retains lost-response locator across same-URL reload, recovers exact receipt without resend"
+    ],
+    "resumeChecks": [
+      "Different Node process and restarted PG preserve exact install/activation receipts, attempts, original evidence and mutation graph",
+      "After actual Node/PG restart, both NOT_OBSERVED and durable READY stay inert until an explicit same-ID submission; READY keeps the original execution",
+      "Foreign tenant cannot observe receipt; different actor and Client role are refused without provider reads or action changes",
+      "Historic success remains an exact receipt after explicit replacement; current configuration is separately marked different",
+      "Revoked membership blocks persisted operation recovery without new authority"
+    ],
+    "observations": {
+      "versionRace": {
+        "status": 409,
+        "oldVersionStatus": 409,
+        "v1Hash": "0538255d51fd599c3d76f389cccd2a3edcffa7b4a566ba9cdf95fb551bd95131",
+        "v2Hash": "5c9721249d174e02ca33bf705c8fbf35ff5eb0669e87586e193a6664fe517db6",
+        "committedMutations": 2
+      },
+      "projectionRollback": {
+        "injectedAfterActualTransactionalProjection": true,
+        "firstHttpStatus": 500,
+        "confirmRolledBackToReady": true,
+        "originalConfirmExecutionPreserved": true,
+        "finalExecutionCount": 3,
+        "finalMutationCount": 3,
+        "finalReceiptHash": "e01bf17fc790269006fcbfc41481679e39bd0e1eaebd72cc49bcfbcb74c129ea"
+      },
+      "runningOriginal": {
+        "observedWhileRunning": "NOT_OBSERVED",
+        "firstAndRetrySameReceipt": true,
+        "exactExecutionCount": 1,
+        "exactMutationCount": 1,
+        "exactAttemptCount": 1,
+        "changedMaterialHttpStatus": 409
+      },
+      "additionalReadRefusals": {
+        "staleVersion": {
+          "status": 409,
+          "code": "crm_config_version_changed",
+          "providerReads": 0,
+          "canonicalActions": 0
+        },
+        "provider403": {
+          "status": 400,
+          "code": "crm_credentials_rejected",
+          "providerReads": 1,
+          "canonicalActions": 0,
+          "recoveryProviderReads": 0,
+          "receiptStatus": "NOT_OBSERVED"
+        }
+      },
+      "restored": {
+        "graphHash": "f1fc672e92c590d354cc99afec566d19eb07e90f22528a394c270eeda009623c",
+        "processChanged": true,
+        "postmasterChanged": true,
+        "providerReadCount": 0,
+        "installReceiptHash": "c492d380f860ccd1fb2b4f230808d853c20cee8445c4bf154e77126700ed4cf7",
+        "activationReceiptHash": "2770be563a0a3bc87f371de5135bf9054d54afbc2ecfb0bee6abeefb75b07816"
+      },
+      "expiredAuthentication": {
+        "fixture": "SIGNED_EXPIRED_ACCESS_TOKEN",
+        "httpStatus": 401,
+        "actionGraphUnchanged": true,
+        "providerReads": 0
+      },
+      "restart-NOT_OBSERVED": {
+        "statusBeforeExplicitRetry": "NOT_OBSERVED",
+        "sameRequestId": true,
+        "exactExecutions": 1,
+        "exactMutations": 1,
+        "exactAttempts": 1,
+        "receiptHash": "7dd27a101594ae3f516add0e66833ba15f06742f428d607b62dd8bdfa0011887"
+      },
+      "restart-READY": {
+        "statusBeforeExplicitRetry": "READY",
+        "sameRequestId": true,
+        "exactExecutions": 1,
+        "exactMutations": 1,
+        "exactAttempts": 1,
+        "receiptHash": "f10cfe1958c981be359f6811843b82b4d76d479b47c642f2269292f7b789bdba"
+      }
+    }
+  },
+  "provider": {
+    "transport": "EXACT_PROFILE_NATIVE_FACTORY_FINITE_SYNTHETIC_GET",
+    "prepareReads": 114,
+    "resumeReads": 15,
+    "realCalls": 0,
+    "writes": 0,
+    "modelCalls": 0,
+    "transportRefused": 0,
+    "forbidden": []
+  },
+  "cleanup": {
+    "clusterStopped": true,
+    "ownedPostmasterPidAbsent": true,
+    "a17ChromeProcessesObserved": 0,
+    "a17ChromeProfileDirectoriesObserved": 0
+  },
+  "artifactHashes": {
+    "manifest.json": "4ff1d908312a02bb3f41a360a8470baf74d2f6c5b9ebd1c18f0e2bb8b0a524bb",
+    "prepare.json": "424024717cfc088b9c5e5bb85b2cb09170c5b2483cdb50cdb3aa2e72e6a1da7a",
+    "resume.json": "304e2effe1937d0fa6f12c6ec43c275154bfe666a2430619c61d1141bfcbfa2d",
+    "prepare-jest.json": "977f0a8dd8797fa106ffa872ac15be4557ed2a36ee99f126ce813a1ccd2cc5b6",
+    "resume-jest.json": "9b7426e9718bfeab6e7e23af84f9bc6b2628d641ebd0e4cfe74bd4cc20f60ea7",
+    "crm-setup-browser/browser.json": "9c7ede7e57dae7bc0a5f8f7f0b5a78772ec1fef406fab47d4d2751e8b9eb5a59"
+  },
+  "preservedBaseline": "baseline (archived separately)",
+  "preservedHistoricalFailures": "prior exact-profile attempts 01/02 (historical archive)",
+  "limits": [
+    "Synthetic identity, source data, partner/user material and test entitlements only; no live provider acceptance.",
+    "Exact ingress/transport functions in test AppModule; not full private launcher environment acceptance.",
+    "Browser uses same-URL reload/password login; PG restart is a separate HTTP stage.",
+    "READY is canonical admission plus test-only pre-mutation delivery failure; not process-crash recovery.",
+    "Expired/cleaned operation retention remains unit-only; signed expired authentication was exercised via HTTP.",
+    "Historical owner connect HTTP 400, NOT_OBSERVED recovery and absent installation are established; original canonical error code, provider payload and root cause remain UNKNOWN.",
+    "Private restart receipt/passwords/tokens excluded from public summary.",
+    "Closed runtime trace retains only its first 64 events."
+  ]
+}

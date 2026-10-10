@@ -1,0 +1,44 @@
+✔ actual Express JSON emits each canonical code without retaining other response fields (1.360042ms)
+✔ unknown, malformed, inherited and accessor fields are not diagnostics (0.189208ms)
+✔ success, unrelated status routes, refusal precedence and closed responses retain original semantics (0.163542ms)
+✔ wrapper preserves receiver, all arguments, return value and thrown application error (0.270209ms)
+✔ closed observer failure cannot change Express response result (0.121583ms)
+✔ runtime diagnostics discard arbitrary errors and accept only closed stage/code records (1.029167ms)
+✔ diagnostic runtime command enforces per-process network closure and exact public fixture (4.469875ms)
+✔ separate real-read profile excludes inherited credentials and cannot weaken stage0 (0.896084ms)
+✔ only existing exact A17 install/activate/status and ordinary onboarding are admitted (0.526917ms)
+✔ native request destination refuses redirects, other tenants companies, writes, client/record and bookable-only team (0.289625ms)
+✔ team completeness rejects truncated, paginated, duplicate, unknown or bookable-only evidence (11.792209ms)
+✔ zero external calls without explicit current authenticated action; close and revocation refuse (1.954833ms)
+✔ size/call bounds and poisoned incomplete staff do not fall through to native fallback (6.689959ms)
+✔ provider denial text is stripped; redirect:error and bounded signal reach transport (0.415167ms)
+✔ actual native adapter setup methods execute through the exact read guard with synthetic wire data (409.09875ms)
+✔ finite trace excludes request query, headers, body and raw errors, and records one HTTP finish (0.603625ms)
+✔ provider trace distinguishes denial, success false, accepted wire and transport failure without raw content (0.574417ms)
+✔ refused provider methods are closed and observer failure cannot alter their refusal (0.422875ms)
+✔ read session reuses exact preparation and cleanup without changing stage 0 (4.2705ms)
+✔ all finite read-profile sources are explicitly bound and landing uses current form (0.18075ms)
+✔ diagnostic mode is fixed to one minute and selects the public constant without owner input (0.564ms)
+✔ safe diagnostic keeps the first failure when cleanup also fails (0.327583ms)
+✔ runtime status before ready cannot be mistaken for application readiness (0.238458ms)
+✔ owner cancellation and relay startup retain distinct outcomes without hiding cleanup failure (0.087208ms)
+✔ closed runtime failure retains its safe stage and cause through cleanup (0.155125ms)
+✔ raw or oversized IPC is refused without retaining its content (0.745709ms)
+✔ persistable preparation environment has no inherited partner or user credentials (0.646959ms)
+✔ local web CSP and no-store headers override shared static/relay values (0.221125ms)
+✔ partner shape is bounded printable ASCII without comma, whitespace or controls (0.112625ms)
+✔ runtime summary projects only closed bounded route-kind counters (0.168625ms)
+✔ hidden prompt returns exact explicit TTY bytes without echo and restores terminal (0.437459ms)
+✔ hidden prompt refuses prebuffer, encoding or another reader before enabling raw input (0.3085ms)
+✔ hidden prompt refuses non-TTY, malformed, oversized and multiple values (0.740209ms)
+✔ hidden prompt cancels on Ctrl-C, Ctrl-D, EOF and abort without echo (0.270084ms)
+✔ hidden prompt has a finite deadline and preserves an already-raw terminal (4.708416ms)
+✔ IPC trace is persisted in order within finite bound and malformed or unknown trace is refused (1.485ms)
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 492.370125

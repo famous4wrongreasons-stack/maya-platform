@@ -1,0 +1,132 @@
+{
+  "contract": "maya.yclients-connect-remediation-checkpoint/1",
+  "status": "QUALIFIED_SYNTHETIC_PASS",
+  "runtimeCommit": "b46e3d09748d6e38549fcaeb3cb0565077f77345",
+  "baselineCommit": "9f935d688f0c1728f837d0216abc93d7896e88c6",
+  "changes": [
+    "Selected company lookup precedes the 200-option discovery display cap.",
+    "Unrelated invalid presentation fields do not block the explicitly selected valid company.",
+    "Malformed envelope, identity or selected presentation yields fixed raw-free crm_connection_failed, not invented company absence.",
+    "Closed local HTTP observer retains only five canonical allowlisted error codes without raw body, message or credentials.",
+    "Current React explains activation gating until saved connection is confirmed; separate activation consent remains mandatory."
+  ],
+  "proof": {
+    "baseline": {
+      "casesPassed": 20,
+      "positiveInstalls": 2,
+      "payloadRefusals": 12,
+      "preProviderRefusals": 6,
+      "syntheticGets": 22,
+      "classification": "BASELINE_REPRODUCED_NOT_REMEDIATION",
+      "evidence": "baseline/summary.json"
+    },
+    "remediationMatrix": {
+      "casesPassed": 20,
+      "positiveInstalls": 4,
+      "payloadRefusals": 10,
+      "preProviderRefusals": 6,
+      "syntheticGets": 30,
+      "noAdmissionOnRefusal": true,
+      "recoveryProviderGets": 0,
+      "evidence": "remediation/matrix/summary.json"
+    },
+    "currentReact": {
+      "checkpoints": 15,
+      "passwordLogins": 9,
+      "refusalCases": [
+        "crm_credentials_rejected",
+        "crm_company_not_found",
+        "crm_connection_failed"
+      ],
+      "sameUrlRecoveryWithoutResend": true,
+      "activationHelperAndSeparateConsent": true,
+      "evidence": "remediation/react/summary.json"
+    },
+    "httpRestart": {
+      "differentNodeProcess": true,
+      "differentPostmaster": true,
+      "sameReceiptsAndMutationGraph": true,
+      "explicitSameIdNotObservedAndReadyContinuation": true,
+      "foreignTenantActorRoleAndRevocationRefused": true,
+      "prepareSyntheticGets": 114,
+      "resumeSyntheticGets": 15
+    },
+    "targetedTests": {
+      "observerAndProfile": 36,
+      "nativeAdapter": 158,
+      "frontendPayloadAndRecovery": 30,
+      "uiSSR": 9,
+      "browserGuard": 6,
+      "allPassed": true,
+      "logs": "checks/"
+    },
+    "typesAndScopedLint": "PASS; successful commands recorded in run report, no diagnostics",
+    "runtimeSourceBindingsPerRun": 42,
+    "visualInspection": [
+      "remediation/react/screenshots/company-malformed-title-activation-help.png",
+      "remediation/react/screenshots/installed.png",
+      "remediation/react/screenshots/recovered-mobile.png"
+    ],
+    "assertions": {
+      "matrix": 563,
+      "reactPrepare": 667,
+      "httpResume": 223
+    }
+  },
+  "ownerOutcome": {
+    "integrationSaved": false,
+    "httpConnectResults": [
+      400,
+      400
+    ],
+    "companiesGetResults": [
+      200,
+      200
+    ],
+    "recoveryStatus": "NOT_OBSERVED",
+    "databaseIntegrations": 0,
+    "databaseA17Executions": 0,
+    "stage": "PRE_AE_CONNECTION_CHECK",
+    "historicalCanonicalErrorCode": "UNKNOWN_NOT_RETAINED",
+    "historicalProviderPayloadAndRootCause": "UNKNOWN",
+    "syntheticDefectsAttributedToOwner": false,
+    "evidence": "../maya-owner-yc-connect400-20261010/summary.json"
+  },
+  "cleanup": {
+    "bothOwnedProofPostgresStopped": true,
+    "postmasterAbsent": true,
+    "ownedBrowserProcessesAndProfilesAbsent": true,
+    "runtimeSourcesUnchanged": true,
+    "ownerDatabaseTouchedByTheseProofs": false
+  },
+  "effects": {
+    "realProviderCalls": 0,
+    "modelCalls": 0,
+    "providerWrites": 0,
+    "outboundNotifications": 0,
+    "websiteChanges": 0,
+    "productionChanges": 0,
+    "syntheticLocalA17InstallAndImportMutations": "EXERCISED_ON_OWNED_FIXTURE_DATABASE_ONLY"
+  },
+  "review": {
+    "source": "review/source.json",
+    "terminal": "review/terminal.json",
+    "verdict": "QUALIFIED_SYNTHETIC_ACTUAL_PASS",
+    "blockers": []
+  },
+  "archive": {
+    "ledger": "archive-ledger.json",
+    "originalHashesAndTransformsPreserved": true,
+    "privateReceiptsOwnerInputsAndScreenshotsExcluded": true
+  },
+  "limits": [
+    "Finite synthetic matrix and current React proof, not restored real YCLIENTS connection or full MAYA/C10 acceptance.",
+    "Test AppModule uses exact ingress/native transport functions with synthetic identity/data/entitlements; full private launcher acceptance is not claimed.",
+    "Browser same-URL reload and separate HTTP process/PostgreSQL restart are distinct checks; browser-across-PG-restart is not claimed.",
+    "Canonical READY admission uses a labelled pre-mutation test delivery failure, not a process-crash test.",
+    "Expired/cleaned operation retention remains unit-only; expired authentication was exercised through HTTP.",
+    "Provider success flag and optional active semantics retain existing behavior; provider schema validation is finite.",
+    "Closed runtime trace retains its first 64 events. Observer depends on existing JSON error envelope and cannot reconstruct old missing codes."
+  ],
+  "nextDiagnosticPriority": "Compare historical working integration path with current connect request using repository history and sanitized fixtures; no new owner form input, owner DB or live provider calls."
+}

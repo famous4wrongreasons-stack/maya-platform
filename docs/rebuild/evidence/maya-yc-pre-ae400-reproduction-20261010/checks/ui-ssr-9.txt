@@ -1,0 +1,17 @@
+✔ explicit local entry immediately exposes password login, no unsupported finder or auth call (6.147583ms)
+✔ ordinary signed-out entry keeps the existing finder and manual alternate login choices (2.413042ms)
+✔ remount of local signed-out presentation still starts password without an auth request (0.89225ms)
+✔ idle setup makes explicit branch loading discoverable without claiming no branches or requesting them (1.223958ms)
+✔ loading is disabled; ready lists only returned branches and never grants write consent (1.5165ms)
+✔ empty or refused branch read stays qualified; it cannot enable stage or activation (2.001375ms)
+✔ unsaved connection and pending install explain both disabled activation controls without retry instructions (2.753416ms)
+✔ idle, busy and blocked activation help stays qualified to the displayed state (2.999291ms)
+✔ ready activation removes blocked help but still requires separate unchecked consent (0.869916ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 113.491875

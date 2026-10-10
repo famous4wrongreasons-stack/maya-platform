@@ -1,0 +1,158 @@
+{
+  "contract": "maya.redacted-proof-archive/1",
+  "sourceCommit": "b46e3d09748d6e38549fcaeb3cb0565077f77345",
+  "excluded": [
+    "private restart receipts",
+    "owner database and credentials",
+    "owner screenshots",
+    "signed download URLs",
+    "unbounded runtime logs"
+  ],
+  "artifacts": {
+    "remediation/matrix/manifest.json": {
+      "originalSha256": "3ea047053b4b59276e6d1ef70132868a8684ac12f9c5703967e043780d6a39d8",
+      "archivedSha256": "01bdb9afb4803443fd672f67b81c1ad25a7366e736dfe8ab47fc6f5c304d6eaa",
+      "transformations": [
+        "Redact ephemeral database, port and cluster identity"
+      ]
+    },
+    "remediation/matrix/matrix.json": {
+      "originalSha256": "1f331619fcf977a6bddd125f34caa305ae9dea8f71b1890976e8003d8e8ad5d5",
+      "archivedSha256": "1f331619fcf977a6bddd125f34caa305ae9dea8f71b1890976e8003d8e8ad5d5",
+      "transformations": []
+    },
+    "remediation/matrix/matrix-jest.json": {
+      "originalSha256": "9418d640fd847d1e61d764646182af07068ace3321ee1ce57bb33411d612c387",
+      "archivedSha256": "ecb8dcb1de8854d941d1147e62be1c56a5a9117d9af09c5aef6472bb7e62aa85",
+      "transformations": [
+        "Replace local source and historical temporary paths with descriptive labels"
+      ]
+    },
+    "remediation/matrix/summary.json": {
+      "originalSha256": "3db350bcfca1fd2ba716fd2ab78630b7a7eaa4ec84a426c4d3007fbb26d57ca2",
+      "archivedSha256": "fb78c4d602ddd902f63109e5210327906aecfebaac4716b9ec8aa55b3d1db116",
+      "transformations": [
+        "Replace local source and historical temporary paths with descriptive labels"
+      ]
+    },
+    "remediation/matrix/source-bindings.json": {
+      "originalSha256": "3c20c3faf098f6b87cdfcdf39d314a23255aeb8e740d1866a15a5384f5d9b2a1",
+      "archivedSha256": "3c20c3faf098f6b87cdfcdf39d314a23255aeb8e740d1866a15a5384f5d9b2a1",
+      "transformations": []
+    },
+    "remediation/react/manifest.json": {
+      "originalSha256": "4ff1d908312a02bb3f41a360a8470baf74d2f6c5b9ebd1c18f0e2bb8b0a524bb",
+      "archivedSha256": "20128e413ee331045045208a185cb38f1092af16c414055b2fb9cf731b0c5468",
+      "transformations": [
+        "Redact ephemeral database, port and cluster identity"
+      ]
+    },
+    "remediation/react/prepare.json": {
+      "originalSha256": "424024717cfc088b9c5e5bb85b2cb09170c5b2483cdb50cdb3aa2e72e6a1da7a",
+      "archivedSha256": "424024717cfc088b9c5e5bb85b2cb09170c5b2483cdb50cdb3aa2e72e6a1da7a",
+      "transformations": []
+    },
+    "remediation/react/resume.json": {
+      "originalSha256": "304e2effe1937d0fa6f12c6ec43c275154bfe666a2430619c61d1141bfcbfa2d",
+      "archivedSha256": "304e2effe1937d0fa6f12c6ec43c275154bfe666a2430619c61d1141bfcbfa2d",
+      "transformations": []
+    },
+    "remediation/react/prepare-jest.json": {
+      "originalSha256": "977f0a8dd8797fa106ffa872ac15be4557ed2a36ee99f126ce813a1ccd2cc5b6",
+      "archivedSha256": "354563e864ed1d2dfa17ae7dd8e9e0393b384a17a2551965d5e838069a7606ff",
+      "transformations": [
+        "Replace local source and historical temporary paths with descriptive labels"
+      ]
+    },
+    "remediation/react/resume-jest.json": {
+      "originalSha256": "9b7426e9718bfeab6e7e23af84f9bc6b2628d641ebd0e4cfe74bd4cc20f60ea7",
+      "archivedSha256": "8c5320d3c9c327826f1192399925228a9041eaa9434ecc1392850a93433b60fb",
+      "transformations": [
+        "Replace local source and historical temporary paths with descriptive labels"
+      ]
+    },
+    "remediation/react/crm-setup-browser/browser.json": {
+      "originalSha256": "9c7ede7e57dae7bc0a5f8f7f0b5a78772ec1fef406fab47d4d2751e8b9eb5a59",
+      "archivedSha256": "9c7ede7e57dae7bc0a5f8f7f0b5a78772ec1fef406fab47d4d2751e8b9eb5a59",
+      "transformations": []
+    },
+    "remediation/react/summary.json": {
+      "originalSha256": "0fb6822dc2c73e20fb7ac19a480cda7d2fd63ee43bb8311ee5170e05bef95141",
+      "archivedSha256": "435552aee5d5bcbab684edb5d082c812fa5b170472efc282b54a747ce39fcb55",
+      "transformations": [
+        "Replace local source and historical temporary paths with descriptive labels",
+        "Correct owner limitation: HTTP400 and absent install are known; code/payload/root cause are unknown"
+      ]
+    },
+    "remediation/react/source-bindings.json": {
+      "originalSha256": "ea7d1dad0647a3f848d3079e00c894024adbb26a34bea710f91fd22876235206",
+      "archivedSha256": "ea7d1dad0647a3f848d3079e00c894024adbb26a34bea710f91fd22876235206",
+      "transformations": []
+    },
+    "remediation/react/screenshots/company-malformed-title-activation-help.png": {
+      "originalSha256": "5e383cfb329f02a329f5b64e8f8983dd13526e55900613ad2a4cf4d80b863b4d",
+      "archivedSha256": "5e383cfb329f02a329f5b64e8f8983dd13526e55900613ad2a4cf4d80b863b4d",
+      "transformations": []
+    },
+    "remediation/react/screenshots/installed.png": {
+      "originalSha256": "913c3c4d57da58579683039f8e357f665db94e3b1adebfe4d3b482540f4cf1e8",
+      "archivedSha256": "913c3c4d57da58579683039f8e357f665db94e3b1adebfe4d3b482540f4cf1e8",
+      "transformations": []
+    },
+    "remediation/react/screenshots/recovered-mobile.png": {
+      "originalSha256": "644a7a2eaf84602fcfe5ebd22165a4c39c6e93c81e9fbe332ffa03fbaf94d265",
+      "archivedSha256": "644a7a2eaf84602fcfe5ebd22165a4c39c6e93c81e9fbe332ffa03fbaf94d265",
+      "transformations": []
+    },
+    "checks/observer-36.txt": {
+      "originalSha256": "c78e10186cf53270b9c6fec429fa6f6eba5b63262d4793d2baf6cf8b33c34a5f",
+      "archivedSha256": "c78e10186cf53270b9c6fec429fa6f6eba5b63262d4793d2baf6cf8b33c34a5f",
+      "transformations": []
+    },
+    "checks/native-158.txt": {
+      "originalSha256": "1d07fd1a750af6d47661d0070783ce381926254d914aaad1f23124cd2bb39744",
+      "archivedSha256": "1d07fd1a750af6d47661d0070783ce381926254d914aaad1f23124cd2bb39744",
+      "transformations": []
+    },
+    "checks/frontend-payload-30.txt": {
+      "originalSha256": "bc680e32e7b49448d2b2de7e281a0a07c09e3a6fb3afb68cd1eae83c1f03ca52",
+      "archivedSha256": "bc680e32e7b49448d2b2de7e281a0a07c09e3a6fb3afb68cd1eae83c1f03ca52",
+      "transformations": []
+    },
+    "checks/ui-ssr-9.txt": {
+      "originalSha256": "c991a6812483440d5678c75bc7bcedd46b1e62a15c0c584ff0a66442e6944c1e",
+      "archivedSha256": "c991a6812483440d5678c75bc7bcedd46b1e62a15c0c584ff0a66442e6944c1e",
+      "transformations": []
+    },
+    "checks/browser-guard-6.txt": {
+      "originalSha256": "068dd6b42e9a09f7f09a31ab6ddd913d117b765867a778b04bf937652fd57d65",
+      "archivedSha256": "068dd6b42e9a09f7f09a31ab6ddd913d117b765867a778b04bf937652fd57d65",
+      "transformations": []
+    },
+    "checks/native-lint.txt": {
+      "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "transformations": []
+    },
+    "checks/final-proof-lint.txt": {
+      "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "transformations": []
+    },
+    "checks/final-proof-types.txt": {
+      "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archivedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "transformations": []
+    },
+    "review/source.json": {
+      "originalSha256": "f8f59ff28bfc3741ad51964d971e7bb019e0fa1470847099ae2cfe6c4d94f1d4",
+      "archivedSha256": "f8f59ff28bfc3741ad51964d971e7bb019e0fa1470847099ae2cfe6c4d94f1d4",
+      "transformations": []
+    },
+    "review/terminal.json": {
+      "originalSha256": "e11c63424a97c7ffd4ef022caad139ee4a628e2a9e4622c9b8009c20bb9dce5b",
+      "archivedSha256": "e11c63424a97c7ffd4ef022caad139ee4a628e2a9e4622c9b8009c20bb9dce5b",
+      "transformations": []
+    }
+  }
+}

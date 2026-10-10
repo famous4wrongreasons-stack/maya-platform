@@ -1,0 +1,6 @@
+
+Test Suites: 2 passed, 2 total
+Tests:       158 passed, 158 total
+Snapshots:   0 total
+Time:        0.685 s, estimated 1 s
+Ran all test suites within paths "src/crm/adapters/yclients-company-profile-source.spec.ts", "src/crm/adapters/yclients-crm.adapter.spec.ts".

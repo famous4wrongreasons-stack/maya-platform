@@ -1,0 +1,26 @@
+{
+  "contract": "maya.c9-occupancy-owned-cluster/1",
+  "database": "REDACTED_EPHEMERAL_SYNTHETIC_RUNTIME",
+  "port": "REDACTED_EPHEMERAL_SYNTHETIC_RUNTIME",
+  "cluster": "REDACTED_EPHEMERAL_SYNTHETIC_RUNTIME",
+  "mode": "crm-a17-operation-http-pg-restart",
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "react-web-build",
+    "prepare",
+    "pg-restart",
+    "resume"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "clusterStopped": true
+}

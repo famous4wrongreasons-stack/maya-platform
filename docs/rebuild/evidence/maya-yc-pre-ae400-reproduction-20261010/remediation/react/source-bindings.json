@@ -1,0 +1,174 @@
+{
+  "contract": "maya.a17-source-bindings/1",
+  "candidateCommit": "b46e3d09748d6e38549fcaeb3cb0565077f77345",
+  "files": {
+    "maya-saas-backend/src/crm/crm-integration.controller.ts": {
+      "sha256": "d133c1b5c53d9a3c724fb4bb4ba5e90dfd12803e11b44a0b02549418b04fec41",
+      "gitBlob": "fa388f134ee797d3e7f3302686d016c0db511e33"
+    },
+    "maya-saas-backend/src/crm/dto/connect-crm-integration.dto.ts": {
+      "sha256": "c4062ff06baa1c885d055c69b76021e31aacfa9f49c73f9403deb6f8194528ea",
+      "gitBlob": "923fe301d64a4b8832766af3daa19e9c02821de4"
+    },
+    "maya-saas-backend/src/crm/dto/crm-operation.dto.ts": {
+      "sha256": "f079ead59eb4467aa4fa0617d131e5f23785f15842311ca0a110c596d027b266",
+      "gitBlob": "885df19841edc209103ee839088dd17cd3461708"
+    },
+    "maya-saas-backend/src/crm/crm-configuration-version.ts": {
+      "sha256": "788724bbc8db8d95d2d6f9d130063950224d6d49913eb8367a70d1ee91c8f855",
+      "gitBlob": "2c74d4fb552bdb849e02ffc06645567abda44212"
+    },
+    "maya-saas-backend/src/crm/crm.service.ts": {
+      "sha256": "8fd8cbc067ca25c32fdd72d93b93b7c69e2217a6a0956de76b9f6500576f8e5a",
+      "gitBlob": "8cad9ecd584101c41777a2976272ce497564710d"
+    },
+    "maya-saas-backend/src/crm/crm-request.errors.ts": {
+      "sha256": "6f7a9de28b4f9cdd65f1e98d936f4f063e509fa7d4e4d877d9db1e33c20b4a8e",
+      "gitBlob": "36d34e3a9d47882f300188e79c3654e4cd2feec1"
+    },
+    "maya-saas-backend/src/crm/crm-provider-settings.ts": {
+      "sha256": "9e1c8efb41332dd788d92453d768afcf8f785d3b482340d362ceb81858c9c161",
+      "gitBlob": "6896a3bdcd22de028c084ecee419ed6d20304c59"
+    },
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": {
+      "sha256": "3d00e50996be486ce5b6005988c00efe875605f62b5a0bb4d00eb814deef9ffd",
+      "gitBlob": "f4200d0db35f6f1e59067619834d5e63a304c22e"
+    },
+    "maya-saas-backend/src/crm/adapters/yclients-company-profile-source.spec.ts": {
+      "sha256": "4a3535faa9bd669c498769b1790c59084d1881d0f2527c1c1c94a21b578a2729",
+      "gitBlob": "3a031833cfd2401d98b0513a3b2b4e1f97dfe000"
+    },
+    "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts": {
+      "sha256": "3cd6bf70e92010e78127fcabd2d792520f5fb8306fe9496f59bfeb758215c06e",
+      "gitBlob": "659fd44d7923126b2882508eda5ece3d2775d49b"
+    },
+    "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts": {
+      "sha256": "0e678563f1fa2273170f79916def92f7c94cb415171130cae838cb1257d962c0",
+      "gitBlob": "c6c3218ce9ac148ce6edeb6a501fe2db39d68de2"
+    },
+    "maya-saas-backend/src/package5-wave3/package5-wave3-production-gateway.service.ts": {
+      "sha256": "309e292720ca2fc570e0adcc2504ea8d440795c870cbda36c3a694695f5360cb",
+      "gitBlob": "5864b28eefa5cc0c905c7e647e83c566d0b74f5e"
+    },
+    "maya-saas-backend/src/action-engine/package5-wave3-executable.contract.ts": {
+      "sha256": "809124b1ee20030ce07fbc64d80bc3c507db02acd63f0f33b58363b158415513",
+      "gitBlob": "0089a2bf674feb5c32ef48a2aafa0b5c46341b07"
+    },
+    "maya-saas-backend/scripts/c9-occupancy-proof.mjs": {
+      "sha256": "f9b5074cf848ceeb5a0b978bcd35dbb231dba1175d03cb5954b9b0364d496f81",
+      "gitBlob": "3d37f71bf91e2e96f2bca47c8a395f5f6e04f288"
+    },
+    "maya-saas-backend/scripts/local-yclients-read-profile.mjs": {
+      "sha256": "f850e8c558f6f52e3b283efbcce69c3cb889656a164b58e97ec44f5c3ca2b869",
+      "gitBlob": "89ca6a031a2a9b2b20628e8600915acf4b20b64a"
+    },
+    "maya-saas-backend/scripts/local-yclients-read-transport.mjs": {
+      "sha256": "031255c1b0d3842fafbc47405c6b7feb5fb9ac0bceb4fa109e91d0168288ba96",
+      "gitBlob": "e75b6e18d7a60e8bf77aed16f8bc98d3990b731a"
+    },
+    "maya-saas-backend/scripts/local-yclients-read-runtime.mjs": {
+      "sha256": "15d37d38bdaa098aa3d4b0cf40459b5095c8f40f5ef456027ea63e9cfa04e351",
+      "gitBlob": "e796a04310ab5225b09f48c72b7d79c8f7449c0b"
+    },
+    "maya-saas-backend/scripts/local-yclients-read-status.mjs": {
+      "sha256": "c5bd4b18f89777ded2568aeb6795191703bc05c1e89a2c1963f43d719fa7ca0b",
+      "gitBlob": "d4f28d45aa24ac54edc17e1a35d4949fd571de04"
+    },
+    "maya-saas-backend/scripts/local-yclients-read.mjs": {
+      "sha256": "9cf3c8dc539b991241a40fd003796adc3acc30e57475e56f32eb220b381da29e",
+      "gitBlob": "f6f9143762b03de0560c130788e14f1cfacd300d"
+    },
+    "maya-saas-backend/scripts/local-onboarding-profile.mjs": {
+      "sha256": "ac53a8a0885d4f8918ee2437050d0dd952ecd52bf5c6ace864e31b2350c685e0",
+      "gitBlob": "bec162158afa91e771ee40657ec680fcad843885"
+    },
+    "maya-saas-backend/src/crm/crm-adapter.factory.ts": {
+      "sha256": "4dfb6827bbb9a624c39a366cd34e9aa177ef81645eabb20157cef3ceef123135",
+      "gitBlob": "e77396611ca2206bb0f62727a67e4fa23a8876f0"
+    },
+    "maya-saas-backend/scripts/crm-a17-operation-proof.test.mjs": {
+      "sha256": "7ea3d5174dd64df4a3d6e35afe7ca4d0109f9c99cd98579e3036b471d18d63aa",
+      "gitBlob": "4efa635c7f3dbe8566aafa6ef867e03241794774"
+    },
+    "maya-saas-backend/test/widgets-live/crm-a17-operation-restart.probe-spec.ts": {
+      "sha256": "db89d0713182fdf16d3598a39758b79c54530c0af12eb99a245ddbf2787bd23f",
+      "gitBlob": "5e298a39c21b56596c34082739e2ff722ede5666"
+    },
+    "maya-saas-backend/test/widgets-live/support/http-bootstrap.ts": {
+      "sha256": "67b3b8e8575829b14a94917acfdc9ab0d06ca6e6930e2f6a414b7c1099abc6db",
+      "gitBlob": "37f8bd620b6ea0e83bdb726b3b976253046b7650"
+    },
+    "maya-saas-backend/test/widgets-live/support/proof-db-guard.ts": {
+      "sha256": "f05f1302d30ead2779179b8ee1cb24dd681cf8b5f5933cb65e616fe3f01f4a19",
+      "gitBlob": "90c2a21d96cc29756bd7f42df6982315e1a424c9"
+    },
+    "maya-carrier-react/test/crm-a17-setup-browser-probe.mjs": {
+      "sha256": "6d363cc3e6edc2c4cd0e98ec774d93eca9dd861c401b67b7e3207b7913a78333",
+      "gitBlob": "4a105590eaef466b6a6b58064b9b66b940bd0f08"
+    },
+    "maya-carrier-react/test/crm-a17-setup-browser-guard.mjs": {
+      "sha256": "16f2c5c56f088e8812aba0875aaf3122c521457e9c6456654e907dd668a4a372",
+      "gitBlob": "1c0cd94eaed55a0f544548bedf0e8aac6be5160d"
+    },
+    "maya-carrier-react/test/crm-a17-setup-browser-guard.test.mjs": {
+      "sha256": "1df2c9c937e9ed997601dd3370a8686cf7092f2edefee617955b09d260d337e8",
+      "gitBlob": "e3372429f3ad325334fb198f7a2d584de0cd5876"
+    },
+    "maya-carrier-react/src/setup/LocalCrmSetup.tsx": {
+      "sha256": "ba366068e38d0d86eae241abf14b8c5365fc23b892abc343614a3258661d612c",
+      "gitBlob": "eb9509c5f2869ba6badfefe342a5ae43fcee471f"
+    },
+    "maya-carrier-react/src/App.tsx": {
+      "sha256": "6080220b345f68a10d8b99e79fa7c7b7fa68cff91b3d268c6e6f4163462a7d58",
+      "gitBlob": "7d5cb538e44f6990e734721cb714f8a55a47d323"
+    },
+    "maya-carrier-react/src/signin/SignIn.tsx": {
+      "sha256": "a9dbc44f8b7528eb103ab143b7755c9973143ade88431db4f062c798e2b4da05",
+      "gitBlob": "7da45c92832b0525bc12ca99d152b5faf339c9e1"
+    },
+    "maya-carrier-react/src/signin/StandardOnboarding.tsx": {
+      "sha256": "e994f216eebd0fcf4b314e139ce8c3f0c736c8de6c46de2c0744887b85788dcd",
+      "gitBlob": "80185c69be311facf972a98c9acdf3288908ca3c"
+    },
+    "maya-carrier-react/src/runtime/crmPending.ts": {
+      "sha256": "7a1265ae670bcc54ab4b8f0c183b5fd150defbfaba984626ee7fdc812b18a587",
+      "gitBlob": "c2347efccd0775f7d5fc1df87d3079f86947b4fd"
+    },
+    "maya-carrier-react/src/runtime/compose.ts": {
+      "sha256": "394721aa55a360f94bcab79127786bd0a2941bd55b4f7baadce20f6882ad91a9",
+      "gitBlob": "4c17f0a7d3d356b5bcce83011b11c7870d746f0b"
+    },
+    "maya-carrier-react/build.mjs": {
+      "sha256": "b91d872cbd59d92cb335431c084a5306cebf7011534d9fc9eafca1aa22e88605",
+      "gitBlob": "26795078c551099f355dadb2c641830ab8d95369"
+    },
+    "maya-chat-shell/src/shell/local-crm-setup.ts": {
+      "sha256": "eab3e310dd2f88c4f55b9f03438b6f80c5cf38cdd77aeaab7620bf04e0642546",
+      "gitBlob": "33721305bdf60249e04e5bc07f5bb201b80019b6"
+    },
+    "maya-chat-shell/src/net/crm-setup.ts": {
+      "sha256": "4b61612ed740e363028f71813bfa7bd82a0ef292df47db16b659bcd19910c401",
+      "gitBlob": "d7cffe04438d24b6d5d31947651e484f1e178c28"
+    },
+    "maya-chat-shell/src/net/client.ts": {
+      "sha256": "4cb3675f5af01bb2135805d9e31a6925f75a05d5d422bbabb591fa18f86ff558",
+      "gitBlob": "b5845b90aa9f5f646bc54ce045738ded542f7038"
+    },
+    "maya-chat-shell/src/net/types.ts": {
+      "sha256": "eb031c7dec23747f9a5f9c95305ba5d59803278b71e6d2fbd300f21cc81e48f7",
+      "gitBlob": "d60b026619e1765d497f3965dbf6c45a8e253e2d"
+    },
+    "maya-chat-shell/test/local-crm-setup.test.mjs": {
+      "sha256": "5d2a0e23bb2826da5ca18b17e11daa654a7f82768255d0db4174518d05c56987",
+      "gitBlob": "ac7c9b55efaebd3cc3ee78cfdc0a937d6e2a09d3"
+    },
+    "maya-chat-shell/dev/serve.mjs": {
+      "sha256": "f0985920ab617d366fefe937ca257f00edbbc1bca90ba7a378dd5a25b03d711d",
+      "gitBlob": "84c04f475f6c8c35f99d9b733ba7655af90847dc"
+    },
+    "maya-chat-shell/test/cdp-verify.mjs": {
+      "sha256": "02de453056df1ec95091086dedd0485f2f1385655e777d9a2d7c55353e44a999",
+      "gitBlob": "74c27e3482c1a4b6ca93a02978505fffe203f5e5"
+    }
+  }
+}

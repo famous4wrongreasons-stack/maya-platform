@@ -1,0 +1,64 @@
+{
+  "contract": "maya.independent-source-review/1",
+  "reviewedAt": "2026-10-10T20:37:13.762895+00:00",
+  "sourceCommit": "b46e3d09748d6e38549fcaeb3cb0565077f77345",
+  "verdict": "QUALIFIED_SOURCE_PASS",
+  "blockers": [],
+  "sourceHashes": {
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": "3d00e50996be486ce5b6005988c00efe875605f62b5a0bb4d00eb814deef9ffd",
+    "maya-saas-backend/src/crm/crm.service.ts": "8fd8cbc067ca25c32fdd72d93b93b7c69e2217a6a0956de76b9f6500576f8e5a",
+    "maya-saas-backend/src/crm/crm-request.errors.ts": "6f7a9de28b4f9cdd65f1e98d936f4f063e509fa7d4e4d877d9db1e33c20b4a8e",
+    "maya-saas-backend/src/crm/adapters/yclients-company-profile-source.spec.ts": "4a3535faa9bd669c498769b1790c59084d1881d0f2527c1c1c94a21b578a2729",
+    "maya-saas-backend/test/widgets-live/crm-a17-operation-restart.probe-spec.ts": "db89d0713182fdf16d3598a39758b79c54530c0af12eb99a245ddbf2787bd23f",
+    "maya-carrier-react/test/crm-a17-setup-browser-probe.mjs": "6d363cc3e6edc2c4cd0e98ec774d93eca9dd861c401b67b7e3207b7913a78333",
+    "maya-carrier-react/test/crm-a17-setup-browser-guard.mjs": "16f2c5c56f088e8812aba0875aaf3122c521457e9c6456654e907dd668a4a372",
+    "maya-carrier-react/test/crm-a17-setup-browser-guard.test.mjs": "1df2c9c937e9ed997601dd3370a8686cf7092f2edefee617955b09d260d337e8"
+  },
+  "sourceMatchesExactGit": true,
+  "reviewedFinalDelta": "Removed redundant TypeScript casts; test requestAddress handles string, URL and Request. No semantic runtime change relative to the reviewed remediation.",
+  "checks": [
+    "Selected company filtering precedes the 200-option display cap after canonical ID and duplicate checks.",
+    "Only selected presentation fields are used; unrelated invalid presentation no longer blocks a valid selected company.",
+    "Malformed envelope, row identity or selected presentation throws fixed raw-free CrmProviderPayloadError, classified before string heuristics.",
+    "Current bound branch/actor/version/A17 guards and fresh consent remain unchanged.",
+    "Matrix keeps durable no-admission/no-redispatch controls; future expected result is 4 positive installs, 10 payload refusals and 6 pre-provider controls.",
+    "Browser third refusal is explicit malformed-title synthetic data; activation explanation and consent-only zero POST assertions do not expand authority."
+  ],
+  "baselineEvidence": {
+    "commit": "9f935d688f0c1728f837d0216abc93d7896e88c6",
+    "classification": "BASELINE_REPRODUCED_NOT_REMEDIATION",
+    "sourcePins": 40,
+    "allPinsMatchExactGit": true,
+    "artifactChecks": {
+      "manifest.json": true,
+      "matrix.json": true
+    },
+    "artifactHashes": {
+      "summary.json": "a4e8af34db3cd2e2cc5f5a31c7d7682537f9a950d68942a56d0d5bb19f94fe12",
+      "manifest.json": "98d20c60018e7bc47c752effeaca636cc4f466f85193e986bb8dc679ca76fb33",
+      "matrix.json": "1d0b0ebfc91fee0ff5a7c627b94f864436ddca63f9c659e85a4179d0127cc4c9"
+    },
+    "observedCases": 20,
+    "observedPositiveInstalls": 2,
+    "observedNativePayloadRefusals": 12,
+    "observedBeforeProviderRefusals": 6,
+    "syntheticNativeGets": 22,
+    "clusterStoppedRecorded": true,
+    "sourceUnchangedRecorded": true,
+    "forbidden": []
+  },
+  "qualification": {
+    "newActualMatrix": "PENDING_SEPARATE_REVIEW",
+    "newActualCurrentReact": "PENDING_SEPARATE_REVIEW",
+    "native158Tests": "PARENT_REPORTED_NOT_REEXECUTED_BY_REVIEWER",
+    "heavyProcessesStartedByReviewer": false,
+    "ownerDatabaseOrKeysReadByReviewer": false,
+    "historicalOwnerRootCause": "UNKNOWN"
+  },
+  "limits": [
+    "This review does not identify the historical provider payload or license another owner input window.",
+    "The 20-case matrix is finite, not exhaustive; synthetic data and explicit test entitlements are not real-provider qualification.",
+    "Companies success flag and optional active semantics retain existing behavior; this is not validation of every provider field.",
+    "Baseline confirms reproduction on old source, not remediation on new source. No browser, restart, model or provider-write claim follows from baseline."
+  ]
+}
