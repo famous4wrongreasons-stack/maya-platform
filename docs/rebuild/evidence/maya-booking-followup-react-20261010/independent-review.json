@@ -1,0 +1,30 @@
+{
+  "reviewer": "independent_review",
+  "mode": "read-only source and retained evidence review; no tests/services/providers run by reviewer",
+  "verdict": "QUALIFIED_PASS_NO_CHECKPOINT_BLOCKERS",
+  "candidateCommit": "6ed41427827e5bceee3e98842d5116044d3628c4",
+  "verified": {
+    "canonicalLogins": 2,
+    "chatPosts": 4,
+    "widgetIntents": 6,
+    "checkpoints": 11,
+    "appointmentIdentityPreserved": true,
+    "aeSucceeded": 3,
+    "attemptsPerExecution": 1,
+    "createRescheduleCancelWording": true,
+    "cancelOutcomeRestoredAfterRelogin": true,
+    "sourceHashesGitAndDisk": 2421,
+    "priorEvidenceUnchanged": 52,
+    "targetedTestsLogPass": 67,
+    "rawArchiveMainJsonMatch": true,
+    "cleanupEvidenceConsistent": true
+  },
+  "limitations": [
+    "Scripted semantics and synthetic internal CRM; no live-model or YCLIENTS acceptance.",
+    "Company/branch drift cancellation gap remains statically identified, runtime not exercised.",
+    "prisma.config.ts independently compared with candidate Git after run; absent from continuous driver manifest binding.",
+    "Saved terminal outcomes restored, not complete conversation history; UI reports some answers not retained.",
+    "R1, R2 and R3 remain failed evidence."
+  ],
+  "reviewedAt": "2026-10-10T07:53:16.998050+00:00"
+}

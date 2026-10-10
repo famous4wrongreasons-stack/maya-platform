@@ -1,0 +1,206 @@
+{
+  "realModelCalls": 0,
+  "realProviderCalls": 0,
+  "businessFixtures": "SAME_BIND_CANDIDATE_SOURCE_AS_CURRENT_REAL_MODEL_RUN",
+  "qualification": "SYNTHETIC_LIFECYCLE_NOT_REAL_PROVIDER_ACCEPTANCE",
+  "fixture": {
+    "verifiedClient": true,
+    "serviceName": "Мужская стрижка",
+    "staffName": "Артём",
+    "start": "2026-10-11T17:00:00+03:00",
+    "branchBound": true
+  },
+  "checkpoints": [
+    {
+      "name": "initial-slots",
+      "receiptOutcome": null,
+      "appointment": null,
+      "executions": []
+    },
+    {
+      "name": "selected-17",
+      "receiptOutcome": null,
+      "appointment": null,
+      "executions": []
+    },
+    {
+      "name": "create-preview",
+      "receiptOutcome": "ACCEPTED",
+      "appointment": null,
+      "executions": []
+    },
+    {
+      "name": "create-commit",
+      "receiptOutcome": "ACCEPTED",
+      "appointment": {
+        "idHash": "679a5df3b08186fd14c0fb1e0026f3767c138e7e4c56f1bc5dd37974c64a8301",
+        "clientHash": "67dee153dc92dc6247e5797bad7714473f7783fb2cc47c2b286a8a30f95e3cfc",
+        "status": "confirmed",
+        "start": "2026-10-11T14:00:00.000Z",
+        "serviceHash": "31c19ffa581f0e7e5ba429c6ce7c85e8e4591c1a5d4fb79428faea25ae6d4fba",
+        "staffHash": "3905243a1a9e72145225124c0e1f37cedc2b83ff320569f5fec3457f149708d0"
+      },
+      "executions": [
+        {
+          "idHash": "856dc22a61da068ee1c3ac38a2a9376f340a16127a6b1fcfd90638b5f4b1c362",
+          "capability": "crm.appointment.create.v1",
+          "state": "SUCCEEDED",
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "name": "own-before-reschedule",
+      "receiptOutcome": null,
+      "appointment": {
+        "idHash": "679a5df3b08186fd14c0fb1e0026f3767c138e7e4c56f1bc5dd37974c64a8301",
+        "clientHash": "67dee153dc92dc6247e5797bad7714473f7783fb2cc47c2b286a8a30f95e3cfc",
+        "status": "confirmed",
+        "start": "2026-10-11T14:00:00.000Z",
+        "serviceHash": "31c19ffa581f0e7e5ba429c6ce7c85e8e4591c1a5d4fb79428faea25ae6d4fba",
+        "staffHash": "3905243a1a9e72145225124c0e1f37cedc2b83ff320569f5fec3457f149708d0"
+      },
+      "executions": [
+        {
+          "idHash": "856dc22a61da068ee1c3ac38a2a9376f340a16127a6b1fcfd90638b5f4b1c362",
+          "capability": "crm.appointment.create.v1",
+          "state": "SUCCEEDED",
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "name": "reschedule-preview",
+      "receiptOutcome": "ACCEPTED",
+      "appointment": {
+        "idHash": "679a5df3b08186fd14c0fb1e0026f3767c138e7e4c56f1bc5dd37974c64a8301",
+        "clientHash": "67dee153dc92dc6247e5797bad7714473f7783fb2cc47c2b286a8a30f95e3cfc",
+        "status": "confirmed",
+        "start": "2026-10-11T14:00:00.000Z",
+        "serviceHash": "31c19ffa581f0e7e5ba429c6ce7c85e8e4591c1a5d4fb79428faea25ae6d4fba",
+        "staffHash": "3905243a1a9e72145225124c0e1f37cedc2b83ff320569f5fec3457f149708d0"
+      },
+      "executions": [
+        {
+          "idHash": "856dc22a61da068ee1c3ac38a2a9376f340a16127a6b1fcfd90638b5f4b1c362",
+          "capability": "crm.appointment.create.v1",
+          "state": "SUCCEEDED",
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "name": "reschedule-commit",
+      "receiptOutcome": "ACCEPTED",
+      "appointment": {
+        "idHash": "679a5df3b08186fd14c0fb1e0026f3767c138e7e4c56f1bc5dd37974c64a8301",
+        "clientHash": "67dee153dc92dc6247e5797bad7714473f7783fb2cc47c2b286a8a30f95e3cfc",
+        "status": "confirmed",
+        "start": "2026-10-11T14:30:00.000Z",
+        "serviceHash": "31c19ffa581f0e7e5ba429c6ce7c85e8e4591c1a5d4fb79428faea25ae6d4fba",
+        "staffHash": "3905243a1a9e72145225124c0e1f37cedc2b83ff320569f5fec3457f149708d0"
+      },
+      "executions": [
+        {
+          "idHash": "856dc22a61da068ee1c3ac38a2a9376f340a16127a6b1fcfd90638b5f4b1c362",
+          "capability": "crm.appointment.create.v1",
+          "state": "SUCCEEDED",
+          "attempts": 1
+        },
+        {
+          "idHash": "1dddd91034c1e80460187e9378170fbad3ecfae32b5508b79fc80856c689d6b3",
+          "capability": "crm.appointment.reschedule.v1",
+          "state": "SUCCEEDED",
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "name": "own-before-cancel",
+      "receiptOutcome": null,
+      "appointment": {
+        "idHash": "679a5df3b08186fd14c0fb1e0026f3767c138e7e4c56f1bc5dd37974c64a8301",
+        "clientHash": "67dee153dc92dc6247e5797bad7714473f7783fb2cc47c2b286a8a30f95e3cfc",
+        "status": "confirmed",
+        "start": "2026-10-11T14:30:00.000Z",
+        "serviceHash": "31c19ffa581f0e7e5ba429c6ce7c85e8e4591c1a5d4fb79428faea25ae6d4fba",
+        "staffHash": "3905243a1a9e72145225124c0e1f37cedc2b83ff320569f5fec3457f149708d0"
+      },
+      "executions": [
+        {
+          "idHash": "856dc22a61da068ee1c3ac38a2a9376f340a16127a6b1fcfd90638b5f4b1c362",
+          "capability": "crm.appointment.create.v1",
+          "state": "SUCCEEDED",
+          "attempts": 1
+        },
+        {
+          "idHash": "1dddd91034c1e80460187e9378170fbad3ecfae32b5508b79fc80856c689d6b3",
+          "capability": "crm.appointment.reschedule.v1",
+          "state": "SUCCEEDED",
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "name": "cancel-preview",
+      "receiptOutcome": "ACCEPTED",
+      "appointment": {
+        "idHash": "679a5df3b08186fd14c0fb1e0026f3767c138e7e4c56f1bc5dd37974c64a8301",
+        "clientHash": "67dee153dc92dc6247e5797bad7714473f7783fb2cc47c2b286a8a30f95e3cfc",
+        "status": "confirmed",
+        "start": "2026-10-11T14:30:00.000Z",
+        "serviceHash": "31c19ffa581f0e7e5ba429c6ce7c85e8e4591c1a5d4fb79428faea25ae6d4fba",
+        "staffHash": "3905243a1a9e72145225124c0e1f37cedc2b83ff320569f5fec3457f149708d0"
+      },
+      "executions": [
+        {
+          "idHash": "856dc22a61da068ee1c3ac38a2a9376f340a16127a6b1fcfd90638b5f4b1c362",
+          "capability": "crm.appointment.create.v1",
+          "state": "SUCCEEDED",
+          "attempts": 1
+        },
+        {
+          "idHash": "1dddd91034c1e80460187e9378170fbad3ecfae32b5508b79fc80856c689d6b3",
+          "capability": "crm.appointment.reschedule.v1",
+          "state": "SUCCEEDED",
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "name": "cancel-commit",
+      "receiptOutcome": "ACCEPTED",
+      "appointment": {
+        "idHash": "679a5df3b08186fd14c0fb1e0026f3767c138e7e4c56f1bc5dd37974c64a8301",
+        "clientHash": "67dee153dc92dc6247e5797bad7714473f7783fb2cc47c2b286a8a30f95e3cfc",
+        "status": "canceled",
+        "start": "2026-10-11T14:30:00.000Z",
+        "serviceHash": "31c19ffa581f0e7e5ba429c6ce7c85e8e4591c1a5d4fb79428faea25ae6d4fba",
+        "staffHash": "3905243a1a9e72145225124c0e1f37cedc2b83ff320569f5fec3457f149708d0"
+      },
+      "executions": [
+        {
+          "idHash": "856dc22a61da068ee1c3ac38a2a9376f340a16127a6b1fcfd90638b5f4b1c362",
+          "capability": "crm.appointment.create.v1",
+          "state": "SUCCEEDED",
+          "attempts": 1
+        },
+        {
+          "idHash": "1dddd91034c1e80460187e9378170fbad3ecfae32b5508b79fc80856c689d6b3",
+          "capability": "crm.appointment.reschedule.v1",
+          "state": "SUCCEEDED",
+          "attempts": 1
+        },
+        {
+          "idHash": "e71996e59009cea5cf399359ba13a68d09805e7432f03dc0e113149aafdfbdbe",
+          "capability": "crm.appointment.cancel.v1",
+          "state": "SUCCEEDED",
+          "attempts": 1
+        }
+      ]
+    }
+  ],
+  "modelDecisions": 4,
+  "externalCalls": 0,
+  "browserChildClosed": true
+}

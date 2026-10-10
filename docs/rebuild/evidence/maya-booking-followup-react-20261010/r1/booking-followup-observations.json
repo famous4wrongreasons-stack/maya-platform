@@ -1,0 +1,76 @@
+{
+  "realModelCalls": 0,
+  "realProviderCalls": 0,
+  "businessFixtures": "SAME_BIND_CANDIDATE_SOURCE_AS_CURRENT_REAL_MODEL_RUN",
+  "qualification": "SYNTHETIC_LIFECYCLE_NOT_REAL_PROVIDER_ACCEPTANCE",
+  "fixture": {
+    "verifiedClient": true,
+    "serviceName": "Мужская стрижка",
+    "staffName": "Артём",
+    "start": "2026-10-11T17:00:00+03:00",
+    "branchBound": true
+  },
+  "checkpoints": [
+    {
+      "name": "initial-slots",
+      "receiptOutcome": null,
+      "appointment": null,
+      "executions": []
+    },
+    {
+      "name": "selected-17",
+      "receiptOutcome": null,
+      "appointment": null,
+      "executions": []
+    },
+    {
+      "name": "create-preview",
+      "receiptOutcome": "ACCEPTED",
+      "appointment": null,
+      "executions": []
+    },
+    {
+      "name": "create-commit",
+      "receiptOutcome": "ACCEPTED",
+      "appointment": {
+        "idHash": "df93ca0ee2e49a373bda4cbe0d947ac25a6b3c87c626ae1eef1b7c4ffb27aeb4",
+        "clientHash": "42cab53f8d4cc6e76ef6528d2ee31d27eb07e3a66c7fe6e59691d61efeaa017f",
+        "status": "confirmed",
+        "start": "2026-10-11T14:00:00.000Z",
+        "serviceHash": "3ec4f9234e4cf8c5eca4844cb689bd7859184228930199a35979224e2285f515",
+        "staffHash": "1563eb742daef4515ffad84d5664803ff464f8210feb37cd07d167ec5cf90867"
+      },
+      "executions": [
+        {
+          "idHash": "ebfb3d6515dc9447d2293a0e962d39e90ee6cdc5be39451302a788424c7e4f3c",
+          "capability": "crm.appointment.create.v1",
+          "state": "SUCCEEDED",
+          "attempts": 1
+        }
+      ]
+    },
+    {
+      "name": "own-before-reschedule",
+      "receiptOutcome": null,
+      "appointment": {
+        "idHash": "df93ca0ee2e49a373bda4cbe0d947ac25a6b3c87c626ae1eef1b7c4ffb27aeb4",
+        "clientHash": "42cab53f8d4cc6e76ef6528d2ee31d27eb07e3a66c7fe6e59691d61efeaa017f",
+        "status": "confirmed",
+        "start": "2026-10-11T14:00:00.000Z",
+        "serviceHash": "3ec4f9234e4cf8c5eca4844cb689bd7859184228930199a35979224e2285f515",
+        "staffHash": "1563eb742daef4515ffad84d5664803ff464f8210feb37cd07d167ec5cf90867"
+      },
+      "executions": [
+        {
+          "idHash": "ebfb3d6515dc9447d2293a0e962d39e90ee6cdc5be39451302a788424c7e4f3c",
+          "capability": "crm.appointment.create.v1",
+          "state": "SUCCEEDED",
+          "attempts": 1
+        }
+      ]
+    }
+  ],
+  "modelDecisions": 3,
+  "externalCalls": 0,
+  "browserChildClosed": true
+}

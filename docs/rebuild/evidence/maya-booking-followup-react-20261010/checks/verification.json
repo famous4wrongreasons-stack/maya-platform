@@ -1,0 +1,97 @@
+{
+  "verifiedAt": "2026-10-10T07:50:11.460776+00:00",
+  "candidateCommit": "6ed41427827e5bceee3e98842d5116044d3628c4",
+  "sourceFilesMatchedGitAndDisk": 2421,
+  "sourceMismatches": [],
+  "supplementalMigrationConfig": {
+    "path": "maya-saas-backend/prisma.config.ts",
+    "sha256": "9d3c9f7befae739cd75e7264b433b96b23872703d4e12e82cfa9a03648c35cbe",
+    "matchesCandidateGit": true,
+    "limitation": "Not in driver manifest inventory; independently compared after run, no continuous observation claimed."
+  },
+  "originalRealModelEvidenceFiles": 52,
+  "originalRealModelEvidenceUnchanged": true,
+  "cleanup": [
+    {
+      "run": "r1",
+      "manifestStatus": "failed",
+      "clusterStopped": true,
+      "postmasterPidFileAbsent": true,
+      "browserCleanup": {
+        "chromeExited": true,
+        "serverClosed": true
+      },
+      "pids": {
+        "chrome": {
+          "pid": 26287,
+          "state": "absent"
+        },
+        "postgres": {
+          "pid": 26131,
+          "state": "absent"
+        }
+      }
+    },
+    {
+      "run": "r2",
+      "manifestStatus": "failed",
+      "clusterStopped": true,
+      "postmasterPidFileAbsent": true,
+      "browserCleanup": {
+        "chromeExited": true,
+        "serverClosed": true
+      },
+      "pids": {
+        "chrome": {
+          "pid": 27113,
+          "state": "absent"
+        },
+        "postgres": {
+          "pid": 27017,
+          "state": "absent"
+        }
+      }
+    },
+    {
+      "run": "r3",
+      "manifestStatus": "failed",
+      "clusterStopped": true,
+      "postmasterPidFileAbsent": true,
+      "browserCleanup": {
+        "chromeExited": true,
+        "serverClosed": true
+      },
+      "pids": {
+        "chrome": {
+          "pid": 27970,
+          "state": "absent"
+        },
+        "postgres": {
+          "pid": 27871,
+          "state": "absent"
+        }
+      }
+    },
+    {
+      "run": "r4",
+      "manifestStatus": "passed",
+      "clusterStopped": true,
+      "postmasterPidFileAbsent": true,
+      "browserCleanup": {
+        "chromeExited": true,
+        "serverClosed": true
+      },
+      "pids": {
+        "chrome": {
+          "pid": 29567,
+          "state": "absent"
+        },
+        "postgres": {
+          "pid": 29452,
+          "state": "absent"
+        }
+      }
+    }
+  ],
+  "qualification": "Current React and canonical owners on synthetic internal CRM; scripted semantic decisions; no live model/YCLIENTS acceptance."
+}

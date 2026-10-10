@@ -1,0 +1,1074 @@
+{
+  "contract": "maya.exact-booking-followup-browser/1",
+  "status": "failed",
+  "realReactAndAuth": true,
+  "scriptedModel": true,
+  "syntheticInternalCalendar": true,
+  "realModelCalls": 0,
+  "realProviderCalls": 0,
+  "steps": [
+    {
+      "name": "initial-slots",
+      "reply": "Выберите подходящее время. Затем проверьте детали и подтвердите запись.",
+      "envelopeKind": "TIME_SLOT_SELECTOR",
+      "receiptOutcome": null,
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 17:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 6. Всего: нет данных.\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 17:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:30 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nТовар по фото накладной\n\nСообщение для MAYA\n↑",
+        "controls": [
+          {
+            "name": "Приватность и данные",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvd01Eb3dNQzR3TURCYSJ9.66d9363008055acd3544f603126a4d13792961116b1153589808942d16892e29",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvek1Eb3dNQzR3TURCYSJ9.ef27a0b60e933d3e7833c70b4f5c7f72c4a9e83f553b025efbb29ab0de686498",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvd01Eb3dNQzR3TURCYSJ9.0f59b9c89ec377612c4f493d187c62317886b04de66f71f04ec52a55fe42b7cb",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvek1Eb3dNQzR3TURCYSJ9.ac0db5addc2b07edff150bbc2fe3e2b623d630b66166fcffc748b636dd93e5ae",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvd01Eb3dNQzR3TURCYSJ9.66625ebe412139c3d60cc159f1dcfac28d7abe4c56ac90257cb748810700b495",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvek1Eb3dNQzR3TURCYSJ9.68a1fe8d032461b4ae99faacca7502247d01fde348c05850ed9e8898e0db9d5a",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "selected-17",
+      "reply": "На 2026-10-11 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.",
+      "envelopeKind": "TIME_SLOT_SELECTOR",
+      "receiptOutcome": null,
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 17:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 6. Всего: нет данных.\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 17:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:30 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-11 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверьте выбранное время\n\nЧасовой пояс: Europe/Moscow\n\nВыбранное время\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 1. Всего: нет данных.\n\nНет данных\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nТовар по фото накладной\n\nСообщение для MAYA\n↑",
+        "controls": [
+          {
+            "name": "Приватность и данные",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvd01Eb3dNQzR3TURCYSJ9.66d9363008055acd3544f603126a4d13792961116b1153589808942d16892e29",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvek1Eb3dNQzR3TURCYSJ9.ef27a0b60e933d3e7833c70b4f5c7f72c4a9e83f553b025efbb29ab0de686498",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvd01Eb3dNQzR3TURCYSJ9.0f59b9c89ec377612c4f493d187c62317886b04de66f71f04ec52a55fe42b7cb",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvek1Eb3dNQzR3TURCYSJ9.ac0db5addc2b07edff150bbc2fe3e2b623d630b66166fcffc748b636dd93e5ae",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvd01Eb3dNQzR3TURCYSJ9.66625ebe412139c3d60cc159f1dcfac28d7abe4c56ac90257cb748810700b495",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvek1Eb3dNQzR3TURCYSJ9.68a1fe8d032461b4ae99faacca7502247d01fde348c05850ed9e8898e0db9d5a",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvd01Eb3dNQzR3TURCYSJ9.66d9363008055acd3544f603126a4d13792961116b1153589808942d16892e29",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-preview",
+      "reply": null,
+      "envelopeKind": "BOOKING_CONFIRMATION",
+      "receiptOutcome": "ACCEPTED",
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 17:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 6. Всего: нет данных.\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 17:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:30 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-11 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nАртём\n30 мин По данным системы записи\n1500 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ЗАПИСЬ\nЗАКРЫТЬ\nТовар по фото накладной\n\nСообщение для MAYA\n↑",
+        "controls": [
+          {
+            "name": "Приватность и данные",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvd01Eb3dNQzR3TURCYSJ9.66d9363008055acd3544f603126a4d13792961116b1153589808942d16892e29",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvek1Eb3dNQzR3TURCYSJ9.ef27a0b60e933d3e7833c70b4f5c7f72c4a9e83f553b025efbb29ab0de686498",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvd01Eb3dNQzR3TURCYSJ9.0f59b9c89ec377612c4f493d187c62317886b04de66f71f04ec52a55fe42b7cb",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvek1Eb3dNQzR3TURCYSJ9.ac0db5addc2b07edff150bbc2fe3e2b623d630b66166fcffc748b636dd93e5ae",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvd01Eb3dNQzR3TURCYSJ9.66625ebe412139c3d60cc159f1dcfac28d7abe4c56ac90257cb748810700b495",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvek1Eb3dNQzR3TURCYSJ9.68a1fe8d032461b4ae99faacca7502247d01fde348c05850ed9e8898e0db9d5a",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Подтвердить запись",
+            "ref": "intent:i1",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-commit",
+      "reply": null,
+      "envelopeKind": null,
+      "receiptOutcome": "ACCEPTED",
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 17:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 6. Всего: нет данных.\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 17:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:30 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-11 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nТовар по фото накладной\n\nСообщение для MAYA\n↑",
+        "controls": [
+          {
+            "name": "Приватность и данные",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvd01Eb3dNQzR3TURCYSJ9.66d9363008055acd3544f603126a4d13792961116b1153589808942d16892e29",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvek1Eb3dNQzR3TURCYSJ9.ef27a0b60e933d3e7833c70b4f5c7f72c4a9e83f553b025efbb29ab0de686498",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvd01Eb3dNQzR3TURCYSJ9.0f59b9c89ec377612c4f493d187c62317886b04de66f71f04ec52a55fe42b7cb",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvek1Eb3dNQzR3TURCYSJ9.ac0db5addc2b07edff150bbc2fe3e2b623d630b66166fcffc748b636dd93e5ae",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvd01Eb3dNQzR3TURCYSJ9.66625ebe412139c3d60cc159f1dcfac28d7abe4c56ac90257cb748810700b495",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvek1Eb3dNQzR3TURCYSJ9.68a1fe8d032461b4ae99faacca7502247d01fde348c05850ed9e8898e0db9d5a",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "own-before-reschedule",
+      "reply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.",
+      "envelopeKind": "SCHEDULE",
+      "receiptOutcome": null,
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 17:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 6. Всего: нет данных.\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 17:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:30 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-11 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись: Мужская стрижка\n\nМужская стрижка\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nТовар по фото накладной\n\nСообщение для MAYA\n↑",
+        "controls": [
+          {
+            "name": "Приватность и данные",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvd01Eb3dNQzR3TURCYSJ9.66d9363008055acd3544f603126a4d13792961116b1153589808942d16892e29",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvek1Eb3dNQzR3TURCYSJ9.ef27a0b60e933d3e7833c70b4f5c7f72c4a9e83f553b025efbb29ab0de686498",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvd01Eb3dNQzR3TURCYSJ9.0f59b9c89ec377612c4f493d187c62317886b04de66f71f04ec52a55fe42b7cb",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvek1Eb3dNQzR3TURCYSJ9.ac0db5addc2b07edff150bbc2fe3e2b623d630b66166fcffc748b636dd93e5ae",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvd01Eb3dNQzR3TURCYSJ9.66625ebe412139c3d60cc159f1dcfac28d7abe4c56ac90257cb748810700b495",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvek1Eb3dNQzR3TURCYSJ9.68a1fe8d032461b4ae99faacca7502247d01fde348c05850ed9e8898e0db9d5a",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiYXBwb2ludG1lbnQtYWN0aW9uOmJjYjg2MzQ2LTBhYjktNGUyMC05MjVhLWExNWZhOTRiNmMzYiJ9.34444edec93f7ac06c52ac99f69d17023b41b9ed6508f4d7c04192375d03f4dd",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "reschedule-preview",
+      "reply": null,
+      "envelopeKind": "BOOKING_CONFIRMATION",
+      "receiptOutcome": "ACCEPTED",
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 17:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 6. Всего: нет данных.\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 17:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:30 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-11 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись: Мужская стрижка\n\nМужская стрижка\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nПеренос записи\n\nУслуга\n\ncmv2385ta000bw2c9q7cugi20\n\n2026-10-11T14:30:00.000Z По данным системы записи\n2026-10-11T14:00:00.000Z По данным системы записи\ncmv2385tb000cw2c9tw2xtno6\n30 мин По данным системы записи\n1500 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ПЕРЕНОС\nЗАКРЫТЬ\nТовар по фото накладной\n\nСообщение для MAYA\n↑",
+        "controls": [
+          {
+            "name": "Приватность и данные",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvd01Eb3dNQzR3TURCYSJ9.66d9363008055acd3544f603126a4d13792961116b1153589808942d16892e29",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvek1Eb3dNQzR3TURCYSJ9.ef27a0b60e933d3e7833c70b4f5c7f72c4a9e83f553b025efbb29ab0de686498",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvd01Eb3dNQzR3TURCYSJ9.0f59b9c89ec377612c4f493d187c62317886b04de66f71f04ec52a55fe42b7cb",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvek1Eb3dNQzR3TURCYSJ9.ac0db5addc2b07edff150bbc2fe3e2b623d630b66166fcffc748b636dd93e5ae",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvd01Eb3dNQzR3TURCYSJ9.66625ebe412139c3d60cc159f1dcfac28d7abe4c56ac90257cb748810700b495",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvek1Eb3dNQzR3TURCYSJ9.68a1fe8d032461b4ae99faacca7502247d01fde348c05850ed9e8898e0db9d5a",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiYXBwb2ludG1lbnQtYWN0aW9uOmJjYjg2MzQ2LTBhYjktNGUyMC05MjVhLWExNWZhOTRiNmMzYiJ9.34444edec93f7ac06c52ac99f69d17023b41b9ed6508f4d7c04192375d03f4dd",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Подтвердить перенос",
+            "ref": "intent:i1",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "reschedule-commit",
+      "reply": null,
+      "envelopeKind": null,
+      "receiptOutcome": "ACCEPTED",
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 17:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 6. Всего: нет данных.\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 17:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:30 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-11 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись: Мужская стрижка\n\nМужская стрижка\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nПеренос записи\n\nУслуга\n\ncmv2385ta000bw2c9q7cugi20\n\n2026-10-11T14:30:00.000Z По данным системы записи\n\n2026-10-11T14:00:00.000Z По данным системы записи\n\ncmv2385tb000cw2c9tw2xtno6\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nТовар по фото накладной\n\nСообщение для MAYA\n↑",
+        "controls": [
+          {
+            "name": "Приватность и данные",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvd01Eb3dNQzR3TURCYSJ9.66d9363008055acd3544f603126a4d13792961116b1153589808942d16892e29",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvek1Eb3dNQzR3TURCYSJ9.ef27a0b60e933d3e7833c70b4f5c7f72c4a9e83f553b025efbb29ab0de686498",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvd01Eb3dNQzR3TURCYSJ9.0f59b9c89ec377612c4f493d187c62317886b04de66f71f04ec52a55fe42b7cb",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvek1Eb3dNQzR3TURCYSJ9.ac0db5addc2b07edff150bbc2fe3e2b623d630b66166fcffc748b636dd93e5ae",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvd01Eb3dNQzR3TURCYSJ9.66625ebe412139c3d60cc159f1dcfac28d7abe4c56ac90257cb748810700b495",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvek1Eb3dNQzR3TURCYSJ9.68a1fe8d032461b4ae99faacca7502247d01fde348c05850ed9e8898e0db9d5a",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiYXBwb2ludG1lbnQtYWN0aW9uOmJjYjg2MzQ2LTBhYjktNGUyMC05MjVhLWExNWZhOTRiNmMzYiJ9.34444edec93f7ac06c52ac99f69d17023b41b9ed6508f4d7c04192375d03f4dd",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "own-before-cancel",
+      "reply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 17:30 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.",
+      "envelopeKind": "SCHEDULE",
+      "receiptOutcome": null,
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 17:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 6. Всего: нет данных.\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 17:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:30 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-11 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись: Мужская стрижка\n\nМужская стрижка\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nПеренос записи\n\nУслуга\n\ncmv2385ta000bw2c9q7cugi20\n\n2026-10-11T14:30:00.000Z По данным системы записи\n\n2026-10-11T14:00:00.000Z По данным системы записи\n\ncmv2385tb000cw2c9tw2xtno6\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 17:30 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись: Мужская стрижка\n\nМужская стрижка\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nТовар по фото накладной\n\nСообщение для MAYA\n↑",
+        "controls": [
+          {
+            "name": "Приватность и данные",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvd01Eb3dNQzR3TURCYSJ9.66d9363008055acd3544f603126a4d13792961116b1153589808942d16892e29",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvek1Eb3dNQzR3TURCYSJ9.ef27a0b60e933d3e7833c70b4f5c7f72c4a9e83f553b025efbb29ab0de686498",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvd01Eb3dNQzR3TURCYSJ9.0f59b9c89ec377612c4f493d187c62317886b04de66f71f04ec52a55fe42b7cb",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvek1Eb3dNQzR3TURCYSJ9.ac0db5addc2b07edff150bbc2fe3e2b623d630b66166fcffc748b636dd93e5ae",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvd01Eb3dNQzR3TURCYSJ9.66625ebe412139c3d60cc159f1dcfac28d7abe4c56ac90257cb748810700b495",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvek1Eb3dNQzR3TURCYSJ9.68a1fe8d032461b4ae99faacca7502247d01fde348c05850ed9e8898e0db9d5a",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiYXBwb2ludG1lbnQtYWN0aW9uOmJjYjg2MzQ2LTBhYjktNGUyMC05MjVhLWExNWZhOTRiNmMzYiJ9.34444edec93f7ac06c52ac99f69d17023b41b9ed6508f4d7c04192375d03f4dd",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiYXBwb2ludG1lbnQtYWN0aW9uOmJjYjg2MzQ2LTBhYjktNGUyMC05MjVhLWExNWZhOTRiNmMzYiJ9.34444edec93f7ac06c52ac99f69d17023b41b9ed6508f4d7c04192375d03f4dd",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "cancel-preview",
+      "reply": null,
+      "envelopeKind": "BOOKING_CONFIRMATION",
+      "receiptOutcome": "ACCEPTED",
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 17:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 6. Всего: нет данных.\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 17:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:30 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-11 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись: Мужская стрижка\n\nМужская стрижка\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nПеренос записи\n\nУслуга\n\ncmv2385ta000bw2c9q7cugi20\n\n2026-10-11T14:30:00.000Z По данным системы записи\n\n2026-10-11T14:00:00.000Z По данным системы записи\n\ncmv2385tb000cw2c9tw2xtno6\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 17:30 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись: Мужская стрижка\n\nМужская стрижка\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nОтмена записи\n\nУслуга\n\ncmv2385ta000bw2c9q7cugi20\n\n2026-10-11T14:30:00.000Z По данным системы записи\ncmv2385tb000cw2c9tw2xtno6\n30 мин По данным системы записи\n1500 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ОТМЕНУ\nЗАКРЫТЬ\nТовар по фото накладной\n\nСообщение для MAYA\n↑",
+        "controls": [
+          {
+            "name": "Приватность и данные",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvd01Eb3dNQzR3TURCYSJ9.66d9363008055acd3544f603126a4d13792961116b1153589808942d16892e29",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvek1Eb3dNQzR3TURCYSJ9.ef27a0b60e933d3e7833c70b4f5c7f72c4a9e83f553b025efbb29ab0de686498",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvd01Eb3dNQzR3TURCYSJ9.0f59b9c89ec377612c4f493d187c62317886b04de66f71f04ec52a55fe42b7cb",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvek1Eb3dNQzR3TURCYSJ9.ac0db5addc2b07edff150bbc2fe3e2b623d630b66166fcffc748b636dd93e5ae",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvd01Eb3dNQzR3TURCYSJ9.66625ebe412139c3d60cc159f1dcfac28d7abe4c56ac90257cb748810700b495",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvek1Eb3dNQzR3TURCYSJ9.68a1fe8d032461b4ae99faacca7502247d01fde348c05850ed9e8898e0db9d5a",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiYXBwb2ludG1lbnQtYWN0aW9uOmJjYjg2MzQ2LTBhYjktNGUyMC05MjVhLWExNWZhOTRiNmMzYiJ9.34444edec93f7ac06c52ac99f69d17023b41b9ed6508f4d7c04192375d03f4dd",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiYXBwb2ludG1lbnQtYWN0aW9uOmJjYjg2MzQ2LTBhYjktNGUyMC05MjVhLWExNWZhOTRiNmMzYiJ9.34444edec93f7ac06c52ac99f69d17023b41b9ed6508f4d7c04192375d03f4dd",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Подтвердить отмену",
+            "ref": "intent:i1",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "cancel-commit",
+      "reply": null,
+      "envelopeKind": null,
+      "receiptOutcome": "ACCEPTED",
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 17:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 18:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\n11 окт. 2026 г., 19:30 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 6. Всего: нет данных.\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\nНет данных\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 17:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 18:30 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:00 (Europe/Moscow) По данным системы записи\n11 окт. 2026 г., 19:30 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-11 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n11 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись: Мужская стрижка\n\nМужская стрижка\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nПеренос записи\n\nУслуга\n\ncmv2385ta000bw2c9q7cugi20\n\n2026-10-11T14:30:00.000Z По данным системы записи\n\n2026-10-11T14:00:00.000Z По данным системы записи\n\ncmv2385tb000cw2c9tw2xtno6\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 17:30 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись: Мужская стрижка\n\nМужская стрижка\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nОтмена записи\n\nУслуга\n\ncmv2385ta000bw2c9q7cugi20\n\n2026-10-11T14:30:00.000Z По данным системы записи\n\ncmv2385tb000cw2c9tw2xtno6\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nТовар по фото накладной\n\nСообщение для MAYA\n↑",
+        "controls": [
+          {
+            "name": "Приватность и данные",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvd01Eb3dNQzR3TURCYSJ9.66d9363008055acd3544f603126a4d13792961116b1153589808942d16892e29",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 17:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TkRvek1Eb3dNQzR3TURCYSJ9.ef27a0b60e933d3e7833c70b4f5c7f72c4a9e83f553b025efbb29ab0de686498",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvd01Eb3dNQzR3TURCYSJ9.0f59b9c89ec377612c4f493d187c62317886b04de66f71f04ec52a55fe42b7cb",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 18:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4TlRvek1Eb3dNQzR3TURCYSJ9.ac0db5addc2b07edff150bbc2fe3e2b623d630b66166fcffc748b636dd93e5ae",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvd01Eb3dNQzR3TURCYSJ9.66625ebe412139c3d60cc159f1dcfac28d7abe4c56ac90257cb748810700b495",
+            "disabled": false
+          },
+          {
+            "name": "11 окт. 2026 г., 19:30 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X2lzbzpNakF5TmkweE1DMHhNVlF4Tmpvek1Eb3dNQzR3TURCYSJ9.68a1fe8d032461b4ae99faacca7502247d01fde348c05850ed9e8898e0db9d5a",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiYXBwb2ludG1lbnQtYWN0aW9uOmJjYjg2MzQ2LTBhYjktNGUyMC05MjVhLWExNWZhOTRiNmMzYiJ9.34444edec93f7ac06c52ac99f69d17023b41b9ed6508f4d7c04192375d03f4dd",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdjIzODVxZjAwMDB3MmM5NnlkcGt2emMiLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiYXBwb2ludG1lbnQtYWN0aW9uOmJjYjg2MzQ2LTBhYjktNGUyMC05MjVhLWExNWZhOTRiNmMzYiJ9.34444edec93f7ac06c52ac99f69d17023b41b9ed6508f4d7c04192375d03f4dd",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    }
+  ],
+  "blocked": [],
+  "chromePid": 27113,
+  "login": "ACTUAL_CANONICAL_DEBUG_EMAIL_SYNTHETIC_CLIENT",
+  "chat": [
+    {
+      "prompt": "Есть время к Артёму завтра на мужскую стрижку?",
+      "actualReply": "Выберите подходящее время. Затем проверьте детали и подтвердите запись.",
+      "requestId": "631654a1-936b-4224-9b25-ae7d216b8037",
+      "responseSha256": "26e9b757b9e3c1fc1cec148b18a5e72c2b3e968ecf2d2d773156d8cdb8c4cba6",
+      "status": 201,
+      "source": "safe_fallback"
+    },
+    {
+      "prompt": "Запиши меня на 17:00",
+      "actualReply": "На 2026-10-11 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.",
+      "requestId": "c6c0f747-cadc-4291-b07f-3f1f3262b9aa",
+      "responseSha256": "4e8c5f7b02bbc7dd83c483d1573b02af6873ef1a14948917006ff1d29ccb8b80",
+      "status": 201,
+      "source": "safe_fallback"
+    },
+    {
+      "prompt": "Покажи мои записи",
+      "actualReply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.",
+      "requestId": "1abfc430-ca6d-43cd-84e7-b009d73b663b",
+      "responseSha256": "ef871ca0d9b08d4473944098450dbaf4c0ba1d50f0b2fdb13276108cbdf4929a",
+      "status": 201,
+      "source": "safe_fallback"
+    },
+    {
+      "prompt": "Покажи мои записи",
+      "actualReply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n11.10.2026, 17:30 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.",
+      "requestId": "53bd595b-163d-404a-a3b0-3953a59369de",
+      "responseSha256": "3a2803105123792631b3c2618c173e1044af88c6e135eb0cb8a47bea87e0e1b5",
+      "status": 201,
+      "source": "safe_fallback"
+    }
+  ],
+  "intents": [
+    {
+      "controlName": "11 окт. 2026 г., 17:00 (Europe/Moscow)",
+      "widgetId": "e0ca6bdc-06b4-41ee-b251-23fb9a7a745e",
+      "status": 200,
+      "outcome": "ACCEPTED",
+      "code": null,
+      "responseSha256": "85e5abf3b0ce6024c443b270483c7f73130b3b3c8023ee51851cdb1215bba253",
+      "nextKind": "BOOKING_CONFIRMATION"
+    },
+    {
+      "controlName": "Подтвердить запись",
+      "widgetId": "14db68d1-8a68-47e3-b2c3-16e184c8e319",
+      "status": 200,
+      "outcome": "ACCEPTED",
+      "code": null,
+      "responseSha256": "7ddb208bf7fba046af19fc7e7f4e2aed30655f1fd712fbe626ac9f238a98867d",
+      "nextKind": null
+    },
+    {
+      "controlName": "Проверить перенос",
+      "widgetId": "0250ac49-6a04-4e4c-bcb2-891776fcd391",
+      "status": 200,
+      "outcome": "ACCEPTED",
+      "code": null,
+      "responseSha256": "162e396e6f69527c15101915b752d2cd7826776ff3fd26718c164bfe7da87979",
+      "nextKind": "BOOKING_CONFIRMATION"
+    },
+    {
+      "controlName": "Подтвердить перенос",
+      "widgetId": "85032c22-f384-45b1-8235-34c2a7ee31b3",
+      "status": 200,
+      "outcome": "ACCEPTED",
+      "code": null,
+      "responseSha256": "7ddb208bf7fba046af19fc7e7f4e2aed30655f1fd712fbe626ac9f238a98867d",
+      "nextKind": null
+    },
+    {
+      "controlName": "Мужская стрижка",
+      "widgetId": "2ece60a7-0de3-4d22-a23c-2a063afbcc43",
+      "status": 200,
+      "outcome": "ACCEPTED",
+      "code": null,
+      "responseSha256": "ff831537d4ed4248a8fccb9156c3d0d0d33c910f3068e63e03a04fa8f597168b",
+      "nextKind": "BOOKING_CONFIRMATION"
+    },
+    {
+      "controlName": "Подтвердить отмену",
+      "widgetId": "fba85bd7-3f82-4fa5-8f57-5a8f5c195021",
+      "status": 200,
+      "outcome": "ACCEPTED",
+      "code": null,
+      "responseSha256": "7ddb208bf7fba046af19fc7e7f4e2aed30655f1fd712fbe626ac9f238a98867d",
+      "nextKind": null
+    }
+  ],
+  "error": "Timeout: reload",
+  "failureSnapshot": {
+    "text": "MAYA\nВход в MAYA\n\nНайдите свой салон и продолжите через Telegram.\n\nНазвание салона\nНайти салон\nВойти по email",
+    "controls": [
+      {
+        "name": "Найти салон",
+        "ref": null,
+        "disabled": false
+      },
+      {
+        "name": "Войти по email",
+        "ref": null,
+        "disabled": false
+      }
+    ]
+  },
+  "cleanup": {
+    "chromeExited": true,
+    "serverClosed": true
+  }
+}
