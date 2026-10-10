@@ -142,7 +142,7 @@
       },
       {
         "path": "src/shell/local-crm-setup.ts",
-        "sha256": "7b5daad54a1893367caedf967b65d3a22cdcd595e215ceb6deb7e5eb94a9a4cf"
+        "sha256": "a151f9a022fa6c71d8e9d80325fb2db6188a7c1e1599991c4ab55c10f6655e40"
       },
       {
         "path": "src/shell/personal-booking.ts",
@@ -170,8 +170,8 @@
       }
     ]
   },
-  "bytes": 604179,
-  "digest": "0c9f55c204ddd629b02985ca3ee3d6f365d1f8ddaaa75562e06f634937a68968",
+  "bytes": 604976,
+  "digest": "813b861817f0888acb95beddb79702a17532355127e138b993d36538a7091867",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -179,8 +179,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "3212a0be393916adfd379b6455a7eb92ca72a05d194dc4879d9a5c8f710dcdae",
-    "modulePath": "m/3212a0be393916ad/",
+    "digest": "17dfd1374af7c2a174ad748a25e7014053002234241a35999e771462ea938518",
+    "modulePath": "m/17dfd1374af7c2a1/",
     "files": [
       {
         "path": "entry/main.js",
@@ -334,8 +334,8 @@
       },
       {
         "path": "src/shell/local-crm-setup.js",
-        "sha256": "23cc7cd6b6b9d04356aac51772fc9de3ff570ca957c9c49377b259e3e233b5da",
-        "bytes": 13064
+        "sha256": "636c46cee3f8070bf0ee7d78e8c67b778f891bfa47809abfd5c53183281ccb4d",
+        "bytes": 13531
       },
       {
         "path": "src/shell/personal-booking.js",
@@ -383,7 +383,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "7cfd97f85c2ce97ec24f0809fa83a897d8634b050ed7f7701fec9c440faab287",
+      "sha256": "832ad63b129dc2d11235789378d76be4ad606995ed8a26b28e1c280700baa5ab",
       "bytes": 1344
     },
     "assets": [

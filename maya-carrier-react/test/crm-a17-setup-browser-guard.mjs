@@ -19,11 +19,11 @@ export function admitted(request, origin, scope) {
         const names = [...url.searchParams.keys()];
         return new Set(names).size === names.length && url.searchParams.get('local_crm_setup') === '1' &&
           (names.length === 1 || (names.length === 3 && names.includes('crm_operation') && names.includes('crm_request') &&
-            url.searchParams.get('crm_operation') === 'activate' && uuid(url.searchParams.get('crm_request'))));
+            ['install', 'activate'].includes(url.searchParams.get('crm_operation')) && uuid(url.searchParams.get('crm_request'))));
       }
       if (url.pathname === '/api/integrations/crm/operation') {
         return [...url.searchParams.keys()].sort().join(',') === 'operation,requestId' &&
-          url.searchParams.get('operation') === 'activate' && uuid(url.searchParams.get('requestId'));
+          ['install', 'activate'].includes(url.searchParams.get('operation')) && uuid(url.searchParams.get('requestId'));
       }
       return !url.search && /^\/(?:api\/(?:ai\/conversation|branches|integrations\/crm)|index\.html|styles\.css|manifest\.webmanifest|favicon\.ico|icons\/maya-(?:192|512|512-maskable|apple-180)\.png|m\/[A-Za-z0-9]+\/main\.js)$/.test(url.pathname);
     }
@@ -46,7 +46,8 @@ export function admitted(request, origin, scope) {
 }
 export async function installGuard(page, origin, scope) {
   localOrigin(origin);
-  const evidence = { blocked: [], errors: [], droppedCommittedResponses: 0 };
+  const evidence = { blocked: [], errors: [], droppedCommittedResponses: 0, droppedUnregisteredRequests: 0 };
+  let firstInstallKey;
   const listener = event => {
     if (event.sessionId !== page.sessionId || event.method !== 'Fetch.requestPaused') return;
     const { requestId, request, responseStatusCode, responseErrorReason } = event.params;
@@ -55,6 +56,15 @@ export async function installGuard(page, origin, scope) {
     if (!admitted(request, origin, scope)) {
       evidence.blocked.push({ method: request.method, path: new URL(request.url).pathname });
       method = 'Fetch.failRequest'; params = { requestId, errorReason: 'BlockedByClient' };
+    } else if (!isResponse && new URL(request.url).pathname === '/api/integrations/crm/connect') {
+      const key = Object.entries(request.headers ?? {}).find(([name]) => name.toLowerCase() === 'idempotency-key')?.[1];
+      if (evidence.droppedUnregisteredRequests === 0) {
+        firstInstallKey = key; evidence.droppedUnregisteredRequests++;
+        method = 'Fetch.failRequest'; params = { requestId, errorReason: 'ConnectionClosed' };
+      } else if (key !== firstInstallKey) {
+        evidence.blocked.push({ method: request.method, path: '/api/integrations/crm/connect', reason: 'changed_operation_key' });
+        method = 'Fetch.failRequest'; params = { requestId, errorReason: 'BlockedByClient' };
+      }
     } else if (isResponse && new URL(request.url).pathname === '/api/integrations/crm/activate' && responseStatusCode === 201 && evidence.droppedCommittedResponses === 0) {
       // Actual upstream response exists. The parent independently checks the
       // canonical DB commit before permitting reload; no body is substituted.

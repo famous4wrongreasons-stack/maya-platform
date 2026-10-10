@@ -19,6 +19,6 @@ test('email code arrays and foreign routes fail closed', () => {
   assert.equal(admitted({ url: 'https://example.invalid/', method: 'GET' }, origin, scope), false);
 });
 test('same URL locator reload and exact recovery read are admitted', () => {
-  for (const path of ['/?local_crm_setup=1', '/?local_crm_setup=1&crm_operation=activate&crm_request=' + key, '/api/integrations/crm/operation?operation=activate&requestId=' + key]) assert.equal(admitted({ url: origin + path, method: 'GET' }, origin, scope), true);
+  for (const path of ['/?local_crm_setup=1', '/?local_crm_setup=1&crm_operation=install&crm_request=' + key, '/?local_crm_setup=1&crm_operation=activate&crm_request=' + key, '/api/integrations/crm/operation?operation=activate&requestId=' + key, '/api/integrations/crm/operation?operation=install&requestId=' + key]) assert.equal(admitted({ url: origin + path, method: 'GET' }, origin, scope), true);
   assert.equal(admitted({ url: origin + '/?local_crm_setup=1&token=secret', method: 'GET' }, origin, scope), false);
 });

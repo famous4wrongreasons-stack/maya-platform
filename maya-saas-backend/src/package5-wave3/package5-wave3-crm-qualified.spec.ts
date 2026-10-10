@@ -1,3 +1,4 @@
+import { ActionConflictError } from '../action-engine/action-engine.errors';
 /* eslint-disable @typescript-eslint/require-await -- Synthetic async ports deliberately resolve without real I/O. */
 import { CrmProvider } from '../common/domain.enums';
 import { ForbiddenException } from '@nestjs/common';
@@ -71,7 +72,10 @@ function fixture() {
         current = { ...current, ...args.data };
         return current;
       }),
-      upsert: jest.fn(),
+      upsert: jest.fn(async (args: { update: Record<string, unknown> }) => {
+        current = { ...current, ...args.update };
+        return current;
+      }),
     },
     actionExecution: {
       findMany: jest.fn(
@@ -143,12 +147,25 @@ function fixture() {
   const ingress = {
     createExecution: jest.fn(
       async (request: {
-        input: Record<string, unknown>;
+        input: unknown;
         capability: string;
         source: { sourceRef?: string };
       }) => {
-        input = request.input;
-        stored ??= {
+        if (stored) {
+          if (wave3Hash(input) !== wave3Hash(request.input))
+            throw new ActionConflictError(
+              'synthetic ingress normalized action differs',
+            );
+          return stored;
+        }
+        if (
+          !request.input ||
+          typeof request.input !== 'object' ||
+          Array.isArray(request.input)
+        )
+          throw new Error('Synthetic ingress expected normalized record');
+        input = request.input as Record<string, unknown>;
+        stored = {
           id: 'execution-a',
           tenantId: TENANT,
           actorUserId: OWNER,
@@ -192,7 +209,8 @@ function fixture() {
     db as never,
     {
       encrypt: (value: string) => `synthetic:${value}`,
-      opaqueReference: () => 'f'.repeat(64),
+      opaqueReference: (namespace: string, value: string) =>
+        wave3Hash({ namespace, value }),
     } as never,
     crm as never,
     {} as never,
@@ -207,6 +225,7 @@ function fixture() {
   const prepare = () =>
     run(() => planner.build(TENANT, { userId: OWNER }, command(), 'execute'));
   return {
+    context,
     db,
     provider,
     project,
@@ -767,4 +786,384 @@ describe('exact durable CRM operation READ', () => {
       ),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
+});
+
+function installInput(f: ReturnType<typeof fixture>) {
+  return {
+    provider: CrmProvider.YCLIENTS,
+    apiToken: 'synthetic-install-token',
+    settingsJson: { companyId: 42, branchBinding: null },
+    expectedVersion: crmConfigurationVersion(f.current),
+  };
+}
+function installCommand(
+  dto: ReturnType<typeof installInput>,
+): Package5Wave3Command {
+  return {
+    operation: 'install_crm_credentials',
+    sourceIntentRef: REQUEST,
+    expectedVersion: dto.expectedVersion,
+    provider: dto.provider,
+    encryptedApiToken: `synthetic:${dto.apiToken}`,
+    credentialFingerprint: wave3Hash({
+      namespace: 'package5.wave3.crm-credential',
+      value: `${dto.provider}\0${dto.apiToken}`,
+    }),
+    baseUrl: null,
+    settingsJson: dto.settingsJson,
+  };
+}
+function deferred() {
+  let release!: () => void;
+  const promise = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  return { promise, release };
+}
+
+describe('qualified install explicit same-key recovery', () => {
+  it('allows first explicit re-entry after pre-preview failure without fabricating an earlier receipt', async () => {
+    const f = fixture(),
+      dto = installInput(f);
+    f.crm.previewCredentials.mockRejectedValueOnce(
+      new Error('preview lost before admission'),
+    );
+    await expect(
+      f.run(() =>
+        f.canonical.installQualifiedCrmCredentials(
+          TENANT,
+          { userId: OWNER },
+          dto,
+          REQUEST,
+        ),
+      ),
+    ).rejects.toThrow('preview lost');
+    expect(f.stored).toBeNull();
+    expect(f.ingress.createExecution).not.toHaveBeenCalled();
+    expect(
+      await f.run(() =>
+        f.canonical.crmOperationStatus(
+          TENANT,
+          { userId: OWNER },
+          'install',
+          REQUEST,
+        ),
+      ),
+    ).toMatchObject({ status: 'NOT_OBSERVED' });
+    const result = await f.run(() =>
+      f.canonical.installQualifiedCrmCredentials(
+        TENANT,
+        { userId: OWNER },
+        dto,
+        REQUEST,
+      ),
+    );
+    expect(result).toMatchObject({
+      status: 'SUCCEEDED',
+      receipt: { phase: 'installed' },
+    });
+    expect(f.db.actionTargetMutation.create).toHaveBeenCalledTimes(1);
+  });
+  it.each(['same', 'different'] as const)(
+    'held original preview plus explicit same UUID %s material: first admitted material wins',
+    async (kind) => {
+      const f = fixture(),
+        dto = installInput(f),
+        held = deferred(),
+        entered = deferred();
+      f.crm.previewCredentials.mockImplementationOnce(async () => {
+        entered.release();
+        await held.promise;
+      });
+      const original = f
+        .run(() =>
+          f.canonical.installQualifiedCrmCredentials(
+            TENANT,
+            { userId: OWNER },
+            dto,
+            REQUEST,
+          ),
+        )
+        .then(
+          (value) => ({ value, error: null }),
+          (error: unknown) => ({ value: null, error }),
+        );
+      await entered.promise;
+      expect(
+        await f.run(() =>
+          f.canonical.crmOperationStatus(
+            TENANT,
+            { userId: OWNER },
+            'install',
+            REQUEST,
+          ),
+        ),
+      ).toMatchObject({ status: 'NOT_OBSERVED' });
+      const retried = {
+        ...dto,
+        apiToken: kind === 'same' ? dto.apiToken : 'different-explicit-token',
+      };
+      const winner = await f.run(() =>
+        f.canonical.installQualifiedCrmCredentials(
+          TENANT,
+          { userId: OWNER },
+          retried,
+          REQUEST,
+        ),
+      );
+      expect(winner.status).toBe('SUCCEEDED');
+      held.release();
+      const result = await original;
+      if (kind === 'same') {
+        expect(result.error).toBeNull();
+        expect(result.value?.receipt).toEqual(winner.receipt);
+      } else
+        expect(result.error).toMatchObject({
+          response: { error: { code: 'crm_operation_material_changed' } },
+        });
+      expect(f.db.actionTargetMutation.create).toHaveBeenCalledTimes(1);
+      expect(f.db.actionAttempt.create).toHaveBeenCalledTimes(1);
+    },
+  );
+  it('rebinds a same-material stale target generation to the single existing trusted READY input once', async () => {
+    const f = fixture(),
+      dto = installInput(f),
+      cmd = installCommand(dto);
+    const stale = await f.run(() =>
+      f.planner.build(TENANT, { userId: OWNER }, cmd, 'execute'),
+    );
+    f.db.actionTargetMutation.findFirst.mockResolvedValue({
+      targetGeneration: 0,
+    } as never);
+    const winner = await f.run(() =>
+      f.planner.build(TENANT, { userId: OWNER }, cmd, 'execute'),
+    );
+    await f.ingress.createExecution(winner.request);
+    const result = await f.run(() => f.executor.execute(stale));
+    expect(result.targetGeneration).toBe(1);
+    expect(f.db.actionTargetMutation.create).toHaveBeenCalledTimes(1);
+    expect(f.ingress.createExecution).toHaveBeenCalledTimes(3);
+  });
+  it('changed material in a stale prepared request never inherits the winning READY input', async () => {
+    const f = fixture(),
+      dto = installInput(f),
+      cmd = installCommand(dto);
+    const loser = await f.run(() =>
+      f.planner.build(
+        TENANT,
+        { userId: OWNER },
+        {
+          ...cmd,
+          credentialFingerprint: 'a'.repeat(64),
+        } as Package5Wave3Command,
+        'execute',
+      ),
+    );
+    const winner = await f.run(() =>
+      f.planner.build(TENANT, { userId: OWNER }, cmd, 'execute'),
+    );
+    await f.ingress.createExecution(winner.request);
+    await expect(f.run(() => f.executor.execute(loser))).rejects.toMatchObject({
+      response: { error: { code: 'crm_operation_material_changed' } },
+    });
+    expect(f.db.actionTargetMutation.create).not.toHaveBeenCalled();
+    expect(f.ingress.createExecution).toHaveBeenCalledTimes(2);
+  });
+  it('never retries an unclassified ingress failure', async () => {
+    const f = fixture(),
+      p = await f.run(() =>
+        f.planner.build(
+          TENANT,
+          { userId: OWNER },
+          installCommand(installInput(f)),
+          'execute',
+        ),
+      );
+    f.ingress.createExecution.mockRejectedValue(
+      new Error('unknown ingress failure'),
+    );
+    await expect(f.run(() => f.executor.execute(p))).rejects.toThrow(
+      'unknown ingress failure',
+    );
+    expect(f.ingress.createExecution).toHaveBeenCalledTimes(1);
+    expect(f.stored).toBeNull();
+  });
+  it('does not retry an ingress conflict without an existing owner occurrence', async () => {
+    const f = fixture(),
+      p = await f.run(() =>
+        f.planner.build(
+          TENANT,
+          { userId: OWNER },
+          installCommand(installInput(f)),
+          'execute',
+        ),
+      );
+    f.ingress.createExecution.mockRejectedValue(
+      new ActionConflictError('synthetic unmatched identity'),
+    );
+    await expect(f.run(() => f.executor.execute(p))).rejects.toThrow(
+      'unmatched identity',
+    );
+    expect(f.ingress.createExecution).toHaveBeenCalledTimes(1);
+    expect(f.stored).toBeNull();
+  });
+  it('never loops when the one existing-owner ingress retry also conflicts', async () => {
+    const f = fixture(),
+      p = await f.run(() =>
+        f.planner.build(
+          TENANT,
+          { userId: OWNER },
+          installCommand(installInput(f)),
+          'execute',
+        ),
+      );
+    await f.ingress.createExecution(p.request);
+    f.ingress.createExecution.mockRejectedValue(
+      new ActionConflictError('synthetic conflict retained'),
+    );
+    await expect(f.run(() => f.executor.execute(p))).rejects.toThrow(
+      'conflict retained',
+    );
+    expect(f.ingress.createExecution).toHaveBeenCalledTimes(3);
+    expect(f.db.actionTargetMutation.create).not.toHaveBeenCalled();
+  });
+  it('refuses a retained READY payload that expires while preview is awaited', async () => {
+    const f = fixture(),
+      dto = installInput(f),
+      p = await f.run(() =>
+        f.planner.build(
+          TENANT,
+          { userId: OWNER },
+          installCommand(dto),
+          'execute',
+        ),
+      );
+    await f.ingress.createExecution(p.request);
+    f.crm.previewCredentials.mockImplementationOnce(async () => {
+      f.stored = { ...f.stored, payloadRetentionUntil: new Date(0) };
+    });
+    await expect(
+      f.run(() =>
+        f.canonical.installQualifiedCrmCredentials(
+          TENANT,
+          { userId: OWNER },
+          dto,
+          REQUEST,
+        ),
+      ),
+    ).rejects.toMatchObject({
+      response: { error: { code: 'crm_operation_evidence_unavailable' } },
+    });
+    expect(f.db.actionAttempt.create).not.toHaveBeenCalled();
+    expect(f.db.actionTargetMutation.create).not.toHaveBeenCalled();
+  });
+  it('retains durable READY after a pre-mutation failure and finishes only on explicit same-key re-entry', async () => {
+    const f = fixture(),
+      dto = installInput(f);
+    f.db.$executeRaw.mockRejectedValueOnce(
+      new Error('local interruption after AE admission'),
+    );
+    await expect(
+      f.run(() =>
+        f.canonical.installQualifiedCrmCredentials(
+          TENANT,
+          { userId: OWNER },
+          dto,
+          REQUEST,
+        ),
+      ),
+    ).rejects.toThrow('local interruption');
+    expect(f.stored?.state).toBe('READY');
+    expect(f.db.actionTargetMutation.create).not.toHaveBeenCalled();
+    f.crm.previewCredentials.mockClear();
+    const read = await f.run(() =>
+      f.canonical.crmOperationStatus(
+        TENANT,
+        { userId: OWNER },
+        'install',
+        REQUEST,
+      ),
+    );
+    expect(read.status).toBe('READY');
+    expect(f.crm.previewCredentials).not.toHaveBeenCalled();
+    const restoredPlanner = new Package5Wave3ShadowService(
+      {} as never,
+      f.db as never,
+      f.context,
+      f.kernel as never,
+      f.provider as never,
+    );
+    const restoredExecutor = new Package5Wave3ExecutableService(
+      f.db as never,
+      f.ingress as never,
+      f.kernel as never,
+      {} as never,
+      restoredPlanner,
+      f.provider as never,
+    );
+    const restoredOwner = new Package5Wave3CanonicalCutoverService(
+      restoredPlanner,
+      restoredExecutor,
+      f.context,
+      f.db as never,
+      {
+        encrypt: (value: string) => `synthetic:${value}`,
+        opaqueReference: (namespace: string, value: string) =>
+          wave3Hash({ namespace, value }),
+      } as never,
+      f.crm as never,
+      {} as never,
+    );
+    const result = await f.run(() =>
+      restoredOwner.installQualifiedCrmCredentials(
+        TENANT,
+        { userId: OWNER },
+        dto,
+        REQUEST,
+      ),
+    );
+    expect(result.status).toBe('SUCCEEDED');
+    expect(f.db.actionTargetMutation.create).toHaveBeenCalledTimes(1);
+  });
+  it.each(['expired', 'revoked', 'changed'] as const)(
+    'refuses %s READY re-entry before provider/mutation',
+    async (kind) => {
+      const f = fixture(),
+        dto = installInput(f),
+        p = await f.run(() =>
+          f.planner.build(
+            TENANT,
+            { userId: OWNER },
+            installCommand(dto),
+            'execute',
+          ),
+        );
+      await f.ingress.createExecution(p.request);
+      if (kind === 'expired')
+        f.stored = { ...f.stored, payloadRetentionUntil: new Date(0) };
+      if (kind === 'revoked')
+        f.db.membership.findUnique.mockResolvedValue({
+          id: 'member-a',
+          role: 'tenant_owner',
+          status: 'revoked',
+          user: { status: 'active' },
+        });
+      await expect(
+        f.run(() =>
+          f.canonical.installQualifiedCrmCredentials(
+            TENANT,
+            { userId: OWNER },
+            {
+              ...dto,
+              apiToken: kind === 'changed' ? 'other-token' : dto.apiToken,
+            },
+            REQUEST,
+          ),
+        ),
+      ).rejects.toThrow();
+      expect(f.crm.previewCredentials).not.toHaveBeenCalled();
+      expect(f.db.actionTargetMutation.create).not.toHaveBeenCalled();
+      expect(f.ingress.createExecution).toHaveBeenCalledTimes(1);
+    },
+  );
 });

@@ -9,6 +9,7 @@ import { createServer, request as nodeRequest } from 'node:http';
 import path from 'node:path';
 import request from 'supertest';
 import { ConfigService } from '@nestjs/config';
+import { CanonicalActionIngressService } from '../../src/action-engine/action-engine.ingress';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import {
   CalendarSource,
@@ -72,6 +73,14 @@ type Saved = {
   graphHash: string;
   processId: number;
   postmasterStartedAt: string;
+  preAdmission?: { owner: Login; requestId: string; materialHash: string };
+  unfinished?: {
+    owner: Login;
+    requestId: string;
+    executionId: string;
+    graphHash: string;
+    materialHash: string;
+  };
 };
 const sourceFiles = [
   'src/crm/crm-integration.controller.ts',
@@ -544,6 +553,258 @@ describe('A17 exact configuration and persisted operation recovery through actua
     expect(await durable(owner.tenantId)).toEqual(before);
     return object(result.body);
   };
+  const preparePreAdmissionRecovery = async () => {
+    const owner = await createTenant('Synthetic request never registered'),
+      token = await login(owner),
+      requestId = randomUUID();
+    const body = connectBody(owner.branchId, null),
+      before = await durable(owner.tenantId),
+      reads = providerReads.length;
+    let discarded = 0;
+    // Deliberately drops one real HTTP request before any forwarding/admission.
+    const relay = createServer((incoming, outgoing) => {
+      expect(incoming.method).toBe('POST');
+      expect(incoming.url).toBe('/api/integrations/crm/connect');
+      incoming.resume();
+      incoming.on('end', () => {
+        discarded++;
+        outgoing.destroy();
+      });
+    });
+    await new Promise<void>((resolve, reject) => {
+      relay.once('error', reject);
+      relay.listen(0, '127.0.0.1', resolve);
+    });
+    try {
+      let error: unknown;
+      try {
+        await request(relay)
+          .post('/api/integrations/crm/connect')
+          .set('Authorization', 'Bearer ' + token)
+          .set('Idempotency-Key', requestId)
+          .send(body)
+          .timeout({ response: 5000, deadline: 7000 });
+      } catch (caught) {
+        error = caught;
+      }
+      assert.ok(error);
+      expect(object(error).code).toBe('ECONNRESET');
+      expect(discarded).toBe(1);
+    } finally {
+      relay.closeAllConnections();
+      await new Promise<void>((resolve) => relay.close(() => resolve()));
+    }
+    const status = await getOperation(token, 'install', requestId);
+    expect(status.status).toBe(200);
+    expect(status.body).toMatchObject({
+      status: 'NOT_OBSERVED',
+      phase: null,
+      receipt: null,
+    });
+    expect(await durable(owner.tenantId)).toEqual(before);
+    expect(providerReads).toHaveLength(reads);
+    saved.preAdmission = { owner, requestId, materialHash: hash(body) };
+    observations.preAdmission = {
+      responseLostBeforeForward: true,
+      backendRegistrations: 0,
+      providerReads: 0,
+      status: 'NOT_OBSERVED',
+      awaitsActualRestart: true,
+    };
+    checks.push(
+      'HTTP request lost before forwarding leaves no registration or credential; NOT_OBSERVED never clears original locator',
+    );
+
+    const running = await createTenant(
+        'Synthetic original install still running',
+      ),
+      runningToken = await login(running),
+      key = randomUUID();
+    const material = connectBody(running.branchId, null);
+    let reached!: () => void;
+    const entered = new Promise<void>((resolve) => {
+      reached = resolve;
+    });
+    const released = new Promise<void>((resolve) => {
+      releaseHeldRead = resolve;
+    });
+    pause = { reached, released };
+    const original = post(runningToken, 'install', key, material).then(
+      (response) => response,
+    );
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([
+        entered,
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(
+            () => reject(new Error('Original preview not paused')),
+            8000,
+          );
+        }),
+      ]);
+      const waiting = await getOperation(runningToken, 'install', key);
+      expect(waiting.status).toBe(200);
+      expect(waiting.body).toMatchObject({
+        status: 'NOT_OBSERVED',
+        receipt: null,
+      });
+      expect((await durable(running.tenantId)).executions).toHaveLength(0);
+      const retried = await post(runningToken, 'install', key, material);
+      expect(retried.status).toBe(201);
+      const receipt = receiptOf(retried.body, 'install', key);
+      releaseHeldRead?.();
+      const delivered = await original;
+      expect(delivered.status).toBe(201);
+      expect(receiptOf(delivered.body, 'install', key)).toEqual(receipt);
+      const committed = await durable(running.tenantId);
+      expect(committed.executions).toHaveLength(1);
+      expect(committed.mutations).toHaveLength(1);
+      expect(committed.executions[0].executionAttemptCount).toBe(1);
+      const previousReads = providerReads.length;
+      const changed = await post(
+        runningToken,
+        'install',
+        key,
+        connectBody(running.branchId, null, 2),
+      );
+      expect(changed.status).toBe(409);
+      expect(changed.body).toMatchObject({
+        error: { code: 'crm_operation_material_changed' },
+      });
+      expect(await durable(running.tenantId)).toEqual(committed);
+      expect(providerReads).toHaveLength(previousReads);
+      observations.runningOriginal = {
+        observedWhileRunning: 'NOT_OBSERVED',
+        firstAndRetrySameReceipt: true,
+        exactExecutionCount: 1,
+        exactMutationCount: 1,
+        exactAttemptCount: 1,
+        changedMaterialHttpStatus: 409,
+      };
+    } finally {
+      clearTimeout(timer);
+      releaseHeldRead?.();
+      await original;
+    }
+    await noUnrelatedEffects(running.tenantId);
+    checks.push(
+      'Original preview still running and explicit same-ID retry converge to one durable install; first admitted material refuses later changed credentials',
+    );
+  };
+  const prepareUnfinished = async () => {
+    const owner = await createTenant('Synthetic durable READY install'),
+      token = await login(owner),
+      requestId = randomUUID();
+    const material = connectBody(owner.branchId, null);
+    const ingress = http.app.get(CanonicalActionIngressService),
+      original = ingress.createExecution.bind(ingress);
+    let executionId: string | undefined;
+    const hold = jest
+      .spyOn(ingress, 'createExecution')
+      .mockImplementationOnce(async (input) => {
+        expect(input.tenantId).toBe(owner.tenantId);
+        const admitted = await original(input);
+        executionId = admitted.id;
+        throw new Error('SYNTHETIC_DELIVERY_LOSS_AFTER_REAL_A17_ADMISSION');
+      });
+    let response;
+    try {
+      response = await post(token, 'install', requestId, material);
+    } finally {
+      hold.mockRestore();
+    }
+    expect(response.status).toBe(500);
+    assert.ok(executionId);
+    const admitted = await durable(owner.tenantId);
+    expect(admitted.integration).toBeNull();
+    expect(admitted.mutations).toHaveLength(0);
+    expect(admitted.executions).toHaveLength(1);
+    expect(admitted.executions[0]).toMatchObject({
+      id: executionId,
+      state: 'READY',
+      executionAttemptCount: 0,
+      attempts: [],
+    });
+    const reads = providerReads.length;
+    const status = await getOperation(token, 'install', requestId);
+    expect(status.status).toBe(200);
+    expect(status.body).toMatchObject({
+      status: 'READY',
+      phase: 'install',
+      receipt: null,
+    });
+    expect(providerReads).toHaveLength(reads);
+    expect(await durable(owner.tenantId)).toEqual(admitted);
+    saved.unfinished = {
+      owner,
+      requestId,
+      executionId,
+      graphHash: hash(admitted),
+      materialHash: hash(material),
+    };
+    observations.unfinished = {
+      realCanonicalAdmission: true,
+      seam: 'CALL_THROUGH_INGRESS_THEN_THROW_BEFORE_LOCAL_MUTATION',
+      state: 'READY',
+      attempts: 0,
+      mutations: 0,
+      awaitsActualRestart: true,
+    };
+    checks.push(
+      'Canonical ingress durably admits READY before a labelled test-only delivery failure; no row seeding or mutation',
+    );
+  };
+  const resumePending = async () => {
+    assert.ok(saved.preAdmission && saved.unfinished);
+    for (const [kind, entry] of [
+      ['NOT_OBSERVED', saved.preAdmission],
+      ['READY', saved.unfinished],
+    ] as const) {
+      const token = await login(entry.owner),
+        before = await durable(entry.owner.tenantId),
+        reads = providerReads.length;
+      if (kind === 'READY')
+        expect(hash(before)).toBe(saved.unfinished.graphHash);
+      else {
+        expect(before.executions).toHaveLength(0);
+        expect(before.integration).toBeNull();
+      }
+      const status = await getOperation(token, 'install', entry.requestId);
+      expect(status.status).toBe(200);
+      expect(status.body).toMatchObject({ status: kind, receipt: null });
+      expect(await durable(entry.owner.tenantId)).toEqual(before);
+      expect(providerReads).toHaveLength(reads);
+      const material = connectBody(entry.owner.branchId, null);
+      expect(hash(material)).toBe(entry.materialHash);
+      const result = await post(token, 'install', entry.requestId, material);
+      expect(result.status).toBe(201);
+      const receipt = receiptOf(result.body, 'install', entry.requestId);
+      if (kind === 'READY')
+        expect(receipt.executionId).toBe(saved.unfinished.executionId);
+      const completed = await durable(entry.owner.tenantId);
+      expect(completed.executions).toHaveLength(1);
+      expect(completed.mutations).toHaveLength(1);
+      expect(completed.executions[0]).toMatchObject({
+        id: receipt.executionId,
+        state: 'SUCCEEDED',
+        executionAttemptCount: 1,
+      });
+      await readSucceededWithoutEffects(token, entry.owner, receipt);
+      await noUnrelatedEffects(entry.owner.tenantId);
+      observations['restart-' + kind] = {
+        statusBeforeExplicitRetry: kind,
+        sameRequestId: true,
+        exactExecutions: 1,
+        exactMutations: 1,
+        exactAttempts: 1,
+        receiptHash: hash(receipt),
+      };
+    }
+    checks.push(
+      'After actual Node/PG restart, both NOT_OBSERVED and durable READY stay inert until an explicit same-ID submission; READY keeps the original execution',
+    );
+  };
   const proveProjectionRollback = async () => {
     const owner = await createTenant('Synthetic atomic projection rollback'),
       token = await login(owner);
@@ -648,6 +909,9 @@ describe('A17 exact configuration and persisted operation recovery through actua
     const names = [
       'initial',
       'loaded',
+      'install-lost',
+      'install-reloaded',
+      'not-observed',
       'installed',
       'activation-lost',
       'reload',
@@ -657,6 +921,7 @@ describe('A17 exact configuration and persisted operation recovery through actua
     let index = 0,
       install: Receipt | undefined,
       activationKey: string | undefined;
+    let preAdmissionKey: string | undefined;
     let committedHash: string | undefined, committedReads: number | undefined;
     await new Promise<void>((resolve, reject) => {
       const child = spawn(
@@ -709,10 +974,26 @@ describe('A17 exact configuration and persisted operation recovery through actua
             expect(message.type).toBe('checkpoint');
             expect(message.name).toBe(names[index]);
             const current = await durable(owner.tenantId);
-            if (message.name === 'initial' || message.name === 'loaded') {
+            if (
+              [
+                'initial',
+                'loaded',
+                'install-lost',
+                'install-reloaded',
+                'not-observed',
+              ].includes(String(message.name))
+            ) {
               expect(current.executions).toHaveLength(0);
               expect(current.integration).toBeNull();
               expect(providerReads).toHaveLength(initialReads);
+              if (message.name === 'install-lost') {
+                assert.equal(typeof message.requestId, 'string');
+                preAdmissionKey = message.requestId as string;
+              }
+              if (message.name === 'not-observed') {
+                assert.ok(preAdmissionKey);
+                expect(message.requestId).toBe(preAdmissionKey);
+              }
             } else if (message.name === 'installed') {
               const value = object(message.receipt);
               assert.equal(typeof value.requestId, 'string');
@@ -721,6 +1002,7 @@ describe('A17 exact configuration and persisted operation recovery through actua
                 'install',
                 value.requestId as string,
               );
+              expect(install.requestId).toBe(preAdmissionKey);
               expect(current.executions).toHaveLength(1);
               expect(current.mutations).toHaveLength(1);
               expect(current.integration?.status).toBe('pending_activation');
@@ -953,6 +1235,8 @@ describe('A17 exact configuration and persisted operation recovery through actua
         await noUnrelatedEffects(owner.tenantId);
         await noUnrelatedEffects(race.tenantId);
         await proveProjectionRollback();
+        await preparePreAdmissionRecovery();
+        await prepareUnfinished();
         await proveCurrentForm();
         writeFileSync(receiptPath, JSON.stringify(saved) + '\n', {
           flag: 'wx',
@@ -978,6 +1262,34 @@ describe('A17 exact configuration and persisted operation recovery through actua
         checks.push(
           'Different Node process and restarted PG preserve exact install/activation receipts, attempts, original evidence and mutation graph',
         );
+        const expiredClaims = {
+          ...(await db.jwt.verifyAsync<Record<string, unknown>>(token)),
+        };
+        delete expiredClaims.iat;
+        delete expiredClaims.exp;
+        delete expiredClaims.nbf;
+        // A deliberately expired, correctly signed fixture credential; no AE
+        // deadline, source timestamp or persisted authentication row is changed.
+        const expiredToken = await db.jwt.signAsync(expiredClaims, {
+          expiresIn: -1,
+        });
+        const beforeExpiredAuth = await durable(saved.owner.tenantId),
+          beforeExpiredReads = providerReads.length;
+        const expired = await getOperation(
+          expiredToken,
+          'activate',
+          saved.activate.requestId,
+        );
+        expect(expired.status).toBe(401);
+        expect(await durable(saved.owner.tenantId)).toEqual(beforeExpiredAuth);
+        expect(providerReads).toHaveLength(beforeExpiredReads);
+        observations.expiredAuthentication = {
+          fixture: 'SIGNED_EXPIRED_ACCESS_TOKEN',
+          httpStatus: 401,
+          actionGraphUnchanged: true,
+          providerReads: 0,
+        };
+        await resumePending();
 
         const reads = providerReads.length,
           before = await durable(saved.owner.tenantId);
@@ -1075,6 +1387,11 @@ describe('A17 exact configuration and persisted operation recovery through actua
             sourceUnchanged: hash(sourceHashes()) === hash(initialSource),
             checks,
             observations,
+            limits: {
+              expiredOrCleanedOperation:
+                'UNIT_ONLY: existing 30-day immutable payload retention; no temporal HTTP mutation or clock bypass',
+              workerCrash: false,
+            },
             providerReadCount: providerReads.length,
             forbidden,
             qualification:

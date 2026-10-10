@@ -216,14 +216,63 @@ test('another CRM provider cannot be staged or activated', async () => {
   assert.equal(f.writes.length, 0); assert.equal(f.port.view().canStage, false); assert.equal(f.port.view().canActivate, false); f.port.dispose();
 });
 
-test('uncertain write survives close/signout/re-entry; NOT_OBSERVED permits reads but never resend', async () => {
+test('uncertain write survives close/signout/re-entry; only explicit NOT_OBSERVED read enables consented same-key resend', async () => {
   const f = fixture({ crmSetupStage: async () => fail('uncertain') }); await f.port.load(); await f.port.stage(input, true);
   assert.equal(f.writes.length, 1); assert.equal(f.port.view().phase, 'uncertain'); assert.deepEqual(f.pending.read(), locator());
   await f.port.stage(input, true); f.port.close(); f.session(false); f.session(true);
-  assert.equal(f.writes.length, 1); await f.port.load();
+  await f.port.stage(input, true); assert.equal(f.writes.length, 1); await f.port.load();
   assert.deepEqual(f.receipts, [locator()]); assert.equal(f.port.view().operation.status, 'NOT_OBSERVED');
-  assert.equal(f.port.view().canStage, false); assert.equal(f.port.view().canActivate, false);
-  await f.port.stage(input, true); await f.port.activate(true); assert.equal(f.writes.length, 1); f.port.dispose();
+  assert.equal(f.port.view().canStage, true); assert.equal(f.port.view().resuming, true); assert.equal(f.port.view().canActivate, false);
+  assert.equal(f.writes.length, 1); assert.deepEqual(f.pending.read(), locator());
+  await f.port.stage(input, false); await f.port.activate(true); assert.equal(f.writes.length, 1);
+  await f.port.stage(input, true); assert.equal(f.writes.length, 2);
+  assert.deepEqual(f.writes.map(write => write.key), [key, key]); assert.equal(f.keysMinted(), 1);
+  assert.equal(f.port.view().canStage, false); assert.deepEqual(f.pending.read(), locator());
+  await f.port.stage(input, true); assert.equal(f.writes.length, 2); f.port.dispose();
+});
+
+test('NOT_OBSERVED after runtime restart uses freshly re-entered material with the saved operation key', async () => {
+  const pending = pendingStore();
+  const before = fixture({ pending, crmSetupStage: async () => fail('uncertain') });
+  await before.port.load(); await before.port.stage(input, true); before.port.dispose();
+  const after = fixture({ pending });
+  assert.deepEqual(after.calls, []); await after.port.stage(input, true); assert.equal(after.writes.length, 0);
+  await after.port.load(); assert.deepEqual(after.calls, ['operation', 'status', 'branches']);
+  assert.equal(after.port.view().operation.status, 'NOT_OBSERVED'); assert.deepEqual(pending.read(), locator());
+  const reentered = { ...input, apiToken: 'synthetic-reentered-token' };
+  await after.port.stage(reentered, false); assert.equal(after.writes.length, 0);
+  await after.port.stage(reentered, true);
+  assert.equal(after.writes.length, 1); assert.equal(after.writes[0].key, key);
+  assert.deepEqual(after.writes[0].material, { ...reentered, expectedVersion: null });
+  assert.equal(after.keysMinted(), 0); assert.equal(pending.read(), null);
+  assert.equal(JSON.stringify(after.port.view()).includes(reentered.apiToken), false); after.port.dispose();
+});
+
+test('NOT_OBSERVED activation requires a new explicit consent and preserves the existing key', async () => {
+  const pending = pendingStore(locator('activate'));
+  const f = fixture({ pending, connection: snapshot().connection });
+  await f.port.activate(true); assert.equal(f.writes.length, 0);
+  await f.port.load(); assert.equal(f.port.view().canActivate, true); assert.equal(f.port.view().canStage, false);
+  assert.equal(f.writes.length, 0); assert.deepEqual(pending.read(), locator('activate'));
+  await f.port.activate(false); assert.equal(f.writes.length, 0);
+  await f.port.activate(true);
+  assert.equal(f.writes.length, 1); assert.equal(f.writes[0].key, key); assert.equal(f.writes[0].material, version);
+  assert.equal(f.keysMinted(), 0); assert.equal(pending.read(), null); f.port.dispose();
+  const active = fixture({ pending: pendingStore(locator('activate')), connection: snapshot({ status: 'active' }).connection });
+  await active.port.load(); assert.equal(active.port.view().operation.status, 'NOT_OBSERVED');
+  assert.equal(active.port.view().canActivate, false); await active.port.activate(true);
+  assert.equal(active.writes.length, 0); assert.equal(active.keysMinted(), 0); active.port.dispose();
+});
+
+test('NOT_OBSERVED same-key retry still rejects configuration drift after explicit receipt read', async () => {
+  for (const kind of ['install', 'activate']) {
+    const pending = pendingStore(locator(kind));
+    const f = fixture({ pending, connection: snapshot().connection }); await f.port.load();
+    f.store(snapshot({ configVersion: changedVersion }));
+    if (kind === 'install') await f.port.stage(input, true); else await f.port.activate(true);
+    assert.equal(f.writes.length, 0); assert.equal(f.keysMinted(), 0);
+    assert.deepEqual(pending.read(), locator(kind)); assert.equal(f.port.view().phase, 'blocked'); f.port.dispose();
+  }
 });
 
 test('new runtime after response loss recovers the same completed locator without a write', async () => {
@@ -278,9 +327,13 @@ test('READY receipt for an older configuration cannot authorize activation of th
   await f.port.activate(true); assert.equal(f.writes.length, 0); assert.deepEqual(f.pending.read(), locator('activate')); f.port.dispose();
 });
 
-test('UNAVAILABLE or malformed saved locator never creates a replacement request', async () => {
-  for (const initial of ['invalid', locator()]) {
-    const f = fixture({ pending: pendingStore(initial), crmSetupOperation: async () => ok(operation('install', { status: 'UNAVAILABLE' })) });
+test('UNAVAILABLE, unknown receipt read or malformed saved locator never permits a write', async () => {
+  for (const [initial, receiptResult] of [
+    ['invalid', ok(operation('install', { status: 'UNAVAILABLE' }))],
+    [locator(), ok(operation('install', { status: 'UNAVAILABLE' }))],
+    [locator(), fail('unavailable')], [locator(), fail('uncertain')],
+  ]) {
+    const f = fixture({ pending: pendingStore(initial), crmSetupOperation: async () => receiptResult });
     await f.port.load(); await f.port.stage(input, true); await f.port.activate(true);
     assert.equal(f.writes.length, 0); assert.equal(f.keysMinted(), 0); assert.equal(f.port.view().canStage, false);
     if (initial === 'invalid') assert.deepEqual(f.calls, []);

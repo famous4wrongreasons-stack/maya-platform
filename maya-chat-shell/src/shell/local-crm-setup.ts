@@ -24,6 +24,10 @@ const same = (a: CrmSetupConnection | null, b: CrmSetupConnection | null): boole
   a.id === b.id && a.tenantId === b.tenantId && a.configVersion === b.configVersion && a.provider === b.provider && a.status === b.status && a.hasCredentials === b.hasCredentials && a.companyId === b.companyId && a.branchId === b.branchId;
 const uncertain = 'Результат действия ещё не подтверждён. Проверьте сохранённую операцию. Автоматического повтора не будет.';
 const sameLocator = (a: CrmOperationLocator, b: CrmOperationLocator) => a.operation === b.operation && a.requestId === b.requestId;
+// NOT_OBSERVED is not proof of non-dispatch. Explicit same-ID submission is
+// safe because the existing AE pins the first admitted material and rejects
+// conflicting later material. Neither observation grants a new operation ID.
+const canSubmitSameId = (op: CrmOperationStatus | null): boolean => op?.status === 'READY' || op?.status === 'NOT_OBSERVED';
 export function createLocalCrmSetup(deps: {
   readonly enabled: boolean; readonly transport: CrmSetupTransport;
   readonly session: Pick<SessionPort, 'view' | 'subscribe'>;
@@ -37,13 +41,14 @@ export function createLocalCrmSetup(deps: {
   const publish = (patch: Partial<LocalCrmSetupView>) => {
     current = { ...current, ...patch, canStage: false, canActivate: false, resuming: false };
     const pending = locator(), connection = current.connection, op = current.operation;
-    const resume = pending !== null && pending !== 'invalid' && op?.status === 'READY' && sameLocator(pending, op);
+    const resume = pending !== null && pending !== 'invalid' && op !== null && canSubmitSameId(op) && sameLocator(pending, op);
     const eligible = allowed() && !current.busy && (current.phase === 'ready' || current.phase === 'uncertain') && (pending === null || resume);
-    // Resuming uses the original key; the server compares immutable request material again.
+    // Re-entered material needs fresh consent. Once admitted, its immutable
+    // server hash must match; a never-admitted body cannot be reconstructed.
     current = { ...current, resuming: resume,
       canStage: eligible && (pending === null || pending.operation === 'install') && (!connection || connection.provider === 'yclients'),
       canActivate: eligible && (pending === null || pending.operation === 'activate') && connection?.provider === 'yclients' && connection.hasCredentials && !!connection.companyId && !!connection.branchId && current.branches.some(b => b.id === connection.branchId) &&
-        (connection.status === 'pending_activation' || (resume && connection.status === 'active')) && (!op?.receipt || op.receipt.configVersion === connection.configVersion),
+        (connection.status === 'pending_activation' || (resume && op?.status === 'READY' && connection.status === 'active')) && (!op?.receipt || op.receipt.configVersion === connection.configVersion),
     };
     for (const listener of listeners) listener(current);
   };
@@ -66,7 +71,7 @@ export function createLocalCrmSetup(deps: {
   const begin = (operation: 'install' | 'activate'): CrmOperationLocator | null => {
     const pending = locator();
     if (pending === 'invalid') return null;
-    if (pending !== null) return current.operation?.status === 'READY' && sameLocator(pending, current.operation) && pending.operation === operation ? pending : null;
+    if (pending !== null) return current.operation !== null && canSubmitSameId(current.operation) && sameLocator(pending, current.operation) && pending.operation === operation ? pending : null;
     const next = { operation, requestId: deps.newId() };
     try { return deps.pending.save(next) ? next : null; } catch { return null; }
   };
@@ -110,7 +115,7 @@ export function createLocalCrmSetup(deps: {
         if (!branches.ok) { fail({ reason: 'unavailable' }); return; }
         const unresolved = locator() !== null;
         publish({ phase: unresolved ? 'uncertain' : 'ready', busy: false, operation, connection: status.value.connection, branches: branches.value,
-          notice: unresolved ? operation?.status === 'READY' ? 'Существующая операция ещё не завершена. Допустимо только явно продолжить её с теми же параметрами.' : uncertain : operation?.status === 'SUCCEEDED' ? 'Сохранённый результат исходной операции восстановлен. Показано текущее подключение.' : 'Показано сохранённое подключение. Проверка доступа к YCLIENTS ещё не выполнялась.' });
+          notice: unresolved ? operation?.status === 'READY' ? 'Существующая операция ещё не завершена. Допустимо только явно продолжить её с теми же параметрами.' : operation?.status === 'NOT_OBSERVED' ? 'Сервер пока не подтвердил исходный запрос. Проверьте параметры и подтвердите повтор с тем же номером запроса; уже принятые параметры изменить нельзя.' : uncertain : operation?.status === 'SUCCEEDED' ? 'Сохранённый результат исходной операции восстановлен. Показано текущее подключение.' : 'Показано сохранённое подключение. Эта загрузка не проверяет доступ к YCLIENTS.' });
       } catch { if (active(version)) fail({ reason: 'unavailable' }); }
     },
     async stage(input, confirmed) {

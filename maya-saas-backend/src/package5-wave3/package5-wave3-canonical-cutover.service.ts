@@ -228,7 +228,7 @@ export class Package5Wave3CanonicalCutoverService {
       baseUrl: null,
       settingsJson: settings,
     };
-    const prepared = await this.planner.build(
+    let prepared = await this.planner.build(
       tenantId,
       actor,
       command,
@@ -238,10 +238,25 @@ export class Package5Wave3CanonicalCutoverService {
       // Provider observation is ephemeral and occurs before AE admission. Failure
       // here intentionally remains NOT_OBSERVED; recovery never invents a receipt.
       await this.crm.previewCredentials(dto.provider, token, settings, null);
-      assertCrmConfiguration(
-        await this.prisma.crmIntegration.findUnique({ where: { tenantId } }),
-        expectedVersion,
-      );
+      const current = await this.prisma.crmIntegration.findUnique({
+        where: { tenantId },
+      });
+      if (crmConfigurationVersion(current) !== expectedVersion) {
+        // A same-key caller may have committed while this original preview was
+        // awaiting transport. Re-read exactly that owner receipt once; changed
+        // actor/material/expired payload still refuse in the existing planner.
+        const observed = await this.planner.build(
+          tenantId,
+          actor,
+          command,
+          'execute',
+        );
+        if (
+          observed.existingExecution?.state !== ActionExecutionState.SUCCEEDED
+        )
+          assertCrmConfiguration(current, expectedVersion);
+        prepared = observed;
+      }
     }
     await this.executor.execute(prepared);
     const outcome = await this.crmOperationStatus(

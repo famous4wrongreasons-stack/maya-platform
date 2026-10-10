@@ -1300,13 +1300,17 @@ export class Package5Wave3ExecutableService {
       execution = await this.ingress.createExecution(prepared.request);
     } catch (error) {
       if (
-        prepared.command.operation !== 'record_client_consent' ||
-        !(error instanceof ActionConflictError)
+        !(error instanceof ActionConflictError) ||
+        !(
+          prepared.command.operation === 'record_client_consent' ||
+          (prepared.command.operation === 'install_crm_credentials' &&
+            'expectedVersion' in prepared.command)
+        )
       )
         throw error;
-      // Concurrent planning can assign different server timestamps to the same
-      // event. Only the existing keyed receipt may resolve that race. Rebuild
-      // validates all business material and authority before reusing its times.
+      // One bounded owner retry: concurrent planning may observe a different
+      // consent time or CRM target generation. The planner must find an existing
+      // trusted input and verify exact actor/material; never mint a new identity.
       const retry = await this.planner.build(
         prepared.request.tenantId,
         prepared.actor,
@@ -1323,12 +1327,18 @@ export class Package5Wave3ExecutableService {
       throw new Package5Wave3Error(
         `Execution cannot run from ${execution.state}`,
       );
+    if ('expectedVersion' in prepared.command)
+      this.assertCrmPayloadCurrent(execution);
     const input = await this.kernel.readTrustedNormalizedInput(
       execution.tenantId,
       execution.id,
     );
     const freshFacts =
-      prepared.command.operation !== 'record_client_consent'
+      prepared.command.operation !== 'record_client_consent' &&
+      !(
+        prepared.command.operation === 'install_crm_credentials' &&
+        'expectedVersion' in prepared.command
+      )
         ? await this.planner.assertStillCurrent(
             execution.tenantId,
             prepared.actor,
@@ -1336,6 +1346,8 @@ export class Package5Wave3ExecutableService {
             input,
           )
         : null;
+    // Qualified install has no provider work here. Its complete source/material
+    // check runs under the target lock below, after checking a concurrent success.
     return this.serializable(async (tx) => {
       if (prepared.command.operation === 'record_client_consent')
         await lockClientConsent(
@@ -1366,6 +1378,8 @@ export class Package5Wave3ExecutableService {
       });
       if (locked.state === ActionExecutionState.SUCCEEDED)
         return this.restore(locked);
+      if ('expectedVersion' in prepared.command)
+        this.assertCrmPayloadCurrent(locked);
       this.assertExecutable(locked, registration.actionClass);
       if (!('expectedVersion' in prepared.command))
         await this.assertActor(tx, locked, input);
@@ -1437,6 +1451,17 @@ export class Package5Wave3ExecutableService {
       await this.finalize(tx, locked, attemptId, value);
       return value;
     });
+  }
+
+  private assertCrmPayloadCurrent(execution: ActionExecution) {
+    if (
+      !execution.payloadRetentionUntil ||
+      execution.payloadRetentionUntil.getTime() <= this.now().getTime()
+    )
+      throw new ConflictException({
+        message: 'CRM operation evidence expired',
+        error: { code: 'crm_operation_evidence_unavailable' },
+      });
   }
 
   private async executeExternal(
