@@ -35,7 +35,7 @@ test('read session reuses exact preparation and cleanup without changing stage 0
   assert.equal(path.basename(read.runtime.args[0]), 'local-yclients-read-runtime.mjs');
   assert.equal(path.basename(before.runtime.args[0]), 'local-onboarding-runtime.mjs');
   assert.equal(read.runtime.cwd, options.stateDirectory);
-  assert.equal(read.durationMs, 900000); assert.equal(read.promptDeadlineMs, 120000); assert.equal(read.preparationDeadlineMs, 900000);
+  assert.equal(read.durationMs, 900000); assert.equal(read.promptDeadlineMs, 600000); assert.equal(read.preparationDeadlineMs, 900000);
   assert.throws(() => readSessionPlan({ ...options, minutes: 16 }));
   assert.throws(() => readSessionPlan({ ...options, database: 'existing_unowned_database' }));
 });
@@ -133,5 +133,5 @@ test('hidden prompt has a finite deadline and preserves an already-raw terminal'
   await assert.rejects(promptPartnerToken({ ...fake, timeoutMs: 5 }), /deadline/);
   assert.equal(fake.input.isRaw, true); assert.equal(fake.input.isPaused(), false);
   assert.equal(fake.input.listenerCount('data'), 0);
-  await assert.rejects(promptPartnerToken({ ...tty(), timeoutMs: 120001 }));
+  await assert.rejects(promptPartnerToken({ ...tty(), timeoutMs: 600001 }));
 });

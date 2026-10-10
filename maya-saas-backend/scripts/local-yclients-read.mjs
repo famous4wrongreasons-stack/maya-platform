@@ -76,7 +76,7 @@ export function readSourceBinding() {
 
 export function readSessionPlan(options) {
   const plan = sessionPlan(options);
-  return { ...plan, preparationDeadlineMs: PREPARATION_MS, promptDeadlineMs: 120000,
+  return { ...plan, preparationDeadlineMs: PREPARATION_MS, promptDeadlineMs: 600000,
     runtime: { ...plan.runtime, args: [path.join(backend, 'scripts/local-yclients-read-runtime.mjs')] } };
 }
 
@@ -87,14 +87,14 @@ export function partnerTokenShape(value) {
 
 // Unit tests use finite public strings and fake TTY events. Real invocation uses
 // only the owner's foreground terminal, never a pipe, environment or token file.
-export async function promptPartnerToken({ input = process.stdin, output = process.stderr, timeoutMs = 120000, signal } = {}) {
+export async function promptPartnerToken({ input = process.stdin, output = process.stderr, timeoutMs = 600000, signal } = {}) {
   assert.equal(input.isTTY, true, 'An interactive terminal is required');
   assert.equal(output.isTTY, true, 'An interactive terminal is required');
   assert.equal(typeof input.setRawMode, 'function');
   assert.equal(input.readableLength, 0, 'Previously buffered terminal input refused');
   assert.equal(input.readableEncoding ?? null, null, 'Pre-decoded terminal input refused');
   assert.equal(input.listenerCount('data') + input.listenerCount('readable'), 0, 'Exclusive terminal input required');
-  assert.ok(Number.isSafeInteger(timeoutMs) && timeoutMs > 0 && timeoutMs <= 120000);
+  assert.ok(Number.isSafeInteger(timeoutMs) && timeoutMs > 0 && timeoutMs <= 600000);
   if (signal?.aborted) throw cancelledInput();
   return new Promise((resolve, reject) => {
     const bytes = Buffer.alloc(4096);
@@ -293,6 +293,7 @@ export async function main(args) {
     }
     assert.equal(control.cancelled, null);
     assert.deepEqual(readSourceBinding(), source, 'Source changed during preparation');
+    clearTimeout(preparationTimer); // Preparation is complete; allow the owner a separate bounded input window.
     const abort = new AbortController(); control.terminate = () => abort.abort();
     manifest.status = 'awaiting_owner_partner_token'; save();
     let partnerToken = await promptPartnerToken({ timeoutMs: plan.promptDeadlineMs, signal: abort.signal });
