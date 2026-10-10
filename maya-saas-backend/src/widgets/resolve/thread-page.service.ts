@@ -261,7 +261,12 @@ export class WidgetThreadPageService {
                         record.effect === 'COMMIT' &&
                         record.capabilitySpace === 'AE',
                     )
-                    .flatMap((record) => record.receipts),
+                    .flatMap((record) =>
+                      record.receipts.map((receipt) => ({
+                        ...receipt,
+                        capabilityKey: record.capabilityKey,
+                      })),
+                    ),
                 ),
           // Fresh reread tokens are owned by the later projector edge.
           reread_intent: null,
@@ -361,6 +366,7 @@ const terminalLines = (
     outcome: string;
     refusalCode: string | null;
     actionReceiptRef: string | null;
+    capabilityKey: string | null;
   }[],
 ): TerminalLine[] => {
   if (!Array.isArray(value)) return [];
@@ -388,13 +394,31 @@ const terminalLines = (
         : line.action_receipt_ref !== null
     )
       return [];
+    // CONFIRMED describes the canonical operation receipt, not the current
+    // appointment state. Use its own retained AE capability for the wording;
+    // a cancellation must not be presented as a newly confirmed booking.
+    const confirmed = receipts.filter(
+      (receipt) =>
+        receipt.outcome === 'ACCEPTED' &&
+        receipt.actionReceiptRef === line.action_receipt_ref,
+    );
+    const confirmedText =
+      confirmed.length === 1 &&
+      confirmed[0].capabilityKey === 'crm.appointment.cancel.v1'
+        ? 'Запись отменена.'
+        : confirmed.length === 1 &&
+            confirmed[0].capabilityKey === 'crm.appointment.reschedule.v1'
+          ? 'Запись перенесена.'
+          : TERMINAL_TEXT.CONFIRMED;
     return [
       {
         outcome,
         text:
           outcome === 'NOT_CONFIRMED'
             ? (refusal ?? TERMINAL_TEXT[outcome])
-            : TERMINAL_TEXT[outcome],
+            : outcome === 'CONFIRMED'
+              ? confirmedText
+              : TERMINAL_TEXT[outcome],
         action_receipt_ref: line.action_receipt_ref as string | null,
       },
     ];

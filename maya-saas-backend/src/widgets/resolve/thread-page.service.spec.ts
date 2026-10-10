@@ -221,6 +221,55 @@ describe('P-RESOLVE principal thread page', () => {
       'Запись подтверждена.',
     ]);
   });
+  it.each([
+    ['crm.appointment.create.v1', 'Запись подтверждена.'],
+    ['crm.appointment.reschedule.v1', 'Запись перенесена.'],
+    ['crm.appointment.cancel.v1', 'Запись отменена.'],
+  ])(
+    'projects %s wording only from its matching canonical receipt',
+    async (capabilityKey, text) => {
+      const { service, findMany } = make();
+      const row = {
+        terminalLinesJson: [
+          {
+            outcome: 'CONFIRMED',
+            action_receipt_ref: 'ae-receipt',
+            text: 'Untrusted stored text',
+          },
+        ],
+        intentRecords: [
+          {
+            intentTokenHash: 'a'.repeat(64),
+            effect: 'COMMIT',
+            capabilitySpace: 'AE',
+            capabilityKey,
+            receipts: [
+              {
+                outcome: 'ACCEPTED',
+                refusalCode: null,
+                actionReceiptRef: 'ae-receipt',
+              },
+            ],
+          },
+        ],
+        renderReceipts: [{ emittedEnvelopeJson: envelope }],
+      };
+      findMany.mockResolvedValue([row] as never);
+      expect((await service.read({ limit: 20 }))[0].terminal_lines).toEqual([
+        { outcome: 'CONFIRMED', action_receipt_ref: 'ae-receipt', text },
+      ]);
+      // A receipt from another action cannot lend its operation wording.
+      row.intentRecords[0].receipts[0].actionReceiptRef = 'unrelated-receipt';
+      expect(
+        (await service.read({ limit: 20 }))[0].terminal_lines[0].text,
+      ).toBe('Запись подтверждена.');
+      row.intentRecords[0].effect = 'CONTROL';
+      row.intentRecords[0].receipts[0].actionReceiptRef = 'ae-receipt';
+      expect(
+        (await service.read({ limit: 20 }))[0].terminal_lines[0].text,
+      ).toBe('Запись подтверждена.');
+    },
+  );
   it('projects the immutable AE COMMIT refusal, never legacy prose or a CONTROL adjudication', async () => {
     const { service, findMany } = make();
     findMany.mockResolvedValue([

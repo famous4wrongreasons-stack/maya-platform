@@ -92,19 +92,29 @@ async function main() {
     assert.equal(envelope.kind, 'BOOKING_CONFIRMATION');
     const intent = envelope.intents.find(i => i.effect === 'COMMIT'); assert.ok(intent);
     const result = await clickRef('intent:' + intent.intent_ref, envelope);
+    const terminalText = { 'create-commit': 'Запись подтверждена.', 'reschedule-commit': 'Запись перенесена.', 'cancel-commit': 'Запись отменена.' }[name];
+    assert.ok(await page.waitFor(`Q.all('[data-chat-message="maya"]').at(-1)?.textContent.includes(${JSON.stringify(terminalText)})`), 'Current operation must render its own canonical outcome');
     await record(name, result); assert.equal(result.receipt_outcome, 'ACCEPTED'); return result;
   }
   async function login() {
+    if (report.lastLoginAt) {
+      // Keep the real resend limit: wait for its normal one-minute window.
+      await untilLoginWindow(report.lastLoginAt + 61000);
+    }
     const beforeAuth = page.apiRequests('/auth/email/start').length;
     const beforeHistory = page.apiRequests('/widgets/resolve').length;
     await clickName('Войти по email');
     assert.ok(await page.waitFor('!!Q.email()')); assert.equal(await page.fill('Q.email()', input.email), true); await clickName('Получить код');
     const auth = await until(() => page.apiRequests('/auth/email/start').slice(beforeAuth).find(r => r.finishedAt), 'email start'); assert.equal(auth.status, 201);
+    report.lastLoginAt = Date.now();
     const challenge = JSON.parse(await page.responseBody(auth.requestId)); assert.equal(challenge.delivery, 'debug');
     assert.ok(await page.waitFor('!!Q.code()')); assert.equal(await page.fill('Q.code()', challenge.debug_code), true); delete challenge.debug_code;
     await clickName('Войти'); assert.ok(await page.waitFor('!!Q.composer()'));
     await until(() => page.apiRequests('/widgets/resolve').slice(beforeHistory).some(r => r.finishedAt && r.status === 200), 'history');
     report.canonicalLogins = (report.canonicalLogins ?? 0) + 1;
+  }
+  async function untilLoginWindow(at) {
+    while (Date.now() < at) await pause(Math.min(1000, at - Date.now()));
   }
   try {
     localOrigin(input.backendOrigin);

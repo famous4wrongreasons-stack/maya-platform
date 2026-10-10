@@ -25,12 +25,17 @@ const env = { DATABASE_URL: `postgresql://booking_confirmation_proof@127.0.0.1:$
 for (const key of ['PATH', 'HOME', 'TMPDIR']) if (process.env[key]) env[key] = process.env[key];
 const manifest = { kind: 'booking-confirmation-http-react-local-proof', browserOnly: values['browser-only'], cluster, database, port, status: 'running', completed: [], syntheticModel: true, syntheticInternalCatalog: true, syntheticLocalProvider: true, externalProviderAcceptance: false, realModelAcceptance: false, certificate: 'NOT_ISSUED', resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, jestWorkers: 1, browserCount: 1 } };
 let sourceHashes;
+let sourceScopes;
+const readSourceHashes = scopes => {
+  const files = execFileSync('git', ['ls-files', '-z', '--', ...scopes], { cwd: backend, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 }).split('\0').filter(Boolean).sort();
+  return Object.fromEntries(files.map(file => [file, createHash('sha256').update(fs.readFileSync(path.resolve(backend, file))).digest('hex')]));
+};
 if (values['exact-followup']) {
   assert.equal(values['browser-only'], true, 'Exact continuation runs only its single targeted browser proof');
   const scopes = ['src', 'prisma', 'test/widgets-live', 'test/jest-widgets-live.json', 'scripts/booking-confirmation-proof.mjs', 'package.json', 'package-lock.json', 'tsconfig.json', '../maya-carrier-react', '../maya-chat-shell'];
+  sourceScopes = scopes;
   assert.equal(execFileSync('git', ['status', '--porcelain', '--untracked-files=all', '--', ...scopes], { cwd: backend, encoding: 'utf8' }), '', 'Commit exact source before the proof');
-  const files = execFileSync('git', ['ls-files', '-z', '--', ...scopes], { cwd: backend, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 }).split('\0').filter(Boolean).sort();
-  sourceHashes = Object.fromEntries(files.map(file => [file, createHash('sha256').update(fs.readFileSync(path.resolve(backend, file))).digest('hex')]));
+  sourceHashes = readSourceHashes(scopes);
   fs.writeFileSync(path.join(values.output, 'source-hashes.json'), JSON.stringify(sourceHashes, null, 2) + '\n', { mode: 0o600 });
   Object.assign(manifest, { exactFollowup: true, candidateCommit: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: backend, encoding: 'utf8' }).trim(), sourceSha256: createHash('sha256').update(JSON.stringify(sourceHashes)).digest('hex'), sourceBinding: 'COMMITTED_SOURCE_BYTES', realModelCalls: 0, realProviderCalls: 0 });
 }
@@ -95,10 +100,6 @@ try {
   await run('react-web-build', process.execPath, ['build.mjs', '--target=web'], {}, path.resolve(backend, '../maya-carrier-react'));
   if (!values['browser-only']) await run('http-booking', process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--runInBand', '--runTestsByPath', 'test/widgets-live/chat-catalog-booking.live-spec.ts', 'test/widgets-live/provider-unknown.live-spec.ts', '--json', '--outputFile=' + path.join(values.output, 'http-booking-jest.json')]);
   await probe();
-  if (sourceHashes) {
-    manifest.sourcesUnchanged = Object.entries(sourceHashes).every(([file, digest]) => createHash('sha256').update(fs.readFileSync(path.resolve(backend, file))).digest('hex') === digest);
-    assert.equal(manifest.sourcesUnchanged, true);
-  }
   manifest.status = 'passed';
 } catch (e) { manifest.status = 'failed'; throw e; }
 finally {
@@ -106,6 +107,16 @@ finally {
     try { await run('pg-stop', pg('pg_ctl'), [...pgArgs, '-m', 'fast', 'stop']); manifest.clusterStopped = true; }
     catch { manifest.status = 'failed-stop'; manifest.clusterStopped = false; }
   }
+  if (sourceHashes) {
+    try {
+      manifest.sourcesUnchanged = JSON.stringify(readSourceHashes(sourceScopes)) === JSON.stringify(sourceHashes)
+        && execFileSync('git', ['rev-parse', 'HEAD'], { cwd: backend, encoding: 'utf8' }).trim() === manifest.candidateCommit
+        && execFileSync('git', ['status', '--porcelain', '--untracked-files=all', '--', ...sourceScopes], { cwd: backend, encoding: 'utf8' }) === '';
+    } catch { manifest.sourcesUnchanged = false; }
+    manifest.sourceCheckAfterCleanup = true;
+    if (!manifest.sourcesUnchanged) manifest.status = 'failed-source-change';
+  }
+  if (cancelled) manifest.status = 'cancelled';
   save();
   process.off('SIGINT', onInt); process.off('SIGTERM', onTerm);
 }
