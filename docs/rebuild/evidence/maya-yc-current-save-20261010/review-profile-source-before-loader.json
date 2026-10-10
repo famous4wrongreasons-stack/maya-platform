@@ -1,0 +1,194 @@
+{
+  "contract": "maya.a17-exact-profile-source-review/1",
+  "reviewedAt": "2026-10-10T19:46:53.204525+00:00",
+  "baseCommit": "f259208eea7e05ee82926531e40350fdc6ef55d5",
+  "verdict": "QUALIFIED_SOURCE_PASS",
+  "blockers": [],
+  "sourceFiles": [
+    {
+      "path": "maya-chat-shell/src/net/client.ts",
+      "sha256": "4cb3675f5af01bb2135805d9e31a6925f75a05d5d422bbabb591fa18f86ff558",
+      "bytes": 51912
+    },
+    {
+      "path": "maya-chat-shell/src/net/types.ts",
+      "sha256": "eb031c7dec23747f9a5f9c95305ba5d59803278b71e6d2fbd300f21cc81e48f7",
+      "bytes": 27173
+    },
+    {
+      "path": "maya-chat-shell/src/shell/local-crm-setup.ts",
+      "sha256": "eab3e310dd2f88c4f55b9f03438b6f80c5cf38cdd77aeaab7620bf04e0642546",
+      "bytes": 15267
+    },
+    {
+      "path": "maya-chat-shell/test/local-crm-setup.test.mjs",
+      "sha256": "5d2a0e23bb2826da5ca18b17e11daa654a7f82768255d0db4174518d05c56987",
+      "bytes": 32480
+    },
+    {
+      "path": "maya-carrier-react/src/App.tsx",
+      "sha256": "6080220b345f68a10d8b99e79fa7c7b7fa68cff91b3d268c6e6f4163462a7d58",
+      "bytes": 3641
+    },
+    {
+      "path": "maya-carrier-react/src/setup/LocalCrmSetup.tsx",
+      "sha256": "e23ce0af9a90f86d3f4f4e7f54add64d10e9f440fc96b0fe2e18a7698ee3dcbd",
+      "bytes": 16862
+    },
+    {
+      "path": "maya-carrier-react/src/signin/SignIn.tsx",
+      "sha256": "a9dbc44f8b7528eb103ab143b7755c9973143ade88431db4f062c798e2b4da05",
+      "bytes": 20081
+    },
+    {
+      "path": "maya-carrier-react/src/signin/StandardOnboarding.tsx",
+      "sha256": "e994f216eebd0fcf4b314e139ce8c3f0c736c8de6c46de2c0744887b85788dcd",
+      "bytes": 21454
+    },
+    {
+      "path": "maya-carrier-react/test/local-setup-entry.test.mjs",
+      "sha256": "88e68da0ba4fa357e39cbad1f214c3618cfacf53b1cbe6edf6ef14d76c67b556",
+      "bytes": 7206
+    },
+    {
+      "path": "maya-carrier-react/test/local-setup-ui.runtime.mjs",
+      "sha256": "d3a9873afa6444d3cdea920821eecbc1a2a8d091bfee26da5a1cdaaaa59e191c",
+      "bytes": 4298
+    },
+    {
+      "path": "maya-carrier-react/package.json",
+      "sha256": "79b5e787d947703c58a7b5b582bc9d42e6a765a9dff45b626f2709deb8e5a701",
+      "bytes": 1059
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-status.mjs",
+      "sha256": "262f4eca7789df3a504669b3194989e3a016c3a1df491f2c4b6c5ffae792d30a",
+      "bytes": 5922
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-transport.mjs",
+      "sha256": "031255c1b0d3842fafbc47405c6b7feb5fb9ac0bceb4fa109e91d0168288ba96",
+      "bytes": 7428
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-runtime.mjs",
+      "sha256": "15d37d38bdaa098aa3d4b0cf40459b5095c8f40f5ef456027ea63e9cfa04e351",
+      "bytes": 6583
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.mjs",
+      "sha256": "9cf3c8dc539b991241a40fd003796adc3acc30e57475e56f32eb220b381da29e",
+      "bytes": 33764
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.test.mjs",
+      "sha256": "6631ddf9114997ed22291ef64122f8f1712331f8b6e9b6aa14edcbe982dbd642",
+      "bytes": 17944
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-profile.test.mjs",
+      "sha256": "6fe14f2017519ccfa4f5d877317f448810ddefe47364810a0bf98a45407a246e",
+      "bytes": 19151
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/http-bootstrap.ts",
+      "sha256": "67b3b8e8575829b14a94917acfdc9ab0d06ca6e6930e2f6a414b7c1099abc6db",
+      "bytes": 10074
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/crm-a17-operation-restart.probe-spec.ts",
+      "sha256": "6e3614411f674fd42fc08c0622116c1474b40565927936877b056e97b7f3f85b",
+      "bytes": 69802
+    },
+    {
+      "path": "maya-carrier-react/test/crm-a17-setup-browser-guard.mjs",
+      "sha256": "da96cac6e73d5a8d8f04b537d05f54b396144b91d8a9e34269f9237eecad23cb",
+      "bytes": 7162
+    },
+    {
+      "path": "maya-carrier-react/test/crm-a17-setup-browser-guard.test.mjs",
+      "sha256": "a8c32a31083a6c7abbb4ef516ff43fae460e6a7bb1fe7e0f7d0afacf83b07a73",
+      "bytes": 5786
+    },
+    {
+      "path": "maya-carrier-react/test/crm-a17-setup-browser-probe.mjs",
+      "sha256": "06ace16e7fee5d84035c17edb002471e721e5421c8f23cebcd2952ffdb282a42",
+      "bytes": 24619
+    }
+  ],
+  "priorUiHeadlessReview": {
+    "file": "maya-a17-save-ux-review-20261010.json",
+    "sha256": "960a6107caffff3ac03a7a65cf1491f614da9c4abf9a7c44cfa74c7c5efb432b",
+    "reviewedBytesStillMatch": true
+  },
+  "checks": [
+    {
+      "name": "trace_projection_privacy",
+      "result": "PASS",
+      "detail": "Exact wire schema; finite route/method/stage/code/status, bounded integer timing and sequence; raw URL/query/body/headers/credential/error fields cannot enter projected events."
+    },
+    {
+      "name": "trace_ownership_and_bounds",
+      "result": "PASS",
+      "detail": "Emitter supplies its own type/contract/sequence/elapsedMs, caps at 64. Launcher requires consecutive projected events; malformed events fail closed without retaining raw payload."
+    },
+    {
+      "name": "receipt_time_qualification",
+      "result": "PASS",
+      "detail": "Launcher adds observedAt only after wire validation. readTraceClock is launcher_received_utc_not_provider_time. Incoming forged observedAt is rejected. UTC receipt timestamp is not a provider event timestamp or request identity."
+    },
+    {
+      "name": "observer_noninterference",
+      "result": "PASS",
+      "detail": "Provider trace callback exceptions and closed IPC sends are caught. Provider transport admission, current actor/company/route limits, request abort, response bounds and scope poisoning remain in place."
+    },
+    {
+      "name": "honest_provider_status",
+      "result": "PASS",
+      "detail": "provider_response_read means bounded parsed wire acceptance only. Provider status/error trace does not assert selected-company validation, A17 admission or commit. Optional category semantics remain unchanged."
+    },
+    {
+      "name": "test_before_init_scope",
+      "result": "PASS",
+      "detail": "Optional HTTP hook runs after configureHttpApp and before app.init/controller registration. No hook for existing callers. Real AppModule guards remain; fixture wraps same runtime ingress/boundary/transport functions before controllers."
+    },
+    {
+      "name": "native_factory_and_synthetic_source",
+      "result": "PASS",
+      "detail": "Factory spy is call-through with fixed public synthetic material and asserts actual native adapter. No alternate provider base URL; real YCLIENTS origin is intercepted by finite synthetic fetch. Fixture is not a real-provider run."
+    },
+    {
+      "name": "finite_browser_refusals",
+      "result": "PASS",
+      "detail": "Two independent synthetic tenants use actual password login; lossInjection=false for provider refusal cases. Browser requires actual400 exact code, safe text, cleared token, same UUID after reload, no automatic setup request, NOT_OBSERVED and configured:false. Parent fixture independently requires no integration/AE/mutation and no new recovery provider read."
+    },
+    {
+      "name": "existing_recovery_controls",
+      "result": "PASS",
+      "detail": "Original request-before-admission drop and committed activation-response loss remain explicit; exact receipts, durable graph and restart controls are preserved. Browser guard restricts exact synthetic login/material and closes old page listeners."
+    },
+    {
+      "name": "ui_headless_safety",
+      "result": "PASS",
+      "detail": "Previously reviewed closed diagnostic projection, uncertainty, exact pending locator, explicit recovery, current-session/version fences and consent remain as bound in prior source review."
+    }
+  ],
+  "qualifications": [
+    "No reviewer tests, builds, services, PG, browser, provider/model requests, TTY, owner-state or credential reads occurred.",
+    "Parent/author reported 42 focused diagnostics tests passing. Execution logs were not independently rerun or accepted as actual HTTP proof by this review.",
+    "Current exact-profile proof is source-ready only; actual HTTP/PG/browser results and final cleanup must be reviewed separately.",
+    "Test AppModule uses explicit synthetic users, grants and native fetch. It does not qualify the complete private launcher environment, arbitrary tenant plans, real owner credentials, real YCLIENTS or model acceptance.",
+    "Trace is capped at first 64 events, without request IDs; aggregate/trace observations cannot establish exact browser-to-provider correlation or reconstruct unobserved historical outcomes.",
+    "Provider wire success and zero guard refusals do not imply A17/business commit; canonical operation receipt and DB evidence remain authoritative.",
+    "Original historical owner failure remains UNKNOWN. Safe metadata projections were checked read-only; owner DB/keys were not accessed by reviewer."
+  ],
+  "documentationNote": "Top-level historical observer correction is properly qualified. A nested subsequentBrowserObservation copy was reported to parent for the same wording correction; it is not a source/runtime blocker.",
+  "execution": {
+    "testsRun": false,
+    "servicesRun": false,
+    "networkCalls": false,
+    "ownerDatabaseRead": false,
+    "credentialsRead": false,
+    "repositoryEdits": false
+  }
+}

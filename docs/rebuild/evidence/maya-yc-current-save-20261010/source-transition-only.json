@@ -1,0 +1,12 @@
+{
+  "contract": "maya.yc-save-source-transition-only/1",
+  "initialOwnerSource": "03875b23523a578fad13ec0e8f7035dcd4e5a66b",
+  "candidateCommit": "d4cc4bd7e0d182ba656c42ee84517c1c50d37ae1",
+  "capturedSourcePaths": 2026,
+  "canonicalFiles": 117,
+  "canonicalSchemaAndMigrationsIdentical": true,
+  "ownerStateRead": false,
+  "credentialsRead": false,
+  "servicesStarted": false,
+  "qualification": "Git source comparison only. The existing resume owner must revalidate private pins and stopped database identity at explicit launch."
+}

@@ -1,0 +1,118 @@
+{
+  "contract": "maya.a17-save-ux-source-review/1",
+  "reviewedAt": "2026-10-10T19:36:46.496065+00:00",
+  "verdict": "QUALIFIED_SOURCE_PASS",
+  "baseCommit": "f259208eea7e05ee82926531e40350fdc6ef55d5",
+  "scope": "Ready headless closed-code diagnostics and local opt-in UI entry, explicit branch loader, and disabled-action explanations; current uncommitted source snapshot.",
+  "blockers": [],
+  "sourceFiles": [
+    {
+      "path": "maya-chat-shell/src/net/client.ts",
+      "sha256": "4cb3675f5af01bb2135805d9e31a6925f75a05d5d422bbabb591fa18f86ff558",
+      "bytes": 51912
+    },
+    {
+      "path": "maya-chat-shell/src/net/types.ts",
+      "sha256": "eb031c7dec23747f9a5f9c95305ba5d59803278b71e6d2fbd300f21cc81e48f7",
+      "bytes": 27173
+    },
+    {
+      "path": "maya-chat-shell/src/shell/local-crm-setup.ts",
+      "sha256": "eab3e310dd2f88c4f55b9f03438b6f80c5cf38cdd77aeaab7620bf04e0642546",
+      "bytes": 15267
+    },
+    {
+      "path": "maya-chat-shell/test/local-crm-setup.test.mjs",
+      "sha256": "5d2a0e23bb2826da5ca18b17e11daa654a7f82768255d0db4174518d05c56987",
+      "bytes": 32480
+    },
+    {
+      "path": "maya-carrier-react/src/App.tsx",
+      "sha256": "6080220b345f68a10d8b99e79fa7c7b7fa68cff91b3d268c6e6f4163462a7d58",
+      "bytes": 3641
+    },
+    {
+      "path": "maya-carrier-react/src/setup/LocalCrmSetup.tsx",
+      "sha256": "e23ce0af9a90f86d3f4f4e7f54add64d10e9f440fc96b0fe2e18a7698ee3dcbd",
+      "bytes": 16862
+    },
+    {
+      "path": "maya-carrier-react/src/signin/SignIn.tsx",
+      "sha256": "a9dbc44f8b7528eb103ab143b7755c9973143ade88431db4f062c798e2b4da05",
+      "bytes": 20081
+    },
+    {
+      "path": "maya-carrier-react/src/signin/StandardOnboarding.tsx",
+      "sha256": "e994f216eebd0fcf4b314e139ce8c3f0c736c8de6c46de2c0744887b85788dcd",
+      "bytes": 21454
+    },
+    {
+      "path": "maya-carrier-react/test/local-setup-entry.test.mjs",
+      "sha256": "88e68da0ba4fa357e39cbad1f214c3618cfacf53b1cbe6edf6ef14d76c67b556",
+      "bytes": 7206
+    },
+    {
+      "path": "maya-carrier-react/test/local-setup-ui.runtime.mjs",
+      "sha256": "d3a9873afa6444d3cdea920821eecbc1a2a8d091bfee26da5a1cdaaaa59e191c",
+      "bytes": 4298
+    },
+    {
+      "path": "maya-carrier-react/package.json",
+      "sha256": "79b5e787d947703c58a7b5b582bc9d42e6a765a9dff45b626f2709deb8e5a701",
+      "bytes": 1059
+    }
+  ],
+  "checks": [
+    {
+      "name": "closed_diagnostic_projection",
+      "result": "PASS",
+      "detail": "Only five exact HTTP400 CRM codes and exact HTTP403 local_yclients_read_route_disabled are projected; body/message/detail and unknown or wrong-status codes do not reach failure/view."
+    },
+    {
+      "name": "uncertainty_and_receipt_authority",
+      "result": "PASS",
+      "detail": "Diagnosis does not establish write completion. HTTP400 remains uncertain, HTTP403 remains forbidden, success still requires exact existing operation receipt and snapshot projection."
+    },
+    {
+      "name": "idempotency_and_recovery",
+      "result": "PASS",
+      "detail": "Failure preserves pending operation locator; no automatic resend or new UUID is introduced. Explicit recovery reads and existing same-ID material binding remain unchanged."
+    },
+    {
+      "name": "current_session_and_version_fences",
+      "result": "PASS",
+      "detail": "Existing generation, signed-in, abort, current connection, and config-version guards remain unchanged."
+    },
+    {
+      "name": "local_entry_and_branch_loader",
+      "result": "PASS",
+      "detail": "Password-first entry is selected only through existing localCrmSetupEnabled localhost opt-in. Rendering does not dispatch login or branch reads; branch loading remains an explicit action."
+    },
+    {
+      "name": "consent_and_secret_display",
+      "result": "PASS",
+      "detail": "Existing canStage/canActivate gates and separate fresh consents remain. Disabled-action explanation is static/display data only. No password/API token or response body is added to React/headless display state."
+    },
+    {
+      "name": "regression_test_source",
+      "result": "PASS",
+      "detail": "Read test assertions for exact code/status projection, private-value sentinel omission, pending locator retention and blocked duplicate submission, synthetic entry/loading/consent controls. No tests were executed by reviewer."
+    }
+  ],
+  "execution": {
+    "reviewerTestsRun": false,
+    "reviewerServicesRun": false,
+    "reviewerNetworkCalls": false,
+    "ownerStateRead": false,
+    "keysRead": false,
+    "repositoryFilesChangedByReviewer": false
+  },
+  "qualifications": [
+    "Source-only assessment of listed bytes; not actual HTTP, backend runtime, provider, model, or complete product acceptance.",
+    "Parent reported 30/30 headless tests and typecheck passing. This report does not independently verify those execution logs.",
+    "Synthetic presentation tests use explicit synthetic ports; they do not prove authenticated backend behavior.",
+    "In-flight HTTP fixture, runtime diagnostics and browser proof files are excluded from this source verdict and require separate final review.",
+    "Backend existing error classification and logging are not changed or qualified by this headless/UI delta.",
+    "Changes after the listed hashes require a new binding or review addendum."
+  ]
+}

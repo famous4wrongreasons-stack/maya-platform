@@ -1,0 +1,343 @@
+{
+  "contract": "maya.a17-current-save-actual-independent-review/1",
+  "reviewedAt": "2026-10-10T19:59:43.265381+00:00",
+  "candidateCommit": "d4cc4bd7e0d182ba656c42ee84517c1c50d37ae1",
+  "verdict": "QUALIFIED_SYNTHETIC_ACTUAL_PASS",
+  "blockers": [],
+  "scope": "Read-only source and actual synthetic HTTP/current React/PG restart evidence review; no reviewer execution and no owner-state access.",
+  "artifactBindings": [
+    {
+      "artifact": "manifest.json",
+      "sha256": "a633b888ae51e01de980c30b99995efd1bf6755fc44ee81f2f52d77588b22959",
+      "bytes": 612
+    },
+    {
+      "artifact": "prepare.json",
+      "sha256": "25d5f5b3745d85313b31ba592b6c4f171370bbc6c5cbc548c1f6ab52193dfcf5",
+      "bytes": 32611
+    },
+    {
+      "artifact": "resume.json",
+      "sha256": "42f2345fe01f1c741deae4f0b45a766c261dd300f8d71450b40deaae93925f46",
+      "bytes": 25442
+    },
+    {
+      "artifact": "prepare-jest.json",
+      "sha256": "8d6a2717b36269608d1b3c382a9617be74d93c9e6c864e2c164f5e0905cb31e8",
+      "bytes": 1458
+    },
+    {
+      "artifact": "resume-jest.json",
+      "sha256": "f627b5767fc960a28e07f67cc70f36c08c93a9fc665b4152cd85f33c994a3585",
+      "bytes": 1456
+    },
+    {
+      "artifact": "crm-setup-browser/browser.json",
+      "sha256": "931335eb6ccf033e8dd036054d68f90485939e164f25a8ccdc9e666545f2bcad",
+      "bytes": 10606
+    },
+    {
+      "artifact": "pg-restart.log",
+      "sha256": "4cb9a437120ad82a86f324727dd10d7a8d7945df2b7784a0fbb0552cec65cd5f",
+      "bytes": 1345
+    },
+    {
+      "artifact": "pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "artifact": "actual03-summary.json",
+      "sha256": "63bdad655a8ab5e44cd195dc35e64a149cf1c2deb7f144d6cb9a497b086745fa",
+      "bytes": 8805
+    },
+    {
+      "artifact": "actual03-source-bindings.json",
+      "sha256": "3973ab0120208e7e04363093bfa76f08d305995224fe8033e60ecb4e11709849",
+      "bytes": 8620
+    },
+    {
+      "artifact": "attempt01-summary.json",
+      "sha256": "48711a235a1fcbeb961b2fa489fc2a76ce0bb1fc0923293497f08ea97dd20df9",
+      "bytes": 835
+    },
+    {
+      "artifact": "attempt02-summary.json",
+      "sha256": "e4fb21c6688b5bd003cd95e340d975e6dd74dd44e1d8761988e5ff592d62f999",
+      "bytes": 3248
+    },
+    {
+      "artifact": "maya-local-setup-compose-source-20261010.json",
+      "sha256": "55d21a39ad6cf67a593c60c4efb7e1b5d2911455141e1f60163824ec6bb7669e",
+      "bytes": 1573
+    },
+    {
+      "artifact": "maya-local-setup-compose-unit-final-20261010.log",
+      "sha256": "41f3b625f9aa85b41f1fc3e4eee1c5035086edfee559cca87f6042893e526b8d",
+      "bytes": 1232
+    },
+    {
+      "artifact": "maya-local-setup-compose-types-final-20261010.log",
+      "sha256": "631672d9be1ce33f184ad6015f9fb486acbd667c141db2f0acec11f9e25faf92",
+      "bytes": 126
+    },
+    {
+      "artifact": "maya-yc-safe-diagnostics-42-final-20261010.log",
+      "sha256": "0c717cf5104125fa5ea52dcdee7dba60164cc2d19a842d1c7b34a20ffaa31ee0",
+      "bytes": 4381
+    },
+    {
+      "artifact": "maya-yc-save-current-source-binding-20261010.json",
+      "sha256": "fdc30047fa20c3f8059944b7650cac1f98a5a63b7f5170e52f66d3bd92702c49",
+      "bytes": 486737
+    }
+  ],
+  "sourceVerification": {
+    "actualPrepareResumeBoundFiles": 40,
+    "prepareResumeMapsIdentical": true,
+    "actualBoundFilesMatchCurrentAndExactGit": true,
+    "mismatches": [],
+    "currentProfileBindingFiles": 2026,
+    "currentProfileBindingMatchesExactGitAndCurrent": true,
+    "currentProfileBindingQualification": "Additional post-run current readSourceBinding attestation; actual stage reports explicitly bind their 40-file source set.",
+    "legacySchemaTransition": {
+      "fromCommit": "03875b23523a578fad13ec0e8f7035dcd4e5a66b",
+      "toCommit": "d4cc4bd7e0d182ba656c42ee84517c1c50d37ae1",
+      "canonicalPrismaAndConfigFiles": 117,
+      "gitTreesIdentical": true,
+      "qualification": "Source-only compatibility; owner database, keys or state not read."
+    },
+    "actualSourceHashes": {
+      "src/crm/crm-integration.controller.ts": "d133c1b5c53d9a3c724fb4bb4ba5e90dfd12803e11b44a0b02549418b04fec41",
+      "src/crm/dto/connect-crm-integration.dto.ts": "c4062ff06baa1c885d055c69b76021e31aacfa9f49c73f9403deb6f8194528ea",
+      "src/crm/dto/crm-operation.dto.ts": "f079ead59eb4467aa4fa0617d131e5f23785f15842311ca0a110c596d027b266",
+      "src/crm/crm-configuration-version.ts": "788724bbc8db8d95d2d6f9d130063950224d6d49913eb8367a70d1ee91c8f855",
+      "src/crm/crm.service.ts": "544fb41187f55184b1959a0e36e45edae738be0f024e52977279859374d8479d",
+      "src/crm/crm-provider-settings.ts": "9e1c8efb41332dd788d92453d768afcf8f785d3b482340d362ceb81858c9c161",
+      "src/crm/adapters/yclients-crm.adapter.ts": "ef484bde55b5a5ee25549b5af0405fea3932201622161c050280d5d5efee4563",
+      "src/package5-wave3/package5-wave3-canonical-cutover.service.ts": "3cd6bf70e92010e78127fcabd2d792520f5fb8306fe9496f59bfeb758215c06e",
+      "src/package5-wave3/package5-wave3.service.ts": "0e678563f1fa2273170f79916def92f7c94cb415171130cae838cb1257d962c0",
+      "src/package5-wave3/package5-wave3-production-gateway.service.ts": "309e292720ca2fc570e0adcc2504ea8d440795c870cbda36c3a694695f5360cb",
+      "src/action-engine/package5-wave3-executable.contract.ts": "809124b1ee20030ce07fbc64d80bc3c507db02acd63f0f33b58363b158415513",
+      "scripts/c9-occupancy-proof.mjs": "a5a312f0cd8aa29dd987dcfa67b3d258b54e0105c6bdcc2619216c39c6294896",
+      "scripts/local-yclients-read-profile.mjs": "f850e8c558f6f52e3b283efbcce69c3cb889656a164b58e97ec44f5c3ca2b869",
+      "scripts/local-yclients-read-transport.mjs": "031255c1b0d3842fafbc47405c6b7feb5fb9ac0bceb4fa109e91d0168288ba96",
+      "scripts/local-yclients-read-runtime.mjs": "15d37d38bdaa098aa3d4b0cf40459b5095c8f40f5ef456027ea63e9cfa04e351",
+      "scripts/local-yclients-read-status.mjs": "262f4eca7789df3a504669b3194989e3a016c3a1df491f2c4b6c5ffae792d30a",
+      "scripts/local-yclients-read.mjs": "9cf3c8dc539b991241a40fd003796adc3acc30e57475e56f32eb220b381da29e",
+      "scripts/local-onboarding-profile.mjs": "ac53a8a0885d4f8918ee2437050d0dd952ecd52bf5c6ace864e31b2350c685e0",
+      "src/crm/crm-adapter.factory.ts": "4dfb6827bbb9a624c39a366cd34e9aa177ef81645eabb20157cef3ceef123135",
+      "scripts/crm-a17-operation-proof.test.mjs": "31afae3850f11c9760d8eee53de510a4a26bf2bbdc8835f5f80f0d4abb979c08",
+      "test/widgets-live/crm-a17-operation-restart.probe-spec.ts": "c4a3857bd00db176bd879c36010a10bcda1f1eaa60720a936807186eeaddec63",
+      "test/widgets-live/support/http-bootstrap.ts": "67b3b8e8575829b14a94917acfdc9ab0d06ca6e6930e2f6a414b7c1099abc6db",
+      "test/widgets-live/support/proof-db-guard.ts": "f05f1302d30ead2779179b8ee1cb24dd681cf8b5f5933cb65e616fe3f01f4a19",
+      "../maya-carrier-react/test/crm-a17-setup-browser-probe.mjs": "06ace16e7fee5d84035c17edb002471e721e5421c8f23cebcd2952ffdb282a42",
+      "../maya-carrier-react/test/crm-a17-setup-browser-guard.mjs": "da96cac6e73d5a8d8f04b537d05f54b396144b91d8a9e34269f9237eecad23cb",
+      "../maya-carrier-react/test/crm-a17-setup-browser-guard.test.mjs": "a8c32a31083a6c7abbb4ef516ff43fae460e6a7bb1fe7e0f7d0afacf83b07a73",
+      "../maya-carrier-react/src/setup/LocalCrmSetup.tsx": "e23ce0af9a90f86d3f4f4e7f54add64d10e9f440fc96b0fe2e18a7698ee3dcbd",
+      "../maya-carrier-react/src/App.tsx": "6080220b345f68a10d8b99e79fa7c7b7fa68cff91b3d268c6e6f4163462a7d58",
+      "../maya-carrier-react/src/signin/SignIn.tsx": "a9dbc44f8b7528eb103ab143b7755c9973143ade88431db4f062c798e2b4da05",
+      "../maya-carrier-react/src/signin/StandardOnboarding.tsx": "e994f216eebd0fcf4b314e139ce8c3f0c736c8de6c46de2c0744887b85788dcd",
+      "../maya-carrier-react/src/runtime/crmPending.ts": "7a1265ae670bcc54ab4b8f0c183b5fd150defbfaba984626ee7fdc812b18a587",
+      "../maya-carrier-react/src/runtime/compose.ts": "394721aa55a360f94bcab79127786bd0a2941bd55b4f7baadce20f6882ad91a9",
+      "../maya-carrier-react/build.mjs": "b91d872cbd59d92cb335431c084a5306cebf7011534d9fc9eafca1aa22e88605",
+      "../maya-chat-shell/src/shell/local-crm-setup.ts": "eab3e310dd2f88c4f55b9f03438b6f80c5cf38cdd77aeaab7620bf04e0642546",
+      "../maya-chat-shell/src/net/crm-setup.ts": "4b61612ed740e363028f71813bfa7bd82a0ef292df47db16b659bcd19910c401",
+      "../maya-chat-shell/src/net/client.ts": "4cb3675f5af01bb2135805d9e31a6925f75a05d5d422bbabb591fa18f86ff558",
+      "../maya-chat-shell/src/net/types.ts": "eb031c7dec23747f9a5f9c95305ba5d59803278b71e6d2fbd300f21cc81e48f7",
+      "../maya-chat-shell/test/local-crm-setup.test.mjs": "5d2a0e23bb2826da5ca18b17e11daa654a7f82768255d0db4174518d05c56987",
+      "../maya-chat-shell/dev/serve.mjs": "f0985920ab617d366fefe937ca257f00edbbc1bca90ba7a378dd5a25b03d711d",
+      "../maya-chat-shell/test/cdp-verify.mjs": "02de453056df1ec95091086dedd0485f2f1385655e777d9a2d7c55353e44a999"
+    }
+  },
+  "actualChecks": {
+    "runnerManifestPassed": true,
+    "completedStages": [
+      "initdb",
+      "pg-start",
+      "createdb",
+      "migrations",
+      "react-web-build",
+      "prepare",
+      "pg-restart",
+      "resume"
+    ],
+    "jest": {
+      "prepare": {
+        "suites": 1,
+        "tests": 1,
+        "passed": true,
+        "openHandles": 0
+      },
+      "resume": {
+        "suites": 1,
+        "tests": 1,
+        "passed": true,
+        "openHandles": 0
+      }
+    },
+    "currentReact": {
+      "checkpoints": [
+        "initial",
+        "loaded",
+        "install-lost",
+        "install-reloaded",
+        "not-observed",
+        "installed",
+        "activation-lost",
+        "reload",
+        "recovered",
+        "provider-denied-result",
+        "provider-denied-observed",
+        "company-unavailable-result",
+        "company-unavailable-observed"
+      ],
+      "checkpointCount": 13,
+      "passwordLogins": 7,
+      "chatAndWidgetRequests": 0,
+      "guardBlocked": 0,
+      "guardErrors": 0,
+      "tokenCleared": true,
+      "sameUrlReload": true,
+      "automaticRetry": false,
+      "installReceiptJoinedToHttpFixture": true,
+      "recoveryReceiptJoinedToHttpFixture": true,
+      "droppedUnregisteredRequests": 1,
+      "droppedCommittedActivationResponses": 1
+    },
+    "providerRefusals": [
+      {
+        "case": "provider-denied",
+        "httpStatus": 400,
+        "code": "crm_credentials_rejected",
+        "providerReads": 1,
+        "receiptStatus": "NOT_OBSERVED",
+        "sameLocatorReload": true,
+        "recoveryProviderReads": 0,
+        "integrations": 0,
+        "executions": 0,
+        "mutations": 0
+      },
+      {
+        "case": "company-unavailable",
+        "httpStatus": 400,
+        "code": "crm_company_not_found",
+        "providerReads": 1,
+        "receiptStatus": "NOT_OBSERVED",
+        "sameLocatorReload": true,
+        "recoveryProviderReads": 0,
+        "integrations": 0,
+        "executions": 0,
+        "mutations": 0
+      }
+    ],
+    "additionalHttpRefusal": {
+      "staleVersion": {
+        "status": 409,
+        "code": "crm_config_version_changed",
+        "providerReads": 0,
+        "canonicalActions": 0
+      },
+      "provider403": {
+        "status": 400,
+        "code": "crm_credentials_rejected",
+        "providerReads": 1,
+        "canonicalActions": 0,
+        "recoveryProviderReads": 0,
+        "receiptStatus": "NOT_OBSERVED"
+      }
+    },
+    "restart": {
+      "separateNodeProcess": true,
+      "postmasterChanged": true,
+      "exactCommittedGraphPreserved": true,
+      "providerReadsForRestoredReceipts": 0,
+      "notObservedAndReadyInertUntilExplicitSameIdSubmission": true,
+      "eachExplicitResumptionOneExecutionOneAttemptOneMutation": true
+    },
+    "concurrency": {
+      "sameIdRunningOriginalAndRetrySameReceipt": true,
+      "executions": 1,
+      "attempts": 1,
+      "mutations": 1,
+      "changedMaterialHttpStatus": 409
+    },
+    "atomicProjectionRollbackAndSameIdRecovery": true,
+    "staleVersion409BeforeProvider": true,
+    "currentAuthorityAndForeignTenantControlsPassed": true,
+    "provider": {
+      "prepareSyntheticNativeReads": 113,
+      "resumeSyntheticNativeReads": 15,
+      "realCalls": 0,
+      "providerWrites": 0,
+      "modelCalls": 0,
+      "transportRefusals": 0,
+      "forbidden": []
+    },
+    "closedTrace": {
+      "prepareEvents": 64,
+      "resumeEvents": 60,
+      "bound": 64,
+      "qualification": "First events only, no request identity. Provider wire acceptance is not business commit. Launcher UTC receipt anchor separately covered by source and pure tests."
+    }
+  },
+  "cleanup": {
+    "manifestClusterStopped": true,
+    "pgRestartAndShutdownLogRead": true,
+    "reviewerObservedPostmasterPidAbsent": true,
+    "prepareAndResumeJestCompleted": true,
+    "browserChildCompletionRequiredByPassingFixture": true,
+    "authorReportedA17ChromeProcesses": 0,
+    "authorReportedA17ChromeProfileDirectories": 0,
+    "qualification": "Reviewer read logs/metadata and checked exact pidfile absence; did not launch pg_ctl or independently enumerate other processes."
+  },
+  "focusedChecksRead": {
+    "composeBehavioralAndSsr": {
+      "passed": 10,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "behavioralTests": 4,
+      "ssrTests": 6
+    },
+    "carrierTypesAndGate": "PASS;30 carrier files;29 runtime modules;0 gate refusals",
+    "diagnosticPureTests": {
+      "passed": 42,
+      "failed": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "reviewerRerun": false
+  },
+  "preservedFailures": [
+    {
+      "attempt": 1,
+      "candidateCommit": "653e0981595aea86b679e2963ac9ceedd1c86ae7",
+      "status": "failed",
+      "rawArtifactHashesMatch": true,
+      "failure": "Jest loader rejected ESM before tests; totalTests0",
+      "cleanupReported": true
+    },
+    {
+      "attempt": 2,
+      "candidateCommit": "7267f27e13ff02720c0a365619d27d0a92f714cd",
+      "status": "failed",
+      "rawArtifactHashesMatch": true,
+      "failure": "Three optional chat-history reads blocked by unchanged browser guard; restart and final refusal checkpoints not reached",
+      "cleanupReported": true
+    }
+  ],
+  "qualifications": [
+    "Synthetic identities, test entitlements and fixed public partner/user material only; actual native adapter/factory uses finite synthetic fetch, not live YCLIENTS.",
+    "Exact read_setup_v1 ingress/transport functions were exercised in test AppModule. Full private launcher environment is not qualified by this HTTP fixture.",
+    "Browser exercised same-URL reload and seven password logins. PG restart was a separate HTTP prepare/resume stage, not browser recovery across PG restart.",
+    "Canonical A17 install/activate/import writes are expected in disposable PG; no unrelated business actions, provider writes or model calls were admitted.",
+    "Durable READY proof uses call-through canonical admission followed by labelled test-only failure. It is not abrupt process-crash recovery.",
+    "Operation payload expiry/cleanup remains unit-only. HTTP signed-expired authentication refusal is a separate tested control.",
+    "Provider401 and provider403 classify as safe credential refusal; unavailable selected company classifies separately. NOT_OBSERVED does not prove no dispatch and grants no automatic retry.",
+    "Compose fix removes optional conversation reader only on a copied transport under unchanged explicit local opt-in. Ordinary restore retained; this fix does not establish the historical owner failure cause.",
+    "Historical owner HTTP outcome and failure cause remain UNKNOWN; historical reports and failed attempts were not rewritten or rescored.",
+    "No reviewer tests, services, browser, PG, network, owner database, keys, tokens or private restart receipt reads occurred.",
+    "No full MAYA/C10, real-provider, real-model, visual/design, or owner-state acceptance is asserted."
+  ]
+}

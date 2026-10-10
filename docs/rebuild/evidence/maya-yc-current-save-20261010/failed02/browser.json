@@ -1,0 +1,253 @@
+{
+  "contract": "maya.crm-a17-current-react-proof/1",
+  "status": "failed",
+  "actualBackend": true,
+  "provider": "NATIVE_ADAPTER_SYNTHETIC_GET_ONLY",
+  "modelCalls": 0,
+  "sameUrlReloadOnly": true,
+  "responseLoss": "CDP_RESPONSE_STAGE_DROP_AFTER_ACTUAL_201_AND_CANONICAL_DB_CHECK",
+  "observations": {
+    "install": {
+      "receiptHash": "03b114bfa2b4f6aefe0d37b3684fcebebb71b24b82e499ce1173555ec640293f",
+      "configVersionHash": "5781abfc60a165491b534aa4bd48574248553eafb131d6ae05c0658e55777793",
+      "tokenCleared": true,
+      "preAdmissionLoss": true,
+      "authoritativeNotObserved": true,
+      "explicitSameIdResubmission": true
+    },
+    "lost": {
+      "locatorHash": "4527f5f912dc4c791db30ec22118e84251ce51ce5fb5cd030c7a88c4aa64385e",
+      "posts": 3,
+      "admittedPosts": 2,
+      "automaticRetry": false
+    }
+  },
+  "screenshots": [
+    "initial",
+    "install-lost",
+    "not-observed",
+    "installed",
+    "activation-lost"
+  ],
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "failure": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ [\n+   {\n+     method: 'GET',\n+     path: '/api/ai/conversation'\n+   },\n+   {\n+     method: 'GET',\n+     path: '/api/ai/conversation'\n+   },\n+   {\n+     method: 'GET',\n+     path: '/api/ai/conversation'\n+   }\n+ ]\n- []\n",
+  "guards": {
+    "blocked": [
+      {
+        "method": "GET",
+        "path": "/api/ai/conversation"
+      },
+      {
+        "method": "GET",
+        "path": "/api/ai/conversation"
+      },
+      {
+        "method": "GET",
+        "path": "/api/ai/conversation"
+      }
+    ],
+    "errors": [],
+    "droppedCommittedResponses": 1,
+    "droppedUnregisteredRequests": 1
+  },
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/m/44XHKY5D/main.js",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 201,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": null,
+      "failed": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/crm/connect",
+      "status": null,
+      "failed": true
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/m/44XHKY5D/main.js",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 201,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": null,
+      "failed": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm/operation",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/crm/connect",
+      "status": 201,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/crm/activate",
+      "status": null,
+      "failed": true
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/m/44XHKY5D/main.js",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 201,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/conversation",
+      "status": null,
+      "failed": true
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm/operation",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": false
+    }
+  ]
+}

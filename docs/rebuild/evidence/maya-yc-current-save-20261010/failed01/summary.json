@@ -1,0 +1,23 @@
+{
+  "contract": "maya.a17-exact-profile-attempt-summary/1",
+  "attempt": 1,
+  "candidateCommit": "653e0981595aea86b679e2963ac9ceedd1c86ae7",
+  "status": "failed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "react-web-build"
+  ],
+  "failure": "Jest CJS loader rejected unchanged ESM profile before test initialization",
+  "testsStarted": 0,
+  "browserStarted": false,
+  "clusterStopped": true,
+  "qualification": "Harness loading failure; not evidence about owner submission or provider behavior",
+  "artifactHashes": {
+    "manifest.json": "7f5ec8471b241d88ed725a34596311c9ef630131b7187f39c19cce1febb4d571",
+    "prepare-jest.json": "012ff3aebec258b6a58eb7cc924da9ad101efd9a3aa5e94583692682617fd155",
+    "prepare.log": "c351b11fd11f02b58e21ca05bacf61e9a760683a848562a5e62313036d7e0aa7"
+  }
+}

@@ -1,0 +1,466 @@
+{
+  "contract": "maya.crm-a17-current-react-proof/1",
+  "status": "passed",
+  "actualBackend": true,
+  "provider": "NATIVE_ADAPTER_SYNTHETIC_GET_ONLY",
+  "modelCalls": 0,
+  "sameUrlReloadOnly": true,
+  "responseLoss": "CDP_RESPONSE_STAGE_DROP_AFTER_ACTUAL_201_AND_CANONICAL_DB_CHECK",
+  "observations": {
+    "install": {
+      "receiptHash": "8d889af236367b528eede2ae8b15b7618732acb56cb679657fdcb6c6741d0370",
+      "configVersionHash": "29a80698a86ff12d32e56d316e94156872574b6e480f2c8289288027577258d6",
+      "tokenCleared": true,
+      "preAdmissionLoss": true,
+      "authoritativeNotObserved": true,
+      "explicitSameIdResubmission": true
+    },
+    "lost": {
+      "locatorHash": "07e6b03100a4edc9b191a46c8e71e7d2a85e9cdc0ebe3733fc32e2a1ada565bd",
+      "posts": 3,
+      "admittedPosts": 2,
+      "automaticRetry": false
+    },
+    "recovery": {
+      "receiptHash": "05cbb99050f20391f14861de94bfff50d3605792642aee60536ce95b27ba4685",
+      "posts": 3,
+      "admittedPosts": 2,
+      "locatorCleared": true,
+      "exactSourceVersion": true
+    }
+  },
+  "screenshots": [
+    "initial",
+    "install-lost",
+    "not-observed",
+    "installed",
+    "activation-lost",
+    "recovered",
+    "recovered-mobile",
+    "provider-denied-result",
+    "provider-denied-observed",
+    "company-unavailable-result",
+    "company-unavailable-observed"
+  ],
+  "chrome": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/154.0.8037.98",
+    "revision": "@b859317bf11f6be47f9b7799ec690a0a42a1fb33",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "jsVersion": "15.4.80.20"
+  },
+  "guards": {
+    "blocked": [],
+    "errors": [],
+    "droppedCommittedResponses": 1,
+    "droppedUnregisteredRequests": 1
+  },
+  "network": [
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/m/S7X6UOUM/main.js",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 201,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/crm/connect",
+      "status": null,
+      "failed": true
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/m/S7X6UOUM/main.js",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 201,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm/operation",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/crm/connect",
+      "status": 201,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/integrations/crm/activate",
+      "status": null,
+      "failed": true
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/styles.css",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/m/S7X6UOUM/main.js",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "status": 201,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm/operation",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/integrations/crm",
+      "status": 200,
+      "failed": false
+    },
+    {
+      "method": "GET",
+      "path": "/api/branches",
+      "status": 200,
+      "failed": false
+    }
+  ],
+  "refusals": [
+    {
+      "key": "provider-denied",
+      "code": "crm_credentials_rejected",
+      "httpStatus": 400,
+      "receiptStatus": "NOT_OBSERVED",
+      "operationHash": "c10393cab6146aea772f28444f0f974d6ddcb3a781e9bf8c9623ae5ba11580c5",
+      "sameLocatorReload": true,
+      "posts": 1,
+      "configured": false,
+      "automaticRetry": false,
+      "guards": {
+        "blocked": [],
+        "errors": [],
+        "droppedCommittedResponses": 0,
+        "droppedUnregisteredRequests": 0
+      },
+      "network": [
+        {
+          "method": "GET",
+          "path": "/",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/styles.css",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/m/S7X6UOUM/main.js",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/login",
+          "status": 201,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/integrations/crm",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/branches",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/integrations/crm",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/branches",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/integrations/crm/connect",
+          "status": 400,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/styles.css",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/m/S7X6UOUM/main.js",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/login",
+          "status": 201,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/integrations/crm/operation",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/integrations/crm",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/branches",
+          "status": 200,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "key": "company-unavailable",
+      "code": "crm_company_not_found",
+      "httpStatus": 400,
+      "receiptStatus": "NOT_OBSERVED",
+      "operationHash": "3411eb7763ab6f7bced0f2eb61e7575fa6bb49ac428b49b33376709392f0fa6e",
+      "sameLocatorReload": true,
+      "posts": 1,
+      "configured": false,
+      "automaticRetry": false,
+      "guards": {
+        "blocked": [],
+        "errors": [],
+        "droppedCommittedResponses": 0,
+        "droppedUnregisteredRequests": 0
+      },
+      "network": [
+        {
+          "method": "GET",
+          "path": "/",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/styles.css",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/m/S7X6UOUM/main.js",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/login",
+          "status": 201,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/integrations/crm",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/branches",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/integrations/crm",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/branches",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/integrations/crm/connect",
+          "status": 400,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/styles.css",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/m/S7X6UOUM/main.js",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/login",
+          "status": 201,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/integrations/crm/operation",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/integrations/crm",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/branches",
+          "status": 200,
+          "failed": false
+        }
+      ]
+    }
+  ]
+}

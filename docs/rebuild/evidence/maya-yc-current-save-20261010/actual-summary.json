@@ -1,0 +1,212 @@
+{
+  "contract": "maya.a17-exact-profile-actual-proof-summary/1",
+  "status": "QUALIFIED_PASS",
+  "candidateCommit": "d4cc4bd7e0d182ba656c42ee84517c1c50d37ae1",
+  "completedStages": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "react-web-build",
+    "prepare",
+    "pg-restart",
+    "resume"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30,
+    "jestWorkers": 1
+  },
+  "sourceFilesBound": 40,
+  "sourceUnchanged": true,
+  "gitBlobsMatched": true,
+  "workingTreeClean": true,
+  "currentReact": {
+    "checkpoints": [
+      "initial",
+      "loaded",
+      "install-lost",
+      "install-reloaded",
+      "not-observed",
+      "installed",
+      "activation-lost",
+      "reload",
+      "recovered",
+      "provider-denied-result",
+      "provider-denied-observed",
+      "company-unavailable-result",
+      "company-unavailable-observed"
+    ],
+    "passwordLogins": 7,
+    "chatOrWidgetRequests": 0,
+    "installReceiptAndCurrentVersionVerified": true,
+    "responseLostAfterActualActivationCommit": true,
+    "sameLocatorReloadWithoutResend": true,
+    "exactRecoveredReceipt": true,
+    "refusals": [
+      {
+        "case": "provider-denied",
+        "httpStatus": 400,
+        "code": "crm_credentials_rejected",
+        "providerReads": 1,
+        "providerRoute": "companies",
+        "operationHash": "c10393cab6146aea772f28444f0f974d6ddcb3a781e9bf8c9623ae5ba11580c5",
+        "receiptStatus": "NOT_OBSERVED",
+        "sameLocatorReload": true,
+        "recoveryProviderReads": 0,
+        "integrations": 0,
+        "executions": 0,
+        "mutations": 0
+      },
+      {
+        "case": "company-unavailable",
+        "httpStatus": 400,
+        "code": "crm_company_not_found",
+        "providerReads": 1,
+        "providerRoute": "companies",
+        "operationHash": "3411eb7763ab6f7bced0f2eb61e7575fa6bb49ac428b49b33376709392f0fa6e",
+        "receiptStatus": "NOT_OBSERVED",
+        "sameLocatorReload": true,
+        "recoveryProviderReads": 0,
+        "integrations": 0,
+        "executions": 0,
+        "mutations": 0
+      }
+    ],
+    "guardsBlocked": 0,
+    "guardsErrors": 0
+  },
+  "http": {
+    "prepareChecks": [
+      "Exact setup-read ingress runs before controllers; OTP, chat, widgets, missing operation key and foreign origin cannot reach provider or AE",
+      "Actual install commit survives HTTP response loss; operation GET performs no provider read or repeat mutation",
+      "Activation and atomic import commit once; final operation receipt survives discarded response",
+      "Replacement during real native verification refuses stale activation; old reviewed version refuses before provider reads",
+      "Real import writes roll back after a test-only post-projection throw; explicit same-key continuation finishes the original confirm once",
+      "HTTP request lost before forwarding leaves no registration or credential; NOT_OBSERVED never clears original locator",
+      "Original preview still running and explicit same-ID retry converge to one durable install; first admitted material refuses later changed credentials",
+      "Canonical ingress durably admits READY before a labelled test-only delivery failure; no row seeding or mutation",
+      "Exact profile rejects stale install source before native reads; native 403 produces safe credential refusal and no admitted operation",
+      "Current React form uses explicit load/install/activation, clears credential, retains lost-response locator across same-URL reload, recovers exact receipt without resend"
+    ],
+    "resumeChecks": [
+      "Different Node process and restarted PG preserve exact install/activation receipts, attempts, original evidence and mutation graph",
+      "After actual Node/PG restart, both NOT_OBSERVED and durable READY stay inert until an explicit same-ID submission; READY keeps the original execution",
+      "Foreign tenant cannot observe receipt; different actor and Client role are refused without provider reads or action changes",
+      "Historic success remains an exact receipt after explicit replacement; current configuration is separately marked different",
+      "Revoked membership blocks persisted operation recovery without new authority"
+    ],
+    "observations": {
+      "versionRace": {
+        "status": 409,
+        "oldVersionStatus": 409,
+        "v1Hash": "67722bdbf1bcc1b66e08e302ed47a95fdb2d0160d5381da332ed6ce39bea2e04",
+        "v2Hash": "fbc067ab7d3329ef895a7d6b471ce18eaa49aa7467d1cf513a0429ceb0761d40",
+        "committedMutations": 2
+      },
+      "projectionRollback": {
+        "injectedAfterActualTransactionalProjection": true,
+        "firstHttpStatus": 500,
+        "confirmRolledBackToReady": true,
+        "originalConfirmExecutionPreserved": true,
+        "finalExecutionCount": 3,
+        "finalMutationCount": 3,
+        "finalReceiptHash": "04de0ce6d8fe3996ba77e8215efa2c2eb83652859ea92c1462a61be8d75f98d5"
+      },
+      "runningOriginal": {
+        "observedWhileRunning": "NOT_OBSERVED",
+        "firstAndRetrySameReceipt": true,
+        "exactExecutionCount": 1,
+        "exactMutationCount": 1,
+        "exactAttemptCount": 1,
+        "changedMaterialHttpStatus": 409
+      },
+      "additionalReadRefusals": {
+        "staleVersion": {
+          "status": 409,
+          "code": "crm_config_version_changed",
+          "providerReads": 0,
+          "canonicalActions": 0
+        },
+        "provider403": {
+          "status": 400,
+          "code": "crm_credentials_rejected",
+          "providerReads": 1,
+          "canonicalActions": 0,
+          "recoveryProviderReads": 0,
+          "receiptStatus": "NOT_OBSERVED"
+        }
+      },
+      "restored": {
+        "graphHash": "4d9eaf74500abd0a29b1fdbfd0c8af23b7fed0b069d7badb35d810dd9d0a6bdc",
+        "processChanged": true,
+        "postmasterChanged": true,
+        "providerReadCount": 0,
+        "installReceiptHash": "c32d87bdfba527f9be576240c15aa5d38f767f0f39887ad5fc5ff72e866cd29c",
+        "activationReceiptHash": "ffd80707fc3e5c0a8869b6cb0166403b3e2a8727d8f2b43ac0079d8745e37451"
+      },
+      "expiredAuthentication": {
+        "fixture": "SIGNED_EXPIRED_ACCESS_TOKEN",
+        "httpStatus": 401,
+        "actionGraphUnchanged": true,
+        "providerReads": 0
+      },
+      "restart-NOT_OBSERVED": {
+        "statusBeforeExplicitRetry": "NOT_OBSERVED",
+        "sameRequestId": true,
+        "exactExecutions": 1,
+        "exactMutations": 1,
+        "exactAttempts": 1,
+        "receiptHash": "1c11fc0dfa94c775a952effcfd4463fb31c2820237a1b593c6508ed2066fa46d"
+      },
+      "restart-READY": {
+        "statusBeforeExplicitRetry": "READY",
+        "sameRequestId": true,
+        "exactExecutions": 1,
+        "exactMutations": 1,
+        "exactAttempts": 1,
+        "receiptHash": "0b0573aa49c408d916ee10e034c5ca2b75e9cbaaf58d66f6c8a97a8793b0507a"
+      }
+    }
+  },
+  "provider": {
+    "transport": "EXACT_PROFILE_NATIVE_FACTORY_FINITE_SYNTHETIC_GET",
+    "prepareReads": 113,
+    "resumeReads": 15,
+    "realCalls": 0,
+    "writes": 0,
+    "modelCalls": 0,
+    "transportRefused": 0,
+    "forbidden": []
+  },
+  "cleanup": {
+    "clusterStopped": true,
+    "ownedPostmasterPidAbsent": true,
+    "a17ChromeProcessesObserved": 0,
+    "a17ChromeProfileDirectoriesObserved": 0
+  },
+  "artifactHashes": {
+    "manifest.json": "a633b888ae51e01de980c30b99995efd1bf6755fc44ee81f2f52d77588b22959",
+    "prepare.json": "25d5f5b3745d85313b31ba592b6c4f171370bbc6c5cbc548c1f6ab52193dfcf5",
+    "resume.json": "42f2345fe01f1c741deae4f0b45a766c261dd300f8d71450b40deaae93925f46",
+    "prepare-jest.json": "8d6a2717b36269608d1b3c382a9617be74d93c9e6c864e2c164f5e0905cb31e8",
+    "resume-jest.json": "f627b5767fc960a28e07f67cc70f36c08c93a9fc665b4152cd85f33c994a3585",
+    "crm-setup-browser/browser.json": "931335eb6ccf033e8dd036054d68f90485939e164f25a8ccdc9e666545f2bcad"
+  },
+  "preservedFailures": [
+    "attempt01-summary.json",
+    "attempt02-summary.json"
+  ],
+  "limits": [
+    "Synthetic identity, source data, partner/user material and test entitlements only; no live provider acceptance.",
+    "Exact ingress/transport functions in test AppModule; not full private launcher environment acceptance.",
+    "Browser uses same-URL reload/password login; PG restart is a separate HTTP stage.",
+    "READY is canonical admission plus test-only pre-mutation delivery failure; not process-crash recovery.",
+    "Expired/cleaned operation retention remains unit-only; signed expired authentication was exercised via HTTP.",
+    "Historical owner install HTTP outcome/cause remains UNKNOWN; this proof cannot reconstruct it.",
+    "Private restart receipt/passwords/tokens excluded from public summary.",
+    "Closed runtime trace retains only its first 64 events."
+  ]
+}

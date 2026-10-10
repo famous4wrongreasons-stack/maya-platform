@@ -1,0 +1,58 @@
+{
+  "contract": "maya.yc-current-save-checkpoint/1",
+  "status": "QUALIFIED_SYNTHETIC_ACTUAL_PASS",
+  "runtimeCommit": "d4cc4bd7e0d182ba656c42ee84517c1c50d37ae1",
+  "productionChanges": [
+    "Explicit local setup uses password login and explicit branch loading",
+    "Fixed safe status/code diagnostics retain uncertainty and original operation locator",
+    "Finite private runtime trace records safe provider/HTTP stages without raw payloads",
+    "Explicit local setup omits automatic chat history restoration; ordinary chat unchanged"
+  ],
+  "actualEvidence": "actual-summary.json",
+  "actualSourcePaths": 40,
+  "capturedCandidateSourcePaths": 2026,
+  "canonicalSchemaFilesUnchangedFromOwnerSource": 117,
+  "checks": {
+    "diagnosticsPure": 42,
+    "headlessNetAndOnboarding": 123,
+    "crmFocusedSubsetOfHeadless": 30,
+    "ssrBeforeCompose": 16,
+    "composeAndEntryOverlappingSSR": 10,
+    "actualReactSyntheticPortsBeforeCompose": 33,
+    "browserGuard": 6,
+    "targetedTypesAndLint": "PASS",
+    "countsAreOverlappingDoNotSum": true
+  },
+  "failedAttempts": [
+    "failed01/summary.json",
+    "failed02/summary.json"
+  ],
+  "historicalOwnerOutcome": "UNKNOWN; last read-only metadata found no integration and no canonical A17 executions",
+  "historicalOwnerEvidence": "../maya-owner-yc-save-20261010/historical-trace.json",
+  "realProviderAcceptance": false,
+  "ownerStateUsedForTests": false,
+  "newOwnerWindowStarted": false,
+  "websiteChanged": false,
+  "productionChanged": false,
+  "C10Acceptance": "NOT_ISSUED",
+  "fullMayaAcceptance": "NOT_ISSUED",
+  "nextStep": "At fresh owner readiness, use the same stopped database and keys, preserve the original pending URL/request ID, log in by password and explicitly read the original operation before any fresh-consent same-ID continuation. No automatic launch or token prompt.",
+  "limits": [
+    "Finite synthetic native provider transport and explicit fixture grants; not complete private launcher environment or live-provider acceptance",
+    "Browser same-URL reload/password recovery and separate HTTP process/PostgreSQL restart are distinct proofs",
+    "Canonical READY test seam is not a worker-crash test; natural operation retention expiry is unit-only",
+    "Private trace capped at 64 without request IDs; wire read success is not canonical A17 commit",
+    "Historical owner cause remains unknown; the synthetic history defect does not establish it"
+  ],
+  "independentReview": {
+    "verdict": "QUALIFIED_SYNTHETIC_ACTUAL_PASS",
+    "blockers": [],
+    "file": "independent-actual-review.json",
+    "originalSha256": "809deed9d1773e687124a25ed5d6f4f78796a12e5cc03c7391295d118b19d39e"
+  },
+  "actualAssertions": {
+    "prepare": 598,
+    "resume": 223,
+    "theseAreAssertionsNotTests": true
+  }
+}

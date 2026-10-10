@@ -1,0 +1,83 @@
+{
+  "contract": "maya.local-setup-entry-checkpoint/1",
+  "source_manifest": "<private-artifacts>/maya-local-setup-entry-source-20261010.json",
+  "source_manifest_sha256": "1d44ce25a4aea2af448eda5518d813bf8bedb1b66e35dd594026c0c587584721",
+  "production_scope": [
+    "local explicit setup entry uses existing password login",
+    "ordinary signed-out finder unchanged",
+    "local signup/password navigation makes no automatic auth request",
+    "idle explicit branch loading and accessible disabled-stage explanation",
+    "no backend allowlist or auth authority changes by this slice"
+  ],
+  "checks": [
+    {
+      "kind": "SSR synthetic ports",
+      "result": "PASS 16/16",
+      "log": "<private-artifacts>/maya-local-setup-entry-ssr-final.log"
+    },
+    {
+      "kind": "headless net/onboarding/local-crm",
+      "result": "PASS 123/123",
+      "log": "<private-artifacts>/maya-local-setup-entry-headless-01.log"
+    },
+    {
+      "kind": "shell build",
+      "result": "PASS",
+      "log": "<private-artifacts>/maya-local-setup-entry-shell-build-01.log"
+    },
+    {
+      "kind": "carrier source gates and types",
+      "result": "PASS",
+      "log": "<private-artifacts>/maya-local-setup-entry-types-03.log"
+    },
+    {
+      "kind": "actual App/SignIn/LocalCrmSetup with synthetic ports",
+      "result": "PASS 33 checks",
+      "log": "<private-artifacts>/maya-local-setup-entry-browser-01.log",
+      "report": "<private-artifacts>/maya-local-setup-entry-browser-01/report.json",
+      "cleanup": "static host stopped; owned Chrome stopped; profile removed"
+    },
+    {
+      "kind": "test-driver syntax and diff whitespace",
+      "result": "PASS"
+    }
+  ],
+  "retained_failed_checks": [
+    {
+      "log": "<private-artifacts>/maya-local-setup-entry-types-01.log",
+      "reason": "Ignored shell dist allowlist hashes preceded parent net/types edits; resolved by canonical shell build."
+    },
+    {
+      "log": "<private-artifacts>/maya-local-setup-entry-types-02.log",
+      "reason": "Exact optional prop rejected explicit undefined backLabel; replaced with one of two literal labels, types03 passed."
+    }
+  ],
+  "actual_backend_driver": {
+    "status": "PREPARED_NOT_RUN_BY_THIS_AGENT",
+    "file": "maya-carrier-react/test/crm-a17-setup-browser-probe.mjs",
+    "normal_password_login": true,
+    "web_ready_origin_handshake": true,
+    "preserved_main_checkpoints": 9,
+    "appended_refusal_checkpoints": [
+      "provider-denied-result",
+      "provider-denied-observed",
+      "company-unavailable-result",
+      "company-unavailable-observed"
+    ],
+    "backend_fixture_and_guard_owner": "branch_http_proof",
+    "required_external_execution": "Parent serial exact read_setup_v1 synthetic provider HTTP/PG run; not claimed by static UI proof."
+  },
+  "qualification": {
+    "http_backend_run_by_this_agent": false,
+    "owner_database_read": false,
+    "actual_provider_calls": false,
+    "real_provider_acceptance": false,
+    "website_changes": false,
+    "commit": false,
+    "push": false
+  },
+  "screenshots_reviewed": [
+    "<private-artifacts>/maya-local-setup-entry-browser-01/local-password.png",
+    "<private-artifacts>/maya-local-setup-entry-browser-01/branches-idle.png"
+  ]
+}

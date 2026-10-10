@@ -1,0 +1,24 @@
+{
+  "baseline": "7267f27e13ff02720c0a365619d27d0a92f714cd",
+  "sourceFiles": {
+    "maya-carrier-react/src/runtime/compose.ts": "394721aa55a360f94bcab79127786bd0a2941bd55b4f7baadce20f6882ad91a9",
+    "maya-carrier-react/test/local-setup-compose.test.mjs": "48a802b24fe9a8bbb99d38f3dc1c15c121867359edd914f5b3ea63233c1cf004",
+    "maya-carrier-react/package.json": "f8f1ad403aa3e605eb5a5e295b90d691b348983284b8330578e8ec473af3e33a"
+  },
+  "evidence": {
+    "<private-artifacts>/maya-local-setup-compose-unit-final-20261010.log": "41f3b625f9aa85b41f1fc3e4eee1c5035086edfee559cca87f6042893e526b8d",
+    "<private-artifacts>/maya-local-setup-compose-types-final-20261010.log": "631672d9be1ce33f184ad6015f9fb486acbd667c141db2f0acec11f9e25faf92",
+    "<private-artifacts>/maya-local-setup-compose-types-20261010.log": "27ea1c764e83935be621093d69402d25a2cafc5ed40034a0becf0d7127619559"
+  },
+  "checks": {
+    "focused_tests": "10/10 PASS; 0 skipped",
+    "carrier_gate": "30 source files, 0 refusals",
+    "types": "30 carrier files + 29 runtime modules; PASS",
+    "diff_check": "PASS"
+  },
+  "commands": [
+    "node --max-old-space-size=256 --test test/local-setup-compose.test.mjs test/local-setup-entry.test.mjs",
+    "node --max-old-space-size=1536 build.mjs --typecheck"
+  ],
+  "qualification": "Real compose/headless runtime in isolated VM with synthetic session/transport, plus SSR. No actual browser/HTTP/PG/provider acceptance. No allowlist or headless behavior changes. Historical owner save cause remains unknown. Initial failed TS2790 check retained; fixed with existing ShellRuntimeDeps transport annotation."
+}

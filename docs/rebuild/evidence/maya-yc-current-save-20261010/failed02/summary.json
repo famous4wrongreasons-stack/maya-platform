@@ -1,0 +1,81 @@
+{
+  "contract": "maya.a17-exact-profile-attempt-summary/1",
+  "attempt": 2,
+  "candidateCommit": "7267f27e13ff02720c0a365619d27d0a92f714cd",
+  "status": "failed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "react-web-build"
+  ],
+  "clusterStopped": true,
+  "ownedPostmasterPidAbsent": true,
+  "failure": "Current local setup password auth lifecycle dispatched 3 chat history GET requests, all blocked by finite browser guard",
+  "sourceUnchanged": true,
+  "providerReadCount": 111,
+  "providerWrites": 0,
+  "modelCalls": 0,
+  "historicalOwnerFailureCause": "UNKNOWN",
+  "checks": [
+    "Exact setup-read ingress runs before controllers; OTP, chat, widgets, missing operation key and foreign origin cannot reach provider or AE",
+    "Actual install commit survives HTTP response loss; operation GET performs no provider read or repeat mutation",
+    "Activation and atomic import commit once; final operation receipt survives discarded response",
+    "Replacement during real native verification refuses stale activation; old reviewed version refuses before provider reads",
+    "Real import writes roll back after a test-only post-projection throw; explicit same-key continuation finishes the original confirm once",
+    "HTTP request lost before forwarding leaves no registration or credential; NOT_OBSERVED never clears original locator",
+    "Original preview still running and explicit same-ID retry converge to one durable install; first admitted material refuses later changed credentials",
+    "Canonical ingress durably admits READY before a labelled test-only delivery failure; no row seeding or mutation",
+    "Exact profile rejects stale install source before native reads; native 403 produces safe credential refusal and no admitted operation"
+  ],
+  "artifactHashes": {
+    "manifest.json": "23d33cc7f0e2b9adeb801ab3ecbc303220ac6ffac447091f2d084285e5f0b5cd",
+    "prepare.json": "616bb5bd4feeea51617e3e43d2f001e0be4ea08a20ab2dbf83caef6d393bab55",
+    "prepare-jest.json": "3430d98fed302c31c3dd4ad722ff46e17e96a6f208c4ee97174bb9bbe87c2a7c",
+    "crm-setup-browser/browser.json": "0b43704fa5a78ea464f8e2348f2609771ae362776f42228ceda8b2531ffb5ec5"
+  },
+  "cleanup": {
+    "clusterStopped": true,
+    "ownedPostmasterPidAbsent": true,
+    "a17ChromeProcessesObserved": 0,
+    "a17ChromeProfileDirectoriesObserved": 0
+  },
+  "currentReactReached": [
+    "initial",
+    "loaded",
+    "install-lost",
+    "install-reloaded",
+    "not-observed",
+    "installed",
+    "activation-lost",
+    "reload"
+  ],
+  "currentReactNotCompleted": [
+    "recovered",
+    "provider-denied-result",
+    "provider-denied-observed",
+    "company-unavailable-result",
+    "company-unavailable-observed"
+  ],
+  "currentReactCanonicalCheckpoint": {
+    "install": {
+      "executions": 1,
+      "mutations": 1,
+      "integrationStatus": "pending_activation",
+      "actualOperationRead": "SUCCEEDED"
+    },
+    "activationLost": {
+      "executions": 3,
+      "mutations": 3,
+      "integrationStatus": "active",
+      "attemptsEach": 1,
+      "sourceVersionPreserved": true
+    },
+    "reload": {
+      "exactCommittedGraphUnchanged": true,
+      "providerReadsDuringRecovery": 0
+    }
+  },
+  "restartExecuted": false
+}
