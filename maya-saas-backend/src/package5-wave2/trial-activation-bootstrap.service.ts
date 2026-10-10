@@ -100,21 +100,33 @@ export class TrialActivationBootstrapService {
       const slug = command.tenant.slug.trim().toLowerCase();
       const email = command.owner.email.trim().toLowerCase();
       const branchTimezone = command.branch.timezone?.trim() || null;
-      await tx.tenant.create({
-        data: {
-          id: ids.tenantId,
-          name: command.tenant.name.trim(),
-          slug,
-          subdomain: slug,
-          status: 'trial',
-          calendarSource: command.tenant.calendarSource ?? 'external',
-          defaultTimezone: command.tenant.defaultTimezone,
-          defaultLocale: command.tenant.defaultLocale,
-          defaultCurrency: command.tenant.defaultCurrency,
-          trialEndsAt: command.tenant.trialEndsAt,
-          trialFullAccess: true,
-        },
-      });
+      try {
+        await tx.tenant.create({
+          data: {
+            id: ids.tenantId,
+            name: command.tenant.name.trim(),
+            slug,
+            subdomain: slug,
+            status: 'trial',
+            calendarSource: command.tenant.calendarSource ?? 'external',
+            defaultTimezone: command.tenant.defaultTimezone,
+            defaultLocale: command.tenant.defaultLocale,
+            defaultCurrency: command.tenant.defaultCurrency,
+            trialEndsAt: command.tenant.trialEndsAt,
+            trialFullAccess: true,
+          },
+        });
+      } catch (error) {
+        // Throw through the transaction immediately. Later owner/session faults
+        // cannot establish that business creation was refused.
+        if (this.isTenantSlugCollision(error)) {
+          throw new ConflictException({
+            message: 'Business short name is already in use',
+            error: { code: 'trial_signup_slug_taken' },
+          });
+        }
+        throw error;
+      }
       await tx.brandingSettings.create({
         data: {
           tenantId: ids.tenantId,
@@ -189,6 +201,41 @@ export class TrialActivationBootstrapService {
       ownerUserId: `p5o_${digest.slice(0, 28)}`,
       branchId: `p5b_${digest.slice(0, 28)}`,
     };
+  }
+
+  private isTenantSlugCollision(error: unknown): boolean {
+    if (
+      !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+      error.code !== 'P2002' ||
+      !error.meta
+    )
+      return false;
+    const meta = error.meta;
+    if (Object.hasOwn(meta, 'modelName') && meta.modelName !== 'Tenant')
+      return false;
+    const record = (value: unknown): Record<string, unknown> | null =>
+      value !== null && typeof value === 'object' && !Array.isArray(value)
+        ? (value as Record<string, unknown>)
+        : null;
+    const adapter = record(meta.driverAdapterError);
+    const cause = record(adapter?.cause);
+    const constraint = record(cause?.constraint);
+    const candidates: unknown[] = [];
+    if (Object.hasOwn(meta, 'target')) candidates.push(meta.target);
+    if (constraint && Object.hasOwn(constraint, 'fields'))
+      candidates.push(constraint.fields);
+    const fields = candidates.map((value): unknown =>
+      Array.isArray(value) && value.length === 1 ? value[0] : null,
+    );
+    // Unknown, mixed or contradictory metadata never becomes a retryable field
+    // refusal. No constraint-name/message substring inference is permitted.
+    return (
+      fields.length > 0 &&
+      fields.every(
+        (field) =>
+          (field === 'slug' || field === 'subdomain') && field === fields[0],
+      )
+    );
   }
 
   private validate(command: TrialActivationBootstrapCommand) {

@@ -348,6 +348,8 @@ export async function createTrialSignup(input: OnboardingInput, activation: Tria
     const value = projectTrialSignup(ex.body, input, activation);
     if (value !== null) return { ok: true, value };
   }
+  // This code is emitted only by the rolled-back tenant insert, before any session.
+  if (ex.kind === 'response' && ex.status === 409 && errorCode(ex.body) === 'trial_signup_slug_taken') return fail({ reason: 'slug_taken' });
   // Bootstrap commits before session issuance. Even a failure can mean the business exists.
   return fail({ reason: 'uncertain' });
 }

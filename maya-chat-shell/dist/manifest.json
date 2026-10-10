@@ -71,7 +71,7 @@
       },
       {
         "path": "src/net/client.ts",
-        "sha256": "8e3551aeacb984e7b84df4c96d72bf4caef7d398bc577b3ca2f08fe75d257797"
+        "sha256": "f4298a9a886d032464a49ca3a26911e5fd2c4dbff8712b0bfd6a92aec0f4517e"
       },
       {
         "path": "src/net/crm-setup.ts",
@@ -99,11 +99,11 @@
       },
       {
         "path": "src/net/session.ts",
-        "sha256": "065a5ce8cdccabfb149ba81461bb3ffef9a94b0e1feb232dce95beecb4064032"
+        "sha256": "97346d84a1617231f645fece136ee1e786562643b5d0b9f1e5994386465b7dd4"
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "d8a637edd3b6a0a3234d2ead56bc90cc9d31244f90bdbb7a42e52f4e6687b33f"
+        "sha256": "d440492933d1eeb51ed052c7050efc2fa5f686e1fff8b422d55ca59937852f73"
       },
       {
         "path": "src/renderer/cells.ts",
@@ -175,8 +175,8 @@
       }
     ]
   },
-  "bytes": 619491,
-  "digest": "6621c574c35bde14b96d715aa96b9e769d9faaaf3086c735b6270b0ca199e89d",
+  "bytes": 619947,
+  "digest": "01cc712901cbde9a43faa87246015f3dbe30833750e705a0ed54dff34521cedd",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -184,8 +184,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "d6aa871f0f69e907970b75e68cf679db9dba63dbfc28289fc312520da6ea16df",
-    "modulePath": "m/d6aa871f0f69e907/",
+    "digest": "1ee9b81eb019189544d3f7e56349e6970a3d549b3c0d84a6a1f1970b78c61623",
+    "modulePath": "m/1ee9b81eb0191895/",
     "files": [
       {
         "path": "entry/main.js",
@@ -244,8 +244,8 @@
       },
       {
         "path": "src/net/client.js",
-        "sha256": "0c26ce64caa31d985cbe6fd2450287ffe8a735a5ad911009689d33cc5b168251",
-        "bytes": 38199
+        "sha256": "9b2c604f8d71ec5c080a84428ddd1c6a5bcd2dccf73540c5d333ba643eef3e6a",
+        "bytes": 38351
       },
       {
         "path": "src/net/crm-setup.js",
@@ -279,8 +279,8 @@
       },
       {
         "path": "src/net/session.js",
-        "sha256": "729908867c3723e9b36079e21cbbe10284a111f589ea5d3aa2746465e088e2a4",
-        "bytes": 18329
+        "sha256": "bc8afdc8033ff8c710020a1c656e282a83229be0980dfbd33b8c5c5c9c32329f",
+        "bytes": 18541
       },
       {
         "path": "src/net/types.js",
@@ -393,7 +393,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "c2d4d612e87c60c662a8618683c1de08cf2d2fe8070fcbd8e93c3139ed5f198c",
+      "sha256": "2ce665f3530bda201b7459e5ec1712ba7d66aeaa62e76190a4aac309c2c9fc29",
       "bytes": 1344
     },
     "assets": [

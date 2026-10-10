@@ -74,11 +74,21 @@ test('normal password login is reachable without email OTP and has no secret val
   assert.deepEqual(findAll(root, el => el.tag === 'button').map(textOf), ['Войти', 'Другие способы входа']);
 });
 test('finite failures never display raw server errors or turn refusal into success', () => {
-  for (const reason of ['closed', 'unavailable', 'expired', 'uncertain', 'rate_limited']) {
+  for (const reason of ['closed', 'unavailable', 'expired', 'uncertain', 'rate_limited', 'slug_taken']) {
     const sentence = m.onboardingSentence({ reason, retryAfterSec: 20, raw: 'PRIVATE' });
     assert.equal(typeof sentence, 'string'); assert.doesNotMatch(sentence, /PRIVATE|Бизнес создан/);
   }
   assert.match(m.onboardingSentence({ reason: 'invalid', field: 'password' }), /не менее 8/);
+});
+test('exact slug refusal is inline and editable with fresh consent, without password recovery claims', () => {
+  const p = panel({ ...idle, phase: 'failed', failure: { reason: 'slug_taken' } });
+  const slug = p.inputs.find(el => el.attrs.name === 'slug');
+  assert.equal(slug.attrs['aria-invalid'], 'true'); assert.equal('disabled' in slug.attrs, false);
+  assert.match(p.text, /короткое имя уже занято/); assert.match(p.text, /Бизнес не создан/);
+  assert.ok('disabled' in p.buttons.find(el => textOf(el) === 'Создать бизнес').attrs);
+  assert.equal('checked' in p.inputs.find(el => el.attrs.name === 'confirmed').attrs, false);
+  assert.doesNotMatch(p.text, /ответ мог потеряться|Попробуйте войти с выбранными/);
+  assert.deepEqual(p.calls, []);
 });
 test('inline errors identify the field, connect accessible help, and keep server text out', () => {
   for (const field of ['name', 'slug', 'ownerEmail', 'password', 'branchName', 'branchTimezone']) {

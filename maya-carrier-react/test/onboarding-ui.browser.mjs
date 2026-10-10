@@ -71,7 +71,7 @@ try {
   const [port, wsPath] = fs.readFileSync(portFile, 'utf8').trim().split('\n');
   browser = new Browser(child, profile, `ws://127.0.0.1:${port}${wsPath}`); await browser.connect();
   report.chromiumBuiltinSandbox = true; report.chromeOsWideNetworkClosure = 'NOT_QUALIFIED';
-  for (const scenario of ['completed', 'unavailable', 'uncertain', 'reject', 'cancel']) {
+  for (const scenario of ['completed', 'unavailable', 'slug_taken', 'uncertain', 'reject', 'cancel', 'cancel-before-slug-refusal']) {
     stage = scenario; const page = activePage = await browser.newPage();
     let blocked = 0;
     const guard = event => {
@@ -113,12 +113,22 @@ try {
       await fill(page, 'password', 'Synthetic-Only-42'); await consent(page); await submit(page);
       await check(page, 'window.onboardingFixture.calls === 2', 'explicit retry after preparation failure');
       await page.eval(`window.onboardingFixture.finish('completed')`);
-    } else if (scenario === 'cancel') {
-      await page.click(button('Отменить и вернуться ко входу'));
+    } else if (scenario === 'slug_taken') {
+      await page.eval(`window.onboardingFixture.finish('slug_taken')`);
+      await check(page, `document.activeElement.name === 'slug' && ${input('slug')}.getAttribute('aria-invalid') === 'true' && document.body.innerText.includes('Это короткое имя уже занято')`, 'rollback refusal focuses and explains exact slug field');
+      await check(page, `${input('name')}.value === 'Синтетический новый бизнес' && ${input('branchName')}.value === 'Тестовый филиал' && ${input('ownerEmail')}.value === 'owner@example.invalid' && ${input('branchTimezone')}.value === 'Europe/Moscow' && ${input('password')}.value === 'Synthetic-Only-42' && !${input('confirmed')}.checked && ${button('Создать бизнес')}.disabled`, 'exact rollback preserves remaining fields and secret only in active DOM, requires fresh consent');
+      await fill(page, 'slug', 'fixture-corrected');
+      await check(page, `${input('slug')}.getAttribute('aria-invalid') === 'false' && !document.body.innerText.includes('Это короткое имя уже занято')`, 'editing slug dismisses its old refusal');
+      await page.press('Enter'); await check(page, 'window.onboardingFixture.calls === 1', 'editing alone never resubmits');
+      await consent(page); await submit(page);
+      await check(page, 'window.onboardingFixture.calls === 2 && window.onboardingFixture.inputsValid', 'only explicit corrected consent resubmits with unchanged remaining fields');
       await page.eval(`window.onboardingFixture.finish('completed')`);
+    } else if (scenario === 'cancel' || scenario === 'cancel-before-slug-refusal') {
+      await page.click(button('Отменить и вернуться ко входу'));
+      await page.eval(`window.onboardingFixture.finish('${scenario === 'cancel' ? 'completed' : 'slug_taken'}')`);
       await check(page, `window.onboardingFixture.recovered && !document.querySelector('input') && window.onboardingFixture.calls === 1`, 'cancel unmounts; late completion cannot reopen form');
     } else await page.eval(`window.onboardingFixture.finish('${scenario}')`);
-    if (['completed', 'unavailable'].includes(scenario)) {
+    if (['completed', 'unavailable', 'slug_taken'].includes(scenario)) {
       await check(page, `document.body.innerText.includes('Бизнес создан') && document.body.innerText.includes('CRM ещё нужно подключить')`, 'synthetic success retains CRM qualification');
       assert.ok(await page.click(button('Продолжить'))); await check(page, 'window.onboardingFixture.completed', 'synthetic success continues');
     }

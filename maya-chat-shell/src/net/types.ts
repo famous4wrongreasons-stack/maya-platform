@@ -49,6 +49,7 @@ export interface OnboardingInput {
 export type OnboardingField = keyof OnboardingInput;
 export type OnboardingFailure =
   | { readonly reason: 'invalid'; readonly field: OnboardingField }
+  | { readonly reason: 'slug_taken' }
   | { readonly reason: 'closed' | 'unavailable' | 'expired' | 'uncertain' }
   | { readonly reason: 'rate_limited'; readonly retryAfterSec: number };
 export interface TrialActivationProjection {

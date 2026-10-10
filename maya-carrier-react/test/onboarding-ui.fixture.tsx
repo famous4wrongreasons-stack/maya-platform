@@ -11,7 +11,7 @@ let settle: (() => void) | null = null;
 const publish = (next: OnboardingView): void => { view = next; listeners.forEach(listener => listener()); };
 const fixture = {
   calls: 0, cancels: 0, completed: false, recovered: false, inputsValid: false,
-  finish(result: 'completed' | 'uncertain' | 'unavailable' | 'reject') {
+  finish(result: 'completed' | 'uncertain' | 'unavailable' | 'slug_taken' | 'reject') {
     if (result !== 'reject') publish({ ...view, busy: false, phase: result === 'completed' ? 'completed' : result === 'uncertain' ? 'uncertain' : 'failed', failure: result === 'completed' ? null : { reason: result }, display: result === 'completed' ? { tenantName: 'Синтетический бизнес', userName: 'Fixture' } : null, trialDays: result === 'completed' ? 10 : null });
     if (result === 'reject') rejectPending?.(new Error('synthetic failure'));
     else settle?.();
@@ -23,7 +23,7 @@ const port: OnboardingPort = {
   subscribe(listener) { listeners.add(listener); return () => { listeners.delete(listener); }; },
   submit(input, confirmed) {
     fixture.calls++;
-    fixture.inputsValid = confirmed && input.slug === 'fixture-manual' && input.name === 'Синтетический новый бизнес' && input.branchName === 'Тестовый филиал' && input.ownerEmail === 'owner@example.invalid' && input.branchTimezone === 'Europe/Moscow' && input.password === 'Synthetic-Only-42';
+    fixture.inputsValid = confirmed && ['fixture-manual', 'fixture-corrected'].includes(input.slug) && input.name === 'Синтетический новый бизнес' && input.branchName === 'Тестовый филиал' && input.ownerEmail === 'owner@example.invalid' && input.branchTimezone === 'Europe/Moscow' && input.password === 'Synthetic-Only-42';
     publish({ ...view, phase: 'creating', busy: true, failure: null });
     return new Promise<void>((resolve, reject) => { settle = resolve; rejectPending = reject; });
   },

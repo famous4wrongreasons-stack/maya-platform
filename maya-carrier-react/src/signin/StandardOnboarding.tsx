@@ -8,6 +8,7 @@ import { timezoneChoices, deviceTimezoneChoice } from './onboardingTimezones.ts'
 import { suggestBusinessSlug } from './onboardingSlug.ts';
 
 const labels = { name: 'Название бизнеса', slug: 'Короткое имя бизнеса для входа', ownerEmail: 'Email владельца', password: 'Пароль', branchName: 'Название филиала', branchTimezone: 'Город или часовой пояс филиала' };
+const slugTakenCopy = 'Это короткое имя уже занято. Выберите другое. Бизнес не создан; остальные данные сохранены в форме.';
 const invalidCopy: Readonly<Record<OnboardingField, string>> = {
   name: 'Укажите название бизнеса — до 200 символов.',
   slug: 'Используйте строчные латинские буквы, цифры и одиночные дефисы между словами, до 100 символов.',
@@ -19,6 +20,7 @@ const invalidCopy: Readonly<Record<OnboardingField, string>> = {
 export function onboardingSentence(failure: OnboardingFailure | null): string | null {
   if (!failure) return null;
   if (failure.reason === 'invalid') return invalidCopy[failure.field];
+  if (failure.reason === 'slug_taken') return slugTakenCopy;
   if (failure.reason === 'uncertain') return 'Создание бизнеса не подтверждено: ответ мог потеряться после сохранения. Не создавайте бизнес повторно. Попробуйте войти с выбранными коротким именем бизнеса, email и паролем.';
   if (failure.reason === 'closed') return 'Самостоятельная регистрация на этом сервере недоступна.';
   if (failure.reason === 'expired') return 'Срок подготовки регистрации истёк. Заполненные данные ещё не отправлены.';
@@ -46,6 +48,7 @@ export function StandardOnboarding({ port, t, back }: { readonly port: Onboardin
   const [localFailure, setLocalFailure] = useState<OnboardingFailure | null>(null);
   const [dismissedFailure, setDismissedFailure] = useState<OnboardingFailure | null>(null);
   const manuallyNamed = useRef(false), submitting = useRef(false), mounted = useRef(true);
+  const submissionEpoch = useRef(0), forgetSubmissionSecret = useRef<(() => void) | null>(null);
   const form = useRef<HTMLDivElement>(null), instance = useId();
   const password = useRef<HTMLInputElement>(null);
   const zones = useMemo(() => timezoneChoices(), []);
@@ -53,39 +56,47 @@ export function StandardOnboarding({ port, t, back }: { readonly port: Onboardin
   const failure = localFailure ?? (view.failure === dismissedFailure ? null : view.failure);
   const uncertain = view.phase === 'uncertain' || failure?.reason === 'uncertain';
   const locked = view.busy || uncertain || view.phase === 'completed';
-  const errorFor = (field: OnboardingField): string | null => failure?.reason === 'invalid' && failure.field === field ? invalidCopy[field] : null;
+  const errorFor = (field: OnboardingField): string | null => failure?.reason === 'invalid' && failure.field === field ? invalidCopy[field] : failure?.reason === 'slug_taken' && field === 'slug' ? slugTakenCopy : null;
   const errorId = (field: OnboardingField): string => instance + '-' + field + '-error';
   const focusField = (field: OnboardingField): void => { const input = form.current?.querySelector('[name="' + field + '"]'); if (input instanceof HTMLElement) input.focus(); };
   const edited = (field: OnboardingField): void => {
     if (localFailure?.reason === 'invalid' && localFailure.field === field) setLocalFailure(null);
     if (view.failure?.reason === 'invalid' && view.failure.field === field) setDismissedFailure(view.failure);
+    if (view.failure?.reason === 'slug_taken' && field === 'slug') setDismissedFailure(view.failure);
   };
   const update = (field: keyof typeof fields, value: string): void => {
     if (field === 'slug') manuallyNamed.current = true;
     setFields(old => ({ ...old, [field]: value, ...(field === 'name' && !manuallyNamed.current ? { slug: suggestBusinessSlug(value) } : {}) }));
     edited(field);
   };
-  useEffect(() => { mounted.current = true; const input = password.current; return () => { mounted.current = false; if (input) input.value = ''; port.cancel(); }; }, [port]);
+  useEffect(() => { mounted.current = true; const input = password.current; return () => { mounted.current = false; submissionEpoch.current++; forgetSubmissionSecret.current?.(); forgetSubmissionSecret.current = null; if (input) input.value = ''; port.cancel(); }; }, [port]);
+  useEffect(() => { if (!view.busy && failure?.reason === 'slug_taken') focusField('slug'); }, [view.busy, failure]);
   const submit = (): void => {
     if (locked || submitting.current || !confirmed) return;
     const parsed = onboardingInput({ ...fields, password: password.current?.value ?? '' });
     if (!parsed.ok) { setLocalFailure(parsed.failure); if (parsed.failure.reason === 'invalid') focusField(parsed.failure.field); return; }
-    // Keep corrections local. Once handed to the runtime, retain no password in the form.
+    // Clear the DOM during dispatch. Restore only for an exact pre-commit refusal
+    // in this same active submission; never publish a secret through state/view/storage.
+    const epoch = ++submissionEpoch.current;
+    let secretForSafeRefusal = parsed.value.password;
+    const forget = (): void => { secretForSafeRefusal = ''; };
+    forgetSubmissionSecret.current = forget;
     if (password.current) password.current.value = '';
     submitting.current = true; setLocalFailure(null); setDismissedFailure(null); setConfirmed(false);
     void port.submit(parsed.value, true).then(() => {
-      if (!mounted.current) return;
+      if (!mounted.current || submissionEpoch.current !== epoch) return;
       const outcome = port.view();
+      if (outcome.phase === 'failed' && outcome.failure?.reason === 'slug_taken') { if (password.current) password.current.value = secretForSafeRefusal; setConfirmed(false); }
       if (outcome.phase === 'completed' || outcome.phase === 'uncertain') { if (password.current) password.current.value = ''; setConfirmed(false); }
       if (outcome.failure?.reason === 'invalid') focusField(outcome.failure.field);
     }).catch(() => {
       // An unexpected rejection cannot authorize another creation attempt.
-      if (!mounted.current) return;
+      if (!mounted.current || submissionEpoch.current !== epoch) return;
       if (password.current) password.current.value = '';
       setConfirmed(false); setLocalFailure({ reason: 'uncertain' });
-    }).finally(() => { submitting.current = false; });
+    }).finally(() => { forget(); if (forgetSubmissionSecret.current === forget) forgetSubmissionSecret.current = null; if (submissionEpoch.current === epoch) submitting.current = false; });
   };
-  const leave = (): void => { if (password.current) password.current.value = ''; port.cancel(); back(fields.slug, fields.ownerEmail); };
+  const leave = (): void => { submissionEpoch.current++; forgetSubmissionSecret.current?.(); forgetSubmissionSecret.current = null; if (password.current) password.current.value = ''; port.cancel(); back(fields.slug, fields.ownerEmail); };
   const disabledReason = view.busy ? 'Создаём бизнес. Дождитесь ответа — повторно отправлять форму не нужно.' : view.phase === 'completed' ? 'Бизнес уже создан.' : !confirmed ? 'Чтобы включить кнопку «Создать бизнес», отметьте подтверждение выше.' : 'Проверьте данные и нажмите «Создать бизнес».';
   return <main style={{ position: 'absolute', inset: 0, overflowY: 'auto', boxSizing: 'border-box', padding: 'calc(env(safe-area-inset-top, 0px) + 24px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px)', background: t.bg, color: t.ink, fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif' }}><div ref={form} role="form" aria-label="Создание бизнеса" onKeyDown={event => { if (event.key === 'Enter' && !event.nativeEvent.isComposing && event.target instanceof HTMLInputElement && event.target.type !== 'checkbox') { event.preventDefault(); submit(); } }} style={{ width: '100%', maxWidth: 440, minWidth: 0, margin: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
     <h2 style={{ margin: 0 }}>Создать бизнес</h2>

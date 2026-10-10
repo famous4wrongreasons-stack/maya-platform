@@ -338,7 +338,7 @@ export function createNet(options: NetOptions = {}) {
   let onboardingAbort: AbortController | null = null;
   let onboardingDisposed = false;
   let signupDispatched = false;
-  // Once a signup may have reached the server, recovery is normal login, never new signup.
+  // A dispatched signup stays uncertain unless a valid receipt or exact rollback refusal arrives.
   let signupUncertain = false;
   const idleOnboarding = (): OnboardingView => ({ phase: 'idle', busy: false, failure: null, display: null, trialDays: null, trialEndsAt: null });
   let onboardingView = idleOnboarding();
@@ -387,6 +387,10 @@ export function createNet(options: NetOptions = {}) {
       if (!current()) return;
       signupDispatched = false;
       onboardingAbort = null;
+      if (!result.ok && result.failure.reason === 'slug_taken') {
+        publishOnboarding({ ...idleOnboarding(), phase: 'failed', failure: result.failure });
+        return;
+      }
       if (!result.ok || !(Date.parse(result.value.grant.refreshExpiresAt) > now()) || !(Date.parse(result.value.trialEndsAt) > now())) {
         signupUncertain = true;
         publishOnboarding({ ...idleOnboarding(), phase: 'uncertain', failure: { reason: 'uncertain' } });

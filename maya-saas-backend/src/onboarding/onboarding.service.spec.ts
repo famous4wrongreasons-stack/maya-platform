@@ -1,5 +1,6 @@
 import { ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Prisma } from '@prisma/client';
 import type { AuthRateLimitService } from '../auth/auth-rate-limit.service';
 import type { CanonicalTrialOnboardingService } from './canonical-trial-onboarding.service';
 import { OnboardingService } from './onboarding.service';
@@ -53,5 +54,20 @@ describe('Onboarding canonical TrialActivation initiator', () => {
       'Session unavailable',
     );
     expect(f.activate).toHaveBeenCalledTimes(1);
+  });
+  it('does not turn a post-activation session P2002 into a slug refusal', async () => {
+    const f = fixture();
+    const error = new Prisma.PrismaClientKnownRequestError(
+      'Synthetic late fault',
+      {
+        code: 'P2002',
+        clientVersion: '7.8.0',
+        meta: { modelName: 'Tenant', target: ['slug'] },
+      },
+    );
+    f.ownerSession.mockRejectedValue(error);
+    await expect(f.service.createTrialSignup(dto)).rejects.toBe(error);
+    expect(f.activate).toHaveBeenCalledTimes(1);
+    expect(f.ownerSession).toHaveBeenCalledTimes(1);
   });
 });

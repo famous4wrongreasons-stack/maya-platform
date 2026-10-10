@@ -100,6 +100,56 @@ test('expired activation never dispatches signup and can be explicitly restarted
   });
 });
 
+test('exact rollback conflict permits an edited explicit signup, with fresh activation and no grant from the refusal', async () => {
+  let attempts = 0;
+  const corrected = { ...input, slug: 'corrected-salon' };
+  await wire(call => {
+    if (call.url.endsWith('/trial-activations')) return response(activationRaw);
+    attempts++;
+    if (attempts === 1) return response({ error: { code: 'trial_signup_slug_taken' }, message: 'PRIVATE' }, 409);
+    return response({ ...signup(), tenant: { ...signup().tenant, slug: corrected.slug } });
+  }, async (net, calls) => {
+    await net.onboarding.submit(input, true);
+    assert.equal(calls.length, 2); assert.equal(net.session.view().signedIn, false);
+    assert.equal(net.onboarding.view().phase, 'failed');
+    assert.deepEqual(net.onboarding.view().failure, { reason: 'slug_taken' });
+    assert.doesNotMatch(JSON.stringify(net.onboarding.view()), /PRIVATE|synthetic-password/);
+    await net.onboarding.submit(corrected, false); assert.equal(calls.length, 2);
+    await net.onboarding.submit(corrected, true);
+    assert.deepEqual(paths(calls), ['/api/onboarding/trial-activations', '/api/onboarding/trial', '/api/onboarding/trial-activations', '/api/onboarding/trial']);
+    assert.equal(JSON.parse(calls[3].body).slug, corrected.slug);
+    assert.equal(net.onboarding.view().phase, 'completed'); assert.equal(net.session.view().signedIn, true);
+  });
+});
+
+for (const [status, body] of [[409, { message: 'Name taken' }], [409, { error: { code: 'other_conflict' } }], [409, { code: 'trial_signup_slug_taken' }], [500, { error: { code: 'trial_signup_slug_taken' } }], [200, { error: { code: 'trial_signup_slug_taken' } }]]) {
+  test(`only exact status and error envelope authorize slug correction: ${status}/${JSON.stringify(body)}`, async () => {
+    await wire(call => response(call.url.endsWith('/trial-activations') ? activationRaw : body, call.url.endsWith('/trial-activations') ? 200 : status), async (net, calls) => {
+      await net.onboarding.submit(input, true);
+      assert.equal(net.onboarding.view().phase, 'uncertain');
+      await net.onboarding.submit({ ...input, slug: 'corrected' }, true);
+      assert.equal(calls.length, 2); assert.equal(net.session.view().signedIn, false);
+    });
+  });
+}
+
+for (const stop of ['cancel', 'signout', 'dispose', 'password']) {
+  test(`late exact409 after ${stop} cannot clear uncertainty or authorize a new signup`, async () => {
+    const pending = deferred();
+    await wire(call => call.url.endsWith('/trial-activations') ? response(activationRaw) : call.url.endsWith('/auth/login') ? response(login()) : pending.promise, async (net, calls) => {
+      const attempt = net.onboarding.submit(input, true); await waitFor(() => calls.length === 2);
+      if (stop === 'cancel') net.onboarding.cancel();
+      if (stop === 'dispose') net.onboarding.dispose();
+      if (stop === 'signout') await net.session.signOut();
+      if (stop === 'password') await net.session.signInPassword(input.slug, input.ownerEmail, input.password);
+      pending.resolve(response({ error: { code: 'trial_signup_slug_taken' } }, 409)); await attempt;
+      assert.equal(net.onboarding.view().phase, 'uncertain');
+      await net.onboarding.submit({ ...input, slug: 'corrected' }, true);
+      assert.equal(paths(calls).filter(path => path.endsWith('/trial')).length, 1);
+    });
+  });
+}
+
 for (const stop of ['cancel', 'signout', 'dispose', 'password', 'email', 'telegram']) {
   test(`${stop} during pending signup prevents late grant/completion and preserves uncertainty`, async () => {
     const pause = deferred();

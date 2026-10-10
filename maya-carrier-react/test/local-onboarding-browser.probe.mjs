@@ -157,11 +157,10 @@ async function installGuard(page, origin, account, state) {
       await page.send('Fetch.continueRequest', { requestId }); return;
     }
     if (pathname === API.signup && state.expectCollision === true) {
-      assert.equal(responseStatusCode, 500, 'current_collision_has_generic_server_error');
+      assert.equal(responseStatusCode, 409, 'collision_is_exact_precommit_refusal');
       const raw = await page.send('Fetch.getResponseBody', { requestId });
       const body = JSON.parse(raw.base64Encoded ? Buffer.from(raw.body, 'base64').toString('utf8') : raw.body);
-      assert.equal(body.statusCode, 500); assert.equal(body.message, 'Internal server error');
-      assert.equal(body.error?.code, undefined, 'no_safe_collision_code_yet');
+      assert.equal(body.error?.code, 'trial_signup_slug_taken');
       state.collisionObserved = true; state.activation = null;
       await page.send('Fetch.continueResponse', { requestId }); return;
     }
@@ -378,15 +377,16 @@ async function main() {
         await click(page, 'Создать бизнес'); await fillSignup(page, account);
         assert.equal(state.signupRequests + state.activationRequests, 0);
         await confirmSignup(page);
-        await visible(page, 'Создание бизнеса не подтверждено: ответ мог потеряться после сохранения.');
+        await visible(page, 'Это короткое имя уже занято. Выберите другое.');
         await quiet(page); await guard.settled();
         assert.equal(state.collisionObserved, true); assert.equal(state.signupCommitted, false);
         assert.equal(state.signupRequests, 1); assert.equal(state.activationRequests, 1);
-        assert.equal(await page.eval(`!!(${named('button', 'Создать бизнес')})`), false);
-        assert.equal(await page.eval('Q.all("input[type=password]").every(el => el.value === "")'), true);
+        assert.equal(await page.eval(`(${named('button', 'Создать бизнес')}).disabled`), true);
+        assert.equal(await page.eval('document.activeElement.name === "slug" && document.activeElement.getAttribute("aria-invalid") === "true"'), true);
+        assert.equal(await page.eval(`Q.all('input[type=password]').every(el => el.value === ${JSON.stringify(account.password)})`), true);
         await page.press('Enter'); await quiet(page); assert.equal(state.signupRequests, 1);
-        await checkpoint('slug-collision-rejected', existing, state, { collision: true, httpStatus: 500, errorCode: null });
-        report.collision = { httpStatus: 500, errorCode: null, ui: 'uncertain_no_repeat', signupRequests: 1, activationRequests: 1, rollbackRequiresParentDatabaseEvidence: true };
+        await checkpoint('slug-collision-rejected', existing, state, { collision: true, httpStatus: 409, errorCode: 'trial_signup_slug_taken' });
+        report.collision = { httpStatus: 409, errorCode: 'trial_signup_slug_taken', ui: 'inline_slug_requires_fresh_consent', signupRequests: 1, activationRequests: 1, rollbackRequiresParentDatabaseEvidence: true };
         assert.equal(page.exceptions.length, 0);
       } finally { guard.close(); await bounded(page.close(), 3000, 'collision_page_close_bound').catch(() => {}); }
     }

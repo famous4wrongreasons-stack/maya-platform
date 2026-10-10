@@ -165,7 +165,7 @@ export async function main(args) {
   fs.mkdirSync(output, { mode: 0o700 }); assertPrivateCwd(output);
   const reportPath = path.join(output, 'parent.json');
   const report = { contract: 'maya.local-onboarding-ui.actual-parent/1', status: 'running', source: { head: source.head, sessionSourceSha256: digest(JSON.stringify(source)), proofFiles: files }, syntheticAccounts: true, ownerStateUsed: false, providerAdmission: false, pgIdentity: initialPg, baseline: null, checkpoints: [], routes: [], collision: null, cleanup: null,
-    limits: ['Local development HTTP only; no production/provider/model acceptance.', 'Zero listed domain-effect rows and closed ingress are checked; no packet-level outbound claim.', 'No database/process restart in this UI proof; the existing launcher owns all PG lifecycle.', 'Occupied slug currently yields generic HTTP 500; uncertain UI/no retry remains required.'] };
+    limits: ['Local development HTTP only; no production/provider/model acceptance.', 'Zero listed domain-effect rows and closed ingress are checked; no packet-level outbound claim.', 'No database/process restart in this UI proof; the existing launcher owns all PG lifecycle.', 'Exact HTTP409/trial_signup_slug_taken permits explicit field correction with fresh consent; ambiguous failures still prohibit repeated creation.'] };
   const save = () => fs.writeFileSync(reportPath, JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
   let child, childClosed, deadline, exitTimer, killTimer, configCreated = false, claimed = false, interrupted = false, fault = null, stage = 'baseline';
   const configPath = path.join(state, 'ui-proof-synthetic-accounts.json'), claimPath = path.join(state, 'ui-proof-claim.json');
@@ -218,8 +218,8 @@ export async function main(args) {
       assert.ok(Object.values(row).every(count => count === 1), 'current_canonical_ownership');
       const counts = snapshot(pg.read); deltaCheck(report.baseline, counts, report.checkpoints.length < 4 ? 1 : 2, collision);
       if (collision) {
-        assert.equal(message.collision, true); assert.equal(message.httpStatus, 500); assert.equal(message.errorCode, null);
-        report.collision = { httpStatus: 500, errorCode: null, genericFailureOnly: true, existingBusinessUnchanged: true, additionalTenantUserBranchMembership: 0, additionalPendingActivation: 1, retryAuthority: false };
+        assert.equal(message.collision, true); assert.equal(message.httpStatus, 409); assert.equal(message.errorCode, 'trial_signup_slug_taken');
+        report.collision = { httpStatus: 409, errorCode: 'trial_signup_slug_taken', exactPrecommitRefusal: true, existingBusinessUnchanged: true, additionalTenantUserBranchMembership: 0, additionalPendingActivation: 1, explicitCorrectionAllowed: true, automaticRetry: false };
       } else assert.notEqual(message.collision, true);
       report.checkpoints.push({ name: message.name, account: expectedKey, canonicalOwnership: row, counts, identitySha256: digest(JSON.stringify(canonical)) }); save();
     };
