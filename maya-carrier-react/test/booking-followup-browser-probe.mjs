@@ -94,6 +94,18 @@ async function main() {
     const result = await clickRef('intent:' + intent.intent_ref, envelope);
     await record(name, result); assert.equal(result.receipt_outcome, 'ACCEPTED'); return result;
   }
+  async function login() {
+    const beforeAuth = page.apiRequests('/auth/email/start').length;
+    const beforeHistory = page.apiRequests('/widgets/resolve').length;
+    await clickName('Войти по email');
+    assert.ok(await page.waitFor('!!Q.email()')); assert.equal(await page.fill('Q.email()', input.email), true); await clickName('Получить код');
+    const auth = await until(() => page.apiRequests('/auth/email/start').slice(beforeAuth).find(r => r.finishedAt), 'email start'); assert.equal(auth.status, 201);
+    const challenge = JSON.parse(await page.responseBody(auth.requestId)); assert.equal(challenge.delivery, 'debug');
+    assert.ok(await page.waitFor('!!Q.code()')); assert.equal(await page.fill('Q.code()', challenge.debug_code), true); delete challenge.debug_code;
+    await clickName('Войти'); assert.ok(await page.waitFor('!!Q.composer()'));
+    await until(() => page.apiRequests('/widgets/resolve').slice(beforeHistory).some(r => r.finishedAt && r.status === 200), 'history');
+    report.canonicalLogins = (report.canonicalLogins ?? 0) + 1;
+  }
   try {
     localOrigin(input.backendOrigin);
     dev = createDevServer({ root: path.join(root, 'dist/web'), api: input.backendOrigin + '/api', upstreamPorts: [new URL(input.backendOrigin).port] });
@@ -114,13 +126,7 @@ async function main() {
     browser = new Browser(chrome, profile, `ws://127.0.0.1:${cdpPort}${wsPath}`); await browser.connect();
     page = await browser.newPage(); guard = await installGuard(page, origin, { emails: [input.email], prompts });
     await page.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
-    await page.goto(origin + '/'); await clickName('Войти по email');
-    assert.ok(await page.waitFor('!!Q.email()')); assert.equal(await page.fill('Q.email()', input.email), true); await clickName('Получить код');
-    const auth = await until(() => page.apiRequests('/auth/email/start').find(r => r.finishedAt), 'email start'); assert.equal(auth.status, 201);
-    const challenge = JSON.parse(await page.responseBody(auth.requestId)); assert.equal(challenge.delivery, 'debug');
-    assert.ok(await page.waitFor('!!Q.code()')); assert.equal(await page.fill('Q.code()', challenge.debug_code), true); delete challenge.debug_code;
-    await clickName('Войти'); assert.ok(await page.waitFor('!!Q.composer()'));
-    await until(() => page.apiRequests('/widgets/resolve').some(r => r.finishedAt && r.status === 200), 'history');
+    await page.goto(origin + '/'); await login();
     report.login = 'ACTUAL_CANONICAL_DEBUG_EMAIL_SYNTHETIC_CLIENT'; save();
     let envelope = await chat(prompts[0], 'initial-slots'); assert.equal(envelope.kind, 'TIME_SLOT_SELECTOR');
     envelope = await chat(prompts[1], 'selected-17'); assert.equal(envelope.kind, 'TIME_SLOT_SELECTOR');
@@ -139,9 +145,12 @@ async function main() {
       await record(operation + '-preview', result); await commit(result.next_envelope, operation + '-commit');
     }
     const before = page.apiRequests('/ai/conversation').length;
-    await page.goto(origin + '/'); await until(() => page.apiRequests('/ai/conversation').slice(before).some(r => r.finishedAt), 'reload');
+    // Current carrier keeps credentials in memory. Recovery uses a second real login.
+    await page.goto(origin + '/'); await login();
+    await until(() => page.apiRequests('/ai/conversation').slice(before).some(r => r.finishedAt && r.status === 200), 'reload');
+    assert.ok(await page.waitFor(`document.body.innerText.includes('Запись отменена.')`));
     await record('reload');
-    assert.equal(report.chat.length, 4); assert.equal(report.intents.length, 6); assert.deepEqual(guard.blocked, []); assert.deepEqual(guard.errors, []);
+    assert.equal(report.canonicalLogins, 2); assert.equal(report.chat.length, 4); assert.equal(report.intents.length, 6); assert.equal(page.apiRequests('/widgets/intent').length, 6); assert.deepEqual(guard.blocked, []); assert.deepEqual(guard.errors, []);
     report.status = 'passed-synthetic-booking-lifecycle';
   } catch (error) {
     report.status = 'failed'; report.error = error.message;
