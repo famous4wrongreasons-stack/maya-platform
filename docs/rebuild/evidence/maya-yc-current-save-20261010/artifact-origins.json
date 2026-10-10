@@ -171,84 +171,84 @@
     },
     {
       "sourceArtifact": "maya-yc-safe-diagnostics-42-final-20261010.log",
-      "archivePath": "checks/diagnostics42.log",
+      "archivePath": "checks/diagnostics42.txt",
       "originalSha256": "0c717cf5104125fa5ea52dcdee7dba60164cc2d19a842d1c7b34a20ffaa31ee0",
       "archivedSha256": "0c717cf5104125fa5ea52dcdee7dba60164cc2d19a842d1c7b34a20ffaa31ee0",
       "pathRedacted": true
     },
     {
       "sourceArtifact": "maya-a17-safe-diagnosis-unit-20261010.log",
-      "archivePath": "checks/crm-unit30.log",
+      "archivePath": "checks/crm-unit30.txt",
       "originalSha256": "7e61ab9bed3fd0c852c0af28dcfa714b65757ef44e1b6b3774f7533bdc2db652",
       "archivedSha256": "7e61ab9bed3fd0c852c0af28dcfa714b65757ef44e1b6b3774f7533bdc2db652",
       "pathRedacted": true
     },
     {
       "sourceArtifact": "maya-a17-safe-diagnosis-types-20261010.log",
-      "archivePath": "checks/shell-types.log",
+      "archivePath": "checks/shell-types.txt",
       "originalSha256": "669a25c1fda6cc66a521104d240b1e59f9baaf4498cc02a9b9d8aca49b8dc7ff",
       "archivedSha256": "669a25c1fda6cc66a521104d240b1e59f9baaf4498cc02a9b9d8aca49b8dc7ff",
       "pathRedacted": true
     },
     {
       "sourceArtifact": "maya-local-setup-entry-ssr-final.log",
-      "archivePath": "checks/ssr16-before-compose.log",
+      "archivePath": "checks/ssr16-before-compose.txt",
       "originalSha256": "a4601156ec52c13887cbc380703812584777e781b4070b08780655d1ccb1c6a4",
       "archivedSha256": "a4601156ec52c13887cbc380703812584777e781b4070b08780655d1ccb1c6a4",
       "pathRedacted": true
     },
     {
       "sourceArtifact": "maya-local-setup-entry-headless-01.log",
-      "archivePath": "checks/headless123.log",
+      "archivePath": "checks/headless123.txt",
       "originalSha256": "211022e56da0664ad9ddc4843891ad7a3008611c45b04482bb9c44d9c643b29f",
       "archivedSha256": "211022e56da0664ad9ddc4843891ad7a3008611c45b04482bb9c44d9c643b29f",
       "pathRedacted": true
     },
     {
       "sourceArtifact": "maya-local-setup-entry-types-03.log",
-      "archivePath": "checks/carrier-types-before-compose.log",
+      "archivePath": "checks/carrier-types-before-compose.txt",
       "originalSha256": "631672d9be1ce33f184ad6015f9fb486acbd667c141db2f0acec11f9e25faf92",
       "archivedSha256": "631672d9be1ce33f184ad6015f9fb486acbd667c141db2f0acec11f9e25faf92",
       "pathRedacted": true
     },
     {
       "sourceArtifact": "maya-local-setup-compose-unit-final-20261010.log",
-      "archivePath": "checks/compose-and-entry10.log",
+      "archivePath": "checks/compose-and-entry10.txt",
       "originalSha256": "41f3b625f9aa85b41f1fc3e4eee1c5035086edfee559cca87f6042893e526b8d",
       "archivedSha256": "41f3b625f9aa85b41f1fc3e4eee1c5035086edfee559cca87f6042893e526b8d",
       "pathRedacted": true
     },
     {
       "sourceArtifact": "maya-local-setup-compose-types-final-20261010.log",
-      "archivePath": "checks/carrier-types-final.log",
+      "archivePath": "checks/carrier-types-final.txt",
       "originalSha256": "631672d9be1ce33f184ad6015f9fb486acbd667c141db2f0acec11f9e25faf92",
       "archivedSha256": "631672d9be1ce33f184ad6015f9fb486acbd667c141db2f0acec11f9e25faf92",
       "pathRedacted": true
     },
     {
       "sourceArtifact": "maya-local-setup-compose-types-20261010.log",
-      "archivePath": "checks/failed-compose-type.log",
+      "archivePath": "checks/failed-compose-type.txt",
       "originalSha256": "27ea1c764e83935be621093d69402d25a2cafc5ed40034a0becf0d7127619559",
       "archivedSha256": "de40dd0ac202fdf9de43b9099abbb9456e39f8d09c85a1546f354e65de0c1777",
       "pathRedacted": true
     },
     {
       "sourceArtifact": "loader-types.log",
-      "archivePath": "checks/probe-types.log",
+      "archivePath": "checks/probe-types.txt",
       "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "archivedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "pathRedacted": true
     },
     {
       "sourceArtifact": "loader-lint.log",
-      "archivePath": "checks/probe-lint.log",
+      "archivePath": "checks/probe-lint.txt",
       "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "archivedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "pathRedacted": true
     },
     {
       "sourceArtifact": "guard-tests.log",
-      "archivePath": "checks/browser-guard6.log",
+      "archivePath": "checks/browser-guard6.txt",
       "originalSha256": "6339917d42b274d1b3b2d6f2b79e5808b1bba6d37dea3d70ade475c9af4f7568",
       "archivedSha256": "6339917d42b274d1b3b2d6f2b79e5808b1bba6d37dea3d70ade475c9af4f7568",
       "pathRedacted": true

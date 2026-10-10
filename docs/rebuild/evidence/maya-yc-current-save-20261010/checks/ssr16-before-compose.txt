@@ -1,0 +1,24 @@
+✔ explicit local entry immediately exposes password login, no unsupported finder or auth call (5.9775ms)
+✔ ordinary signed-out entry keeps the existing finder and manual alternate login choices (2.248625ms)
+✔ remount of local signed-out presentation still starts password without an auth request (0.843875ms)
+✔ idle setup makes explicit branch loading discoverable without claiming no branches or requesting them (1.143917ms)
+✔ loading is disabled; ready lists only returned branches and never grants write consent (1.500833ms)
+✔ empty or refused branch read stays qualified; it cannot enable stage or activation (1.855042ms)
+✔ new business form requires explicit consent and chosen password; render makes zero requests (48.177667ms)
+✔ ambiguous signup removes creation/confirmation affordances and offers only password recovery (25.147833ms)
+✔ pending creation freezes fields/consent but preserves explicit cancel (26.809791ms)
+✔ only completed renders server-qualified success and never claims CRM/features enabled (0.498917ms)
+✔ normal password login is reachable without email OTP and has no secret value in markup (0.545125ms)
+✔ finite failures never display raw server errors or turn refusal into success (0.124125ms)
+✔ exact slug refusal is inline and editable with fresh consent, without password recovery claims (26.209625ms)
+✔ inline errors identify the field, connect accessible help, and keep server text out (150.468583ms)
+✔ slug suggestions transliterate and remain valid and bounded without claiming availability (0.665583ms)
+✔ timezone choices use valid IANA, current offset, broad coverage and explicit device choice (50.813834ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 422.101958

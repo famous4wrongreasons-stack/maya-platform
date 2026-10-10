@@ -1,0 +1,21 @@
+gate: PASS (30 source files, 0 refusals)
+  typecheck  src/runtime/compose.ts(163,34): error TS2790: The operand of a 'delete' operator must be optional.
+file://<worktree>/maya-carrier-react/build.mjs:84
+      throw new R.CarrierRefused(diags.map(() => R.refusal('typecheck', 'src', 0, '', 'typecheck failed')));
+            ^
+
+CarrierRefused: BUILD REFUSED — 1 refusal(s)
+    at typecheck (file://<worktree>/maya-carrier-react/build.mjs:84:13)
+    at async file://<worktree>/maya-carrier-react/build.mjs:104:1 {
+  refusals: [
+    {
+      rule: 'typecheck',
+      file: 'src',
+      line: 0,
+      name: '',
+      message: 'typecheck failed'
+    }
+  ]
+}
+
+Node.js v24.15.0

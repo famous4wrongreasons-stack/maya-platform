@@ -1,0 +1,18 @@
+✔ explicit setup never restores chat/history widgets on initial login or relogin; A17 reads remain explicit (5.060917ms)
+✔ setup with a restored signed-in session also skips history and widget restoration (1.297208ms)
+✔ ordinary chat restores saved text and bounded widgets once per login, including initial signed-in session (2.551667ms)
+✔ history omission requires the existing exact local opt-in; remote/unsupported/other query retains ordinary restore (4.55675ms)
+✔ explicit local entry immediately exposes password login, no unsupported finder or auth call (6.556416ms)
+✔ ordinary signed-out entry keeps the existing finder and manual alternate login choices (2.604208ms)
+✔ remount of local signed-out presentation still starts password without an auth request (1.028125ms)
+✔ idle setup makes explicit branch loading discoverable without claiming no branches or requesting them (1.280125ms)
+✔ loading is disabled; ready lists only returned branches and never grants write consent (1.586292ms)
+✔ empty or refused branch read stays qualified; it cannot enable stage or activation (1.964958ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 100.11625

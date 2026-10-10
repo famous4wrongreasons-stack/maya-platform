@@ -1,0 +1,14 @@
+✔ only exact synthetic setup material is admitted (0.858ms)
+✔ only the exact private synthetic password login is admitted; OTP stays closed (0.294125ms)
+✔ chat and widget routes remain outside the actual setup-read profile (0.207917ms)
+✔ negative provider cases accept only their explicitly selected synthetic material (0.191542ms)
+✔ same URL locator reload and exact recovery read are admitted (0.24725ms)
+✔ refusal page observes the real response and disposal leaves no interception listener (3.608542ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 50.917708
