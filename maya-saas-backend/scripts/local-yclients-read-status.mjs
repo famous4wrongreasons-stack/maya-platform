@@ -26,14 +26,21 @@ export const READ_TRACE_LIMIT = 64;
 const TRACE_ROUTES = Object.freeze(['auth', 'connect', 'activate', 'operation', 'companies', 'company', 'book_services', 'services', 'categories', 'team', 'unlisted']);
 const CONNECTION_FAILURE_CODES = Object.freeze(['crm_credentials_rejected', 'crm_company_not_found', 'crm_provider_unreachable', 'crm_platform_configuration_error', 'crm_connection_failed']);
 const TRACE_CODES = Object.freeze([...CONNECTION_FAILURE_CODES, 'provider_response_read', 'provider_http_error', 'provider_rejected', 'provider_scope_refused', 'provider_transport_unavailable', 'response_closed', 'local_onboarding_origin_refused', 'local_yclients_diagnostic_route_disabled', 'local_yclients_read_route_disabled']);
+export const TEAM_ISSUES = Object.freeze(['payload_shape', 'success_unconfirmed', 'data_shape', 'member_limit', 'pagination_present', 'meta_shape', 'unknown_meta_fields', 'total_count_type', 'total_count_mismatch', 'count_mismatch', 'page_not_first', 'row_shape', 'invalid_staff_id', 'duplicate_staff_id', 'foreign_company']);
 export function projectReadTrace(message) {
   const fields = ['type', 'contract', 'sequence', 'elapsedMs', 'surface', 'route', 'method', 'stage', 'status', 'code'];
+  // Optional closed diagnosis only: no values, field names, IDs, counts or body.
+  if (message && Object.hasOwn(message, 'teamIssues')) fields.push('teamIssues');
   if (!message || typeof message !== 'object' || Array.isArray(message) || Object.keys(message).length !== fields.length || !fields.every(key => Object.hasOwn(message, key))) return null;
   if (message.type !== 'read-trace' || message.contract !== 'maya.local-yclients-read-trace/1' || !Number.isSafeInteger(message.sequence) || message.sequence < 1 || message.sequence > READ_TRACE_LIMIT || !Number.isSafeInteger(message.elapsedMs) || message.elapsedMs < 0 || message.elapsedMs > 1200000) return null;
   if (!['http', 'provider'].includes(message.surface) || !TRACE_ROUTES.includes(message.route) || !['GET', 'POST', 'OTHER'].includes(message.method) || !['entered', 'completed', 'refused', 'closed'].includes(message.stage)) return null;
   if (message.status !== null && (!Number.isSafeInteger(message.status) || message.status < 100 || message.status > 599)) return null;
   if (message.code !== null && !TRACE_CODES.includes(message.code)) return null;
-  return Object.fromEntries(fields.map(key => [key, message[key]]));
+  if (fields.includes('teamIssues')) {
+    const issues = message.teamIssues;
+    if (message.surface !== 'provider' || message.route !== 'team' || message.stage !== 'refused' || message.code !== 'provider_scope_refused' || message.status < 200 || message.status >= 300 || !Array.isArray(issues) || issues.length === 0 || issues.length > TEAM_ISSUES.length || issues.some((issue, index) => !TEAM_ISSUES.includes(issue) || (index > 0 && TEAM_ISSUES.indexOf(issue) <= TEAM_ISSUES.indexOf(issues[index - 1])))) return null;
+  }
+  return Object.fromEntries(fields.map(key => [key, key === 'teamIssues' ? [...message[key]] : message[key]]));
 }
 export function createReadTrace(send, clock = Date.now) {
   const start = clock(); let sequence = 0;

@@ -1,0 +1,66 @@
+{
+  "contract": "maya.owner-team-refusal-checkpoint/1",
+  "observedSource": "6d20be267c96a0a4d7b5e945db18bdd16f2785fa",
+  "observedAt": "2026-10-10T21:50:12.865960+00:00",
+  "realAttempt": {
+    "companyList": "HTTP_200_ACCEPTED",
+    "services": "HTTP_200_ACCEPTED",
+    "categories": "HTTP_200_ACCEPTED",
+    "company": "HTTP_200_ACCEPTED",
+    "team": "HTTP_200_REFUSED_BY_LOCAL_GUARD",
+    "connect": "HTTP_400_crm_connection_failed",
+    "operationStatus": "NOT_OBSERVED_UI",
+    "integrationCount": 0,
+    "a17Count": 0,
+    "exactTeamCondition": "NOT_RETAINED_UNKNOWN",
+    "traceLimitReached": false,
+    "authExchange": false,
+    "activation": false
+  },
+  "preservation": {
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "sourceUnchanged": true,
+    "samePrivateState": true
+  },
+  "newProof": {
+    "localDiagnosticTests": {
+      "pass": 72,
+      "fail": 0
+    },
+    "counterfactualNew20TestsAgainstOriginalDiagnostic": {
+      "pass": 1,
+      "fail": 19
+    },
+    "teamValidatorUnchanged": true,
+    "teamValidatorSha256": "4bb63cb98e3f02ca1ddb9edd122009bf0170b3037617696be8167a9a247f634a",
+    "realRetryAfterDiagnosticChange": "NOT_RUN"
+  },
+  "privateReceiptHashes": [
+    {
+      "path": "/private/tmp/maya-owner-same-db-read-20261011-02/resume.json",
+      "sha256": "dc617d63d2ce3507346bf1911ad52c8496ccac9a6de0e45e5d832f6c854c3bda"
+    },
+    {
+      "path": "/private/tmp/maya-owner-a17-metadata-20261011-02/result.json",
+      "sha256": "de9c5c0b68c4b950757386b1835656d50ca9d16f56cf426cbe93bbb112e1bb67"
+    },
+    {
+      "path": "/tmp/maya-team-diagnostic-tests-20261011.txt",
+      "sha256": "2829b4704ffc48cc590bb1e76433fb76b403a694b723b99ec1c54ecc3e08b62b"
+    },
+    {
+      "path": "/private/tmp/maya-team-diagnostic-counterfactual-vsf0quwc/baseline.log",
+      "sha256": "9801577255e44337096824fcdd9f62c5ee9629207d10a50cbddfb57598931a2a"
+    }
+  ],
+  "officialDocumentation": {
+    "url": "https://yclientsru.docs.apiary.io/",
+    "publicDataUrl": "https://jsapi.apiary.io/apis/yclientsru",
+    "retrievedAt": "2026-10-10T21:52:10.975798+00:00",
+    "sha256": "8d0eae04ec52f804607345ce6335eaeab80efcafe216650612e4b1718c7a841c",
+    "observation": "Management staff example uses success true, data array and meta.total_count; actual rejected response shape remains unknown."
+  },
+  "releaseCertified": false,
+  "published": false
+}

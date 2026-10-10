@@ -2,6 +2,7 @@
 // Only the test supplies a synthetic nativeFetch. Runtime captures real fetch once.
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { companyId, loginShape } from './local-yclients-read-profile.mjs';
+import { TEAM_ISSUES } from './local-yclients-read-status.mjs';
 
 export const READ_LIMITS = Object.freeze({ requestCalls: 64, sessionCalls: 256, requestMs: 120000, fetchMs: 20000, responseBytes: 2 * 1024 * 1024, teamMembers: 50 });
 const fail = reason => { const error = new Error('Local YCLIENTS read refused: ' + reason); error.code = 'LOCAL_YCLIENTS_READ_REFUSED'; throw error; };
@@ -34,6 +35,34 @@ export function validateTeamResponse(payload, headers, selectedCompany) {
   if (ids.some(id => !companyId(id)) || new Set(ids.map(String)).size !== ids.length) fail('incomplete_team');
   if (!companyId(selectedCompany) || payload.data.some(item => Object.hasOwn(item, 'company_id') && String(item.company_id) !== String(selectedCompany))) fail('foreign_company_team');
 }
+// Called only AFTER the unchanged validator refuses. Diagnose all applicable
+// checks in one attempt, without retaining any provider values or personal data.
+export function teamRefusalIssues(payload, headers, selectedCompany) {
+  const issues = new Set();
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return ['payload_shape'];
+  if (payload.success !== true) issues.add('success_unconfirmed');
+  const data = payload.data;
+  if (!Array.isArray(data)) issues.add('data_shape');
+  else if (data.length > READ_LIMITS.teamMembers) issues.add('member_limit');
+  if (headers?.get('link') || headers?.get('content-range') || Object.hasOwn(payload, 'pagination')) issues.add('pagination_present');
+  const meta = payload.meta;
+  if (!meta || typeof meta !== 'object' || Array.isArray(meta)) issues.add('meta_shape');
+  else {
+    if (Object.keys(meta).some(key => !['total_count', 'count', 'page'].includes(key))) issues.add('unknown_meta_fields');
+    if (!Number.isSafeInteger(meta.total_count)) issues.add('total_count_type');
+    else if (Array.isArray(data) && meta.total_count !== data.length) issues.add('total_count_mismatch');
+    if (meta.count !== undefined && Array.isArray(data) && meta.count !== data.length) issues.add('count_mismatch');
+    if (meta.page !== undefined && meta.page !== 1) issues.add('page_not_first');
+  }
+  if (Array.isArray(data) && data.length <= READ_LIMITS.teamMembers) {
+    if (data.some(row => !row || typeof row !== 'object' || Array.isArray(row))) issues.add('row_shape');
+    const ids = data.map(row => row?.id);
+    if (ids.some(id => !companyId(id))) issues.add('invalid_staff_id');
+    if (new Set(ids.map(String)).size !== ids.length) issues.add('duplicate_staff_id');
+    if (!companyId(selectedCompany) || data.some(row => row && Object.hasOwn(row, 'company_id') && String(row.company_id) !== String(selectedCompany))) issues.add('foreign_company');
+  }
+  return TEAM_ISSUES.filter(issue => issues.has(issue));
+}
 export function createReadTransport(nativeFetch, resolveCompany, clock = Date.now, trace = () => {}, { allowUserAuth = false } = {}) {
   const context = new AsyncLocalStorage();
   const counters = { calls: 0, refused: 0, routes: {} };
@@ -49,9 +78,9 @@ export function createReadTransport(nativeFetch, resolveCompany, clock = Date.no
   }
   async function guardedFetch(raw, init) {
     const scope = context.getStore();
-    let route = 'unlisted', status = null;
+    let route = 'unlisted', status = null, teamIssues = null;
     const method = init?.method === undefined ? 'GET' : ['GET', 'POST'].includes(init.method) ? init.method : 'OTHER';
-    const emit = (stage, code = null) => { try { trace({ surface: 'provider', route, method, stage, status, code }); } catch { /* Diagnostics never change transport behavior. */ } };
+    const emit = (stage, code = null) => { try { trace({ surface: 'provider', route, method, stage, status, code, ...(stage === 'refused' && code === 'provider_scope_refused' && teamIssues?.length ? { teamIssues } : {}) }); } catch { /* Diagnostics never change transport behavior. */ } };
     try {
       if (!scope?.active || scope.poisoned || clock() >= scope.deadline || !['/api/integrations/crm/connect', '/api/integrations/crm/activate'].includes(scope.request.originalUrl) || scope.request.method !== 'POST') fail('explicit_request_required');
       // request.user is populated by the real Nest auth guards before any domain call.
@@ -95,7 +124,13 @@ export function createReadTransport(nativeFetch, resolveCompany, clock = Date.no
       const rawBody = Buffer.concat(chunks).toString('utf8');
       let payload; try { payload = JSON.parse(rawBody); } catch { fail('response_json'); }
       if (payload?.success === false) { emit('refused', 'provider_rejected'); return new Response('{"success":false}', { status: 200 }); }
-      if (route === 'team') validateTeamResponse(payload, response.headers, selected);
+      if (route === 'team') {
+        try { validateTeamResponse(payload, response.headers, selected); }
+        catch (error) {
+          try { teamIssues = teamRefusalIssues(payload, response.headers, selected); } catch { /* Keep the original refusal even if diagnosis fails. */ }
+          throw error;
+        }
+      }
       // Parsed bounded wire only; selected-company and A17 validation happen later.
       emit('completed', 'provider_response_read');
       return new Response(rawBody, { status: response.status, headers: { 'content-type': 'application/json' } });

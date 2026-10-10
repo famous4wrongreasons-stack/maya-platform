@@ -228,3 +228,17 @@ test('IPC trace is persisted in order within finite bound and malformed or unkno
     assert.equal(d.readTrace.length, 0); assert.equal(JSON.stringify(d).includes('PRIVATE'), false);
   }
 });
+
+test('closed team diagnosis survives runtime IPC and receipt serialization; raw details are refused', async () => {
+  const event = { type: 'read-trace', contract: 'maya.local-yclients-read-trace/1', sequence: 1, elapsedMs: 10, surface: 'provider', route: 'team', method: 'GET', stage: 'refused', status: 200, code: 'provider_scope_refused', teamIssues: ['unknown_meta_fields', 'total_count_mismatch'] };
+  const diagnostic = createDiagnostic(false); let saved;
+  const observer = runtimeObserver(diagnostic, { origin: 'http://127.0.0.1:55432', providerAdmission: 'explicit_setup_reads_only' }, () => { saved = JSON.parse(JSON.stringify(diagnostic)); });
+  observer.accept(event);
+  assert.deepEqual(saved.readTrace[0].teamIssues, event.teamIssues);
+  assert.equal(saved.readTraceLimitReached, false);
+  for (const changed of [{ teamIssues: ['PRIVATE_RESPONSE'] }, { teamIssues: event.teamIssues, rawMeta: 'PRIVATE_RESPONSE' }]) {
+    const d = createDiagnostic(false), o = runtimeObserver(d, { origin: 'http://127.0.0.1:55432', providerAdmission: 'explicit_setup_reads_only' }, () => {});
+    o.accept({ ...event, ...changed }); await assert.rejects(o.failure, { diagnosticCode: 'runtime_status_invalid' });
+    assert.equal(d.readTrace.length, 0); assert.equal(JSON.stringify(d).includes('PRIVATE'), false);
+  }
+});
