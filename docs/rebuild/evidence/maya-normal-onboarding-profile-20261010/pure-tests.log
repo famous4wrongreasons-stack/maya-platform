@@ -1,0 +1,30 @@
+✔ environment construction ignores inherited credentials, loaders, proxies and DB (0.996166ms)
+✖ actual production validator accepts only deterministic unit-key profile (144.648083ms)
+✔ profile refuses altered scheduler, external DB, reused key or provider environment (1.733209ms)
+✔ exact standard onboarding and password auth reach actual owners (0.140125ms)
+✔ direct-backend fence rejects other owners, ambiguous routes, query and body variants (0.083459ms)
+✔ fresh owned PG plan omits seeds/fixtures and migrations use controlled empty cwd (2.135375ms)
+✔ private state cannot be existing or enter the repository through a symlink (1.001625ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 6
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 211.794542
+
+✖ failing tests:
+
+test at scripts/local-onboarding.test.mjs:28:1
+✖ actual production validator accepts only deterministic unit-key profile (144.648083ms)
+  Error: Runtime configuration is unsafe:
+  - Production CORS origins must use HTTPS
+      at validateRuntimeConfig (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-saas-backend/src/config/runtime-config.ts:104:11)
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-saas-backend/scripts/local-onboarding.test.mjs:32:16)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)

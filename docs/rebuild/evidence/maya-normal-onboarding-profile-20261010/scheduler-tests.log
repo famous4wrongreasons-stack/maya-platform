@@ -1,0 +1,6 @@
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        0.802 s
+Ran all test suites within paths "src/team-communications/local-scheduler-opt-out.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-normal-onboarding-20261010/scheduler-tests.json

@@ -1,0 +1,18 @@
+{
+  "status": "PUBLISHED_AND_REMOTE_SHA_VERIFIED",
+  "verifiedAt": "2026-10-10T13:27:59.057717+00:00",
+  "target": "https://github.com/famous4wrongreasons-stack/maya-platform.git",
+  "ref": "refs/heads/codex/maya-local-crm-setup-20261010",
+  "commit": "c097e9919df509fecbf081f929703c03b4f8ab10",
+  "pushExitCode": 0,
+  "pushAttemptsThisTurn": 1,
+  "remoteShaMatched": true,
+  "baseline": "77d41ef56254972d6ae849d497046ea02ac2487c",
+  "payloadPreflight": "/tmp/maya-publish-preflight-b5557193/summary.json",
+  "payloadPreflightSha256": "cfd668e035da05ad7eee564f1a9572a1b58501d55f2414e46f0f6f067d1de016",
+  "force": false,
+  "mainChanged": false,
+  "deployment": false,
+  "originChanged": false,
+  "newUncommittedProfileFilesExcluded": true
+}

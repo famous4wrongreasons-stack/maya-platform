@@ -1,0 +1,13 @@
+{
+  "candidate": "c097e9919df509fecbf081f929703c03b4f8ab10",
+  "approvedTarget": "https://github.com/famous4wrongreasons-stack/maya-platform.git",
+  "targetRef": "refs/heads/codex/maya-local-crm-setup-20261010",
+  "observedPublishedBases": [
+    "dff728e85a97841dd72bd290992b888344780780",
+    "d6583a96c58b3b75b0ecfadc3a3b01e55b3b9015"
+  ],
+  "observation": "Successful read-only git ls-remote in this turn; these two hashes match local commit objects. Other published refs are conservatively not excluded.",
+  "unpublishedCommits": 425,
+  "originUnchanged": "/Users/stanislavmosin/Documents/Codex/2026-10-05/task-3/client-readiness",
+  "pushAttempted": false
+}

@@ -1,0 +1,15 @@
+✔ environment construction ignores inherited credentials, loaders, proxies and DB (0.956959ms)
+✔ runtime validator accepts explicit local development; production HTTP prohibition remains intact (87.505792ms)
+✔ profile refuses altered scheduler, external DB, reused key or provider environment (1.731083ms)
+✔ admits exact standard onboarding/password routes for existing owners (0.141917ms)
+✔ direct-backend fence rejects other owners, ambiguous routes, query and body variants (0.089084ms)
+✔ fresh owned PG plan omits seeds/fixtures and migrations use controlled empty cwd (1.951416ms)
+✔ private state cannot be existing or enter the repository through a symlink (0.852667ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 145.547125

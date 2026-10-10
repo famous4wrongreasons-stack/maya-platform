@@ -129,7 +129,7 @@
 
 Ближайший пакет разработки:
 
-1. Собрать normal local profile без внешнего dispatch и без изменений synthetic launcher; штатный tenant/owner/branch вместо fixtures.
+1. Код normal local onboarding stage 0 подготовлен без изменений synthetic launcher; штатный tenant/owner/branch вместо fixtures. [14 локальных checks, source evidence и ограничения](evidence/maya-normal-onboarding-profile-20261010/summary.json). Actual AppModule/HTTP/PG/browser запуск ещё не выполнен, real-provider admission закрыт; scoped typed lint остановился по памяти и не объявлен PASS.
 2. Минимальный onboarding и password login **реализованы локально**. Следом проверить их с обычным backend/profile; не выдавать synthetic/SSR за actual registration и не писать «осталось только ввести токен».
 3. В существующем API inventory выделить операции первого полного выпуска, явно отметить deferred/excluded и для included привязать current code/owner/недостающее. Это рабочий список реализации, не новый аудит.
 4. Подготовить существующий verified Client и точные READ/create/move/cancel сценарии; затем при отдельном допуске выполнить первый real источник/model цикл.
@@ -151,5 +151,5 @@
 - **Неоднозначность каналов явная:** отсрочка нового Telegram/WhatsApp/MAX inbound не отменяет согласованную campaign функцию. Точный существующий outbound маршрут, получатели и consent надо выбрать; без этого delivery не объявляется готовой.
 - **Website/real booking другой задачи не затрагиваются.** Существующие ограничения source/identity/retention/authority сохраняются. Любая новая схема, retention или autonomy decision останавливает только зависимое изменение до точного решения.
 
-Ни полная функциональность первого салона, ни масштабная MAYA ещё не приняты. Этот документ сохраняет выбранную цель, завершённые локальные результаты и следующий исполнимый порядок работ; он не выдаёт C10 completion из contracts или synthetic proof. После сохранения плана штатный onboarding уже соединён с текущим carrier; ближайшая техническая работа — normal profile и actual проверка этого пути, затем разрешённое подключение источника.
+Ни полная функциональность первого салона, ни масштабная MAYA ещё не приняты. Этот документ сохраняет выбранную цель, завершённые локальные результаты и следующий исполнимый порядок работ; он не выдаёт C10 completion из contracts или synthetic proof. После сохранения плана штатный onboarding уже соединён с текущим carrier; код normal local onboarding stage 0 уже подготовлен; ближайшая техническая работа — actual проверка этого пути в согласованном HTTP/PG слоте, затем отдельный разрешённый real-provider профиль и подключение источника.
 

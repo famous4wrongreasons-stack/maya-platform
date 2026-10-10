@@ -1,0 +1,41 @@
+{
+  "baseline": "77d41ef56254972d6ae849d497046ea02ac2487c",
+  "publishedCommit": "c097e9919df509fecbf081f929703c03b4f8ab10",
+  "publishedBranch": "https://github.com/famous4wrongreasons-stack/maya-platform/tree/codex/maya-local-crm-setup-20261010",
+  "runtimeCommit": "7dc83910bfa47409525915a1cdb90b3d25656f02",
+  "runtimeCommitPublished": false,
+  "status": "QUALIFIED_SOURCE_ONLY_PASS",
+  "sourceFiles": 7,
+  "sourceHashesMatchDiskAndCommit": true,
+  "checks": {
+    "pureTestsPassed": 8,
+    "schedulerUnitTestsPassed": 6,
+    "backendTypecheck": "PASS; author-observed exit 0",
+    "syntax": "PASS; author-observed exit 0",
+    "formatting": "PASS",
+    "independentSourceReview": "PASS; no concrete source blockers",
+    "scopedTypedLint": "NOT_COMPLETED_RESOURCE_LIMIT; exit 134 at 1024 MiB, no retry"
+  },
+  "preservedFailures": [
+    "initial production HTTP/CORS refusal; production HTTPS rule unchanged, local profile explicitly development",
+    "scoped typed ESLint V8 heap exhaustion"
+  ],
+  "actual": {
+    "appModule": "NOT_RUN",
+    "http": "NOT_RUN",
+    "postgresql": "NOT_RUN",
+    "currentReact": "NOT_RUN",
+    "provider": "NOT_RUN",
+    "model": "NOT_RUN",
+    "serviceKeysGenerated": false
+  },
+  "scope": "Prepared normal local onboarding stage 0 only; actual AppModule/HTTP/PG/browser qualification and real-provider profile admission remain open",
+  "notes": [
+    "Normal server authority retained; no fixtures, grants, schema or retention policy changes",
+    "Future explicit run creates fresh private owned state outside repo; no keys generated in this checkpoint",
+    "Native CRM adapter remains existing owner but provider setup/write/model/notification routes are closed in stage 0",
+    "Two scheduler opt-outs preserve existing defaults; pure profile disables all observed schedulers",
+    "Publication receipt applies only to c097; no second push or deployment performed",
+    "All original author checkpoint bytes retained; its pending-review status is superseded by independent-review.json and this summary"
+  ]
+}

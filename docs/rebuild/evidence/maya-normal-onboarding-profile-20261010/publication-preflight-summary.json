@@ -1,0 +1,130 @@
+{
+  "contract": "maya.local-publication-preflight/1",
+  "candidate_head": "c097e9919df509fecbf081f929703c03b4f8ab10",
+  "reviewed_at": "2026-10-10",
+  "verdict": "QUALIFIED_GO_FOR_ACTUAL_OUTGOING_SET",
+  "confirmed_sensitive_blockers": [],
+  "decision": "No new concrete live credential or real-client PII blocker identified in the actual outgoing set against the two observed GitHub refs. Original bounded static/image qualifications remain.",
+  "publication_target_for_parent_only": "https://github.com/famous4wrongreasons-stack/maya-platform",
+  "scope": {
+    "head": "c097e9919df509fecbf081f929703c03b4f8ab10",
+    "base_reviewed_head": "b555719307bfeaf12a422c79e4023b86674a624d",
+    "boundary": "Exact c097e991 HEAD --not two parent-observed published GitHub refs; full historical blob versions, previously scanned blobs reused, 384 newly included blobs scanned.",
+    "excluded_local_tracking_refs_historical": [
+      "refs/remotes/origin/HEAD",
+      "refs/remotes/origin/codex/exact-attempt-isolation-20261006",
+      "refs/remotes/origin/codex/maya-b35-completion-20261005",
+      "refs/remotes/origin/codex/maya-chat-semantic-contract-20261005",
+      "refs/remotes/origin/codex/maya-client-readiness-20261005",
+      "refs/remotes/origin/codex/maya-controlled-integration-20260930",
+      "refs/remotes/origin/codex/maya-final-completion-20261005",
+      "refs/remotes/origin/codex/maya-yc-service-pricing-20261006",
+      "refs/remotes/origin/codex/website-booking-entry-20261005"
+    ],
+    "excluded_observed_github_refs": [
+      "dff728e85a97841dd72bd290992b888344780780",
+      "d6583a96c58b3b75b0ecfadc3a3b01e55b3b9015"
+    ]
+  },
+  "coverage": {
+    "commits": 425,
+    "unique_outgoing_blobs": 7784,
+    "unique_text_blobs": 7308,
+    "text_bytes": 338857580,
+    "binary_blobs": 476,
+    "image_blobs": 465,
+    "gzip_archives": 11,
+    "decoded_gzip_bytes": 4338787,
+    "historical_complete_blob_versions_scanned": true,
+    "strict_default_gitleaks": "8.30.1; ignored repository suppressions; full text plus decoded gzip; original history diff scan also retained",
+    "custom_shapes": [
+      "email",
+      "Russian and North American phone",
+      "complete PEM marker pairs",
+      "JWT shape",
+      "common provider token shapes"
+    ],
+    "final_docs_delta_files": 6,
+    "final_docs_delta_gitleaks_findings": 0,
+    "incremental_ancestor_commits": 57,
+    "incremental_unique_blobs": 384,
+    "incremental_gitleaks_matches": 19,
+    "previous_368_commit_categories": {
+      "docs/evidence": 126,
+      "runtime/other": 152,
+      "tests/proofs": 90
+    }
+  },
+  "findings": {
+    "full_blob_gitleaks_matches": 7038,
+    "triage": {
+      "sha256_or_token_digest": 6757,
+      "synthetic_record_identity_or_idempotency_fixture": 58,
+      "explicit_unit_or_probe_fixture_token": 11,
+      "explicit_fixture_or_placeholder_literal": 32,
+      "source_manifest_digest": 1,
+      "registered_capability_name": 16,
+      "synthetic_proof_intent_token": 153,
+      "test_marker_only": 6,
+      "empty_quoted_template_assignment_multiline_false_positive": 4
+    },
+    "complete_private_key_blocks": 0,
+    "custom_jwt_shapes": 0,
+    "custom_provider_token_shapes": 0,
+    "contact_candidate_contexts": {
+      "operational_ssh_destination_not_client_contact": 84,
+      "reserved_or_local_fixture_domain": 357,
+      "common_synthetic_number_candidate": 275,
+      "archived_proof_context_not_individually_identity_verified": 6,
+      "test_fixture_context_not_individually_identity_verified": 718,
+      "explicit_example_or_synthetic_context": 8
+    },
+    "incremental_gitleaks_triage": {
+      "registered_policy_identifier": 6,
+      "explicit_synthetic_fixture_secret": 12,
+      "synthetic_unit_idempotency_key": 1
+    }
+  },
+  "images": {
+    "groups": 50,
+    "synthetic_groups": 48,
+    "synthetic_images": 462,
+    "public_login_groups_visually_reviewed": 1,
+    "public_login_images_visually_reviewed": 2,
+    "unreconciled_provenance_groups": 0,
+    "qualification": "462 images qualified by existing synthetic manifests/state/source records; not all images visually inspected or OCR scanned.",
+    "additional_image_visually_reviewed": {
+      "path": "docs/rebuild/evidence/final-completion-20261005/react-resume-after.jpg",
+      "blob": "a407dd16ad05280590422c90f201ee9adcf86e82",
+      "review": "Visually inspected. Test resume conversation with generic unavailable/refusal replies, no client/contact/credential data visible."
+    }
+  },
+  "limits": [
+    "Ancestors already reachable from the two parent-observed GitHub refs are excluded as already published; child performed no extra network. This revision closes the previous local-origin-only boundary.",
+    "Inventory records one representative historical path per unique blob; content was scanned once regardless of aliases.",
+    "No universal PII absence proof: names, addresses, faces and nonstandard secret formats are not comprehensively recognized by regex; most fixture/contact candidates were qualified by local synthetic proof context, not individually identity-verified.",
+    "Binary coverage is archive decoding plus image provenance and two visual spot checks; no exhaustive OCR or metadata/steganography analysis.",
+    "Opaque widget intent tokens were qualified as synthetic proof fixtures; they were not replayed, decrypted or live-validated.",
+    "Git author identity already present in excluded local origin history; normal repository paths, operational SSH destination metadata and public business branding remain.",
+    "No credentials, Keychain, live environment files, remote provider, model, production service or network access used. No repo edits, remote changes, commit or push performed."
+  ],
+  "fallback_if_parent_requires_stricter_payload": "Do not merely delete files at HEAD: old blobs remain reachable. Preserve current history and choose a separately reviewed publication boundary if additional ancestor or artifact assurance is required; no boundary changes performed here.",
+  "deliverables": [
+    "summary.json",
+    "commit-inventory.json",
+    "blob-inventory.json",
+    "secret-findings-triage.json",
+    "image-provenance-review.json",
+    "token-provenance-review.json",
+    "contact-candidates-context.json",
+    "decoded-archive-inventory.json",
+    "git-metadata-coverage.json",
+    "final-delta-paths.json",
+    "additional-summary.json",
+    "actual-outgoing-blob-inventory.json",
+    "actual-outgoing-commit-inventory.json",
+    "additional-secret-findings-triage.json",
+    "additional-public-metadata-comparison.json"
+  ],
+  "scratch_hygiene": "Extracted committed text copies and temporary visual copies removed after scan; deliverables contain locations, hashes and classifications, not matched secret/contact values."
+}

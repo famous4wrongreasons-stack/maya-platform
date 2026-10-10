@@ -1,0 +1,111 @@
+{
+  "contract": "maya.normal-local-onboarding-source-checkpoint/1",
+  "createdAt": "2026-10-10T13:37:18.986123+00:00",
+  "baseCommit": "c097e9919df509fecbf081f929703c03b4f8ab10",
+  "status": "SOURCE_ONLY_READY_FOR_REVIEW",
+  "files": [
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding-profile.mjs",
+      "sha256": "c5dfbd0a34599c5033534d02aa9da642c237f2ef32b9e8c1b6609b2f5a592b67"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding-runtime.mjs",
+      "sha256": "37508284365adadc96b844929dde07d0e06e0826278af1f7403366fa0c9c18e2"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding.mjs",
+      "sha256": "d0908e8607de2df4aa4e359592008aa44a0817886a54712dfd804386b7ff3e06"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding.test.mjs",
+      "sha256": "b57f9537ea95b47275de2e4a06b71cd070470bc3d2cc515e2b5ed7eb4b3f8c61"
+    },
+    {
+      "path": "maya-saas-backend/src/team-communications/team-communications.scheduler.ts",
+      "sha256": "8d4e97ead74be1d2acc99e016b98fb1b32f6a8280601c906a385b2d4c4f8c78d"
+    },
+    {
+      "path": "maya-saas-backend/src/native-feedback/native-feedback.scheduler.ts",
+      "sha256": "b373c7471cf6587c3f20ac4ccde458163ac31ee5d7ec15c5e693421c6b41e60e"
+    },
+    {
+      "path": "maya-saas-backend/src/team-communications/local-scheduler-opt-out.spec.ts",
+      "sha256": "5547482e0a801b489303705d2b3129e35c95cc74d66872de26102b3f9a85fb00"
+    }
+  ],
+  "checks": [
+    {
+      "name": "first-production-http-policy-control",
+      "command": "node --max-old-space-size=256 --test scripts/local-onboarding.test.mjs",
+      "exitCode": 1,
+      "result": "6 passed / 1 failed: Production CORS origins must use HTTPS; preserved, policy unchanged",
+      "log": "pure-tests.log"
+    },
+    {
+      "name": "final-pure-and-format",
+      "command": "node --max-old-space-size=256 --test scripts/local-onboarding.test.mjs > /tmp/maya-normal-onboarding-20261010/pure-tests-03.log 2>&1\nnode --max-old-space-size=256 node_modules/prettier/bin/prettier.cjs --check src/team-communications/team-communications.scheduler.ts src/native-feedback/native-feedback.scheduler.ts src/team-communications/local-scheduler-opt-out.spec.ts > /tmp/maya-normal-onboarding-20261010/format.log 2>&1",
+      "commandGroupExitCode": 0,
+      "result": "8 pure tests passed; 3 TS files formatting passed",
+      "logs": [
+        "pure-tests-03.log",
+        "format.log"
+      ]
+    },
+    {
+      "name": "scheduler-unit",
+      "command": "node --max-old-space-size=1536 node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/team-communications/local-scheduler-opt-out.spec.ts --json --outputFile=/tmp/maya-normal-onboarding-20261010/scheduler-tests.json",
+      "exitCode": 0,
+      "result": "6 tests / 1 suite passed; fake timers only",
+      "logs": [
+        "scheduler-tests.log",
+        "scheduler-tests.json"
+      ]
+    },
+    {
+      "name": "backend-typecheck",
+      "command": "node --max-old-space-size=3072 node_modules/typescript/bin/tsc --noEmit --project tsconfig.build.json --incremental false",
+      "exitCode": 0,
+      "result": "PASS; observed exec completion session52513",
+      "log": "types.log"
+    },
+    {
+      "name": "scoped-typed-lint",
+      "command": "node --max-old-space-size=1024 node_modules/eslint/bin/eslint.js src/team-communications/team-communications.scheduler.ts src/native-feedback/native-feedback.scheduler.ts src/team-communications/local-scheduler-opt-out.spec.ts",
+      "exitCode": 134,
+      "result": "NOT_COMPLETED_RESOURCE_LIMIT: V8 heap exhausted at 1024 MiB; no escalation/retry",
+      "log": "lint.log"
+    },
+    {
+      "name": "mjs-syntax",
+      "command": "for source in scripts/local-onboarding-profile.mjs scripts/local-onboarding-runtime.mjs scripts/local-onboarding.mjs scripts/local-onboarding.test.mjs; do node --check \"$source\" || exit; done",
+      "exitCode": 0,
+      "result": "4 files PASS",
+      "log": "syntax.log"
+    }
+  ],
+  "profile": "normal local development AppModule, stage 0, no provider admission",
+  "actual": {
+    "appModule": "NOT_RUN",
+    "http": "NOT_RUN",
+    "postgresql": "NOT_RUN",
+    "currentReact": "NOT_RUN",
+    "provider": "NOT_RUN",
+    "model": "NOT_RUN",
+    "serviceKeysGenerated": false
+  },
+  "boundaries": [
+    "No fixtures, grants, seed, domain overrides or schema changes",
+    "Only future explicit --run generates private keys; retained with fresh private owned DB outside repository",
+    "Actual AppModule loaded from own build in controlled private cwd; dotenv-free migration config/no seed",
+    "Direct backend and transparent relay both fenced; CRM writes/discovery/preview, model, speech, notification routes refused",
+    "Existing scheduler defaults unchanged; local profile explicitly disables all observed schedulers",
+    "Runtime duration 1..15 minutes after ready; preparation separately bounded per stage 180 seconds, pg stop45 seconds, owned group TERM/KILL waits5+5 seconds",
+    "Production HTTPS/CORS policy unchanged; this is not production, provider or iPhone HTTPS acceptance"
+  ],
+  "remaining": [
+    "Independent review pending",
+    "Typed ESLint incomplete due resource limit; no PASS claim",
+    "Actual normal AppModule/onboarding/HTTP/PG/browser run not authorized or executed",
+    "Real provider credential/scope admission remains explicitly blocked"
+  ]
+}

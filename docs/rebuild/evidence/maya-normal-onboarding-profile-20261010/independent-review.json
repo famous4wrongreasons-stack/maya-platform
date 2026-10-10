@@ -1,0 +1,153 @@
+{
+  "contract": "maya.normal-local-onboarding-independent-review/1",
+  "status": "QUALIFIED_SOURCE_REVIEW_PASS",
+  "reviewer": "checkpoint_review",
+  "baseCommit": "c097e9919df509fecbf081f929703c03b4f8ab10",
+  "scope": "Read-only source and existing evidence review; no tests, services, network, credentials or runtime execution by reviewer.",
+  "sourceCheckpoint": {
+    "path": "source-checkpoint.json",
+    "sha256": "e7097ca244a3332f5302afcd19dd120c6c95b41286cd03dd4088f1a871f3d994"
+  },
+  "sourceVerification": {
+    "allSevenFilesMatch": true,
+    "files": [
+      {
+        "path": "maya-saas-backend/scripts/local-onboarding-profile.mjs",
+        "bytes": 8398,
+        "sha256": "c5dfbd0a34599c5033534d02aa9da642c237f2ef32b9e8c1b6609b2f5a592b67",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/scripts/local-onboarding-runtime.mjs",
+        "bytes": 3697,
+        "sha256": "37508284365adadc96b844929dde07d0e06e0826278af1f7403366fa0c9c18e2",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/scripts/local-onboarding.mjs",
+        "bytes": 19028,
+        "sha256": "d0908e8607de2df4aa4e359592008aa44a0817886a54712dfd804386b7ff3e06",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/scripts/local-onboarding.test.mjs",
+        "bytes": 9340,
+        "sha256": "b57f9537ea95b47275de2e4a06b71cd070470bc3d2cc515e2b5ed7eb4b3f8c61",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/src/team-communications/team-communications.scheduler.ts",
+        "bytes": 4020,
+        "sha256": "8d4e97ead74be1d2acc99e016b98fb1b32f6a8280601c906a385b2d4c4f8c78d",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/src/native-feedback/native-feedback.scheduler.ts",
+        "bytes": 5180,
+        "sha256": "b373c7471cf6587c3f20ac4ccde458163ac31ee5d7ec15c5e693421c6b41e60e",
+        "matches": true
+      },
+      {
+        "path": "maya-saas-backend/src/team-communications/local-scheduler-opt-out.spec.ts",
+        "bytes": 1547,
+        "sha256": "5547482e0a801b489303705d2b3129e35c95cc74d66872de26102b3f9a85fb00",
+        "matches": true
+      }
+    ]
+  },
+  "blockers": [],
+  "resolvedFinding": {
+    "issue": "The shared relay drops Origin, so backend-only origin validation permitted a cross-origin request to reach a canonical mutation through the web relay.",
+    "resolution": "localBrowserBoundary now checks exact Host, supplied Origin and Sec-Fetch-Site before every shared relay handler; the direct backend also enforces the boundary. No common relay change.",
+    "sourceLocations": [
+      "scripts/local-onboarding-profile.mjs:89",
+      "scripts/local-onboarding.mjs:132",
+      "scripts/local-onboarding-runtime.mjs:34"
+    ],
+    "negativeControls": [
+      "foreign or null Origin",
+      "array Origin",
+      "cross-site and same-site fetch metadata",
+      "foreign, array or wrong-port Host"
+    ],
+    "status": "CLOSED_IN_REVIEWED_SOURCE"
+  },
+  "verifiedSourceProperties": [
+    "Canonical fresh private state directory outside repository, including parent-symlink resolution; private key files generated only behind future explicit --run.",
+    "Closed sterile environment, no inherited provider/model credentials or loader/proxy variables; real AppModule imported only after private-cwd/profile validation.",
+    "Dotenv-free migration configuration, no seed, test container, domain override or fixture grant.",
+    "Finite standard onboarding/password routes only; CRM provider writes/discovery/preview, chat, speech and outbound routes remain closed.",
+    "Fresh own PostgreSQL plan, finite per-stage deadlines, exact private cluster stop, owned process-group TERM/KILL cleanup.",
+    "Two scheduler opt-outs preserve default/true behavior; explicit local profile disables all observed scheduled workers.",
+    "Explicit local development mode; existing production HTTPS/CORS validator rules remain unchanged."
+  ],
+  "existingEvidenceObserved": [
+    {
+      "name": "pure tests",
+      "result": "8 passed / 0 failed",
+      "path": "pure-tests-03.log",
+      "sha256": "db2a98556f503573d69df1ddbd6ea5a13a9aaeaf50f3b3b0368dcbd11d69e830"
+    },
+    {
+      "name": "scheduler fake-timer unit tests",
+      "result": "6 passed / 1 suite / 0 failed; success=true",
+      "path": "scheduler-tests.json",
+      "sha256": "fc7b94f36dfb5d2b27edd6ad9e551fecafcc3db59a96a305634fd12cb1c08776"
+    },
+    {
+      "name": "formatting",
+      "result": "All matched files use Prettier code style",
+      "path": "format.log",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "name": "scoped typed lint",
+      "result": "NOT_COMPLETED_RESOURCE_LIMIT: V8 heap exhausted at 1024 MiB",
+      "path": "lint.log",
+      "sha256": "7a4e59d4c6b811c5f39e0afe62ecaf6dee0a347f221b2ef254c68bdd8caf287a"
+    }
+  ],
+  "authorReportedExecutionResults": [
+    {
+      "name": "backend typecheck",
+      "exitCode": 0,
+      "evidence": "source-checkpoint.json reports observed exec completion session52513; types.log is empty, so its bytes alone do not prove the exit code."
+    },
+    {
+      "name": "four MJS syntax checks",
+      "exitCode": 0,
+      "evidence": "source-checkpoint.json reports exit 0; syntax.log is empty, so its bytes alone do not prove the exit code."
+    },
+    {
+      "name": "initial production HTTP validator control",
+      "exitCode": 1,
+      "evidence": "Author records 6 passed / 1 failed with Production CORS origins must use HTTPS; retained failure and revised explicit development profile do not change production policy."
+    }
+  ],
+  "limitations": [
+    "Typed ESLint is incomplete due to the recorded 1 GiB heap exhaustion; no lint PASS claim.",
+    "Source readiness is not operational acceptance. No actual normal AppModule/onboarding/HTTP/PostgreSQL/current React session was exercised.",
+    "No real provider or model acceptance, credential admission, iPhone HTTPS readiness or broader MAYA completion is claimed.",
+    "Runtime duration is bounded to 1..15 minutes after ready; preparation is separately bounded per stage rather than included in that duration."
+  ],
+  "actual": {
+    "AppModule": "NOT_RUN",
+    "HTTP": "NOT_RUN",
+    "PostgreSQL": "NOT_RUN",
+    "currentReactSession": "NOT_RUN",
+    "provider": "NOT_RUN",
+    "model": "NOT_RUN",
+    "serviceKeysGenerated": false
+  },
+  "reviewerActions": {
+    "sourceReads": true,
+    "existingLogReads": true,
+    "sourceAndEvidenceHashComparison": true,
+    "repositoryEdits": false,
+    "testsExecuted": false,
+    "servicesStarted": false,
+    "networkCalls": false,
+    "credentialReadsOrGeneration": false
+  },
+  "conclusion": "The seven frozen source files pass this qualified independent source review. The relay finding is closed. Runtime acceptance and the incomplete lint check remain explicitly unqualified."
+}
