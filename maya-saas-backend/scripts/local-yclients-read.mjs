@@ -29,6 +29,8 @@ export const READ_SOURCE_FILES = Object.freeze([
   'maya-saas-backend/scripts/local-yclients-read.test.mjs',
   'maya-saas-backend/scripts/local-yclients-read-status.mjs',
   'maya-saas-backend/scripts/local-yclients-read-diagnostic.mjs',
+  'maya-saas-backend/scripts/local-yclients-read-resume.mjs',
+  'maya-saas-backend/scripts/local-yclients-read-resume.test.mjs',
 ]);
 export const LOCAL_READ_HEADERS = Object.freeze({
   'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
@@ -246,7 +248,7 @@ export const LANDING_HTML = '<!doctype html><html lang="ru"><meta charset="utf-8
 
 export const DIAGNOSTIC_HTML = '<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>MAYA — диагностика локального запуска</title><main><h1>Диагностика локального запуска MAYA</h1><p>Текущие React, backend и отдельная PostgreSQL запущены для проверки. Внешняя сеть закрыта. Не вводите токены или другие реквизиты: разрешены только health-запросы.</p><p><a href="/">Открыть текущий интерфейс для проверки отображения</a></p></main></html>';
 
-async function runReadRuntime(plan, runtimeEnv, state, control, manifest, save) {
+export async function runReadRuntime(plan, runtimeEnv, state, control, manifest, save) {
   const diagnostic = manifest.diagnostic;
   const command = plan.diagnosticNoProvider ? diagnosticRuntimeCommand(plan, runtimeEnv) : plan.runtime;
   let child;

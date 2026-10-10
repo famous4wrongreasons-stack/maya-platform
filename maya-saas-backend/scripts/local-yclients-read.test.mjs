@@ -40,8 +40,8 @@ test('read session reuses exact preparation and cleanup without changing stage 0
   assert.throws(() => readSessionPlan({ ...options, database: 'existing_unowned_database' }));
 });
 test('all finite read-profile sources are explicitly bound and landing uses current form', () => {
-  assert.equal(READ_SOURCE_FILES.length, 8); assert.equal(new Set(READ_SOURCE_FILES).size, 8);
-  for (const name of ['local-yclients-read.mjs', 'local-yclients-read-profile.mjs', 'local-yclients-read-runtime.mjs', 'local-yclients-read-transport.mjs', 'local-yclients-read-profile.test.mjs', 'local-yclients-read.test.mjs', 'local-yclients-read-status.mjs', 'local-yclients-read-diagnostic.mjs']) assert.ok(READ_SOURCE_FILES.some(file => path.basename(file) === name));
+  assert.equal(READ_SOURCE_FILES.length, 10); assert.equal(new Set(READ_SOURCE_FILES).size, 10);
+  for (const name of ['local-yclients-read.mjs', 'local-yclients-read-profile.mjs', 'local-yclients-read-runtime.mjs', 'local-yclients-read-transport.mjs', 'local-yclients-read-profile.test.mjs', 'local-yclients-read.test.mjs', 'local-yclients-read-status.mjs', 'local-yclients-read-diagnostic.mjs', 'local-yclients-read-resume.mjs', 'local-yclients-read-resume.test.mjs']) assert.ok(READ_SOURCE_FILES.some(file => path.basename(file) === name));
   assert.ok(LANDING_HTML.includes('href="/?local_crm_setup=1"'));
   assert.ok(LANDING_HTML.includes('Партнёрский токен вводится скрыто'));
   assert.ok(LANDING_HTML.includes('Отдельная активация'));
