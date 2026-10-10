@@ -110,7 +110,7 @@ test('provider denial text is stripped; redirect:error and bounded signal reach 
   const transport = createReadTransport(async (_url, init) => { assert.equal(init.redirect, 'error'); assert.ok(init.signal instanceof AbortSignal); return new Response('{"meta":{"message":"private-provider-body"}}', { status: 403 }); }, async () => 424242);
   await transport.run(request(), new EventEmitter(), async () => { const result = await transport.fetch(source('company/424242')); assert.equal(result.status, 403); assert.equal(await result.text(), '{}'); });
 });
-test('actual native adapter setup methods execute through the exact read guard with synthetic wire data', async () => {
+for (const totalCount of [1, '1']) test(`actual native adapter setup methods execute through exact read guard with ${typeof totalCount} total count`, async () => {
   const require = createRequire(import.meta.url);
   const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   require('ts-node').register({ project: path.join(backend, 'tsconfig.scripts.json'), transpileOnly: true });
@@ -123,7 +123,7 @@ test('actual native adapter setup methods execute through the exact read guard w
     if (url.pathname.endsWith('/company/424242')) return reply({ id: 424242, title: 'Synthetic company', timezone_name: 'Europe/Moscow' });
     if (url.pathname.endsWith('/book_services/424242')) return reply({ services: [{ id: 1, title: 'Synthetic service', price_min: 100, duration: 1800 }] });
     if (url.pathname.endsWith('/service_categories/424242')) return reply([]);
-    if (url.pathname.endsWith('/company/424242/staff')) return reply([{ id: 2, company_id: 424242, name: 'Synthetic staff', bookable: true, fired: false }], { meta: { total_count: 1 } });
+    if (url.pathname.endsWith('/company/424242/staff')) return reply([{ id: 2, company_id: 424242, name: 'Synthetic staff', bookable: true, fired: false }], { meta: { total_count: totalCount } });
     assert.fail('unplanned_native_read');
   }, async () => 424242);
   const oldFetch = globalThis.fetch, oldPartner = process.env.YCLIENTS_PARTNER_TOKEN;

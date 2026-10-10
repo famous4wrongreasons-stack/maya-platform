@@ -1,0 +1,66 @@
+{
+  "contract": "maya.local-team-count-compatibility/1",
+  "baseSource": "cce0cb46f0592ce87e8a49208aac99e21196b08b",
+  "observedFailure": {
+    "teamHttp": 200,
+    "teamIssues": [
+      "total_count_type"
+    ],
+    "otherTeamChecksPassed": true,
+    "exactCountValueOrEncoding": "NOT_RETAINED",
+    "connectHttp": 400,
+    "connectCode": "crm_connection_failed",
+    "recovery": "NOT_OBSERVED_UI",
+    "integrationCount": 0,
+    "a17Count": 0,
+    "traceLimitReached": false
+  },
+  "implementation": {
+    "exactDecimalStringCountAccepted": true,
+    "integerStillAccepted": true,
+    "missingCountAccepted": false,
+    "inferCountFromArray": false,
+    "incompleteForeignDuplicateOrPaginatedTeamAccepted": false,
+    "providerResponseBytesRewritten": false,
+    "closedEncodingDiagnostic": true
+  },
+  "proof": {
+    "localReadTests": {
+      "pass": 79,
+      "fail": 0
+    },
+    "counterfactualSixNewTestsAtBase": {
+      "pass": 2,
+      "fail": 4
+    },
+    "nativeAdapterNumberAndStringCount": "PASS_SYNTHETIC",
+    "allCounts0Through50": "PASS_SYNTHETIC",
+    "actualOwnerSaveAfterChange": "NOT_RUN"
+  },
+  "preservation": {
+    "sourceUnchanged": true,
+    "samePrivateState": true,
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true
+  },
+  "receipts": [
+    {
+      "path": "/private/tmp/maya-owner-same-db-read-20261011-03/resume.json",
+      "sha256": "48618b1b5834f93701f4a4bab5f3cc8456c4621ddc4e78c091fe428a36146093"
+    },
+    {
+      "path": "/private/tmp/maya-owner-a17-metadata-20261011-03/result.json",
+      "sha256": "cf7f299184f631cac5b3ef03e64bab22d526f7da191bde556de6a32383d57733"
+    },
+    {
+      "path": "/tmp/maya-team-count-tests-20261011-02.txt",
+      "sha256": "8784a4d6675a48d20cfb81759a2c985ab371499fa9c2090e9c121fcb2e066e57"
+    },
+    {
+      "path": "/private/tmp/maya-team-count-counterfactual-p_mwaoru/baseline.log",
+      "sha256": "1897c04817616320155f81c17d5c276b7ec6b02fa065273f8692620d5d711490"
+    }
+  ],
+  "certified": false,
+  "published": false
+}
