@@ -1,0 +1,48 @@
+{
+  "baseline": "77d41ef56254972d6ae849d497046ea02ac2487c",
+  "implementationBase": "b555719307bfeaf12a422c79e4023b86674a624d",
+  "runtimeCommit": "4aec1a470a3b66766af3e20d867ef1fd9f2627ef",
+  "status": "qualified_local_pass",
+  "sourceFiles": 13,
+  "allSourcesMatchCommittedAndDisk": true,
+  "generatedShellManifestSha256": "7908cc01e3f191d007717a3c199b1cd6d13b47fb0b8f4a594c8abbdf933acd85",
+  "checks": {
+    "focusedSyntheticAndSsr": {
+      "passed": 117,
+      "failed": 0,
+      "skipped": 0
+    },
+    "finalSsrAfterStyleCorrection": {
+      "passed": 6,
+      "failed": 0,
+      "subsetRerunNotAdditionalCoverage": true
+    },
+    "shellBuild": "PASS",
+    "reactGuardsTypesBuild": "PASS",
+    "independentSourceReview": "PASS"
+  },
+  "preservedFailures": [
+    "initial SSR missing server snapshot",
+    "React inline-style guard",
+    "duplicate style properties after literal expansion"
+  ],
+  "limits": {
+    "actualOnboardingHttpPgBrowser": "NOT_RUN",
+    "realProviderModelCredentials": "NOT_RUN",
+    "backendChanged": false,
+    "a17AuthorityChanged": false,
+    "crmConnectedClaimed": false,
+    "widgetsRuntimeGranted": false,
+    "websiteChanged": false,
+    "iosChanged": false,
+    "visualRedesign": false
+  },
+  "behavior": [
+    "Explicit standard signup via existing two public APIs",
+    "Required chosen password and reachable normal password login",
+    "Uncertain signup cannot automatically recreate tenant",
+    "Exact activation/tenant/owner/branch/source projection before private session install",
+    "Old auth/signup responses cannot replace current intent",
+    "Completion survives normal form cleanup; signout/dispose wins"
+  ]
+}

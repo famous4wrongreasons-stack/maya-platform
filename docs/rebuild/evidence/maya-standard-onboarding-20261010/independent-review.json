@@ -1,0 +1,200 @@
+{
+  "contract": "maya.standard-onboarding-independent-review/1",
+  "reviewer": "checkpoint_review",
+  "reviewedAt": "2026-10-10T13:12:02.960283+00:00",
+  "verdict": "QUALIFIED_SOURCE_REVIEW_PASS",
+  "baseCommit": "b555719307bfeaf12a422c79e4023b86674a624d",
+  "headAtReview": "b555719307bfeaf12a422c79e4023b86674a624d",
+  "manifest": {
+    "path": "/tmp/maya-standard-onboarding-source-03.json",
+    "sha256": "7392f2bb4b039deafecb2527f2727f9f957499bb1b2cdbbc00fb878989c69d19",
+    "sourceFiles": 13,
+    "allCurrentBytesMatch": true
+  },
+  "summary": {
+    "path": "/tmp/maya-standard-onboarding-checkpoint.json",
+    "sha256": "031b422a9234e2618898dfaf65b1d1a8b116965b7594674507c06b1a7facbe19"
+  },
+  "sourceFiles": [
+    {
+      "path": "maya-carrier-react/package.json",
+      "sha256": "dc930e0f6ab99a20fa8877ccf62a74d071c00b6cbd42878b9f2ba429ac69be57",
+      "bytes": 1027,
+      "currentSha256": "dc930e0f6ab99a20fa8877ccf62a74d071c00b6cbd42878b9f2ba429ac69be57",
+      "matches": true
+    },
+    {
+      "path": "maya-carrier-react/src/App.tsx",
+      "sha256": "4d260fb946c25431cfc6c5700d9f46fc2b13912a5cac609b16657f586aec2ef0",
+      "bytes": 3607,
+      "currentSha256": "4d260fb946c25431cfc6c5700d9f46fc2b13912a5cac609b16657f586aec2ef0",
+      "matches": true
+    },
+    {
+      "path": "maya-carrier-react/src/runtime/compose.ts",
+      "sha256": "edbe6adf0f12b7aef46d217eaa8d4e1656953e8e6725e822e53917d332ea3385",
+      "bytes": 10583,
+      "currentSha256": "edbe6adf0f12b7aef46d217eaa8d4e1656953e8e6725e822e53917d332ea3385",
+      "matches": true
+    },
+    {
+      "path": "maya-carrier-react/src/signin/SignIn.tsx",
+      "sha256": "aba1e2051537b95b938fc8d4426fa9743045c249c92c3c7b9090bdb5f4a2a950",
+      "bytes": 19878,
+      "currentSha256": "aba1e2051537b95b938fc8d4426fa9743045c249c92c3c7b9090bdb5f4a2a950",
+      "matches": true
+    },
+    {
+      "path": "maya-carrier-react/src/signin/StandardOnboarding.tsx",
+      "sha256": "86886e437aa606fdc00dbc5d526cce3f0ea0262e20c5c1cde00734978dbdcd69",
+      "bytes": 11893,
+      "currentSha256": "86886e437aa606fdc00dbc5d526cce3f0ea0262e20c5c1cde00734978dbdcd69",
+      "matches": true
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding.test.mjs",
+      "sha256": "5c641e428ec1bdccb6b5de7d7a604bdf1ecab0024caaf43d36f6befe2dbbd5f8",
+      "bytes": 6023,
+      "currentSha256": "5c641e428ec1bdccb6b5de7d7a604bdf1ecab0024caaf43d36f6befe2dbbd5f8",
+      "matches": true
+    },
+    {
+      "path": "maya-chat-shell/build.mjs",
+      "sha256": "29e673e3017b0abfb53f1e38d01db53cb2e4163f42a3c20ff36f88801f23b96c",
+      "bytes": 147540,
+      "currentSha256": "29e673e3017b0abfb53f1e38d01db53cb2e4163f42a3c20ff36f88801f23b96c",
+      "matches": true
+    },
+    {
+      "path": "maya-chat-shell/src/net/client.ts",
+      "sha256": "8e3551aeacb984e7b84df4c96d72bf4caef7d398bc577b3ca2f08fe75d257797",
+      "bytes": 51039,
+      "currentSha256": "8e3551aeacb984e7b84df4c96d72bf4caef7d398bc577b3ca2f08fe75d257797",
+      "matches": true
+    },
+    {
+      "path": "maya-chat-shell/src/net/onboarding.ts",
+      "sha256": "e2917bec2b5fb7d74d1640a33b60886a2bc6340c753253839537ed360bfb598a",
+      "bytes": 5077,
+      "currentSha256": "e2917bec2b5fb7d74d1640a33b60886a2bc6340c753253839537ed360bfb598a",
+      "matches": true
+    },
+    {
+      "path": "maya-chat-shell/src/net/session.ts",
+      "sha256": "065a5ce8cdccabfb149ba81461bb3ffef9a94b0e1feb232dce95beecb4064032",
+      "bytes": 26174,
+      "currentSha256": "065a5ce8cdccabfb149ba81461bb3ffef9a94b0e1feb232dce95beecb4064032",
+      "matches": true
+    },
+    {
+      "path": "maya-chat-shell/src/net/types.ts",
+      "sha256": "d8a637edd3b6a0a3234d2ead56bc90cc9d31244f90bdbb7a42e52f4e6687b33f",
+      "bytes": 26783,
+      "currentSha256": "d8a637edd3b6a0a3234d2ead56bc90cc9d31244f90bdbb7a42e52f4e6687b33f",
+      "matches": true
+    },
+    {
+      "path": "maya-chat-shell/test/net.test.mjs",
+      "sha256": "12041fadb8d2d302413b39dbd6b96862243733f0c9d24457e15d45aaae675945",
+      "bytes": 89230,
+      "currentSha256": "12041fadb8d2d302413b39dbd6b96862243733f0c9d24457e15d45aaae675945",
+      "matches": true
+    },
+    {
+      "path": "maya-chat-shell/test/onboarding.test.mjs",
+      "sha256": "e23000a1e747c5ebe3e2e1155bf93d99adae9655c4da236f3f40967c8ba8b53a",
+      "bytes": 13245,
+      "currentSha256": "e23000a1e747c5ebe3e2e1155bf93d99adae9655c4da236f3f40967c8ba8b53a",
+      "matches": true
+    }
+  ],
+  "generatedMetadata": {
+    "path": "maya-chat-shell/dist/manifest.json",
+    "sha256": "7908cc01e3f191d007717a3c199b1cd6d13b47fb0b8f4a594c8abbdf933acd85",
+    "qualification": "Additional normal build metadata outside the 13-file author manifest; inspected delta records new onboarding module and corresponding source/build hashes. No admission authority."
+  },
+  "logs": [
+    {
+      "path": "/tmp/maya-standard-onboarding-shell-build-01.log",
+      "sha256": "375611edeb625d2da115a7543285ed143b400a6046c0eb322131017d103e96ad",
+      "bytes": 1010,
+      "matches": true
+    },
+    {
+      "path": "/tmp/maya-standard-onboarding-final-tests-01.log",
+      "sha256": "35572d8a5a92960c750d05091a35cc893b77eb718e3369f24c9049d97d38f80d",
+      "bytes": 12801,
+      "matches": true
+    },
+    {
+      "path": "/tmp/maya-standard-onboarding-react-build-03.log",
+      "sha256": "ce7963056c5688a8fcb9d6920f2639010adc7a5a47e17656ad876b745855f91e",
+      "bytes": 185,
+      "matches": true
+    },
+    {
+      "path": "/tmp/maya-standard-onboarding-react-final-03.log",
+      "sha256": "c59765fb7e001590654e16c776035bf24c1ed5d475336318da40ff9aca045d51",
+      "bytes": 719,
+      "matches": true
+    }
+  ],
+  "failedAttemptsRetained": [
+    {
+      "path": "/tmp/maya-standard-onboarding-react-01.log",
+      "sha256": "a5c6e771920d2f81ef2812aaa7bdc5b9ee94cd55fde71622c5433d6c3c205279",
+      "bytes": 7765,
+      "qualification": "Initial SSR 3/6 failed: missing getServerSnapshot; final component supplies port.view as SSR snapshot."
+    },
+    {
+      "path": "/tmp/maya-standard-onboarding-react-types-01.log",
+      "sha256": "0c0b87d1a77356e9a9b4cea696eca83ec6bb47855c016d27aa39d6e9c2805132",
+      "bytes": 9514,
+      "qualification": "16 inline-style-shape refusals: indirect style helper objects; expanded to literal values without changing displayed semantics."
+    },
+    {
+      "path": "/tmp/maya-standard-onboarding-react-types-02.log",
+      "sha256": "e8607e67429e99cd249b6f7a9851e3de57676339d66c6bb616802df18db12c30",
+      "bytes": 1712,
+      "qualification": "4 TS1117 duplicate style properties after expansion; duplicate background/color removed, preserving intended accent values."
+    }
+  ],
+  "reviewFindingsClosed": [
+    "Exact activation receipt + top-level tenant/user tenant equality + nonempty branch + active tenant_owner + external CRM mode validated before session installation.",
+    "Required owner-selected password rejects surrounding whitespace; no password/token is placed in view, URL, persistence or diagnostic copy.",
+    "Signup uncertainty prevents fresh signup retries within the current runtime; normal password login is recovery. Reload requires owner to re-enter slug/email/password.",
+    "Pending auth-intent guard prevents older login/verify/Telegram responses from replacing newer signup and cancels signup at alternate auth initiation/signout/dispose.",
+    "Private completed snapshot precedes session notification; normal form cleanup preserves completion, while explicit signout/dispose wins.",
+    "Only exact two public onboarding API paths added; existing A17 runtime, role policy, widgets release admission and backend are unchanged."
+  ],
+  "validationObserved": {
+    "focusedTests": {
+      "passed": 117,
+      "failed": 0,
+      "skipped": 0
+    },
+    "finalSsrAfterLastUiCorrection": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0
+    },
+    "shellBuild": "PASS",
+    "reactGuardTypecheckBundle": "PASS",
+    "testsExecutedByReviewer": false
+  },
+  "authority": {
+    "backendDiffEmpty": true,
+    "testOnlyFeatureGrantsAdded": false,
+    "widgetsRuntimeInferred": false,
+    "crmConnectedClaimed": false,
+    "productionOrProviderPermissionGranted": false
+  },
+  "blockers": [],
+  "limitations": [
+    "Source review plus author-run synthetic wire contracts and SSR/build evidence; no actual browser interaction or HTTP/PG onboarding acceptance in this checkpoint.",
+    "No real YCLIENTS, model, email delivery, credentials or production environment exercised.",
+    "Visual/design acceptance and durable signup recovery after losing both response and chosen login facts are not claimed.",
+    "Cancellation/timeout cannot undo a server commit; UI marks unresolved outcome and does not imply rollback.",
+    "Source-manifest snapshots 01/02/03 differ only in StandardOnboarding.tsx; earlier failed logs remain retained, final UI received separate SSR and build checks."
+  ]
+}

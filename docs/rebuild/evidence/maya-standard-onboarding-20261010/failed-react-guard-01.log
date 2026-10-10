@@ -1,0 +1,144 @@
+BUILD REFUSED — 16 refusal(s):
+  inline-style-shape         src/signin/StandardOnboarding.tsx:28  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:28  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:32  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:51  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:51  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:55  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:57  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:58  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:61  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:65  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:83  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:83  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:85  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:86  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:87  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+  inline-style-shape         src/signin/StandardOnboarding.tsx:90  style  — an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site
+file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/build.mjs:58
+  throw new R.CarrierRefused(refusals);
+        ^
+
+CarrierRefused: BUILD REFUSED — 16 refusal(s)
+    at report (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/build.mjs:58:9)
+    at file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/build.mjs:102:1
+    at ModuleJob.run (node:internal/modules/esm/module_job:437:25)
+    at async node:internal/modules/esm/loader:639:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  refusals: [
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 28,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 28,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 32,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 51,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 51,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 55,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 57,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 58,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 61,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 65,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 83,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 83,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 85,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 86,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 87,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    },
+    {
+      rule: 'inline-style-shape',
+      file: 'src/signin/StandardOnboarding.tsx',
+      line: 90,
+      name: 'style',
+      message: 'an inline style must be an object literal written here, not an object arriving through an identifier — the indirect form cannot be reviewed at the call site'
+    }
+  ]
+}
+
+Node.js v24.15.0

@@ -1,0 +1,58 @@
+✖ new business form requires explicit consent and chosen password; render makes zero requests (1.642208ms)
+✖ ambiguous signup removes creation/confirmation affordances and offers only password recovery (0.109916ms)
+✖ pending creation freezes fields/consent but preserves explicit cancel (0.088708ms)
+✔ only completed renders server-qualified success and never claims CRM/features enabled (2.4045ms)
+✔ normal password login is reachable without email OTP and has no secret value in markup (0.701958ms)
+✔ finite failures never display raw server errors or turn refusal into success (0.102833ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 3
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 68.799375
+
+✖ failing tests:
+
+test at maya-carrier-react/test/onboarding.test.mjs:25:1
+✖ new business form requires explicit consent and chosen password; render makes zero requests (1.642208ms)
+  Error: Missing getServerSnapshot, which is required for server-rendered content. Will revert to client rendering.
+      at Object.useSyncExternalStore (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:9749:19)
+      at process.env.NODE_ENV.exports.useSyncExternalStore (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react/cjs/react.development.js:1270:34)
+      at usePortView (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/test/.onboarding-98giML/presentation.mjs:9:10)
+      at StandardOnboarding (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/test/.onboarding-98giML/presentation.mjs:99:16)
+      at Object.react_stack_bottom_frame (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:9808:18)
+      at renderWithHooks (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:5062:19)
+      at renderElement (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:5497:23)
+      at retryNode (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:6417:31)
+      at performWork (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:7435:17)
+      at startWork (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:8270:7)
+
+test at maya-carrier-react/test/onboarding.test.mjs:35:1
+✖ ambiguous signup removes creation/confirmation affordances and offers only password recovery (0.109916ms)
+  Error: Missing getServerSnapshot, which is required for server-rendered content. Will revert to client rendering.
+      at Object.useSyncExternalStore (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:9749:19)
+      at process.env.NODE_ENV.exports.useSyncExternalStore (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react/cjs/react.development.js:1270:34)
+      at usePortView (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/test/.onboarding-98giML/presentation.mjs:9:10)
+      at StandardOnboarding (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/test/.onboarding-98giML/presentation.mjs:99:16)
+      at Object.react_stack_bottom_frame (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:9808:18)
+      at renderWithHooks (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:5062:19)
+      at renderElement (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:5497:23)
+      at retryNode (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:6417:31)
+      at performWork (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:7435:17)
+      at startWork (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:8270:7)
+
+test at maya-carrier-react/test/onboarding.test.mjs:43:1
+✖ pending creation freezes fields/consent but preserves explicit cancel (0.088708ms)
+  Error: Missing getServerSnapshot, which is required for server-rendered content. Will revert to client rendering.
+      at Object.useSyncExternalStore (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:9749:19)
+      at process.env.NODE_ENV.exports.useSyncExternalStore (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react/cjs/react.development.js:1270:34)
+      at usePortView (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/test/.onboarding-98giML/presentation.mjs:9:10)
+      at StandardOnboarding (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/test/.onboarding-98giML/presentation.mjs:99:16)
+      at Object.react_stack_bottom_frame (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:9808:18)
+      at renderWithHooks (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:5062:19)
+      at renderElement (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:5497:23)
+      at retryNode (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:6417:31)
+      at performWork (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:7435:17)
+      at startWork (/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules/react-dom/cjs/react-dom-server-legacy.node.development.js:8270:7)

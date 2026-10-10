@@ -1,0 +1,45 @@
+gate: PASS (28 source files, 0 refusals)
+  typecheck  src/signin/StandardOnboarding.tsx(57,266): error TS1117: An object literal cannot have multiple properties with the same name.
+  typecheck  src/signin/StandardOnboarding.tsx(57,291): error TS1117: An object literal cannot have multiple properties with the same name.
+  typecheck  src/signin/StandardOnboarding.tsx(83,248): error TS1117: An object literal cannot have multiple properties with the same name.
+  typecheck  src/signin/StandardOnboarding.tsx(83,273): error TS1117: An object literal cannot have multiple properties with the same name.
+file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/build.mjs:84
+      throw new R.CarrierRefused(diags.map(() => R.refusal('typecheck', 'src', 0, '', 'typecheck failed')));
+            ^
+
+CarrierRefused: BUILD REFUSED — 4 refusal(s)
+    at typecheck (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/build.mjs:84:13)
+    at async file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/build.mjs:104:1 {
+  refusals: [
+    {
+      rule: 'typecheck',
+      file: 'src',
+      line: 0,
+      name: '',
+      message: 'typecheck failed'
+    },
+    {
+      rule: 'typecheck',
+      file: 'src',
+      line: 0,
+      name: '',
+      message: 'typecheck failed'
+    },
+    {
+      rule: 'typecheck',
+      file: 'src',
+      line: 0,
+      name: '',
+      message: 'typecheck failed'
+    },
+    {
+      rule: 'typecheck',
+      file: 'src',
+      line: 0,
+      name: '',
+      message: 'typecheck failed'
+    }
+  ]
+}
+
+Node.js v24.15.0

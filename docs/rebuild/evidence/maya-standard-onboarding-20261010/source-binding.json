@@ -1,0 +1,57 @@
+{
+  "base": "b555719307bfeaf12a422c79e4023b86674a624d",
+  "files": [
+    {
+      "path": "maya-carrier-react/package.json",
+      "sha256": "dc930e0f6ab99a20fa8877ccf62a74d071c00b6cbd42878b9f2ba429ac69be57"
+    },
+    {
+      "path": "maya-carrier-react/src/App.tsx",
+      "sha256": "4d260fb946c25431cfc6c5700d9f46fc2b13912a5cac609b16657f586aec2ef0"
+    },
+    {
+      "path": "maya-carrier-react/src/runtime/compose.ts",
+      "sha256": "edbe6adf0f12b7aef46d217eaa8d4e1656953e8e6725e822e53917d332ea3385"
+    },
+    {
+      "path": "maya-carrier-react/src/signin/SignIn.tsx",
+      "sha256": "aba1e2051537b95b938fc8d4426fa9743045c249c92c3c7b9090bdb5f4a2a950"
+    },
+    {
+      "path": "maya-carrier-react/src/signin/StandardOnboarding.tsx",
+      "sha256": "86886e437aa606fdc00dbc5d526cce3f0ea0262e20c5c1cde00734978dbdcd69"
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding.test.mjs",
+      "sha256": "5c641e428ec1bdccb6b5de7d7a604bdf1ecab0024caaf43d36f6befe2dbbd5f8"
+    },
+    {
+      "path": "maya-chat-shell/build.mjs",
+      "sha256": "29e673e3017b0abfb53f1e38d01db53cb2e4163f42a3c20ff36f88801f23b96c"
+    },
+    {
+      "path": "maya-chat-shell/src/net/client.ts",
+      "sha256": "8e3551aeacb984e7b84df4c96d72bf4caef7d398bc577b3ca2f08fe75d257797"
+    },
+    {
+      "path": "maya-chat-shell/src/net/onboarding.ts",
+      "sha256": "e2917bec2b5fb7d74d1640a33b60886a2bc6340c753253839537ed360bfb598a"
+    },
+    {
+      "path": "maya-chat-shell/src/net/session.ts",
+      "sha256": "065a5ce8cdccabfb149ba81461bb3ffef9a94b0e1feb232dce95beecb4064032"
+    },
+    {
+      "path": "maya-chat-shell/src/net/types.ts",
+      "sha256": "d8a637edd3b6a0a3234d2ead56bc90cc9d31244f90bdbb7a42e52f4e6687b33f"
+    },
+    {
+      "path": "maya-chat-shell/test/net.test.mjs",
+      "sha256": "12041fadb8d2d302413b39dbd6b96862243733f0c9d24457e15d45aaae675945"
+    },
+    {
+      "path": "maya-chat-shell/test/onboarding.test.mjs",
+      "sha256": "e23000a1e747c5ebe3e2e1155bf93d99adae9655c4da236f3f40967c8ba8b53a"
+    }
+  ]
+}

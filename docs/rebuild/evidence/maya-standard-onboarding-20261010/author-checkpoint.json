@@ -1,0 +1,37 @@
+{
+  "base": "b555719307bfeaf12a422c79e4023b86674a624d",
+  "source_manifest": "/tmp/maya-standard-onboarding-source-03.json",
+  "source_manifest_sha256": "7392f2bb4b039deafecb2527f2727f9f957499bb1b2cdbbc00fb878989c69d19",
+  "source_unchanged_after_checks": true,
+  "logs": [
+    {
+      "path": "/tmp/maya-standard-onboarding-shell-build-01.log",
+      "sha256": "375611edeb625d2da115a7543285ed143b400a6046c0eb322131017d103e96ad"
+    },
+    {
+      "path": "/tmp/maya-standard-onboarding-final-tests-01.log",
+      "sha256": "35572d8a5a92960c750d05091a35cc893b77eb718e3369f24c9049d97d38f80d"
+    },
+    {
+      "path": "/tmp/maya-standard-onboarding-react-build-03.log",
+      "sha256": "ce7963056c5688a8fcb9d6920f2639010adc7a5a47e17656ad876b745855f91e"
+    },
+    {
+      "path": "/tmp/maya-standard-onboarding-react-final-03.log",
+      "sha256": "c59765fb7e001590654e16c776035bf24c1ed5d475336318da40ff9aca045d51"
+    }
+  ],
+  "checks": {
+    "shell_build": "PASS",
+    "headless_new_onboarding_existing_auth_and_local_crm_plus_ssr": "117/117 PASS",
+    "react_guard_types_bundle": "PASS",
+    "react_ssr_after_inline_style_fix": "6/6 PASS",
+    "git_diff_check": "PASS"
+  },
+  "limits": [
+    "Synthetic response fixtures and SSR only; no real signup/browser/HTTP/PG acceptance",
+    "No provider, model, credentials, services, website, iOS or backend changes",
+    "No commit/push/remote/deploy actions",
+    "Existing local CRM opt-in remains unchanged; signup does not prove CRM connected or widgets.runtime granted"
+  ]
+}

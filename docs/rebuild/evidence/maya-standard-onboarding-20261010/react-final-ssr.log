@@ -1,0 +1,14 @@
+✔ new business form requires explicit consent and chosen password; render makes zero requests (3.9535ms)
+✔ ambiguous signup removes creation/confirmation affordances and offers only password recovery (0.548125ms)
+✔ pending creation freezes fields/consent but preserves explicit cancel (0.442375ms)
+✔ only completed renders server-qualified success and never claims CRM/features enabled (0.232542ms)
+✔ normal password login is reachable without email OTP and has no secret value in markup (0.634041ms)
+✔ finite failures never display raw server errors or turn refusal into success (0.096333ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 60.834208

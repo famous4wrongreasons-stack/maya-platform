@@ -41,6 +41,8 @@
 
 Это не настоящее подключение YCLIENTS. [Отдельный обычный профиль](MAYA-LOCAL-YCLIENTS-ONE-TIME-HANDOFF-20261010.md) подготовлен как точное следующее действие, но ещё не собран/не допущен к real provider. Нельзя использовать synthetic launcher с настоящим токеном. Рабочий сайт, production и телефон в этом checkpoint не менялись.
 
+**Следующий функциональный разрыв уже закрыт локально:** на `4aec1a470a3b66766af3e20d867ef1fd9f2627ef` текущий React получил «Создать бизнес» через существующие standard trial APIs и обычный вход по паролю. Создаются бизнес/первый филиал/владелец; CRM подключается отдельно. При неопределённом ответе форма предлагает парольный вход и не создаёт бизнес повторно. Исправлены гонки старого входа с новой регистрацией и cleanup формы с успешной сессией; токены не передаются presentation. **117 focused synthetic/SSR tests, shell build, React guards/types/build PASS**, финальные 6 SSR повторены после исправления формы записи стилей. Независимый review и 13 точных source bindings сохранены в [evidence](evidence/maya-standard-onboarding-20261010/summary.json). Начальные SSR/compile failures сохранены. Actual onboarding HTTP/PG/browser и real source пока NOT_RUN; это не завершение этапа A целиком.
+
 ## Состояние 12 групп поставки
 
 Это 12 групп для планирования, не новый нормативный реестр агентов. «Реализовано», «соединено», «проверено» и «принято на реальном салоне» — разные состояния. Во всех строках полная реальная приёмка **NOT_ISSUED**. Наличие 163 `certified:false` не означает 163 дефекта; unmapped API operation тоже не означает отсутствующую реализацию.
@@ -58,7 +60,7 @@
 | 9. Работа сотрудников | Own schedule/journal, dossier, задачи/team owners, отдельные schedule actions | Выбранные READ/approval пути; own tasks читают A23 | Локальные day/timezone/role/continuation proofs, не весь рабочий день | NOT_ISSUED | Составить непрерывный staff workflow, довести нужные task/effect связки и права. Для confirmed schedule решить точный SETTINGS_DRAFT profile вопрос; backend сам по себе не открывает карточку |
 | 10. Лояльность, сертификаты, абонементы, referrals/reviews | Существующие канонические owners и отдельные чтения/действия | Частичное chat-покрытие | Исторические owner proofs + отдельные новые bounded READ | NOT_ISSUED | По каждой нужной операции соединить source→role→review→AE→outcome в текущем приложении. Не переписывать готовые owners и не выдавать legacy balance за факт YCLIENTS |
 | 11. Ограниченный C10 | Explicit L0/L1/L2, C5 L2.5 shadow и durable C9 foundations | Явные запросы; автономного initiator нет | Explicit proofs не доказывают C10 | NOT_ISSUED | Зафиксировать tenant×domain×action, trigger/principal, лимиты, отзыв/stop и escalation; затем existing-owner admission/dedupe/restart/shadow outcome, далее отдельные реальные workflow. Пока только узкий proposed Occupancy envelope, не весь автопилот |
-| 12. Доставка приложения, privacy, onboarding и эксплуатация | React/headless/widgets/history erasure, tenant/auth/entitlements, iOS packaging | Многие desktop пути; initial onboarding form не соединена; Debug API override существует | Локальные browser/restart/isolation и исторический install; текущая phone UI не принята | NOT_ISSUED | Нормальный onboarding/profile/grant, current-candidate reachability, mobile/voice/reconnect/privacy, backup/restore одного салона. Затем реальный второй tenant, конфигурации и measured 1000-salon envelope |
+| 12. Доставка приложения, privacy, onboarding и эксплуатация | React/headless/widgets/history erasure, tenant/auth/entitlements, iOS packaging | Standard onboarding и password login теперь связаны в carrier; многие desktop пути и Debug API override существуют | Onboarding: synthetic/SSR/build; остальные локальные browser/restart/isolation и исторический install отдельны; текущая phone UI не принята | NOT_ISSUED | Normal profile/grant и actual onboarding qualification, current-candidate reachability, mobile/voice/reconnect/privacy, backup/restore одного салона. Затем реальный второй tenant, конфигурации и measured 1000-salon envelope |
 
 Архитектурная граница остаётся из [C9 preflight](CYCLE-09-PREFLIGHT-AND-SCOPE.md): четыре домена — Admin, Lifecycle, Occupancy, BI. Источники фактов — CRM/C7/C8 и их канонические владельцы; mutations — только существующий AE. Presentation и рекомендация не авторизуют действие. Кампании используют B35/CD, а не пятого автономного агента.
 
@@ -88,11 +90,11 @@
 
 ## Оценка усилий и её пределы
 
-Инженерный день — один сосредоточенный день работы инженера, знакомого с этой codebase. Это не длительность CI/LLM ответа и не обещание календарной даты. Диапазоны предполагают повторное использование существующих owners, отсутствие архитектурного fork, доступ к согласованным источникам, одну текущую ветку интеграции и конечные сценарии. Не предполагаются новые schema/retention решения без точного согласованного delta.
+Инженерный день — один сосредоточенный день работы инженера, знакомого с этой codebase. Это не длительность CI/LLM ответа и не обещание календарной даты. Оценка сделана на checkpoint `ad224bfd`, до последующего локального соединения onboarding; эта частичная реализация не обнуляет оставшиеся normal-profile/grant/real-qualification работы пакета. Диапазоны предполагают повторное использование существующих owners, отсутствие архитектурного fork, доступ к согласованным источникам, одну текущую ветку интеграции и конечные сценарии. Не предполагаются новые schema/retention решения без точного согласованного delta.
 
 | Пакет | Оценка усилий | Уверенность / включено и исключено |
 | --- | --- | --- |
-| Normal profile + UI к existing onboarding API + существующие entitlements | **3–6 инженерных дней** | Умеренная: API уже есть, UI не связан. Работа с существующим grant включена технически; ожидание платформенных полномочий/certificate отдельно |
+| Normal profile + UI к existing onboarding API + существующие entitlements | **3–6 инженерных дней на исходный пакет** | Умеренная: API был готов, UI после оценки соединён локально. Normal profile/grant и actual qualification остаются. Работа с существующим grant включена технически; ожидание платформенных полномочий/certificate отдельно |
 | Соединить известные conversation/read/booking/staff/confirmed-write пути в последовательный опыт | **5–10 инженерных дней** | Умеренная/низкая: переиспользуем готовые bounded paths. Только имеющиеся операции, без полного нового API CRUD, public knowledge contract или универсальных compound задач |
 | Первый конечный real-model + real-CRM цикл этих путей, recovery и refusals | **4–8 инженерных дней** | Ниже: подготовка/исполнение/разбор одного цикла. Неизвестные исправления по его результатам не включены; доступ/согласованные действия предоставлены до цикла |
 | **Известный пакет выше** | **12–24 инженерных дня** | Сумма трёх неперекрывающихся пакетов; замещает более раннюю узкую оценку 7–14, а не добавляется к ней. Не полный функциональный выпуск |
@@ -128,7 +130,7 @@
 Ближайший пакет разработки:
 
 1. Собрать normal local profile без внешнего dispatch и без изменений synthetic launcher; штатный tenant/owner/branch вместо fixtures.
-2. Подключить минимальный onboarding к текущему carrier и существующим APIs; вывести реальные prerequisites, а не сообщение «осталось только ввести токен».
+2. Минимальный onboarding и password login **реализованы локально**. Следом проверить их с обычным backend/profile; не выдавать synthetic/SSR за actual registration и не писать «осталось только ввести токен».
 3. В существующем API inventory выделить операции первого полного выпуска, явно отметить deferred/excluded и для included привязать current code/owner/недостающее. Это рабочий список реализации, не новый аудит.
 4. Подготовить существующий verified Client и точные READ/create/move/cancel сценарии; затем при отдельном допуске выполнить первый real источник/model цикл.
 5. Продолжать конечные функции №2–11; после инвентаря и первого real цикла заменить NOT_ESTIMABLE оценками конкретных исправлений. Показывать владельцу полезные результаты по мере готовности, не ждать финальной сертификации всей платформы.
@@ -149,5 +151,5 @@
 - **Неоднозначность каналов явная:** отсрочка нового Telegram/WhatsApp/MAX inbound не отменяет согласованную campaign функцию. Точный существующий outbound маршрут, получатели и consent надо выбрать; без этого delivery не объявляется готовой.
 - **Website/real booking другой задачи не затрагиваются.** Существующие ограничения source/identity/retention/authority сохраняются. Любая новая схема, retention или autonomy decision останавливает только зависимое изменение до точного решения.
 
-Ни полная функциональность первого салона, ни масштабная MAYA ещё не приняты. Этот документ сохраняет выбранную цель, завершённый локальный результат и следующий исполнимый порядок работ; он не выдаёт C10 completion из contracts или synthetic proof. После сохранения плана продолжается безопасная реализация ближайшего недостающего соединения — штатного onboarding в текущем carrier.
+Ни полная функциональность первого салона, ни масштабная MAYA ещё не приняты. Этот документ сохраняет выбранную цель, завершённые локальные результаты и следующий исполнимый порядок работ; он не выдаёт C10 completion из contracts или synthetic proof. После сохранения плана штатный onboarding уже соединён с текущим carrier; ближайшая техническая работа — normal profile и actual проверка этого пути, затем разрешённое подключение источника.
 
