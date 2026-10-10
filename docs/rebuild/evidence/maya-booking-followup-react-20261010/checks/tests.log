@@ -1,0 +1,6 @@
+
+Test Suites: 3 passed, 3 total
+Tests:       67 passed, 67 total
+Snapshots:   0 total
+Time:        0.877 s
+Ran all test suites within paths "src/widgets/resolve/thread-page.service.spec.ts", "src/widgets/resolve/booking-receipt-read.spec.ts", "src/widgets/stores/widget-stores.service.spec.ts".

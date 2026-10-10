@@ -1,0 +1,31 @@
+widgets-live: proof database maya_widget_gate_proof_bookingconfirmation_3439b9658d38 on 127.0.0.1:49331 (local)
+[31m[Nest] 26194  - [39m10/10/2026, 7:42:11 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 26194  - [39m10/10/2026, 7:42:11 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/booking-followup-react.probe-spec.ts (8.015 s)
+  Exact17:00 current React → canonical create/reschedule/cancel [SCRIPTED SEMANTICS / SYNTHETIC INTERNAL CRM]
+    ✕ clicks the selected17:00 slot, explicitly confirms once, then reviews and confirms own move/cancel (2751 ms)
+
+  ● Exact17:00 current React → canonical create/reschedule/cancel [SCRIPTED SEMANTICS / SYNTHETIC INTERNAL CRM] › clicks the selected17:00 slot, explicitly confirms once, then reviews and confirms own move/cancel
+
+    Browser 1: Expected values to be strictly equal:
+    + actual - expected
+
+    + undefined
+    - 'BOOKING_CONFIRMATION'
+
+      330 |             : code === 0
+      331 |               ? resolve()
+    > 332 |               : reject(new Error(`Browser ${code}: ${stderr}`)),
+          |                        ^
+      333 |         );
+      334 |       });
+      335 |     });
+
+      at widgets-live/booking-followup-react.probe-spec.ts:332:24
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        8.038 s
+Ran all test suites within paths "test/widgets-live/booking-followup-react.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-booking-followup-20261010-r1/browser-jest.json
