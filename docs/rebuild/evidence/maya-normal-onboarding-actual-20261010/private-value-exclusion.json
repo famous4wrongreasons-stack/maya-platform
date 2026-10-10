@@ -1,0 +1,8 @@
+{
+  "contract": "maya.own-private-values-exclusion/1",
+  "checked_values": 19,
+  "archive_files": 23,
+  "exact_private_value_matches": 0,
+  "private_sources": "own generated service keys and synthetic passwords only; values not copied",
+  "qualification": "Exact known-value scan only; independent outgoing scan remains required"
+}

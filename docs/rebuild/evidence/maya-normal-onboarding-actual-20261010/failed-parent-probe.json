@@ -1,0 +1,83 @@
+{
+  "contract": "maya.normal-onboarding.actual-parent/1",
+  "mode": "prepare",
+  "status": "FAIL",
+  "source": "11e16cd111af6fa571ed2b638fb2dac06acd31d1",
+  "browserSourceSha256": "18cea8e01356977595bb7bbe4674a4738306098dc07080de901ae241ade99e45",
+  "privateStateSha256": "d5cbdc02b92903c5aedb0ab9a9f5b9156b315ee7e30deec30bf0955821fe8193",
+  "pgIdentity": {
+    "startedAt": "2026-10-10T13:52:09.03965+00:00",
+    "databaseHash": "27a82fb8eed5e17b1f14db12e7cc4e9575da687a328e4decd4d37c7df05aa7bb",
+    "systemIdentifierHash": "00f86e97eb97a8ba0831183b26850dc62ca9ff69fcd07f53caab88af9ee876ff"
+  },
+  "before": {
+    "Tenant": 2,
+    "User": 0,
+    "Branch": 1,
+    "Membership": 0,
+    "TrialActivation": 0,
+    "CrmIntegration": 0,
+    "Client": 0,
+    "Appointment": 0,
+    "ActionExecution": 0,
+    "Opportunity": 0,
+    "AgentTask": 0,
+    "OwnerReportRun": 0,
+    "NativeFeedbackRequest": 0,
+    "TeamMessage": 0,
+    "ExpenseReminderRun": 0
+  },
+  "checkpoints": [],
+  "routes": [
+    {
+      "host": "web",
+      "route": "/api/ai/chat",
+      "status": 403,
+      "code": "local_onboarding_route_disabled"
+    },
+    {
+      "host": "web",
+      "route": "/api/integrations/crm/connect",
+      "status": 403,
+      "code": "local_provider_admission_required"
+    },
+    {
+      "host": "web",
+      "route": "/api/auth/email/start",
+      "status": 403,
+      "code": "local_onboarding_route_disabled"
+    },
+    {
+      "host": "backend",
+      "route": "/api/ai/chat",
+      "status": 403,
+      "code": "local_onboarding_route_disabled"
+    },
+    {
+      "host": "backend",
+      "route": "/api/integrations/crm/connect",
+      "status": 403,
+      "code": "local_provider_admission_required"
+    },
+    {
+      "host": "backend",
+      "route": "/api/auth/email/start",
+      "status": 403,
+      "code": "local_onboarding_route_disabled"
+    },
+    {
+      "host": "web",
+      "boundary": "Origin",
+      "status": 403
+    }
+  ],
+  "providerCalls": "not invoked; closed profile and no credentials",
+  "modelCalls": "not invoked; safe provider profile",
+  "limits": [
+    "No packet-level external traffic proof",
+    "No revocation route admitted in stage 0"
+  ],
+  "cleanup": {
+    "driverGroupAbsent": true
+  }
+}

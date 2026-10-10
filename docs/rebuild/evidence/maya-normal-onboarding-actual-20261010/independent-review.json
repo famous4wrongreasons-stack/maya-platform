@@ -1,0 +1,195 @@
+{
+  "contract": "maya.normal-onboarding-final-independent-review/1",
+  "status": "QUALIFIED_EVIDENCE_REVIEW_PASS",
+  "reviewer": "checkpoint_review",
+  "sourceCommit": "11e16cd111af6fa571ed2b638fb2dac06acd31d1",
+  "blockers": [],
+  "scope": "Read-only source/evidence and hash verification of normal local stage-0 onboarding with synthetic accounts, committed current React, canonical backend/auth and owned PostgreSQL. Private state/key/configuration contents were not read by reviewer.",
+  "sourceVerification": {
+    "manifestFiles": 2013,
+    "allEntriesMatchGitTreeAndCurrentBytes": true,
+    "initialAndRestartSourceListsIdentical": true,
+    "currentHeadMatches": true,
+    "archiveDocsBeingAddedDoNotChangeReviewedRuntimeBytes": true,
+    "browserDriverPath": "maya-carrier-react/test/local-onboarding-browser.probe.mjs",
+    "browserDriverSha256": "18cea8e01356977595bb7bbe4674a4738306098dc07080de901ae241ade99e45",
+    "browserMatchesGitAndBothParentReports": true,
+    "currentReactBundleSha256": "e6502a05afd84049abcc705566ba9245ab91dcc07b8851b70f71762fb28a6b1d",
+    "bundleHashSameAcrossBrowserReports": true
+  },
+  "checks": {
+    "initial": {
+      "browserCheckpoints": 8,
+      "canonicalDbCheckpoints": 8,
+      "actualSignups": 2,
+      "actualPasswordLogins": 5,
+      "lostSignupResponseAfterCanonicalSuccess": true,
+      "noResubmittedSignupOnRecovery": true,
+      "reloadAndSignoutLoginsVerifiedForBothAccounts": true
+    },
+    "restart": {
+      "browserCheckpoints": 2,
+      "canonicalDbCheckpoints": 2,
+      "actualSignups": 0,
+      "activationRequests": 0,
+      "actualPasswordLogins": 2,
+      "sameDatabaseHash": true,
+      "sameClusterSystemIdentifierHash": true,
+      "differentPostmasterStart": true,
+      "initialPostmasterStart": "2026-10-10T13:52:09.03965+00:00",
+      "restartPostmasterStart": "2026-10-10T13:57:15.634302+00:00",
+      "samePrivateStateHashAcrossReportedReads": true,
+      "privateStateContentsInspected": false,
+      "initialManifestHashAndBytesUnchanged": true,
+      "sameOwnerTenantBranchMembershipIdentities": true,
+      "onlyPgStartAndRuntimeReused": true
+    },
+    "census": {
+      "migrationBaseline": {
+        "Tenant": 2,
+        "User": 0,
+        "Branch": 1,
+        "Membership": 0,
+        "TrialActivation": 0
+      },
+      "successfulInitialRunBefore": {
+        "Tenant": 2,
+        "User": 0,
+        "Branch": 1,
+        "Membership": 0,
+        "TrialActivation": 1
+      },
+      "final": {
+        "Tenant": 4,
+        "User": 2,
+        "Branch": 3,
+        "Membership": 2,
+        "TrialActivation": 3
+      },
+      "activationStatuses": {
+        "completed": 2,
+        "pending": 1
+      },
+      "restartBeforeEqualsAfter": true,
+      "zeroCountDomainTables": [
+        "CrmIntegration",
+        "Client",
+        "Appointment",
+        "ActionExecution",
+        "Opportunity",
+        "AgentTask",
+        "OwnerReportRun",
+        "NativeFeedbackRequest",
+        "TeamMessage",
+        "ExpenseReminderRun"
+      ],
+      "noDuplicateBusinessRowsObserved": true
+    },
+    "ingress": {
+      "eachRunObserved403Controls": 12,
+      "webAndDirectBackendChecked": true,
+      "checks": [
+        "chat route",
+        "provider connect route",
+        "email authentication route",
+        "foreign Origin",
+        "foreign Host through raw http.request",
+        "cross-site Sec-Fetch-Site"
+      ],
+      "crmStatus": "200 unconfigured; owned branch READ 200",
+      "conversationRead": "403 stage-0 refusal; no chat or widget access inferred"
+    },
+    "cleanup": {
+      "bothRuntimeGroupsAbsent": true,
+      "bothOwnedClustersStopped": true,
+      "bothBrowserProfilesRemoved": true,
+      "bothChromeProcessesClosed": true,
+      "bothDriverGroupsAbsent": true,
+      "evidenceBasis": "Existing launcher/browser/parent reports; reviewer did not start OS queries or services."
+    }
+  },
+  "resolvedFindings": [
+    {
+      "finding": "Relay drops Origin; backend-only check insufficient",
+      "resolution": "Exact Host/Origin/Sec-Fetch gate before shared relay and direct backend; actual 403 controls recorded.",
+      "status": "CLOSED"
+    },
+    {
+      "finding": "Scratch wrapper had unbounded wait after SIGTERM and non-fatal surviving-group observation",
+      "resolution": "Final wrapper targets the owned group with SIGTERM then 5-second SIGKILL; bounded final wait and required absence; surviving-group observation marks FAIL even if cleanup later succeeds.",
+      "status": "CLOSED_FOR_RESTART_WRAPPER",
+      "initialQualification": "Initial actual report recorded group absent. Final wrapper bytes do not retrospectively qualify or pin the initial wrapper."
+    },
+    {
+      "finding": "Third activation status absent in initial report",
+      "resolution": "Restart read-only status census records completed=2 and pending=1.",
+      "status": "CLOSED"
+    }
+  ],
+  "provenanceQualifications": [
+    "Initial scratch wrapper bytes were not pinned before execution. Final wrapper hash covers the restart wrapper reviewed here and must not be attributed retrospectively to the initial run.",
+    "Initial/restart outputs and committed browser source are pinned. Initial manifest, parent and browser hashes still equal the previously reviewed values.",
+    "First failed parent harness remains preserved: fetch did not send the intended forged Host, leaving one pending activation and no business/user creation. No hidden deletion or census reset is present in the reviewed wrapper; SQL evidence uses read-only transactions. Later Host checks use raw http.request.",
+    "Parent reports the first restart automatic review timed out and one identical allowed retry succeeded. This procedural account is not independently reconstructed from an approval transcript and is not described as a safety denial.",
+    "Parent reports restart launcher exit 0. Reviewed restart manifest records controlled cancellation after readiness with successful cleanup; no separate exit artifact was supplied for this review."
+  ],
+  "limits": [
+    "Synthetic-account stage-0 functional onboarding and restart proof only; no real YCLIENTS connection/activation, paid/real model, production/site release, C10 or broad MAYA completion is established.",
+    "Zero model/provider/CRM-mutation browser requests and zero listed domain rows are observed. Closed environment and routes support non-dispatch; no packet-level external traffic proof exists.",
+    "Current membership revocation was not exercised because stage 0 admits no revocation route.",
+    "No test-only grants, source fixtures, direct signup insertion, auth token injection or response fulfillment are used in this normal flow. Canonical migrations account for baseline two tenants and one branch.",
+    "Private state hash compared only through non-secret reports. Reviewer did not read, regenerate or export service keys or password configuration."
+  ],
+  "artifacts": {
+    "initialManifest": {
+      "path": "/private/tmp/maya-normal-onboarding-actual-20261010-c/manifest.json",
+      "bytes": 504729,
+      "sha256": "a89db62fc2bcad0612f808ac91e1b42f3f48bbb8768d407efcb7f2588e5d51c4"
+    },
+    "initialParent": {
+      "path": "/private/tmp/maya-normal-onboarding-proof-20261010-prepare-02/parent.json",
+      "bytes": 8843,
+      "sha256": "42267a1fd74853c232f6f01350de62ceae3c0a0ca26eba7a474d9e9bf7f0c76a"
+    },
+    "initialBrowser": {
+      "path": "/private/tmp/maya-normal-onboarding-proof-20261010-prepare-02/browser.json",
+      "bytes": 6982,
+      "sha256": "2ab0988ec30dffd2a15337e894d6b8136b4b2e9bbecb0396b444e9e165b8f563"
+    },
+    "failedInitialParent": {
+      "path": "/private/tmp/maya-normal-onboarding-proof-20261010-prepare/parent.json",
+      "bytes": 2230,
+      "sha256": "c326bf3d7f99c451037905fefb92b6b7f17b6ba02f38a2c95c5d3248c0040981"
+    },
+    "restartManifest": {
+      "path": "/private/tmp/maya-normal-onboarding-restart-20261010-c/restart.json",
+      "bytes": 505107,
+      "sha256": "6767eeef60bef4c6ae2562bd0147c22ffdfbffd0efb2da6dc58dba8dc4a23660"
+    },
+    "restartParent": {
+      "path": "/private/tmp/maya-normal-onboarding-proof-20261010-resume-login-02/parent.json",
+      "bytes": 4824,
+      "sha256": "30015cd5f6df290ca2a020b67e95959f9b7212dcd1d63991d1fbd2b1e3e3095a"
+    },
+    "restartBrowser": {
+      "path": "/private/tmp/maya-normal-onboarding-proof-20261010-resume-login-02/browser.json",
+      "bytes": 2900,
+      "sha256": "fd68abdce01a88fab5a5c2f9bc343ed809d56efea9436886a8d4d415f6490318"
+    },
+    "finalScratchDriver": {
+      "path": "/tmp/maya-normal-onboarding-driver-20261010.mjs",
+      "bytes": 9951,
+      "sha256": "e392c1f2ba686b1e7b408a95927ece29bd0bd9f46a0b68d963c15cf5a0d41a25"
+    }
+  },
+  "reviewerActions": {
+    "sourceAndArtifactReads": true,
+    "gitAndHashVerification": true,
+    "reportFileCreated": true,
+    "repositoryEdits": false,
+    "testsOrServicesRun": false,
+    "networkOrDatabaseQueries": false,
+    "privateKeyOrConfigReads": false
+  },
+  "conclusion": "Qualified evidence PASS for two normal UI registrations, one post-commit response loss followed by password recovery, and both original accounts logging in after actual owned PostgreSQL/application restart. Qualifications remain explicit."
+}

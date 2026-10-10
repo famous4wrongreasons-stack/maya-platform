@@ -1,0 +1,219 @@
+{
+  "contract": "maya.normal-onboarding.actual-checkpoint/1",
+  "status": "QUALIFIED_LOCAL_SYNTHETIC_PASS",
+  "runtime_source_commit": "11e16cd111af6fa571ed2b638fb2dac06acd31d1",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "previous_published_head": "c097e9919df509fecbf081f929703c03b4f8ab10",
+  "actual": {
+    "normal_AppModule": true,
+    "current_React_bundle_hash_verified": true,
+    "fresh_owned_PostgreSQL_migrations": true,
+    "standard_signup_two_businesses": true,
+    "lost_real_success_response_then_password_recovery": true,
+    "current_membership_and_branch_checks": 10,
+    "ui_initial_checkpoints": 8,
+    "ui_restart_checkpoints": 2,
+    "signup_requests_total": 2,
+    "password_logins_total": 7,
+    "crm_status": "unconnected, actual GET 200",
+    "branch_list": "actual GET 200, one own bootstrap branch per synthetic tenant",
+    "same_cluster_database_keys_source_after_restart": true,
+    "postmaster_start_changed": true,
+    "closed_routes_and_browser_boundary_checks_per_run": 12,
+    "all_owned_process_groups_and_PG_stopped": true
+  },
+  "checks": {
+    "pure_tests": {
+      "passed": 10
+    },
+    "scoped_typed_eslint": {
+      "exit": 0,
+      "heap_MiB": 3072,
+      "files": 3,
+      "retry_after_preserved_1024MiB_OOM": 1
+    },
+    "backend_build": "PASS",
+    "current_React_build": "PASS",
+    "independent_review": "QUALIFIED_EVIDENCE_REVIEW_PASS"
+  },
+  "counts": {
+    "migration_baseline": {
+      "Tenant": 2,
+      "Branch": 1,
+      "User": 0,
+      "Membership": 0
+    },
+    "after_UI_and_restart": {
+      "Tenant": 4,
+      "Branch": 3,
+      "User": 2,
+      "Membership": 2,
+      "TrialActivation": 3
+    },
+    "activations": {
+      "completed": 2,
+      "pending": 1
+    },
+    "businesses_created_by_probe": 2,
+    "domain_rows_zero": [
+      "CrmIntegration",
+      "Client",
+      "Appointment",
+      "ActionExecution",
+      "Opportunity",
+      "AgentTask",
+      "OwnerReportRun",
+      "NativeFeedbackRequest",
+      "TeamMessage",
+      "ExpenseReminderRun"
+    ]
+  },
+  "retained_findings": [
+    "Attempt a: sandbox loopback EPERM before preparation; private directory empty, no keys/PG created.",
+    "Attempt b: build/migrations passed, runtime strict allowlist rejected macOS-injected __CF_USER_TEXT_ENCODING; owned PG stopped. Finite darwin shape allowance is the only reproduced runtime fix.",
+    "First parent boundary probe used fetch with Host override; this Node fetch retained the URL Host, so one permitted pending activation was created. No signup occurred. Raw HTTP retest verifies hostile Host refusal. Failed report retained; no hidden cleanup or delete.",
+    "Two baseline tenants and one branch are inserted by canonical migrations, not fixture grants or duplicate signup.",
+    "First restart approval review timed out before execution. Exactly one identical permitted retry succeeded; no safety rejection or workaround.",
+    "Initial parent wrapper was inspected but not byte-pinned before its run; archived final wrapper includes bounded cleanup and restart assertions and is not presented as original initial bytes."
+  ],
+  "boundaries": {
+    "synthetic_identities_only": true,
+    "provider_admission": false,
+    "real_tokens_or_imports": false,
+    "model_calls": false,
+    "website_design_phone_production_changed": false,
+    "seed_or_fixture_grants": false,
+    "new_schema_retention_autonomy": false
+  },
+  "limits": [
+    "No real YCLIENTS/model/full MAYA/C10 acceptance",
+    "No packet-level egress capture; ingress/config/source tests and finite database census support bounded no-effects claim",
+    "Stage0 does not admit a revocation endpoint; actual membership revocation was not tested",
+    "Trial does not grant widgets.runtime; setup readiness does not prove complete chat/action carrier",
+    "Restart helper qualifies the exact completed session/source; it is not a general provider-enabled resume service",
+    "No independent neighboring design, pricing or notification branch was imported by this delta"
+  ],
+  "next_owner_handoff": "Finite real-provider read/local-import profile still requires preparation and explicit scope admission, private YCLIENTS partner credential plus user token, and exact company-to-owned-branch choice. Never enter real provider tokens into stage0 or synthetic launcher.",
+  "files": [
+    {
+      "path": "failed-parent-probe.json",
+      "sha256": "c326bf3d7f99c451037905fefb92b6b7f17b6ba02f38a2c95c5d3248c0040981",
+      "bytes": 2230
+    },
+    {
+      "path": "failed-startup-manifest.json",
+      "sha256": "489c83c66f5000fff732c102d35329a43fa182e23d11e2d9d2ef893c0009df32",
+      "bytes": 504096
+    },
+    {
+      "path": "final-pure-tests.log",
+      "sha256": "594eb8463a308731d86de9406803b76b34cde3ddd4e09dfee1b9eaf6b763f68a",
+      "bytes": 1124
+    },
+    {
+      "path": "independent-review.json",
+      "sha256": "df3332b1b6cfb255e1e2202b7eb189530d089672e3cd3fd456304d1d0511d8ca",
+      "bytes": 9272
+    },
+    {
+      "path": "initial-backend-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "initial-browser.json",
+      "sha256": "2ab0988ec30dffd2a15337e894d6b8136b4b2e9bbecb0396b444e9e165b8f563",
+      "bytes": 6982
+    },
+    {
+      "path": "initial-createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "initial-initdb.log",
+      "sha256": "486218845b5c5f8c790b1fae97e0b0e57d1a5daf6ede7ef57caed5beef5caad7",
+      "bytes": 906
+    },
+    {
+      "path": "initial-manifest.json",
+      "sha256": "a89db62fc2bcad0612f808ac91e1b42f3f48bbb8768d407efcb7f2588e5d51c4",
+      "bytes": 504729
+    },
+    {
+      "path": "initial-migrations.log",
+      "sha256": "07b2371e7d77311854c7d5df16935c5cde0bb5a89507ae2830c9aa9e5e0dfa91",
+      "bytes": 14830
+    },
+    {
+      "path": "initial-parent.json",
+      "sha256": "42267a1fd74853c232f6f01350de62ceae3c0a0ca26eba7a474d9e9bf7f0c76a",
+      "bytes": 8843
+    },
+    {
+      "path": "initial-pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "initial-pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "initial-react-build.log",
+      "sha256": "e1304acedaa411bddb232b81a4da168cd8735b39e1268113a069d134b79b06de",
+      "bytes": 185
+    },
+    {
+      "path": "pre-source-publication-scan.json",
+      "sha256": "7c6132234664f849bd0b21073253e971c0df1098199bac84e5f63c965b7201c1",
+      "bytes": 1669
+    },
+    {
+      "path": "private-value-exclusion.json",
+      "sha256": "2a173d0a9751cdc9f9f8b74ddc2331f228ffae093503eb59d4473d27dd2b9e87",
+      "bytes": 332
+    },
+    {
+      "path": "restart-browser.json",
+      "sha256": "fd68abdce01a88fab5a5c2f9bc343ed809d56efea9436886a8d4d415f6490318",
+      "bytes": 2900
+    },
+    {
+      "path": "restart-manifest.json",
+      "sha256": "6767eeef60bef4c6ae2562bd0147c22ffdfbffd0efb2da6dc58dba8dc4a23660",
+      "bytes": 505107
+    },
+    {
+      "path": "restart-parent-driver.mjs",
+      "sha256": "e392c1f2ba686b1e7b408a95927ece29bd0bd9f46a0b68d963c15cf5a0d41a25",
+      "bytes": 9951
+    },
+    {
+      "path": "restart-parent.json",
+      "sha256": "30015cd5f6df290ca2a020b67e95959f9b7212dcd1d63991d1fbd2b1e3e3095a",
+      "bytes": 4824
+    },
+    {
+      "path": "restart-pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52
+    },
+    {
+      "path": "restart-pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    },
+    {
+      "path": "scoped-lint-3072.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    {
+      "path": "scoped-lint-3072.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ]
+}

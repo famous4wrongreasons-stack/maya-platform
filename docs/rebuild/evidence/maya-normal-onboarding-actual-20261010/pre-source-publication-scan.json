@@ -1,0 +1,36 @@
+{
+  "contract": "maya.incremental-publication-preflight/1",
+  "base_published_head": "c097e9919df509fecbf081f929703c03b4f8ab10",
+  "candidate_head": "11e16cd111af6fa571ed2b638fb2dac06acd31d1",
+  "verdict": "QUALIFIED_GO_PINNED_RANGE_ONLY",
+  "confirmed_sensitive_blockers": [],
+  "coverage": {
+    "commits": 3,
+    "historical_unique_blobs": 29,
+    "text_blobs": 29,
+    "bytes": 493276,
+    "binary_blobs": 0,
+    "gitleaks_version": "8.30.1",
+    "gitleaks_suppressions": "Strict default rules; repository allowlists and ignore comments not used.",
+    "gitleaks_findings": 0,
+    "custom_email_candidates": 6,
+    "email_classification": "All use reserved fixture domains.",
+    "custom_phone_jwt_provider_token_private_key_markers": 0
+  },
+  "scope": "c097e9919df509fecbf081f929703c03b4f8ab10..11e16cd111af6fa571ed2b638fb2dac06acd31d1; full Git blob contents including historical versions, no repeat of previously scanned 425 commits.",
+  "limits": [
+    "Only this pinned range is cleared. Later actual evidence/docs commit requires a separate incremental scan before final publication.",
+    "Static matching is not a universal guarantee against arbitrary secrets or PII formats; no concrete sensitive artifact identified.",
+    "Only committed Git objects read; no private state directories, credentials, worktree content, remote network, model, provider or service accessed.",
+    "No repository edits, tests, commits or push performed."
+  ],
+  "deliverables": [
+    "summary.json",
+    "scope.json",
+    "commit-inventory.json",
+    "blob-inventory.json",
+    "changed-paths.json",
+    "contact-and-token-candidates.json",
+    "gitleaks.redacted.json"
+  ]
+}

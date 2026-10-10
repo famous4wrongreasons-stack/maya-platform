@@ -1,0 +1,197 @@
+{
+  "contract": "maya.normal-onboarding.actual-parent/1",
+  "mode": "resume-login",
+  "status": "PASS",
+  "source": "11e16cd111af6fa571ed2b638fb2dac06acd31d1",
+  "browserSourceSha256": "18cea8e01356977595bb7bbe4674a4738306098dc07080de901ae241ade99e45",
+  "privateStateSha256": "d5cbdc02b92903c5aedb0ab9a9f5b9156b315ee7e30deec30bf0955821fe8193",
+  "pgIdentity": {
+    "startedAt": "2026-10-10T13:57:15.634302+00:00",
+    "databaseHash": "27a82fb8eed5e17b1f14db12e7cc4e9575da687a328e4decd4d37c7df05aa7bb",
+    "systemIdentifierHash": "00f86e97eb97a8ba0831183b26850dc62ca9ff69fcd07f53caab88af9ee876ff"
+  },
+  "before": {
+    "Tenant": 4,
+    "User": 2,
+    "Branch": 3,
+    "Membership": 2,
+    "TrialActivation": 3,
+    "CrmIntegration": 0,
+    "Client": 0,
+    "Appointment": 0,
+    "ActionExecution": 0,
+    "Opportunity": 0,
+    "AgentTask": 0,
+    "OwnerReportRun": 0,
+    "NativeFeedbackRequest": 0,
+    "TeamMessage": 0,
+    "ExpenseReminderRun": 0
+  },
+  "checkpoints": [
+    {
+      "name": "success-restart-login",
+      "identityHash": "e2e2f561cd8feb8552f71ff8be58e4d147877847bd4b2b5d0cc17560e22c10d2",
+      "canonicalOwnership": {
+        "tenant": 1,
+        "user": 1,
+        "membership": 1,
+        "branch": 1,
+        "activation": 1
+      },
+      "counts": {
+        "Tenant": 4,
+        "User": 2,
+        "Branch": 3,
+        "Membership": 2,
+        "TrialActivation": 3,
+        "CrmIntegration": 0,
+        "Client": 0,
+        "Appointment": 0,
+        "ActionExecution": 0,
+        "Opportunity": 0,
+        "AgentTask": 0,
+        "OwnerReportRun": 0,
+        "NativeFeedbackRequest": 0,
+        "TeamMessage": 0,
+        "ExpenseReminderRun": 0
+      }
+    },
+    {
+      "name": "lost-reply-restart-login",
+      "identityHash": "eb8867ed8ba43b2031065ec05467709452d9b3b78425aa936683dee99ff4ccf2",
+      "canonicalOwnership": {
+        "tenant": 1,
+        "user": 1,
+        "membership": 1,
+        "branch": 1,
+        "activation": 1
+      },
+      "counts": {
+        "Tenant": 4,
+        "User": 2,
+        "Branch": 3,
+        "Membership": 2,
+        "TrialActivation": 3,
+        "CrmIntegration": 0,
+        "Client": 0,
+        "Appointment": 0,
+        "ActionExecution": 0,
+        "Opportunity": 0,
+        "AgentTask": 0,
+        "OwnerReportRun": 0,
+        "NativeFeedbackRequest": 0,
+        "TeamMessage": 0,
+        "ExpenseReminderRun": 0
+      }
+    }
+  ],
+  "routes": [
+    {
+      "host": "web",
+      "route": "/api/ai/chat",
+      "status": 403,
+      "code": "local_onboarding_route_disabled"
+    },
+    {
+      "host": "web",
+      "route": "/api/integrations/crm/connect",
+      "status": 403,
+      "code": "local_provider_admission_required"
+    },
+    {
+      "host": "web",
+      "route": "/api/auth/email/start",
+      "status": 403,
+      "code": "local_onboarding_route_disabled"
+    },
+    {
+      "host": "backend",
+      "route": "/api/ai/chat",
+      "status": 403,
+      "code": "local_onboarding_route_disabled"
+    },
+    {
+      "host": "backend",
+      "route": "/api/integrations/crm/connect",
+      "status": 403,
+      "code": "local_provider_admission_required"
+    },
+    {
+      "host": "backend",
+      "route": "/api/auth/email/start",
+      "status": 403,
+      "code": "local_onboarding_route_disabled"
+    },
+    {
+      "host": "web",
+      "boundary": "Origin",
+      "status": 403
+    },
+    {
+      "host": "web",
+      "boundary": "Host",
+      "status": 403
+    },
+    {
+      "host": "web",
+      "boundary": "Sec-Fetch-Site",
+      "status": 403
+    },
+    {
+      "host": "backend",
+      "boundary": "Origin",
+      "status": 403
+    },
+    {
+      "host": "backend",
+      "boundary": "Host",
+      "status": 403
+    },
+    {
+      "host": "backend",
+      "boundary": "Sec-Fetch-Site",
+      "status": 403
+    }
+  ],
+  "providerCalls": "not invoked; closed profile and no credentials",
+  "modelCalls": "not invoked; safe provider profile",
+  "limits": [
+    "No packet-level external traffic proof",
+    "No revocation route admitted in stage 0"
+  ],
+  "cleanup": {
+    "driverGroupAbsent": true
+  },
+  "restartIdentity": {
+    "sameDatabase": true,
+    "sameCluster": true,
+    "samePrivateKeys": true,
+    "differentPostmasterStart": true,
+    "sameSource": true
+  },
+  "activations": {
+    "completed": 2,
+    "pending": 1
+  },
+  "browser": {
+    "status": "PASS",
+    "reportPath": "/private/tmp/maya-normal-onboarding-proof-20261010-resume-login-02/browser.json"
+  },
+  "after": {
+    "Tenant": 4,
+    "User": 2,
+    "Branch": 3,
+    "Membership": 2,
+    "TrialActivation": 3,
+    "CrmIntegration": 0,
+    "Client": 0,
+    "Appointment": 0,
+    "ActionExecution": 0,
+    "Opportunity": 0,
+    "AgentTask": 0,
+    "OwnerReportRun": 0,
+    "NativeFeedbackRequest": 0,
+    "TeamMessage": 0,
+    "ExpenseReminderRun": 0
+  }
+}
