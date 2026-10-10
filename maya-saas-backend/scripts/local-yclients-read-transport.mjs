@@ -103,6 +103,27 @@ export function teamRefusalIssues(payload, headers, selectedCompany, sourceEvide
   }
   return TEAM_ISSUES.filter(issue => issues.has(issue));
 }
+// Diagnose every source/shape predicate after refusal; never emit URLs, headers,
+// unknown property names, values, IDs or staff data. This grants no admission.
+export function teamCollectionCheck(raw, init, response, payload, selectedCompany) {
+  const exact = `https://api.yclients.com/api/v1/company/${selectedCompany}/staff`;
+  const fields = (value, allowed) => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+    const names = Object.keys(value);
+    return [...allowed.filter(key => Object.hasOwn(value, key)), ...(names.some(key => !allowed.includes(key)) ? ['other'] : [])];
+  };
+  return {
+    requestRoute: String(raw) === exact ? 'management_exact' : String(raw) === `https://api.yclients.com/api/v1/staff/${selectedCompany}` ? 'legacy_exact' : 'other',
+    v2Accept: new Headers(init?.headers).get('accept') === 'application/vnd.yclients.v2+json',
+    responseUrl: !response.url ? 'absent' : response.url === exact ? 'exact' : 'other',
+    http200: response.status === 200,
+    redirected: response.redirected === true,
+    metaFields: fields(payload?.meta, ['total_count', 'count', 'page']),
+    outerFields: fields(payload, ['success', 'data', 'meta']),
+    paginationHeader: response.headers.has('link') || response.headers.has('content-range'),
+    everyRowCompanyPresent: Array.isArray(payload?.data) ? payload.data.every(row => row !== null && typeof row === 'object' && !Array.isArray(row) && Object.hasOwn(row, 'company_id')) : null,
+  };
+}
 export function createReadTransport(nativeFetch, resolveCompany, clock = Date.now, trace = () => {}, { allowUserAuth = false } = {}) {
   const context = new AsyncLocalStorage();
   const counters = { calls: 0, refused: 0, routes: {} };
@@ -118,9 +139,9 @@ export function createReadTransport(nativeFetch, resolveCompany, clock = Date.no
   }
   async function guardedFetch(raw, init) {
     const scope = context.getStore();
-    let route = 'unlisted', status = null, teamIssues = null, countEncoding = null, completeness = null;
+    let route = 'unlisted', status = null, teamIssues = null, countEncoding = null, completeness = null, collectionCheck = null;
     const method = init?.method === undefined ? 'GET' : ['GET', 'POST'].includes(init.method) ? init.method : 'OTHER';
-    const emit = (stage, code = null) => { try { trace({ surface: 'provider', route, method, stage, status, code, ...(stage === 'refused' && code === 'provider_scope_refused' && teamIssues?.length ? { teamIssues } : {}), ...(countEncoding && ['provider_response_read', 'provider_scope_refused'].includes(code) ? { teamCountEncoding: countEncoding } : {}), ...(stage === 'completed' && completeness ? { teamCompleteness: completeness } : {}) }); } catch { /* Diagnostics never change transport behavior. */ } };
+    const emit = (stage, code = null) => { try { trace({ surface: 'provider', route, method, stage, status, code, ...(stage === 'refused' && code === 'provider_scope_refused' && teamIssues?.length ? { teamIssues } : {}), ...(stage === 'refused' && code === 'provider_scope_refused' && collectionCheck ? { teamCollectionCheck: collectionCheck } : {}), ...(countEncoding && ['provider_response_read', 'provider_scope_refused'].includes(code) ? { teamCountEncoding: countEncoding } : {}), ...(stage === 'completed' && completeness ? { teamCompleteness: completeness } : {}) }); } catch { /* Diagnostics never change transport behavior. */ } };
     try {
       if (!scope?.active || scope.poisoned || clock() >= scope.deadline || !['/api/integrations/crm/connect', '/api/integrations/crm/activate'].includes(scope.request.originalUrl) || scope.request.method !== 'POST') fail('explicit_request_required');
       // request.user is populated by the real Nest auth guards before any domain call.
@@ -170,6 +191,7 @@ export function createReadTransport(nativeFetch, resolveCompany, clock = Date.no
         try { completeness = validateTeamResponse(payload, response.headers, selected, sourceEvidence); }
         catch (error) {
           try { teamIssues = teamRefusalIssues(payload, response.headers, selected, sourceEvidence); } catch { /* Keep the original refusal even if diagnosis fails. */ }
+          try { collectionCheck = teamCollectionCheck(raw, init, response, payload, selected); } catch { /* Keep the original refusal if structural diagnosis fails. */ }
           throw error;
         }
       }

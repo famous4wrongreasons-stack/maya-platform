@@ -1,5 +1,7 @@
 # YCLIENTS management staff collection compatibility — 2026-10-11
 
+Subsequent real attempt at `f3aceca9` still refused; the synthetic collection compatibility did not resolve the owner response. [Diagnostic continuation](MAYA-YCLIENTS-TEAM-SOURCE-DIAGNOSTIC-20261011.md) retains this failure and does not widen admission.
+
 Base: `2f55da13a0b32f0d7cede07ccf27aa2fa58f4ff9`, existing `codex/maya-local-crm-setup-20261010` branch. This is local setup compatibility, not release certification or real connection acceptance.
 
 ## Actual owner result

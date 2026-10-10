@@ -48,11 +48,11 @@ for (const file of [transportFile, statusFile]) fs.writeFileSync(path.join(root,
 run('historical-baseline', false, 'regression: exact unfiltered management collection');
 fs.writeFileSync(path.join(root, statusFile), currentStatus);
 for (const [name, before, after, failure] of [
-  ['source-binding', 'String(raw) === exact', 'true', 'countless collection refuses deprecated endpoint'],
+  ['source-binding', 'return String(raw) === exact', 'return true', 'countless collection refuses deprecated endpoint'],
   ['company-witness', "(collection && !Object.hasOwn(item, 'company_id'))", 'false', 'countless collection refuses missing staff company'],
   ['metadata-shape', 'Object.keys(payload.meta).length === 0', 'true', 'countless collection refuses contradictory total'],
   ['duplicate-staff', '|| new Set(ids.map(String)).size !== ids.length', '|| false', 'countless collection refuses duplicate staff'],
-  ['partial-response', 'response.status === 200', 'response.status >= 200', 'countless collection refuses partial HTTP'],
+  ['partial-response', '&& response.status === 200', '&& response.status >= 200', 'countless collection refuses partial HTTP'],
   ['current-actor', "scope.request.user.membershipStatus !== 'active'", 'false', 'countless collection refuses inactive principal'],
   ['private-evidence', 'sourceEvidence === MANAGEMENT_COLLECTION', 'true', 'standalone validation cannot obtain source authority'],
 ]) {

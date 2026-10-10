@@ -1,0 +1,68 @@
+{
+  "contract": "maya.team-source-refusal-diagnostic/1",
+  "baseSource": "f3aceca9e5a1609545be9ce519e240c9cf201286",
+  "realResult": {
+    "companyList": 200,
+    "services": 200,
+    "companyProfile": 200,
+    "staff": 200,
+    "teamRefused": true,
+    "teamIssues": [
+      "total_count_type"
+    ],
+    "teamCountEncoding": "missing",
+    "collectionPredicateFailure": "NOT_RETAINED_UNRESOLVED",
+    "connect": 400,
+    "code": "crm_connection_failed",
+    "operationStatus": "NOT_OBSERVED",
+    "integrations": 0,
+    "a17Executions": 0,
+    "traceLimitReached": false,
+    "priorCollectionCompatibilityResolvedRealRefusal": false
+  },
+  "implementation": {
+    "diagnosticOnly": true,
+    "admissionPredicatesByteIdenticalSha256": "91d6834a30536d6c1e8df6b2157b8a4a415f9fe1c326452991a258615aaa5370",
+    "closedCollectionWitness": true,
+    "rawFieldsValuesHeadersUrlsOrPIIEmitted": false
+  },
+  "proof": {
+    "tests": 148,
+    "fail": 0,
+    "exactHistoricalAdmissionVectors": 18,
+    "observerModesPerVector": 2,
+    "compared": "response status/body or exact error plus native calls/counters and poisoned fallback",
+    "existingMutationsKilled": 7,
+    "finalSourceStartup": "PENDING_AT_THIS_SOURCE_COMMIT",
+    "realAttemptWithNewDiagnosis": "NOT_RUN"
+  },
+  "preservation": {
+    "samePrivateState": true,
+    "sourceUnchanged": true,
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "metadataReadExternalCalls": 0,
+    "metadataReadBusinessWrites": 0
+  },
+  "receipts": [
+    {
+      "path": "/private/tmp/maya-owner-same-db-read-20261011-05/resume.json",
+      "sha256": "105b834d03bf080ca9c4cb1b841cd263a6061673366604340a2627d8195cb962"
+    },
+    {
+      "path": "/private/tmp/maya-owner-a17-metadata-20261011-05/result.json",
+      "sha256": "dddab46a1b9c04cae403dff0d2ee1e561f3e82246cfdd58d727b51b52d1042ed"
+    },
+    {
+      "path": "/tmp/maya-team-source-diagnostic-tests-20261011-01.txt",
+      "sha256": "5f8f157e1e7557f0e99e80a571a3bf66b5fc8a1d5b2091040675e0f233d63c09"
+    },
+    {
+      "path": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-team-collection-proof-akmfql/summary.json",
+      "sha256": "0de9bd5e94a60c06821f10069d08187a682ef09e362033b8f6763533edac1114"
+    }
+  ],
+  "certified": false,
+  "realConnectionAccepted": false,
+  "published": false
+}
