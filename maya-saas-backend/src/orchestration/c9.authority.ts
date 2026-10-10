@@ -19,9 +19,17 @@ export class C9Authority {
       tenantId = this.context.requireTenantId();
     const tenant = await tx.tenant.findUnique({
       where: { id: tenantId },
-      select: { status: true },
+      select: { status: true, trialFullAccess: true, trialEndsAt: true },
     });
-    if (tenant?.status !== 'active') this.deny();
+    // A current full trial is an existing tenancy lifecycle, not a feature or
+    // business permission. Entitlements, roles and source owners still decide
+    // every capability (in particular, trial never enables widgets.runtime).
+    const currentTrial =
+      tenant?.status === 'trial' &&
+      tenant.trialFullAccess === true &&
+      tenant.trialEndsAt instanceof Date &&
+      tenant.trialEndsAt.getTime() > Date.now();
+    if (tenant?.status !== 'active' && !currentTrial) this.deny();
     if (channelProof) {
       const link = await this.channels.resolve(channelProof, tx);
       return {
