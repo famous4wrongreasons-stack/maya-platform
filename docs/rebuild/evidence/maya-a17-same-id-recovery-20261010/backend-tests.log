@@ -1,0 +1,13 @@
+[Nest] 75561  - 10/10/2026, 3:29:26 PM     LOG [CrmService] Tenant timezone set from CRM: Europe/Berlin (branches updated: 1)
+[Nest] 75561  - 10/10/2026, 3:29:26 PM     LOG [CrmService] Tenant timezone set from CRM: Europe/Berlin (branches updated: 1)
+[Nest] 75561  - 10/10/2026, 3:29:26 PM     LOG [CrmService] Tenant timezone set from CRM: Europe/Berlin (branches updated: 1)
+[Nest] 75561  - 10/10/2026, 3:29:26 PM     LOG [CrmService] Tenant timezone set from CRM: Europe/Berlin (branches updated: 1)
+[Nest] 75561  - 10/10/2026, 3:29:26 PM     LOG [CrmService] Tenant timezone set from CRM: Europe/Berlin (branches updated: 1)
+[Nest] 75561  - 10/10/2026, 3:29:26 PM    WARN [CrmService] CRM tenant presentation refresh deferred tenant=synthetic-import-tenant: unavailable
+
+Test Suites: 4 passed, 4 total
+Tests:       78 passed, 78 total
+Snapshots:   0 total
+Time:        0.77 s, estimated 1 s
+Ran all test suites within paths "src/package5-wave3/package5-wave3-crm-qualified.spec.ts", "src/package5-wave3/package5-wave3-canonical-cutover.service.spec.ts", "src/package5-wave3/package5-wave3-branch-binding.spec.ts", "src/crm/crm-import-projection.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-crm-same-key-final.json

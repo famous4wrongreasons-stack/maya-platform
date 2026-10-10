@@ -1,0 +1,9 @@
+{
+  "contract": "maya.crm-local-form-result/1",
+  "stopped": true,
+  "providerTransport": "SYNTHETIC_NATIVE_ADAPTER_GET_ONLY",
+  "providerReadCount": 25,
+  "forbidden": [],
+  "realProviderCalls": 0,
+  "modelCalls": 0
+}

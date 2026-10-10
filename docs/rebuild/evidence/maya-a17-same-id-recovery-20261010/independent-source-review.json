@@ -1,0 +1,61 @@
+{
+  "contract": "maya.a17.same-id-independent-source-review/1",
+  "reviewedAtUtc": "2026-10-10T12:30:13.096963+00:00",
+  "baseCommit": "77d41ef56254972d6ae849d497046ea02ac2487c",
+  "sourceState": "Uncommitted follow-up, bound by file hashes. Harness and launcher excluded.",
+  "verdict": "QUALIFIED_SOURCE_NO_REMAINING_BLOCKERS",
+  "reviewerExecution": {
+    "tests": false,
+    "services": false,
+    "network": false,
+    "browser": false,
+    "provider": false
+  },
+  "closedFindings": [
+    {
+      "id": "P2_unconditional_local_database_promise",
+      "closure": "UI copy now describes encrypted storage at the connected MAYA server instead of claiming localhost proves an isolated database on this Mac."
+    }
+  ],
+  "confirmedBoundaries": [
+    "NOT_OBSERVED remains an observation, not non-dispatch or terminal failure. Explicit re-entry requires an operation GET, fresh consent and the original operation+UUID; no automatic retry or new key.",
+    "Never-admitted request material is not reconstructable after reload. Re-entry uses explicitly supplied material; the first admitted material becomes immutable. This is not a claim of exact replay of an unregistered original body.",
+    "Existing planner rechecks current actor, exact request material and retained trusted input; bounded ingress conflict handling requires an existing same-key occurrence and retries at most once.",
+    "After preview, a changed source can resolve only an exact same-key SUCCEEDED result. Other source drift refuses; no changed credential inherits the winning receipt.",
+    "Qualified install current source/material/branch/actor validation remains under existing target lock before mutation. READY payload retention is checked before trusted-input use and again on the locked row.",
+    "SUCCEEDED restoration is presented through the existing final operation-status/current-actor owner and keeps historical receipt separate from current configuration.",
+    "Unknown ingress errors, unmatched conflicts and UNAVAILABLE evidence do not enable retry. Frontend generation/session/source checks and locator retention remain."
+  ],
+  "evidenceQualification": [
+    "Saved parent-reported focused results: backend78 and frontend38 passing tests; this review does not independently execute or certify those gates.",
+    "Source review only. New tests use finite synthetic ingress/database ports. Actual SQL race/restart/current React follow-up evidence remains separate and pending.",
+    "No new schema, parallel operation store, credential persistence in browser, lifecycle or automatic initiator is introduced.",
+    "No real-provider, real-model, production/site, full MAYA/C10 or general recovery acceptance."
+  ],
+  "files": [
+    {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "sha256": "0e678563f1fa2273170f79916def92f7c94cb415171130cae838cb1257d962c0"
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sha256": "3cd6bf70e92010e78127fcabd2d792520f5fb8306fe9496f59bfeb758215c06e"
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3-crm-qualified.spec.ts",
+      "sha256": "6f587f20c2fad171808a1bd4e2c9103a7bfa7e4be5250f1d1bb3b27fa5759463"
+    },
+    {
+      "path": "maya-chat-shell/src/shell/local-crm-setup.ts",
+      "sha256": "a151f9a022fa6c71d8e9d80325fb2db6188a7c1e1599991c4ab55c10f6655e40"
+    },
+    {
+      "path": "maya-chat-shell/test/local-crm-setup.test.mjs",
+      "sha256": "d5e2b0daae05b46b51358ad331960ac107501c8dc3b0152e8dc7ef2b1ac2bd12"
+    },
+    {
+      "path": "maya-carrier-react/src/setup/LocalCrmSetup.tsx",
+      "sha256": "1eaa0829f6400964171bede077f71925a981d4a30bcb75a0865443e3d64f6631"
+    }
+  ]
+}

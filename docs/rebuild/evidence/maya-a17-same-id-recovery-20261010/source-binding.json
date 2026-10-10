@@ -1,0 +1,141 @@
+{
+  "baseline": "77d41ef56254972d6ae849d497046ea02ac2487c",
+  "executedSource": "cbe2c2103f6ee12d35fe3b509fb7eafc9d6754d5",
+  "files": [
+    {
+      "path": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "sha256": "d133c1b5c53d9a3c724fb4bb4ba5e90dfd12803e11b44a0b02549418b04fec41",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/dto/connect-crm-integration.dto.ts",
+      "sha256": "c4062ff06baa1c885d055c69b76021e31aacfa9f49c73f9403deb6f8194528ea",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/dto/crm-operation.dto.ts",
+      "sha256": "f079ead59eb4467aa4fa0617d131e5f23785f15842311ca0a110c596d027b266",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm-configuration-version.ts",
+      "sha256": "788724bbc8db8d95d2d6f9d130063950224d6d49913eb8367a70d1ee91c8f855",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm.service.ts",
+      "sha256": "544fb41187f55184b1959a0e36e45edae738be0f024e52977279859374d8479d",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm-provider-settings.ts",
+      "sha256": "9e1c8efb41332dd788d92453d768afcf8f785d3b482340d362ceb81858c9c161",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "sha256": "ef484bde55b5a5ee25549b5af0405fea3932201622161c050280d5d5efee4563",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sha256": "3cd6bf70e92010e78127fcabd2d792520f5fb8306fe9496f59bfeb758215c06e",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "sha256": "0e678563f1fa2273170f79916def92f7c94cb415171130cae838cb1257d962c0",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3-production-gateway.service.ts",
+      "sha256": "309e292720ca2fc570e0adcc2504ea8d440795c870cbda36c3a694695f5360cb",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/src/action-engine/package5-wave3-executable.contract.ts",
+      "sha256": "809124b1ee20030ce07fbc64d80bc3c507db02acd63f0f33b58363b158415513",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/c9-occupancy-proof.mjs",
+      "sha256": "a5a312f0cd8aa29dd987dcfa67b3d258b54e0105c6bdcc2619216c39c6294896",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/crm-a17-operation-proof.test.mjs",
+      "sha256": "31afae3850f11c9760d8eee53de510a4a26bf2bbdc8835f5f80f0d4abb979c08",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/crm-a17-operation-restart.probe-spec.ts",
+      "sha256": "a60f49c238335215b774525e0411b5adc54ab93c4ad5b87adf5e15d5125da32f",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/http-bootstrap.ts",
+      "sha256": "7b5cc34c41505a6326bc684708f29a94f968e4ea09511077be19c516f934f140",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/support/proof-db-guard.ts",
+      "sha256": "f05f1302d30ead2779179b8ee1cb24dd681cf8b5f5933cb65e616fe3f01f4a19",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-carrier-react/test/crm-a17-setup-browser-probe.mjs",
+      "sha256": "878e108b3ae89d5a9f37e20fe923304e2bc974ccf2841d3d19b8f449ed1ff916",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-carrier-react/test/crm-a17-setup-browser-guard.mjs",
+      "sha256": "254ad116a6af69031f709503f856cdbbd132f96249ff6da4390c0e2fe04360b9",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-carrier-react/test/crm-a17-setup-browser-guard.test.mjs",
+      "sha256": "0909b43fb8f3bafb1ec1a3a3744cd9657ba4fb6fc69a859fcfd05501984f9f2c",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-carrier-react/src/setup/LocalCrmSetup.tsx",
+      "sha256": "1eaa0829f6400964171bede077f71925a981d4a30bcb75a0865443e3d64f6631",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-carrier-react/src/runtime/crmPending.ts",
+      "sha256": "7a1265ae670bcc54ab4b8f0c183b5fd150defbfaba984626ee7fdc812b18a587",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-carrier-react/src/runtime/compose.ts",
+      "sha256": "de18d3e234e24d59f680c6006f1d46b0adc5ed0878e9cf60ad195104fbc5a391",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-carrier-react/build.mjs",
+      "sha256": "b91d872cbd59d92cb335431c084a5306cebf7011534d9fc9eafca1aa22e88605",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-chat-shell/src/shell/local-crm-setup.ts",
+      "sha256": "a151f9a022fa6c71d8e9d80325fb2db6188a7c1e1599991c4ab55c10f6655e40",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-chat-shell/src/net/crm-setup.ts",
+      "sha256": "4b61612ed740e363028f71813bfa7bd82a0ef292df47db16b659bcd19910c401",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-chat-shell/dev/serve.mjs",
+      "sha256": "f0985920ab617d366fefe937ca257f00edbbc1bca90ba7a378dd5a25b03d711d",
+      "matchesExecutedCommitAndDisk": true
+    },
+    {
+      "path": "maya-chat-shell/test/cdp-verify.mjs",
+      "sha256": "02de453056df1ec95091086dedd0485f2f1385655e777d9a2d7c55353e44a999",
+      "matchesExecutedCommitAndDisk": true
+    }
+  ]
+}

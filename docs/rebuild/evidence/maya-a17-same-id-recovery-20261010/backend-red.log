@@ -1,0 +1,96 @@
+FAIL src/package5-wave3/package5-wave3-crm-qualified.spec.ts
+  ● qualified install explicit same-key recovery › held original preview plus explicit same UUID same material: first admitted material wins
+
+    expect(received).toBeNull()
+
+    Received: [ConflictException: CRM configuration changed]
+
+      909 |       const result = await original;
+      910 |       if (kind === 'same') {
+    > 911 |         expect(result.error).toBeNull();
+          |                              ^
+      912 |         expect(result.value?.receipt).toEqual(winner.receipt);
+      913 |       } else
+      914 |         expect(result.error).toMatchObject({
+
+      at package5-wave3/package5-wave3-crm-qualified.spec.ts:911:30
+
+  ● qualified install explicit same-key recovery › held original preview plus explicit same UUID different material: first admitted material wins
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 1
+
+      Object {
+        "response": Object {
+          "error": Object {
+    -       "code": "crm_operation_material_changed",
+    +       "code": "crm_config_version_changed",
+          },
+        },
+      }
+
+      912 |         expect(result.value?.receipt).toEqual(winner.receipt);
+      913 |       } else
+    > 914 |         expect(result.error).toMatchObject({
+          |                              ^
+      915 |           response: { error: { code: 'crm_operation_material_changed' } },
+      916 |         });
+      917 |       expect(f.db.actionTargetMutation.create).toHaveBeenCalledTimes(1);
+
+      at package5-wave3/package5-wave3-crm-qualified.spec.ts:914:30
+
+  ● qualified install explicit same-key recovery › rebinds a same-material stale target generation to the single existing trusted READY input once
+
+    ActionConflictError: synthetic ingress normalized action differs
+
+      154 |         if (stored) {
+      155 |           if (wave3Hash(input) !== wave3Hash(request.input))
+    > 156 |             throw new ActionConflictError(
+          |                   ^
+      157 |               'synthetic ingress normalized action differs',
+      158 |             );
+      159 |           return stored;
+
+      at Object.<anonymous> (package5-wave3/package5-wave3-crm-qualified.spec.ts:156:19)
+      at Package5Wave3ExecutableService.executeLocal (package5-wave3/package5-wave3.service.ts:1300:38)
+      at Package5Wave3ExecutableService.execute (package5-wave3/package5-wave3.service.ts:1287:14)
+      at package5-wave3/package5-wave3-crm-qualified.spec.ts:935:49
+      at TenantContextService.runAsSystemTenant (tenancy/tenant-context.service.ts:46:25)
+      at Object.run (package5-wave3/package5-wave3-crm-qualified.spec.ts:213:13)
+      at Object.<anonymous> (package5-wave3/package5-wave3-crm-qualified.spec.ts:935:28)
+
+  ● qualified install explicit same-key recovery › changed material in a stale prepared request never inherits the winning READY input
+
+    expect(received).rejects.toMatchObject(expected)
+
+    - Expected  - 7
+    + Received  + 1
+
+    - Object {
+    -   "response": Object {
+    -     "error": Object {
+    -       "code": "crm_operation_material_changed",
+    -     },
+    -   },
+    - }
+    + [ActionConflictError: synthetic ingress normalized action differs]
+
+      957 |     );
+      958 |     await f.ingress.createExecution(winner.request);
+    > 959 |     await expect(f.run(() => f.executor.execute(loser))).rejects.toMatchObject({
+          |                                                                  ^
+      960 |       response: { error: { code: 'crm_operation_material_changed' } },
+      961 |     });
+      962 |     expect(f.db.actionTargetMutation.create).not.toHaveBeenCalled();
+
+      at Object.toMatchObject (../../../maya-development-integration/maya-saas-backend/node_modules/expect/build/index.js:2155:20)
+      at Object.<anonymous> (package5-wave3/package5-wave3-crm-qualified.spec.ts:959:66)
+
+Test Suites: 1 failed, 1 total
+Tests:       4 failed, 27 skipped, 6 passed, 37 total
+Snapshots:   0 total
+Time:        0.486 s, estimated 1 s
+Ran all test suites within paths "src/package5-wave3/package5-wave3-crm-qualified.spec.ts".
+Test results written to: ../../../../../../../../tmp/maya-crm-same-key-red.json

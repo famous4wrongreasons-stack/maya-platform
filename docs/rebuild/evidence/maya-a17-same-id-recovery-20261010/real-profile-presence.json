@@ -1,0 +1,31 @@
+{
+  "kind": "presence_only_no_secret_values",
+  "observedAt": "2026-10-10T12:43:18.208Z",
+  "scope": "current_execution_shell_and_owned_backend_worktree_only",
+  "environmentPresence": {
+    "YCLIENTS_PARTNER_TOKEN": false,
+    "CRM_ENCRYPTION_KEY": false,
+    "DATABASE_URL": false,
+    "JWT_SECRET": false,
+    "AUTH_REFRESH_TOKEN_SECRET": false,
+    "AUTH_SESSION_METADATA_SECRET": false,
+    "AUTH_RATE_LIMIT_SECRET": false,
+    "PHONE_AUTH_SECRET": false,
+    "EMAIL_AUTH_SECRET": false,
+    "ACTION_ENGINE_IDENTITY_SECRET": false,
+    "ACTION_ENGINE_PAYLOAD_ENCRYPTION_SECRET": false,
+    "CLIENT_IDENTITY_HASH_SECRET": false,
+    "MAYA_LOYALTY_REDEMPTION_CODE_PEPPER": false,
+    "MAYA_REFERRAL_REWARD_PRESENTATION_KEY": false,
+    "MAYA_REFERRAL_REWARD_CLAIM_SECRET": false,
+    "MAYA_GIFT_CERTIFICATE_PRESENTATION_KEY": false,
+    "MAYA_GIFT_CERTIFICATE_CLAIM_SECRET": false
+  },
+  "envFiles": {
+    "env": false,
+    "envLocal": false
+  },
+  "providerUserTokenRead": false,
+  "externalSecretStoresInspected": false,
+  "providerRequests": 0
+}

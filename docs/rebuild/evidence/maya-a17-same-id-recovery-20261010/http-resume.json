@@ -1,0 +1,88 @@
+{
+  "contract": "maya.crm-a17-operation-http-pg-proof/1",
+  "stage": "resume",
+  "status": "passed",
+  "candidateCommit": "cbe2c2103f6ee12d35fe3b509fb7eafc9d6754d5",
+  "sourceHashes": {
+    "src/crm/crm-integration.controller.ts": "d133c1b5c53d9a3c724fb4bb4ba5e90dfd12803e11b44a0b02549418b04fec41",
+    "src/crm/dto/connect-crm-integration.dto.ts": "c4062ff06baa1c885d055c69b76021e31aacfa9f49c73f9403deb6f8194528ea",
+    "src/crm/dto/crm-operation.dto.ts": "f079ead59eb4467aa4fa0617d131e5f23785f15842311ca0a110c596d027b266",
+    "src/crm/crm-configuration-version.ts": "788724bbc8db8d95d2d6f9d130063950224d6d49913eb8367a70d1ee91c8f855",
+    "src/crm/crm.service.ts": "544fb41187f55184b1959a0e36e45edae738be0f024e52977279859374d8479d",
+    "src/crm/crm-provider-settings.ts": "9e1c8efb41332dd788d92453d768afcf8f785d3b482340d362ceb81858c9c161",
+    "src/crm/adapters/yclients-crm.adapter.ts": "ef484bde55b5a5ee25549b5af0405fea3932201622161c050280d5d5efee4563",
+    "src/package5-wave3/package5-wave3-canonical-cutover.service.ts": "3cd6bf70e92010e78127fcabd2d792520f5fb8306fe9496f59bfeb758215c06e",
+    "src/package5-wave3/package5-wave3.service.ts": "0e678563f1fa2273170f79916def92f7c94cb415171130cae838cb1257d962c0",
+    "src/package5-wave3/package5-wave3-production-gateway.service.ts": "309e292720ca2fc570e0adcc2504ea8d440795c870cbda36c3a694695f5360cb",
+    "src/action-engine/package5-wave3-executable.contract.ts": "809124b1ee20030ce07fbc64d80bc3c507db02acd63f0f33b58363b158415513",
+    "scripts/c9-occupancy-proof.mjs": "a5a312f0cd8aa29dd987dcfa67b3d258b54e0105c6bdcc2619216c39c6294896",
+    "scripts/crm-a17-operation-proof.test.mjs": "31afae3850f11c9760d8eee53de510a4a26bf2bbdc8835f5f80f0d4abb979c08",
+    "test/widgets-live/crm-a17-operation-restart.probe-spec.ts": "a60f49c238335215b774525e0411b5adc54ab93c4ad5b87adf5e15d5125da32f",
+    "test/widgets-live/support/http-bootstrap.ts": "7b5cc34c41505a6326bc684708f29a94f968e4ea09511077be19c516f934f140",
+    "test/widgets-live/support/proof-db-guard.ts": "f05f1302d30ead2779179b8ee1cb24dd681cf8b5f5933cb65e616fe3f01f4a19",
+    "../maya-carrier-react/test/crm-a17-setup-browser-probe.mjs": "878e108b3ae89d5a9f37e20fe923304e2bc974ccf2841d3d19b8f449ed1ff916",
+    "../maya-carrier-react/test/crm-a17-setup-browser-guard.mjs": "254ad116a6af69031f709503f856cdbbd132f96249ff6da4390c0e2fe04360b9",
+    "../maya-carrier-react/test/crm-a17-setup-browser-guard.test.mjs": "0909b43fb8f3bafb1ec1a3a3744cd9657ba4fb6fc69a859fcfd05501984f9f2c",
+    "../maya-carrier-react/src/setup/LocalCrmSetup.tsx": "1eaa0829f6400964171bede077f71925a981d4a30bcb75a0865443e3d64f6631",
+    "../maya-carrier-react/src/runtime/crmPending.ts": "7a1265ae670bcc54ab4b8f0c183b5fd150defbfaba984626ee7fdc812b18a587",
+    "../maya-carrier-react/src/runtime/compose.ts": "de18d3e234e24d59f680c6006f1d46b0adc5ed0878e9cf60ad195104fbc5a391",
+    "../maya-carrier-react/build.mjs": "b91d872cbd59d92cb335431c084a5306cebf7011534d9fc9eafca1aa22e88605",
+    "../maya-chat-shell/src/shell/local-crm-setup.ts": "a151f9a022fa6c71d8e9d80325fb2db6188a7c1e1599991c4ab55c10f6655e40",
+    "../maya-chat-shell/src/net/crm-setup.ts": "4b61612ed740e363028f71813bfa7bd82a0ef292df47db16b659bcd19910c401",
+    "../maya-chat-shell/dev/serve.mjs": "f0985920ab617d366fefe937ca257f00edbbc1bca90ba7a378dd5a25b03d711d",
+    "../maya-chat-shell/test/cdp-verify.mjs": "02de453056df1ec95091086dedd0485f2f1385655e777d9a2d7c55353e44a999"
+  },
+  "sourceUnchanged": true,
+  "checks": [
+    "Different Node process and restarted PG preserve exact install/activation receipts, attempts, original evidence and mutation graph",
+    "After actual Node/PG restart, both NOT_OBSERVED and durable READY stay inert until an explicit same-ID submission; READY keeps the original execution",
+    "Foreign tenant cannot observe receipt; different actor and Client role are refused without provider reads or action changes",
+    "Historic success remains an exact receipt after explicit replacement; current configuration is separately marked different",
+    "Revoked membership blocks persisted operation recovery without new authority"
+  ],
+  "observations": {
+    "restored": {
+      "graphHash": "45ea15a3f807ca2e47bed634e92da355fa39dc2f4208f177766627cc396ce8dd",
+      "processChanged": true,
+      "postmasterChanged": true,
+      "providerReadCount": 0,
+      "installReceiptHash": "70c2f90c8f3166cac99ec42ea9f4380beca689287c7ed937341708269a53d270",
+      "activationReceiptHash": "dbd53441b9087c7ccb03f559845dea8f6498aa36335e293293c48bcb8afe80d7"
+    },
+    "expiredAuthentication": {
+      "fixture": "SIGNED_EXPIRED_ACCESS_TOKEN",
+      "httpStatus": 401,
+      "actionGraphUnchanged": true,
+      "providerReads": 0
+    },
+    "restart-NOT_OBSERVED": {
+      "statusBeforeExplicitRetry": "NOT_OBSERVED",
+      "sameRequestId": true,
+      "exactExecutions": 1,
+      "exactMutations": 1,
+      "exactAttempts": 1,
+      "receiptHash": "2789134d3c38241189452d376f77ea0be0de3a53a52bd799e1561b54ff7bee37"
+    },
+    "restart-READY": {
+      "statusBeforeExplicitRetry": "READY",
+      "sameRequestId": true,
+      "exactExecutions": 1,
+      "exactMutations": 1,
+      "exactAttempts": 1,
+      "receiptHash": "101904f70de6b30eed68ef83afd4e09a13341007bb872df6a2eb228ea4f5102a"
+    }
+  },
+  "limits": {
+    "expiredOrCleanedOperation": "UNIT_ONLY: existing 30-day immutable payload retention; no temporal HTTP mutation or clock bypass",
+    "workerCrash": false
+  },
+  "providerReadCount": 15,
+  "forbidden": [],
+  "qualification": "LOCAL_SYNTHETIC_NATIVE_ADAPTER_ONLY; real canonical A17 writes in disposable PG; actual response-discard relay; no worker-crash or live-provider acceptance",
+  "boundaries": {
+    "model": "forbidden spy",
+    "providerWrites": "finite GET-only transport",
+    "outbound": "no delivery rows and no admitted external transport",
+    "privateReceiptArchived": false
+  }
+}

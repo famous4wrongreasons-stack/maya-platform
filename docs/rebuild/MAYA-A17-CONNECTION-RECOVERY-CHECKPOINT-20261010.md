@@ -1,5 +1,7 @@
 # A17 connection version and recovery — 2026-10-10
 
+The pre-admission `NOT_OBSERVED` usability blocker below is superseded by the [same-ID recovery and runnable local handoff](MAYA-A17-SAME-ID-RECOVERY-HANDOFF-20261010.md). This report retains its original source and evidence qualification.
+
 Qualified local development follow-up to [the first local setup UI checkpoint](MAYA-LOCAL-CRM-SETUP-20261010.md), on `codex/maya-local-crm-setup-20261010` from committed `1a43694e9e0b3513a5e00cdd9b64cb762b2421a6`. The current React form now carries the reviewed configuration version into the existing A17/Action Engine install, activation and import owners. An exact authenticated operation read recovers the original receipt after response loss. Import projection and its successful receipt share the existing database transaction.
 
 This is a bounded local development candidate. Real YCLIENTS connection acceptance, booking readiness, broader MAYA completion and C10 completion are **not issued**. No working website, hosting, production database, provider booking, model invocation, outbound notification or background initiator is part of this change. Historical real-model evidence remains [separate and ungraded](MAYA-CURRENT-REACT-REAL-MODEL-20261010.md).

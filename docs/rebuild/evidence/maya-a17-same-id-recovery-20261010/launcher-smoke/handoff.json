@@ -1,0 +1,14 @@
+{
+  "contract": "maya.crm-local-handoff/1",
+  "status": "stopped",
+  "landingUrl": "http://127.0.0.1:63148/__local-a17",
+  "formUrl": "http://127.0.0.1:63148/?local_crm_setup=1",
+  "email": "wl-42710f96@widgets-live.test",
+  "companyId": 424242,
+  "branchName": "Synthetic branch",
+  "testToken": "SYNTHETIC_A17_V1",
+  "expiresAt": "2026-10-10T12:39:56.483Z",
+  "localDatabaseOnly": true,
+  "syntheticProviderOnly": true,
+  "stoppedAt": "2026-10-10T12:39:56.499Z"
+}

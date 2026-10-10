@@ -1,0 +1,127 @@
+{
+  "contract": "maya.a17.local-launcher-independent-review/1",
+  "reviewedAtUtc": "2026-10-10T12:40:52.237786+00:00",
+  "candidateCommit": "792cc10af9d27524446b07911b73c553c8f8c4ee",
+  "verdict": "QUALIFIED_LOCAL_SYNTHETIC_LAUNCHER_SOURCE_AND_SMOKE_PASS",
+  "blockers": [],
+  "reviewerActions": "Read-only source/JSON/log/Git comparisons. No test/service/browser/network/provider/model execution and no auth/debug code or raw credential inspection. Only this review JSON written.",
+  "source": {
+    "fourReviewedFilesMatchExactGitDiskAndManifest": true,
+    "files": [
+      {
+        "path": "maya-saas-backend/scripts/crm-setup-local.mjs",
+        "sha256": "049eb6bd2c6387e538d0280a909f8da672559d8f3373aa9b059020fdcb47eb08"
+      },
+      {
+        "path": "maya-saas-backend/scripts/crm-setup-local.test.mjs",
+        "sha256": "7ded9751c99762d86b377c25629b459d8226bc4afcf289e9db85aadc25afd733"
+      },
+      {
+        "path": "maya-saas-backend/test/widgets-live/crm-a17-local-form.probe-spec.ts",
+        "sha256": "e199f3ec202bdfc4bdb859f64ab5326b66c4e946d3f925cc61bfe3f0aee99245"
+      },
+      {
+        "path": "maya-carrier-react/test/crm-a17-local-form-server.mjs",
+        "sha256": "1b2c2446a00b0518f27a7ad7dc06dcca8a44cdaa54eadf6c29246e13b48ef8c9"
+      }
+    ],
+    "manifestSourceBindingsCount": 1955,
+    "prismaConfigBound": true,
+    "qualification": "Four source files independently byte-compared. Count1955 and final inventory equality are recorded supervisor checks; this review did not independently rehash all1955 files."
+  },
+  "closedFindings": [
+    {
+      "id": "P2_migration_config_binding",
+      "closure": "prisma.config.ts included in clean/Git/blob inventory before migration execution."
+    },
+    {
+      "id": "P2_late_cancellation_status",
+      "closure": "Cancellation received during cleanup changes stopped to cancelled before final save; source/cleanup failures retain precedence. Source review only, no injected interruption proof."
+    }
+  ],
+  "confirmedSourceBoundaries": [
+    "Explicit --run, fresh output and own temporary PostgreSQL; existing/ambient database URL, env files and provider credentials are excluded by finite proof environment.",
+    "Only explicit current-form actions reach real AppModule through transparent local relay; exact synthetic company/branch/token allowlist rejects non-synthetic credentials before forwarding.",
+    "No API body or successful backend response substitution; debug login code is copied only from actual successful backend debug response for exact fixture email, held in RAM, cleared on successful login/expiry/cleanup.",
+    "Current React is built from committed source. Separate loopback notice identifies synthetic fixture, explicit consent and bounded duration; no promise that ordinary localhost alone proves isolation.",
+    "Form runs in one owned detached process group, bounded TERM/KILL and group-absence check; own PG has separate stop finalizer. Source hashes and clean captured paths rechecked at completion."
+  ],
+  "smoke": {
+    "durationMs": 60000,
+    "terminalStatus": "stopped",
+    "formExit": {
+      "code": 0,
+      "signal": null
+    },
+    "handoffShown": true,
+    "handoffTerminalStatus": "stopped",
+    "recordedChecks": {
+      "status": "passed",
+      "landing200": true,
+      "currentForm200": true,
+      "actualDebugCodeVisibleOnlyOnLocalNotice": true,
+      "actualAuth": true,
+      "branchCount": 1,
+      "unapprovedTokenRejected403": true,
+      "actualInstall201": true,
+      "actualActivationImport201": true
+    },
+    "localResult": {
+      "contract": "maya.crm-local-form-result/1",
+      "stopped": true,
+      "providerTransport": "SYNTHETIC_NATIVE_ADAPTER_GET_ONLY",
+      "providerReadCount": 25,
+      "forbidden": [],
+      "realProviderCalls": 0,
+      "modelCalls": 0
+    },
+    "jest": {
+      "success": true,
+      "passedTests": 1,
+      "failedTests": 0,
+      "pendingTests": 0,
+      "suites": 1
+    },
+    "qualification": "HTTP checks are the saved smoke-checks summary, not an independent raw-HTTP replay in this review. Current-form200 proves serving, not new automated browser interaction; prior actual React run remains separate. Canonical A17 local writes are intended, not zero business effects."
+  },
+  "cleanup": {
+    "formGroupAbsentReported": true,
+    "clusterStoppedReported": true,
+    "pgStopLogConfirmsStopped": true,
+    "sourceUnchanged": true,
+    "qualification": "Supervisor source implements actual owned-PGID absence check and pg_ctl stop; terminal records inspected. Reviewer did not run an independent OS PID/group census."
+  },
+  "limits": [
+    "Synthetic-only local launcher: no real YCLIENTS credentials/provider, model, production/site, booking readiness, full MAYA/C10 or iPhone/HTTPS acceptance.",
+    "One-minute automatic bounded expiry was exercised. No new interruption, host-crash, forced-kill or long15-minute handoff proof.",
+    "Debug email fixture login is not real email delivery; no auth token/debug code is included in this review.",
+    "No prior failure evidence or source review is overwritten. This smoke does not reclassify broader product coverage."
+  ],
+  "artifacts": [
+    {
+      "file": "manifest.json",
+      "bytes": 490076,
+      "sha256": "a1fe0dcf0abad16d1f1934aa9117169dc460377dee54594bdedf94d334e1f12a"
+    },
+    {
+      "file": "local-form-result.json",
+      "bytes": 219,
+      "sha256": "c9ca7f4630b58e993e32ade0ed2f572826dfd06ec4f4cb8a8de9cf8d90667fa9"
+    },
+    {
+      "file": "local-form-jest.json",
+      "bytes": 1267,
+      "sha256": "9da095ea8a5648db20d7fb8d7950ee9fc43f713bec71b92f5879a5d2b962e668"
+    },
+    {
+      "file": "smoke-checks.json",
+      "bytes": 375,
+      "sha256": "69dad25fe2f52741a69b841736e6f213039afaebc1fc891f03f1ce9f20fe46f2"
+    },
+    {
+      "file": "pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    }
+  ]
+}

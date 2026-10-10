@@ -1,0 +1,59 @@
+{
+  "baseline": "77d41ef56254972d6ae849d497046ea02ac2487c",
+  "runtimeSource": "2fdd6cf13e38b15f178dad7787eb8eea9fbe8bbf",
+  "executedRecoverySource": "cbe2c2103f6ee12d35fe3b509fb7eafc9d6754d5",
+  "launcherSource": "792cc10af9d27524446b07911b73c553c8f8c4ee",
+  "status": "qualified_local_pass",
+  "tests": {
+    "backend": 78,
+    "backendSuites": 4,
+    "frontendNetUrl": 38,
+    "driverGuard": 5,
+    "launcherGuard": 6
+  },
+  "actualRecovery": {
+    "prepareAssertions": 298,
+    "resumeAssertions": 97,
+    "reactCheckpoints": 9,
+    "browserPostAttempts": 3,
+    "admittedSetupPosts": 2,
+    "nodeAndPostgresqlRestart": true,
+    "sourceBindings": 27,
+    "ownedClustersStopped": true
+  },
+  "localLauncher": {
+    "actualAppModule": true,
+    "actualCurrentFormServed": true,
+    "recordedHttpAuthInstallAtomicImportSmoke": true,
+    "syntheticNativeProviderReads": 25,
+    "sourceBindings": 1955,
+    "naturalExpiryCleanup": true,
+    "ownerDemoStarted": false
+  },
+  "boundaries": {
+    "realProvider": false,
+    "realModel": false,
+    "newSchema": false,
+    "newRetention": false,
+    "websiteChanged": false,
+    "productionChanged": false,
+    "pushMerge": false,
+    "C10Acceptance": "NOT_ISSUED",
+    "fullMayaAcceptance": "NOT_ISSUED"
+  },
+  "limits": [
+    "First admitted material wins; exact never-admitted body is not restored.",
+    "AE30-day natural expiry is unit-only; actual expired JWT is separate.",
+    "Post-admission test exception is not a worker crash.",
+    "Browser same-URL reload and actual PostgreSQL restart are separate proofs.",
+    "Launcher smoke HTTP result is a recorded assertion summary; current browser acceptance is the separate recovery run.",
+    "Real native-adapter profile remains separate and not admitted; synthetic guard is unchanged."
+  ],
+  "failedAttempts": [
+    {
+      "path": "failed-attempt-01",
+      "reason": "test import changed canonical CommonJS bootstrap order",
+      "ownedClusterStopped": true
+    }
+  ]
+}

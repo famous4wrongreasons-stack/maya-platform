@@ -1,0 +1,324 @@
+{
+  "contract": "maya.a17.same-id-independent-evidence-review/1",
+  "reviewedAtUtc": "2026-10-10T12:36:48.826504+00:00",
+  "candidateCommit": "cbe2c2103f6ee12d35fe3b509fb7eafc9d6754d5",
+  "baselineCommit": "77d41ef56254972d6ae849d497046ea02ac2487c",
+  "verdict": "QUALIFIED_LOCAL_SYNTHETIC_HTTP_PG_RESTART_AND_REACT_PASS",
+  "checkpointBlockers": [],
+  "reviewerActions": "Read-only local JSON/log/source and Git-hash comparisons. No tests, services, browser launch, network, provider or model calls; no private saved credential/receipt file read. Only this review artifact written.",
+  "sourceReview": {
+    "file": "maya-a17-same-id-source-review.json",
+    "sha256": "f9e01b9a3c2dd602c491802f344a2d4a66d10adfcf69287e02e5c4519a11f547",
+    "allSixReviewedFilesMatchExecutedGit": true
+  },
+  "sourceBinding": {
+    "count": 27,
+    "prepareResumeIdentical": true,
+    "allMatchExactCandidateGitAndCurrentDisk": true,
+    "sourceUnchangedReportedBothStages": true,
+    "qualification": "Finite explicit 27-file inventory, not an exhaustive repository/dependency/environment inventory.",
+    "files": [
+      {
+        "path": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+        "sha256": "d133c1b5c53d9a3c724fb4bb4ba5e90dfd12803e11b44a0b02549418b04fec41"
+      },
+      {
+        "path": "maya-saas-backend/src/crm/dto/connect-crm-integration.dto.ts",
+        "sha256": "c4062ff06baa1c885d055c69b76021e31aacfa9f49c73f9403deb6f8194528ea"
+      },
+      {
+        "path": "maya-saas-backend/src/crm/dto/crm-operation.dto.ts",
+        "sha256": "f079ead59eb4467aa4fa0617d131e5f23785f15842311ca0a110c596d027b266"
+      },
+      {
+        "path": "maya-saas-backend/src/crm/crm-configuration-version.ts",
+        "sha256": "788724bbc8db8d95d2d6f9d130063950224d6d49913eb8367a70d1ee91c8f855"
+      },
+      {
+        "path": "maya-saas-backend/src/crm/crm.service.ts",
+        "sha256": "544fb41187f55184b1959a0e36e45edae738be0f024e52977279859374d8479d"
+      },
+      {
+        "path": "maya-saas-backend/src/crm/crm-provider-settings.ts",
+        "sha256": "9e1c8efb41332dd788d92453d768afcf8f785d3b482340d362ceb81858c9c161"
+      },
+      {
+        "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+        "sha256": "ef484bde55b5a5ee25549b5af0405fea3932201622161c050280d5d5efee4563"
+      },
+      {
+        "path": "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts",
+        "sha256": "3cd6bf70e92010e78127fcabd2d792520f5fb8306fe9496f59bfeb758215c06e"
+      },
+      {
+        "path": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+        "sha256": "0e678563f1fa2273170f79916def92f7c94cb415171130cae838cb1257d962c0"
+      },
+      {
+        "path": "maya-saas-backend/src/package5-wave3/package5-wave3-production-gateway.service.ts",
+        "sha256": "309e292720ca2fc570e0adcc2504ea8d440795c870cbda36c3a694695f5360cb"
+      },
+      {
+        "path": "maya-saas-backend/src/action-engine/package5-wave3-executable.contract.ts",
+        "sha256": "809124b1ee20030ce07fbc64d80bc3c507db02acd63f0f33b58363b158415513"
+      },
+      {
+        "path": "maya-saas-backend/scripts/c9-occupancy-proof.mjs",
+        "sha256": "a5a312f0cd8aa29dd987dcfa67b3d258b54e0105c6bdcc2619216c39c6294896"
+      },
+      {
+        "path": "maya-saas-backend/scripts/crm-a17-operation-proof.test.mjs",
+        "sha256": "31afae3850f11c9760d8eee53de510a4a26bf2bbdc8835f5f80f0d4abb979c08"
+      },
+      {
+        "path": "maya-saas-backend/test/widgets-live/crm-a17-operation-restart.probe-spec.ts",
+        "sha256": "a60f49c238335215b774525e0411b5adc54ab93c4ad5b87adf5e15d5125da32f"
+      },
+      {
+        "path": "maya-saas-backend/test/widgets-live/support/http-bootstrap.ts",
+        "sha256": "7b5cc34c41505a6326bc684708f29a94f968e4ea09511077be19c516f934f140"
+      },
+      {
+        "path": "maya-saas-backend/test/widgets-live/support/proof-db-guard.ts",
+        "sha256": "f05f1302d30ead2779179b8ee1cb24dd681cf8b5f5933cb65e616fe3f01f4a19"
+      },
+      {
+        "path": "maya-carrier-react/test/crm-a17-setup-browser-probe.mjs",
+        "sha256": "878e108b3ae89d5a9f37e20fe923304e2bc974ccf2841d3d19b8f449ed1ff916"
+      },
+      {
+        "path": "maya-carrier-react/test/crm-a17-setup-browser-guard.mjs",
+        "sha256": "254ad116a6af69031f709503f856cdbbd132f96249ff6da4390c0e2fe04360b9"
+      },
+      {
+        "path": "maya-carrier-react/test/crm-a17-setup-browser-guard.test.mjs",
+        "sha256": "0909b43fb8f3bafb1ec1a3a3744cd9657ba4fb6fc69a859fcfd05501984f9f2c"
+      },
+      {
+        "path": "maya-carrier-react/src/setup/LocalCrmSetup.tsx",
+        "sha256": "1eaa0829f6400964171bede077f71925a981d4a30bcb75a0865443e3d64f6631"
+      },
+      {
+        "path": "maya-carrier-react/src/runtime/crmPending.ts",
+        "sha256": "7a1265ae670bcc54ab4b8f0c183b5fd150defbfaba984626ee7fdc812b18a587"
+      },
+      {
+        "path": "maya-carrier-react/src/runtime/compose.ts",
+        "sha256": "de18d3e234e24d59f680c6006f1d46b0adc5ed0878e9cf60ad195104fbc5a391"
+      },
+      {
+        "path": "maya-carrier-react/build.mjs",
+        "sha256": "b91d872cbd59d92cb335431c084a5306cebf7011534d9fc9eafca1aa22e88605"
+      },
+      {
+        "path": "maya-chat-shell/src/shell/local-crm-setup.ts",
+        "sha256": "a151f9a022fa6c71d8e9d80325fb2db6188a7c1e1599991c4ab55c10f6655e40"
+      },
+      {
+        "path": "maya-chat-shell/src/net/crm-setup.ts",
+        "sha256": "4b61612ed740e363028f71813bfa7bd82a0ef292df47db16b659bcd19910c401"
+      },
+      {
+        "path": "maya-chat-shell/dev/serve.mjs",
+        "sha256": "f0985920ab617d366fefe937ca257f00edbbc1bca90ba7a378dd5a25b03d711d"
+      },
+      {
+        "path": "maya-chat-shell/test/cdp-verify.mjs",
+        "sha256": "02de453056df1ec95091086dedd0485f2f1385655e777d9a2d7c55353e44a999"
+      }
+    ]
+  },
+  "results": {
+    "statuses": {
+      "manifest": "passed",
+      "prepare": "passed",
+      "resume": "passed",
+      "browser": "passed"
+    },
+    "jest": {
+      "prepare": {
+        "passedTests": 1,
+        "suites": 1,
+        "failedTests": 0,
+        "pendingTests": 0,
+        "jestAssertions": 298
+      },
+      "resume": {
+        "passedTests": 1,
+        "suites": 1,
+        "failedTests": 0,
+        "pendingTests": 0,
+        "jestAssertions": 97
+      }
+    },
+    "canonicalCommittedGraphHash": "45ea15a3f807ca2e47bed634e92da355fa39dc2f4208f177766627cc396ce8dd",
+    "sameGraphAfterDifferentNodeAndPgRestart": true,
+    "preAdmission": {
+      "responseLostBeforeForward": true,
+      "backendRegistrations": 0,
+      "providerReads": 0,
+      "status": "NOT_OBSERVED",
+      "awaitsActualRestart": true
+    },
+    "heldOriginal": {
+      "observedWhileRunning": "NOT_OBSERVED",
+      "firstAndRetrySameReceipt": true,
+      "exactExecutionCount": 1,
+      "exactMutationCount": 1,
+      "exactAttemptCount": 1,
+      "changedMaterialHttpStatus": 409
+    },
+    "readySeam": {
+      "realCanonicalAdmission": true,
+      "seam": "CALL_THROUGH_INGRESS_THEN_THROW_BEFORE_LOCAL_MUTATION",
+      "state": "READY",
+      "attempts": 0,
+      "mutations": 0,
+      "awaitsActualRestart": true
+    },
+    "postRestartNotObserved": {
+      "statusBeforeExplicitRetry": "NOT_OBSERVED",
+      "sameRequestId": true,
+      "exactExecutions": 1,
+      "exactMutations": 1,
+      "exactAttempts": 1,
+      "receiptHash": "2789134d3c38241189452d376f77ea0be0de3a53a52bd799e1561b54ff7bee37"
+    },
+    "postRestartReady": {
+      "statusBeforeExplicitRetry": "READY",
+      "sameRequestId": true,
+      "exactExecutions": 1,
+      "exactMutations": 1,
+      "exactAttempts": 1,
+      "receiptHash": "101904f70de6b30eed68ef83afd4e09a13341007bb872df6a2eb228ea4f5102a"
+    },
+    "expiredAuthentication": {
+      "fixture": "SIGNED_EXPIRED_ACCESS_TOKEN",
+      "httpStatus": 401,
+      "actionGraphUnchanged": true,
+      "providerReads": 0
+    },
+    "versionRace": {
+      "status": 409,
+      "oldVersionStatus": 409,
+      "v1Hash": "f031ea48a414ab26cd7c6bff59378047bc23839e85e0898f0af290c686044d12",
+      "v2Hash": "94b950f138b8de68f3ceae139ec691b08cb3876a0b9ad65c83e8a2e5131e5215",
+      "committedMutations": 2
+    },
+    "atomicProjectionRollback": {
+      "injectedAfterActualTransactionalProjection": true,
+      "firstHttpStatus": 500,
+      "confirmRolledBackToReady": true,
+      "originalConfirmExecutionPreserved": true,
+      "finalExecutionCount": 3,
+      "finalMutationCount": 3,
+      "finalReceiptHash": "601f288b1ea1c2721c33a575859f60c0caafdb4f4fe997c7a1977de27e3f6f2c"
+    },
+    "react": {
+      "checkpoints": [
+        "initial",
+        "loaded",
+        "install-lost",
+        "install-reloaded",
+        "not-observed",
+        "installed",
+        "activation-lost",
+        "reload",
+        "recovered"
+      ],
+      "successfulDebugEmailLogins": 3,
+      "setupPostAttempts": 3,
+      "backendAdmittedHttpSetupPosts": 2,
+      "actualSetupExecutions": 3,
+      "preAdmissionRequestDropped": 1,
+      "committedActivationResponseDropped": 1,
+      "installReceiptHash": "659b3e5176813a8edf2a533ffe1140e63455ff8218b4bf151af1909e2f7b9956",
+      "recoveryReceiptHash": "6d8f25f7e5ccb52bf48385a5a113ac77faa3e25c4937d6fa64d613f254028b0f",
+      "browserReceiptHashesMatchParentDbObservations": true,
+      "explicitSameIdResubmission": true,
+      "tokenCleared": true,
+      "automaticRetry": false,
+      "locatorClearedAfterSuccess": true,
+      "sameUrlReloadOnly": true
+    },
+    "provider": {
+      "transport": "Finite synthetic native-adapter GET only",
+      "prepareReadTotal": 110,
+      "resumeReadTotal": 15,
+      "measuredOriginalReceiptRestorationReads": 0,
+      "measuredBrowserActivationRecoveryReads": 0,
+      "qualification": "Explicit install retry/replacement performs provider reads. Zero-read claim applies only to measured recovery GET intervals."
+    },
+    "forbidden": {
+      "prepare": [],
+      "resume": [],
+      "browserBlocked": [],
+      "browserErrors": []
+    },
+    "effects": "A17 setup writes intentionally occur. Source assertions verify exact original install/activate/confirm receipts, one execution/attempt/mutation for each pending install completion, no unrelated appointment/approval/delivery/team-message effects, current actor/tenant refusals and zero model calls."
+  },
+  "failureHistory": {
+    "attempt": "01",
+    "status": "failed",
+    "clusterStopped": true,
+    "passedTests": 0,
+    "failedTests": 1,
+    "failure": "Actual AppModule bootstrap reported circular dependency from changed eager import evaluation order. Harness import was reordered after existing bootstrap imports; runtime source unchanged. Attempt01 remains FAIL.",
+    "manifestSha256": "6dbe7c53ac46ef0f3c71a9b54341ad90d837d3205106184e3c3890849a80ed98",
+    "jestSha256": "a3acbad18c1029e76c66edeab9b8baeacbd86762c4b38c25c2cf1cb99674f6dd"
+  },
+  "cleanup": {
+    "finalClusterStopped": true,
+    "pgStopLogConfirmsStopped": true,
+    "priorFailedClusterStopped": true,
+    "qualification": "Recorded PG stop and owned-stage completion reviewed; no independent OS group/PID census. Browser cleanup remains procedure-level; its success JSON is written before cleanup."
+  },
+  "limits": [
+    "Synthetic local acceptance only; no real YCLIENTS credentials/provider, real model, production/site, booking readiness or full MAYA/C10 claim.",
+    "NOT_OBSERVED is not proof of non-dispatch. The actual held-original case demonstrates a request can still be running. Explicit retry preserves operation+UUID; first admitted material is immutable.",
+    "Never-admitted original material cannot be reconstructed after reload. Browser uses fresh explicit entry and consent; no claim of server comparison with an unregistered original body.",
+    "READY fixture calls real canonical admission then throws before mutation. Actual later Node/PG restart is proven; abrupt worker-crash recovery is not.",
+    "Expired signed authentication is actual HTTP401. Expired/cleaned AE payload is unit-only; no elapsed30-day HTTP retention proof or timestamp rewriting.",
+    "Browser same-URL reload/debug-email login and process/PG restart are separate paths. No browser-across-PG-restart or all OAuth-navigation claim.",
+    "Without resend applies activation receipt GET, not the whole browser scenario, which includes one explicit same-ID install resubmission.",
+    "Counts are two successful staged Jest tests (298 and97 assertions), not395 independent scenarios; failed attempts are not counted as passes.",
+    "Launcher is a separate uncommitted deliverable and is not qualified by this evidence."
+  ],
+  "artifacts": [
+    {
+      "file": "manifest.json",
+      "sha256": "da3581602d57fdfee09a110dc650b93ff45ae1a2d037784c50c4e345b25085a4",
+      "bytes": 612
+    },
+    {
+      "file": "prepare.json",
+      "sha256": "486b8d749686e5af94607e39fea467d415beeb9422fce42bec4da3a2fddc68ae",
+      "bytes": 7530
+    },
+    {
+      "file": "resume.json",
+      "sha256": "98a4ff7ebde09d0ba03745050095da8924eccce3c70293de46804f5d9907ba11",
+      "bytes": 5878
+    },
+    {
+      "file": "prepare-jest.json",
+      "sha256": "ac457d0d3454e18502b55de3ba08092bfc04d4ec53d7d29d78d41aa3ea3d4e2e",
+      "bytes": 1459
+    },
+    {
+      "file": "resume-jest.json",
+      "sha256": "74430488de094b72e4673b8e4f7a338be2c413364b2c776ce2ae4c1faaf68bdc",
+      "bytes": 1455
+    },
+    {
+      "file": "crm-setup-browser/browser.json",
+      "sha256": "3be257ff2b5e4db6e0aacbad7a10f407d6a9f0d3179dbbe2868cf464b77dd5e9",
+      "bytes": 7419
+    },
+    {
+      "file": "pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56
+    }
+  ]
+}

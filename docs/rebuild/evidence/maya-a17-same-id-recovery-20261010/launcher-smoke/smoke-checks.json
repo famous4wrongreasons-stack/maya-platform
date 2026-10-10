@@ -1,0 +1,13 @@
+{
+  "contract": "maya.local-handoff-smoke/1",
+  "status": "passed",
+  "landing200": true,
+  "currentForm200": true,
+  "actualDebugCodeVisibleOnlyOnLocalNotice": true,
+  "actualAuth": true,
+  "branchCount": 1,
+  "unapprovedTokenRejected403": true,
+  "actualInstall201": true,
+  "actualActivationImport201": true,
+  "sourceCommit": "792cc10af9d27524446b07911b73c553c8f8c4ee"
+}

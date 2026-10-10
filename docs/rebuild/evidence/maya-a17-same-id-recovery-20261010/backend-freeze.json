@@ -1,0 +1,49 @@
+{
+  "contract": "maya.crm-same-key-backend-freeze/1",
+  "base": "77d41ef56254972d6ae849d497046ea02ac2487c",
+  "qualification": "FAKE_PORTS_UNIT_AND_STATIC_ONLY_NO_HTTP_PG_PROVIDER",
+  "files": [
+    {
+      "path": "src/package5-wave3/package5-wave3.service.ts",
+      "bytes": 69838,
+      "sha256": "0e678563f1fa2273170f79916def92f7c94cb415171130cae838cb1257d962c0"
+    },
+    {
+      "path": "src/package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "bytes": 23850,
+      "sha256": "3cd6bf70e92010e78127fcabd2d792520f5fb8306fe9496f59bfeb758215c06e"
+    },
+    {
+      "path": "src/package5-wave3/package5-wave3-crm-qualified.spec.ts",
+      "bytes": 37692,
+      "sha256": "6f587f20c2fad171808a1bd4e2c9103a7bfa7e4be5250f1d1bb3b27fa5759463"
+    }
+  ],
+  "commands": [
+    {
+      "command": "node --max-old-space-size=1536 node_modules/jest/bin/jest.js --runInBand --runTestsByPath src/package5-wave3/package5-wave3-crm-qualified.spec.ts src/package5-wave3/package5-wave3-canonical-cutover.service.spec.ts src/package5-wave3/package5-wave3-branch-binding.spec.ts src/crm/crm-import-projection.spec.ts --json --outputFile=/tmp/maya-crm-same-key-final.json",
+      "exitCode": 0,
+      "log": "/tmp/maya-crm-same-key-final.log"
+    },
+    {
+      "command": "node --max-old-space-size=2048 node_modules/typescript/bin/tsc --project /tmp/maya-crm-qualified-test-tsconfig.json",
+      "exitCode": 0,
+      "log": "/tmp/maya-crm-same-key-types-r2.log"
+    },
+    {
+      "command": "node --max-old-space-size=1536 node_modules/eslint/bin/eslint.js src/package5-wave3/package5-wave3.service.ts src/package5-wave3/package5-wave3-canonical-cutover.service.ts src/package5-wave3/package5-wave3-crm-qualified.spec.ts",
+      "exitCode": 0,
+      "log": "/tmp/maya-crm-same-key-lint.log"
+    }
+  ],
+  "passedTests": 78,
+  "failedTests": 0,
+  "passedSuites": 4,
+  "red": "/tmp/maya-crm-same-key-red.json",
+  "limits": [
+    "Same operation/UUID is a first-admission candidate when no durable body exists, never proof of a recovered unsaved body.",
+    "Provider preview still precedes AE admission.",
+    "READY owner recreation and expiry are synthetic unit proofs; no actual process/PG restart or deadline rewrite in this gate.",
+    "No new store/contract/schema/authority; changed material and revoked/expired actors refuse; bounded one existing-owner ingress retry only."
+  ]
+}
