@@ -1,0 +1,18 @@
+✔ read session reuses exact preparation and cleanup without changing stage 0 (2.661ms)
+✔ all finite read-profile sources are explicitly bound and landing uses current form (0.091875ms)
+✔ persistable preparation environment has no inherited partner or user credentials (0.407542ms)
+✔ local web CSP and no-store headers override shared static/relay values (0.119ms)
+✔ partner shape is bounded printable ASCII without comma, whitespace or controls (0.07125ms)
+✔ runtime summary projects only closed bounded route-kind counters (0.097416ms)
+✔ hidden prompt returns exact explicit TTY bytes without echo and restores terminal (0.282042ms)
+✔ hidden prompt refuses non-TTY, malformed, oversized and multiple values (0.664791ms)
+✔ hidden prompt cancels on Ctrl-C, Ctrl-D, EOF and abort without echo (0.365416ms)
+✔ hidden prompt has a finite deadline and preserves an already-raw terminal (5.909208ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 52.247375

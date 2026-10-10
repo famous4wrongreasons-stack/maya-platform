@@ -1,0 +1,61 @@
+{
+  "contract": "maya.local-yclients-read-launcher-source-checkpoint/1",
+  "baseHead": "388c4b18f603de1cf816f7a42fb37d9892a6b79f",
+  "files": [
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.mjs",
+      "sha256": "6eec9bc7517864ab8e3f66f29db1c43469b449925dd899c92068b8e221283be1"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.test.mjs",
+      "sha256": "d70989acfb48b472c2aa6f182e903cc54e58a49177a49c6f817ff1b8e2cfd146"
+    }
+  ],
+  "checks": {
+    "syntax": {
+      "files": 2,
+      "exitCode": 0
+    },
+    "pureTests": {
+      "passed": 11,
+      "failed": 0,
+      "exitCode": 0,
+      "command": "node --test scripts/local-yclients-read.test.mjs",
+      "log": "/tmp/maya-local-yclients-read-launcher-tests-03.log",
+      "exitFile": "/tmp/maya-local-yclients-read-launcher-tests-03.exit"
+    }
+  },
+  "bounds": {
+    "runtimeMinutesMax": 15,
+    "preparationMinutesMax": 15,
+    "hiddenPromptSecondsMax": 120,
+    "runtimeStartupSecondsMax": 60,
+    "nodeHeapMiB": 3072,
+    "pgSharedBuffersMiB": 64,
+    "pgWorkMemMiB": 4,
+    "pgConnectionsMax": 30,
+    "relayTimeoutMs": 125000
+  },
+  "qualification": {
+    "realTTY": "NOT_RUN",
+    "keysGenerated": "NOT_RUN",
+    "builds": "NOT_RUN",
+    "PostgreSQL": "NOT_RUN",
+    "AppModule": "NOT_RUN",
+    "Yclients": "NOT_RUN",
+    "model": "NOT_RUN",
+    "providerCredentialsEntered": "NONE"
+  },
+  "scope": [
+    "Separate real-provider setup-read launcher; stage0 and synthetic launchers unchanged.",
+    "Fresh private state only; no supplied existing DB or inherited provider credentials.",
+    "Private service environment saved before hidden partner prompt, with no provider token.",
+    "User token enters existing React/A17 path; partner token stays in runtime memory.",
+    "Only finite route-kind counters accepted from runtime; no IDs/URLs/bodies archived.",
+    "Root owns profile/runtime/transport and final source commit/execution."
+  ],
+  "reviewCorrections": [
+    "Refuse prebuffered/predecoded or nonexclusive terminal input before raw mode.",
+    "Zero the bounded assembly buffer and consumed native Buffer chunks after processing; no claim of erasing JavaScript strings."
+  ]
+}

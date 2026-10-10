@@ -1,0 +1,302 @@
+{
+  "contract": "maya.real-yc-read-ui-findings/1",
+  "prepared_at": "2026-10-10T14:13:38.238858+00:00",
+  "qualification": "READ_ONLY_SOURCE_REVIEW; proposal only; no current-task UI, HTTP, provider or browser acceptance",
+  "source": {
+    "worktree": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010",
+    "head": "388c4b18f603de1cf816f7a42fb37d9892a6b79f",
+    "status_porcelain": [
+      "?? maya-saas-backend/scripts/local-yclients-read-profile.mjs",
+      "?? maya-saas-backend/scripts/local-yclients-read-runtime.mjs",
+      "?? maya-saas-backend/scripts/local-yclients-read-transport.mjs",
+      "?? maya-saas-backend/scripts/local-yclients-read.mjs",
+      "?? maya-saas-backend/scripts/local-yclients-read.test.mjs"
+    ],
+    "files": {
+      "maya-carrier-react/src/App.tsx": "4d260fb946c25431cfc6c5700d9f46fc2b13912a5cac609b16657f586aec2ef0",
+      "maya-carrier-react/src/setup/LocalCrmSetup.tsx": "1eaa0829f6400964171bede077f71925a981d4a30bcb75a0865443e3d64f6631",
+      "maya-carrier-react/src/runtime/compose.ts": "edbe6adf0f12b7aef46d217eaa8d4e1656953e8e6725e822e53917d332ea3385",
+      "maya-chat-shell/src/shell/local-crm-setup.ts": "a151f9a022fa6c71d8e9d80325fb2db6188a7c1e1599991c4ab55c10f6655e40",
+      "maya-chat-shell/src/net/client.ts": "8e3551aeacb984e7b84df4c96d72bf4caef7d398bc577b3ca2f08fe75d257797",
+      "maya-chat-shell/src/net/crm-setup.ts": "4b61612ed740e363028f71813bfa7bd82a0ef292df47db16b659bcd19910c401",
+      "maya-saas-backend/src/crm/crm-integration.controller.ts": "d133c1b5c53d9a3c724fb4bb4ba5e90dfd12803e11b44a0b02549418b04fec41",
+      "maya-saas-backend/src/crm/crm.service.ts": "544fb41187f55184b1959a0e36e45edae738be0f024e52977279859374d8479d",
+      "maya-saas-backend/src/crm/crm-adapter.factory.ts": "4dfb6827bbb9a624c39a366cd34e9aa177ef81645eabb20157cef3ceef123135",
+      "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": "ef484bde55b5a5ee25549b5af0405fea3932201622161c050280d5d5efee4563",
+      "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts": "3cd6bf70e92010e78127fcabd2d792520f5fb8306fe9496f59bfeb758215c06e",
+      "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts": "0e678563f1fa2273170f79916def92f7c94cb415171130cae838cb1257d962c0",
+      "maya-saas-backend/src/package5-wave3/package5-wave3-production-gateway.service.ts": "309e292720ca2fc570e0adcc2504ea8d440795c870cbda36c3a694695f5360cb",
+      "maya-saas-backend/src/entitlements/feature.guard.ts": "060001bb2fca9c3588ffa1b7589750907ad4932a1126c0a64811074779eb2beb",
+      "maya-saas-backend/src/guards/subscription-access.guard.ts": "800cf2133d141495f845d637287e238aee20f52c6d3bc24904eaf2d80b0c52cf",
+      "maya-saas-backend/scripts/local-onboarding-profile.mjs": "ac53a8a0885d4f8918ee2437050d0dd952ecd52bf5c6ace864e31b2350c685e0",
+      "maya-saas-backend/scripts/local-onboarding-runtime.mjs": "37508284365adadc96b844929dde07d0e06e0826278af1f7403366fa0c9c18e2",
+      "maya-saas-backend/scripts/local-onboarding.mjs": "4718fcb23730d0a6e3e9489d2236811644d03f6d7d502620d0b01e29ae9ad53b"
+    }
+  },
+  "outcome": {
+    "existing_current_react_suitable": true,
+    "ui_changes_needed_for_private_token_separation": false,
+    "new_browser_credential_endpoint_needed": false,
+    "partner_input": "Separate launcher reads hidden interactive TTY; explicit ephemeral child environment YCLIENTS_PARTNER_TOKEN before AppModule/adapter initialization; no argv, ambient credential inheritance, file or browser submission.",
+    "user_input": "Existing password input after ordinary signup/password login; selected tenant-owned branch and company ID; existing encrypted local server persistence only after separate explicit staging consent.",
+    "interpretation": "Provider GET-only is compatible with separately admitted explicit A17 local activation/import. It is not a claim that local state remains read-only."
+  },
+  "current_ui": [
+    {
+      "fact": "Loopback plus local_crm_setup=1 controls presentation only; normal sign-in precedes setup. No chat or widgets.runtime grant is needed by the direct setup path. Standard subscription and tenant/actor guards still apply.",
+      "refs": [
+        "maya-carrier-react/src/App.tsx:73",
+        "maya-carrier-react/src/runtime/compose.ts:201",
+        "maya-saas-backend/src/entitlements/feature.guard.ts:17"
+      ]
+    },
+    {
+      "fact": "No automatic setup load/preview/discover on mount. Explicit load reads connection, branch list and existing operation locator. Stage and activate are separate buttons with separate consent.",
+      "refs": [
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:16",
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:49",
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:127",
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:142"
+      ]
+    },
+    {
+      "fact": "Token value exists in password-input DOM ref and transient submission closure, not React state/storage; cleared synchronously before stage/activate, on load/close/signout/unmount. UI keeps only hasToken boolean.",
+      "refs": [
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:9",
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:16",
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:43",
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:54",
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:105"
+      ]
+    },
+    {
+      "fact": "Copy correctly states encrypted storage on the connected MAYA server and partner token configured separately; it does not prove that the server database is isolated. Launcher evidence must provide that guarantee.",
+      "refs": [
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:101"
+      ]
+    },
+    {
+      "fact": "Activation UI trusts finite port eligibility and displayed configuration version, preserves operation receipt/current-version distinction, and never equates import_confirmed with bookability.",
+      "refs": [
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:25",
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:34",
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:84",
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:139"
+      ]
+    },
+    {
+      "fact": "UNKNOWN does not silently retry. Explicit authoritative receipt recovery and same operation UUID are used; NOT_OBSERVED permits owner reentry without claiming old plaintext request restoration.",
+      "refs": [
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:82",
+        "maya-chat-shell/src/shell/local-crm-setup.ts"
+      ]
+    },
+    {
+      "fact": "Current activation wording authorizes import generally; the exact local effects below should be disclosed in the separate profile landing/handoff before enabling it. No copy edit was made in this task.",
+      "refs": [
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:139"
+      ]
+    }
+  ],
+  "direct_api": {
+    "existing_routes": [
+      "GET /api/integrations/crm",
+      "GET /api/branches",
+      "POST /api/integrations/crm/connect",
+      "POST /api/integrations/crm/activate",
+      "GET /api/integrations/crm/operation?operation=install|activate&requestId=<uuid>"
+    ],
+    "writes": "Existing qualified connect/activate only; Idempotency-Key and expectedVersion; no generic provider proxy or extra credential endpoint.",
+    "authority": "A17 rechecks active user + tenant membership. OWNER_ROLES currently includes tenant_owner, business_owner, tenant_admin, administrator; presentation is not authorization. An owner-only pilot admission can further narrow this without broadening canonical roles.",
+    "refs": [
+      "maya-chat-shell/src/net/client.ts:684",
+      "maya-saas-backend/src/crm/crm-integration.controller.ts:82",
+      "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts:65",
+      "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts:727",
+      "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts:199",
+      "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts:284"
+    ]
+  },
+  "provider_read_inventory": {
+    "method": "GET only",
+    "pinned_origin": "https://api.yclients.com",
+    "base_path": "/api/v1/",
+    "paths": [
+      "companies?my=1",
+      "company/{selected_company_id}",
+      "book_services/{selected_company_id}",
+      "services/{selected_company_id}",
+      "service_categories/{selected_company_id}",
+      "company/{selected_company_id}/staff",
+      "staff/{selected_company_id}",
+      "book_staff/{selected_company_id}"
+    ],
+    "explanation": "Native preview checks accessible company directory, then selected-company services/categories/staff/team/profile. Existing finite endpoint fallbacks and A17 source revalidation can repeat reads; no one-GET claim. Staff and team share one adapter catalog promise per preview.",
+    "no_paths_for": [
+      "clients",
+      "records",
+      "appointments",
+      "goods",
+      "finance",
+      "notifications",
+      "model"
+    ],
+    "refs": [
+      "maya-saas-backend/src/crm/crm.service.ts:6676",
+      "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts:390",
+      "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts:456",
+      "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts:3320",
+      "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts:3336",
+      "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts:4514"
+    ]
+  },
+  "local_effect_inventory": [
+    {
+      "step": "stage: install_crm_credentials",
+      "effect": "Provider GET preview before admission, then encrypted user credential + fingerprint/provider/company/branch binding into crmIntegration pending_activation; error/verification fields reset; existing AE command/attempt/outcome/receipt and controller audit. No staff/client/appointment import.",
+      "refs": [
+        "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts:199",
+        "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts:1642"
+      ]
+    },
+    {
+      "step": "activate: activate_crm_integration",
+      "effect": "Fresh provider GET verification; local crmIntegration active and verification timestamps; tenant.calendarSource external; non-mock brandingSettings.themeJson.booking.mode live. This local flag is not permission for provider writes and not proof of booking availability.",
+      "refs": [
+        "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts:959",
+        "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts:1672"
+      ]
+    },
+    {
+      "step": "activate: confirm_crm_import",
+      "effect": "Second canonical command uses fresh accepted provider snapshot; updates acceptedImportSnapshotHash and sync timestamps; projects staff/access/presentation inside the same transaction as import receipt, atomicProjection true.",
+      "refs": [
+        "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts:315",
+        "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts:990",
+        "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts:1421",
+        "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts:1709",
+        "maya-saas-backend/src/crm/crm.service.ts:815"
+      ]
+    },
+    {
+      "step": "team projection",
+      "effect": "Creates local Staff with encrypted display name, StaffProviderLink, CrmStaffAccess pending_contact; updates titles and links. Existing non-owner access can become active/pending_contact/disabled; absent members can be suspended and sessions revoked. Does not create new User accounts in this projection.",
+      "refs": [
+        "maya-saas-backend/src/crm/crm.service.ts:6753"
+      ]
+    },
+    {
+      "step": "company presentation",
+      "effect": "Valid company timezone may update tenant default and all branches following previous default/null, not merely the selected branch. Safe HTTPS company logo URL can update branding, respecting uploaded logo priority. URL is stored, not downloaded by this import.",
+      "refs": [
+        "maya-saas-backend/src/crm/crm.service.ts:851",
+        "maya-saas-backend/src/crm/crm.service.ts:938",
+        "maya-saas-backend/src/crm/crm.service.ts:981"
+      ]
+    },
+    {
+      "step": "explicit exclusions",
+      "effect": "This import path does not import clients or appointments/records and does not materialize the complete service catalog in local Service rows. Services participate in preview/source evidence. No provider POST/PUT/PATCH/DELETE occurs in this source call tree.",
+      "refs": [
+        "maya-saas-backend/src/crm/crm.service.ts:815",
+        "maya-saas-backend/src/package5-wave3/package5-wave3-production-gateway.service.ts:157"
+      ]
+    },
+    {
+      "step": "partial completion semantics",
+      "effect": "Activation and import are sequential canonical commands, not one transaction together: activation may succeed while import remains unconfirmed. Preserve qualified receipt phase and current-version relation.",
+      "refs": [
+        "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts:284",
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:34"
+      ]
+    }
+  ],
+  "concrete_limits": [
+    {
+      "limit": "Current ordinary native GET request allows default redirect following.",
+      "required_before_admission": "Separate real-profile outbound boundary must force redirect:error and pin exact HTTPS origin/method/path/query; reject unexpected source/host and provider non-GET. Shared adapter/synthetic profile need not be broadened.",
+      "refs": [
+        "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts:4332"
+      ]
+    },
+    {
+      "limit": "Preview truncates services/staff to 30 and team to 50. Existing import evidence checks team.items, not original team.count; reconcile treats absent existing staff as inactive.",
+      "qualification": "Do not claim complete catalog/team import. For safe bounded real pilot, refuse incomplete/over-50 team source before activation or get explicit narrow admission based on a verified complete fresh-tenant source; current code has no such new profile guard.",
+      "refs": [
+        "maya-saas-backend/src/crm/crm.service.ts:6722",
+        "maya-saas-backend/src/crm/crm.service.ts:823",
+        "maya-saas-backend/src/crm/crm.service.ts:6802",
+        "maya-saas-backend/src/package5-wave3/package5-wave3-production-gateway.service.ts:157"
+      ]
+    },
+    {
+      "limit": "The native permission check reads the accessible companies directory.",
+      "qualification": "Disclose that directory GET and do not claim every allowed request URI is scoped to the selected company. Never archive returned real company/staff names or raw responses.",
+      "refs": [
+        "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts:390"
+      ]
+    },
+    {
+      "limit": "Qualified connect returns current configuration/receipt, not the preview rows.",
+      "qualification": "Do not promise services/staff counts will always be visible after stage; stagedCounts can be absent.",
+      "refs": [
+        "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts:270",
+        "maya-carrier-react/src/setup/LocalCrmSetup.tsx:136"
+      ]
+    },
+    {
+      "limit": "Partner token is captured in adapter constructor and adapters may be cached.",
+      "qualification": "Supply once before AppModule starts; restart and private prompt for replacement. Do not implement mid-flight global env swaps.",
+      "refs": [
+        "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts:348",
+        "maya-saas-backend/src/crm/crm.service.ts:6552"
+      ]
+    }
+  ],
+  "proposed_implementation_scope": {
+    "new_files_only_suggested": [
+      "maya-saas-backend/scripts/local-real-yc-read-profile.mjs",
+      "maya-saas-backend/scripts/local-real-yc-read-runtime.mjs",
+      "maya-saas-backend/scripts/local-real-yc-read.mjs",
+      "focused profile/secret-input/ingress/outbound guard tests"
+    ],
+    "existing_ui_net_changes": "None required for token separation or existing qualified A17 actions; no new transport, secret store, public partner-token endpoint or widgets grant.",
+    "separation": "Keep stage0 launcher/profile/runtime environment allowlist, providerAdmission:false, refusal routes and synthetic behavior unchanged.",
+    "tty_contract": "Interactive TTY required; hidden no-echo bounded input; restore terminal on success/cancel/error; reject non-TTY. Do not inherit provider secret from process environment, save it, include in arguments, logs, reports, IPC or service-keys.json. Only explicit owned runtime child environment receives it. Do not pass it to PG/migrations/frontend or descendants.",
+    "admission": "Dedicated fixed profile name and explicit real-read admission, independently optional activation/import admission; finite expiry, exact owned local DB evidence, source binding, current ordinary authenticated owner and selected company/tenant/branch. Profile flag does not replace canonical backend checks.",
+    "ingress": "Exact normal onboarding/auth/status/branches/operation paths plus qualified connect; activate only when separately admitted. Preserve Host/Origin/Sec-Fetch-Site guard at browser relay and backend. Keep clients/records/booking/goods/model/chat/widget/effect/background routes refused.",
+    "egress": "Native fetch passthrough only for admitted GET inventory; fixed YCLIENTS base URL, no ambient overrides, no redirects, finite time/response/request budgets, generic sanitized denial. No injected provider response or token/session mocks.",
+    "background": "All scheduler flags remain disabled, no startup provider read, no automatic activation/import/retry, no background C10 work.",
+    "sanitized_report_fields": [
+      "profile",
+      "source_commit_and_hashes",
+      "owned_local_database_qualification",
+      "provider_admission_GET_only",
+      "local_credential_install_admitted",
+      "local_activation_import_separately_admitted",
+      "provider_mutations_false",
+      "client_and_record_import_false",
+      "background_false",
+      "expires_at",
+      "receipt_phase_counts_and_source_version_match",
+      "safe_refusal_code"
+    ],
+    "secret_storage_note": "User token persists encrypted in the existing local server DB together with existing retained encryption keys. Partner token is process-only, not durable. JS/process memory cannot promise forensic zeroization; stop owned process and avoid crash dumps/environment logging."
+  },
+  "checks_this_task": {
+    "source_reads_only": true,
+    "repository_edits": false,
+    "services_started": false,
+    "tests_run": false,
+    "browser_run": false,
+    "provider_calls": false,
+    "credentials_read_or_entered": false,
+    "website_changes": false
+  },
+  "remaining_before_real_use": [
+    "Parent decision and implementation of separate profile admission/TTY/outbound guards.",
+    "Focused source-bound guard tests and actual current React/local profile qualification; none claimed by this review.",
+    "Exact local effect disclosure before explicit activation, including staff access/session and timezone effects; preserve failed/partial receipt states.",
+    "Owner privately supplies partner/user tokens through the approved private paths; never send them in chat."
+  ]
+}

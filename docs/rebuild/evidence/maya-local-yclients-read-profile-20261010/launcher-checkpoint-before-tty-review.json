@@ -1,0 +1,57 @@
+{
+  "contract": "maya.local-yclients-read-launcher-source-checkpoint/1",
+  "baseHead": "388c4b18f603de1cf816f7a42fb37d9892a6b79f",
+  "files": [
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.mjs",
+      "sha256": "e0dbbd1b9005cf190f52c16408f964ed5560f2b2c732f9588e88ef0122b60e96"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.test.mjs",
+      "sha256": "c04e898ef76e717f6c32c87abfd05509487e13dada069a07dcf50f4fe84b6d3c"
+    }
+  ],
+  "checks": {
+    "syntax": {
+      "files": 2,
+      "exitCode": 0
+    },
+    "pureTests": {
+      "passed": 10,
+      "failed": 0,
+      "exitCode": 0,
+      "command": "node --test scripts/local-yclients-read.test.mjs",
+      "log": "/tmp/maya-local-yclients-read-launcher-tests-02.log",
+      "exitFile": "/tmp/maya-local-yclients-read-launcher-tests-02.exit"
+    }
+  },
+  "bounds": {
+    "runtimeMinutesMax": 15,
+    "preparationMinutesMax": 15,
+    "hiddenPromptSecondsMax": 120,
+    "runtimeStartupSecondsMax": 60,
+    "nodeHeapMiB": 3072,
+    "pgSharedBuffersMiB": 64,
+    "pgWorkMemMiB": 4,
+    "pgConnectionsMax": 30,
+    "relayTimeoutMs": 125000
+  },
+  "qualification": {
+    "realTTY": "NOT_RUN",
+    "keysGenerated": "NOT_RUN",
+    "builds": "NOT_RUN",
+    "PostgreSQL": "NOT_RUN",
+    "AppModule": "NOT_RUN",
+    "Yclients": "NOT_RUN",
+    "model": "NOT_RUN",
+    "providerCredentialsEntered": "NONE"
+  },
+  "scope": [
+    "Separate real-provider setup-read launcher; stage0 and synthetic launchers unchanged.",
+    "Fresh private state only; no supplied existing DB or inherited provider credentials.",
+    "Private service environment saved before hidden partner prompt, with no provider token.",
+    "User token enters existing React/A17 path; partner token stays in runtime memory.",
+    "Only finite route-kind counters accepted from runtime; no IDs/URLs/bodies archived.",
+    "Root owns profile/runtime/transport and final source commit/execution."
+  ]
+}

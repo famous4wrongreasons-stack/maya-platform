@@ -1,0 +1,127 @@
+{
+  "contract": "maya.local-yclients-read-handoff-review/1",
+  "verdict": "QUALIFIED_HANDOFF_AND_ARCHIVE_PASS",
+  "reviewer": "checkpoint_review",
+  "sourceCommit": "2777ca65ab69c71224e20971d491575d074eb096",
+  "blockers": [],
+  "method": "Read-only review of handoff document, changed delivery-plan/completion-map text and archive summary; independent hash/size and committed source verification. No code edits or tests/services/PG/network/credential access.",
+  "reviewedDocs": [
+    {
+      "path": "docs/rebuild/MAYA-LOCAL-YCLIENTS-ONE-TIME-HANDOFF-20261010.md",
+      "bytes": 16012,
+      "sha256": "02184e4338de5b89903c2621edb97aa27291ac23c29718c1a5ac0cec8ba218aa"
+    },
+    {
+      "path": "docs/rebuild/MAYA-DELIVERY-PLAN-20261010.md",
+      "bytes": 47194,
+      "sha256": "5b8f3fdaeb894055d6ad6a774beae45fc2310229362003291a9376dcb6a76c4e"
+    },
+    {
+      "path": "docs/rebuild/MAYA-FINAL-COMPLETION-MAP.md",
+      "bytes": 211158,
+      "sha256": "bc004f927ff5d770ce9c0acdf1bb8be944ddee9a3695ceea1f7a917a33292fd9"
+    }
+  ],
+  "summary": {
+    "path": "docs/rebuild/evidence/maya-local-yclients-read-profile-20261010/summary.json",
+    "sha256": "c2a174f96ce6e2cf8b969af133c61f1e56716d51b9ae0838c703122d73015c10"
+  },
+  "artifactVerification": {
+    "count": 13,
+    "allHashesAndSizesMatch": true,
+    "artifacts": [
+      {
+        "path": "targeted-tests.log",
+        "bytes": 3021,
+        "sha256": "834bb01239018400fab295fce044809c6e72132239527de08768c45ace7d3b2f"
+      },
+      {
+        "path": "source-binding.json",
+        "bytes": 485101,
+        "sha256": "c206a8b8d40ab7e5d01788ccd65bf80308f5f2c73b5c5f6213b9e16986b061f5"
+      },
+      {
+        "path": "source-findings.json",
+        "bytes": 19302,
+        "sha256": "9e745c49592d761eb1fe2ef8cd9dfe8f9ea5a8f8cd7bc11a73ea6ae125e400bf"
+      },
+      {
+        "path": "ui-findings.json",
+        "bytes": 19456,
+        "sha256": "2724044e55d40d3f7bf3f665df63010a8ff810af4a25bf825dec753389ebb032"
+      },
+      {
+        "path": "launcher-checkpoint.json",
+        "bytes": 2201,
+        "sha256": "0e5205839be836edea8025b3ace2f139414f83010b7f86bd2cfc19f09ddbce6d"
+      },
+      {
+        "path": "independent-review.json",
+        "bytes": 8054,
+        "sha256": "55b8a7f65ed923f8ded778d5ae7d2e028b8f32e74c087a88f58c27a31809ca35"
+      },
+      {
+        "path": "launcher-tests-final.log",
+        "bytes": 1137,
+        "sha256": "b8e7dbf422017389de0d7e78b466a37ea6748fff8300f5339f91ca61b98f7ebe"
+      },
+      {
+        "path": "launcher-tests-final.exit",
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      {
+        "path": "launcher-checkpoint-before-tty-review.json",
+        "bytes": 1955,
+        "sha256": "af4bf5652f823cd0253dc6ca6fe0fd0c7018f4aee2c6e4657fe4f18ee12dafba"
+      },
+      {
+        "path": "launcher-tests-initial.log",
+        "bytes": 949,
+        "sha256": "760848abcab4db91a6d19e05298d3e14b01d138b621a1e8361e03e17c201fe59"
+      },
+      {
+        "path": "launcher-tests-initial.exit",
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      {
+        "path": "launcher-tests-intermediate.log",
+        "bytes": 1029,
+        "sha256": "fe771917d811fbc5b43546fc34ae20aee83fbb0ac42508f00044c7b5f4750737"
+      },
+      {
+        "path": "launcher-tests-intermediate.exit",
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      }
+    ],
+    "archivedSourceReviewMatchesOriginal": true
+  },
+  "sourceVerification": {
+    "count": 2019,
+    "uniquePaths": 2019,
+    "allCurrentSha256AndGitBlobHashesMatch": true,
+    "head": "2777ca65ab69c71224e20971d491575d074eb096"
+  },
+  "closedFinding": {
+    "id": "whole-run-time-versus-ready-session",
+    "resolution": "Future approval quote now separately names preparation<=15m, backend startup<=60s, ready session<=15m and bounded owned cleanup; it no longer implies a total15m wall-clock maximum."
+  },
+  "claimsConsistent": [
+    "Explicit future owner approval is still pending. Instructions contain no credential values and forbid real tokens in synthetic/stage0 launchers.",
+    "Code/source/native synthetic transport qualification is distinguished from NOT_RUN new-profile AppModule/PG/React/realTTY/YC. Historical normal-onboarding actual proof is explicitly not transferred.",
+    "Separate connect/install and activation/import owner actions, exact version-bound receipts and partial activation-before-import outcomes are explicit; no automatic new UUID or undisclosed retry claimed.",
+    "Seven exact GET templates, accessible-company directory scope, selected-company metadata/services/categories/fullteam, native repetitions and no book_staff fallback are accurate. No YC writes/client/record/model/outbound/C10 acceptance is claimed.",
+    "Local configuration, encrypted user token, staff/link/access, presentation/timezone and possible existing access/session reconciliation effects are disclosed. Service preview is not a complete service-catalog import.",
+    "Optional category errors can degrade preview while allowing remaining A17 processing; no global rollback claim. Complete team<=50 remains independently mandatory.",
+    "Private0700 state/0600 key files and retained local DB+keys are disclosed; no integration-tokenTTL, existing30d executable/7d shadow/2555d audit declarations do not promise physical purge while schedulers are off.",
+    "Partner child-environment/in-memory exposure, sameUID and JavaScript-erasure limitations, application-layer rather than OS firewall boundary, and no generic retained-state restart are explicit.",
+    "29 observed logged passes (8+11+10) remain synthetic/pure; summary distinguishes separately author-observed syntax/noarg/combined-exit evidence. Historical source/UI findings do not override final source qualification."
+  ],
+  "qualifications": [
+    "This approves the accuracy of preparation/handoff documentation and archive integrity, not a real run or provider compatibility.",
+    "Actual new-profile startup, controlled runtime slot, private owner credential entry and observed YCLIENTS response completeness remain future work.",
+    "Reviewer authored the earlier source review; this archive check verifies that exact report and supporting bytes, not an additional independent live acceptance."
+  ]
+}

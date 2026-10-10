@@ -1,0 +1,236 @@
+{
+  "contract": "maya.local-yclients-read-profile-checkpoint/1",
+  "sourceCommit": "2777ca65ab69c71224e20971d491575d074eb096",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "previousPublishedBoundary": "388c4b18f603de1cf816f7a42fb37d9892a6b79f",
+  "verdict": "QUALIFIED_SOURCE_AND_SYNTHETIC_TRANSPORT_PASS",
+  "purpose": "Separate runnable native YCLIENTS setup-read profile, prepared for exact future owner admission; ordinary AppModule, current React and canonical A17/AE remain owners.",
+  "sourceBinding": {
+    "file": "source-binding.json",
+    "files": 2019,
+    "allCurrentBytesVerified": true,
+    "newFiles": [
+      {
+        "path": "maya-saas-backend/scripts/local-yclients-read-profile.mjs",
+        "bytes": 3506,
+        "sha256": "f850e8c558f6f52e3b283efbcce69c3cb889656a164b58e97ec44f5c3ca2b869",
+        "matchesCommittedGitBlob": true
+      },
+      {
+        "path": "maya-saas-backend/scripts/local-yclients-read-profile.test.mjs",
+        "bytes": 11493,
+        "sha256": "145bec9bc4bb9eedfe1d754b121b1f45673067f828db537c14b6a016fcf24a8f",
+        "matchesCommittedGitBlob": true
+      },
+      {
+        "path": "maya-saas-backend/scripts/local-yclients-read-runtime.mjs",
+        "bytes": 4495,
+        "sha256": "81a4895a38e899bc755b17530033f2d2e6bc69e3b50c76a0976060d573c3d3c6",
+        "matchesCommittedGitBlob": true
+      },
+      {
+        "path": "maya-saas-backend/scripts/local-yclients-read-transport.mjs",
+        "bytes": 6630,
+        "sha256": "f108783172dce316371376ae933137c3e717dfd843fb2df0e6bc0c7b525e62dc",
+        "matchesCommittedGitBlob": true
+      },
+      {
+        "path": "maya-saas-backend/scripts/local-yclients-read.mjs",
+        "bytes": 23881,
+        "sha256": "6eec9bc7517864ab8e3f66f29db1c43469b449925dd899c92068b8e221283be1",
+        "matchesCommittedGitBlob": true
+      },
+      {
+        "path": "maya-saas-backend/scripts/local-yclients-read.test.mjs",
+        "bytes": 9801,
+        "sha256": "d70989acfb48b472c2aa6f182e903cc54e58a49177a49c6f817ff1b8e2cfd146",
+        "matchesCommittedGitBlob": true
+      }
+    ]
+  },
+  "checks": {
+    "combinedTests": {
+      "command": "node --test scripts/local-yclients-read-profile.test.mjs scripts/local-yclients-read.test.mjs scripts/local-onboarding-environment.test.mjs scripts/local-onboarding.test.mjs",
+      "passed": 29,
+      "failed": 0,
+      "exitCode": 0,
+      "exitEvidence": "author observed tool return; combined raw log contains counts, not separate exit file",
+      "split": {
+        "profileNativeSyntheticAdapter": 8,
+        "launcherPureFakeTTY": 11,
+        "existingStage0Regression": 10
+      }
+    },
+    "syntax": {
+      "files": 4,
+      "result": "PASS",
+      "evidence": "author observed; no raw log retained"
+    },
+    "noArgumentPreparation": {
+      "result": "PASS",
+      "evidence": "author observed prepared-only output; no state or runtime created"
+    },
+    "independentReview": {
+      "result": "QUALIFIED_STATIC_PASS",
+      "blockers": [],
+      "file": "independent-review.json"
+    },
+    "sourceBindingInvocation": {
+      "initial": "node stdin alias failed ENOENT on realpath of argv[1]=\"-\" in existing imported launcher; no source/state/services changed",
+      "final": "node --input-type=module -e succeeded and verified all 2019 source files",
+      "exitCode": 0
+    },
+    "handoffReview": {
+      "result": "QUALIFIED_HANDOFF_AND_ARCHIVE_PASS",
+      "blockers": [],
+      "file": "handoff-review.json",
+      "reviewBoundary": "13 preceding artifacts and summary before this additive review record; reviewed source and docs unchanged"
+    }
+  },
+  "nativeTransportQualification": {
+    "mode": "real YclientsCRMAdapter against injected synthetic fetch responses in tests only",
+    "externalRequests": 0,
+    "syntheticGETsInHappyTest": 5,
+    "fixtureCredentials": "finite public test strings only; no actual credentials"
+  },
+  "api": {
+    "method": "GET",
+    "origin": "https://api.yclients.com",
+    "basePath": "/api/v1/",
+    "paths": [
+      "companies?my=1",
+      "company/{selected}",
+      "book_services/{selected}",
+      "services/{selected}",
+      "service_categories/{selected}",
+      "company/{selected}/staff",
+      "staff/{selected}"
+    ],
+    "nativeFallbackDeliberatelyRefused": "book_staff/{selected}",
+    "scope": "companies directory for credential access, then exact selected company; native A17 revalidation may repeat allowed reads",
+    "teamCompleteness": "success=true; array<=50; unique IDs; mandatory total_count exactly array length; no pagination/link/range; explicit company_id must match",
+    "limits": {
+      "callsPerRequest": 64,
+      "callsPerSession": 256,
+      "requestSeconds": 120,
+      "fetchSeconds": 20,
+      "responseBytes": 2097152,
+      "runtimeMinutes": 15
+    },
+    "noProviderWrites": true,
+    "noClientsRecordsSalesPayments": true
+  },
+  "localWrites": "Explicit standard onboarding and A17 install/activation/import only; encrypted user token/settings/receipts/audit, complete staff links/access, company presentation/timezone. Existing memberships/sessions may be updated during reconciliation. No new staff User accounts. Service catalog is preview-only.",
+  "privateInputAndRetention": {
+    "partner": "hidden actual owner TTY, ephemeral explicit runtime child environment; absent from persisted service environment/log/manifest; no same-UID or memory-zeroization guarantee",
+    "user": "existing React password field; existing AES-256-GCM integration and AE storage after explicit install",
+    "state": "fresh own 0700 directory, 0600 key/environment files, own local DB; DB and keys retained after stop, no generic real-profile resume",
+    "existingIntegrationTokenTTL": "none",
+    "existingAEExecutablePayloadDays": 30,
+    "existingAEShadowPayloadDays": 7,
+    "existingAuditDays": 2555,
+    "physicalPurge": "not promised; scheduler disabled; no new retention decision"
+  },
+  "limits": [
+    "New-profile AppModule, PostgreSQL, React interaction, actual TTY and real YCLIENTS NOT_RUN. Prior stage0 actual proof is historical and does not qualify this runtime.",
+    "Native provider compatibility and mandatory team total metadata are unqualified against real YC. Refusal must not be silently weakened.",
+    "Optional categories catch-to-empty may degrade metadata and permit A17 commit after other successful reads. No whole-operation rollback guarantee for every transport refusal.",
+    "Activation and import are sequential existing commands and can partially complete; existing receipts/recovery remain authoritative.",
+    "Preview services/staff slices30 are not exhaustive service catalog proof; full team<=50 separately required.",
+    "Application-layer dispatch guards are not an OS firewall or packet-level isolation proof.",
+    "Source/UI findings describe earlier baseline and proposed constraints; final six-file source, final review and this summary determine implemented scope. Source auditor conservative services<=30 suggestion was not adopted; team completeness is independently enforced.",
+    "No actual provider/model/production/HTTPS/phone run; no website/design/neighbor-lane changes; no full MAYA/C10 acceptance."
+  ],
+  "remaining": [
+    "Exact owner approval described in ../../MAYA-LOCAL-YCLIENTS-ONE-TIME-HANDOFF-20261010.md",
+    "Agreed HTTP/PG runtime slot on shared Mac",
+    "Owner enters partner and user tokens privately and chooses own company/branch",
+    "First actual new-profile runtime and provider compatibility qualification; no booking write authority"
+  ],
+  "artifacts": [
+    {
+      "path": "targeted-tests.log",
+      "bytes": 3021,
+      "sha256": "834bb01239018400fab295fce044809c6e72132239527de08768c45ace7d3b2f",
+      "original": "/tmp/maya-real-yc-read-20261010/targeted-tests.log"
+    },
+    {
+      "path": "source-binding.json",
+      "bytes": 485101,
+      "sha256": "c206a8b8d40ab7e5d01788ccd65bf80308f5f2c73b5c5f6213b9e16986b061f5",
+      "original": "/tmp/maya-real-yc-read-20261010/source-binding.json"
+    },
+    {
+      "path": "source-findings.json",
+      "bytes": 19302,
+      "sha256": "9e745c49592d761eb1fe2ef8cd9dfe8f9ea5a8f8cd7bc11a73ea6ae125e400bf",
+      "original": "/tmp/maya-real-yc-read-source-findings-20261010.json"
+    },
+    {
+      "path": "ui-findings.json",
+      "bytes": 19456,
+      "sha256": "2724044e55d40d3f7bf3f665df63010a8ff810af4a25bf825dec753389ebb032",
+      "original": "/tmp/maya-real-yc-read-ui-findings-20261010.json"
+    },
+    {
+      "path": "launcher-checkpoint.json",
+      "bytes": 2201,
+      "sha256": "0e5205839be836edea8025b3ace2f139414f83010b7f86bd2cfc19f09ddbce6d",
+      "original": "/tmp/maya-local-yclients-read-launcher-source-checkpoint.json"
+    },
+    {
+      "path": "independent-review.json",
+      "bytes": 8054,
+      "sha256": "55b8a7f65ed923f8ded778d5ae7d2e028b8f32e74c087a88f58c27a31809ca35",
+      "original": "/tmp/maya-local-yclients-read-independent-review.json"
+    },
+    {
+      "path": "launcher-tests-final.log",
+      "bytes": 1137,
+      "sha256": "b8e7dbf422017389de0d7e78b466a37ea6748fff8300f5339f91ca61b98f7ebe",
+      "original": "/tmp/maya-local-yclients-read-launcher-tests-03.log"
+    },
+    {
+      "path": "launcher-tests-final.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "original": "/tmp/maya-local-yclients-read-launcher-tests-03.exit"
+    },
+    {
+      "path": "launcher-checkpoint-before-tty-review.json",
+      "bytes": 1955,
+      "sha256": "af4bf5652f823cd0253dc6ca6fe0fd0c7018f4aee2c6e4657fe4f18ee12dafba",
+      "original": "/tmp/maya-local-yclients-read-launcher-source-checkpoint-before-tty-review.json"
+    },
+    {
+      "path": "launcher-tests-initial.log",
+      "bytes": 949,
+      "sha256": "760848abcab4db91a6d19e05298d3e14b01d138b621a1e8361e03e17c201fe59",
+      "original": "/tmp/maya-local-yclients-read-launcher-tests.log"
+    },
+    {
+      "path": "launcher-tests-initial.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "original": "/tmp/maya-local-yclients-read-launcher-tests.exit"
+    },
+    {
+      "path": "launcher-tests-intermediate.log",
+      "bytes": 1029,
+      "sha256": "fe771917d811fbc5b43546fc34ae20aee83fbb0ac42508f00044c7b5f4750737",
+      "original": "/tmp/maya-local-yclients-read-launcher-tests-02.log"
+    },
+    {
+      "path": "launcher-tests-intermediate.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "original": "/tmp/maya-local-yclients-read-launcher-tests-02.exit"
+    },
+    {
+      "path": "handoff-review.json",
+      "bytes": 6433,
+      "sha256": "ee5a04dde29857a50d61b2757c1944f4eeeef9a66e5014fd6c33af5501af3575",
+      "original": "/tmp/maya-local-yclients-read-handoff-review.json"
+    }
+  ]
+}

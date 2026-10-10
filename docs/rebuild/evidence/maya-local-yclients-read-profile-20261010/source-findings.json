@@ -1,0 +1,475 @@
+{
+  "contract": "maya.real-yc-read.source-findings/1",
+  "source_head": "388c4b18f603de1cf816f7a42fb37d9892a6b79f",
+  "mode": "read-only source audit; no service, network, credential or provider execution",
+  "scope": "AppModule application-owned startup/timer initiators under exact existing stage0 FIXED_PROFILE, plus existing qualified A17 source graph. A future REAL-YC profile is not yet exercised.",
+  "background": {
+    "verdict": "NO_UNFLAGGED_AUTONOMOUS_BUSINESS_TICK_FOUND_UNDER_EXACT_PROFILE",
+    "schedulers": [
+      {
+        "name": "billing",
+        "key": "BILLING_SCHEDULER_ENABLED",
+        "profile_value": "false",
+        "result": "returns before installing any timer",
+        "refs": [
+          {
+            "path": "maya-saas-backend/src/billing/billing-scheduler.service.ts",
+            "line": 42
+          },
+          {
+            "path": "maya-saas-backend/src/billing/billing-scheduler.service.ts",
+            "line": 117
+          }
+        ]
+      },
+      {
+        "name": "owner_reports",
+        "key": "OWNER_REPORTS_SCHEDULER_ENABLED",
+        "profile_value": "false",
+        "result": "returns before installing any timer",
+        "refs": [
+          {
+            "path": "maya-saas-backend/src/owner-reports/owner-reports.scheduler.ts",
+            "line": 34
+          },
+          {
+            "path": "maya-saas-backend/src/owner-reports/owner-reports.scheduler.ts",
+            "line": 89
+          }
+        ]
+      },
+      {
+        "name": "appointment_reminders",
+        "key": "APPOINTMENT_REMINDERS_SCHEDULER_ENABLED",
+        "profile_value": "false",
+        "result": "returns before installing any timer",
+        "refs": [
+          {
+            "path": "maya-saas-backend/src/appointment-notifications/appointment-notifications.scheduler.ts",
+            "line": 28
+          },
+          {
+            "path": "maya-saas-backend/src/appointment-notifications/appointment-notifications.scheduler.ts",
+            "line": 74
+          }
+        ]
+      },
+      {
+        "name": "ingestion_and_rc_retention",
+        "key": "INGESTION_QUARANTINE_RETENTION_ENABLED",
+        "profile_value": "false",
+        "result": "returns before installing any timer",
+        "refs": [
+          {
+            "path": "maya-saas-backend/src/events/ingestion-retention.scheduler.ts",
+            "line": 49
+          },
+          {
+            "path": "maya-saas-backend/src/events/ingestion-retention.scheduler.ts",
+            "line": 112
+          }
+        ]
+      },
+      {
+        "name": "crm_reconciliation",
+        "key": "CRM_RECONCILIATION_SCHEDULER_ENABLED",
+        "profile_value": "false",
+        "result": "returns before installing any timer",
+        "refs": [
+          {
+            "path": "maya-saas-backend/src/crm/appointment-reconciliation.scheduler.ts",
+            "line": 63
+          },
+          {
+            "path": "maya-saas-backend/src/crm/appointment-reconciliation.scheduler.ts",
+            "line": 205
+          }
+        ]
+      },
+      {
+        "name": "expense_reminders",
+        "key": "EXPENSE_REMINDERS_CANONICAL_ENABLED",
+        "profile_value": "false",
+        "result": "returns before installing any timer",
+        "refs": [
+          {
+            "path": "maya-saas-backend/src/expense-intake/expense-reminder.scheduler.ts",
+            "line": 25
+          },
+          {
+            "path": "maya-saas-backend/src/expense-intake/expense-reminder.scheduler.ts",
+            "line": 25
+          }
+        ]
+      },
+      {
+        "name": "team_communications",
+        "key": "TEAM_COMMUNICATIONS_SCHEDULER_ENABLED",
+        "profile_value": "false",
+        "result": "returns before installing any timer",
+        "refs": [
+          {
+            "path": "maya-saas-backend/src/team-communications/team-communications.scheduler.ts",
+            "line": 31
+          },
+          {
+            "path": "maya-saas-backend/src/team-communications/team-communications.scheduler.ts",
+            "line": 31
+          }
+        ]
+      },
+      {
+        "name": "native_feedback",
+        "key": "NATIVE_FEEDBACK_SCHEDULER_ENABLED",
+        "profile_value": "false",
+        "result": "returns before installing any timer",
+        "refs": [
+          {
+            "path": "maya-saas-backend/src/native-feedback/native-feedback.scheduler.ts",
+            "line": 30
+          },
+          {
+            "path": "maya-saas-backend/src/native-feedback/native-feedback.scheduler.ts",
+            "line": 30
+          }
+        ]
+      },
+      {
+        "name": "operational_alerts_and_c8",
+        "key": "OPERATIONAL_ALERTS_CANONICAL_CUTOVER_AT",
+        "profile_value": "absent and forbidden by closed environment key allowlist",
+        "result": "Date.parse('') is not finite; initialization returns before timer installation",
+        "refs": [
+          {
+            "path": "maya-saas-backend/src/operational-alerts/operational-alerts.scheduler.ts",
+            "line": 29
+          },
+          {
+            "path": "maya-saas-backend/scripts/local-onboarding-profile.mjs",
+            "line": 53
+          }
+        ]
+      }
+    ],
+    "remaining_startup_hooks": [
+      {
+        "hook": "PrismaService.onModuleInit",
+        "effect": "Connects to configured local database; no application business query/mutation in hook",
+        "ref": {
+          "path": "maya-saas-backend/src/prisma/prisma.service.ts",
+          "line": 20
+        }
+      },
+      {
+        "hook": "WidgetsModule.onModuleInit",
+        "effect": "Registry/ledger/owner/routing assertions only",
+        "ref": {
+          "path": "maya-saas-backend/src/widgets/widgets.module.ts",
+          "line": 175
+        }
+      },
+      {
+        "hook": "CrmAdapterFactory.onModuleInit",
+        "effect": "Checks partner-token presence, emits configuration warning if missing; no provider request",
+        "ref": {
+          "path": "maya-saas-backend/src/crm/crm-adapter.factory.ts",
+          "line": 24
+        }
+      }
+    ],
+    "assumptions": [
+      "All eight listed flags stay literal 'false'. Operational-alert cutover variable stays absent/rejected.",
+      "Existing closed child env and private empty cwd checks remain; no dotenv config injection.",
+      "Request-scoped deadlines/backoff are not automatic ticks; explicit permitted HTTP operations still perform their documented local writes."
+    ],
+    "coverage": "Searched application src for OnModuleInit/onApplicationBootstrap, native and Nest timers, cron decorators, queue worker registrations and startup hooks; read matched initiators and gates. No runtime execution or dependency-internal timer census."
+  },
+  "a17": {
+    "native_base": "https://api.yclients.com/api/v1",
+    "read_allowlist": [
+      {
+        "method": "GET",
+        "path": "companies",
+        "query": {
+          "my": "1"
+        },
+        "purpose": "selected company access",
+        "ref": {
+          "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+          "line": 388
+        }
+      },
+      {
+        "method": "GET",
+        "path": "company/{companyId}",
+        "query": {},
+        "purpose": "company profile; falls back to companies",
+        "ref": {
+          "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+          "line": 455
+        }
+      },
+      {
+        "method": "GET",
+        "path": "book_services/{companyId}",
+        "query": {},
+        "purpose": "primary services",
+        "ref": {
+          "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+          "line": 3338
+        }
+      },
+      {
+        "method": "GET",
+        "path": "services/{companyId}",
+        "query": {},
+        "purpose": "services fallback",
+        "ref": {
+          "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+          "line": 3351
+        }
+      },
+      {
+        "method": "GET",
+        "path": "service_categories/{companyId}",
+        "query": {},
+        "purpose": "optional categories; errors swallowed to empty categories",
+        "ref": {
+          "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+          "line": 3358
+        }
+      },
+      {
+        "method": "GET",
+        "path": "company/{companyId}/staff",
+        "query": {},
+        "purpose": "primary shared staff/team source",
+        "ref": {
+          "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+          "line": 4515
+        }
+      },
+      {
+        "method": "GET",
+        "path": "staff/{companyId}",
+        "query": {},
+        "purpose": "first staff fallback",
+        "ref": {
+          "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+          "line": 4522
+        }
+      },
+      {
+        "method": "GET",
+        "path": "book_staff/{companyId}",
+        "query": {},
+        "purpose": "second staff fallback; not proof of exhaustive team",
+        "ref": {
+          "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+          "line": 4523
+        }
+      }
+    ],
+    "preview_bound": {
+      "normal_gets_per_sweep": 5,
+      "max_gets_per_sweep_with_existing_fallbacks": 9,
+      "timeout_ms_per_request": 20000,
+      "pagination": "No pagination query/loop in these readers. No provider metadata completeness check.",
+      "transport_limits_missing": [
+        "GET redirect refusal",
+        "response byte bound",
+        "per-request-scope aggregate call budget"
+      ],
+      "refs": [
+        {
+          "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+          "line": 4331
+        },
+        {
+          "path": "maya-saas-backend/src/crm/crm-request.errors.ts",
+          "line": 68
+        }
+      ]
+    },
+    "graph": [
+      {
+        "step": "connect",
+        "effect": "Owner-qualified expectedVersion/idempotent install; ephemeral full preview before AE admission, encrypted credential staged pending_activation",
+        "ref": {
+          "path": "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts",
+          "line": 199
+        }
+      },
+      {
+        "step": "preview",
+        "effect": "GET sweep with local count-only audit, no import confirmation",
+        "ref": {
+          "path": "maya-saas-backend/src/crm/crm.service.ts",
+          "line": 788
+        }
+      },
+      {
+        "step": "activate",
+        "effect": "Runs activation then confirm_crm_import in one explicit operation flow, separate existing AE executions; import projection atomic within its confirmation transaction",
+        "refs": [
+          {
+            "path": "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts",
+            "line": 284
+          },
+          {
+            "path": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+            "line": 1422
+          }
+        ]
+      }
+    ],
+    "materialized_local_data": {
+      "tables": [
+        "CrmIntegration",
+        "Staff",
+        "StaffProviderLink",
+        "CrmStaffAccess",
+        "Membership (existing)",
+        "AuthSession (existing)",
+        "Tenant",
+        "Branch",
+        "BrandingSettings",
+        "ActionExecution and existing AE attempt/mutation/evidence owners",
+        "AuditLog"
+      ],
+      "pii": "Staff display names encrypted in Staff/CrmStaffAccess; source IDs/title/role/status retained. Preview includes staff names/title/avatar/rating and company public metadata. Raw provider JSON can contain additional fields in memory. No customer database fetch in this graph.",
+      "not_materialized_by_import": [
+        "ServiceOffering catalog",
+        "service categories",
+        "customer/contact database",
+        "Appointment or booking effect"
+      ],
+      "refs": [
+        {
+          "path": "maya-saas-backend/src/crm/crm.service.ts",
+          "line": 815
+        },
+        {
+          "path": "maya-saas-backend/src/crm/crm.service.ts",
+          "line": 6753
+        },
+        {
+          "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+          "line": 4591
+        }
+      ]
+    },
+    "existing_retention": {
+      "credential": "CrmIntegration.encryptedApiToken encrypted AES-256-GCM under existing CRM_ENCRYPTION_KEY owner. Schema has no credential TTL; no new automatic expiry/deletion is implied. Partner token remains runtime environment material, not integration payload.",
+      "a17_ae_payload": "Executable Wave3 payloadRetentionMs = 30 days; shadow = 7 days. Deadline is stored at execution creation. Qualified A17 replay/status/execution checks reject missing/expired payload evidence.",
+      "a17_ae_audit": "Registry declares auditRetentionMs = 7 * 365 days. This is existing configuration, not a new retention decision or proof that physical cleanup has run.",
+      "important_limit": "Timer opt-out does not erase existing data. Generic kernel input reader checks payload presence/contract but A17-specific paths perform expiry checks. No automatic CrmIntegration token deletion was found.",
+      "refs": [
+        {
+          "path": "maya-saas-backend/prisma/schema.prisma",
+          "line": 1041
+        },
+        {
+          "path": "maya-saas-backend/src/encryption/encryption.service.ts",
+          "line": 17
+        },
+        {
+          "path": "maya-saas-backend/src/encryption/encryption.service.ts",
+          "line": 31
+        },
+        {
+          "path": "maya-saas-backend/src/action-engine/action-engine.registry.ts",
+          "line": 1831
+        },
+        {
+          "path": "maya-saas-backend/src/action-engine/action-engine.kernel.ts",
+          "line": 329
+        },
+        {
+          "path": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+          "line": 340
+        },
+        {
+          "path": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+          "line": 590
+        },
+        {
+          "path": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+          "line": 1456
+        }
+      ]
+    },
+    "finite_profile_constraints": [
+      {
+        "finding": "Preview slices services/staff to30 and team to50; reconciliation uses sliced team as active roster. AE limit sees already-sliced items.",
+        "bound": "For strict first profile, service source array<=30 and raw shared staff catalog<=30 is conservative and prevents all local preview slices (hence team<=30<=50). Projected service<=30/bookable staff<=30/team<=50 is less restrictive only if actual whole source completeness is verified. Services are preview-only here, so30 service cap protects honest preview rather than a ServiceOffering import.",
+        "ref": {
+          "path": "maya-saas-backend/src/crm/crm.service.ts",
+          "line": 6720
+        }
+      },
+      {
+        "finding": "Declared partial/paginated source metadata must refuse; raw count limits alone do not prove upstream catalog completeness. No new endpoint/page guessing authorized.",
+        "ref": {
+          "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+          "line": 4515
+        }
+      },
+      {
+        "finding": "Poisoning transport scope alone cannot guarantee enclosing A17 refuses: categories.catch returns[] and company profile/other catalog fallbacks swallow errors. A terminal profile-level refusal must also reach the enclosing operation before any AE local admission/projection; merely changing HTTP response after commit is too late.",
+        "refs": [
+          {
+            "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+            "line": 505
+          },
+          {
+            "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+            "line": 455
+          },
+          {
+            "path": "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts",
+            "line": 238
+          }
+        ]
+      },
+      {
+        "finding": "Only exact setup/status/preview/recovery HTTP routes should be admitted. Same controller exposes journal/customer/business mutation operations; full prefix allow is unsafe.",
+        "ref": {
+          "path": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+          "line": 193
+        }
+      },
+      {
+        "finding": "Provider error text can enter warning logs; real-read profile must avoid recording raw provider bodies/error detail.",
+        "ref": {
+          "path": "maya-saas-backend/src/crm/crm.service.ts",
+          "line": 6970
+        }
+      }
+    ]
+  },
+  "limits": [
+    "No real credentials, selected company, API rights or provider completeness verified.",
+    "No code, schema, retention policy or automation changes made.",
+    "Not a full dependency/process audit and not proof of runtime absence; application-owned startup initiators only."
+  ],
+  "inspected_source_sha256": {
+    "maya-saas-backend/scripts/local-onboarding-profile.mjs": "ac53a8a0885d4f8918ee2437050d0dd952ecd52bf5c6ace864e31b2350c685e0",
+    "maya-saas-backend/src/action-engine/action-engine.registry.ts": "9b9dfc9cc055760766b25d46e5fd4ab457ef537b1ebd0fafb34bd2d6001197ad",
+    "maya-saas-backend/src/app.module.ts": "dcd77cb49af339636b22274f24817828e9490348d379c37e8eeb932715f63388",
+    "maya-saas-backend/src/appointment-notifications/appointment-notifications.scheduler.ts": "5d6942130af5016206d0c99314858e318161244c239ea35819e82e0698543d93",
+    "maya-saas-backend/src/billing/billing-scheduler.service.ts": "4ffdcff823bd699f09ff5e7f27447290608564d890b6b3b1192fa793928485c6",
+    "maya-saas-backend/src/config/runtime-config.ts": "58cea2f2b5ed30dc02393b1c9229e6fdb560820d9e79c2fb73ea024da4c2fb90",
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": "ef484bde55b5a5ee25549b5af0405fea3932201622161c050280d5d5efee4563",
+    "maya-saas-backend/src/crm/appointment-reconciliation.scheduler.ts": "030bba7bdb7549cc61f0448a56f6a999baec5d7e8e89b99ed31887d8bfbb02b6",
+    "maya-saas-backend/src/crm/crm.service.ts": "544fb41187f55184b1959a0e36e45edae738be0f024e52977279859374d8479d",
+    "maya-saas-backend/src/events/ingestion-retention.scheduler.ts": "4c45ca94af7b81050ef68d762499541d9f6089e6f1520b6f31cc08ee84ba32c5",
+    "maya-saas-backend/src/expense-intake/expense-reminder.scheduler.ts": "adc66c44b5aae88be6579aa394ee0d4ef7725dcf38c477e8d0b0d7daf29db99c",
+    "maya-saas-backend/src/native-feedback/native-feedback.scheduler.ts": "b373c7471cf6587c3f20ac4ccde458163ac31ee5d7ec15c5e693421c6b41e60e",
+    "maya-saas-backend/src/operational-alerts/operational-alerts.scheduler.ts": "ad7b95e383378731454d19f9daa5d2421303fa75f9e366e2cd995d4832e0bf0c",
+    "maya-saas-backend/src/owner-reports/owner-reports.scheduler.ts": "e55699262b78cf892c28d6ba186af44282d4721e079f66d6d7212c3b07fc4750",
+    "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts": "3cd6bf70e92010e78127fcabd2d792520f5fb8306fe9496f59bfeb758215c06e",
+    "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts": "0e678563f1fa2273170f79916def92f7c94cb415171130cae838cb1257d962c0",
+    "maya-saas-backend/src/team-communications/team-communications.scheduler.ts": "8d4e97ead74be1d2acc99e016b98fb1b32f6a8280601c906a385b2d4c4f8c78d"
+  }
+}

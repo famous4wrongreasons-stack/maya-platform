@@ -1,0 +1,127 @@
+{
+  "contract": "maya.local-yclients-read-independent-review/1",
+  "verdict": "QUALIFIED_STATIC_PASS",
+  "reviewer": "checkpoint_review",
+  "method": "Read-only source review and file/Git/log hash verification. Reviewer ran no tests, AppModule, listeners, PostgreSQL, TTY, provider or model calls.",
+  "candidateCommit": "2777ca65ab69c71224e20971d491575d074eb096",
+  "sourceFiles": [
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-profile.mjs",
+      "bytes": 3506,
+      "sha256": "f850e8c558f6f52e3b283efbcce69c3cb889656a164b58e97ec44f5c3ca2b869",
+      "matchesCommittedGitBlob": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-profile.test.mjs",
+      "bytes": 11493,
+      "sha256": "145bec9bc4bb9eedfe1d754b121b1f45673067f828db537c14b6a016fcf24a8f",
+      "matchesCommittedGitBlob": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-runtime.mjs",
+      "bytes": 4495,
+      "sha256": "81a4895a38e899bc755b17530033f2d2e6bc69e3b50c76a0976060d573c3d3c6",
+      "matchesCommittedGitBlob": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-transport.mjs",
+      "bytes": 6630,
+      "sha256": "f108783172dce316371376ae933137c3e717dfd843fb2df0e6bc0c7b525e62dc",
+      "matchesCommittedGitBlob": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.mjs",
+      "bytes": 23881,
+      "sha256": "6eec9bc7517864ab8e3f66f29db1c43469b449925dd899c92068b8e221283be1",
+      "matchesCommittedGitBlob": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.test.mjs",
+      "bytes": 9801,
+      "sha256": "d70989acfb48b472c2aa6f182e903cc54e58a49177a49c6f817ff1b8e2cfd146",
+      "matchesCommittedGitBlob": true
+    }
+  ],
+  "launcherCheckpoint": {
+    "path": "/tmp/maya-local-yclients-read-launcher-source-checkpoint.json",
+    "sha256": "0e5205839be836edea8025b3ace2f139414f83010b7f86bd2cfc19f09ddbce6d",
+    "allPinnedFilesMatch": true
+  },
+  "blockers": [],
+  "closedFindings": [
+    {
+      "id": "complete-management-team",
+      "source": "local-yclients-read-transport.mjs:24-33",
+      "resolution": "Require success=true, <=50 unique canonical IDs, mandatory total_count equal to returned length, optional count equal and page=1, no pagination/link/range evidence; explicit company_id must equal selected company. Violation poisons request; book_staff remains forbidden."
+    },
+    {
+      "id": "exclusive-explicit-terminal-input",
+      "source": "local-yclients-read.mjs:90-149",
+      "resolution": "Before prompting require empty undecoded TTY and no data/readable consumer; restore raw/pause state and remove own listeners on terminal paths; zero assembly and consumed Buffer chunks. Fake-TTY regression evidence only."
+    }
+  ],
+  "verifiedSourceBoundaries": [
+    "Separate explicit profile. Stage0 remains provider-closed and unchanged. Exact sterile environment; no inherited provider/model credential, loader, proxy or database URL.",
+    "Default invocation returns prepared-only before state creation. Explicit run requires real owner TTY, fresh canonical owned private directory outside checkout, own fresh PostgreSQL and existing canonical migrations without seed or fixture grants.",
+    "Persisted service environment is written before partner input and excludes partner material. Explicit partner enters child runtime environment only; parent removes its runtimeEnv copy after spawn. Existing A17 stores the user credential encrypted in private PostgreSQL after explicit connect.",
+    "Actual AppModule/guards/CRM/A17 retained. Only canonical exact connect/activate POST under authenticated current request can use guarded native fetch. Read-only status/recovery and standard onboarding/password routes remain admitted; chat/model/booking/clients/records and provider writes are not admitted.",
+    "Seven finite native GET path templates at exact HTTPS api.yclients.com, selected company binding, only companies?my=1 query, redirect:error, 64 request/256 session dispatch caps, 120-second request/20-second fetch bounds, 2MiB response cap. Guard installed before AppModule import; ready asserts zero startup provider calls.",
+    "Shared web relay fenced before handlers for exact Host/Origin/Sec-Fetch; direct backend fenced again. Self-only CSP, no-referrer and no-store enforced. Relay timeout125s exceeds finite source request120s.",
+    "Preparation15m, hidden prompt120s, startup60s, runtime<=15m, owned TERM/KILL cleanup and exact PG directory stop. Only bounded route-kind IPC counters accepted and required at clean ready-session stop; no provider URLs, IDs, body or token in this summary.",
+    "All six new source files match the committed Git bytes and are included in future launcher source binding. Existing A17 authority, migrations, runtime owners, stage0 source and frontend are unchanged by this six-file commit."
+  ],
+  "optionalCategoriesJudgment": {
+    "blocker": false,
+    "evidence": [
+      "src/crm/adapters/yclients-crm.adapter.ts:498-506",
+      "src/crm/crm.service.ts:815-837",
+      "src/crm/crm.service.ts:6689-6704",
+      "src/crm/crm.service.ts:6722-6734"
+    ],
+    "qualification": "Existing optional category read catch-to-empty may swallow a transport refusal after other allowed parallel reads completed; A17 can still save configuration. This profile does not promise rollback of the whole operation on every transport refusal. Categories decorate preview metadata; current canonical import projection writes complete team and company presentation, not service/category catalog. Mandatory complete-team validation is retained. Service/staff preview slices30 do not establish exhaustive service catalog; team projection bound50 is independently checked."
+  },
+  "checks": {
+    "observedArtifacts": {
+      "combinedNodeTests": {
+        "passed": 29,
+        "failed": 0,
+        "split": "8 profile/native synthetic adapter +11 launcher fake-TTY/pure +10 existing stage0 regression",
+        "exitCode": "not independently captured in combined log; parent reports0"
+      },
+      "launcherLatest": {
+        "passed": 11,
+        "failed": 0,
+        "exitCode": 0
+      },
+      "artifacts": [
+        {
+          "path": "/tmp/maya-real-yc-read-20261010/targeted-tests.log",
+          "bytes": 3021,
+          "sha256": "834bb01239018400fab295fce044809c6e72132239527de08768c45ace7d3b2f"
+        },
+        {
+          "path": "/tmp/maya-local-yclients-read-launcher-tests-03.log",
+          "bytes": 1137,
+          "sha256": "b8e7dbf422017389de0d7e78b466a37ea6748fff8300f5339f91ca61b98f7ebe"
+        },
+        {
+          "path": "/tmp/maya-local-yclients-read-launcher-tests-03.exit",
+          "bytes": 2,
+          "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+        }
+      ]
+    },
+    "authorReportedOnly": [
+      "Four syntax checks PASS.",
+      "Prepared-only no-argument invocation PASS without services."
+    ],
+    "rerunByReviewer": false
+  },
+  "qualifications": [
+    "Actual new-profile AppModule boot, fresh PostgreSQL lifecycle, current React interaction, real TTY entry and YCLIENTS requests are NOT_RUN in this checkpoint; old stage0 actual proof does not substitute for this new profile.",
+    "Native adapter evidence uses five synthetic fetch responses through the real adapter; no actual provider data, credentials or model requests.",
+    "This is application-layer routing/dispatch control, not an OS packet-level egress firewall or cross-UID secret isolation claim.",
+    "Partner remains in child environment/in-memory JavaScript strings for the session; no claim of cryptographic memory erasure or invisibility to same-user process inspection. User token and imported configuration/team data use existing encrypted/private local DB retention.",
+    "Local A17 setup/import effects are explicitly allowed only by separate owner actions and disclosed; this is not a no-local-writes profile. Real provider compatibility and live acceptance are unqualified."
+  ]
+}

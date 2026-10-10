@@ -1,0 +1,37 @@
+✔ macOS injected encoding metadata has a finite exception, not general environment inheritance (1.55675ms)
+✔ environment construction ignores inherited credentials, loaders, proxies and DB (1.000667ms)
+✔ runtime validator accepts explicit local development; production HTTP prohibition remains intact (87.512084ms)
+✔ profile refuses altered scheduler, external DB, reused key or provider environment (1.6775ms)
+✔ admits exact standard onboarding/password routes for existing owners (0.152667ms)
+✔ direct-backend fence rejects other owners, ambiguous routes, query and body variants (0.08325ms)
+✔ web relay and direct backend reject cross-origin effects before Origin is dropped (0.072667ms)
+✔ fresh owned PG plan omits seeds/fixtures and migrations use controlled empty cwd (2.131375ms)
+✔ private state cannot be existing or enter the repository through a symlink (0.862584ms)
+✔ restart metadata requires the exact completed launcher session and unchanged committed source (1.475084ms)
+✔ separate real-read profile excludes inherited credentials and cannot weaken stage0 (1.419458ms)
+✔ only existing exact A17 install/activate/status and ordinary onboarding are admitted (0.342792ms)
+✔ native request destination refuses redirects, other tenants companies, writes, client/record and bookable-only team (0.567834ms)
+✔ team completeness rejects truncated, paginated, duplicate, unknown or bookable-only evidence (8.261667ms)
+✔ zero external calls without explicit current authenticated action; close and revocation refuse (1.388125ms)
+✔ size/call bounds and poisoned incomplete staff do not fall through to native fallback (5.500208ms)
+✔ provider denial text is stripped; redirect:error and bounded signal reach transport (0.305834ms)
+✔ actual native adapter setup methods execute through the exact read guard with synthetic wire data (272.441125ms)
+✔ read session reuses exact preparation and cleanup without changing stage 0 (3.133542ms)
+✔ all finite read-profile sources are explicitly bound and landing uses current form (0.108458ms)
+✔ persistable preparation environment has no inherited partner or user credentials (0.486125ms)
+✔ local web CSP and no-store headers override shared static/relay values (0.135291ms)
+✔ partner shape is bounded printable ASCII without comma, whitespace or controls (0.086916ms)
+✔ runtime summary projects only closed bounded route-kind counters (0.121417ms)
+✔ hidden prompt returns exact explicit TTY bytes without echo and restores terminal (0.361ms)
+✔ hidden prompt refuses prebuffer, encoding or another reader before enabling raw input (0.387959ms)
+✔ hidden prompt refuses non-TTY, malformed, oversized and multiple values (1.070167ms)
+✔ hidden prompt cancels on Ctrl-C, Ctrl-D, EOF and abort without echo (0.452875ms)
+✔ hidden prompt has a finite deadline and preserves an already-raw terminal (6.037417ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 329.361125
