@@ -1048,7 +1048,9 @@ describe('A17 exact configuration and persisted operation recovery through actua
           'activate',
           saved.activate.requestId,
         );
-        expect(revoked.status).toBe(403);
+        // Existing session authentication rejects a suspended membership before
+        // controller/role authorization is reached.
+        expect(revoked.status).toBe(401);
         expect(await durable(saved.owner.tenantId)).toEqual(beforeRevoked);
         expect(providerReads).toHaveLength(beforeReads);
         checks.push(
