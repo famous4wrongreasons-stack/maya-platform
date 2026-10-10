@@ -1,0 +1,38 @@
+{
+  "contract": "maya.core-conversation-permit/1",
+  "runId": "4fc5a356-e16f-46a2-a154-7ea970733b3a",
+  "nonce": "b25f7c6ede43998da5f6e64fde6fbe5b42e032f93bbe1458c1467667b4ea75a8",
+  "candidateCommit": "8a68dd397a0333f4e4c8877e5ab0233c6b175cd6",
+  "manifestSha256": "4f116d92ff7b2ca296d49659137aeabdb29641dcdc5235d29930d0774c20d1e8",
+  "profile": "core-react-diagnostic-20261009/1",
+  "limitsSha256": "754a7d2ba93f07c263330496c8675854ba6b245dae19c612062523c5d655b9e1",
+  "ownerApprovalRef": "Sentinel_221acc9c23e8819199b0ffb31955aabe/Sentinel_27818d0044a08191ba15093fbf622c2c",
+  "startsAt": "2026-10-10T07:17:32.449Z",
+  "expiresAt": "2026-10-10T07:27:32.449Z",
+  "revoked": false,
+  "target": {
+    "host": "localhost",
+    "workDirectory": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-pricing-semantic-integration/maya-saas-backend",
+    "brokerUid": 501,
+    "runnerUid": 501,
+    "brokerSocket": {
+      "path": "/private/tmp/maya-ui-ready-20261009-r2/channel/b.sock",
+      "gid": 20
+    }
+  },
+  "credentialSource": {
+    "kind": "terminal-stdin",
+    "reference": "owner-terminal-stdin-once",
+    "owner": 501,
+    "reader": 501
+  },
+  "pricing": {
+    "model": "deepseek-v4-pro",
+    "inputNanoUsdPerToken": 1320,
+    "outputNanoUsdPerToken": 3960,
+    "reference": "/private/tmp/maya-ui-ready-20261009-r2/pricing-observation-20261010.json",
+    "sha256": "03642a0249d4016fbb23cf3460af864242e9044b8b5a6eb11580890b7025cfc1",
+    "verifiedAt": "2026-10-10T07:17:32.449Z"
+  },
+  "claimPath": "/private/tmp/maya-ui-ready-20261009-r2/permit.json.claim"
+}

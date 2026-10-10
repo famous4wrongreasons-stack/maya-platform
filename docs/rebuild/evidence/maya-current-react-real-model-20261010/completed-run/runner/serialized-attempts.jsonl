@@ -1,0 +1,5 @@
+{"caseId":"core-client-create-followup","turn":1,"bytes":69071,"bodySha256":"701ee93916a3f22efb3b14a37ad0f7471ce161d6f7018153e9e09c0ccced2df2","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"core-client-create-followup","turn":2,"bytes":70032,"bodySha256":"1a8d4657587cc3d4539a0aa4d690bd932716630ba2fde2a197ffb7357935714c","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"core-owner-compound-clarification","turn":1,"bytes":93197,"bodySha256":"8f4cfdeae287f0ff518630279f615323420f1dc59533f6eeec9106d4bea1db17","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"core-owner-compound-clarification","turn":2,"bytes":97869,"bodySha256":"6a9b1a60c3c1d048ec475cdd1ab2760d9981c95a20d8652b8f68be586ac45101","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}
+{"caseId":"core-admin-private-data-refusal","turn":1,"bytes":80825,"bodySha256":"5cb78f7d7f647244d58b92748de0334c4623772c0c10e3a19ecf838181fad082","outputLimit":1200,"jsonMode":true,"messageRoles":["system","user"]}

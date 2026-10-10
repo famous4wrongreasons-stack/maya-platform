@@ -1,0 +1,128 @@
+{
+  "contract": "maya.core-conversation-runner/1",
+  "status": "passed-ungraded",
+  "mode": "ADMITTED_LOCAL_MODEL_HTTP",
+  "runId": "cd4410e8-8a19-467f-b1e9-605b480ab982",
+  "candidateCommit": "5298378590a93fb9dd4afaa778eb01bf94bf477c",
+  "manifestSha256": "af9ec563159778598759da2a893179d10516ce88e1e9a88752b879f2b7e368fd",
+  "profile": "core-react-diagnostic-20261009/1",
+  "semanticFailureFixture": null,
+  "limitsSha256": "754a7d2ba93f07c263330496c8675854ba6b245dae19c612062523c5d655b9e1",
+  "cluster": "/private/tmp/maya-core-conversation-CYtYk1/pg",
+  "database": "maya_widget_gate_proof_c9occ_01f80ceef102",
+  "port": 64057,
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "react-web-build",
+    "conversation"
+  ],
+  "groups": {
+    "initdb": {
+      "detached": true,
+      "pid": 16957,
+      "pgid": 16957,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "pg-start": {
+      "detached": true,
+      "pid": 16979,
+      "pgid": 16979,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "createdb": {
+      "detached": true,
+      "pid": 16998,
+      "pgid": 16998,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "migrations": {
+      "detached": true,
+      "pid": 17010,
+      "pgid": 17010,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "react-web-build": {
+      "detached": true,
+      "pid": 17036,
+      "pgid": 17036,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "conversation": {
+      "detached": true,
+      "pid": 17077,
+      "pgid": 17077,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    },
+    "pg-stop": {
+      "detached": true,
+      "pid": 17515,
+      "pgid": 17515,
+      "closed": true,
+      "groupAbsent": true,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "termSent": false,
+      "killSent": false
+    }
+  },
+  "resources": {
+    "nodeHeapMb": 3072,
+    "brokerHeapMb": 256,
+    "jestWorkers": 1,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30
+  },
+  "timeouts": {
+    "conversationMaxMs": 600000,
+    "jestTestMaxMs": 660000
+  },
+  "qualification": "REAL_MODEL_SYNTHETIC_DATA_UNGRADED",
+  "recordedReplay": false,
+  "replayFixture": null,
+  "brokerStopRequested": true,
+  "liveBrokerCleanupRequiresBrokerReport": true,
+  "clusterStopped": true,
+  "postmasterPidAbsent": true,
+  "sourcesUnchanged": true
+}

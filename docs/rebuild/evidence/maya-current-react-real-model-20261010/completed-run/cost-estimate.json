@@ -1,0 +1,24 @@
+{
+  "qualification": "USAGE_BASED_ESTIMATE_NOT_PROVIDER_BILLING_CONFIRMATION",
+  "usage": {
+    "prompt_tokens": 86651,
+    "completion_tokens": 1640,
+    "total_tokens": 88291,
+    "prompt_cache_hit_tokens": 20608,
+    "prompt_cache_miss_tokens": 66043
+  },
+  "providerRequests": 5,
+  "originalAttemptRequests": 0,
+  "combinedRequests": 5,
+  "approvedCombinedRequestCap": 12,
+  "approvedCombinedSpendCapUSD": 2,
+  "reservedUSD": 0.59330568,
+  "reserveMeaning": "Conservative serialized request reservation; mirrored runner ledger is the same logical budget and is not added again.",
+  "estimatedUSDAtPublishedOffPeakCacheRates": 0.047288956,
+  "estimatedUSDAtPublishedPeakCacheRates": 0.094577912,
+  "conservativeUsageUSDAllInputPeakMiss": 0.12087372,
+  "pricingSource": "https://api-docs.deepseek.com/quick_start/pricing/",
+  "pricingObservedAt": "2026-10-10T07:17:32.449Z",
+  "offPeakReason": "2026-10-10 is Saturday; published schedule marks weekends off-peak. No provider bill or balance was read.",
+  "restartOrUnusedBudgetSpend": "NOT_AUTHORIZED_OR_PERFORMED"
+}

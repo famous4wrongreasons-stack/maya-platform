@@ -1,0 +1,27 @@
+{
+  "reviewer": "independent_review",
+  "mode": "READ_ONLY_NO_EXECUTION_NO_TERMINAL_ACCESS",
+  "result": "QUALIFIED_PASS_NO_CHECKPOINT_BLOCKER",
+  "candidateCommit": "5298378590a93fb9dd4afaa778eb01bf94bf477c",
+  "manifestSha256": "af9ec563159778598759da2a893179d10516ce88e1e9a88752b879f2b7e368fd",
+  "sourceHashesVerifiedAgainstGit": 2551,
+  "serializedProviderRequestJoins": 5,
+  "providerUsageAndContentJoins": 5,
+  "browserHttpJournalJoins": 5,
+  "uiLogins": 3,
+  "visible201Replies": 5,
+  "businessWrites": 0,
+  "oldAttemptVerifiedZeroUse": true,
+  "ownerSavedRevision": 1,
+  "ownerEvidenceCount": 2,
+  "observedLimits": [
+    "All5visible replies source safe_fallback: deterministic application prose after actual model semantic planning.",
+    "Client17:00review is not appointment creation.",
+    "Owner current:false published financial snapshot plus current AVAILABLE opportunity; not complete today business overview.",
+    "Admin refused credentials/phone with no READ.",
+    "Client turn2 raw model included extra server-like permission/tool/capability fields; strict model-output schema adherence not accepted.",
+    "Browser DOM retained empty-value labels and ADMINISTRATOR heading for client fixture; no inferred authorization-role change.",
+    "No real CRM, restart, general intelligence or full MAYA acceptance."
+  ],
+  "cleanup": "Reports verified; parent OS verification recorded separately."
+}

@@ -1,5 +1,7 @@
 # Текущий React подключён к ограниченному model runner
 
+**Историческая подготовка.** Один фактический ограниченный current UI/model прогон завершён 10 октября: [результаты, usage, сохранённый input-timeout и linked recovery](MAYA-CURRENT-REACT-REAL-MODEL-20261010.md). Приведённый ниже старый launcher уже имеет использованный claim и не предназначен для повторного запуска.
+
 **Техническое соединение готово и проверено на безопасном stub:** текущий React → настоящий вход по email → пять сообщений через интерфейс → canonical HTTP/AiCore/C9 → существующий budget gate/broker → фактический ответ в React. Это закрывает implementation gap из [предыдущей подготовки](MAYA-CURRENT-MODEL-PREPARATION-20261009.md). Реальная модель, её языковое качество и настоящая YCLIENTS-сессия этим не приняты.
 
 Финальный исполнявшийся source: **`1bad667c0196ff139db9f9413bab0206aec71dc0`**. [R3 manifest](evidence/maya-react-broker-ui-20261009/r3/candidate-manifest.json) SHA256 **`80ddb2943bde2ca640becb5afbae3d0845d7a6d07167817b45277d59ff540cd3`**; 2551 исходный файл. Последующий документационный checkpoint требует свежего prepare на своём HEAD; он не меняет историческую привязку R3.

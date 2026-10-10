@@ -1,0 +1,9 @@
+{
+  "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+  "retrievedAt": "2026-10-10T07:17:32.449Z",
+  "method": "web.open official pricing page, freshly retrieved 2026-10-10",
+  "model": "deepseek-v4-pro",
+  "inputNanoUsdPerToken": 1320,
+  "outputNanoUsdPerToken": 3960,
+  "basis": "Published peak/cache-miss rate retained as conservative upper rate; off-peak discount not relied on."
+}

@@ -1,0 +1,10 @@
+{
+  "sourceThreadId": "01a10b14-bd01-7513-8d9f-86c0c75010f5",
+  "ownerApprovalRef": "Sentinel_221acc9c23e8819199b0ffb31955aabe/Sentinel_27818d0044a08191ba15093fbf622c2c",
+  "paidApprovalAt": "2026-10-09T22:07:39Z",
+  "readinessAt": "2026-10-10T07:15:41Z",
+  "scope": "Current React UI, 3 dialogues, 5 user messages, at most 12 provider calls, 10 minutes, USD 2 total; synthetic CRM, no business effects; one hidden owner key input; no restart, no frozen9 run.",
+  "candidateCommit": "8a68dd397a0333f4e4c8877e5ab0233c6b175cd6",
+  "manifestSha256": "4f116d92ff7b2ca296d49659137aeabdb29641dcdc5235d29930d0774c20d1e8",
+  "observedAt": "2026-10-10T07:17:32.449Z"
+}

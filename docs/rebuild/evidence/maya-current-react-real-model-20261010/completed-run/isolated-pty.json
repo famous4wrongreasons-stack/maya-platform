@@ -1,0 +1,22 @@
+[
+  {
+    "timeoutMs": 80,
+    "termination": "timeout",
+    "isolatedPTY": true,
+    "visibleWindow": false,
+    "termiosRestored": true,
+    "inputNotEchoed": true,
+    "listenersRemoved": true,
+    "exitCode": 0
+  },
+  {
+    "timeoutMs": 180000,
+    "termination": "abort",
+    "isolatedPTY": true,
+    "visibleWindow": false,
+    "termiosRestored": true,
+    "inputNotEchoed": true,
+    "listenersRemoved": true,
+    "exitCode": 0
+  }
+]

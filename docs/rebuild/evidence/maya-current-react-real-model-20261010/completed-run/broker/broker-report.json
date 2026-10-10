@@ -1,0 +1,72 @@
+{
+  "contract": "maya.core-conversation-broker/1",
+  "mode": "ADMITTED_LOCAL_MODEL_HTTP",
+  "runId": "cd4410e8-8a19-467f-b1e9-605b480ab982",
+  "candidateCommit": "5298378590a93fb9dd4afaa778eb01bf94bf477c",
+  "profile": "core-react-diagnostic-20261009/1",
+  "limitsSha256": "754a7d2ba93f07c263330496c8675854ba6b245dae19c612062523c5d655b9e1",
+  "manifestSha256": "af9ec563159778598759da2a893179d10516ce88e1e9a88752b879f2b7e368fd",
+  "paidAuthorized": true,
+  "credentialsLoaded": true,
+  "upstreamCalls": 5,
+  "upstreamCountMeaning": "attempts started; delivery may be unknown",
+  "startedAt": "2026-10-10T07:24:08.493Z",
+  "expiresAt": "2026-10-10T07:33:50.318Z",
+  "requests": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "bytes": 69071,
+      "bodySha256": "701ee93916a3f22efb3b14a37ad0f7471ce161d6f7018153e9e09c0ccced2df2",
+      "status": 200
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "bytes": 70032,
+      "bodySha256": "1a8d4657587cc3d4539a0aa4d690bd932716630ba2fde2a197ffb7357935714c",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "bytes": 93197,
+      "bodySha256": "8f4cfdeae287f0ff518630279f615323420f1dc59533f6eeec9106d4bea1db17",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "bytes": 97869,
+      "bodySha256": "6a9b1a60c3c1d048ec475cdd1ab2760d9981c95a20d8652b8f68be586ac45101",
+      "status": 200
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "bytes": 80825,
+      "bodySha256": "5cb78f7d7f647244d58b92748de0334c4623772c0c10e3a19ecf838181fad082",
+      "status": 200
+    }
+  ],
+  "rejections": [],
+  "stopped": true,
+  "qualification": "ACTUAL_MODEL_SYNTHETIC_DATA_UNGRADED",
+  "recordedReplay": false,
+  "usageValidation": "REQUIRED_BEFORE_APP_DELIVERY",
+  "replayFixture": null,
+  "socketPath": "/private/tmp/maya-ui-recovery-20261010/channel/b.sock",
+  "stopReason": "explicit_finish",
+  "connectionsAtStop": 1,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-10T07:25:14.584Z",
+  "stats": {
+    "dialogs": 3,
+    "turns": 5,
+    "attempts": 5,
+    "inputTokens": 431474,
+    "outputTokens": 6000,
+    "reservedNanoUsd": 593305680,
+    "halted": false
+  }
+}
