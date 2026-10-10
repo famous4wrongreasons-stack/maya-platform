@@ -1,0 +1,13 @@
+{
+  "candidateCommit": "21f8ba5a7cda39e5ae4a0a2583f2cc6e997d8ce3",
+  "ownerReportedBackendAndBegetWorkingAt": "2026-10-10T13:09:53Z",
+  "sshResult": "Beget authenticated; target hop timed out before target authentication or collector execution",
+  "publicResult": "Mac GET timed out without an observed HTTP status; web tool separately could not access URL",
+  "currentBindingEstablished": false,
+  "backendDownConclusion": false,
+  "writesOrSettingsChanges": false,
+  "providerOrModelCalls": 0,
+  "newKeysOrSecretContentsRead": false,
+  "rawSshDebugOrHttpBodyRetained": false,
+  "furtherAttempts": false
+}

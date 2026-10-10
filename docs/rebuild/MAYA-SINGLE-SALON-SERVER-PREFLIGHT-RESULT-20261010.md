@@ -1,5 +1,15 @@
 # Read-only серверный preflight: первый SSH attempt и разрешённая проверка маршрута
 
+## Повторная ограниченная проверка доступности — 13:17 UTC
+
+В 13:09:53 владелец сообщил, что backend Yandex Cloud и Beget работают. Это сообщение не заменяется старым выводом о недоступности: **состояние backend как «down» не установлено**. По поручению parent выполнен один recheck прежнего согласованного read-only маршрута с тем же collector SHA256 `922bd2ae1d6648f3f92fa9d68931c08dbfb093d97e0077981d23c9d4affbe443`, без изменения команд/ключей/настроек.
+
+Наблюдение с этого Mac 13:17:46–13:17:54: Beget SSH authentication подтверждена; до целевой авторизации/collector дело не дошло, маршрут завершился timeout/exit255 за 8.023 секунды. Отдельный один GET `https://mayaos.ru/api/health` в 13:18:19–13:18:30 завершился transport TimeoutError за 11.047 секунды, HTTP status не получен. Browser web tool ранее не смог открыть этот URL; это также не HTTP health verdict. Никаких redirect, новых маршрутов, повторов SSH, CRM/model calls или настроек не выполнялось. Секреты, сырые SSH debug и HTTP body не сохранены. Текущая привязка остаётся неизвестной именно этому наблюдению, а не объявлена отсутствующей.
+
+[Точные metadata receipts и ограничения](evidence/maya-server-availability-recheck-20261010/summary.json), [SSH](evidence/maya-server-availability-recheck-20261010/attempt.json), [public request](evidence/maya-server-availability-recheck-20261010/public-health.json). После этих конечных попыток проверка остановлена; локальная реализация продолжается независимо.
+
+## Исторический первоначальный результат — 09:52 UTC
+
 **Текущая привязка tenant/branch/company и metadata backend не получены.** Первичная попытка по существующему Beget-маршруту завершилась SSH exit 255 за 8.028 секунды после успешной авторизации на промежуточном Beget. Целевая SSH-авторизация не наблюдалась; collector и подготовленный SQL не исполнялись. Повтора этого metadata-запроса или смены маршрута не было. После уточнения разрешённого scope отдельно выполнена ограниченная проверка Beget → известный backend: **TCP connect к `89.169.160.55:22` завершился `TimeoutError` за 8.006 секунды**. Подробности ниже.
 
 ## Точный scope и время

@@ -1,0 +1,49 @@
+{
+  "contract": "maya.single-salon-authorized-readonly-attempt/1",
+  "startedAt": "2026-10-10T13:17:46.660524+00:00",
+  "candidateCommit": "21f8ba5a7cda39e5ae4a0a2583f2cc6e997d8ce3",
+  "recheckContext": {
+    "ownerStatusMessage": "Sentinel_daeca7661fd08191afa940f70dce2769",
+    "ownerStatusAt": "2026-10-10T13:09:53Z",
+    "parentInstruction": "bounded recheck of the previously authorized exact read-only route; no loops, settings, secrets or new keys"
+  },
+  "authorization": {
+    "questionMessage": "Sentinel_70ef609ce7b081919f4ec67cdefdd5ae",
+    "questionAt": "2026-10-10T09:48:30Z",
+    "answerMessage": "Sentinel_dee4f07ef0e081919c571ebea8f4e987",
+    "answerAt": "2026-10-10T09:49:14Z",
+    "answer": "\u0440\u0430\u0437\u0440\u0435\u0448\u0430\u044e",
+    "scope": "one existing-route SSH attempt; current tenant/branch/company binding and runtime metadata only"
+  },
+  "target": "botadmin@api.mayaos.ru",
+  "route": "existing Beget ProxyCommand",
+  "networkAttempts": 1,
+  "connectionAttemptsPerHop": 1,
+  "connectTimeoutPerHopSeconds": 8,
+  "outerDeadlineSeconds": 45,
+  "hostKeyChecking": "strict",
+  "updateHostKeys": false,
+  "collectorSha256": "922bd2ae1d6648f3f92fa9d68931c08dbfb093d97e0077981d23c9d4affbe443",
+  "remoteCommand": "python3 -B -",
+  "status": "no_remote_metadata",
+  "exitCode": 255,
+  "finishedAt": "2026-10-10T13:17:54.683627+00:00",
+  "seconds": 8.023,
+  "stdoutBytes": 0,
+  "stderrBytes": 11070,
+  "phases": {
+    "proxyAuthenticated": true,
+    "forwardChannelConfirmed": false,
+    "remoteProtocolBannerCount": 1,
+    "targetAuthenticated": false,
+    "timeout": true,
+    "hostKeyRefused": false,
+    "authenticationRefused": false,
+    "forwardingRefused": false
+  },
+  "rawSshDebugRetained": false,
+  "localStopReason": null,
+  "collectorOutputObserved": false,
+  "currentMappingEstablished": false,
+  "noFurtherAttempt": true
+}
