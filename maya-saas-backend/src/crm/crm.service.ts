@@ -164,6 +164,7 @@ import {
   CrmOutcomeUnknownError,
   CrmRecordGoneError,
   CrmProviderResponseError,
+  CrmProviderPayloadError,
 } from './crm-request.errors';
 
 export type AppointmentActionInvocation = {
@@ -7024,6 +7025,8 @@ export class CrmService {
   }
 
   private classifyConnectionError(error: unknown): string {
+    if (error instanceof CrmProviderPayloadError)
+      return 'crm_connection_failed';
     const message =
       error instanceof Error
         ? error.message

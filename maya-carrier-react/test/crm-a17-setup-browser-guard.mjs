@@ -39,7 +39,7 @@ export function admitted(request, origin, scope) {
     if (url.pathname === '/api/integrations/crm/activate') return (!scope.apiToken || scope.apiToken === 'SYNTHETIC_A17_V1') && keys(body, ['expectedVersion']) && version(body.expectedVersion);
     if (url.pathname !== '/api/integrations/crm/connect' || !keys(body, ['provider', 'apiToken', 'expectedVersion', 'settingsJson'])) return false;
     const token = scope.apiToken ?? 'SYNTHETIC_A17_V1';
-    return ['SYNTHETIC_A17_V1', 'SYNTHETIC_A17_DENIED', 'SYNTHETIC_A17_COMPANY_MISSING'].includes(token) &&
+    return ['SYNTHETIC_A17_V1', 'SYNTHETIC_A17_DENIED', 'SYNTHETIC_A17_COMPANY_MISSING', 'SYNTHETIC_A17_COMPANY_BAD_TITLE'].includes(token) &&
       body.provider === 'yclients' && body.apiToken === token && body.expectedVersion === null &&
       keys(body.settingsJson, ['companyId', 'branchBinding']) && body.settingsJson.companyId === scope.companyId &&
       keys(body.settingsJson.branchBinding, ['contract', 'companyId', 'branchId']) &&

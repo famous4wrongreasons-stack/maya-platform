@@ -62,6 +62,7 @@ import {
   CrmOutcomeUnknownError,
   CrmRecordGoneError,
   CrmProviderResponseError,
+  CrmProviderPayloadError,
   isUnknownOutcomeCause,
 } from '../crm-request.errors';
 import {
@@ -388,22 +389,58 @@ export class YclientsCRMAdapter implements CRMAdapter {
 
   private async readCompanyOptions(
     preserveMissingTitle: boolean,
+    selectedCompanyId?: string,
   ): Promise<CrmCompanyOption[]> {
     const query = new URLSearchParams();
     query.set('my', '1');
-    const response = await this.request<YclientsCompanyApiItem[]>('companies', {
-      query,
-    });
-
-    return (response.data || [])
+    let response: unknown;
+    try {
+      response = await this.request<unknown>('companies', { query });
+    } catch (error) {
+      // A null JSON envelope can fail in the existing request parser. Network
+      // failures already have their own typed outcome and remain unchanged.
+      if (error instanceof TypeError) throw new CrmProviderPayloadError();
+      throw error;
+    }
+    if (!response || typeof response !== 'object' || Array.isArray(response))
+      throw new CrmProviderPayloadError();
+    const rows = (response as Record<string, unknown>).data;
+    if (!Array.isArray(rows)) throw new CrmProviderPayloadError();
+    const active: YclientsCompanyApiItem[] = [];
+    const identities = new Set<string>();
+    for (const row of rows) {
+      if (!row || typeof row !== 'object' || Array.isArray(row))
+        throw new CrmProviderPayloadError();
+      const company = row as Record<string, unknown>;
+      if (
+        !['string', 'number'].includes(typeof company.id) ||
+        !/^[1-9][0-9]*$/.test(String(company.id)) ||
+        !Number.isSafeInteger(Number(company.id)) ||
+        identities.has(String(company.id))
+      )
+        throw new CrmProviderPayloadError();
+      identities.add(String(company.id));
+      if (company.active !== false) active.push(company);
+    }
+    // The discovery UI displays at most 200 options. A selected-company check
+    // must neither lose a later ID nor parse unrelated presentation fields.
+    return active
       .filter(
         (company) =>
-          company.active !== false &&
-          company.id !== undefined &&
-          company.id !== null,
+          selectedCompanyId === undefined ||
+          String(company.id) === selectedCompanyId,
       )
       .slice(0, 200)
       .map((company) => {
+        if (
+          [company.title, company.public_title, company.address].some(
+            (value) =>
+              value !== undefined &&
+              value !== null &&
+              typeof value !== 'string',
+          )
+        )
+          throw new CrmProviderPayloadError();
         const id = String(company.id);
         const title = this.companyTitle(company, preserveMissingTitle);
         const address = company.address?.trim() || null;
@@ -481,7 +518,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
     }
 
     const discovered = (
-      await this.readCompanyOptions(preserveMissingTitle)
+      await this.readCompanyOptions(preserveMissingTitle, String(companyId))
     ).find((company) => company.id === String(companyId));
     if (!discovered) {
       return null;
@@ -3321,7 +3358,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
     void tenantId;
 
     const companyId = String(this.getCompanyId());
-    const company = (await this.discoverCompanies()).find(
+    const company = (await this.readCompanyOptions(false, companyId)).find(
       (candidate) => candidate.id === companyId,
     );
     if (!company) {

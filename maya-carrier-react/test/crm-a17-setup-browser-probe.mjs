@@ -56,14 +56,39 @@ const postCount = page => page.apiRequests('/integrations/crm').filter(row => ro
 const refusalContracts = Object.freeze({
   'provider-denied': { token: 'SYNTHETIC_A17_DENIED', code: 'crm_credentials_rejected', notice: 'YCLIENTS отклонил проверку доступа. Нужно проверить токен и его права на выбранную компанию.' },
   'company-unavailable': { token: 'SYNTHETIC_A17_COMPANY_MISSING', code: 'crm_company_not_found', notice: 'Выбранная компания YCLIENTS не найдена или недоступна для этого токена.' },
+  'company-malformed-title': { token: 'SYNTHETIC_A17_COMPANY_BAD_TITLE', code: 'crm_connection_failed', notice: 'Сервер не смог проверить подключение к YCLIENTS.' },
 });
 const safeNetwork = page => [...page.requests.values()].map(row => ({ method: row.method, path: new URL(row.url).pathname, status: row.status ?? null, failed: Boolean(row.failed) }));
+const activationHelp = 'Сначала должно завершиться сохранение подключения в шаге 1. Сейчас оно не подтверждено, поэтому активация и импорт недоступны.';
+async function checkActivation(page, state) {
+  assert.ok(['blocked', 'ready', 'consented'].includes(state));
+  // Closed booleans only: never archive arbitrary text, IDs, form values or credentials.
+  const snapshot = await page.eval(`(() => {
+    const section = document.querySelector('section[aria-label="Активация подключения"]');
+    if (!section) return null;
+    const controls = [...section.querySelectorAll('button')];
+    const consent = controls.find(el => el.getAttribute('role') === 'checkbox');
+    const action = controls.find(el => !el.hasAttribute('role'));
+    if (!consent || !action || controls.length !== 2) return null;
+    const consentHelp = consent.getAttribute('aria-describedby');
+    const actionHelp = action.getAttribute('aria-describedby');
+    const help = consentHelp ? document.getElementById(consentHelp) : null;
+    return { consentDisabled: consent.disabled, consentChecked: consent.getAttribute('aria-checked') === 'true',
+      actionDisabled: action.disabled, hasHelp: !!(consentHelp || actionHelp),
+      canonicalSharedHelp: !!help && section.contains(help) && Q.visible(help) && consentHelp === actionHelp && help.textContent.trim() === ${JSON.stringify(activationHelp)} };
+  })()`);
+  assert.deepEqual(snapshot, {
+    consentDisabled: state === 'blocked', consentChecked: state === 'consented',
+    actionDisabled: state !== 'consented', hasHelp: state === 'blocked', canonicalSharedHelp: state === 'blocked',
+  }, 'Actual activation controls and associated explanation: ' + state);
+  return snapshot;
+}
 
 async function main() {
   assert.equal(process.connected, true, 'Use the owned --crm-setup HTTP fixture');
   const ready = receive('start'); process.send({ type: 'ready' });
   const input = await ready;
-  assert.deepEqual(input.refusals?.map(scope => scope.key), ['provider-denied', 'company-unavailable'], 'Two finite refusal cases required');
+  assert.deepEqual(input.refusals?.map(scope => scope.key), ['provider-denied', 'company-unavailable', 'company-malformed-title'], 'Three finite refusal cases required');
   for (const scope of input.refusals) assert.equal(scope.apiToken, refusalContracts[scope.key].token);
   const backendOrigin = localOrigin(input.backendOrigin);
   assert.ok(path.isAbsolute(input.output));
@@ -86,9 +111,10 @@ async function main() {
   })();
   const terminate = () => { void cleanup().finally(() => process.exit(2)); };
   process.once('SIGTERM', terminate); process.once('disconnect', terminate);
-  async function capture(name) {
+  async function capture(name, activation = false) {
     assert.equal(await page.eval(`(${tokenInput})?.value ?? ''`), '', 'Never capture an entered credential');
     await page.eval('document.querySelector("main")?.scrollTo(0,0)');
+    if (activation) await page.eval('document.querySelector(\'section[aria-label="Активация подключения"]\')?.scrollIntoView({block:"center"})');
     await page.eval('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))');
     assert.equal(await page.eval('document.documentElement.scrollWidth > innerWidth'), false);
     const screenshot = await page.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
@@ -128,6 +154,7 @@ async function main() {
     await capture('initial'); await checkpoint('initial');
     await named(page, 'Загрузить филиалы');
     assert.ok(await page.waitFor('document.body.innerText.includes("Показано сохранённое подключение")'));
+    await checkActivation(page, 'blocked');
     await checkpoint('loaded');
     assert.equal(await page.fill(tokenInput, 'SYNTHETIC_A17_V1'), true);
     assert.equal(await page.fill(companyInput, String(input.companyId)), true);
@@ -138,6 +165,7 @@ async function main() {
     assert.equal(await page.eval(`(${tokenInput}).value`), '', 'Token cleared at submission');
     await until(() => guard.droppedUnregisteredRequests === 1, 'request dropped before backend registration');
     assert.ok(await page.waitFor('document.body.innerText.includes("Результат действия ещё не подтверждён")'));
+    await checkActivation(page, 'blocked');
     const installPendingUrl = await page.eval('window.location.href');
     const installLocator = new URL(installPendingUrl).searchParams;
     assert.equal(installLocator.get('crm_operation'), 'install');
@@ -157,6 +185,7 @@ async function main() {
     assert.equal(missing.status, 'NOT_OBSERVED'); assert.equal(missing.requestId, installKey); assert.equal(missing.receipt, null);
     assert.equal(await page.eval(`(${button('Повторить отправку подключения')}).disabled`), true, 'Missing observation grants no fresh consent');
     assert.equal(postCount(page), 1);
+    report.observations.notObservedActivation = await checkActivation(page, 'blocked');
     await capture('not-observed'); await checkpoint('not-observed', { requestId: installKey });
     assert.equal(await page.fill(tokenInput, 'SYNTHETIC_A17_V1'), true);
     assert.equal(await page.fill(companyInput, String(input.companyId)), true);
@@ -173,9 +202,12 @@ async function main() {
     assert.equal(installed.receipt.configVersion, installed.connection.configVersion);
     assert.ok(await page.waitFor('document.body.innerText.includes("Подключение сохранено. Активация и импорт требуют отдельного подтверждения.")'));
     assert.equal(await page.eval(`(${button('Активировать и импортировать')}).disabled`), true);
+    report.observations.installedActivation = await checkActivation(page, 'ready');
     assert.equal(postCount(page), 2);
     await capture('installed'); await checkpoint('installed', { receipt: installed.receipt });
     await click(page, 'Q.all("button[role=checkbox]").find(el => Q.name(el).includes("Разрешаю активировать показанную версию"))', 'activation consent');
+    report.observations.consentedActivation = await checkActivation(page, 'consented');
+    assert.equal(postCount(page), 2, 'Consent alone never dispatches activation');
     await named(page, 'Активировать и импортировать');
     await until(() => guard.droppedCommittedResponses === 1, 'actual upstream activation 201 response');
     assert.ok(await page.waitFor('document.body.innerText.includes("Результат действия ещё не подтверждён")'));
@@ -238,11 +270,14 @@ async function main() {
       assert.equal(await page.eval(`(${tokenInput}).value`), '');
       assert.equal(await page.eval(`(${button('Проверить и сохранить подключение')}).disabled`), true);
       assert.equal(await page.eval(`(${button('Активировать и импортировать')}).disabled`), true);
+      const refusedActivation = await checkActivation(page, 'blocked');
       assert.equal(postCount(page), 1);
       const pendingUrl = await page.eval('window.location.href'), locator = new URL(pendingUrl).searchParams;
       assert.equal(locator.get('crm_operation'), 'install');
       const pendingId = locator.get('crm_request'); assert.match(pendingId, /^[a-f0-9-]{36}$/);
-      await capture(scope.key + '-result'); await checkpoint(scope.key + '-result', { requestId: pendingId, code: expected.code });
+      await capture(scope.key + '-result');
+      await capture(scope.key + '-activation-help', true);
+      await checkpoint(scope.key + '-result', { requestId: pendingId, code: expected.code });
       const readsBefore = page.apiRequests('/integrations/crm').length;
       await page.goto(pendingUrl); await login(page, scope);
       assert.equal(await page.eval('window.location.href'), pendingUrl, 'Refusal reload preserves same operation locator');
@@ -261,12 +296,13 @@ async function main() {
       assert.equal(connection.configured, false); assert.equal(connection.connection, null);
       assert.equal(await page.eval(`(${button('Повторить отправку подключения')}).disabled`), true, 'No fresh token or consent after reload');
       assert.equal(await page.eval(`(${button('Активировать и импортировать')}).disabled`), true);
+      const observedActivation = await checkActivation(page, 'blocked');
       assert.equal(postCount(page), 1); assert.equal(page.apiRequests('/auth/login').length, 2);
       assert.deepEqual(guard.blocked, []); assert.deepEqual(guard.errors, []);
       assert.equal(guard.droppedCommittedResponses, 0); assert.equal(guard.droppedUnregisteredRequests, 0);
       assert.deepEqual(page.exceptions, []);
       await capture(scope.key + '-observed'); await checkpoint(scope.key + '-observed', { requestId: pendingId, status: operation.status });
-      report.refusals.push({ key: scope.key, code: expected.code, httpStatus: refused.status, receiptStatus: operation.status, operationHash: hash({ operation: 'install', requestId: pendingId }), sameLocatorReload: true, posts: 1, configured: false, automaticRetry: false, guards: guard, network: safeNetwork(page) });
+      report.refusals.push({ key: scope.key, code: expected.code, httpStatus: refused.status, receiptStatus: operation.status, operationHash: hash({ operation: 'install', requestId: pendingId }), sameLocatorReload: true, posts: 1, configured: false, automaticRetry: false, refusedActivation, observedActivation, guards: guard, network: safeNetwork(page) });
       guard.dispose(); await page.close(); page = null;
     }
     report.status = 'passed';

@@ -26,11 +26,13 @@ test('chat and widget routes remain outside the actual setup-read profile', () =
   assert.equal(admitted(call('/api/widgets/resolve', { thread_page: { limit: 20 } }), origin, scope), false);
 });
 test('negative provider cases accept only their explicitly selected synthetic material', () => {
-  for (const apiToken of ['SYNTHETIC_A17_DENIED', 'SYNTHETIC_A17_COMPANY_MISSING']) {
+  for (const apiToken of ['SYNTHETIC_A17_DENIED', 'SYNTHETIC_A17_COMPANY_MISSING', 'SYNTHETIC_A17_COMPANY_BAD_TITLE']) {
     const specific = { ...scope, apiToken };
     const body = { provider: 'yclients', apiToken, expectedVersion: null, settingsJson: { companyId: scope.companyId, branchBinding: { contract: 'maya.crm-branch-binding/1', companyId: scope.companyId, branchId: scope.branchId } } };
     assert.equal(admitted(call('/api/integrations/crm/connect', body, { 'Idempotency-Key': key }), origin, specific), true);
     assert.equal(admitted(call('/api/integrations/crm/connect', { ...body, apiToken: 'SYNTHETIC_A17_V1' }, { 'Idempotency-Key': key }), origin, specific), false);
+    for (const other of ['SYNTHETIC_A17_DENIED', 'SYNTHETIC_A17_COMPANY_MISSING', 'SYNTHETIC_A17_COMPANY_BAD_TITLE'].filter(value => value !== apiToken))
+      assert.equal(admitted(call('/api/integrations/crm/connect', { ...body, apiToken: other }, { 'Idempotency-Key': key }), origin, specific), false);
     assert.equal(admitted(call('/api/integrations/crm/activate', { expectedVersion: 'a'.repeat(64) }, { 'Idempotency-Key': key }), origin, specific), false);
   }
 });

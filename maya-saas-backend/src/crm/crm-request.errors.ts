@@ -38,6 +38,15 @@ export class CrmProviderResponseError extends Error {
   }
 }
 
+/** Invalid provider data is not evidence that a company is absent. No raw
+ * payload, field value or provider message is retained by this error. */
+export class CrmProviderPayloadError extends Error {
+  constructor() {
+    super('CRM returned an invalid response shape');
+    this.name = 'CrmProviderPayloadError';
+  }
+}
+
 /**
  * Исход неизвестен: ответа не было.
  *

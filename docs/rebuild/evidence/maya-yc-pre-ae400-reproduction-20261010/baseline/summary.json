@@ -1,0 +1,16 @@
+{
+  "runtimeCommit": "9f935d688f0c1728f837d0216abc93d7896e88c6",
+  "sourceUnchanged": true,
+  "status": "passed",
+  "classification": "BASELINE_REPRODUCED_NOT_REMEDIATION",
+  "cases": 20,
+  "syntheticProviderReads": 22,
+  "realProviderCalls": 0,
+  "modelCalls": 0,
+  "ownerDatabaseTouched": false,
+  "clusterStopped": true,
+  "artifacts": {
+    "manifest.json": "98d20c60018e7bc47c752effeaca636cc4f466f85193e986bb8dc679ca76fb33",
+    "matrix.json": "1d0b0ebfc91fee0ff5a7c627b94f864436ddca63f9c659e85a4179d0127cc4c9"
+  }
+}

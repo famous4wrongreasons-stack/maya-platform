@@ -1,8 +1,15 @@
 import { CrmProvider } from '../../common/domain.enums';
 import { YclientsCRMAdapter } from './yclients-crm.adapter';
+import { CrmProviderPayloadError } from '../crm-request.errors';
 
 type Titles = { title?: string; public_title?: string };
 type ProfileRoute = 'detail' | 'discovery fallback';
+const requestAddress = (input: Parameters<typeof fetch>[0]): string =>
+  typeof input === 'string'
+    ? input
+    : input instanceof URL
+      ? input.href
+      : input.url;
 
 /** Finite synthetic native GET transport; no live CRM or model qualification. */
 describe('native public company title provenance [synthetic transport]', () => {
@@ -155,5 +162,107 @@ describe('native public company title provenance [synthetic transport]', () => {
       { id: '123', title: 'Филиал 123', address: 'Публичный адрес' },
     ]);
     expect(f.requested).toEqual(['/companies?my=1']);
+  });
+  it.each([
+    { name: 'absent data', payload: { success: true } },
+    { name: 'null envelope', payload: null },
+    { name: 'array envelope', payload: [] },
+    { name: 'object data', payload: { data: {} } },
+    { name: 'null row', payload: { data: [null] } },
+    { name: 'primitive row', payload: { data: [42] } },
+    {
+      name: 'missing identity',
+      payload: { data: [{ title: 'PRIVATE_VALUE' }] },
+    },
+    { name: 'noncanonical identity', payload: { data: [{ id: '00123' }] } },
+    {
+      name: 'duplicate identity',
+      payload: { data: [{ id: 123 }, { id: '123' }] },
+    },
+    {
+      name: 'invalid selected title',
+      payload: { data: [{ id: 123, title: { private: 'PRIVATE_VALUE' } }] },
+    },
+    {
+      name: 'invalid selected address',
+      payload: { data: [{ id: 123, address: 42 }] },
+    },
+  ])(
+    'refuses $name without retaining provider content',
+    async ({ payload }) => {
+      const f = fixture('detail', {});
+      jest
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValue(
+          new Response(JSON.stringify(payload), { status: 200 }),
+        );
+      let observed: unknown;
+      try {
+        await f.adapter.testConnection('synthetic');
+      } catch (error) {
+        observed = error;
+      }
+      expect(observed).toBeInstanceOf(CrmProviderPayloadError);
+      expect(String(observed)).toBe(
+        'CrmProviderPayloadError: CRM returned an invalid response shape',
+      );
+      expect(JSON.stringify(observed)).not.toContain('PRIVATE_VALUE');
+    },
+  );
+
+  it('keeps the discovery display bound while checking a selected company beyond it', async () => {
+    const f = fixture('discovery fallback', {});
+    const rows = [
+      ...Array.from({ length: 200 }, (_, index) => ({
+        id: 1000 + index,
+        title: 'Synthetic',
+      })),
+      { id: 123, title: 'Selected' },
+    ];
+    jest.spyOn(globalThis, 'fetch').mockImplementation((input) =>
+      Promise.resolve(
+        new Response(
+          requestAddress(input).includes('/companies?')
+            ? JSON.stringify({ success: true, data: rows })
+            : '{}',
+          {
+            status: requestAddress(input).includes('/companies?') ? 200 : 404,
+          },
+        ),
+      ),
+    );
+    expect(await f.adapter.discoverCompanies()).toHaveLength(200);
+    await expect(f.adapter.testConnection('synthetic')).resolves.toMatchObject({
+      ok: true,
+    });
+    await expect(
+      f.adapter.getCompanyProfile({ preserveMissingTitle: true }),
+    ).resolves.toMatchObject({ id: '123', title: 'Selected' });
+  });
+
+  it('does not parse unrelated company presentation as selected-company evidence', async () => {
+    const f = fixture('discovery fallback', {});
+    jest.spyOn(globalThis, 'fetch').mockImplementation((input) =>
+      Promise.resolve(
+        new Response(
+          requestAddress(input).includes('/companies?')
+            ? JSON.stringify({
+                success: true,
+                data: [
+                  { id: 124, title: 42 },
+                  { id: 123, title: 'Selected' },
+                ],
+              })
+            : '{}',
+          { status: requestAddress(input).includes('/companies?') ? 200 : 404 },
+        ),
+      ),
+    );
+    await expect(f.adapter.testConnection('synthetic')).resolves.toMatchObject({
+      ok: true,
+    });
+    await expect(
+      f.adapter.getCompanyProfile({ preserveMissingTitle: true }),
+    ).resolves.toMatchObject({ id: '123', title: 'Selected' });
   });
 });

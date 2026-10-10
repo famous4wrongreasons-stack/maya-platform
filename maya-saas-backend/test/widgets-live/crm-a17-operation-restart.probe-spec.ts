@@ -54,6 +54,7 @@ const syntheticTokens = [
   'SYNTHETIC_A17_DENIED',
   'SYNTHETIC_A17_FORBIDDEN',
   'SYNTHETIC_A17_COMPANY_MISSING',
+  'SYNTHETIC_A17_COMPANY_BAD_TITLE',
 ] as const;
 // Jest wraps imported createRequire with its CJS loader. Use Node's actual
 // built-in loader to execute the unchanged ESM profile and transport modules.
@@ -173,8 +174,10 @@ const sourceFiles = [
   'src/crm/dto/crm-operation.dto.ts',
   'src/crm/crm-configuration-version.ts',
   'src/crm/crm.service.ts',
+  'src/crm/crm-request.errors.ts',
   'src/crm/crm-provider-settings.ts',
   'src/crm/adapters/yclients-crm.adapter.ts',
+  'src/crm/adapters/yclients-company-profile-source.spec.ts',
   'src/package5-wave3/package5-wave3-canonical-cutover.service.ts',
   'src/package5-wave3/package5-wave3.service.ts',
   'src/package5-wave3/package5-wave3-production-gateway.service.ts',
@@ -312,7 +315,9 @@ describe('A17 exact configuration and persisted operation recovery through actua
         data =
           material === 'SYNTHETIC_A17_COMPANY_MISSING'
             ? [{ ...company, id: companyId + 1 }]
-            : [company];
+            : material === 'SYNTHETIC_A17_COMPANY_BAD_TITLE'
+              ? [{ ...company, title: 42 }]
+              : [company];
       else if (route === `company/${companyId}`) data = company;
       else if (route === `book_services/${companyId}`)
         data = {
@@ -1146,6 +1151,12 @@ describe('A17 exact configuration and persisted operation recovery through actua
         code: 'crm_company_not_found',
         owner: await createTenant('Synthetic company unavailable'),
       },
+      {
+        key: 'company-malformed-title',
+        apiToken: 'SYNTHETIC_A17_COMPANY_BAD_TITLE',
+        code: 'crm_connection_failed',
+        owner: await createTenant('Synthetic malformed company title'),
+      },
     ];
     const refused: Record<
       string,
@@ -1275,10 +1286,12 @@ describe('A17 exact configuration and persisted operation recovery through actua
               if (message.name === refusal.key + '-result') {
                 expect(message.code).toBe(refusal.code);
                 expect(refused[refusal.key]).toBeUndefined();
+                const refusalIndex = refusals.indexOf(refusal);
+                expect(refusalEvidence).toHaveLength(refusalIndex);
                 const startReads =
-                  refusalEvidence.length === 0
+                  refusalIndex === 0
                     ? committedReads
-                    : refused[refusals[0].key].reads;
+                    : refused[refusals[refusalIndex - 1].key].reads;
                 expect(providerReads.slice(startReads)).toEqual(['companies']);
                 refused[refusal.key] = {
                   requestId,
@@ -1444,6 +1457,7 @@ describe('A17 exact configuration and persisted operation recovery through actua
       });
     });
     expect(index).toBe(names.length);
+    expect(refusalEvidence).toHaveLength(refusals.length);
     checks.push(
       'Current React form uses explicit load/install/activation, clears credential, retains lost-response locator across same-URL reload, recovers exact receipt without resend',
     );
@@ -1609,14 +1623,14 @@ describe('A17 exact configuration and persisted operation recovery through actua
       {
         key: 'selected-beyond-200',
         payload: { success: true, data: [...preceding(200), base] },
-        status: 400,
-        code: 'crm_company_not_found',
+        status: 201,
+        code: null,
       },
       {
         key: 'data-absent',
         payload: { success: true },
         status: 400,
-        code: 'crm_company_not_found',
+        code: 'crm_connection_failed',
       },
       {
         key: 'data-non-array',
@@ -1634,7 +1648,7 @@ describe('A17 exact configuration and persisted operation recovery through actua
         key: 'envelope-array',
         payload: [base],
         status: 400,
-        code: 'crm_company_not_found',
+        code: 'crm_connection_failed',
       },
       {
         key: 'item-null',
@@ -1646,19 +1660,19 @@ describe('A17 exact configuration and persisted operation recovery through actua
         key: 'items-primitive',
         payload: { success: true, data: [1, true, 'synthetic'] },
         status: 400,
-        code: 'crm_company_not_found',
+        code: 'crm_connection_failed',
       },
       {
         key: 'title-invalid-type',
         payload: { success: true, data: [{ ...base, title: 42 }] },
         status: 400,
-        code: 'crm_company_not_found',
+        code: 'crm_connection_failed',
       },
       {
         key: 'address-invalid-type',
         payload: { success: true, data: [{ ...base, address: 42 }] },
         status: 400,
-        code: 'crm_company_not_found',
+        code: 'crm_connection_failed',
       },
       {
         key: 'unrelated-row-invalid-title',
@@ -1666,8 +1680,8 @@ describe('A17 exact configuration and persisted operation recovery through actua
           success: true,
           data: [base, { ...base, id: companyId + 1, title: 42 }],
         },
-        status: 400,
-        code: 'crm_company_not_found',
+        status: 201,
+        code: null,
       },
       {
         key: 'outer-shape',
@@ -1711,6 +1725,19 @@ describe('A17 exact configuration and persisted operation recovery through actua
         code: null,
       },
     ];
+    const positiveRoutes = [
+      'companies',
+      `book_services/${companyId}`,
+      `service_categories/${companyId}`,
+      `company/${companyId}/staff`,
+      `company/${companyId}`,
+    ];
+    const positiveCases = cases.filter((entry) => entry.status === 201).length;
+    const beforeProviderCases = cases.filter((entry) => entry.control).length;
+    const payloadRefusals = cases.length - positiveCases - beforeProviderCases;
+    const expectedProviderReads =
+      positiveCases * positiveRoutes.length + payloadRefusals;
+    const matrixReadStart = providerReads.length;
     const foreign = await createTenant('Synthetic matrix foreign branch');
     const foreignBefore = await durable(foreign.tenantId);
     for (const entry of cases) {
@@ -1803,15 +1830,7 @@ describe('A17 exact configuration and persisted operation recovery through actua
         expect(state.executions[0].executionAttemptCount).toBe(1);
         expect(state.mutations).toHaveLength(1);
         expect(state.integration?.status).toBe('pending_activation');
-        expect(routes.slice().sort()).toEqual(
-          [
-            'companies',
-            `book_services/${companyId}`,
-            `service_categories/${companyId}`,
-            `company/${companyId}/staff`,
-            `company/${companyId}`,
-          ].sort(),
-        );
+        expect(routes.slice().sort()).toEqual(positiveRoutes.slice().sort());
         await readSucceededWithoutEffects(ownerToken, owner, receipt);
         row.receiptStatus = 'SUCCEEDED';
         row.receiptHash = hash(receipt);
@@ -1857,17 +1876,21 @@ describe('A17 exact configuration and persisted operation recovery through actua
       matrixCompanies = undefined;
       matrixTrace = undefined;
     }
-    expect(results).toHaveLength(20);
-    expect(providerReads).toHaveLength(22);
+    expect(results).toHaveLength(cases.length);
+    expect(providerReads).toHaveLength(matrixReadStart + expectedProviderReads);
     checks.push(
-      'Twelve parsed HTTP200 companies payload classes fail before AE, with exact HTTP error codes and closed traces; status reads remain NOT_OBSERVED without redispatch',
+      `${payloadRefusals} parsed HTTP200 companies payload classes fail before AE, with exact HTTP error codes and closed traces; status reads remain NOT_OBSERVED without redispatch`,
     );
     checks.push(
-      'Six malformed/scope/version/role controls refuse before provider dispatch; first and 200th selected-company controls install exactly once',
+      `${beforeProviderCases} malformed/scope/version/role controls refuse before provider dispatch; ${positiveCases} selected-company controls install exactly once, including beyond the display cap and an unrelated invalid title`,
     );
     observations.matrixQualification = {
-      cases: 20,
-      providerReads: 22,
+      cases: cases.length,
+      positiveCases,
+      beforeProviderCases,
+      payloadRefusals,
+      providerReads: providerReads.length - matrixReadStart,
+      expectedProviderReads,
       realProviderCalls: 0,
       modelCalls: 0,
       perCaseObserver:

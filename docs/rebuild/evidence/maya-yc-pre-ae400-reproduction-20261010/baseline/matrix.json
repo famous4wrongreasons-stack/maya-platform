@@ -1,0 +1,2770 @@
+{
+  "contract": "maya.crm-a17-operation-http-pg-proof/1",
+  "stage": "matrix",
+  "status": "passed",
+  "candidateCommit": "9f935d688f0c1728f837d0216abc93d7896e88c6",
+  "sourceHashes": {
+    "src/crm/crm-integration.controller.ts": "d133c1b5c53d9a3c724fb4bb4ba5e90dfd12803e11b44a0b02549418b04fec41",
+    "src/crm/dto/connect-crm-integration.dto.ts": "c4062ff06baa1c885d055c69b76021e31aacfa9f49c73f9403deb6f8194528ea",
+    "src/crm/dto/crm-operation.dto.ts": "f079ead59eb4467aa4fa0617d131e5f23785f15842311ca0a110c596d027b266",
+    "src/crm/crm-configuration-version.ts": "788724bbc8db8d95d2d6f9d130063950224d6d49913eb8367a70d1ee91c8f855",
+    "src/crm/crm.service.ts": "544fb41187f55184b1959a0e36e45edae738be0f024e52977279859374d8479d",
+    "src/crm/crm-provider-settings.ts": "9e1c8efb41332dd788d92453d768afcf8f785d3b482340d362ceb81858c9c161",
+    "src/crm/adapters/yclients-crm.adapter.ts": "ef484bde55b5a5ee25549b5af0405fea3932201622161c050280d5d5efee4563",
+    "src/package5-wave3/package5-wave3-canonical-cutover.service.ts": "3cd6bf70e92010e78127fcabd2d792520f5fb8306fe9496f59bfeb758215c06e",
+    "src/package5-wave3/package5-wave3.service.ts": "0e678563f1fa2273170f79916def92f7c94cb415171130cae838cb1257d962c0",
+    "src/package5-wave3/package5-wave3-production-gateway.service.ts": "309e292720ca2fc570e0adcc2504ea8d440795c870cbda36c3a694695f5360cb",
+    "src/action-engine/package5-wave3-executable.contract.ts": "809124b1ee20030ce07fbc64d80bc3c507db02acd63f0f33b58363b158415513",
+    "scripts/c9-occupancy-proof.mjs": "f9b5074cf848ceeb5a0b978bcd35dbb231dba1175d03cb5954b9b0364d496f81",
+    "scripts/local-yclients-read-profile.mjs": "f850e8c558f6f52e3b283efbcce69c3cb889656a164b58e97ec44f5c3ca2b869",
+    "scripts/local-yclients-read-transport.mjs": "031255c1b0d3842fafbc47405c6b7feb5fb9ac0bceb4fa109e91d0168288ba96",
+    "scripts/local-yclients-read-runtime.mjs": "15d37d38bdaa098aa3d4b0cf40459b5095c8f40f5ef456027ea63e9cfa04e351",
+    "scripts/local-yclients-read-status.mjs": "c5bd4b18f89777ded2568aeb6795191703bc05c1e89a2c1963f43d719fa7ca0b",
+    "scripts/local-yclients-read.mjs": "9cf3c8dc539b991241a40fd003796adc3acc30e57475e56f32eb220b381da29e",
+    "scripts/local-onboarding-profile.mjs": "ac53a8a0885d4f8918ee2437050d0dd952ecd52bf5c6ace864e31b2350c685e0",
+    "src/crm/crm-adapter.factory.ts": "4dfb6827bbb9a624c39a366cd34e9aa177ef81645eabb20157cef3ceef123135",
+    "scripts/crm-a17-operation-proof.test.mjs": "7ea3d5174dd64df4a3d6e35afe7ca4d0109f9c99cd98579e3036b471d18d63aa",
+    "test/widgets-live/crm-a17-operation-restart.probe-spec.ts": "1f958294491b3c20e6c5d8f1ae32ba5ab19a62c84cee34fa76f82a899adfa88d",
+    "test/widgets-live/support/http-bootstrap.ts": "67b3b8e8575829b14a94917acfdc9ab0d06ca6e6930e2f6a414b7c1099abc6db",
+    "test/widgets-live/support/proof-db-guard.ts": "f05f1302d30ead2779179b8ee1cb24dd681cf8b5f5933cb65e616fe3f01f4a19",
+    "../maya-carrier-react/test/crm-a17-setup-browser-probe.mjs": "06ace16e7fee5d84035c17edb002471e721e5421c8f23cebcd2952ffdb282a42",
+    "../maya-carrier-react/test/crm-a17-setup-browser-guard.mjs": "da96cac6e73d5a8d8f04b537d05f54b396144b91d8a9e34269f9237eecad23cb",
+    "../maya-carrier-react/test/crm-a17-setup-browser-guard.test.mjs": "a8c32a31083a6c7abbb4ef516ff43fae460e6a7bb1fe7e0f7d0afacf83b07a73",
+    "../maya-carrier-react/src/setup/LocalCrmSetup.tsx": "ba366068e38d0d86eae241abf14b8c5365fc23b892abc343614a3258661d612c",
+    "../maya-carrier-react/src/App.tsx": "6080220b345f68a10d8b99e79fa7c7b7fa68cff91b3d268c6e6f4163462a7d58",
+    "../maya-carrier-react/src/signin/SignIn.tsx": "a9dbc44f8b7528eb103ab143b7755c9973143ade88431db4f062c798e2b4da05",
+    "../maya-carrier-react/src/signin/StandardOnboarding.tsx": "e994f216eebd0fcf4b314e139ce8c3f0c736c8de6c46de2c0744887b85788dcd",
+    "../maya-carrier-react/src/runtime/crmPending.ts": "7a1265ae670bcc54ab4b8f0c183b5fd150defbfaba984626ee7fdc812b18a587",
+    "../maya-carrier-react/src/runtime/compose.ts": "394721aa55a360f94bcab79127786bd0a2941bd55b4f7baadce20f6882ad91a9",
+    "../maya-carrier-react/build.mjs": "b91d872cbd59d92cb335431c084a5306cebf7011534d9fc9eafca1aa22e88605",
+    "../maya-chat-shell/src/shell/local-crm-setup.ts": "eab3e310dd2f88c4f55b9f03438b6f80c5cf38cdd77aeaab7620bf04e0642546",
+    "../maya-chat-shell/src/net/crm-setup.ts": "4b61612ed740e363028f71813bfa7bd82a0ef292df47db16b659bcd19910c401",
+    "../maya-chat-shell/src/net/client.ts": "4cb3675f5af01bb2135805d9e31a6925f75a05d5d422bbabb591fa18f86ff558",
+    "../maya-chat-shell/src/net/types.ts": "eb031c7dec23747f9a5f9c95305ba5d59803278b71e6d2fbd300f21cc81e48f7",
+    "../maya-chat-shell/test/local-crm-setup.test.mjs": "5d2a0e23bb2826da5ca18b17e11daa654a7f82768255d0db4174518d05c56987",
+    "../maya-chat-shell/dev/serve.mjs": "f0985920ab617d366fefe937ca257f00edbbc1bca90ba7a378dd5a25b03d711d",
+    "../maya-chat-shell/test/cdp-verify.mjs": "02de453056df1ec95091086dedd0485f2f1385655e777d9a2d7c55353e44a999"
+  },
+  "sourceUnchanged": true,
+  "checks": [
+    "Twelve parsed HTTP200 companies payload classes fail before AE, with exact HTTP error codes and closed traces; status reads remain NOT_OBSERVED without redispatch",
+    "Six malformed/scope/version/role controls refuse before provider dispatch; first and 200th selected-company controls install exactly once"
+  ],
+  "observations": {
+    "preAdmission400Matrix": [
+      {
+        "case": "selected-missing",
+        "boundary": "native_connection_check",
+        "httpStatus": 400,
+        "errorCode": "crm_company_not_found",
+        "providerRoutes": [
+          "companies"
+        ],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 20,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 22,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 23,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 400,
+            "code": "crm_company_not_found"
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 5,
+            "elapsedMs": 31,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 6,
+            "elapsedMs": 39,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "selected-inactive-boolean",
+        "boundary": "native_connection_check",
+        "httpStatus": 400,
+        "errorCode": "crm_company_not_found",
+        "providerRoutes": [
+          "companies"
+        ],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 8,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 8,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 400,
+            "code": "crm_company_not_found"
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 5,
+            "elapsedMs": 15,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 6,
+            "elapsedMs": 22,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "selected-beyond-200",
+        "boundary": "native_connection_check",
+        "httpStatus": 400,
+        "errorCode": "crm_company_not_found",
+        "providerRoutes": [
+          "companies"
+        ],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 8,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 8,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 400,
+            "code": "crm_company_not_found"
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 5,
+            "elapsedMs": 15,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 6,
+            "elapsedMs": 20,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "data-absent",
+        "boundary": "native_connection_check",
+        "httpStatus": 400,
+        "errorCode": "crm_company_not_found",
+        "providerRoutes": [
+          "companies"
+        ],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 9,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 9,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 10,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 400,
+            "code": "crm_company_not_found"
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 5,
+            "elapsedMs": 16,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 6,
+            "elapsedMs": 22,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "data-non-array",
+        "boundary": "native_connection_check",
+        "httpStatus": 400,
+        "errorCode": "crm_connection_failed",
+        "providerRoutes": [
+          "companies"
+        ],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 8,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 8,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 8,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 400,
+            "code": "crm_connection_failed"
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 5,
+            "elapsedMs": 15,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 6,
+            "elapsedMs": 20,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "envelope-null",
+        "boundary": "native_connection_check",
+        "httpStatus": 400,
+        "errorCode": "crm_connection_failed",
+        "providerRoutes": [
+          "companies"
+        ],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 0,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 6,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 6,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 6,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 400,
+            "code": "crm_connection_failed"
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 5,
+            "elapsedMs": 12,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 6,
+            "elapsedMs": 16,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "envelope-array",
+        "boundary": "native_connection_check",
+        "httpStatus": 400,
+        "errorCode": "crm_company_not_found",
+        "providerRoutes": [
+          "companies"
+        ],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 8,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 8,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 400,
+            "code": "crm_company_not_found"
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 5,
+            "elapsedMs": 16,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 6,
+            "elapsedMs": 21,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "item-null",
+        "boundary": "native_connection_check",
+        "httpStatus": 400,
+        "errorCode": "crm_connection_failed",
+        "providerRoutes": [
+          "companies"
+        ],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 6,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 6,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 7,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 400,
+            "code": "crm_connection_failed"
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 5,
+            "elapsedMs": 12,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 6,
+            "elapsedMs": 17,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "items-primitive",
+        "boundary": "native_connection_check",
+        "httpStatus": 400,
+        "errorCode": "crm_company_not_found",
+        "providerRoutes": [
+          "companies"
+        ],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 8,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 400,
+            "code": "crm_company_not_found"
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 5,
+            "elapsedMs": 14,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 6,
+            "elapsedMs": 18,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "title-invalid-type",
+        "boundary": "native_connection_check",
+        "httpStatus": 400,
+        "errorCode": "crm_company_not_found",
+        "providerRoutes": [
+          "companies"
+        ],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 7,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 400,
+            "code": "crm_company_not_found"
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 5,
+            "elapsedMs": 13,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 6,
+            "elapsedMs": 18,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "address-invalid-type",
+        "boundary": "native_connection_check",
+        "httpStatus": 400,
+        "errorCode": "crm_company_not_found",
+        "providerRoutes": [
+          "companies"
+        ],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 0,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 6,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 6,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 6,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 400,
+            "code": "crm_company_not_found"
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 5,
+            "elapsedMs": 12,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 6,
+            "elapsedMs": 16,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "unrelated-row-invalid-title",
+        "boundary": "native_connection_check",
+        "httpStatus": 400,
+        "errorCode": "crm_company_not_found",
+        "providerRoutes": [
+          "companies"
+        ],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 0,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 6,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 6,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 6,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 400,
+            "code": "crm_company_not_found"
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 5,
+            "elapsedMs": 14,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 6,
+            "elapsedMs": 19,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "outer-shape",
+        "boundary": "before_provider",
+        "httpStatus": 403,
+        "errorCode": "local_yclients_read_route_disabled",
+        "providerRoutes": [],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": "local_yclients_read_route_disabled"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 403,
+            "code": "local_yclients_read_route_disabled"
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 7,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 12,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "company-binding-mismatch",
+        "boundary": "before_provider",
+        "httpStatus": 403,
+        "errorCode": "local_yclients_read_route_disabled",
+        "providerRoutes": [],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": "local_yclients_read_route_disabled"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 403,
+            "code": "local_yclients_read_route_disabled"
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 6,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 10,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "request-key-missing",
+        "boundary": "before_provider",
+        "httpStatus": 403,
+        "errorCode": "local_yclients_read_route_disabled",
+        "providerRoutes": [],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": "local_yclients_read_route_disabled"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 403,
+            "code": "local_yclients_read_route_disabled"
+          }
+        ],
+        "submittedRequestKey": false,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 7,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 12,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "foreign-branch",
+        "boundary": "before_provider",
+        "httpStatus": 404,
+        "errorCode": null,
+        "providerRoutes": [],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 5,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 404,
+            "code": null
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 10,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 15,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "client-role",
+        "boundary": "before_provider",
+        "httpStatus": 403,
+        "errorCode": null,
+        "providerRoutes": [],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 2,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 403,
+            "code": null
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 10,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 15,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "stale-version",
+        "boundary": "before_provider",
+        "httpStatus": 409,
+        "errorCode": "crm_config_version_changed",
+        "providerRoutes": [],
+        "executions": 0,
+        "mutations": 0,
+        "integrationStatus": null,
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 5,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "refused",
+            "status": 409,
+            "code": null
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "NOT_OBSERVED",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 11,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 15,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "positive-selected-first",
+        "boundary": "positive_install",
+        "httpStatus": 201,
+        "errorCode": null,
+        "providerRoutes": [
+          "companies",
+          "book_services/424242",
+          "service_categories/424242",
+          "company/424242/staff",
+          "company/424242"
+        ],
+        "executions": 1,
+        "mutations": 1,
+        "integrationStatus": "pending_activation",
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 6,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "book_services",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 5,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "categories",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 6,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "team",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 7,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "company",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 8,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "book_services",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 9,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "categories",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 10,
+            "elapsedMs": 8,
+            "surface": "provider",
+            "route": "team",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 11,
+            "elapsedMs": 8,
+            "surface": "provider",
+            "route": "company",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 12,
+            "elapsedMs": 63,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "completed",
+            "status": 201,
+            "code": null
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "SUCCEEDED",
+        "receiptHash": "845b1d44505589e33806e4810221ad4fc6cdc293a1be2a6c114709218d59129d",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 13,
+            "elapsedMs": 69,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 14,
+            "elapsedMs": 74,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      },
+      {
+        "case": "positive-selected-200th-string-id",
+        "boundary": "positive_install",
+        "httpStatus": 201,
+        "errorCode": null,
+        "providerRoutes": [
+          "companies",
+          "book_services/424242",
+          "service_categories/424242",
+          "company/424242/staff",
+          "company/424242"
+        ],
+        "executions": 1,
+        "mutations": 1,
+        "integrationStatus": "pending_activation",
+        "trace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 1,
+            "elapsedMs": 1,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 2,
+            "elapsedMs": 6,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 3,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "companies",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 4,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "book_services",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 5,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "categories",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 6,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "team",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 7,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "company",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 8,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "book_services",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 9,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "categories",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 10,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "team",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 11,
+            "elapsedMs": 7,
+            "surface": "provider",
+            "route": "company",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": "provider_response_read"
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 12,
+            "elapsedMs": 33,
+            "surface": "http",
+            "route": "connect",
+            "method": "POST",
+            "stage": "completed",
+            "status": 201,
+            "code": null
+          }
+        ],
+        "submittedRequestKey": true,
+        "receiptStatus": "SUCCEEDED",
+        "receiptHash": "be5b34725eb25cf6dd2e865cbac1bedd8d38b257957d75bd00e48e81477c3e3f",
+        "recoveryTrace": [
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 13,
+            "elapsedMs": 39,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "entered",
+            "status": null,
+            "code": null
+          },
+          {
+            "type": "read-trace",
+            "contract": "maya.local-yclients-read-trace/1",
+            "sequence": 14,
+            "elapsedMs": 45,
+            "surface": "http",
+            "route": "operation",
+            "method": "GET",
+            "stage": "completed",
+            "status": 200,
+            "code": null
+          }
+        ],
+        "recoveryProviderReads": 0,
+        "noUnrelatedEffects": true
+      }
+    ],
+    "matrixQualification": {
+      "cases": 20,
+      "providerReads": 22,
+      "realProviderCalls": 0,
+      "modelCalls": 0,
+      "perCaseObserver": "Existing closed trace projector, first64 per synthetic case; production global cap unchanged",
+      "historicalOwnerCause": "UNKNOWN; equal metadata trace does not identify the original provider payload",
+      "browserRun": false,
+      "restartRun": false
+    }
+  },
+  "limits": {
+    "expiredOrCleanedOperation": "UNIT_ONLY: existing 30-day immutable payload retention; no temporal HTTP mutation or clock bypass",
+    "workerCrash": false
+  },
+  "providerReadCount": 22,
+  "readTransport": {
+    "calls": 22,
+    "refused": 0,
+    "routes": {
+      "companies": 14,
+      "book_services": 2,
+      "categories": 2,
+      "team": 2,
+      "company": 2
+    }
+  },
+  "ingress": {
+    "checked": 61,
+    "denied": [
+      {
+        "method": "POST",
+        "path": "/api/integrations/crm/connect",
+        "code": "local_yclients_read_route_disabled"
+      },
+      {
+        "method": "POST",
+        "path": "/api/integrations/crm/connect",
+        "code": "local_yclients_read_route_disabled"
+      },
+      {
+        "method": "POST",
+        "path": "/api/integrations/crm/connect",
+        "code": "local_yclients_read_route_disabled"
+      }
+    ]
+  },
+  "readTrace": [
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 1,
+      "elapsedMs": 637,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 2,
+      "elapsedMs": 656,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 3,
+      "elapsedMs": 658,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 4,
+      "elapsedMs": 659,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "refused",
+      "status": 400,
+      "code": "crm_company_not_found"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 5,
+      "elapsedMs": 667,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 6,
+      "elapsedMs": 675,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 7,
+      "elapsedMs": 859,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 8,
+      "elapsedMs": 865,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 9,
+      "elapsedMs": 866,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 10,
+      "elapsedMs": 866,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "refused",
+      "status": 400,
+      "code": "crm_company_not_found"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 11,
+      "elapsedMs": 873,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 12,
+      "elapsedMs": 880,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 13,
+      "elapsedMs": 1061,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 14,
+      "elapsedMs": 1067,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 15,
+      "elapsedMs": 1068,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 16,
+      "elapsedMs": 1068,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "refused",
+      "status": 400,
+      "code": "crm_company_not_found"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 17,
+      "elapsedMs": 1075,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 18,
+      "elapsedMs": 1080,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 19,
+      "elapsedMs": 1256,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 20,
+      "elapsedMs": 1264,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 21,
+      "elapsedMs": 1264,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 22,
+      "elapsedMs": 1265,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "refused",
+      "status": 400,
+      "code": "crm_company_not_found"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 23,
+      "elapsedMs": 1271,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 24,
+      "elapsedMs": 1277,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 25,
+      "elapsedMs": 1458,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 26,
+      "elapsedMs": 1465,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 27,
+      "elapsedMs": 1465,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 28,
+      "elapsedMs": 1465,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "refused",
+      "status": 400,
+      "code": "crm_connection_failed"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 29,
+      "elapsedMs": 1472,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 30,
+      "elapsedMs": 1477,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 31,
+      "elapsedMs": 1649,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 32,
+      "elapsedMs": 1655,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 33,
+      "elapsedMs": 1655,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 34,
+      "elapsedMs": 1655,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "refused",
+      "status": 400,
+      "code": "crm_connection_failed"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 35,
+      "elapsedMs": 1661,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 36,
+      "elapsedMs": 1665,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 37,
+      "elapsedMs": 1839,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 38,
+      "elapsedMs": 1845,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 39,
+      "elapsedMs": 1846,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 40,
+      "elapsedMs": 1846,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "refused",
+      "status": 400,
+      "code": "crm_company_not_found"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 41,
+      "elapsedMs": 1854,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 42,
+      "elapsedMs": 1859,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 43,
+      "elapsedMs": 2031,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 44,
+      "elapsedMs": 2036,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 45,
+      "elapsedMs": 2036,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 46,
+      "elapsedMs": 2037,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "refused",
+      "status": 400,
+      "code": "crm_connection_failed"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 47,
+      "elapsedMs": 2042,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 48,
+      "elapsedMs": 2047,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 49,
+      "elapsedMs": 2219,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 50,
+      "elapsedMs": 2225,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 51,
+      "elapsedMs": 2225,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 52,
+      "elapsedMs": 2226,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "refused",
+      "status": 400,
+      "code": "crm_company_not_found"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 53,
+      "elapsedMs": 2232,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 54,
+      "elapsedMs": 2236,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 55,
+      "elapsedMs": 2412,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 56,
+      "elapsedMs": 2418,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 57,
+      "elapsedMs": 2418,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 58,
+      "elapsedMs": 2418,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "refused",
+      "status": 400,
+      "code": "crm_company_not_found"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 59,
+      "elapsedMs": 2424,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 60,
+      "elapsedMs": 2429,
+      "surface": "http",
+      "route": "operation",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 61,
+      "elapsedMs": 2606,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 62,
+      "elapsedMs": 2612,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 63,
+      "elapsedMs": 2612,
+      "surface": "provider",
+      "route": "companies",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read"
+    },
+    {
+      "type": "read-trace",
+      "contract": "maya.local-yclients-read-trace/1",
+      "sequence": 64,
+      "elapsedMs": 2612,
+      "surface": "http",
+      "route": "connect",
+      "method": "POST",
+      "stage": "refused",
+      "status": 400,
+      "code": "crm_company_not_found"
+    }
+  ],
+  "traceQualification": "Actual closed observer, first 64 events only; no request identity or body retention",
+  "forbidden": [],
+  "qualification": "LOCAL_SYNTHETIC_NATIVE_ADAPTER_ONLY; actual HTTP pre-AE400 matrix and positive canonical installs; no browser/restart/live-provider acceptance",
+  "boundaries": {
+    "model": "forbidden spy",
+    "providerWrites": "exact local read_setup_v1 transport around finite synthetic native GETs",
+    "nativeFactory": "call-through; fixed synthetic partner scoped to construction",
+    "auth": "actual password HTTP; fixture bcrypt user and explicit test entitlements",
+    "outbound": "no delivery rows and no admitted external transport",
+    "privateReceiptArchived": false
+  }
+}
