@@ -503,7 +503,9 @@ describe('A17 exact configuration and persisted operation recovery through actua
       } catch (caught) {
         error = caught;
       }
-      assert.ok(error instanceof Error, 'Downstream must lose its response');
+      // Node transport errors can cross Jest's VM realm. The exact error code
+      // below proves delivery failure without relying on prototype identity.
+      assert.ok(error, 'Downstream must lose its response');
       expect(object(error).code).toBe('ECONNRESET');
       expect(upstreamStatus).toBe(201);
       expect(forwarded).toBe(1);
