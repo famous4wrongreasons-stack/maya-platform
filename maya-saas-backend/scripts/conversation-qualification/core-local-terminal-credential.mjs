@@ -37,7 +37,7 @@ function optionsFor(value) {
     !(signal instanceof AbortSignal) ||
     !Number.isSafeInteger(timeoutMs) ||
     timeoutMs < 1 ||
-    timeoutMs > 30000
+    timeoutMs > 180000
   )
     throw failure('options_refused');
   let aborted;

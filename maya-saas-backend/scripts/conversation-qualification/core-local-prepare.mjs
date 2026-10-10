@@ -117,7 +117,7 @@ export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE) {
     trustBoundary: 'OWNER_MANAGED_SAME_UID_NOT_PROCESS_ISOLATION',
     terminalInput: {
       recipient: 'local broker only',
-      timeoutMs: 30000,
+      timeoutMs: profile.id === CORE_UI_PROFILE ? 180000 : 30000,
       storage: 'memory only',
       inputsPerRun: 1,
     },

@@ -409,7 +409,10 @@ export async function startCoreBroker(values, batch = null) {
       else
         localCredential = await readLocalTerminalCredential({
           signal: controller.signal,
-          timeoutMs: Math.min(30000, remaining),
+          timeoutMs: Math.min(
+            profile.id === CORE_UI_PROFILE ? 180000 : 30000,
+            remaining,
+          ),
         });
       admission(binding);
       controller.signal.throwIfAborted();

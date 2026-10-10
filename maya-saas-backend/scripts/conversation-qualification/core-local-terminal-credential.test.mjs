@@ -173,7 +173,7 @@ test('a real active AbortSignal and closed data-only options are mandatory', asy
     { ...f.options, signal: Object.create(AbortSignal.prototype) },
     { ...f.options, timeoutMs: 0 },
     { ...f.options, timeoutMs: null },
-    { ...f.options, timeoutMs: 30001 },
+    { ...f.options, timeoutMs: 180001 },
     { ...f.options, timeoutMs: 1.5 },
     { ...f.options, timeoutMs: '1000' },
     { ...f.options, key: SYNTHETIC },
@@ -275,6 +275,17 @@ test('timeout refuses and restores a partially entered value', async (t) => {
   const result = readLocalTerminalCredential({ ...f.options, timeoutMs: 5 });
   f.input.send(SYNTHETIC);
   await assert.rejects(result, code('timeout'));
+  cleaned(f);
+});
+
+test('three-minute owner input remains abortable and restores the terminal', async (t) => {
+  const f = fixture(t);
+  const result = readLocalTerminalCredential({
+    ...f.options,
+    timeoutMs: 180000,
+  });
+  f.controller.abort();
+  await assert.rejects(result, code('aborted'));
   cleaned(f);
 });
 
