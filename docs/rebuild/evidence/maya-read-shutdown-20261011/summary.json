@@ -1,0 +1,74 @@
+{
+  "contract": "maya.local-read-shutdown-checkpoint/1",
+  "baseCommit": "1fe7074bc1ff2a00cbff0226e6fe13de971715b4",
+  "qualification": "SYNTHETIC_PROCESS_LIFECYCLE_NOT_LIVE_OWNER_ACCEPTANCE",
+  "sourceFiles": [
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.mjs",
+      "sha256": "65207580bce38fe04a9c1c25002edc046641556be07fc1c7594bf07e10ef10fd",
+      "bytes": 34277
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-lifecycle.test.mjs",
+      "sha256": "192f269f27f7963d1490d9bf03905bfc2db923197e4e9112a96f516da7aaf31d",
+      "bytes": 4996
+    }
+  ],
+  "proof": {
+    "localReadTests": {
+      "pass": 157,
+      "fail": 0
+    },
+    "preFixOwnerCancelCounterfactual": {
+      "pass": 0,
+      "fail": 2,
+      "expectedFailure": "runtime_summary_missing"
+    },
+    "providerCalls": 0,
+    "paidModelCalls": 0,
+    "ownerDatabaseTouched": false,
+    "productionTouched": false
+  },
+  "privateReceipts": [
+    {
+      "path": "/private/tmp/maya-read-lifecycle-confirmed-20261011.txt",
+      "sha256": "27c278b8be3165b9e5090ee395f10474d0655823a61eef33b5845654cf40e042",
+      "bytes": 15715
+    },
+    {
+      "path": "/private/tmp/maya-lifecycle-counterfactual-final-20261011.txt",
+      "sha256": "4d4db643a8fc93e98e4a08e9cab0a8d21f1838870734e0cc0bf98098de355e47",
+      "bytes": 6325
+    },
+    {
+      "path": "/private/tmp/maya-read-lifecycle-after-20261011.txt",
+      "sha256": "e05b210c6acdf7170173b9b01277cfee73f58ee1245c1bb152b75dee20a090ec",
+      "bytes": 2373
+    },
+    {
+      "path": "/private/tmp/maya-read-lifecycle-final-20261011.txt",
+      "sha256": "f595506797389bddba50bc3b9befb81dceeee4b38cd85813aeeb200080fafc8d",
+      "bytes": 21412
+    },
+    {
+      "path": "/private/tmp/maya-read-lifecycle-diag-20261011.txt",
+      "sha256": "d3df194abd66a3d418b069b996d7c3439af366d0c52aa1ffd4d8590d01f146ac",
+      "bytes": 19292
+    },
+    {
+      "path": "/private/tmp/maya-lifecycle-source-instrument-20261011.txt",
+      "sha256": "ee709e32ff282b4da3ad6672c3379b0be5644a02934ebfa0d794cbb65cfd7191",
+      "bytes": 20478
+    },
+    {
+      "path": "/private/tmp/maya-post-connect-chat-offline-20261011-01/runner-report.json",
+      "sha256": "bb1729d44bd6fb280b5bac13e999c6982bfb70ddb70fa662337e8a1a74332937",
+      "bytes": 3807
+    },
+    {
+      "path": "/private/tmp/maya-post-connect-chat-offline-20261011-01/semantic-score.json",
+      "sha256": "b31356e6e3641dfea283292179d1e983c91407e5c242298d5e405301df54fdea",
+      "bytes": 1312752
+    }
+  ]
+}

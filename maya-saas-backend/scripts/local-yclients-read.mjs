@@ -237,7 +237,16 @@ async function freePort() {
   await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
   return port;
 }
-function alive(pid) { try { process.kill(-pid, 0); return true; } catch (error) { if (error.code === 'ESRCH') return false; throw error; } }
+function alive(pid) {
+  try { process.kill(-pid, 0); return true; }
+  catch (error) {
+    if (error.code === 'ESRCH') return false;
+    // A denied existence probe is not proof of absence. Keep waiting within the
+    // original deadline; actual signal failures still propagate from signalGroup.
+    if (error.code === 'EPERM') return true;
+    throw error;
+  }
+}
 function signalGroup(pid, signal) { try { process.kill(-pid, signal); } catch (error) { if (error.code !== 'ESRCH') throw error; } }
 async function stopGroup(pid) {
   if (!pid || !alive(pid)) return;
@@ -261,13 +270,16 @@ export async function runReadRuntime(plan, runtimeEnv, state, control, manifest,
   try { child = spawn(command.command, command.args, { cwd: state, env: runtimeEnv, detached: true, stdio: ['ignore', 'ignore', 'ignore', 'ipc'] }); }
   catch { diagnosticFailure(diagnostic, 'child_boot_failed'); throw safeFailure('child_boot_failed'); }
   finally { delete runtimeEnv.YCLIENTS_PARTNER_TOKEN; }
-  let dev, timer, killTimer, cancelled, wasReady = false;
+  let dev, timer, stopPromise, cancelled, wasReady = false;
   const origin = `http://127.0.0.1:${runtimeEnv.PORT}`;
   const observer = runtimeObserver(diagnostic, { origin, providerAdmission: plan.providerAdmission }, save);
   child.on('message', observer.accept);
   const closed = new Promise((resolve, reject) => { child.once('error', () => reject(safeFailure('child_boot_failed'))); child.once('close', (code, signal) => resolve({ code, signal })); });
   void closed.catch(() => {});
-  const terminate = () => { if (!child.pid) return; signalGroup(child.pid, 'SIGTERM'); killTimer ??= setTimeout(() => signalGroup(child.pid, 'SIGKILL'), 5000); cancelled?.(); };
+  // Cancellation and finally share one shutdown. A second SIGTERM after a
+  // once-handler has begun closing the app kills it before its IPC receipt.
+  const stopChild = () => stopPromise ??= stopGroup(child.pid);
+  const terminate = () => { void stopChild().catch(() => {}); cancelled?.(); };
   control.terminate = terminate;
   try {
     await Promise.race([
@@ -313,13 +325,16 @@ export async function runReadRuntime(plan, runtimeEnv, state, control, manifest,
     let cleanupFailed = false;
     try { await dev?.close(); }
     catch { cleanupFailed = true; diagnosticFailure(diagnostic, 'cleanup_failed', { cleanup: true }); }
-    try { await stopGroup(child.pid); }
+    try { await stopChild(); }
     catch { cleanupFailed = true; diagnosticFailure(diagnostic, 'cleanup_failed', { cleanup: true }); }
-    finally { clearTimeout(killTimer); control.terminate = null; }
-    try { manifest.runtimeGroupAbsent = !child.pid || !alive(child.pid); }
-    catch { manifest.runtimeGroupAbsent = false; cleanupFailed = true; diagnosticFailure(diagnostic, 'cleanup_failed', { cleanup: true }); }
+    finally { control.terminate = null; }
     const exit = await Promise.race([closed.catch(() => null), new Promise(resolve => { timer = setTimeout(() => resolve(null), 5000); })]);
     clearTimeout(timer);
+    // Observe absence after the child has been reaped, and never report a clean
+    // shutdown while any member of its owned group is still observable.
+    try { manifest.runtimeGroupAbsent = !child.pid || !alive(child.pid); }
+    catch { manifest.runtimeGroupAbsent = false; }
+    if (!manifest.runtimeGroupAbsent) { cleanupFailed = true; diagnosticFailure(diagnostic, 'cleanup_failed', { cleanup: true }); }
     const summary = observer.summary;
     const validSummary = exit?.code === 0 && exit.signal === null && summary && (!plan.diagnosticNoProvider || (summary.calls === 0 && summary.refused === 0));
     manifest.providerReadSummary = validSummary ? summary : null;
