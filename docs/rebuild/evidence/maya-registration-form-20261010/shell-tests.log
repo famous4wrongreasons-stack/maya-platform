@@ -1,0 +1,33 @@
+✔ closed normalized body includes chosen password/external source, excludes injected authority/config (14.16725ms)
+✔ real serializer shape allows null nested relations, validates activation and owner/tenant/branch facts (0.463292ms)
+✔ explicit consent starts exactly two canonical requests; single flight; grant remains private (13.503417ms)
+✔ invalid password makes zero requests and reports finite field (0.13625ms)
+✔ signup network is uncertain, never retries creation even after close; ordinary password login recovers (0.765917ms)
+✔ signup 500 is uncertain, never retries creation even after close; ordinary password login recovers (0.617042ms)
+✔ signup 403 is uncertain, never retries creation even after close; ordinary password login recovers (0.611083ms)
+✔ signup malformed is uncertain, never retries creation even after close; ordinary password login recovers (1.03725ms)
+✔ signup foreign is uncertain, never retries creation even after close; ordinary password login recovers (0.421334ms)
+✔ signup expired-refresh is uncertain, never retries creation even after close; ordinary password login recovers (0.42775ms)
+✔ signup invalid-refresh is uncertain, never retries creation even after close; ordinary password login recovers (0.357125ms)
+✔ signup expired-trial is uncertain, never retries creation even after close; ordinary password login recovers (0.32375ms)
+✔ expired activation never dispatches signup and can be explicitly restarted (0.279708ms)
+✔ cancel during pending signup prevents late grant/completion and preserves uncertainty (3.74875ms)
+✔ signout during pending signup prevents late grant/completion and preserves uncertainty (0.536375ms)
+✔ dispose during pending signup prevents late grant/completion and preserves uncertainty (0.392958ms)
+✔ password during pending signup prevents late grant/completion and preserves uncertainty (0.436625ms)
+✔ email during pending signup prevents late grant/completion and preserves uncertainty (0.434583ms)
+✔ telegram during pending signup prevents late grant/completion and preserves uncertainty (0.441666ms)
+✔ older pending password login cannot replace newer signup before-signup-completion (0.615041ms)
+✔ older pending password login cannot replace newer signup after-signup-completion (0.523708ms)
+✔ cancel before activation response prevents signup; publication cancellation prevents all dispatch (0.298166ms)
+✔ signout on successful session publication cannot be followed by stale completed onboarding (0.372541ms)
+✔ successful session publication may synchronously unmount the form without losing completion (0.215417ms)
+✔ dispose on successful session publication suppresses completion (0.201375ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 135.725666

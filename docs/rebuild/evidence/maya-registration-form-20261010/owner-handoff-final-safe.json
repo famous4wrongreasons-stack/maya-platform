@@ -1,0 +1,24 @@
+{
+  "observedAt": "2026-10-10T17:45:03.535361+00:00",
+  "source": "ae2054f6ffdc6dc71776c64fdc7d7b706ee41570",
+  "status": "stopped",
+  "credentialAccepted": true,
+  "diagnosticStage": "stopped",
+  "firstFailure": null,
+  "expiresAt": "2026-10-10T17:45:00.657Z",
+  "clusterStopped": true,
+  "runtimeGroupAbsent": true,
+  "providerReadSummary": {
+    "calls": 0,
+    "refused": 0,
+    "routes": {}
+  },
+  "providerReadSummaryStatus": "reported_at_clean_stop",
+  "sourceUnchanged": true,
+  "contract": "maya.owner-setup.safe-final/1",
+  "registrationCompleted": false,
+  "yclientsBindingCompleted": false,
+  "liveConsentState": "NOT_OBSERVED",
+  "oldAttemptReason": "UNKNOWN_PRESERVED",
+  "ownerDatabaseAndKeys": "RETAINED_UNMODIFIED"
+}

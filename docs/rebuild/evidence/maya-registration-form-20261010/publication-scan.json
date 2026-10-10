@@ -1,0 +1,207 @@
+{
+  "head": "ae2054f6ffdc6dc71776c64fdc7d7b706ee41570",
+  "files": 26,
+  "bytes": 190355,
+  "manifest": [
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/README.md",
+      "bytes": 2668,
+      "sha256": "fa06bc15325b01173ded33aa38a46fa52f6925c93100078640b64f0a3568174f"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/browser-attempt-01.json",
+      "bytes": 1136,
+      "sha256": "25c45647e137c6b45988eba62fb2f52dd18cd322aed5136912576e1185ad6cd8"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/browser-attempt-02.json",
+      "bytes": 1696,
+      "sha256": "df4fceb25eb8bfeb843dd659ca1aca804d4611266bee656112497974cb2d8e56"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/browser-attempt-03.json",
+      "bytes": 1696,
+      "sha256": "028c9cef6d47e31f14f9b708ff2876b8924cb110ab097423845363c0579ff8b7"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/browser-attempt-04.json",
+      "bytes": 1872,
+      "sha256": "2f6e604a5c5ba4ecddf804d8a523b186a589120c01fd1032aff4b0cca186cad6"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/browser-attempt-05.json",
+      "bytes": 1872,
+      "sha256": "7124ece2d911b9955a5da853608ec9ea2d4bfb3bd99f81428ec836f3ee91389f"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/browser-pass.json",
+      "bytes": 4141,
+      "sha256": "ea95040347c522e2c280fb3e8c67a9ca811fb86563004cfc247343abd85a1b3e"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/carrier-tests.log",
+      "bytes": 1044,
+      "sha256": "0f38998f9827e7a103921f5d4eec5b34fa85a77ac7e923009f84bd38d950b5df"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/independent-source-review.json",
+      "bytes": 623,
+      "sha256": "244ff767f80540f4a31353230e1b1080be816ddd96dc16e5490d8144929616a1"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/owner-handoff-final-safe.json",
+      "bytes": 734,
+      "sha256": "9fd20620de43e2fd001fac2561d09de8d03e34db9b5ffbd330178dea3cc932d0"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/ratchet-tests.log",
+      "bytes": 7864,
+      "sha256": "9c9dd5d2e95815e834abf4fb37f14e912fa39892a46a54fa8263132617a98256"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/shell-tests.log",
+      "bytes": 2840,
+      "sha256": "dc59f2774435168f1eae199a25fbc1a0edf356cffbf53f8bf40338440e0a5bd9"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/summary.json",
+      "bytes": 672,
+      "sha256": "202340fec3e38f1e337e0848bee319115e19a532e6f6092b1adaeb2976ac9756"
+    },
+    {
+      "path": "maya-carrier-react/src/signin/StandardOnboarding.tsx",
+      "bytes": 19863,
+      "sha256": "2139a550bc52fd6ff7a77937874f1b81aada48df3996de2bcf4e1cc9e490fb4d"
+    },
+    {
+      "path": "maya-carrier-react/src/signin/onboardingSlug.ts",
+      "bytes": 715,
+      "sha256": "5c70dd17ce0f7f07fe123b2339831c6a0cbf48631f0814c611c004ddf3a01f8f"
+    },
+    {
+      "path": "maya-carrier-react/src/signin/onboardingTimezones.ts",
+      "bytes": 4095,
+      "sha256": "cb20abea99db5b335974af93a50fbb7310e6d138a091f35358b8bea12410f015"
+    },
+    {
+      "path": "maya-carrier-react/src/styles.css",
+      "bytes": 4363,
+      "sha256": "69d66a10a31bcd8c75329a23a0b7afc7409787e411d8917cc6d0a0c3c89128e1"
+    },
+    {
+      "path": "maya-carrier-react/test/local-onboarding-browser.probe.mjs",
+      "bytes": 33734,
+      "sha256": "64c51887c38a197b689f9dd688f37d8b75485fe547fa88f0192ce95f3f8bbc40"
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding-preview.fixture.tsx",
+      "bytes": 1565,
+      "sha256": "36640eb8a9c5e8b8fc3c4e02f04f8177ff0148f481d0954dfa7a8e551e9eda58"
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding-preview.serve.mjs",
+      "bytes": 2170,
+      "sha256": "67b5ac064858ac49f6901e1bb6bf37e8fb9ab6058e65c629ea713108750ae069"
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding-ui.browser.mjs",
+      "bytes": 13541,
+      "sha256": "1206c58175a8c07c9d3ec31bcc39714e7d00f43be13a070c9afc4dee75d0fe9e"
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding-ui.fixture.tsx",
+      "bytes": 2765,
+      "sha256": "10be93e4aac2602d329657d6966943438bf8c2c204782b9585dab42a47dae91a"
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding.test.mjs",
+      "bytes": 8820,
+      "sha256": "187cbefed12b1e3e2eb3f69774257c891b90f5a1016c4a8e2922792cb870c31b"
+    },
+    {
+      "path": "maya-carrier-react/tools/ratchets.mjs",
+      "bytes": 27511,
+      "sha256": "3238aecc9eaec3992a95de0496a571510b083219bec8ad1ec4749af6fb819dfc"
+    },
+    {
+      "path": "maya-carrier-react/tools/ratchets.selftest.mjs",
+      "bytes": 16659,
+      "sha256": "3a2b1060bab2861d3f0b31c2da475e29db4460b419f7a72e708d4b77d1acc6a6"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding-ui-proof.mjs",
+      "bytes": 25696,
+      "sha256": "499a66ed2a01c5d6613e57068dbce680dbe2bcdcf3e04edfa60dba2c9c3990ef"
+    }
+  ],
+  "candidates": [
+    {
+      "path": "maya-carrier-react/src/signin/StandardOnboarding.tsx",
+      "line": 14,
+      "category": "email",
+      "reservedFixtureDomain": false
+    },
+    {
+      "path": "maya-carrier-react/test/local-onboarding-browser.probe.mjs",
+      "line": 371,
+      "category": "email",
+      "reservedFixtureDomain": true
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding-ui.browser.mjs",
+      "line": 49,
+      "category": "email",
+      "reservedFixtureDomain": true
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding-ui.browser.mjs",
+      "line": 102,
+      "category": "email",
+      "reservedFixtureDomain": true
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding-ui.browser.mjs",
+      "line": 112,
+      "category": "email",
+      "reservedFixtureDomain": true
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding-ui.fixture.tsx",
+      "line": 26,
+      "category": "email",
+      "reservedFixtureDomain": true
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding-ui.fixture.tsx",
+      "line": 36,
+      "category": "email",
+      "reservedFixtureDomain": true
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding.test.mjs",
+      "line": 68,
+      "category": "email",
+      "reservedFixtureDomain": true
+    }
+  ],
+  "verdict": "QUALIFIED_GO_FOR_SCANNED_UI_PAYLOAD",
+  "blockers": [],
+  "gitleaksFindings": 0,
+  "qualifiedClaims": [
+    "63 component browser checks use a synthetic OnboardingPort",
+    "6 browser source hashes match current files",
+    "Actual HTTP/PG on this UI remains PENDING",
+    "No website/production path changes",
+    "Adjacent new backend proof source scanned for sensitive publication data only"
+  ],
+  "candidateClassifications": {
+    "reservedTestDomainHits": 7,
+    "explicitEmailFormatPlaceholderHits": 1,
+    "unresolved": 0
+  },
+  "limits": [
+    "Static bounded publication scan; no tests/services/network/private state reads",
+    "All26 byte hashes rechecked unchanged",
+    "No claim of real signup, YCLIENTS, or browser OS-wide network closure"
+  ]
+}

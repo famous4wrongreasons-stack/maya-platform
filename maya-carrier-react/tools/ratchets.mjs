@@ -220,6 +220,8 @@ const INPUT_TYPES = new Set(['text', 'email', 'password']);
 // A finite upload capability, not a new request sink or general input-type grant.
 // Multipart transport stays in the headless client's single exchange function.
 export const GOODS_PHOTO_PICKER = 'src/chat/GoodsPhotoPicker.tsx';
+// Native selection/consent in the existing signup presentation. No form navigation.
+export const STANDARD_ONBOARDING = 'src/signin/StandardOnboarding.tsx';
 
 /** Attributes that make a browser issue a request or navigate. */
 const REQUEST_SINKS = ['src', 'srcSet', 'href', 'action', 'formAction', 'poster', 'ping', 'data', 'background'];
@@ -229,7 +231,7 @@ const inputAttributes = (text) => {
   const source = ts.createSourceFile('carrier.tsx', text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
   const inputs = new Map();
   const visit = node => {
-    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && node.tagName.getText(source) === 'input') {
+    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && ['input', 'select', 'option'].includes(node.tagName.getText(source))) {
       const attributes = new Map();
       let unsafe = false;
       for (const attribute of node.attributes.properties) {
@@ -249,6 +251,7 @@ const inputAttributes = (text) => {
 export function scanJsx(rel, text, { hrefAllowed = false } = {}) {
   const out = [];
   let photoPickers = 0;
+  let confirmations = 0;
   const code = codeOnly(text);
   const inputs = inputAttributes(text);
   // Both spellings. The owner's canonical source is pre-compiled React.createElement, and a
@@ -268,12 +271,19 @@ export function scanJsx(rel, text, { hrefAllowed = false } = {}) {
         && !['multiple', 'directory', 'webkitdirectory'].some(name => parsed.attributes.has(name));
       if (photoPicker && ++photoPickers > 1)
         out.push(refusal('input-type', rel, lineAt(text, m.index), 'input', 'Only one goods photo picker is admitted.'));
-      if (!parsed || parsed.unsafe || (!INPUT_TYPES.has(literal) && !photoPicker))
+      const confirmation = rel === STANDARD_ONBOARDING && literal === 'checkbox' && !parsed?.unsafe && parsed.attributes.get('name') === 'confirmed';
+      if (confirmation && ++confirmations > 1)
+        out.push(refusal('input-type', rel, lineAt(text, m.index), 'input', 'Only one explicit signup confirmation is admitted.'));
+      if (!parsed || parsed.unsafe || (!INPUT_TYPES.has(literal) && !photoPicker && !confirmation))
         out.push(refusal('input-type', rel, lineAt(text, m.index), 'input',
           viaCreateElement
             ? 'createElement(\'input\', …) is refused: its attributes are an object this scanner cannot vet.'
-            : 'An input needs a literal text/email/password type; only the dedicated goods photo picker may admit one bounded image file.'));
+            : 'An input needs a literal text/email/password type; dedicated owners alone admit one image picker or signup confirmation.'));
       continue;
+    }
+    if (rel === STANDARD_ONBOARDING && ['select', 'option'].includes(tag) && m[0].startsWith('<')) {
+      const parsed = inputs.get(m.index);
+      if (parsed && !parsed.unsafe && (tag === 'option' || parsed.attributes.get('name') === 'branchTimezone')) continue;
     }
     if (!CLOSED_TAGS.has(tag))
       out.push(refusal('closed-tag-set', rel, lineAt(text, m.index), tag,

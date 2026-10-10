@@ -1,0 +1,49 @@
+{
+  "contract": "maya.onboarding-ui.synthetic/1",
+  "status": "FAIL",
+  "syntheticPort": true,
+  "httpSignup": false,
+  "database": false,
+  "providerCalls": 0,
+  "realAcceptance": false,
+  "checks": [
+    "initial unchecked consent blocks submit",
+    "no implicit device or Moscow timezone",
+    "slug suggested from Cyrillic name",
+    "manual slug preserved after business edit",
+    "no horizontal overflow at 320px",
+    "no horizontal overflow at 390px",
+    "no horizontal overflow at 1280px",
+    "Space consent enables create",
+    "missing timezone stays local, focuses error and preserves password",
+    "invalid email focuses inline error and keeps public fields"
+  ],
+  "cleanup": {
+    "staticHostStopped": true,
+    "ownedBrowserStopped": true,
+    "profileRemoved": true
+  },
+  "bundleSha256": "25a0847bdc0ecd48373026371a56aa1469d9b1f61cc4606fee737ddfed525387",
+  "sources": {
+    "src/signin/StandardOnboarding.tsx": "2139a550bc52fd6ff7a77937874f1b81aada48df3996de2bcf4e1cc9e490fb4d",
+    "src/signin/onboardingSlug.ts": "5c70dd17ce0f7f07fe123b2339831c6a0cbf48631f0814c611c004ddf3a01f8f",
+    "src/signin/onboardingTimezones.ts": "cb20abea99db5b335974af93a50fbb7310e6d138a091f35358b8bea12410f015",
+    "src/styles.css": "69d66a10a31bcd8c75329a23a0b7afc7409787e411d8917cc6d0a0c3c89128e1",
+    "test/onboarding-ui.fixture.tsx": "10be93e4aac2602d329657d6966943438bf8c2c204782b9585dab42a47dae91a",
+    "test/onboarding-ui.browser.mjs": "00a4cd7d055df36f3a23936e32f1e23d282cfafcded26a73c66e5cd872b72ab8"
+  },
+  "chromiumBuiltinSandbox": true,
+  "chromeOsWideNetworkClosure": "NOT_QUALIFIED",
+  "selectionStart": {
+    "index": 0,
+    "focused": "branchTimezone"
+  },
+  "selectionEnd": {
+    "index": 0,
+    "value": "",
+    "focused": ""
+  },
+  "selectionTarget": 31,
+  "failedStage": "completed",
+  "failure": "native keyboard timezone selects exact IANA"
+}

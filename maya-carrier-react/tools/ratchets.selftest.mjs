@@ -175,6 +175,29 @@ export function selfTest() {
       }
     }
   }
+  // Native timezone/consent stay confined to signup; navigation remains refused.
+  {
+    const checkbox = '<input type="checkbox" name="confirmed" checked={confirmed} />';
+    const select = '<select name="branchTimezone"><option value="UTC">UTC</option></select>';
+    for (const [file, source, mustRefuse] of [
+      [R.STANDARD_ONBOARDING, checkbox, false], [R.STANDARD_ONBOARDING, select, false],
+      ['src/other.tsx', checkbox, true], ['src/other.tsx', select, true],
+      [R.STANDARD_ONBOARDING, checkbox + checkbox, true],
+      [R.STANDARD_ONBOARDING, checkbox.replace('name="confirmed"', 'name="other"'), true],
+      [R.STANDARD_ONBOARDING, checkbox.replace('type="checkbox"', 'type={kind}'), true],
+      [R.STANDARD_ONBOARDING, checkbox.replace('checked=', '{...props} checked='), true],
+      [R.STANDARD_ONBOARDING, select.replace('name="branchTimezone"', 'name="other"'), true],
+      [R.STANDARD_ONBOARDING, select.replace('value="UTC"', '{...props}'), true],
+      [R.STANDARD_ONBOARDING, '<form onSubmit={f} />', true],
+      [R.STANDARD_ONBOARDING, '<select name="branchTimezone" formAction="/outside" />', true],
+      [R.STANDARD_ONBOARDING, "React.createElement('select', { name: 'branchTimezone' })", true],
+    ]) {
+      const hit = R.scanJsx(file, source).length > 0;
+      if (hit === mustRefuse) { if (mustRefuse) refused++; else admitted++; }
+      else { failed++; console.log(`  FAIL signup controls: ${file}: ${source}`); }
+    }
+    console.log('  checked 13 signup control boundary fixtures');
+  }
   // the inline-SVG shape must be ADMITTED — it is bytes in the file, not a fetch
   if (!R.checkCss('x.css', INLINE_SVG_CSS).length) { admitted++; console.log('  PASS  admit  no-external-resource       inline data:image/svg+xml'); }
   else { failed++; console.log('  FAIL  admit  no-external-resource       inline SVG wrongly refused'); }

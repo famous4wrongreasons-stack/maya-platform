@@ -37,8 +37,8 @@ body { position: fixed; inset: 0; }
   overflow: hidden;
   overflow-wrap: anywhere;
 }
-button, input, textarea { -webkit-tap-highlight-color: transparent; }
-button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid #0A84FF; outline-offset: 3px; }
+button, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #0A84FF; outline-offset: 3px; }
 @media (forced-colors: active) { :root { --text: CanvasText; } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

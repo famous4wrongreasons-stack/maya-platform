@@ -1,0 +1,17 @@
+{
+  "contract": "maya.registration-form-ui/1",
+  "status": "QUALIFIED_LOCAL_UI_CHECKPOINT",
+  "base": "ae2054f6ffdc6dc71776c64fdc7d7b706ee41570",
+  "componentBrowserChecks": 63,
+  "carrierTests": 9,
+  "shellTests": 25,
+  "ratchetCases": 117,
+  "carrierTypesAndBuild": "PASS",
+  "actualBackendOnThisUi": "PENDING",
+  "collision": "Existing backend P2002 produces generic500; no safe field-specific retry added",
+  "preview": "Static-only, no signup API; explicitly labelled; delivered separately from real backend",
+  "realYclientsAcceptance": false,
+  "ownerDatabaseAndKeys": "RETAINED_UNMODIFIED",
+  "websiteProductionChanged": false,
+  "initialFailuresRetained": true
+}

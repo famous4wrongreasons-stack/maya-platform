@@ -83,6 +83,24 @@ async function fill(page, label, value) {
   assert.ok(await page.waitFor(`!!(${el}) && !(${el}).disabled`), 'required_enabled_field');
   assert.equal(await page.fill(el, value), true, 'actual_keyboard_input');
 }
+async function fillSignup(page, account) {
+  for (const [label, value] of [['Название бизнеса', account.name], ['Короткое имя бизнеса для входа', account.slug], ['Название филиала', account.branchName], ['Email владельца', account.email], ['Пароль нового владельца', account.password]]) await fill(page, label, value);
+  assert.ok(await page.focus("document.querySelector('select[name=branchTimezone]')"));
+  const choice = await page.eval("Array.from(document.querySelector('select[name=branchTimezone]').options).find(option => option.value === " + JSON.stringify(account.branchTimezone) + ")?.textContent");
+  assert.ok(choice, 'fixture_timezone_offered');
+  // Native typeahead uses keyboard events, not Input.insertText or DOM value injection.
+  for (const key of choice.split(' — ')[0]) {
+    await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key, text: key, unmodifiedText: key, windowsVirtualKeyCode: 0 });
+    await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key, windowsVirtualKeyCode: 0 });
+  }
+  await page.press('Tab');
+  assert.equal(await page.eval("document.querySelector('select[name=branchTimezone]').value"), account.branchTimezone, 'explicit_timezone_selection');
+}
+async function confirmSignup(page) {
+  assert.equal(await page.eval(`(${named('button', 'Создать бизнес')}).disabled`), true, 'explicit_consent_required');
+  assert.ok(await page.focus("document.querySelector('input[name=confirmed]')"));
+  await page.press('Space'); await click(page, 'Создать бизнес');
+}
 async function visible(page, text) { assert.ok(await page.waitFor(`document.body.innerText.includes(${JSON.stringify(text)})`), 'required_ui_copy'); }
 async function quiet(page) {
   let since = null;
@@ -137,6 +155,15 @@ async function installGuard(page, origin, account, state) {
       if (pathname === API.login) state.loginRequests++;
       if (pathname === API.logout) state.logoutRequests++;
       await page.send('Fetch.continueRequest', { requestId }); return;
+    }
+    if (pathname === API.signup && state.expectCollision === true) {
+      assert.equal(responseStatusCode, 500, 'current_collision_has_generic_server_error');
+      const raw = await page.send('Fetch.getResponseBody', { requestId });
+      const body = JSON.parse(raw.base64Encoded ? Buffer.from(raw.body, 'base64').toString('utf8') : raw.body);
+      assert.equal(body.statusCode, 500); assert.equal(body.message, 'Internal server error');
+      assert.equal(body.error?.code, undefined, 'no_safe_collision_code_yet');
+      state.collisionObserved = true; state.activation = null;
+      await page.send('Fetch.continueResponse', { requestId }); return;
     }
     assert.ok([200, 201].includes(responseStatusCode), 'required_auth_response_not_success');
     const raw = await page.send('Fetch.getResponseBody', { requestId });
@@ -209,6 +236,7 @@ async function main() {
   const reportPath = path.join(output, 'browser.json'); assert.equal(fs.existsSync(reportPath), false, 'never_overwrite_evidence');
   const report = { contract: 'maya.local-onboarding.browser/1', mode, status: 'running', actualCurrentReact: false, bundleSha256, normalLocalWebHost: true, syntheticAccounts: true, authInjection: false, syntheticResponses: false, providerBrowserRequests: 0, modelBrowserRequests: 0, crmMutationRequests: 0, backendEffectsAndDatabaseRequireParentEvidence: true, checkpoints: [], accounts: [], cleanup: null };
   let activeStep = 'startup', browser, child, profile, childClose, closing;
+  const currentIdentities = new Map();
   const cleanup = () => closing ??= (async () => {
     let clean = true;
     if (browser) await bounded(browser.close(), 4000, 'browser_close_bound').catch(() => { clean = false; });
@@ -260,7 +288,7 @@ async function main() {
   async function passwordLogin(page, account, state, fromRecovery = false) {
     if (fromRecovery) await click(page, 'Перейти ко входу по паролю');
     else await click(page, 'Войти по паролю');
-    await fill(page, 'Адрес бизнеса', account.slug); await fill(page, 'Email', account.email); await fill(page, 'Пароль', account.password);
+    await fill(page, 'Короткое имя бизнеса для входа', account.slug); await fill(page, 'Email', account.email); await fill(page, 'Пароль', account.password);
     const before = state.verifiedLogins;
     await click(page, 'Войти'); await visible(page, 'Локальное подключение YCLIENTS');
     await until(() => state.verifiedLogins === before + 1, 'canonical_login_unverified');
@@ -298,10 +326,9 @@ async function main() {
           await checkpoint(account.key + '-restart-login', account, state, { crmReadOutcome: state.crmReadOutcome });
         } else {
           await click(page, 'Создать бизнес');
-          for (const [label, value] of [['Название бизнеса', account.name], ['Адрес бизнеса для входа', account.slug], ['Название филиала', account.branchName], ['Часовой пояс филиала', account.branchTimezone], ['Email владельца', account.email], ['Пароль нового владельца', account.password]]) await fill(page, label, value);
+          await fillSignup(page, account);
           assert.equal(state.activationRequests + state.signupRequests, 0, 'no_automatic_onboarding');
-          assert.equal(await page.eval(`(${named('button', 'Создать бизнес')}).disabled`), true, 'explicit_consent_required');
-          await click(page, 'Создать этот бизнес и учётную запись на сервере MAYA'); await click(page, 'Создать бизнес');
+          await confirmSignup(page);
           if (account.key === 'success') {
             await visible(page, 'Бизнес создан'); await visible(page, 'CRM ещё нужно подключить. Доступ к функциям и действиям определяет сервер.');
             assert.equal(state.signupCommitted, true); await quiet(page);
@@ -320,7 +347,7 @@ async function main() {
           await page.reload(); await click(page, 'Войти по паролю');
           // Password form after reload must not contain an injected or persisted password.
           assert.equal(await page.eval(`(${named('input', 'Пароль')}).value`), '');
-          await fill(page, 'Адрес бизнеса', account.slug); await fill(page, 'Email', account.email); await fill(page, 'Пароль', account.password);
+          await fill(page, 'Короткое имя бизнеса для входа', account.slug); await fill(page, 'Email', account.email); await fill(page, 'Пароль', account.password);
           const before = state.verifiedLogins; await click(page, 'Войти'); await visible(page, 'Локальное подключение YCLIENTS');
           await until(() => state.verifiedLogins === before + 1, 'reload_login_identity_unverified'); await crmRead(page, state, account);
           await checkpoint(account.key + '-reload-login', account, state, { crmReadOutcome: state.crmReadOutcome });
@@ -334,8 +361,34 @@ async function main() {
         assert.equal(page.apiRequests('/ai/chat').length, 0); assert.equal(page.apiRequests('/widgets/intent').length, 0);
         assert.equal(page.exceptions.length, 0, 'uncaught_browser_exception');
         const calls = page.apiRequests('/').map(request => ({ method: request.method, path: finitePaths.has(new URL(request.url).pathname) ? new URL(request.url).pathname : '[unlisted]', status: request.status ?? null, failed: !!request.failed }));
+        currentIdentities.set(account.key, { ...state.identity });
         report.accounts.push({ key: account.key, identityHash: digest(JSON.stringify(state.identity)), signupRequests: state.signupRequests, activationRequests: state.activationRequests, loginRequests: state.loginRequests, logoutRequests: state.logoutRequests, verifiedLogins: state.verifiedLogins, responseLossInjectedAfterCommit: state.lossInjected, crmReadOutcome: state.crmReadOutcome, requests: calls });
       } finally { guard.close(); await bounded(page.close(), 3000, 'page_close_bound').catch(() => {}); }
+    }
+    if (mode === 'prepare') {
+      activeStep = 'slug-collision';
+      const existing = accounts[0];
+      const account = { ...existing, key: 'collision', email: 'collision@example.invalid' };
+      const state = { mode, requestCount: 0, activationRequests: 0, signupRequests: 0, loginRequests: 0, logoutRequests: 0, verifiedLogins: 0, activation: null, identity: currentIdentities.get(existing.key), signupCommitted: false, lossInjected: false, expectCollision: true, collisionObserved: false };
+      const page = await browser.newPage(); const guard = await installGuard(page, origin, account, state);
+      try {
+        await page.goto(origin + '/?local_crm_setup=1');
+        const entry = await until(() => [...page.requests.values()].find(request => new URL(request.url).pathname === bundlePath && request.finishedAt), 'collision_current_entry_missing');
+        assert.equal(digest(await page.responseBody(entry.requestId)), bundleSha256);
+        await click(page, 'Создать бизнес'); await fillSignup(page, account);
+        assert.equal(state.signupRequests + state.activationRequests, 0);
+        await confirmSignup(page);
+        await visible(page, 'Создание бизнеса не подтверждено: ответ мог потеряться после сохранения.');
+        await quiet(page); await guard.settled();
+        assert.equal(state.collisionObserved, true); assert.equal(state.signupCommitted, false);
+        assert.equal(state.signupRequests, 1); assert.equal(state.activationRequests, 1);
+        assert.equal(await page.eval(`!!(${named('button', 'Создать бизнес')})`), false);
+        assert.equal(await page.eval('Q.all("input[type=password]").every(el => el.value === "")'), true);
+        await page.press('Enter'); await quiet(page); assert.equal(state.signupRequests, 1);
+        await checkpoint('slug-collision-rejected', existing, state, { collision: true, httpStatus: 500, errorCode: null });
+        report.collision = { httpStatus: 500, errorCode: null, ui: 'uncertain_no_repeat', signupRequests: 1, activationRequests: 1, rollbackRequiresParentDatabaseEvidence: true };
+        assert.equal(page.exceptions.length, 0);
+      } finally { guard.close(); await bounded(page.close(), 3000, 'collision_page_close_bound').catch(() => {}); }
     }
     report.status = 'PASS';
   } catch {
