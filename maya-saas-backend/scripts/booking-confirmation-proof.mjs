@@ -1,7 +1,7 @@
 // Explicit narrow local proof. Never reuses a cluster, DB, env file or output.
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
-import { randomBytes } from 'node:crypto';
+import { spawn, execFileSync } from 'node:child_process';
+import { randomBytes, createHash } from 'node:crypto';
 import fs from 'node:fs';
 import net from 'node:net';
 import os from 'node:os';
@@ -9,7 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const { values } = parseArgs({ options: { run: { type: 'boolean' }, output: { type: 'string' }, 'browser-only': {type: 'boolean', default: false} } });
+const { values } = parseArgs({ options: { run: { type: 'boolean' }, output: { type: 'string' }, 'browser-only': {type: 'boolean', default: false}, 'exact-followup': { type: 'boolean', default: false } } });
 assert.equal(values.run, true, 'Explicit --run and parent heavy-slot authorization required');
 assert.ok(values.output && path.isAbsolute(values.output) && !fs.existsSync(values.output), 'New absolute output required');
 for (const name of ['.env', '.env.local']) assert.equal(fs.existsSync(path.join(backend, name)), false);
@@ -24,6 +24,16 @@ const database = 'maya_widget_gate_proof_bookingconfirmation_' + randomBytes(6).
 const env = { DATABASE_URL: `postgresql://booking_confirmation_proof@127.0.0.1:${port}/${database}`, NODE_ENV: 'test', NODE_OPTIONS: '--max-old-space-size=3072', LANG: 'C', TZ: 'UTC' };
 for (const key of ['PATH', 'HOME', 'TMPDIR']) if (process.env[key]) env[key] = process.env[key];
 const manifest = { kind: 'booking-confirmation-http-react-local-proof', browserOnly: values['browser-only'], cluster, database, port, status: 'running', completed: [], syntheticModel: true, syntheticInternalCatalog: true, syntheticLocalProvider: true, externalProviderAcceptance: false, realModelAcceptance: false, certificate: 'NOT_ISSUED', resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, jestWorkers: 1, browserCount: 1 } };
+let sourceHashes;
+if (values['exact-followup']) {
+  assert.equal(values['browser-only'], true, 'Exact continuation runs only its single targeted browser proof');
+  const scopes = ['src', 'prisma', 'test/widgets-live', 'test/jest-widgets-live.json', 'scripts/booking-confirmation-proof.mjs', 'package.json', 'package-lock.json', 'tsconfig.json', '../maya-carrier-react', '../maya-chat-shell'];
+  assert.equal(execFileSync('git', ['status', '--porcelain', '--untracked-files=all', '--', ...scopes], { cwd: backend, encoding: 'utf8' }), '', 'Commit exact source before the proof');
+  const files = execFileSync('git', ['ls-files', '-z', '--', ...scopes], { cwd: backend, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 }).split('\0').filter(Boolean).sort();
+  sourceHashes = Object.fromEntries(files.map(file => [file, createHash('sha256').update(fs.readFileSync(path.resolve(backend, file))).digest('hex')]));
+  fs.writeFileSync(path.join(values.output, 'source-hashes.json'), JSON.stringify(sourceHashes, null, 2) + '\n', { mode: 0o600 });
+  Object.assign(manifest, { exactFollowup: true, candidateCommit: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: backend, encoding: 'utf8' }).trim(), sourceSha256: createHash('sha256').update(JSON.stringify(sourceHashes)).digest('hex'), sourceBinding: 'COMMITTED_SOURCE_BYTES', realModelCalls: 0, realProviderCalls: 0 });
+}
 const save = () => fs.writeFileSync(path.join(values.output, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 let cancelled = null, activeChild = null, activeCleanup = false;
 const cancel = (signal) => {
@@ -72,7 +82,8 @@ async function run(name, command, args, extra = {}, cwd = backend) {
   } finally { fs.closeSync(fd); }
 }
 const pg = (name) => path.join(pgBin, name), pgArgs = ['-D', cluster, '-w', '-t', '30'];
-const probe = () => run('browser', process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--testRegex', 'booking-confirmation-react\\.probe-spec\\.ts$', '--runInBand', '--runTestsByPath', 'test/widgets-live/booking-confirmation-react.probe-spec.ts', '--json', '--outputFile=' + path.join(values.output, 'browser-jest.json')], { JEST_BOOKING_CONFIRMATION_OUTPUT: values.output });
+const probeName = values['exact-followup'] ? 'booking-followup-react' : 'booking-confirmation-react';
+const probe = () => run('browser', process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--testRegex', probeName + '\\.probe-spec\\.ts$', '--runInBand', '--runTestsByPath', 'test/widgets-live/' + probeName + '.probe-spec.ts', '--json', '--outputFile=' + path.join(values.output, 'browser-jest.json')], { JEST_BOOKING_CONFIRMATION_OUTPUT: values.output });
 let startAttempted = false;
 save();
 try {
@@ -84,6 +95,10 @@ try {
   await run('react-web-build', process.execPath, ['build.mjs', '--target=web'], {}, path.resolve(backend, '../maya-carrier-react'));
   if (!values['browser-only']) await run('http-booking', process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--runInBand', '--runTestsByPath', 'test/widgets-live/chat-catalog-booking.live-spec.ts', 'test/widgets-live/provider-unknown.live-spec.ts', '--json', '--outputFile=' + path.join(values.output, 'http-booking-jest.json')]);
   await probe();
+  if (sourceHashes) {
+    manifest.sourcesUnchanged = Object.entries(sourceHashes).every(([file, digest]) => createHash('sha256').update(fs.readFileSync(path.resolve(backend, file))).digest('hex') === digest);
+    assert.equal(manifest.sourcesUnchanged, true);
+  }
   manifest.status = 'passed';
 } catch (e) { manifest.status = 'failed'; throw e; }
 finally {
