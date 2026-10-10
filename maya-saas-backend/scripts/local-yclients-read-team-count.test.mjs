@@ -63,7 +63,9 @@ test('closed count encoding distinguishes missing/null/number/string without ret
   for (const [value, encoding] of [[undefined, 'missing'], [null, 'null'], [-2, 'invalid_number'], ['PRIVATE_TOTAL', 'invalid_string'], [true, 'other'], ['3', 'decimal_string'], [3, 'number']]) {
     const body = payload(); if (value === undefined) delete body.meta.total_count; else body.meta.total_count = value;
     const events = [], transport = createReadTransport(async () => new Response(JSON.stringify(body)), async () => 424242, Date.now, createReadTrace(e => events.push(e)));
-    await transport.run(request(), new EventEmitter(), () => assert.rejects(transport.fetch(url)));
+    // Missing totals at the deprecated endpoint still have no whole-collection proof.
+    const source = value === undefined ? 'https://api.yclients.com/api/v1/staff/424242' : url;
+    await transport.run(request(), new EventEmitter(), () => assert.rejects(transport.fetch(source)));
     assert.equal(events.at(-1).teamCountEncoding, encoding);
     assert.equal(JSON.stringify(events).includes('PRIVATE'), false);
   }

@@ -1,5 +1,7 @@
 # YCLIENTS staff total-count compatibility — 2026-10-11
 
+Subsequent real attempt at `2f55da13` proved **missing**, not a numeric-string total. This historical checkpoint is retained; the exact management collection exception is documented in [the next compatibility unit](MAYA-YCLIENTS-TEAM-COLLECTION-COMPATIBILITY-20261011.md).
+
 Base: `cce0cb46f0592ce87e8a49208aac99e21196b08b`, same local CRM branch and retained owner database. This is not real connection acceptance or certification.
 
 ## Established failure and uncertainty

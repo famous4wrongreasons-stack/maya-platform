@@ -33,6 +33,7 @@ export function projectReadTrace(message) {
   // Optional closed diagnosis only: no values, field names, IDs, counts or body.
   if (message && Object.hasOwn(message, 'teamIssues')) fields.push('teamIssues');
   if (message && Object.hasOwn(message, 'teamCountEncoding')) fields.push('teamCountEncoding');
+  if (message && Object.hasOwn(message, 'teamCompleteness')) fields.push('teamCompleteness');
   if (!message || typeof message !== 'object' || Array.isArray(message) || Object.keys(message).length !== fields.length || !fields.every(key => Object.hasOwn(message, key))) return null;
   if (message.type !== 'read-trace' || message.contract !== 'maya.local-yclients-read-trace/1' || !Number.isSafeInteger(message.sequence) || message.sequence < 1 || message.sequence > READ_TRACE_LIMIT || !Number.isSafeInteger(message.elapsedMs) || message.elapsedMs < 0 || message.elapsedMs > 1200000) return null;
   if (!['http', 'provider'].includes(message.surface) || !TRACE_ROUTES.includes(message.route) || !['GET', 'POST', 'OTHER'].includes(message.method) || !['entered', 'completed', 'refused', 'closed'].includes(message.stage)) return null;
@@ -43,6 +44,12 @@ export function projectReadTrace(message) {
     if (message.surface !== 'provider' || message.route !== 'team' || message.stage !== 'refused' || message.code !== 'provider_scope_refused' || message.status < 200 || message.status >= 300 || !Array.isArray(issues) || issues.length === 0 || issues.length > TEAM_ISSUES.length || issues.some((issue, index) => !TEAM_ISSUES.includes(issue) || (index > 0 && TEAM_ISSUES.indexOf(issue) <= TEAM_ISSUES.indexOf(issues[index - 1])))) return null;
   }
   if (fields.includes('teamCountEncoding') && (message.surface !== 'provider' || message.route !== 'team' || !['completed', 'refused'].includes(message.stage) || !['provider_response_read', 'provider_scope_refused'].includes(message.code) || message.status < 200 || message.status >= 300 || !TEAM_COUNT_ENCODINGS.includes(message.teamCountEncoding))) return null;
+  if (fields.includes('teamCompleteness')) {
+    if (message.surface !== 'provider' || message.route !== 'team' || message.method !== 'GET' || message.stage !== 'completed' || message.code !== 'provider_response_read' || message.status < 200 || message.status >= 300) return null;
+    if (message.teamCompleteness === 'management_collection_contract') {
+      if (message.status !== 200 || message.teamCountEncoding !== 'missing') return null;
+    } else if (message.teamCompleteness !== 'explicit_total' || !['number', 'decimal_string'].includes(message.teamCountEncoding)) return null;
+  }
   return Object.fromEntries(fields.map(key => [key, key === 'teamIssues' ? [...message[key]] : message[key]]));
 }
 export function createReadTrace(send, clock = Date.now) {

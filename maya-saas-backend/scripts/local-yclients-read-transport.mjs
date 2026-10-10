@@ -39,21 +39,43 @@ function teamCountEncoding(value) {
   if (typeof value === 'string') return teamTotalCount(value) === null ? 'invalid_string' : 'decimal_string';
   return 'other';
 }
-export function validateTeamResponse(payload, headers, selectedCompany) {
+// Private transport evidence, never a provider/caller-authored completeness flag.
+// The current management collection contract has no pagination parameters and
+// does not require meta.total_count. Its narrow empty-meta variant is admissible
+// only at this exact unfiltered source; legacy/subset sources still need a total.
+const MANAGEMENT_COLLECTION = Symbol('management_collection_contract');
+function teamSourceEvidence(raw, init, response, selectedCompany) {
+  const exact = `https://api.yclients.com/api/v1/company/${selectedCompany}/staff`;
+  return String(raw) === exact && (init?.method ?? 'GET') === 'GET' && init?.body == null
+    && new Headers(init?.headers).get('accept') === 'application/vnd.yclients.v2+json'
+    && response.status === 200 && !response.redirected
+    && (!response.url || response.url === exact) ? MANAGEMENT_COLLECTION : null;
+}
+function isManagementCollection(payload, headers, sourceEvidence) {
+  return sourceEvidence === MANAGEMENT_COLLECTION && payload?.meta
+    && typeof payload.meta === 'object' && !Array.isArray(payload.meta)
+    && Object.keys(payload.meta).length === 0
+    && !headers?.has('link') && !headers?.has('content-range')
+    && Object.keys(payload).length === 3
+    && ['success', 'data', 'meta'].every(key => Object.hasOwn(payload, key));
+}
+export function validateTeamResponse(payload, headers, selectedCompany, sourceEvidence = null) {
   if (!payload || typeof payload !== 'object' || payload.success !== true || !Array.isArray(payload.data) || payload.data.length > READ_LIMITS.teamMembers) fail('incomplete_team');
   if (headers?.get('link') || headers?.get('content-range') || Object.hasOwn(payload, 'pagination')) fail('incomplete_team');
   const meta = payload.meta;
   if (!meta || typeof meta !== 'object' || Array.isArray(meta)) fail('incomplete_team');
   const names = Object.keys(meta);
   const totalCount = teamTotalCount(meta.total_count);
-  if (names.some(key => !['total_count', 'count', 'page'].includes(key)) || totalCount === null || totalCount !== payload.data.length || (meta.count !== undefined && meta.count !== payload.data.length) || (meta.page !== undefined && meta.page !== 1)) fail('incomplete_team');
+  const collection = isManagementCollection(payload, headers, sourceEvidence);
+  if (!collection && (names.some(key => !['total_count', 'count', 'page'].includes(key)) || totalCount === null || totalCount !== payload.data.length || (meta.count !== undefined && meta.count !== payload.data.length) || (meta.page !== undefined && meta.page !== 1))) fail('incomplete_team');
   const ids = payload.data.map(item => item?.id);
   if (ids.some(id => !companyId(id)) || new Set(ids.map(String)).size !== ids.length) fail('incomplete_team');
-  if (!companyId(selectedCompany) || payload.data.some(item => Object.hasOwn(item, 'company_id') && String(item.company_id) !== String(selectedCompany))) fail('foreign_company_team');
+  if (!companyId(selectedCompany) || payload.data.some(item => (collection && !Object.hasOwn(item, 'company_id')) || (Object.hasOwn(item, 'company_id') && String(item.company_id) !== String(selectedCompany)))) fail('foreign_company_team');
+  return collection ? 'management_collection_contract' : 'explicit_total';
 }
 // Called only AFTER the validator refuses. Diagnose all applicable
 // checks in one attempt, without retaining any provider values or personal data.
-export function teamRefusalIssues(payload, headers, selectedCompany) {
+export function teamRefusalIssues(payload, headers, selectedCompany, sourceEvidence = null) {
   const issues = new Set();
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return ['payload_shape'];
   if (payload.success !== true) issues.add('success_unconfirmed');
@@ -62,12 +84,13 @@ export function teamRefusalIssues(payload, headers, selectedCompany) {
   else if (data.length > READ_LIMITS.teamMembers) issues.add('member_limit');
   if (headers?.get('link') || headers?.get('content-range') || Object.hasOwn(payload, 'pagination')) issues.add('pagination_present');
   const meta = payload.meta;
+  const collection = isManagementCollection(payload, headers, sourceEvidence);
   if (!meta || typeof meta !== 'object' || Array.isArray(meta)) issues.add('meta_shape');
   else {
     if (Object.keys(meta).some(key => !['total_count', 'count', 'page'].includes(key))) issues.add('unknown_meta_fields');
     const totalCount = teamTotalCount(meta.total_count);
-    if (totalCount === null) issues.add('total_count_type');
-    else if (Array.isArray(data) && totalCount !== data.length) issues.add('total_count_mismatch');
+    if (totalCount === null && !collection) issues.add('total_count_type');
+    else if (totalCount !== null && Array.isArray(data) && totalCount !== data.length) issues.add('total_count_mismatch');
     if (meta.count !== undefined && Array.isArray(data) && meta.count !== data.length) issues.add('count_mismatch');
     if (meta.page !== undefined && meta.page !== 1) issues.add('page_not_first');
   }
@@ -76,7 +99,7 @@ export function teamRefusalIssues(payload, headers, selectedCompany) {
     const ids = data.map(row => row?.id);
     if (ids.some(id => !companyId(id))) issues.add('invalid_staff_id');
     if (new Set(ids.map(String)).size !== ids.length) issues.add('duplicate_staff_id');
-    if (!companyId(selectedCompany) || data.some(row => row && Object.hasOwn(row, 'company_id') && String(row.company_id) !== String(selectedCompany))) issues.add('foreign_company');
+    if (!companyId(selectedCompany) || data.some(row => row && ((collection && !Object.hasOwn(row, 'company_id')) || (Object.hasOwn(row, 'company_id') && String(row.company_id) !== String(selectedCompany))))) issues.add('foreign_company');
   }
   return TEAM_ISSUES.filter(issue => issues.has(issue));
 }
@@ -95,9 +118,9 @@ export function createReadTransport(nativeFetch, resolveCompany, clock = Date.no
   }
   async function guardedFetch(raw, init) {
     const scope = context.getStore();
-    let route = 'unlisted', status = null, teamIssues = null, countEncoding = null;
+    let route = 'unlisted', status = null, teamIssues = null, countEncoding = null, completeness = null;
     const method = init?.method === undefined ? 'GET' : ['GET', 'POST'].includes(init.method) ? init.method : 'OTHER';
-    const emit = (stage, code = null) => { try { trace({ surface: 'provider', route, method, stage, status, code, ...(stage === 'refused' && code === 'provider_scope_refused' && teamIssues?.length ? { teamIssues } : {}), ...(countEncoding && ['provider_response_read', 'provider_scope_refused'].includes(code) ? { teamCountEncoding: countEncoding } : {}) }); } catch { /* Diagnostics never change transport behavior. */ } };
+    const emit = (stage, code = null) => { try { trace({ surface: 'provider', route, method, stage, status, code, ...(stage === 'refused' && code === 'provider_scope_refused' && teamIssues?.length ? { teamIssues } : {}), ...(countEncoding && ['provider_response_read', 'provider_scope_refused'].includes(code) ? { teamCountEncoding: countEncoding } : {}), ...(stage === 'completed' && completeness ? { teamCompleteness: completeness } : {}) }); } catch { /* Diagnostics never change transport behavior. */ } };
     try {
       if (!scope?.active || scope.poisoned || clock() >= scope.deadline || !['/api/integrations/crm/connect', '/api/integrations/crm/activate'].includes(scope.request.originalUrl) || scope.request.method !== 'POST') fail('explicit_request_required');
       // request.user is populated by the real Nest auth guards before any domain call.
@@ -143,9 +166,10 @@ export function createReadTransport(nativeFetch, resolveCompany, clock = Date.no
       if (payload?.success === false) { emit('refused', 'provider_rejected'); return new Response('{"success":false}', { status: 200 }); }
       if (route === 'team') {
         countEncoding = teamCountEncoding(payload?.meta?.total_count);
-        try { validateTeamResponse(payload, response.headers, selected); }
+        const sourceEvidence = teamSourceEvidence(raw, init, response, selected);
+        try { completeness = validateTeamResponse(payload, response.headers, selected, sourceEvidence); }
         catch (error) {
-          try { teamIssues = teamRefusalIssues(payload, response.headers, selected); } catch { /* Keep the original refusal even if diagnosis fails. */ }
+          try { teamIssues = teamRefusalIssues(payload, response.headers, selected, sourceEvidence); } catch { /* Keep the original refusal even if diagnosis fails. */ }
           throw error;
         }
       }

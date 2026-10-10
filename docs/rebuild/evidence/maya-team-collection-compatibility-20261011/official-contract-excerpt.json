@@ -1,0 +1,60 @@
+{
+  "source": "https://developers.yclients.com/ru/",
+  "retrievedLocalDate": "2026-10-11",
+  "openapi": "3.0.3",
+  "sourceHtmlSha256": "ed57f3e1908597d58e880184d7cea555534d6243837d5648069b114f4326bd36",
+  "extractedSpecSha256": "9ba4c2deca4197aeee333c95b4d641f19073ef91b40279b0fc83651bd502157b",
+  "servers": [
+    {
+      "url": "https://api.yclients.ru"
+    }
+  ],
+  "path": "/api/v1/company/{company_id}/staff/{staff_id}",
+  "method": "GET",
+  "summary": "Получить список сотрудников / конкретного сотрудника",
+  "parameters": [
+    {
+      "name": "company_id",
+      "in": "path",
+      "required": true,
+      "description": "ID филиала"
+    },
+    {
+      "name": "staff_id",
+      "in": "path",
+      "required": true,
+      "description": "ID сотрудника, если нужно работать с конкретным сотрудником."
+    },
+    {
+      "name": "Accept",
+      "in": "header",
+      "required": true,
+      "description": "application/vnd.yclients.v2+json"
+    },
+    {
+      "name": "Content-Type",
+      "in": "header",
+      "required": true,
+      "description": "application/json"
+    },
+    {
+      "name": "Authorization",
+      "in": "header",
+      "required": true,
+      "description": "Bearer partner_token, User user_token"
+    }
+  ],
+  "responseSchemaName": "company_companyid_staff_staffid_response_data_types",
+  "responseRequired": null,
+  "meta": {
+    "type": "object",
+    "properties": {
+      "total_count": {
+        "type": "integer",
+        "format": "int32"
+      }
+    },
+    "description": "Метаданные (содержат количество найденных сотрудников)"
+  },
+  "interpretation": "Unfiltered management list contract; no query pagination specified; meta.total_count is not declared required. Exhaustiveness is contract-based interpretation, not an observed independent total. Host remains the existing .com route; .ru is not newly admitted."
+}

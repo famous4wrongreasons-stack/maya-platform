@@ -33,7 +33,9 @@ for (const [name, change, issues] of cases) test(`team refusal diagnosis: ${name
   const transport = createReadTransport(async () => new Response(JSON.stringify(payload), { status: 200 }), async () => 424242, Date.now, createReadTrace(e => events.push(e)));
   assert.throws(() => validateTeamResponse(payload, new Headers(), 424242));
   await transport.run(request(), new EventEmitter(), async () => {
-    await assert.rejects(transport.fetch('https://api.yclients.com/api/v1/company/424242/staff'), { code: 'LOCAL_YCLIENTS_READ_REFUSED' });
+    // Empty meta is now source-bound to the exact management collection only.
+    const source = name === 'empty meta' ? 'https://api.yclients.com/api/v1/staff/424242' : 'https://api.yclients.com/api/v1/company/424242/staff';
+    await assert.rejects(transport.fetch(source), { code: 'LOCAL_YCLIENTS_READ_REFUSED' });
     await assert.rejects(transport.fetch('https://api.yclients.com/api/v1/staff/424242'));
   });
   const refusal = events.find(e => e.route === 'team' && e.stage === 'refused');
@@ -47,7 +49,7 @@ for (const [name, change, issues] of cases) test(`team refusal diagnosis: ${name
 
 test('valid team still passes unchanged; failed observer changes neither acceptance nor denial', async () => {
   for (const valid of [true, false]) {
-    const payload = complete(); if (!valid) payload.meta = {};
+    const payload = complete(); if (!valid) payload.meta = { total_count: 3 };
     const transport = createReadTransport(async () => new Response(JSON.stringify(payload)), async () => 424242, Date.now, () => { throw Error('PRIVATE_OBSERVER'); });
     await transport.run(request(), new EventEmitter(), async () => {
       const promise = transport.fetch('https://api.yclients.com/api/v1/company/424242/staff');

@@ -1,0 +1,168 @@
+{
+  "contract": "maya.local-team-collection-compatibility/1",
+  "baseSource": "2f55da13a0b32f0d7cede07ccf27aa2fa58f4ff9",
+  "observedFailure": {
+    "teamHttp": 200,
+    "teamIssues": [
+      "total_count_type"
+    ],
+    "teamCountEncoding": "missing",
+    "connectHttp": 400,
+    "connectCode": "crm_connection_failed",
+    "operationStatus": "NOT_OBSERVED",
+    "integrations": 0,
+    "a17Executions": 0,
+    "rawStaffPayloadRetained": false,
+    "metaExactKeys": "NOT_RETAINED",
+    "decimalStringHypothesisResolvedRealFailure": false
+  },
+  "admission": {
+    "exactManagementCollectionOnly": true,
+    "apiVersion": "application/vnd.yclients.v2+json",
+    "emptyMetaOnly": true,
+    "exact200NoRedirect": true,
+    "everyRowCompanyRequired": true,
+    "uniqueIdsMax50": true,
+    "noPaginationOrExtraOuterKeys": true,
+    "noCallerCompletenessAuthority": true,
+    "noCountSynthesis": true,
+    "originalWirePreserved": true,
+    "explicitTotalValidationPreserved": true,
+    "standaloneMissingTotalStillRefused": true
+  },
+  "proof": {
+    "localReadTests": {
+      "pass": 126,
+      "fail": 0
+    },
+    "counterfactualAndMutations": [
+      {
+        "name": "unmutated",
+        "exit": 0,
+        "pass": 46,
+        "fail": 0,
+        "logSha256": "3861f1de306115c9e4d5bbdf684fc679fa7fa64ed3602e9efebc1b33108fac4d"
+      },
+      {
+        "name": "historical-baseline",
+        "exit": 1,
+        "pass": 40,
+        "fail": 6,
+        "logSha256": "ce36b5255014ef2e9142233c48370816dff4b20daee53329c48b95cafe8af5cd"
+      },
+      {
+        "name": "source-binding",
+        "exit": 1,
+        "pass": 43,
+        "fail": 3,
+        "logSha256": "1d7fa3c406e35383d90f1d7ecfaec11486242d5ca6309ccc0e693077628e4d20"
+      },
+      {
+        "name": "company-witness",
+        "exit": 1,
+        "pass": 44,
+        "fail": 2,
+        "logSha256": "f3c9d5641dbd03fe04df49b3f958aa768fb2486fa1fa52220113dd16a23ee4c9"
+      },
+      {
+        "name": "metadata-shape",
+        "exit": 1,
+        "pass": 39,
+        "fail": 7,
+        "logSha256": "9cd61de8b8c505e77383dad5521c68e1342318534589b9504ec82c648c076fce"
+      },
+      {
+        "name": "duplicate-staff",
+        "exit": 1,
+        "pass": 45,
+        "fail": 1,
+        "logSha256": "3a2a779e9757fb9d5761804deb2ada024418df66d19eee362bb6f7acc1b58068"
+      },
+      {
+        "name": "partial-response",
+        "exit": 1,
+        "pass": 44,
+        "fail": 2,
+        "logSha256": "14e271535282aebe0e6c902403c0f24f230ee56fda3b5394c3b0e8526437faa9"
+      },
+      {
+        "name": "current-actor",
+        "exit": 1,
+        "pass": 45,
+        "fail": 1,
+        "logSha256": "70f67f20e02adb7f4740868f59558738ffef69470125a46949df9653dd2f64d0"
+      },
+      {
+        "name": "private-evidence",
+        "exit": 1,
+        "pass": 36,
+        "fail": 10,
+        "logSha256": "64d9d6080463a7a1f009bdbbdd1cd44f7c7bbc346b8cd617f7b34cbace4b1f2c"
+      },
+      {
+        "name": "restored",
+        "exit": 0,
+        "pass": 46,
+        "fail": 0,
+        "logSha256": "82623cd77774444e7b84a64b312e2bb39870e56793b67394cc936f1bffc062b7"
+      }
+    ],
+    "sourceHashes": {
+      "maya-chat-shell/dev/local-api-env.mjs": "a73446eb0c3b91e8b0aff8eb2d82d6721f6f60c310147a95b15aec2fb221b550",
+      "maya-chat-shell/dev/scenarios.mjs": "f2249b6c0bea7dd99e7c140e091a6c14c72fc5fc0dfb4ce8c754bb9b005041c8",
+      "maya-chat-shell/dev/serve.mjs": "f0985920ab617d366fefe937ca257f00edbbc1bca90ba7a378dd5a25b03d711d",
+      "maya-saas-backend/scripts/local-onboarding-profile.mjs": "ac53a8a0885d4f8918ee2437050d0dd952ecd52bf5c6ace864e31b2350c685e0",
+      "maya-saas-backend/scripts/local-onboarding.mjs": "4718fcb23730d0a6e3e9489d2236811644d03f6d7d502620d0b01e29ae9ad53b",
+      "maya-saas-backend/scripts/local-yclients-read-diagnostic.mjs": "042e74fe44e26570edfa90900f81eba4bf162a19777766513fd763490feb5243",
+      "maya-saas-backend/scripts/local-yclients-read-profile.mjs": "d3dd8395f4bdaf49e4df343799c51e739ef8373e7ff0d98b041518441c3c0869",
+      "maya-saas-backend/scripts/local-yclients-read-status.mjs": "09b3377de85eadb89b1cdf3a8ccc9dc62d7bb6f7a22e39a0a3c89ac6d0987601",
+      "maya-saas-backend/scripts/local-yclients-read-team-collection.test.mjs": "640ab3e2f13218f984f55a74d3a25ad620aea60d6b0f37af233023b2f486584e",
+      "maya-saas-backend/scripts/local-yclients-read-transport.mjs": "b8f98eee5f374cd2f99ccde8e9f5da6fcde1d097607a48eac1cfbb669e8e3402",
+      "maya-saas-backend/scripts/local-yclients-read.mjs": "23d44ad86ecef6e9e37872760ea71f00830c2c0fea995a35c910c208d72bd730"
+    },
+    "nativeAdapterCountlessNumberString": "PASS_SYNTHETIC",
+    "sameDatabaseStartupOnFinalCommit": "PENDING_AT_THIS_SOURCE_COMMIT",
+    "actualOwnerSaveAfterChange": "NOT_RUN"
+  },
+  "preservation": {
+    "sourceUnchangedAfterSession04": true,
+    "samePrivateState": true,
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "metadataReadExternalCalls": 0,
+    "metadataReadBusinessWrites": 0
+  },
+  "receipts": [
+    {
+      "path": "/private/tmp/maya-owner-same-db-read-20261011-04/resume.json",
+      "sha256": "aa8044007be93fdff13d0c2708d9b422c7bea82c54085cd2aaa53f0d1f766f10"
+    },
+    {
+      "path": "/private/tmp/maya-owner-a17-metadata-20261011-04/result.json",
+      "sha256": "0ce03d122a9d5b8a12ff7dffa8a2d37467d3f70b45acd93a99080079a66b068d"
+    },
+    {
+      "path": "/tmp/maya-team-collection-tests-20261011-02.txt",
+      "sha256": "1e8fc08819dc05c511742333700fea8a3da765882459e377eaa13e84054431da"
+    },
+    {
+      "path": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-team-collection-proof-jnPNU9/summary.json",
+      "sha256": "2a6455162beaffb3e11d3ae1c1790e71f27724f2c613c4b6775623b5225f3426"
+    }
+  ],
+  "qualification": {
+    "fullCertification": false,
+    "realConnectionAcceptance": false,
+    "published": false
+  },
+  "proofHarnessAttempts": [
+    {
+      "path": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-team-collection-proof-OpGLJN",
+      "result": "REFUSED_MISSING_INSTALLED_DEPENDENCY; not a product result"
+    },
+    {
+      "path": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-team-collection-proof-Frs2Uh",
+      "result": "REFUSED_NONUNIQUE_MUTATION_SITE; partial results inadmissible"
+    }
+  ]
+}
