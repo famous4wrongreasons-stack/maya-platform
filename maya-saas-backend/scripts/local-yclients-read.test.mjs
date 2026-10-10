@@ -7,7 +7,7 @@ import test from 'node:test';
 import { PRIVATE_KEYS } from './local-onboarding-profile.mjs';
 import { realReadEnvironment } from './local-yclients-read-profile.mjs';
 import { sessionPlan } from './local-onboarding.mjs';
-import { readSessionPlan, READ_SOURCE_FILES, LOCAL_READ_HEADERS, protectWebResponse, readSummaryProjection, partnerTokenShape, promptPartnerToken, LANDING_HTML } from './local-yclients-read.mjs';
+import { readSessionPlan, READ_SOURCE_FILES, LOCAL_READ_HEADERS, protectWebResponse, readSummaryProjection, partnerTokenShape, promptPartnerToken, LANDING_HTML, PUBLIC_DIAGNOSTIC_PARTNER, DIAGNOSTIC_HTML, createDiagnostic, diagnosticStage, diagnosticFailure, runtimeStatusProjection, runtimeObserver, runtimeCredential } from './local-yclients-read.mjs';
 
 const token = 'PublicTestPartnerToken_1234567890';
 const options = { stateDirectory: '/private/tmp/local-yclients-read-unit-only', pgBin: '/opt/homebrew/opt/postgresql@16/bin', database: 'maya_local_onboarding_0123456789abcdef', pgPort: 55431, apiPort: 55432, webPort: 55433, minutes: 15 };
@@ -40,12 +40,85 @@ test('read session reuses exact preparation and cleanup without changing stage 0
   assert.throws(() => readSessionPlan({ ...options, database: 'existing_unowned_database' }));
 });
 test('all finite read-profile sources are explicitly bound and landing uses current form', () => {
-  assert.equal(READ_SOURCE_FILES.length, 6); assert.equal(new Set(READ_SOURCE_FILES).size, 6);
-  for (const name of ['local-yclients-read.mjs', 'local-yclients-read-profile.mjs', 'local-yclients-read-runtime.mjs', 'local-yclients-read-transport.mjs', 'local-yclients-read-profile.test.mjs', 'local-yclients-read.test.mjs']) assert.ok(READ_SOURCE_FILES.some(file => path.basename(file) === name));
+  assert.equal(READ_SOURCE_FILES.length, 8); assert.equal(new Set(READ_SOURCE_FILES).size, 8);
+  for (const name of ['local-yclients-read.mjs', 'local-yclients-read-profile.mjs', 'local-yclients-read-runtime.mjs', 'local-yclients-read-transport.mjs', 'local-yclients-read-profile.test.mjs', 'local-yclients-read.test.mjs', 'local-yclients-read-status.mjs', 'local-yclients-read-diagnostic.mjs']) assert.ok(READ_SOURCE_FILES.some(file => path.basename(file) === name));
   assert.ok(LANDING_HTML.includes('href="/?local_crm_setup=1"'));
   assert.ok(LANDING_HTML.includes('Партнёрский токен вводится скрыто'));
   assert.ok(LANDING_HTML.includes('Отдельная активация'));
   assert.equal(/<script|https?:\/\//.test(LANDING_HTML), false);
+});
+test('diagnostic mode is fixed to one minute and selects the public constant without owner input', () => {
+  const plan = readSessionPlan({ ...options, diagnosticNoProvider: true });
+  assert.equal(plan.durationMs, 60000);
+  assert.equal(plan.providerAdmission, 'diagnostic_network_closed');
+  assert.deepEqual(plan.runtime.args.slice(1), ['--diagnostic-no-provider']);
+  assert.equal(runtimeCredential(true), PUBLIC_DIAGNOSTIC_PARTNER);
+  assert.throws(() => runtimeCredential(true, token));
+  assert.throws(() => runtimeCredential(false, PUBLIC_DIAGNOSTIC_PARTNER), { diagnosticCode: 'input_invalid' });
+  assert.throws(() => runtimeCredential(false), { diagnosticCode: 'input_invalid' });
+  assert.equal(runtimeCredential(false, token), token);
+  assert.equal(readSessionPlan(options).providerAdmission, 'explicit_setup_reads_only');
+  assert.equal(/<input|<form/.test(DIAGNOSTIC_HTML), false);
+});
+test('safe diagnostic keeps the first failure when cleanup also fails', () => {
+  const diagnostic = createDiagnostic(false);
+  diagnosticStage(diagnostic, 'waiting_input');
+  diagnosticFailure(diagnostic, 'input_invalid');
+  const first = structuredClone(diagnostic.firstFailure);
+  diagnosticStage(diagnostic, 'stopping'); diagnosticFailure(diagnostic, 'cleanup_failed', { cleanup: true });
+  diagnosticStage(diagnostic, 'stopped', 'completed');
+  assert.deepEqual(diagnostic.firstFailure, first);
+  assert.equal(diagnostic.cleanupFailures[0].code, 'cleanup_failed');
+  assert.equal(diagnostic.outcome, 'failed'); assert.equal(diagnostic.credentialAccepted, false);
+  assert.deepEqual(Object.keys(first).sort(), ['code', 'runtimeStage', 'stage']);
+  assert.throws(() => diagnosticFailure(diagnostic, 'raw-private-error-message'));
+  const cancelled = createDiagnostic(false); diagnosticStage(cancelled, 'waiting_input');
+  diagnosticFailure(cancelled, 'input_cancelled'); diagnosticStage(cancelled, 'stopped', 'cancelled');
+  assert.equal(cancelled.outcome, 'cancelled');
+});
+test('runtime status before ready cannot be mistaken for application readiness', async () => {
+  const diagnostic = createDiagnostic(true); diagnosticStage(diagnostic, 'backend_starting');
+  const expected = { origin: 'http://127.0.0.1:55432', providerAdmission: 'diagnostic_network_closed' };
+  const observer = runtimeObserver(diagnostic, expected, () => {});
+  let ready = false; void observer.ready.then(() => { ready = true; });
+  const status = { type: 'runtime-status', contract: 'maya.local-yclients-read-status/1', stage: 'app_importing', outcome: 'entered', code: null, cause: null };
+  observer.accept(status); await Promise.resolve();
+  assert.equal(ready, false); assert.equal(diagnostic.runtimeStatuses.length, 1);
+  observer.accept({ type: 'ready', contract: 'maya.local-yclients-read/1', ...expected }); await observer.ready;
+  assert.equal(ready, true); assert.equal(diagnostic.credentialAccepted, false);
+});
+test('owner cancellation and relay startup retain distinct outcomes without hiding cleanup failure', () => {
+  const cancelled = createDiagnostic(false); diagnosticStage(cancelled, 'backend_starting');
+  diagnosticFailure(cancelled, 'session_cancelled'); diagnosticStage(cancelled, 'stopped', 'cancelled');
+  assert.equal(cancelled.outcome, 'cancelled');
+  diagnosticFailure(cancelled, 'cleanup_failed', { cleanup: true });
+  assert.equal(cancelled.firstFailure.code, 'session_cancelled'); assert.equal(cancelled.outcome, 'failed');
+  const relay = createDiagnostic(true); diagnosticStage(relay, 'web_starting'); diagnosticFailure(relay, 'relay_start_failed');
+  assert.deepEqual(relay.firstFailure, { stage: 'web_starting', code: 'relay_start_failed', runtimeStage: null });
+});
+test('closed runtime failure retains its safe stage and cause through cleanup', async () => {
+  const diagnostic = createDiagnostic(false); diagnosticStage(diagnostic, 'backend_starting'); diagnostic.credentialAccepted = true;
+  const observer = runtimeObserver(diagnostic, { origin: 'http://127.0.0.1:55432', providerAdmission: 'explicit_setup_reads_only' }, () => {});
+  const failed = { type: 'runtime-status', contract: 'maya.local-yclients-read-status/1', stage: 'app_creating', outcome: 'failed', code: 'app_create_failed', cause: 'dependency_resolution' };
+  observer.accept(failed); await assert.rejects(observer.failure, { diagnosticCode: 'app_create_failed' });
+  diagnosticFailure(diagnostic, 'cleanup_failed', { cleanup: true });
+  assert.equal(diagnostic.firstFailure.runtimeStage, 'app_creating');
+  assert.equal(diagnostic.firstFailure.code, 'app_create_failed');
+  assert.equal(diagnostic.runtimeStatuses[0].cause, 'dependency_resolution');
+  assert.equal(diagnostic.credentialAccepted, true);
+});
+test('raw or oversized IPC is refused without retaining its content', async () => {
+  const status = { type: 'runtime-status', contract: 'maya.local-yclients-read-status/1', stage: 'app_importing', outcome: 'entered', code: null, cause: null };
+  for (const message of [{ ...status, message: 'RAW_SECRET_BODY' }, { ...status, cause: 'RAW_SECRET_BODY' }, { ...status, stage: 'RAW_SECRET_BODY' }, { type: 'unknown', body: 'RAW_SECRET_BODY' }]) {
+    const diagnostic = createDiagnostic(true), observer = runtimeObserver(diagnostic, { origin: 'http://127.0.0.1:55432', providerAdmission: 'diagnostic_network_closed' }, () => {});
+    assert.equal(runtimeStatusProjection(message), null);
+    observer.accept(message); await assert.rejects(observer.failure, { diagnosticCode: 'runtime_status_invalid' });
+    assert.equal(JSON.stringify(diagnostic).includes('RAW_SECRET_BODY'), false);
+  }
+  const diagnostic = createDiagnostic(true), observer = runtimeObserver(diagnostic, { origin: 'http://127.0.0.1:55432', providerAdmission: 'diagnostic_network_closed' }, () => {});
+  for (let i = 0; i < 25; i += 1) observer.accept(status);
+  await assert.rejects(observer.failure, { diagnosticCode: 'runtime_status_invalid' });
+  assert.equal(diagnostic.runtimeStatuses.length, 24);
 });
 test('persistable preparation environment has no inherited partner or user credentials', () => {
   const keys = Object.fromEntries(PRIVATE_KEYS.map((name, index) => [name, (index + 1).toString(16).padStart(64, '0')]));
@@ -130,7 +203,7 @@ test('hidden prompt cancels on Ctrl-C, Ctrl-D, EOF and abort without echo', asyn
 });
 test('hidden prompt has a finite deadline and preserves an already-raw terminal', async () => {
   const fake = tty(); fake.input.isRaw = true; fake.input.paused = false;
-  await assert.rejects(promptPartnerToken({ ...fake, timeoutMs: 5 }), /deadline/);
+  await assert.rejects(promptPartnerToken({ ...fake, timeoutMs: 5 }), { diagnosticCode: 'input_timeout' });
   assert.equal(fake.input.isRaw, true); assert.equal(fake.input.isPaused(), false);
   assert.equal(fake.input.listenerCount('data'), 0);
   await assert.rejects(promptPartnerToken({ ...tty(), timeoutMs: 600001 }));

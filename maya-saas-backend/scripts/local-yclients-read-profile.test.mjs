@@ -8,6 +8,8 @@ import test from 'node:test';
 import { PRIVATE_KEYS, assertProfileEnvironment } from './local-onboarding-profile.mjs';
 import { realReadEnvironment, assertRealReadEnvironment, realReadIngress } from './local-yclients-read-profile.mjs';
 import { createReadTransport, admittedProviderRead, validateTeamResponse, READ_LIMITS } from './local-yclients-read-transport.mjs';
+import { runtimeStatus, projectRuntimeStatus, safeRuntimeCause } from './local-yclients-read-status.mjs';
+import { PUBLIC_DIAGNOSTIC_PARTNER, diagnosticSandboxPolicy, diagnosticRuntimeCommand } from './local-yclients-read-diagnostic.mjs';
 
 const requestId = '11111111-1111-4111-8111-111111111111';
 const origin = 'http://127.0.0.1:55433';
@@ -19,6 +21,35 @@ const actor = { tenantId: 'synthetic-tenant', userId: 'synthetic-owner', members
 const request = (changed = {}) => ({ method: 'POST', originalUrl: '/api/integrations/crm/connect', user: actor, body: body(), ...changed });
 const source = route => 'https://api.yclients.com/api/v1/' + route;
 const reply = (data, extra = {}) => new Response(JSON.stringify({ success: true, data, ...extra }), { status: 200 });
+
+test('runtime diagnostics discard arbitrary errors and accept only closed stage/code records', () => {
+  const hidden = new Error('DO_NOT_RETAIN_PRIVATE_INPUT'); hidden.code = 'ECONNREFUSED';
+  const event = runtimeStatus('app_creating', 'failed', 'app_create_failed', hidden);
+  assert.equal(event.cause, 'connection_refused');
+  assert.deepEqual(projectRuntimeStatus(event), event);
+  assert.equal(JSON.stringify(event).includes(hidden.message), false);
+  assert.equal(safeRuntimeCause({ name: 'PRIVATE_NAME', code: 'PRIVATE_CODE', message: hidden.message }), 'unknown');
+  assert.equal(projectRuntimeStatus({ ...event, message: hidden.message }), null);
+  for (const changed of [{ stage: hidden.message }, { code: hidden.message }, { cause: hidden.message }, { outcome: 'unknown' }, { type: 'ready' }]) assert.equal(projectRuntimeStatus({ ...event, ...changed }), null);
+  assert.equal(projectRuntimeStatus({ ...runtimeStatus('runtime_ready', 'completed'), cause: 'unknown' }), null);
+  assert.throws(() => runtimeStatus('private-stage'));
+});
+test('diagnostic runtime command enforces per-process network closure and exact public fixture', () => {
+  const policy = diagnosticSandboxPolicy(55431, 55432);
+  assert.ok(policy.includes('(deny network*)'));
+  assert.ok(policy.includes('(remote ip "localhost:55431")'));
+  assert.ok(policy.includes('(local ip "localhost:55432")'));
+  assert.equal(policy.includes('api.yclients.com'), false);
+  for (const ports of [[55431, 55431], [0, 55432], [55431, 65536], ['55431', 55432]]) assert.throws(() => diagnosticSandboxPolicy(...ports));
+  if (process.platform !== 'darwin') return;
+  const plan = { runtime: { command: process.execPath, args: ['/fixture/local-yclients-read-runtime.mjs', '--diagnostic-no-provider'] } };
+  const env = realReadEnvironment({}, options, PUBLIC_DIAGNOSTIC_PARTNER);
+  const spec = diagnosticRuntimeCommand(plan, env);
+  assert.equal(spec.command, '/usr/bin/sandbox-exec');
+  assert.deepEqual(spec.args, ['-p', policy, process.execPath, ...plan.runtime.args]);
+  assert.throws(() => diagnosticRuntimeCommand(plan, { ...env, YCLIENTS_PARTNER_TOKEN: 'PRIVATE_NOT_ACCEPTED' }));
+  assert.throws(() => diagnosticRuntimeCommand({ runtime: { ...plan.runtime, args: plan.runtime.args.slice(0, 1) } }, env));
+});
 
 test('separate real-read profile excludes inherited credentials and cannot weaken stage0', () => {
   const env = realReadEnvironment({ YCLIENTS_PARTNER_TOKEN: 'INHERITED_NOT_ALLOWED', OPENAI_API_KEY: 'INHERITED_NOT_ALLOWED' }, options);
