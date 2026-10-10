@@ -21,6 +21,7 @@ import {
 import type { Fixtures } from './support/fixtures';
 import { assertProofDatabase } from './support/proof-db-guard';
 import { firstSlot, object, submit } from './support/release-booking-flow';
+import { ClientChannelLinkService } from '../../src/crm/client-channel-link.service';
 import { ActionEngineRuntimeService } from '../../src/action-engine/action-engine.runtime';
 
 assertProofDatabase();
@@ -52,6 +53,7 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
     ((s: Scenario) => Promise<'gone' | 'lost' | void>) | undefined;
   let afterDetail: ((s: Scenario) => Promise<void>) | undefined;
   let readbackReady = true;
+  let readbackId = 5001;
   beforeAll(async () => {
     db = await bootFixtureContext();
     http = await bootHttp();
@@ -190,7 +192,7 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
         assert.ok(row);
         await afterDetail?.(s);
         data = {
-          id: 5001,
+          id: readbackId,
           company_id: company,
           datetime: s.day + 'T10:00:00',
           seance_length: 1800,
@@ -218,6 +220,7 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
     afterDelete = undefined;
     afterDetail = undefined;
     readbackReady = true;
+    readbackId = 5001;
     const s = scenarios.at(-1);
     if (!s) return;
     const executions = await db.prisma.actionExecution.findMany({
@@ -226,6 +229,8 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
         id: true,
         state: true,
         executionAttemptCount: true,
+        reconciliationState: true,
+        attempts: { select: { kind: true, state: true } },
         evidenceRefsJson: true,
       },
     });
@@ -499,7 +504,10 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
             tenantId: s.tenantId,
             capability: 'crm.appointment.create.v1',
           },
-          data: { bookingIntentEncrypted: null },
+          data: {
+            bookingIntentEncrypted: null,
+            payloadRetentionUntil: new Date(Date.now() - 1000),
+          },
         });
       if (mode === 'provider-change')
         await db.prisma.crmIntegration.update({
@@ -511,17 +519,46 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
           where: { id: s.tenantId },
           data: { calendarSource: 'internal' },
         });
-      if (mode === 'revoked-link')
-        await db.prisma.clientChannelLink.update({
-          where: { id: s.linkId },
-          data: { revokedAt: new Date() },
-        });
+      if (mode === 'revoked-link') await revoke(s);
       const result = await submit(http, s.token, s.confirmation!, 'COMMIT');
       expect(result.receipt_outcome).not.toBe('ACCEPTED');
       await assertUntouched(s);
     },
     30000,
   );
+  async function revoke(s: Scenario) {
+    const link = await db.prisma.clientChannelLink.findUniqueOrThrow({
+      where: { id: s.linkId },
+    });
+    const proof = randomUUID();
+    // Synthetic verifier only; use the canonical immutable A18 revocation owner.
+    const owner = new ClientChannelLinkService(db.prisma, db.tenantContext, {
+      verifyLink: () => Promise.reject(new Error('No link creation authority')),
+      verifyRevocation: (provided) =>
+        provided === proof
+          ? Promise.resolve({
+              tenantId: s.tenantId,
+              provider: 'maya_user',
+              providerSubjectHash: link.providerSubjectHash,
+              linkId: s.linkId,
+              revocationIdentityHash: 'c'.repeat(64),
+              actorProofHash: 'd'.repeat(64),
+              reason: 'synthetic-cancel-source-revocation',
+              validUntil: new Date(Date.now() + 600000),
+            })
+          : Promise.reject(new Error('Unknown synthetic proof')),
+    });
+    await db.tenantContext.runAsSystemTenant(s.tenantId, () =>
+      owner.revoke({ proof }),
+    );
+    expect(
+      (
+        await db.prisma.clientChannelLink.findUniqueOrThrow({
+          where: { id: s.linkId },
+        })
+      ).revokedAt,
+    ).not.toBeNull();
+  }
   it('unchanged source cancellation, concurrent same-key callers and replay share one AE/DELETE', async () => {
     const s = await scenario(),
       key = randomUUID();
@@ -573,10 +610,7 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
         second = cancelHttp(s, key).then((r) => r);
       expect((await Promise.race([first, second])).status).toBe(201);
       await entered;
-      await db.prisma.clientChannelLink.update({
-        where: { id: s.linkId },
-        data: { revokedAt: new Date() },
-      });
+      await revoke(s);
       release();
       expect(
         (await Promise.all([first, second])).map((r) => r.status).sort(),
@@ -612,10 +646,7 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
     try {
       const pending = submit(http, s.token, s.confirmation!, 'COMMIT');
       await entered;
-      await db.prisma.clientChannelLink.update({
-        where: { id: s.linkId },
-        data: { revokedAt: new Date() },
-      });
+      await revoke(s);
       release();
       const result = await pending;
       expect(result).toMatchObject({
@@ -646,11 +677,7 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
         .mockImplementationOnce(async function (params) {
           expect(typeof params.assertSourceCurrent).toBe('function');
           if (mode === 'source') await switchCompany(s);
-          if (mode === 'revoke')
-            await db.prisma.clientChannelLink.update({
-              where: { id: s.linkId },
-              data: { revokedAt: new Date() },
-            });
+          if (mode === 'revoke') await revoke(s);
           if (mode === 'record-identity')
             await db.prisma.appointment.update({
               where: { id: s.appointmentId },
@@ -700,14 +727,10 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
     },
     30000,
   );
-  it('stable UNKNOWN reconciles the original provider without another DELETE', async () => {
+  it('lost DELETE response reconciles the original provider within the existing finite attempt budget', async () => {
     const s = await scenario(),
       key = randomUUID();
-    readbackReady = false;
     afterDelete = () => Promise.resolve('lost');
-    expect((await cancelHttp(s, key)).status).toBe(503);
-    expect((await executions(s))[0].state).toBe('UNKNOWN');
-    readbackReady = true;
     expect((await cancelHttp(s, key)).status).toBe(201);
     expect(deletes(s)).toHaveLength(1);
     expect((await ownedRow(s)).status).toBe('canceled');
@@ -719,10 +742,7 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
   it('source changes during UNKNOWN readback: retains UNKNOWN without mirror or company-B access', async () => {
     const s = await scenario(),
       key = randomUUID();
-    readbackReady = false;
     afterDelete = () => Promise.resolve('lost');
-    expect((await cancelHttp(s, key)).status).toBe(503);
-    readbackReady = true;
     afterDetail = async () => {
       await switchCompany(s);
     };
@@ -741,6 +761,49 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
       executionAttemptCount: 1,
     });
   }, 30000);
+  it.each(['unavailable', 'foreign-record'])(
+    'UNKNOWN readback %s reaches the existing manual bound and replay never redispatches',
+    async (mode) => {
+      const s = await scenario(),
+        key = randomUUID();
+      readbackReady = mode !== 'unavailable';
+      readbackId = mode === 'foreign-record' ? 5002 : 5001;
+      afterDelete = () => Promise.resolve('lost');
+      expect((await cancelHttp(s, key)).status).toBe(503);
+      const execution = await db.prisma.actionExecution.findFirstOrThrow({
+        where: {
+          tenantId: s.tenantId,
+          capability: 'crm.appointment.cancel.v1',
+        },
+        include: { attempts: true },
+      });
+      expect(execution).toMatchObject({
+        state: 'UNKNOWN',
+        reconciliationState: 'MANUAL_REQUIRED',
+        executionAttemptCount: 1,
+      });
+      expect(
+        execution.attempts.filter((a) => a.kind === 'RECONCILIATION'),
+      ).toHaveLength(3);
+      expect(
+        transport.filter(
+          (r) =>
+            r.company === s.companyA &&
+            r.method === 'GET' &&
+            r.route === `record/${s.companyA}/5001`,
+        ),
+      ).toHaveLength(3);
+      readbackReady = true;
+      readbackId = 5001;
+      const before = transport.length;
+      expect((await cancelHttp(s, key)).status).toBe(503);
+      expect(transport.slice(before)).toEqual([]);
+      expect(deletes(s)).toHaveLength(1);
+      expect((await ownedRow(s)).status).toBe('confirmed');
+      expect(records.get(s.companyB)?.canceled).toBe(false);
+    },
+    30000,
+  );
   it('foreign tenant cannot cancel the owned appointment', async () => {
     const s = await scenario(),
       foreign = await scenario();

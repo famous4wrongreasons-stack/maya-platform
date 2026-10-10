@@ -3920,6 +3920,11 @@ export class CrmService {
                   scopedTenantId,
                   durableExternalId,
                 );
+            if (
+              clientCancel &&
+              decodeCrmAppointmentKey(detail.id) !== durableExternalId
+            )
+              return { outcome: 'STILL_UNKNOWN' };
             canceled = isCanceledStatus(detail.status);
           } catch (error) {
             if (!(error instanceof CrmRecordGoneError)) throw error;
