@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { PRIVATE_KEYS, FIXED_PROFILE, profileEnvironment, assertProfileEnvironment, ingressDecision, migrationConfigSource, externalStatePath, localBrowserBoundary } from './local-onboarding-profile.mjs';
 import { sessionPlan } from './local-onboarding.mjs';
+import { assertCompletedSession } from './local-onboarding-proof.mjs';
 
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const keys = Object.fromEntries(PRIVATE_KEYS.map((key, index) => [key, (index + 1).toString(16).padStart(64, '0')]));
@@ -102,4 +103,26 @@ test('private state cannot be existing or enter the repository through a symlink
     assert.throws(() => externalStatePath(path.join(directory, 'repository-link/new-private-state'), repository));
     assert.equal(externalStatePath(path.join(directory, 'new-private-state'), repository), path.join(fs.realpathSync(directory), 'new-private-state'));
   } finally { fs.rmSync(directory, { recursive: true, force: true }); }
+});
+test('restart metadata requires the exact completed launcher session and unchanged committed source', () => {
+  const state = options.stateDirectory;
+  const source = { head: 'a'.repeat(40), files: [{ path: 'unit-source.mjs', gitBlob: 'b'.repeat(40), sha256: 'c'.repeat(64) }] };
+  const manifest = {
+    contract: 'maya.normal-local-onboarding-session/1', status: 'stopped', providerAdmission: false,
+    qualifiedAcceptance: false, source, stateDirectory: state, ownedCluster: path.join(state, 'pg'),
+    creation: 'fresh-exclusive-directory_then-initdb',
+    completed: ['backend-build', 'react-build', 'initdb', 'pg-start', 'createdb', 'migrations'],
+    clusterStopped: true, runtimeGroupAbsent: true, sourceUnchanged: true, privateStateRetained: true,
+    readyAt: '2026-10-10T12:00:00.000Z', resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, pgWorkMemMb: 4, pgMaxConnections: 30 },
+  };
+  assert.doesNotThrow(() => assertCompletedSession(manifest, state, source));
+  assert.doesNotThrow(() => assertCompletedSession({ ...manifest, status: 'cancelled' }, state, source));
+  for (const changed of [
+    { status: 'failed' }, { status: 'ready' }, { readyAt: undefined }, { readyAt: 'invalid' },
+    { clusterStopped: false }, { runtimeGroupAbsent: false }, { sourceUnchanged: false },
+    { providerAdmission: true }, { qualifiedAcceptance: true }, { privateStateRetained: false },
+    { creation: 'existing-database' }, { completed: manifest.completed.slice(1) },
+    { ownedCluster: '/private/tmp/another-cluster' }, { stateDirectory: '/private/tmp/another-state' },
+    { source: { ...source, head: 'd'.repeat(40) } }, { resources: { ...manifest.resources, pgMaxConnections: 31 } },
+  ]) assert.throws(() => assertCompletedSession({ ...manifest, ...changed }, state, source));
 });

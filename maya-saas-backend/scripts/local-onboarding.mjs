@@ -19,6 +19,8 @@ const sourcePaths = [
   'maya-saas-backend/src', 'maya-saas-backend/prisma', 'maya-saas-backend/prisma.config.ts',
   'maya-saas-backend/scripts/local-onboarding.mjs', 'maya-saas-backend/scripts/local-onboarding-profile.mjs',
   'maya-saas-backend/scripts/local-onboarding-runtime.mjs', 'maya-saas-backend/scripts/local-onboarding.test.mjs',
+  'maya-saas-backend/scripts/local-onboarding-proof.mjs',
+  'maya-saas-backend/scripts/local-onboarding-environment.test.mjs',
   'maya-saas-backend/package.json', 'maya-saas-backend/package-lock.json', 'maya-saas-backend/tsconfig.json', 'maya-saas-backend/tsconfig.build.json', 'maya-saas-backend/nest-cli.json',
   'maya-carrier-react/src', 'maya-carrier-react/tools', 'maya-carrier-react/index.html', 'maya-carrier-react/build.mjs', 'maya-carrier-react/package.json', 'maya-carrier-react/package-lock.json', 'maya-carrier-react/tsconfig.json',
   'maya-chat-shell/src', 'maya-chat-shell/dev', 'maya-chat-shell/build.mjs', 'maya-chat-shell/package.json',
@@ -223,3 +225,6 @@ export async function main(args) {
 }
 if (process.argv[1] && pathToFileURL(fs.realpathSync(process.argv[1])).href === import.meta.url)
   main(process.argv.slice(2)).catch(() => { console.error('Normal local onboarding stopped with a controlled failure; no credential values recorded'); process.exitCode = 1; });
+
+// The finite restart proof reuses the same runtime, relay and owned cleanup.
+export { sourceBinding, stage, runRuntime };

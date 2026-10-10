@@ -52,6 +52,13 @@ export function profileEnvironment(system, { databaseUrl, keys, apiPort, origin,
 }
 export function assertProfileEnvironment(env) {
   const allowed = new Set([...Object.keys(FIXED_PROFILE), ...PRIVATE_KEYS, ...PROCESS_KEYS, 'DATABASE_URL', 'PORT', 'CORS_ALLOWED_ORIGINS', 'MAYA_LOCAL_ONBOARDING_STATE']);
+  // macOS adds this text-encoding metadata when starting Node even with an
+  // explicit child environment. It is not inherited by profileEnvironment.
+  if (process.platform === 'darwin' && Object.hasOwn(env, '__CF_USER_TEXT_ENCODING')) {
+    const value = env.__CF_USER_TEXT_ENCODING;
+    assert.ok(typeof value === 'string' && value.length <= 64 && /^(?:0x[0-9a-f]+|[0-9]+):(?:0x[0-9a-f]+|[0-9]+):(?:0x[0-9a-f]+|[0-9]+)$/i.test(value), 'Invalid macOS text encoding metadata');
+    allowed.add('__CF_USER_TEXT_ENCODING');
+  }
   // Values are never included in errors: these fields contain private material.
   for (const key of Object.keys(env)) assert.ok(allowed.has(key), 'Unapproved runtime environment key');
   for (const [key, value] of Object.entries(FIXED_PROFILE)) assert.ok(env[key] === value, 'Local onboarding profile setting changed');
