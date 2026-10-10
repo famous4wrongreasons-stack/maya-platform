@@ -73,20 +73,25 @@ async function main() {
     report.chat ??= []; report.chat.push({ prompt, actualReply: body.reply, requestId: body.request_id, responseSha256: hash(raw), status: request.status, source: body.source }); save();
     await record(name, body); return body.resolution?.receipt?.envelope;
   }
-  async function clickRef(ref) {
+  async function clickRef(ref, envelope) {
     const snapshot = await view();
     assert.ok(snapshot.controls.some(c => c.ref === ref && !c.disabled), 'Visible canonical control: ' + ref);
     const before = page.apiRequests('/widgets/intent').length;
-    assert.equal(await page.click(`Q.all('button[data-ref]').find(el=>Q.visible(el)&&el.dataset.ref===${JSON.stringify(ref)})`), true);
+    // Refs are local to each envelope. Earlier chat cards legitimately retain i1/i2.
+    const control = `Q.all('button[data-ref]').filter(el=>Q.visible(el)&&!el.disabled&&el.getAttribute('aria-disabled')!=='true'&&el.dataset.ref===${JSON.stringify(ref)}).at(-1)`;
+    const controlName = await page.eval(`Q.name(${control})`);
+    assert.equal(await page.click(control), true);
     const request = await until(() => page.apiRequests('/widgets/intent').slice(before).find(r => r.finishedAt || r.failed), 'widget intent');
+    const submission = JSON.parse(await page.postData(request));
+    assert.equal(submission.widget_id, envelope.widget_id, 'Click must belong to the current canonical envelope');
     const raw = await page.responseBody(request.requestId), body = JSON.parse(raw);
-    report.intents ??= []; report.intents.push({ status: request.status, outcome: body.receipt_outcome ?? null, code: body.code ?? null, responseSha256: hash(raw), nextKind: body.next_envelope?.kind ?? null }); save();
+    report.intents ??= []; report.intents.push({ controlName, widgetId: envelope.widget_id, status: request.status, outcome: body.receipt_outcome ?? null, code: body.code ?? null, responseSha256: hash(raw), nextKind: body.next_envelope?.kind ?? null }); save();
     assert.equal(request.status, 200); return body;
   }
   async function commit(envelope, name) {
     assert.equal(envelope.kind, 'BOOKING_CONFIRMATION');
     const intent = envelope.intents.find(i => i.effect === 'COMMIT'); assert.ok(intent);
-    const result = await clickRef('intent:' + intent.intent_ref);
+    const result = await clickRef('intent:' + intent.intent_ref, envelope);
     await record(name, result); assert.equal(result.receipt_outcome, 'ACCEPTED'); return result;
   }
   try {
@@ -121,14 +126,16 @@ async function main() {
     envelope = await chat(prompts[1], 'selected-17'); assert.equal(envelope.kind, 'TIME_SLOT_SELECTOR');
     const slots = envelope.body.groups.flatMap(g => g.slots); assert.equal(slots.length, 1);
     assert.equal(Date.parse(slots[0].start.value), Date.parse(input.start));
-    let result = await clickRef('slot:' + slots[0].slot_ref); assert.equal(result.next_envelope?.kind, 'BOOKING_CONFIRMATION');
+    let result = await clickRef('slot:' + slots[0].slot_ref, envelope); assert.equal(result.next_envelope?.kind, 'BOOKING_CONFIRMATION');
     assert.equal(result.next_envelope.body.staff_label.value, 'Артём');
     await record('create-preview', result); await commit(result.next_envelope, 'create-commit');
     for (const operation of ['reschedule', 'cancel']) {
       envelope = await chat(prompts[2], 'own-before-' + operation); assert.equal(envelope.kind, 'SCHEDULE');
       const intent = envelope.intents.find(i => i.effect === 'REFINE' && i.label === (operation === 'reschedule' ? 'Проверить перенос' : 'Проверить отмену'));
       assert.ok(intent, 'Current own schedule lacks canonical ' + operation + ' control');
-      result = await clickRef('intent:' + intent.intent_ref); assert.equal(result.next_envelope?.kind, 'BOOKING_CONFIRMATION');
+      // SCHEDULE renders its detail intent on the appointment entry itself.
+      const entry = envelope.body.entries.find(e => e.detail_intent === intent.intent_ref);
+      result = await clickRef(entry ? 'entry:' + entry.entry_ref : 'intent:' + intent.intent_ref, envelope); assert.equal(result.next_envelope?.kind, 'BOOKING_CONFIRMATION');
       await record(operation + '-preview', result); await commit(result.next_envelope, operation + '-commit');
     }
     const before = page.apiRequests('/ai/conversation').length;
