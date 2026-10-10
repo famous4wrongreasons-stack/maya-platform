@@ -1,0 +1,179 @@
+{
+  "contract": "maya.a17.independent-source-review/1",
+  "reviewedAtUtc": "2026-10-10T12:08:52.641624+00:00",
+  "baseCommit": "1a43694e9e0b3513a5e00cdd9b64cb762b2421a6",
+  "sourceState": "Uncommitted frozen candidate over baseCommit; hashes, not a final commit, bind this review.",
+  "verdict": "QUALIFIED_SOURCE_NO_REMAINING_BLOCKERS",
+  "scope": "A17 qualified version pin, existing AE receipt recovery, transaction-bound import projection, current actor/tenant checks, local opt-in UI URL locator and explicit actions. No proof-runner/browser-probe acceptance review.",
+  "closedFindings": [
+    {
+      "id": "P1_source_migration_history",
+      "closure": "Qualified install checks surviving CRM identities even when integration is absent, including disabled/unlinked history; source comparison includes baseUrl; qualified confirm refuses unresolved historical identity rather than reactivating it."
+    },
+    {
+      "id": "P2_post_success_actor",
+      "closure": "Both qualified POST paths recheck current actor after final awaited status read and preserve durable historical receipt separately from current configuration."
+    },
+    {
+      "id": "UI_foreign_completion",
+      "closure": "Completion checks reviewed tenant/integration and requested company/branch before clearing pending locator or displaying success."
+    },
+    {
+      "id": "UI_stale_generation_dispatch",
+      "closure": "Final preflight publication and locator save are followed by active-generation checks before POST."
+    }
+  ],
+  "confirmedSourceProperties": [
+    "Expected version and actor are checked under the existing AE target lock; present branch binding is checked in tenant scope.",
+    "Qualified confirmation applies projection through the same transaction before mutation receipt and SUCCEEDED; projection errors propagate; postprojection version mismatch rolls back.",
+    "Exact recovery validates actor, tenant, capability, source reference, immutable trusted input and retention; no provider reread or action admission in the GET path.",
+    "Historical success is separated from matchesCurrentVersion; qualified completion requires its atomic import receipt.",
+    "URL locator contains only operation kind and random UUID, is saved before POST, and is not consent or authorization. Unknown/not-observed/unavailable does not admit a new key; READY explicit continuation retains the original key and server material checks.",
+    "Token is cleared from the form and is not retained in public view, URL or React state; no raw preview/credentials are added to AE payload."
+  ],
+  "checks": {
+    "reviewerExecutedTests": false,
+    "reviewerStartedServices": false,
+    "reviewerNetworkCalls": false,
+    "backendFreezeFilesVerified": 9,
+    "savedBackendJest": {
+      "numTotalTests": 65,
+      "numPassedTests": 65,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTotalTestSuites": 4,
+      "numPassedTestSuites": 4,
+      "numFailedTestSuites": 0,
+      "success": true
+    },
+    "savedBackendJestSha256": "ca8f22e02c71151efe4ae90da0a69a46ce24fc9b34862eb3f5ed2773f7743e5c",
+    "savedLogs": [
+      {
+        "kind": "scopedTypes",
+        "file": "maya-crm-qualified-test-types-r2.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "qualification": "Existing saved log inspected; exit success reported by frozen author manifest, not rerun by reviewer."
+      },
+      {
+        "kind": "lint",
+        "file": "maya-crm-qualified-lint-final.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "qualification": "Existing saved log inspected; exit success reported by frozen author manifest, not rerun by reviewer."
+      }
+    ],
+    "frontendTests": "35/35 reported by parent; not independently rerun or summed with backend suites."
+  },
+  "limitations": [
+    "Source/component review only: no HTTP, PG, actual restart, Chrome, real YCLIENTS or model acceptance established here.",
+    "Pre-admission failure remains NOT_OBSERVED and unresolved. No definitive abandonment/failure lifecycle or automatic retry was introduced.",
+    "Qualified confirm conservatively refuses disabled/unlinked identity history, including legitimate same-company reimports; no migration semantics were invented.",
+    "Existing 30-day normalized-payload retention applies; unavailable/cleaned/historical-unqualified receipt is not upgraded to success.",
+    "URL persistence is limited to preserving the same URL; all OAuth/navigation flows are not proven. Existing bounded 401 refresh may resend the same key/body.",
+    "Legacy unqualified entry points are not certified as having the new qualified recovery/atomicity contract.",
+    "No full MAYA/C10, booking-readiness or live-credential acceptance is issued."
+  ],
+  "files": [
+    {
+      "path": "maya-saas-backend/src/crm/crm-configuration-version.ts",
+      "sha256": "788724bbc8db8d95d2d6f9d130063950224d6d49913eb8367a70d1ee91c8f855",
+      "bytes": 3160,
+      "freezeMatch": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/dto/crm-operation.dto.ts",
+      "sha256": "f079ead59eb4467aa4fa0617d131e5f23785f15842311ca0a110c596d027b266",
+      "bytes": 596,
+      "freezeMatch": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+      "sha256": "d133c1b5c53d9a3c724fb4bb4ba5e90dfd12803e11b44a0b02549418b04fec41",
+      "bytes": 21112,
+      "freezeMatch": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm.service.ts",
+      "sha256": "544fb41187f55184b1959a0e36e45edae738be0f024e52977279859374d8479d",
+      "bytes": 243356,
+      "freezeMatch": true
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+      "sha256": "372a248f71d1d4c24a57862411728be581b2ae44e987f3982ffc314cd22fee3c",
+      "bytes": 68841,
+      "freezeMatch": true
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "sha256": "5abf52974e5915c503b679467c1a8d600b8f6f59c0446b40fe69f2526b2392fa",
+      "bytes": 23243,
+      "freezeMatch": true
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3-production-gateway.service.ts",
+      "sha256": "309e292720ca2fc570e0adcc2504ea8d440795c870cbda36c3a694695f5360cb",
+      "bytes": 6837,
+      "freezeMatch": true
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave3/package5-wave3-crm-qualified.spec.ts",
+      "sha256": "cde345d19f0f1a32ac47ff0958a7b6e286da226e414bed48dcc86f2d3dfbf87b",
+      "bytes": 24918,
+      "freezeMatch": true
+    },
+    {
+      "path": "maya-saas-backend/src/crm/crm-import-projection.spec.ts",
+      "sha256": "e365572de9e287b7da3536f5edd2f2a4176d0578fab2900c635c22f9c7374b67",
+      "bytes": 9095,
+      "freezeMatch": true
+    },
+    {
+      "path": "maya-chat-shell/src/shell/local-crm-setup.ts",
+      "sha256": "7b5daad54a1893367caedf967b65d3a22cdcd595e215ceb6deb7e5eb94a9a4cf",
+      "bytes": 13077
+    },
+    {
+      "path": "maya-chat-shell/src/net/crm-setup.ts",
+      "sha256": "4b61612ed740e363028f71813bfa7bd82a0ef292df47db16b659bcd19910c401",
+      "bytes": 5352
+    },
+    {
+      "path": "maya-chat-shell/src/net/client.ts",
+      "sha256": "444f5c821ba2c806bce5ab4af14520aa38c6c6ac13982cb3bcd36311547f2645",
+      "bytes": 48828
+    },
+    {
+      "path": "maya-chat-shell/src/net/types.ts",
+      "sha256": "fd3224e1f4687677dc7044c351603ff7a58e643ff7e1e90ee86e1d7c1a0cefec",
+      "bytes": 25191
+    },
+    {
+      "path": "maya-chat-shell/build.mjs",
+      "sha256": "6f13abd0447865e1c2e8426243f7338de3edb33478537f2cf412a78fc0a95d9b",
+      "bytes": 147482
+    },
+    {
+      "path": "maya-chat-shell/test/local-crm-setup.test.mjs",
+      "sha256": "d9c895fd6c86e8429377935923146a2079eb8d51fd5eb28d5b763766faae5915",
+      "bytes": 25599
+    },
+    {
+      "path": "maya-carrier-react/src/runtime/compose.ts",
+      "sha256": "de18d3e234e24d59f680c6006f1d46b0adc5ed0878e9cf60ad195104fbc5a391",
+      "bytes": 10517
+    },
+    {
+      "path": "maya-carrier-react/src/runtime/crmPending.ts",
+      "sha256": "7a1265ae670bcc54ab4b8f0c183b5fd150defbfaba984626ee7fdc812b18a587",
+      "bytes": 2198
+    },
+    {
+      "path": "maya-carrier-react/src/setup/LocalCrmSetup.tsx",
+      "sha256": "f6274b962c74715f7611ac93cfe6addfb469356dc2785e23922979a57e7c1922",
+      "bytes": 14406
+    }
+  ],
+  "backendFreezeSha256": "de59936a2813c3ef39fca5dd5bf98c84ed3572acd8ea3350598a2abe8fa3f28a"
+}

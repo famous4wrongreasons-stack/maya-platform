@@ -1,0 +1,43 @@
+✔ read is passive and empty URL carries no operation (0.672083ms)
+✔ save stores only the operation locator and retains route, opt-in and inert fragment (0.318166ms)
+✔ new location adapter reconstructs the same locator without rewriting or treating it as authority (0.131791ms)
+✔ partial, duplicate, unknown and malformed locators fail closed (0.226667ms)
+✔ invalid new locators cannot mutate the URL (0.059ms)
+✔ existing pending locator cannot be overwritten even by an identical save (0.107333ms)
+✔ clear requires the exact operation and key, preserving unrelated URL state (0.1355ms)
+✔ save and clear verify the observed URL instead of assuming replace succeeded (0.427417ms)
+✔ a rejected URL replacement is surfaced to the port and does not fabricate saved state (0.194916ms)
+✔ foreign URL changes before clear are preserved and cannot acknowledge another operation (0.108416ms)
+✔ public projection drops raw previews/secrets and requires a valid configVersion (0.727708ms)
+✔ operation projection binds the exact locator and refuses unqualified import success (0.244625ms)
+✔ wire sends versioned closed bodies and exact operation GET without authority in query (9.537166ms)
+✔ invalid fields, versions and locators do no authorization or I/O (0.251125ms)
+✔ 401 refresh is bounded and keeps the exact operation key and versioned write body (0.547584ms)
+✔ lost, malformed, conflict and server write results never automatically resend (1.279667ms)
+✔ disabled composition, viewing and subscribing trigger no transport or pending write (0.406041ms)
+✔ explicit load reads only; stage requires consent, current branch and a persisted locator before dispatch (0.329834ms)
+✔ activation needs separate consent and pins the reviewed configVersion through canonical import receipt (0.169459ms)
+✔ configVersion drift with unchanged timestamp and removed branches refuse before either write (0.246041ms)
+✔ a foreign tenant completion cannot replace the reviewed owner connection (0.091625ms)
+✔ another CRM provider cannot be staged or activated (0.063625ms)
+✔ uncertain write survives close/signout/re-entry; NOT_OBSERVED permits reads but never resend (0.148667ms)
+✔ new runtime after response loss recovers the same completed locator without a write (0.096417ms)
+✔ READY install after restart continues only by explicit consent using the original key (0.089375ms)
+✔ a refused READY continuation retains the original locator and never starts a replacement operation (0.086ms)
+✔ READY activation confirmation resumes its same key and current receipt version without token (0.073958ms)
+✔ READY receipt for an older configuration cannot authorize activation of the replacement (0.053042ms)
+✔ UNAVAILABLE or malformed saved locator never creates a replacement request (0.053875ms)
+✔ URL locator save refusal or exception stops before POST (0.096833ms)
+✔ failure clearing a completed locator preserves uncertainty and blocks a new operation (0.052542ms)
+✔ double submit is single flight; signout aborts and ignores a late completion, keeping recovery locator (0.065042ms)
+✔ current owner revocation during preflight prevents dispatch (0.038042ms)
+✔ close during the final preflight publication prevents a stale-generation write (0.11725ms)
+✔ signout while saving the recovery locator prevents dispatch but preserves that locator (0.049541ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 35
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 92.337375

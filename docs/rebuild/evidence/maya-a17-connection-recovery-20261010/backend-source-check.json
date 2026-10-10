@@ -1,0 +1,68 @@
+{
+  "contract": "maya.crm-qualified-backend-local-check/1",
+  "head": "1a43694e9e0b3513a5e00cdd9b64cb762b2421a6",
+  "qualified": "LOCAL_UNIT_STATIC_ONLY_NO_HTTP_PG_PROVIDER",
+  "tests": {
+    "passed": 65,
+    "failed": 0,
+    "suites": 4
+  },
+  "checks": {
+    "scopedTypes": "/tmp/maya-crm-qualified-test-types-r2.log",
+    "lint": "/tmp/maya-crm-qualified-lint-final.log",
+    "unit": "/tmp/maya-crm-qualified-unit-final.json"
+  },
+  "files": [
+    {
+      "path": "src/crm/crm-configuration-version.ts",
+      "bytes": 3160,
+      "sha256": "788724bbc8db8d95d2d6f9d130063950224d6d49913eb8367a70d1ee91c8f855"
+    },
+    {
+      "path": "src/crm/dto/crm-operation.dto.ts",
+      "bytes": 596,
+      "sha256": "f079ead59eb4467aa4fa0617d131e5f23785f15842311ca0a110c596d027b266"
+    },
+    {
+      "path": "src/crm/crm-integration.controller.ts",
+      "bytes": 21112,
+      "sha256": "d133c1b5c53d9a3c724fb4bb4ba5e90dfd12803e11b44a0b02549418b04fec41"
+    },
+    {
+      "path": "src/crm/crm.service.ts",
+      "bytes": 243356,
+      "sha256": "544fb41187f55184b1959a0e36e45edae738be0f024e52977279859374d8479d"
+    },
+    {
+      "path": "src/package5-wave3/package5-wave3.service.ts",
+      "bytes": 68841,
+      "sha256": "372a248f71d1d4c24a57862411728be581b2ae44e987f3982ffc314cd22fee3c"
+    },
+    {
+      "path": "src/package5-wave3/package5-wave3-canonical-cutover.service.ts",
+      "bytes": 23243,
+      "sha256": "5abf52974e5915c503b679467c1a8d600b8f6f59c0446b40fe69f2526b2392fa"
+    },
+    {
+      "path": "src/package5-wave3/package5-wave3-production-gateway.service.ts",
+      "bytes": 6837,
+      "sha256": "309e292720ca2fc570e0adcc2504ea8d440795c870cbda36c3a694695f5360cb"
+    },
+    {
+      "path": "src/package5-wave3/package5-wave3-crm-qualified.spec.ts",
+      "bytes": 24918,
+      "sha256": "cde345d19f0f1a32ac47ff0958a7b6e286da226e414bed48dcc86f2d3dfbf87b"
+    },
+    {
+      "path": "src/crm/crm-import-projection.spec.ts",
+      "bytes": 9095,
+      "sha256": "e365572de9e287b7da3536f5edd2f2a4176d0578fab2900c635c22f9c7374b67"
+    }
+  ],
+  "limits": [
+    "Pre-admission provider failure remains NOT_OBSERVED; no terminal failure receipt invented.",
+    "Qualified confirm with unlinked/disabled CRM identity history is conservatively refused even on same-company reimport; pilot limitation, not a new migration policy.",
+    "Historical receipts without atomic marker/payload remain unqualified.",
+    "No production/provider/network/model/PG execution."
+  ]
+}

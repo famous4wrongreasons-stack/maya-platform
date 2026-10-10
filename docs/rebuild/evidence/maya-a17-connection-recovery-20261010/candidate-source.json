@@ -1,0 +1,33 @@
+{
+  "contract": "maya.a17-candidate-source/1",
+  "commit": "95cd7d58415e644ce25aca727aae47b8aa0ff03b",
+  "files": {
+    "maya-carrier-react/src/runtime/compose.ts": "de18d3e234e24d59f680c6006f1d46b0adc5ed0878e9cf60ad195104fbc5a391",
+    "maya-carrier-react/src/runtime/crmPending.ts": "7a1265ae670bcc54ab4b8f0c183b5fd150defbfaba984626ee7fdc812b18a587",
+    "maya-carrier-react/src/setup/LocalCrmSetup.tsx": "f6274b962c74715f7611ac93cfe6addfb469356dc2785e23922979a57e7c1922",
+    "maya-carrier-react/test/crm-a17-setup-browser-guard.mjs": "41d65c36536b7534f8469a8db9ffee405d98092134c22ee45c75a7d7a97514c0",
+    "maya-carrier-react/test/crm-a17-setup-browser-guard.test.mjs": "0890a75ce9570aa52c1a628bc78fa022ec66d9dcbe7ab6b4a90970e57177bf6e",
+    "maya-carrier-react/test/crm-a17-setup-browser-probe.mjs": "3dba00116117d446550ded931d2a00b73f056763c9ffd0e02d6f14becf08edf9",
+    "maya-carrier-react/test/crm-pending.test.mjs": "408d7edc973d0d5a05da29d8dab76fc2f8d45bdb71a8dba7fba7958bd42011a9",
+    "maya-carrier-react/test/local-crm-setup-browser-probe.mjs": "e2bd11fd8a9d80a5668421cb9845e802ce3b7a5021adfe4b51b0da370cda36b7",
+    "maya-chat-shell/build.mjs": "6f13abd0447865e1c2e8426243f7338de3edb33478537f2cf412a78fc0a95d9b",
+    "maya-chat-shell/dist/manifest.json": "5c95706106d1716d9af1d2d3b87e88868f263e8905149b02a10466daa5d13a1b",
+    "maya-chat-shell/src/net/client.ts": "444f5c821ba2c806bce5ab4af14520aa38c6c6ac13982cb3bcd36311547f2645",
+    "maya-chat-shell/src/net/crm-setup.ts": "4b61612ed740e363028f71813bfa7bd82a0ef292df47db16b659bcd19910c401",
+    "maya-chat-shell/src/net/types.ts": "fd3224e1f4687677dc7044c351603ff7a58e643ff7e1e90ee86e1d7c1a0cefec",
+    "maya-chat-shell/src/shell/local-crm-setup.ts": "7b5daad54a1893367caedf967b65d3a22cdcd595e215ceb6deb7e5eb94a9a4cf",
+    "maya-chat-shell/test/local-crm-setup.test.mjs": "d9c895fd6c86e8429377935923146a2079eb8d51fd5eb28d5b763766faae5915",
+    "maya-saas-backend/scripts/c9-occupancy-proof.mjs": "a5a312f0cd8aa29dd987dcfa67b3d258b54e0105c6bdcc2619216c39c6294896",
+    "maya-saas-backend/scripts/crm-a17-operation-proof.test.mjs": "31afae3850f11c9760d8eee53de510a4a26bf2bbdc8835f5f80f0d4abb979c08",
+    "maya-saas-backend/src/crm/crm-configuration-version.ts": "788724bbc8db8d95d2d6f9d130063950224d6d49913eb8367a70d1ee91c8f855",
+    "maya-saas-backend/src/crm/crm-import-projection.spec.ts": "e365572de9e287b7da3536f5edd2f2a4176d0578fab2900c635c22f9c7374b67",
+    "maya-saas-backend/src/crm/crm-integration.controller.ts": "d133c1b5c53d9a3c724fb4bb4ba5e90dfd12803e11b44a0b02549418b04fec41",
+    "maya-saas-backend/src/crm/crm.service.ts": "544fb41187f55184b1959a0e36e45edae738be0f024e52977279859374d8479d",
+    "maya-saas-backend/src/crm/dto/crm-operation.dto.ts": "f079ead59eb4467aa4fa0617d131e5f23785f15842311ca0a110c596d027b266",
+    "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts": "5abf52974e5915c503b679467c1a8d600b8f6f59c0446b40fe69f2526b2392fa",
+    "maya-saas-backend/src/package5-wave3/package5-wave3-crm-qualified.spec.ts": "cde345d19f0f1a32ac47ff0958a7b6e286da226e414bed48dcc86f2d3dfbf87b",
+    "maya-saas-backend/src/package5-wave3/package5-wave3-production-gateway.service.ts": "309e292720ca2fc570e0adcc2504ea8d440795c870cbda36c3a694695f5360cb",
+    "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts": "372a248f71d1d4c24a57862411728be581b2ae44e987f3982ffc314cd22fee3c",
+    "maya-saas-backend/test/widgets-live/crm-a17-operation-restart.probe-spec.ts": "1721a921045942adb703894fb5eb7c2dc7c8321564f98401efc11f001de9af48"
+  }
+}

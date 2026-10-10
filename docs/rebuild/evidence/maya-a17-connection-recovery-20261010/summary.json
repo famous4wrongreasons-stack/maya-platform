@@ -1,0 +1,60 @@
+{
+  "contract": "maya.a17-connection-recovery-checkpoint/1",
+  "candidate": "95cd7d58415e644ce25aca727aae47b8aa0ff03b",
+  "qualification": "LOCAL_SYNTHETIC_NATIVE_ADAPTER_HTTP_PG_RESTART_CURRENT_REACT_ONLY",
+  "checks": {
+    "backendUnit": {
+      "passed": 65,
+      "suites": 4
+    },
+    "frontendAndLocator": {
+      "passed": 35
+    },
+    "sharedTransportRegression": {
+      "passed": 12
+    },
+    "driverAndBrowserGuard": {
+      "passed": 5
+    },
+    "shellBuild": "PASS",
+    "reactGateAndTypes": "PASS",
+    "backendAndProbeTypesLint": "PASS",
+    "httpPrepare": "PASS",
+    "httpResumeAfterActualProcessAndPgRestart": "PASS",
+    "currentReactSameUrlReloadAndEmailLogin": "PASS",
+    "ownedClusterStopped": true
+  },
+  "externalEffects": {
+    "realProviderCalls": 0,
+    "modelCalls": 0,
+    "providerWrites": 0,
+    "productionChanges": 0,
+    "websiteChanges": 0,
+    "paidCalls": 0
+  },
+  "retainedFailedRuns": [
+    {
+      "attempt": 1,
+      "status": "FAILED",
+      "cause": "Jest cross-realm Error prototype assertion; exact ECONNRESET check retained by fix",
+      "clusterStopped": true
+    },
+    {
+      "attempt": 2,
+      "status": "FAILED",
+      "cause": "Test expected403 for suspended membership; canonical session returns401; prepare and earlier restart assertions had passed",
+      "clusterStopped": true
+    }
+  ],
+  "limits": [
+    "NOT_OBSERVED before AE admission blocks new writes; terminal abandonment contract remains unresolved.",
+    "Historical disabled/unlinked identities conservatively refuse qualified reimport.",
+    "Browser reload and HTTP/PG restart are separate qualified probes, not browser surviving PG restart.",
+    "No worker-crash, live-provider, real-model, booking, full-MAYA or C10 acceptance."
+  ],
+  "independentEvidenceReview": {
+    "file": "independent-evidence-review.json",
+    "verdict": "QUALIFIED_LOCAL_SYNTHETIC_HTTP_PG_RESTART_AND_REACT_PASS",
+    "checkpointBlockers": []
+  }
+}

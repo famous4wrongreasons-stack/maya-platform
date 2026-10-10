@@ -1,0 +1,270 @@
+{
+  "contract": "maya.a17-local-unit-evidence/1",
+  "sourceCheck": "backend-source-check.json",
+  "passed": 65,
+  "failed": 0,
+  "pending": 0,
+  "suites": 4,
+  "tests": [
+    {
+      "name": "canonical import projection uses its caller transaction keeps every read/write on the supplied client, including access revocation and completion",
+      "status": "passed"
+    },
+    {
+      "name": "canonical import projection uses its caller transaction propagates team_read failure to the caller without falsely completing import",
+      "status": "passed"
+    },
+    {
+      "name": "canonical import projection uses its caller transaction propagates provider_read failure to the caller without falsely completing import",
+      "status": "passed"
+    },
+    {
+      "name": "canonical import projection uses its caller transaction propagates identity_write failure to the caller without falsely completing import",
+      "status": "passed"
+    },
+    {
+      "name": "canonical import projection uses its caller transaction propagates link_write failure to the caller without falsely completing import",
+      "status": "passed"
+    },
+    {
+      "name": "canonical import projection uses its caller transaction propagates grant_write failure to the caller without falsely completing import",
+      "status": "passed"
+    },
+    {
+      "name": "canonical import projection uses its caller transaction propagates session_revoke failure to the caller without falsely completing import",
+      "status": "passed"
+    },
+    {
+      "name": "canonical import projection uses its caller transaction propagates timezone_write failure to the caller without falsely completing import",
+      "status": "passed"
+    },
+    {
+      "name": "canonical import projection uses its caller transaction propagates branch_write failure to the caller without falsely completing import",
+      "status": "passed"
+    },
+    {
+      "name": "canonical import projection uses its caller transaction propagates branding_read failure to the caller without falsely completing import",
+      "status": "passed"
+    },
+    {
+      "name": "canonical import projection uses its caller transaction propagates branding_write failure to the caller without falsely completing import",
+      "status": "passed"
+    },
+    {
+      "name": "canonical import projection uses its caller transaction propagates completion_write failure to the caller without falsely completing import",
+      "status": "passed"
+    },
+    {
+      "name": "canonical import projection uses its caller transaction refuses a foreign tenant before touching the supplied client",
+      "status": "passed"
+    },
+    {
+      "name": "canonical import projection uses its caller transaction preserves legacy best-effort presentation refresh without a caller transaction",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService rejects changed original source material during completed replay without consulting CRM",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService replays confirmed schedule material without current CRM dependencies: {\"slots\":[],\"normalized\":[]}",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService replays confirmed schedule material without current CRM dependencies: {\"slots\":[{\"from\":\"13:00\",\"to\":\"17:00\"},{\"from\":\"09:00\",\"to\":\"12:00\"}],\"normalized\":[{\"from\":\"09:00\",\"to\":\"12:00\"},{\"from\":\"13:00\",\"to\":\"17:00\"}]}",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService keeps the existing planner refusal for changed slots on the same successful source",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService rechecks current account authority before returning the successful replay",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService never projects confirmed slots when the existing owner leaves the outcome unknown",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService preserves bounded legacy identity lookup only when original local identity is absent",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService does not fall back to current identity for malformed original local ID \"\"",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService does not fall back to current identity for malformed original local ID \" staff-1\"",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService does not fall back to current identity for malformed original local ID \"staff/1\"",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService does not fall back to current identity for malformed original local ID \"staff-1\\n\"",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService does not fall back to current identity for malformed original local ID \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService crosses canonical ingress and resumes the same execution",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService verifies credentials read-only before planning encrypted install material",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService checks exact tenant branch before preview; foreign=false",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService checks exact tenant branch before preview; foreign=true",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService company change cannot silently inherit a former branch binding",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3CanonicalCutoverService rejects missing bounded idempotency identity",
+      "status": "passed"
+    },
+    {
+      "name": "Package5Wave3ProductionGatewayService does not call a provider again while reconciliation is still ambiguous",
+      "status": "passed"
+    },
+    {
+      "name": "qualified CRM configuration and atomic confirmation pins ciphertext, identity, provider, base URL and settings, but not activation/confirmation state",
+      "status": "passed"
+    },
+    {
+      "name": "qualified CRM configuration and atomic confirmation checks the version after awaited provider observation before admission",
+      "status": "passed"
+    },
+    {
+      "name": "qualified CRM configuration and atomic confirmation rejects a replacement under the actual target lock, before attempt/projection",
+      "status": "passed"
+    },
+    {
+      "name": "qualified CRM configuration and atomic confirmation refuses missing/foreign bound branch before-provider",
+      "status": "passed"
+    },
+    {
+      "name": "qualified CRM configuration and atomic confirmation refuses missing/foreign bound branch under-lock",
+      "status": "passed"
+    },
+    {
+      "name": "qualified CRM configuration and atomic confirmation projects in the same transaction before recording a qualified SUCCEEDED receipt",
+      "status": "passed"
+    },
+    {
+      "name": "qualified CRM configuration and atomic confirmation rolls back if projection changes the pinned configuration before commit receipt",
+      "status": "passed"
+    },
+    {
+      "name": "qualified CRM configuration and atomic confirmation projection failure rolls back both import state and successful action receipt",
+      "status": "passed"
+    },
+    {
+      "name": "qualified CRM configuration and atomic confirmation refuses disconnected surviving staffProviderLink before credential verification/admission",
+      "status": "passed"
+    },
+    {
+      "name": "qualified CRM configuration and atomic confirmation refuses disconnected surviving crmClientLink before credential verification/admission",
+      "status": "passed"
+    },
+    {
+      "name": "qualified CRM configuration and atomic confirmation refuses disconnected surviving crmStaffAccess before credential verification/admission",
+      "status": "passed"
+    },
+    {
+      "name": "qualified CRM configuration and atomic confirmation refuses confirmation when historical disabled identity could be reactivated",
+      "status": "passed"
+    },
+    {
+      "name": "qualified CRM configuration and atomic confirmation refuses custom endpoint to default migration with surviving identities",
+      "status": "passed"
+    },
+    {
+      "name": "qualified CRM configuration and atomic confirmation migration cannot erase identity ownership even after accepted snapshot metadata was removed",
+      "status": "passed"
+    },
+    {
+      "name": "exact durable CRM operation READ recovers committed version A after replacement B, with no provider read or admission",
+      "status": "passed"
+    },
+    {
+      "name": "exact durable CRM operation READ completed activation POST replays version A after B without provider read or admission",
+      "status": "passed"
+    },
+    {
+      "name": "exact durable CRM operation READ keeps pre-admission provider failure NOT_OBSERVED without claiming it was terminalized",
+      "status": "passed"
+    },
+    {
+      "name": "exact durable CRM operation READ refuses cleaned evidence instead of recreating an action",
+      "status": "passed"
+    },
+    {
+      "name": "exact durable CRM operation READ refuses expired evidence instead of recreating an action",
+      "status": "passed"
+    },
+    {
+      "name": "exact durable CRM operation READ refuses historic evidence instead of recreating an action",
+      "status": "passed"
+    },
+    {
+      "name": "exact durable CRM operation READ refuses executing evidence instead of recreating an action",
+      "status": "passed"
+    },
+    {
+      "name": "exact durable CRM operation READ rejects another current owner and a revoked member",
+      "status": "passed"
+    },
+    {
+      "name": "exact durable CRM operation READ returns NOT_OBSERVED for another exact UUID without build/read effects",
+      "status": "passed"
+    },
+    {
+      "name": "exact durable CRM operation READ reports activation alone as READY, not completed import",
+      "status": "passed"
+    },
+    {
+      "name": "exact durable CRM operation READ refuses install POST if membership is revoked during the final status read, preserving committed receipt",
+      "status": "passed"
+    },
+    {
+      "name": "exact durable CRM operation READ refuses activate POST if membership is revoked during the final status read, preserving committed receipt",
+      "status": "passed"
+    },
+    {
+      "name": "exact durable CRM operation READ does not accept current revocation during receipt decryption",
+      "status": "passed"
+    },
+    {
+      "name": "rechecks branch ownership inside the local commit transaction before any mutation",
+      "status": "passed"
+    },
+    {
+      "name": "permits correction with unchanged credential but rejects identical pending material",
+      "status": "passed"
+    },
+    {
+      "name": "refuses foreign branch/membership while planning",
+      "status": "passed"
+    },
+    {
+      "name": "refuses revoked branch/membership while planning",
+      "status": "passed"
+    },
+    {
+      "name": "existing A17 executor stores the exact pair pending activation once and restores its completed receipt",
+      "status": "passed"
+    }
+  ]
+}

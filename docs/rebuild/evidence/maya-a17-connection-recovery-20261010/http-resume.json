@@ -1,0 +1,61 @@
+{
+  "contract": "maya.crm-a17-operation-http-pg-proof/1",
+  "stage": "resume",
+  "status": "passed",
+  "candidateCommit": "95cd7d58415e644ce25aca727aae47b8aa0ff03b",
+  "sourceHashes": {
+    "src/crm/crm-integration.controller.ts": "d133c1b5c53d9a3c724fb4bb4ba5e90dfd12803e11b44a0b02549418b04fec41",
+    "src/crm/dto/connect-crm-integration.dto.ts": "c4062ff06baa1c885d055c69b76021e31aacfa9f49c73f9403deb6f8194528ea",
+    "src/crm/dto/crm-operation.dto.ts": "f079ead59eb4467aa4fa0617d131e5f23785f15842311ca0a110c596d027b266",
+    "src/crm/crm-configuration-version.ts": "788724bbc8db8d95d2d6f9d130063950224d6d49913eb8367a70d1ee91c8f855",
+    "src/crm/crm.service.ts": "544fb41187f55184b1959a0e36e45edae738be0f024e52977279859374d8479d",
+    "src/crm/crm-provider-settings.ts": "9e1c8efb41332dd788d92453d768afcf8f785d3b482340d362ceb81858c9c161",
+    "src/crm/adapters/yclients-crm.adapter.ts": "ef484bde55b5a5ee25549b5af0405fea3932201622161c050280d5d5efee4563",
+    "src/package5-wave3/package5-wave3-canonical-cutover.service.ts": "5abf52974e5915c503b679467c1a8d600b8f6f59c0446b40fe69f2526b2392fa",
+    "src/package5-wave3/package5-wave3.service.ts": "372a248f71d1d4c24a57862411728be581b2ae44e987f3982ffc314cd22fee3c",
+    "src/package5-wave3/package5-wave3-production-gateway.service.ts": "309e292720ca2fc570e0adcc2504ea8d440795c870cbda36c3a694695f5360cb",
+    "src/action-engine/package5-wave3-executable.contract.ts": "809124b1ee20030ce07fbc64d80bc3c507db02acd63f0f33b58363b158415513",
+    "scripts/c9-occupancy-proof.mjs": "a5a312f0cd8aa29dd987dcfa67b3d258b54e0105c6bdcc2619216c39c6294896",
+    "scripts/crm-a17-operation-proof.test.mjs": "31afae3850f11c9760d8eee53de510a4a26bf2bbdc8835f5f80f0d4abb979c08",
+    "test/widgets-live/crm-a17-operation-restart.probe-spec.ts": "1721a921045942adb703894fb5eb7c2dc7c8321564f98401efc11f001de9af48",
+    "test/widgets-live/support/http-bootstrap.ts": "7b5cc34c41505a6326bc684708f29a94f968e4ea09511077be19c516f934f140",
+    "test/widgets-live/support/proof-db-guard.ts": "f05f1302d30ead2779179b8ee1cb24dd681cf8b5f5933cb65e616fe3f01f4a19",
+    "../maya-carrier-react/test/crm-a17-setup-browser-probe.mjs": "3dba00116117d446550ded931d2a00b73f056763c9ffd0e02d6f14becf08edf9",
+    "../maya-carrier-react/test/crm-a17-setup-browser-guard.mjs": "41d65c36536b7534f8469a8db9ffee405d98092134c22ee45c75a7d7a97514c0",
+    "../maya-carrier-react/test/crm-a17-setup-browser-guard.test.mjs": "0890a75ce9570aa52c1a628bc78fa022ec66d9dcbe7ab6b4a90970e57177bf6e",
+    "../maya-carrier-react/src/setup/LocalCrmSetup.tsx": "f6274b962c74715f7611ac93cfe6addfb469356dc2785e23922979a57e7c1922",
+    "../maya-carrier-react/src/runtime/crmPending.ts": "7a1265ae670bcc54ab4b8f0c183b5fd150defbfaba984626ee7fdc812b18a587",
+    "../maya-carrier-react/src/runtime/compose.ts": "de18d3e234e24d59f680c6006f1d46b0adc5ed0878e9cf60ad195104fbc5a391",
+    "../maya-carrier-react/build.mjs": "b91d872cbd59d92cb335431c084a5306cebf7011534d9fc9eafca1aa22e88605",
+    "../maya-chat-shell/src/shell/local-crm-setup.ts": "7b5daad54a1893367caedf967b65d3a22cdcd595e215ceb6deb7e5eb94a9a4cf",
+    "../maya-chat-shell/src/net/crm-setup.ts": "4b61612ed740e363028f71813bfa7bd82a0ef292df47db16b659bcd19910c401",
+    "../maya-chat-shell/dev/serve.mjs": "f0985920ab617d366fefe937ca257f00edbbc1bca90ba7a378dd5a25b03d711d",
+    "../maya-chat-shell/test/cdp-verify.mjs": "02de453056df1ec95091086dedd0485f2f1385655e777d9a2d7c55353e44a999"
+  },
+  "sourceUnchanged": true,
+  "checks": [
+    "Different Node process and restarted PG preserve exact install/activation receipts, attempts, original evidence and mutation graph",
+    "Foreign tenant cannot observe receipt; different actor and Client role are refused without provider reads or action changes",
+    "Historic success remains an exact receipt after explicit replacement; current configuration is separately marked different",
+    "Revoked membership blocks persisted operation recovery without new authority"
+  ],
+  "observations": {
+    "restored": {
+      "graphHash": "49dccb5538f453aeb32d3177d82a388c9ee50bcd3342d8256f50892491636002",
+      "processChanged": true,
+      "postmasterChanged": true,
+      "providerReadCount": 0,
+      "installReceiptHash": "490b31f7860fa130cf43737bdd773cc47d046cfffc53bb3ad82fc9f05b190e6b",
+      "activationReceiptHash": "5566ed7de44938038f99fa63a69811284ce69c0399bf8d23593675a66374e581"
+    }
+  },
+  "providerReadCount": 5,
+  "forbidden": [],
+  "qualification": "LOCAL_SYNTHETIC_NATIVE_ADAPTER_ONLY; real canonical A17 writes in disposable PG; actual response-discard relay; no worker-crash or live-provider acceptance",
+  "boundaries": {
+    "model": "forbidden spy",
+    "providerWrites": "finite GET-only transport",
+    "outbound": "no delivery rows and no admitted external transport",
+    "privateReceiptArchived": false
+  }
+}

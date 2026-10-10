@@ -1,0 +1,287 @@
+{
+  "contract": "maya.a17.independent-evidence-review/1",
+  "reviewedAtUtc": "2026-10-10T12:17:46.289619+00:00",
+  "candidateCommit": "95cd7d58415e644ce25aca727aae47b8aa0ff03b",
+  "verdict": "QUALIFIED_LOCAL_SYNTHETIC_HTTP_PG_RESTART_AND_REACT_PASS",
+  "checkpointBlockers": [],
+  "scope": "Read-only review of final run03 reports, source assertions, finite Git/source bindings and checkpoint claims. No reviewer tests, services, browser launch, network, model or provider calls. Private restart receipt and credentials not read or copied.",
+  "priorSourceReview": {
+    "file": "maya-a17-independent-review.json",
+    "sha256": "92f1f0e8b00870479242407cb029b99f8fd80af74d80622418639c98ee54a05a",
+    "all18PreviouslyReviewedFilesMatchCandidateGitAndCurrentDisk": true,
+    "priorVerdictRetained": true
+  },
+  "sourceBinding": {
+    "finiteInventoryCount": 27,
+    "prepareResumeInventoriesEqual": true,
+    "allInventoryHashesMatchExactGitAndCurrentDisk": true,
+    "bothStagesReportedSourceUnchanged": true,
+    "files": [
+      {
+        "path": "maya-saas-backend/src/crm/crm-integration.controller.ts",
+        "sha256": "d133c1b5c53d9a3c724fb4bb4ba5e90dfd12803e11b44a0b02549418b04fec41"
+      },
+      {
+        "path": "maya-saas-backend/src/crm/dto/connect-crm-integration.dto.ts",
+        "sha256": "c4062ff06baa1c885d055c69b76021e31aacfa9f49c73f9403deb6f8194528ea"
+      },
+      {
+        "path": "maya-saas-backend/src/crm/dto/crm-operation.dto.ts",
+        "sha256": "f079ead59eb4467aa4fa0617d131e5f23785f15842311ca0a110c596d027b266"
+      },
+      {
+        "path": "maya-saas-backend/src/crm/crm-configuration-version.ts",
+        "sha256": "788724bbc8db8d95d2d6f9d130063950224d6d49913eb8367a70d1ee91c8f855"
+      },
+      {
+        "path": "maya-saas-backend/src/crm/crm.service.ts",
+        "sha256": "544fb41187f55184b1959a0e36e45edae738be0f024e52977279859374d8479d"
+      },
+      {
+        "path": "maya-saas-backend/src/crm/crm-provider-settings.ts",
+        "sha256": "9e1c8efb41332dd788d92453d768afcf8f785d3b482340d362ceb81858c9c161"
+      },
+      {
+        "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+        "sha256": "ef484bde55b5a5ee25549b5af0405fea3932201622161c050280d5d5efee4563"
+      },
+      {
+        "path": "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts",
+        "sha256": "5abf52974e5915c503b679467c1a8d600b8f6f59c0446b40fe69f2526b2392fa"
+      },
+      {
+        "path": "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts",
+        "sha256": "372a248f71d1d4c24a57862411728be581b2ae44e987f3982ffc314cd22fee3c"
+      },
+      {
+        "path": "maya-saas-backend/src/package5-wave3/package5-wave3-production-gateway.service.ts",
+        "sha256": "309e292720ca2fc570e0adcc2504ea8d440795c870cbda36c3a694695f5360cb"
+      },
+      {
+        "path": "maya-saas-backend/src/action-engine/package5-wave3-executable.contract.ts",
+        "sha256": "809124b1ee20030ce07fbc64d80bc3c507db02acd63f0f33b58363b158415513"
+      },
+      {
+        "path": "maya-saas-backend/scripts/c9-occupancy-proof.mjs",
+        "sha256": "a5a312f0cd8aa29dd987dcfa67b3d258b54e0105c6bdcc2619216c39c6294896"
+      },
+      {
+        "path": "maya-saas-backend/scripts/crm-a17-operation-proof.test.mjs",
+        "sha256": "31afae3850f11c9760d8eee53de510a4a26bf2bbdc8835f5f80f0d4abb979c08"
+      },
+      {
+        "path": "maya-saas-backend/test/widgets-live/crm-a17-operation-restart.probe-spec.ts",
+        "sha256": "1721a921045942adb703894fb5eb7c2dc7c8321564f98401efc11f001de9af48"
+      },
+      {
+        "path": "maya-saas-backend/test/widgets-live/support/http-bootstrap.ts",
+        "sha256": "7b5cc34c41505a6326bc684708f29a94f968e4ea09511077be19c516f934f140"
+      },
+      {
+        "path": "maya-saas-backend/test/widgets-live/support/proof-db-guard.ts",
+        "sha256": "f05f1302d30ead2779179b8ee1cb24dd681cf8b5f5933cb65e616fe3f01f4a19"
+      },
+      {
+        "path": "maya-carrier-react/test/crm-a17-setup-browser-probe.mjs",
+        "sha256": "3dba00116117d446550ded931d2a00b73f056763c9ffd0e02d6f14becf08edf9"
+      },
+      {
+        "path": "maya-carrier-react/test/crm-a17-setup-browser-guard.mjs",
+        "sha256": "41d65c36536b7534f8469a8db9ffee405d98092134c22ee45c75a7d7a97514c0"
+      },
+      {
+        "path": "maya-carrier-react/test/crm-a17-setup-browser-guard.test.mjs",
+        "sha256": "0890a75ce9570aa52c1a628bc78fa022ec66d9dcbe7ab6b4a90970e57177bf6e"
+      },
+      {
+        "path": "maya-carrier-react/src/setup/LocalCrmSetup.tsx",
+        "sha256": "f6274b962c74715f7611ac93cfe6addfb469356dc2785e23922979a57e7c1922"
+      },
+      {
+        "path": "maya-carrier-react/src/runtime/crmPending.ts",
+        "sha256": "7a1265ae670bcc54ab4b8f0c183b5fd150defbfaba984626ee7fdc812b18a587"
+      },
+      {
+        "path": "maya-carrier-react/src/runtime/compose.ts",
+        "sha256": "de18d3e234e24d59f680c6006f1d46b0adc5ed0878e9cf60ad195104fbc5a391"
+      },
+      {
+        "path": "maya-carrier-react/build.mjs",
+        "sha256": "b91d872cbd59d92cb335431c084a5306cebf7011534d9fc9eafca1aa22e88605"
+      },
+      {
+        "path": "maya-chat-shell/src/shell/local-crm-setup.ts",
+        "sha256": "7b5daad54a1893367caedf967b65d3a22cdcd595e215ceb6deb7e5eb94a9a4cf"
+      },
+      {
+        "path": "maya-chat-shell/src/net/crm-setup.ts",
+        "sha256": "4b61612ed740e363028f71813bfa7bd82a0ef292df47db16b659bcd19910c401"
+      },
+      {
+        "path": "maya-chat-shell/dev/serve.mjs",
+        "sha256": "f0985920ab617d366fefe937ca257f00edbbc1bca90ba7a378dd5a25b03d711d"
+      },
+      {
+        "path": "maya-chat-shell/test/cdp-verify.mjs",
+        "sha256": "02de453056df1ec95091086dedd0485f2f1385655e777d9a2d7c55353e44a999"
+      }
+    ],
+    "qualification": "Finite 27-file execution inventory, plus separately rechecked 18-file prior source review; not an exhaustive repository/dependency/build-environment inventory."
+  },
+  "observedProof": {
+    "statuses": {
+      "manifest": "passed",
+      "prepare": "passed",
+      "resume": "passed",
+      "browser": "passed"
+    },
+    "jest": {
+      "prepare": {
+        "passedTests": 1,
+        "suites": 1,
+        "failedTests": 0,
+        "pendingTests": 0,
+        "jestAssertions": 222
+      },
+      "resume": {
+        "passedTests": 1,
+        "suites": 1,
+        "failedTests": 0,
+        "pendingTests": 0,
+        "jestAssertions": 46
+      }
+    },
+    "processAndPgRestart": {
+      "differentNodeProcess": true,
+      "differentPostmasterStart": true,
+      "sameDurableGraphHash": "49dccb5538f453aeb32d3177d82a388c9ee50bcd3342d8256f50892491636002",
+      "originalExecutions": 3,
+      "originalAttempts": 3,
+      "originalMutations": 3,
+      "exactOriginalReceiptEquality": "Actual source assertions compare recovered install/activation receipts with saved original objects; raw private receipt remains excluded."
+    },
+    "versionRace": {
+      "status": 409,
+      "oldVersionStatus": 409,
+      "v1Hash": "fc750c991988f8a13671942239c4f036cb0b3206a5c558811d79ac176a2e69ba",
+      "v2Hash": "27bc19c8260bc6945f75a3d305fe4847babc576b28905736fed0b7704300dc10",
+      "committedMutations": 2
+    },
+    "atomicRollbackAndSameKeyContinuation": {
+      "injectedAfterActualTransactionalProjection": true,
+      "firstHttpStatus": 500,
+      "confirmRolledBackToReady": true,
+      "originalConfirmExecutionPreserved": true,
+      "finalExecutionCount": 3,
+      "finalMutationCount": 3,
+      "finalReceiptHash": "fcf8acf2720e497a40ef86a0f2592fab45592bcb41811a7f72f69be6406ece93"
+    },
+    "react": {
+      "actualCurrentReact": true,
+      "checkpoints": [
+        "initial",
+        "loaded",
+        "installed",
+        "activation-lost",
+        "reload",
+        "recovered"
+      ],
+      "setupPosts": 2,
+      "droppedActualCommittedActivationResponses": 1,
+      "automaticRetry": false,
+      "tokenCleared": true,
+      "sameUrlReloadAndDebugEmailRelogin": true,
+      "installReceiptHash": "3381779bbebc6776c6fff4a113b02266c3ded00bb8d2fe6fa7f21d32fe80f7a7",
+      "recoveredReceiptHash": "a290dd9b256ed61f96c264d7056867679af4e9cd504a9a94544a018341b48636",
+      "bothHashesMatchParentDbObservations": true,
+      "locatorClearedOnlyAfterExactRecovery": true,
+      "exactCurrentSourceVersion": true,
+      "modelCalls": 0
+    },
+    "authority": "Actual authentication/controller paths refuse foreign-tenant observation, different actor/CLIENT access and suspended membership; canonical suspension response is 401. Historical success remains distinct from changed current configuration.",
+    "effects": "Canonical A17 install/activate/confirm writes intentionally occur in disposable PG. Measured recovery GETs preserve durable graph and perform zero provider reads. Assertions forbid Appointment, AiApproval, MarketingDeliveryAttempt and TeamMessage rows and unexpected AE capabilities; no claim of zero setup business writes.",
+    "providerReads": {
+      "prepareTotal": 95,
+      "resumeTotal": 5,
+      "resumeOriginalReceiptRestoration": 0,
+      "browserRecovery": 0,
+      "qualification": "Finite synthetic native-adapter GETs. Resume total5 belongs to later explicit replacement; zero-read claim applies only to measured recovery intervals."
+    },
+    "forbiddenTransport": {
+      "prepare": [],
+      "resume": [],
+      "browserBlocked": [],
+      "browserErrors": []
+    }
+  },
+  "cleanup": {
+    "finalManifestClusterStopped": true,
+    "finalPgStopLogConfirmsStopped": true,
+    "prior01And02ManifestsAlsoClusterStopped": true,
+    "qualification": "Reviewed recorded PG stop and awaited owned-stage completion. Browser cleanup is source/procedure-level; browser success report precedes cleanup. No independent OS PID/group census or cancellation/interruption proof is claimed by this review."
+  },
+  "failureHistory": [
+    {
+      "attempt": "01",
+      "terminalStatus": "failed",
+      "preserved": true,
+      "qualification": "Cross-Jest-realm error assertion failed; later harness requires exact ECONNRESET and actual committed response/receipt."
+    },
+    {
+      "attempt": "02",
+      "terminalStatus": "failed",
+      "preserved": true,
+      "qualification": "Prepare/restart recovery completed; final revocation oracle expected403 but canonical session returned401. Corrected harness only."
+    }
+  ],
+  "remainingLimits": [
+    "Local synthetic acceptance only: no real YCLIENTS credentials/provider, model, production/site, booking readiness, full MAYA or C10 acceptance.",
+    "Pre-admission NOT_OBSERVED remains unresolved and blocks another write. This is a real-pilot usability blocker; no safe abandonment/new-key contract is established.",
+    "Response loss after commit and injected transaction rollback are proven. Interrupted worker, external UNKNOWN effect and automatic retry are not proven.",
+    "Browser same-URL reload/debug-email relogin and HTTP/PG restart are separate paths; no browser survival across PG restart or all OAuth/navigation preservation claim.",
+    "Existing import bounds and conservative historical-identity migration refusal remain; no full large-organization import or migration qualification.",
+    "Two successful staged Jest invocations with222 and46 assertions are not268 independent scenarios, and earlier failed attempts are not counted as passes."
+  ],
+  "checkpointDocument": {
+    "path": "docs/rebuild/MAYA-A17-CONNECTION-RECOVERY-CHECKPOINT-20261010.md",
+    "sha256": "e826165e9f0603b96576e46af345b9b5e4309bb82cd5f080c7907ee04dcea682",
+    "verdict": "Claims consistent with the qualified evidence and explicit remaining pilot blocker at review time."
+  },
+  "artifacts": [
+    {
+      "file": "manifest.json",
+      "bytes": 612,
+      "sha256": "3633e8c0fe81cecf70a594bd9dc0487a495061d4925bb873dc9a721f97abb950"
+    },
+    {
+      "file": "prepare.json",
+      "bytes": 6194,
+      "sha256": "d41dba2594f9cd8c5767579c30e9324f3f5a4b6c345f8db941f7b718b7d56339"
+    },
+    {
+      "file": "resume.json",
+      "bytes": 4812,
+      "sha256": "b52d7be0b72f7ddf1a74dc92396e9dba9aaef902da11e6cb706687b58123edd8"
+    },
+    {
+      "file": "prepare-jest.json",
+      "bytes": 1458,
+      "sha256": "f40fd1b83181852cdd896778d8f4b2e75a66bd300af735b1ce2f795346ff2a94"
+    },
+    {
+      "file": "resume-jest.json",
+      "bytes": 1455,
+      "sha256": "c78673a30d6039698080d132c02ddadf6928fc1ca46791e39f1fcee36b65e753"
+    },
+    {
+      "file": "crm-setup-browser/browser.json",
+      "bytes": 5225,
+      "sha256": "3f5e9d1eda4dc2188778f814c448cfdc0c3dabed86a0a904cb668a5c5040f7a1"
+    },
+    {
+      "file": "pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+✔ read is passive and empty URL carries no operation (0.640625ms)
+✔ save stores only the operation locator and retains route, opt-in and inert fragment (0.28ms)
+✔ new location adapter reconstructs the same locator without rewriting or treating it as authority (0.124667ms)
+✔ partial, duplicate, unknown and malformed locators fail closed (0.228542ms)
+✔ invalid new locators cannot mutate the URL (0.055083ms)
+✔ existing pending locator cannot be overwritten even by an identical save (0.101167ms)
+✔ clear requires the exact operation and key, preserving unrelated URL state (0.119125ms)
+✔ save and clear verify the observed URL instead of assuming replace succeeded (0.1675ms)
+✔ a rejected URL replacement is surfaced to the port and does not fabricate saved state (0.254917ms)
+✔ foreign URL changes before clear are preserved and cannot acknowledge another operation (0.130125ms)
+✔ public projection drops raw previews/secrets and requires a valid configVersion (0.758416ms)
+✔ operation projection binds the exact locator and refuses unqualified import success (0.233625ms)
+✔ wire sends versioned closed bodies and exact operation GET without authority in query (10.557458ms)
+✔ invalid fields, versions and locators do no authorization or I/O (0.250917ms)
+✔ 401 refresh is bounded and keeps the exact operation key and versioned write body (0.507125ms)
+✔ lost, malformed, conflict and server write results never automatically resend (1.264ms)
+✔ disabled composition, viewing and subscribing trigger no transport or pending write (0.370833ms)
+✔ explicit load reads only; stage requires consent, current branch and a persisted locator before dispatch (0.322333ms)
+✔ activation needs separate consent and pins the reviewed configVersion through canonical import receipt (0.127208ms)
+✔ configVersion drift with unchanged timestamp and removed branches refuse before either write (0.2355ms)
+✖ a foreign tenant completion cannot replace the reviewed owner connection (0.40575ms)
+✔ another CRM provider cannot be staged or activated (0.068084ms)
+✔ uncertain write survives close/signout/re-entry; NOT_OBSERVED permits reads but never resend (0.143333ms)
+✔ new runtime after response loss recovers the same completed locator without a write (0.103958ms)
+✔ READY install after restart continues only by explicit consent using the original key (0.092958ms)
+✔ READY activation confirmation resumes its same key and current receipt version without token (0.085ms)
+✔ READY receipt for an older configuration cannot authorize activation of the replacement (0.047667ms)
+✔ UNAVAILABLE or malformed saved locator never creates a replacement request (0.063292ms)
+✔ URL locator save refusal or exception stops before POST (0.072167ms)
+✔ failure clearing a completed locator preserves uncertainty and blocks a new operation (0.0845ms)
+✔ double submit is single flight; signout aborts and ignores a late completion, keeping recovery locator (0.090667ms)
+✔ current owner revocation during preflight prevents dispatch (0.045208ms)
+✖ close during the final preflight publication prevents a stale-generation write (0.09025ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 31
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 92.450291
+
+✖ failing tests:
+
+test at maya-chat-shell/test/local-crm-setup.test.mjs:202:1
+✖ a foreign tenant completion cannot replace the reviewed owner connection (0.40575ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-chat-shell/test/local-crm-setup.test.mjs:205:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at maya-chat-shell/test/local-crm-setup.test.mjs:310:1
+✖ close during the final preflight publication prevents a stale-generation write (0.09025ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-chat-shell/test/local-crm-setup.test.mjs:314:10)
+      at async Test.run (node:internal/test_runner/test:1208:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
