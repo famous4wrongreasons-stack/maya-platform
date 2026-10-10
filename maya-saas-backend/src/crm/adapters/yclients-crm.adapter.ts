@@ -1424,6 +1424,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
   }
 
   async cancelAppointment(params: {
+    assertSourceCurrent?: () => Promise<void>;
     tenantId: string;
     externalId: string;
   }): Promise<CancelledAppointment> {
@@ -1432,6 +1433,7 @@ export class YclientsCRMAdapter implements CRMAdapter {
     const externalId = String(
       this.toNumericId(params.externalId, 'externalId'),
     );
+    await params.assertSourceCurrent?.();
     const response = await this.request<Record<string, unknown>>(
       `record/${this.getCompanyId()}/${externalId}`,
       {

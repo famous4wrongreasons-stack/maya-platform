@@ -21,6 +21,7 @@ import {
 import type { Fixtures } from './support/fixtures';
 import { assertProofDatabase } from './support/proof-db-guard';
 import { firstSlot, object, submit } from './support/release-booking-flow';
+import { ActionEngineRuntimeService } from '../../src/action-engine/action-engine.runtime';
 
 assertProofDatabase();
 const output = process.env.JEST_CANCEL_SOURCE_OUTPUT!;
@@ -47,6 +48,10 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
   const transport: { method: string; company: number; route: string }[] = [];
   const observations: Record<string, unknown>[] = [];
   let forbidden = 0;
+  let afterDelete:
+    ((s: Scenario) => Promise<'gone' | 'lost' | void>) | undefined;
+  let afterDetail: ((s: Scenario) => Promise<void>) | undefined;
+  let readbackReady = true;
   beforeAll(async () => {
     db = await bootFixtureContext();
     http = await bootHttp();
@@ -73,7 +78,7 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
           delete process.env.YCLIENTS_PARTNER_TOKEN;
         }
       });
-    jest.spyOn(globalThis, 'fetch').mockImplementation((input, init) => {
+    jest.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
       const url = new URL(
         typeof input === 'string'
           ? input
@@ -168,10 +173,22 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
       ) {
         assert.ok(records.has(company));
         records.get(company)!.canceled = true;
+        const mode = await afterDelete?.(s);
+        if (mode === 'lost')
+          throw new TypeError('Synthetic DELETE response lost');
+        if (mode === 'gone')
+          return new Response(JSON.stringify({ success: false }), {
+            status: 404,
+          });
         data = {};
       } else if (s && method === 'GET' && route === `record/${company}/5001`) {
+        if (!readbackReady)
+          return new Response(JSON.stringify({ success: false }), {
+            status: 503,
+          });
         const row = records.get(company);
         assert.ok(row);
+        await afterDetail?.(s);
         data = {
           id: 5001,
           company_id: company,
@@ -192,9 +209,38 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
         forbidden++;
         throw new Error('Unadmitted synthetic route: ' + method + ' ' + route);
       }
-      return Promise.resolve(
-        new Response(JSON.stringify({ success: true, data }), { status: 200 }),
-      );
+      return new Response(JSON.stringify({ success: true, data }), {
+        status: 200,
+      });
+    });
+  });
+  afterEach(async () => {
+    afterDelete = undefined;
+    afterDetail = undefined;
+    readbackReady = true;
+    const s = scenarios.at(-1);
+    if (!s) return;
+    const executions = await db.prisma.actionExecution.findMany({
+      where: { tenantId: s.tenantId, capability: 'crm.appointment.cancel.v1' },
+      select: {
+        id: true,
+        state: true,
+        executionAttemptCount: true,
+        evidenceRefsJson: true,
+      },
+    });
+    observations.push({
+      case: expect.getState().currentTestName,
+      companyA: { ...records.get(s.companyA) },
+      companyB: { ...records.get(s.companyB) },
+      executions,
+      provider: transport.filter((row) =>
+        [s.companyA, s.companyB].includes(row.company),
+      ),
+      appointment: await db.prisma.appointment.findFirst({
+        where: { id: s.appointmentId, tenantId: s.tenantId },
+        select: { id: true, status: true, branchId: true, crmExternalId: true },
+      }),
     });
   });
   afterAll(async () => {
@@ -384,6 +430,322 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
     expect(records.get(s.companyA)?.canceled).toBe(false);
     expect(appointment.status).toBe('confirmed');
     expect(result.receipt_outcome).not.toBe('ACCEPTED');
+    expect(forbidden).toBe(0);
+  }, 30000);
+  const ownedRow = (s: Scenario) =>
+    db.prisma.appointment.findUniqueOrThrow({ where: { id: s.appointmentId } });
+  const cancelHttp = (s: Scenario, key: string, token = s.token) =>
+    request(http.app.getHttpServer())
+      .post(`/api/appointments/${s.appointmentId}/cancel`)
+      .set('Authorization', 'Bearer ' + token)
+      .set('Idempotency-Key', key)
+      .send({});
+  const executions = (s: Scenario) =>
+    db.prisma.actionExecution.findMany({
+      where: { tenantId: s.tenantId, capability: 'crm.appointment.cancel.v1' },
+    });
+  const deletes = (s: Scenario) =>
+    transport.filter(
+      (row) =>
+        row.method === 'DELETE' &&
+        [s.companyA, s.companyB].includes(row.company),
+    );
+  async function switchCompany(s: Scenario) {
+    const integration = await db.prisma.crmIntegration.findUniqueOrThrow({
+      where: { tenantId: s.tenantId },
+    });
+    await db.prisma.crmIntegration.update({
+      where: { id: integration.id },
+      data: {
+        settingsJson: {
+          ...object(integration.settingsJson),
+          companyId: s.companyB,
+          branchBinding: {
+            contract: 'maya.crm-branch-binding/1',
+            companyId: s.companyB,
+            branchId: s.branchId,
+          },
+        },
+      },
+    });
+  }
+  async function assertUntouched(s: Scenario) {
+    expect(deletes(s)).toEqual([]);
+    expect(records.get(s.companyA)?.canceled).toBe(false);
+    expect(records.get(s.companyB)).toEqual({ canceled: false, own: false });
+    expect((await ownedRow(s)).status).toBe('confirmed');
+  }
+  it.each([
+    'branch-remap',
+    'missing-branch',
+    'missing-origin',
+    'provider-change',
+    'internal-source',
+    'revoked-link',
+  ])(
+    'refuses %s after preview before any DELETE',
+    async (mode) => {
+      const s = await scenario();
+      if (mode === 'branch-remap')
+        await connect(s, s.companyA, s.otherBranchId);
+      if (mode === 'missing-branch')
+        await db.prisma.appointment.update({
+          where: { id: s.appointmentId },
+          data: { branchId: null },
+        });
+      if (mode === 'missing-origin')
+        await db.prisma.actionExecution.updateMany({
+          where: {
+            tenantId: s.tenantId,
+            capability: 'crm.appointment.create.v1',
+          },
+          data: { bookingIntentEncrypted: null },
+        });
+      if (mode === 'provider-change')
+        await db.prisma.crmIntegration.update({
+          where: { tenantId: s.tenantId },
+          data: { provider: 'altegio' },
+        });
+      if (mode === 'internal-source')
+        await db.prisma.tenant.update({
+          where: { id: s.tenantId },
+          data: { calendarSource: 'internal' },
+        });
+      if (mode === 'revoked-link')
+        await db.prisma.clientChannelLink.update({
+          where: { id: s.linkId },
+          data: { revokedAt: new Date() },
+        });
+      const result = await submit(http, s.token, s.confirmation!, 'COMMIT');
+      expect(result.receipt_outcome).not.toBe('ACCEPTED');
+      await assertUntouched(s);
+    },
+    30000,
+  );
+  it('unchanged source cancellation, concurrent same-key callers and replay share one AE/DELETE', async () => {
+    const s = await scenario(),
+      key = randomUUID();
+    afterDelete = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 40));
+    };
+    const replies = await Promise.all([cancelHttp(s, key), cancelHttp(s, key)]);
+    expect(replies.map((r) => r.status)).toEqual([201, 201]);
+    expect((await cancelHttp(s, key)).status).toBe(201);
+    expect(deletes(s)).toHaveLength(1);
+    expect(deletes(s)[0].company).toBe(s.companyA);
+    expect((await ownedRow(s)).status).toBe('canceled');
+    const rows = await executions(s);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      state: 'SUCCEEDED',
+      executionAttemptCount: 1,
+    });
+    expect(records.get(s.companyB)?.canceled).toBe(false);
+  }, 30000);
+  it('rechecks current Client after a concurrent waiter receives the completed AE result', async () => {
+    const s = await scenario(),
+      key = randomUUID(),
+      runtime = http.app.get(ActionEngineRuntimeService);
+    const execute = runtime.executeWithReceipt.bind(runtime);
+    let held!: () => void,
+      release!: () => void,
+      count = 0;
+    const entered = new Promise<void>((resolve) => {
+      held = resolve;
+    });
+    const resumed = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const spy = jest
+      .spyOn(runtime, 'executeWithReceipt')
+      .mockImplementation(async (input, handlers) => {
+        const current =
+          input.capability === 'crm.appointment.cancel.v1' ? ++count : 0;
+        const result = await execute(input, handlers);
+        if (current === 2) {
+          held();
+          await resumed;
+        }
+        return result;
+      });
+    try {
+      const first = cancelHttp(s, key).then((r) => r),
+        second = cancelHttp(s, key).then((r) => r);
+      expect((await Promise.race([first, second])).status).toBe(201);
+      await entered;
+      await db.prisma.clientChannelLink.update({
+        where: { id: s.linkId },
+        data: { revokedAt: new Date() },
+      });
+      release();
+      expect(
+        (await Promise.all([first, second])).map((r) => r.status).sort(),
+      ).toEqual([201, 403]);
+      expect(deletes(s)).toHaveLength(1);
+      expect(await executions(s)).toHaveLength(1);
+    } finally {
+      release();
+      spy.mockRestore();
+    }
+  }, 30000);
+  it('widget COMMIT preserves late Client revocation instead of disclosing a completed cancel', async () => {
+    const s = await scenario(),
+      runtime = http.app.get(ActionEngineRuntimeService);
+    const execute = runtime.executeWithReceipt.bind(runtime);
+    let held!: () => void, release!: () => void;
+    const entered = new Promise<void>((resolve) => {
+      held = resolve;
+    });
+    const resumed = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const spy = jest
+      .spyOn(runtime, 'executeWithReceipt')
+      .mockImplementation(async (input, handlers) => {
+        const result = await execute(input, handlers);
+        if (input.capability === 'crm.appointment.cancel.v1') {
+          held();
+          await resumed;
+        }
+        return result;
+      });
+    try {
+      const pending = submit(http, s.token, s.confirmation!, 'COMMIT');
+      await entered;
+      await db.prisma.clientChannelLink.update({
+        where: { id: s.linkId },
+        data: { revokedAt: new Date() },
+      });
+      release();
+      const result = await pending;
+      expect(result).toMatchObject({
+        receipt_outcome: 'REFUSED',
+        action_receipt_ref: null,
+        owner_decision: null,
+      });
+      expect(deletes(s)).toHaveLength(1);
+      expect((await executions(s))[0]).toMatchObject({
+        state: 'SUCCEEDED',
+        executionAttemptCount: 1,
+      });
+      expect((await ownedRow(s)).status).toBe('canceled');
+    } finally {
+      release();
+      spy.mockRestore();
+    }
+  }, 30000);
+  it.each(['source', 'revoke', 'record-identity'])(
+    'rechecks %s inside the native DELETE seam',
+    async (mode) => {
+      const s = await scenario();
+      // Invoked below with the exact native adapter receiver.
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      const original = YclientsCRMAdapter.prototype.cancelAppointment;
+      const spy = jest
+        .spyOn(YclientsCRMAdapter.prototype, 'cancelAppointment')
+        .mockImplementationOnce(async function (params) {
+          expect(typeof params.assertSourceCurrent).toBe('function');
+          if (mode === 'source') await switchCompany(s);
+          if (mode === 'revoke')
+            await db.prisma.clientChannelLink.update({
+              where: { id: s.linkId },
+              data: { revokedAt: new Date() },
+            });
+          if (mode === 'record-identity')
+            await db.prisma.appointment.update({
+              where: { id: s.appointmentId },
+              data: { crmExternalId: '5002' },
+            });
+          return original.call(this, params);
+        });
+      try {
+        const result = await submit(http, s.token, s.confirmation!, 'COMMIT');
+        expect(result.receipt_outcome).not.toBe('ACCEPTED');
+        await assertUntouched(s);
+        expect((await executions(s))[0].state).toBe('FAILED');
+      } finally {
+        spy.mockRestore();
+      }
+    },
+    30000,
+  );
+  it.each(['ok', 'gone', 'lost'] as const)(
+    'source changes after DELETE (%s): UNKNOWN, no company-B read/mirror/retry',
+    async (mode) => {
+      const s = await scenario();
+      afterDelete = async () => {
+        await switchCompany(s);
+        return mode === 'ok' ? undefined : mode;
+      };
+      const before = transport.length;
+      const result = await submit(http, s.token, s.confirmation!, 'COMMIT');
+      expect(result).toMatchObject({
+        receipt_outcome: 'ACCEPTED',
+        owner_decision: { state: 'UNKNOWN' },
+      });
+      const replay = await submit(http, s.token, s.confirmation!, 'COMMIT');
+      expect(
+        (replay.owner_decision as { state?: string } | null)?.state,
+      ).not.toBe('SUCCEEDED');
+      expect(
+        transport.slice(before).filter((row) => row.company === s.companyB),
+      ).toEqual([]);
+      expect(deletes(s)).toHaveLength(1);
+      expect(records.get(s.companyB)?.canceled).toBe(false);
+      expect((await ownedRow(s)).status).toBe('confirmed');
+      expect((await executions(s))[0]).toMatchObject({
+        state: 'UNKNOWN',
+        executionAttemptCount: 1,
+      });
+    },
+    30000,
+  );
+  it('stable UNKNOWN reconciles the original provider without another DELETE', async () => {
+    const s = await scenario(),
+      key = randomUUID();
+    readbackReady = false;
+    afterDelete = () => Promise.resolve('lost');
+    expect((await cancelHttp(s, key)).status).toBe(503);
+    expect((await executions(s))[0].state).toBe('UNKNOWN');
+    readbackReady = true;
+    expect((await cancelHttp(s, key)).status).toBe(201);
+    expect(deletes(s)).toHaveLength(1);
+    expect((await ownedRow(s)).status).toBe('canceled');
+    expect((await executions(s))[0]).toMatchObject({
+      state: 'SUCCEEDED',
+      executionAttemptCount: 1,
+    });
+  }, 30000);
+  it('source changes during UNKNOWN readback: retains UNKNOWN without mirror or company-B access', async () => {
+    const s = await scenario(),
+      key = randomUUID();
+    readbackReady = false;
+    afterDelete = () => Promise.resolve('lost');
+    expect((await cancelHttp(s, key)).status).toBe(503);
+    readbackReady = true;
+    afterDetail = async () => {
+      await switchCompany(s);
+    };
+    const before = transport.length;
+    expect((await cancelHttp(s, key)).status).toBe(503);
+    expect(
+      transport.slice(before).filter((row) => row.company === s.companyB),
+    ).toEqual([]);
+    const retryBefore = transport.length;
+    expect((await cancelHttp(s, key)).status).toBe(409);
+    expect(transport.slice(retryBefore)).toEqual([]);
+    expect(deletes(s)).toHaveLength(1);
+    expect((await ownedRow(s)).status).toBe('confirmed');
+    expect((await executions(s))[0]).toMatchObject({
+      state: 'UNKNOWN',
+      executionAttemptCount: 1,
+    });
+  }, 30000);
+  it('foreign tenant cannot cancel the owned appointment', async () => {
+    const s = await scenario(),
+      foreign = await scenario();
+    expect((await cancelHttp(s, randomUUID(), foreign.token)).status).toBe(404);
+    await assertUntouched(s);
     expect(forbidden).toBe(0);
   }, 30000);
 });

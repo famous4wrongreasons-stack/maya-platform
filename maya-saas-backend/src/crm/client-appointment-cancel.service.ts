@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -24,6 +25,7 @@ type OwnedCancelTarget = {
   tenantId: string;
   clientId: string;
   linkId: string;
+  branchSourceRevision?: string | null;
   appointment: {
     id: string;
     tenantId: string;
@@ -31,6 +33,7 @@ type OwnedCancelTarget = {
     mayaClientId: string | null;
     branchId: string | null;
     crmExternalId: string | null;
+    crmProvider: string | null;
     source: string;
     staffExternalId: string;
     serviceIds: Prisma.JsonValue;
@@ -105,12 +108,58 @@ export class ClientAppointmentCancelService {
       appointmentId,
     );
     const canonicalStatus = parseVisitOutcome(target.appointment.status);
+    const branchSourceRevision = await this.readSourceRevision(target);
     return {
-      target,
+      target: { ...target, branchSourceRevision },
       storedStatus: target.appointment.status,
       canonicalStatus,
       alreadyCancelled: canonicalStatus === 'canceled',
     };
+  }
+
+  /** A provider-local record ID is not a company identity. Native Client
+   * cancellation requires the same canonical create origin used by reschedule. */
+  private async readSourceRevision(target: OwnedCancelTarget) {
+    const row = target.appointment;
+    if (row.source === 'internal') return null;
+    if (!row.crmProvider)
+      throw new ConflictException({
+        error: { code: 'booking_appointment_source_unproven' },
+      });
+    if (!['yclients', 'altegio'].includes(row.crmProvider)) return null;
+    if (!row.branchId || !row.crmExternalId)
+      throw new ConflictException({
+        error: { code: 'booking_appointment_source_unproven' },
+      });
+    const readRevision = async () => {
+      try {
+        return await this.crm.readBranchAvailabilityRevision(
+          target.tenantId,
+          row.branchId!,
+        );
+      } catch {
+        throw new ConflictException({
+          error: { code: 'booking_branch_source_stale' },
+        });
+      }
+    };
+    const revision = await readRevision();
+    if (!revision)
+      throw new ConflictException({
+        error: { code: 'booking_appointment_source_unproven' },
+      });
+    await this.crm.assertClientAppointmentBranchOrigin(
+      target.tenantId,
+      target.clientId,
+      row.crmExternalId,
+      row.branchId,
+      row.crmProvider,
+    );
+    if ((await readRevision()) !== revision)
+      throw new ConflictException({
+        error: { code: 'booking_branch_source_stale' },
+      });
+    return revision;
   }
 
   private async executeOwnedCancel(
@@ -131,6 +180,7 @@ export class ClientAppointmentCancelService {
     const ownedInvocation: AppointmentActionInvocation = {
       sourceType: 'authenticated_request',
       sourceRef: `client-channel-link:${target.linkId}`,
+      branchSourceRevision: target.branchSourceRevision ?? undefined,
       clientPrincipal: {
         linkId: target.linkId,
         appointmentId: target.appointment.id,
@@ -140,11 +190,28 @@ export class ClientAppointmentCancelService {
         key: identity,
       },
       authorizationCheck: async () => {
-        await this.resolveOwnedTarget(
+        const current = await this.resolveOwnedTarget(
           target.tenantId,
           userId,
           target.appointment.id,
         );
+        if (
+          current.linkId !== target.linkId ||
+          current.clientId !== target.clientId
+        )
+          throw new ForbiddenException('Original Client binding required');
+        if (
+          current.appointment.source !== target.appointment.source ||
+          current.appointment.crmProvider !== target.appointment.crmProvider ||
+          current.appointment.crmExternalId !==
+            target.appointment.crmExternalId ||
+          current.appointment.branchId !== target.appointment.branchId ||
+          (await this.readSourceRevision(current)) !==
+            (target.branchSourceRevision ?? null)
+        )
+          throw new ConflictException({
+            error: { code: 'booking_branch_source_stale' },
+          });
       },
     };
     try {
@@ -187,6 +254,9 @@ export class ClientAppointmentCancelService {
       throw error;
     }
 
+    // A concurrent waiter or a completed replay can return from AE without
+    // executing handlers. Recheck current Client authority before disclosure.
+    await ownedInvocation.authorizationCheck?.();
     const appointment = await this.prisma.appointment.findFirst({
       where: {
         id: target.appointment.id,

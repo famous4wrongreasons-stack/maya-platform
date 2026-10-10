@@ -1,4 +1,8 @@
-import { ConflictException, ServiceUnavailableException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import type { EntitlementsService } from '../../entitlements/entitlements.service';
 import type { ActionExecution } from '@prisma/client';
 
@@ -282,6 +286,50 @@ describe('U13c booking COMMIT owner port', () => {
 });
 
 describe('booking owner reason projection', () => {
+  it.each([
+    new ForbiddenException('client_link_required'),
+    new ConflictException({ error: { code: 'booking_branch_source_stale' } }),
+  ])(
+    'does not disclose a succeeded cancel after current owner refusal',
+    async (error) => {
+      const built = fixture();
+      const original = built.cancel.forAccount.getMockImplementation()!;
+      built.cancel.forAccount.mockImplementation(async (...args: unknown[]) => {
+        await original(...args);
+        throw error;
+      });
+      await expect(
+        built.adapter.commit(input('crm.appointment.cancel.v1')),
+      ).resolves.toMatchObject({
+        receiptOutcome: 'REFUSED',
+        actionReceiptRef: null,
+        ownerDecision: null,
+      });
+      expect(built.cancel.forAccount).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it('preserves cancel UNKNOWN after an owner error without inventing a definitive outcome', async () => {
+    const built = fixture();
+    const original = built.cancel.forAccount.getMockImplementation()!;
+    built.cancel.forAccount.mockImplementation(async (...args: unknown[]) => {
+      await original(...args);
+      throw new ServiceUnavailableException('Outcome unknown');
+    });
+    built.create.executionResult.mockResolvedValue({
+      executionId: execution.id,
+      state: 'UNKNOWN',
+      outcomeCode: null,
+    });
+    await expect(
+      built.adapter.commit(input('crm.appointment.cancel.v1')),
+    ).resolves.toMatchObject({
+      receiptOutcome: 'ACCEPTED',
+      actionReceiptRef: null,
+      ownerDecision: { state: 'UNKNOWN', reconciliation: 'required' },
+    });
+  });
+
   it.each([
     ['booking_preview_stale', 'handle_stale'],
     ['booking_preview_refresh_required', 'booking_confirmation_required'],

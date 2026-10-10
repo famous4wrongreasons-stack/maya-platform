@@ -600,6 +600,8 @@ export interface CRMAdapter {
     params: CreateAppointmentParams,
   ): Promise<CreatedAppointment>;
   cancelAppointment(params: {
+    /** Server-only source/authority guard immediately before DELETE. */
+    assertSourceCurrent?: () => Promise<void>;
     tenantId: string;
     externalId: string;
   }): Promise<CancelledAppointment>;

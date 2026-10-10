@@ -170,7 +170,7 @@ export type AppointmentActionInvocation = {
   expectedBookingFactsHash?: string;
   /** Server-observed terms persisted once as evidence on a new canonical create. */
   bookingFactsHash?: string;
-  /** Immutable server source witness for a new verified Client create/reschedule. */
+  /** Immutable server source witness for a new verified Client appointment action. */
   branchSourceRevision?: string;
   /** Server-resolved timezone of a verified Client reschedule preview. */
   appointmentTimezone?: string;
@@ -3127,17 +3127,20 @@ export class CrmService {
     }
   }
 
-  private async assertRescheduleBranchWitness(
+  private async assertAppointmentBranchWitness(
     tenantId: string,
     invocation: AppointmentActionInvocation,
     executionId: string,
+    capability:
+      | 'crm.appointment.reschedule.v1'
+      | 'crm.appointment.cancel.v1' = 'crm.appointment.reschedule.v1',
   ) {
     if (!invocation.clientPrincipal?.appointmentId) return;
     const row = await this.prisma.actionExecution.findFirst({
       where: {
         id: executionId,
         tenantId,
-        capability: 'crm.appointment.reschedule.v1',
+        capability,
       },
       select: { evidenceRefsJson: true },
     });
@@ -3158,8 +3161,11 @@ export class CrmService {
       },
     });
     if (!appointment) throw new NotFoundException('Appointment source missing');
+    const nativeCancel =
+      capability === 'crm.appointment.cancel.v1' &&
+      ['yclients', 'altegio'].includes(appointment.crmProvider ?? '');
     if (!appointment.branchId) {
-      if (refs.length)
+      if (refs.length || nativeCancel)
         throw new ConflictException({
           error: { code: 'booking_branch_source_stale' },
         });
@@ -3170,7 +3176,7 @@ export class CrmService {
       appointment.branchId,
     );
     if (revision === null) {
-      if (refs.length)
+      if (refs.length || nativeCancel)
         throw new ConflictException({
           error: { code: 'booking_branch_source_stale' },
         });
@@ -3383,7 +3389,7 @@ export class CrmService {
       )
         throw new ForbiddenException('Original Client action required');
       if (execution.state !== 'SUCCEEDED')
-        await this.assertRescheduleBranchWitness(
+        await this.assertAppointmentBranchWitness(
           input.tenantId,
           {
             clientPrincipal: {
@@ -3816,6 +3822,19 @@ export class CrmService {
     await this.assertExternalSource(scopedTenantId);
     const adapter = await this.getAdapterForTenant(scopedTenantId);
     const crmProvider = await this.providerOfTenant(scopedTenantId);
+    const clientCancel = Boolean(invocation.clientPrincipal?.appointmentId);
+    const assertSourceCurrent = async (executionId: string) => {
+      await invocation.authorizationCheck?.();
+      if (!clientCancel) return;
+      await this.assertAppointmentBranchWitness(
+        scopedTenantId,
+        invocation,
+        executionId,
+        'crm.appointment.cancel.v1',
+      );
+      if ((await this.getAdapterForTenant(scopedTenantId)) !== adapter)
+        throw new ConflictException('CRM source changed before cancellation');
+    };
     return {
       request: this.appointmentActionRequest({
         tenantId: scopedTenantId,
@@ -3825,53 +3844,89 @@ export class CrmService {
         invocation,
       }),
       handlers: {
-        dispatch: async (input) => {
-          await invocation.authorizationCheck?.();
+        prepare: async (_input, context) => {
+          await assertSourceCurrent(context.executionId);
+          return undefined;
+        },
+        dispatch: async (input, _key, context) => {
+          const guard = () => assertSourceCurrent(context.executionId);
+          await guard();
           const durableExternalId = requireString(
             input.externalId,
             'externalId',
           );
+          let value: CancelledAppointment;
           try {
-            const value = await adapter.cancelAppointment({
+            value = await adapter.cancelAppointment({
               tenantId: scopedTenantId,
               externalId: durableExternalId,
+              ...(clientCancel ? { assertSourceCurrent: guard } : {}),
             });
-            await this.persistCancelledAppointmentMirror(
-              scopedTenantId,
-              crmProvider,
-              durableExternalId,
-            );
-            return { value, safeResult: this.cancelledAppointmentSafe(value) };
           } catch (error) {
             if (!(error instanceof CrmRecordGoneError)) throw error;
-            const value = {
-              external_id: durableExternalId,
-              status: 'canceled',
-            };
-            await this.persistCancelledAppointmentMirror(
-              scopedTenantId,
-              crmProvider,
-              durableExternalId,
-            );
-            return { value, safeResult: this.cancelledAppointmentSafe(value) };
+            value = { external_id: durableExternalId, status: 'canceled' };
           }
+          // Even a 404 belongs to the captured provider source. A changed
+          // source/authority after DELETE is uncertain, never a new-source mirror.
+          if (clientCancel) {
+            try {
+              await guard();
+            } catch (error) {
+              throw new CrmOutcomeUnknownError(
+                'CRM source changed after cancellation dispatch',
+                error,
+              );
+            }
+          }
+          await this.persistCancelledAppointmentMirror(
+            scopedTenantId,
+            crmProvider,
+            durableExternalId,
+          );
+          return { value, safeResult: this.cancelledAppointmentSafe(value) };
         },
-        reconcile: async (input) => {
+        reconcile: async (input, _previous, context) => {
+          const guard = async () => {
+            if (!clientCancel) return true;
+            try {
+              if (!context?.executionId) return false;
+              await assertSourceCurrent(context.executionId);
+              return true;
+            } catch {
+              return false;
+            }
+          };
+          if (!(await guard())) return { outcome: 'STILL_UNKNOWN' };
           const durableExternalId = requireString(
             input.externalId,
             'externalId',
           );
+          let canceled = false;
           try {
-            const detail = await this.loadAppointmentDetail(
-              scopedTenantId,
-              durableExternalId,
-            );
-            if (!isCanceledStatus(detail.status)) {
-              return { outcome: 'PROVEN_NOT_EXECUTED' };
-            }
+            // Never resolve a new adapter during readback of an old action.
+            const detail = clientCancel
+              ? await (async () => {
+                  if (!adapter.getAppointmentDetail)
+                    throw new Error(
+                      'Original cancellation readback unavailable',
+                    );
+                  return adapter.getAppointmentDetail({
+                    tenantId: scopedTenantId,
+                    externalId: durableExternalId,
+                    timezone: await this.tenantTimezone(scopedTenantId),
+                  });
+                })()
+              : await this.loadAppointmentDetail(
+                  scopedTenantId,
+                  durableExternalId,
+                );
+            canceled = isCanceledStatus(detail.status);
           } catch (error) {
             if (!(error instanceof CrmRecordGoneError)) throw error;
+            canceled = true;
           }
+          if (!(await guard())) return { outcome: 'STILL_UNKNOWN' };
+          if (!canceled) return { outcome: 'PROVEN_NOT_EXECUTED' };
           await this.persistCancelledAppointmentMirror(
             scopedTenantId,
             crmProvider,
@@ -4392,7 +4447,7 @@ export class CrmService {
       handlers: {
         prepare: async (input, context) => {
           await invocation.authorizationCheck?.();
-          await this.assertRescheduleBranchWitness(
+          await this.assertAppointmentBranchWitness(
             scopedTenantId,
             invocation,
             context.executionId,
@@ -4414,7 +4469,7 @@ export class CrmService {
         dispatch: async (input, _key, context) => {
           const assertSourceCurrent = async () => {
             await invocation.authorizationCheck?.();
-            await this.assertRescheduleBranchWitness(
+            await this.assertAppointmentBranchWitness(
               scopedTenantId,
               invocation,
               context.executionId,
@@ -4456,7 +4511,7 @@ export class CrmService {
           if (invocation.clientPrincipal?.appointmentId) {
             try {
               if (!context?.executionId) return { outcome: 'STILL_UNKNOWN' };
-              await this.assertRescheduleBranchWitness(
+              await this.assertAppointmentBranchWitness(
                 scopedTenantId,
                 invocation,
                 context.executionId,
@@ -4473,7 +4528,7 @@ export class CrmService {
           );
           if (invocation.clientPrincipal?.appointmentId) {
             try {
-              await this.assertRescheduleBranchWitness(
+              await this.assertAppointmentBranchWitness(
                 scopedTenantId,
                 invocation,
                 context!.executionId,

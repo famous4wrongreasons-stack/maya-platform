@@ -126,6 +126,10 @@ function setup(options: Options = {}) {
     execution: { state: 'SUCCEEDED', executionId: 'exec-crm' },
   });
   const crm = {
+    readBranchAvailabilityRevision: jest
+      .fn()
+      .mockResolvedValue('source-revision'),
+    assertClientAppointmentBranchOrigin: jest.fn().mockResolvedValue(undefined),
     executeInternalAppointmentCancelWithReceipt: executeInternal,
     executeCancelAppointmentWithReceipt: executeCrm,
   };
@@ -267,8 +271,9 @@ describe('B29 verified Client appointment cancel authority', () => {
         tenantId: 'tenant-1',
         clientId: null,
         mayaClientId: 'client-1',
-        branchId: null,
+        branchId: 'branch-1',
         crmExternalId: 'crm-1',
+        crmProvider: 'yclients',
         source: 'external',
         staffExternalId: 'staff-1',
         serviceIds: [],

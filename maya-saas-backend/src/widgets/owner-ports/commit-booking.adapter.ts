@@ -118,6 +118,15 @@ export class CommitBookingAdapter implements CommitBookingOwnerPort {
       input.routing.tenantId,
       executionId,
     );
+    // A completed cancel can be joined after its Client authority/source changed.
+    // Preserve the durable result, but do not override the owner's current refusal.
+    // UNKNOWN still follows the existing reconciliation projection below.
+    if (
+      result.state === 'SUCCEEDED' &&
+      ownerError !== undefined &&
+      record.capabilityKey === 'crm.appointment.cancel.v1'
+    )
+      return rejected(gate14Reason(ownerError));
     if (result.state === 'SUCCEEDED')
       return {
         receiptOutcome: 'ACCEPTED',

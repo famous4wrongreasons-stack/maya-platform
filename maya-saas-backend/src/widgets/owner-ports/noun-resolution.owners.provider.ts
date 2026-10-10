@@ -219,7 +219,7 @@ export class NounResolutionOwnersProvider implements NounReadPort {
     } catch (error) {
       // A withdrawn canonical source is an unresolved noun, not a provider
       // transport outage or evidence that the time was taken.
-      if (values.has('branch') && error instanceof HttpException) {
+      if (error instanceof HttpException) {
         const body = error.getResponse();
         const detail =
           typeof body === 'object' && body !== null && 'error' in body
@@ -231,7 +231,9 @@ export class NounResolutionOwnersProvider implements NounReadPort {
             : null;
         if (
           code === 'booking_branch_source_unavailable' ||
-          code === 'booking_preview_stale'
+          code === 'booking_branch_source_stale' ||
+          code === 'booking_appointment_source_unproven' ||
+          (values.has('branch') && code === 'booking_preview_stale')
         )
           return { kind: 'gone', reason: 'not_found' };
       }
