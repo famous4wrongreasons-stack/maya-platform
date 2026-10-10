@@ -12,7 +12,7 @@ import { createDevServer } from '../../maya-chat-shell/dev/serve.mjs';
 import { PRIVATE_KEYS, migrationConfigSource, assertPrivateCwd, externalStatePath, localBrowserBoundary } from './local-onboarding-profile.mjs';
 import { sourceBinding, sessionPlan, stage } from './local-onboarding.mjs';
 import { realReadEnvironment } from './local-yclients-read-profile.mjs';
-import { projectRuntimeStatus, RUNTIME_STAGES, RUNTIME_CODES } from './local-yclients-read-status.mjs';
+import { projectRuntimeStatus, RUNTIME_STAGES, RUNTIME_CODES, projectReadTrace, READ_TRACE_LIMIT } from './local-yclients-read-status.mjs';
 import { PUBLIC_DIAGNOSTIC_PARTNER, diagnosticRuntimeCommand } from './local-yclients-read-diagnostic.mjs';
 export { PUBLIC_DIAGNOSTIC_PARTNER };
 
@@ -44,7 +44,7 @@ const FAILURE_CODES = Object.freeze(['preflight_refused', 'relay_start_failed', 
 const safeFailure = code => Object.assign(new Error('Local setup-read operation stopped'), { diagnosticCode: code });
 
 export function createDiagnostic(diagnosticNoProvider) {
-  return { contract: 'maya.local-yclients-read-diagnostic/1', mode: diagnosticNoProvider ? 'network_closed' : 'owner_input', stage: 'preparing', outcome: 'entered', credentialAccepted: false, preparationStep: null, firstFailure: null, cleanupFailures: [], runtimeStatuses: [] };
+  return { contract: 'maya.local-yclients-read-diagnostic/1', mode: diagnosticNoProvider ? 'network_closed' : 'owner_input', stage: 'preparing', outcome: 'entered', credentialAccepted: false, preparationStep: null, firstFailure: null, cleanupFailures: [], runtimeStatuses: [], readTrace: [], readTraceLimitReached: false, readTraceClock: 'launcher_received_utc_not_provider_time' };
 }
 export function diagnosticStage(diagnostic, stage, outcome = 'entered') {
   assert.ok(LAUNCHER_STAGES.includes(stage));
@@ -82,6 +82,12 @@ export function runtimeObserver(diagnostic, expected, save) {
     get summary() { return summaryCount === 1 ? summary : null; },
     accept(message) {
       try {
+        if (message?.type === 'read-trace') {
+          const event = projectReadTrace(message);
+          if (!event || event.sequence !== diagnostic.readTrace.length + 1 || diagnostic.readTrace.length >= READ_TRACE_LIMIT) { refuse('runtime_status_invalid'); save(); return; }
+          // Receipt timestamp from this launcher, not provider occurrence time.
+          diagnostic.readTrace.push({ ...event, observedAt: new Date().toISOString() }); diagnostic.readTraceLimitReached = diagnostic.readTrace.length === READ_TRACE_LIMIT; save(); return;
+        }
         if (message?.type === 'runtime-status') {
           const projected = runtimeStatusProjection(message);
           if (!projected || diagnostic.runtimeStatuses.length >= 24) { refuse('runtime_status_invalid'); save(); return; }

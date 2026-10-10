@@ -1,0 +1,20 @@
+{
+  "attempt": "01",
+  "sourceReportBasename": "result.json",
+  "contract": "maya.owner-a17-readonly-metadata/1",
+  "status": "UNKNOWN",
+  "externalCalls": 0,
+  "applicationStarted": false,
+  "credentialsRead": false,
+  "databaseBusinessWrites": 0,
+  "newKeys": false,
+  "queriesReadOnly": true,
+  "tcpListening": false,
+  "cleanupFailures": [],
+  "sameOwnedDatabaseAndSystem": true,
+  "failure": "single_existing_owner_required",
+  "clusterStopped": true,
+  "sharedLockAbsent": true,
+  "integrationReadCompleted": false,
+  "qualification": "Stopped at the owner-selection guard before integration metadata was read; no save/activation conclusion follows from this attempt."
+}

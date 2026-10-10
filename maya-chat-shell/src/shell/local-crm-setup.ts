@@ -23,6 +23,17 @@ const empty = (): LocalCrmSetupView => ({ phase: 'idle', busy: false, branches: 
 const same = (a: CrmSetupConnection | null, b: CrmSetupConnection | null): boolean => a === null || b === null ? a === b :
   a.id === b.id && a.tenantId === b.tenantId && a.configVersion === b.configVersion && a.provider === b.provider && a.status === b.status && a.hasCredentials === b.hasCredentials && a.companyId === b.companyId && a.branchId === b.branchId;
 const uncertain = 'Результат действия ещё не подтверждён. Проверьте сохранённую операцию. Автоматического повтора не будет.';
+const diagnosticNotice = (failure: CrmSetupFailure): string => {
+  switch (failure.diagnostic) {
+    case 'crm_credentials_rejected': return 'YCLIENTS отклонил проверку доступа. Нужно проверить токен и его права на выбранную компанию.';
+    case 'crm_company_not_found': return 'Выбранная компания YCLIENTS не найдена или недоступна для этого токена.';
+    case 'crm_provider_unreachable': return 'Не удалось получить ответ YCLIENTS: сервис временно недоступен.';
+    case 'crm_platform_configuration_error': return 'На сервере MAYA не настроен доступ к YCLIENTS. Требуется проверить серверную настройку.';
+    case 'crm_connection_failed': return 'Сервер не смог проверить подключение к YCLIENTS.';
+    case 'local_yclients_read_route_disabled': return 'Локальный сеанс отклонил запрос настройки. Требуется проверить его разрешённый формат.';
+    default: return '';
+  }
+};
 const sameLocator = (a: CrmOperationLocator, b: CrmOperationLocator) => a.operation === b.operation && a.requestId === b.requestId;
 // NOT_OBSERVED is not proof of non-dispatch. Explicit same-ID submission is
 // safe because the existing AE pins the first admitted material and rejects
@@ -55,8 +66,12 @@ export function createLocalCrmSetup(deps: {
   const active = (version: number) => version === serial && allowed() && !abort.signal.aborted;
   const reset = () => { serial++; abort.abort(); abort = deps.newAbort(); current = empty(); publish({}); };
   const fail = (failure: CrmSetupFailure) => {
-    if (failure.reason === 'forbidden') { current = empty(); publish({ phase: 'blocked', notice: 'Доступ к настройке подключения не подтверждён. Войдите с правами владельца или администратора.' }); }
-    else publish({ busy: false, phase: locator() !== null ? 'uncertain' : 'blocked', stagedCounts: null, operation: null, notice: locator() !== null ? uncertain : 'Не удалось подтвердить актуальное подключение. Проверьте состояние перед продолжением.' });
+    const diagnosis = diagnosticNotice(failure);
+    if (failure.reason === 'forbidden') { current = empty(); publish({ phase: 'blocked', notice: diagnosis ? `${diagnosis} ${uncertain}` : 'Доступ к настройке подключения не подтверждён. Войдите с правами владельца или администратора.' }); }
+    else {
+      const recovery = locator() !== null ? uncertain : 'Не удалось подтвердить актуальное подключение. Проверьте состояние перед продолжением.';
+      publish({ busy: false, phase: locator() !== null ? 'uncertain' : 'blocked', stagedCounts: null, operation: null, notice: diagnosis ? `${diagnosis} ${recovery}` : recovery });
+    }
   };
   const fresh = async (version: number, expected: CrmSetupConnection | null, branchId: string): Promise<boolean> => {
     const status = await deps.transport.crmSetupStatus(abort.signal);

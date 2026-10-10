@@ -6,6 +6,12 @@ import { createHash, randomUUID } from 'node:crypto';
 import { execFileSync, spawn } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createServer, request as nodeRequest } from 'node:http';
+import { createRequire } from 'node:module';
+import type {
+  NextFunction,
+  Request as ExpressRequest,
+  Response as ExpressResponse,
+} from 'express';
 import path from 'node:path';
 import request from 'supertest';
 import { ConfigService } from '@nestjs/config';
@@ -38,7 +44,79 @@ assert.ok(
 );
 assertProofDatabase(process.env);
 const companyId = 424242;
-const origin = 'https://synthetic-a17-setup.invalid';
+const origin = 'https://api.yclients.com';
+// Public synthetic material only; the real factory still constructs the native
+// adapter, and the actual profile transport validates every outbound request.
+const syntheticTokens = [
+  'SYNTHETIC_A17_V1',
+  'SYNTHETIC_A17_V2',
+  'SYNTHETIC_A17_DENIED',
+  'SYNTHETIC_A17_FORBIDDEN',
+  'SYNTHETIC_A17_COMPANY_MISSING',
+] as const;
+const nativeRequire = createRequire(__filename);
+type ProfileRequest = ExpressRequest & {
+  user?: { tenantId: string; userId: string; membershipStatus: string };
+};
+type ReadTransport = {
+  run(
+    request: ExpressRequest,
+    response: ExpressResponse,
+    next: NextFunction,
+  ): unknown;
+  fetch: typeof fetch;
+  counters: { calls: number; refused: number; routes: Record<string, number> };
+};
+const { realReadIngress, companyId: validCompanyId } = nativeRequire(
+  path.resolve('scripts/local-yclients-read-profile.mjs'),
+) as {
+  realReadIngress(
+    this: void,
+    method: string,
+    url: string,
+    headers: ExpressRequest['headers'],
+    body: unknown,
+    origin: string,
+  ): string | null;
+  companyId(this: void, value: unknown): boolean;
+};
+const { localBrowserBoundary } = nativeRequire(
+  path.resolve('scripts/local-onboarding-profile.mjs'),
+) as {
+  localBrowserBoundary(
+    this: void,
+    headers: ExpressRequest['headers'],
+    origin: string,
+    host: string,
+  ): boolean;
+};
+const { createReadTransport } = nativeRequire(
+  path.resolve('scripts/local-yclients-read-transport.mjs'),
+) as {
+  createReadTransport(
+    this: void,
+    nativeFetch: typeof fetch,
+    resolveCompany: (request: ProfileRequest) => Promise<unknown>,
+    clock: () => number,
+    trace: (value: Record<string, unknown>) => void,
+  ): ReadTransport;
+};
+const { createReadTrace, projectReadTrace, traceHttpRequest } = nativeRequire(
+  path.resolve('scripts/local-yclients-read-status.mjs'),
+) as {
+  createReadTrace(
+    this: void,
+    send: (value: unknown) => void,
+  ): (value: Record<string, unknown>) => void;
+  projectReadTrace(this: void, value: unknown): Record<string, unknown> | null;
+  traceHttpRequest(
+    this: void,
+    request: ExpressRequest,
+    response: ExpressResponse,
+    emit: (value: Record<string, unknown>) => void,
+    refusal: string | null,
+  ): void;
+};
 const hash = (value: unknown) =>
   createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const object = (value: unknown): Record<string, unknown> => {
@@ -97,6 +175,13 @@ const sourceFiles = [
   'src/package5-wave3/package5-wave3-production-gateway.service.ts',
   'src/action-engine/package5-wave3-executable.contract.ts',
   'scripts/c9-occupancy-proof.mjs',
+  'scripts/local-yclients-read-profile.mjs',
+  'scripts/local-yclients-read-transport.mjs',
+  'scripts/local-yclients-read-runtime.mjs',
+  'scripts/local-yclients-read-status.mjs',
+  'scripts/local-yclients-read.mjs',
+  'scripts/local-onboarding-profile.mjs',
+  'src/crm/crm-adapter.factory.ts',
   'scripts/crm-a17-operation-proof.test.mjs',
   'test/widgets-live/crm-a17-operation-restart.probe-spec.ts',
   'test/widgets-live/support/http-bootstrap.ts',
@@ -105,11 +190,17 @@ const sourceFiles = [
   '../maya-carrier-react/test/crm-a17-setup-browser-guard.mjs',
   '../maya-carrier-react/test/crm-a17-setup-browser-guard.test.mjs',
   '../maya-carrier-react/src/setup/LocalCrmSetup.tsx',
+  '../maya-carrier-react/src/App.tsx',
+  '../maya-carrier-react/src/signin/SignIn.tsx',
+  '../maya-carrier-react/src/signin/StandardOnboarding.tsx',
   '../maya-carrier-react/src/runtime/crmPending.ts',
   '../maya-carrier-react/src/runtime/compose.ts',
   '../maya-carrier-react/build.mjs',
   '../maya-chat-shell/src/shell/local-crm-setup.ts',
   '../maya-chat-shell/src/net/crm-setup.ts',
+  '../maya-chat-shell/src/net/client.ts',
+  '../maya-chat-shell/src/net/types.ts',
+  '../maya-chat-shell/test/local-crm-setup.test.mjs',
   '../maya-chat-shell/dev/serve.mjs',
   '../maya-chat-shell/test/cdp-verify.mjs',
 ];
@@ -130,39 +221,26 @@ describe('A17 exact configuration and persisted operation recovery through actua
   const observations: Record<string, unknown> = {};
   const initialSource = sourceHashes();
   let releaseHeldRead: (() => void) | undefined;
+  let readTransport: ReadTransport;
+  const readTrace: Record<string, unknown>[] = [];
+  let invalidTrace = 0;
+  const trace = createReadTrace((value) => {
+    const projected = projectReadTrace(value);
+    if (projected === null) invalidTrace++;
+    else readTrace.push(projected);
+  });
+  let browserOrigin: string | undefined;
+  const ingressEvidence: {
+    checked: number;
+    denied: Array<{ method: string; path: string; code: string }>;
+  } = { checked: 0, denied: [] };
   let pause: { reached: () => void; released: Promise<void> } | undefined;
 
   beforeAll(async () => {
     db = await bootFixtureContext();
-    http = await bootHttp();
-    http.app.get(ConfigService).set('EMAIL_LOGIN_ENABLED', 'true');
-    http.app.get(ConfigService).set('EMAIL_AUTH_PROVIDER', 'debug');
     assert.equal(process.env.YCLIENTS_PARTNER_TOKEN, undefined);
-    jest
-      .spyOn(http.app.get(CrmAdapterFactory), 'create')
-      .mockImplementation((provider, config) => {
-        assert.equal(provider, CrmProvider.YCLIENTS);
-        assert.ok(
-          config.apiToken === 'SYNTHETIC_A17_V1' ||
-            config.apiToken === 'SYNTHETIC_A17_V2',
-        );
-        process.env.YCLIENTS_PARTNER_TOKEN = 'SYNTHETIC_A17_PARTNER';
-        try {
-          return new YclientsCRMAdapter({
-            ...config,
-            baseUrl: origin + '/api/v1',
-          });
-        } finally {
-          delete process.env.YCLIENTS_PARTNER_TOKEN;
-        }
-      });
-    jest
-      .spyOn(http.app.get(AiCoreModelService), 'decide')
-      .mockImplementation(() => {
-        forbidden.push('model');
-        throw new Error('Model forbidden in A17 proof');
-      });
-    jest.spyOn(globalThis, 'fetch').mockImplementation((input, init) => {
+    assert.equal(process.env.YCLIENTS_BASE_URL, undefined);
+    const syntheticFetch: typeof fetch = (input, init) => {
       const url = new URL(
         typeof input === 'string'
           ? input
@@ -183,14 +261,39 @@ describe('A17 exact configuration and persisted operation recovery through actua
         forbidden.push('unexpected-provider-query');
         throw new Error('Provider query refused');
       }
+      assert.equal(init.redirect, 'error');
+      const authorization = new Headers(init.headers).get('authorization');
+      const material = syntheticTokens.find(
+        (value) =>
+          authorization === `Bearer SYNTHETIC_A17_PARTNER, User ${value}`,
+      );
+      assert.ok(
+        material,
+        'Only fixed public synthetic adapter material is admitted',
+      );
       providerReads.push(route);
+      if (
+        material === 'SYNTHETIC_A17_DENIED' ||
+        material === 'SYNTHETIC_A17_FORBIDDEN'
+      ) {
+        assert.equal(route, 'companies');
+        return Promise.resolve(
+          new Response('{}', {
+            status: material === 'SYNTHETIC_A17_DENIED' ? 401 : 403,
+          }),
+        );
+      }
       const company = {
         id: companyId,
         title: 'Synthetic A17 company',
         timezone_name: 'Europe/Moscow',
       };
       let data: unknown;
-      if (route === 'companies') data = [company];
+      if (route === 'companies')
+        data =
+          material === 'SYNTHETIC_A17_COMPANY_MISSING'
+            ? [{ ...company, id: companyId + 1 }]
+            : [company];
       else if (route === `company/${companyId}`) data = company;
       else if (route === `book_services/${companyId}`)
         data = {
@@ -209,7 +312,6 @@ describe('A17 exact configuration and persisted operation recovery through actua
           `service_categories/${companyId}`,
           `company/${companyId}/staff`,
           `staff/${companyId}`,
-          `book_staff/${companyId}`,
         ].includes(route)
       )
         data = [];
@@ -217,9 +319,18 @@ describe('A17 exact configuration and persisted operation recovery through actua
         forbidden.push('unexpected-provider-route');
         throw new Error('Provider route refused');
       }
-      const response = new Response(JSON.stringify({ success: true, data }), {
-        status: 200,
-      });
+      assert.equal(init?.redirect, 'error');
+      const team =
+        route === `company/${companyId}/staff` ||
+        route === `staff/${companyId}`;
+      const response = new Response(
+        JSON.stringify({
+          success: true,
+          data,
+          ...(team ? { meta: { total_count: 0, count: 0, page: 1 } } : {}),
+        }),
+        { status: 200 },
+      );
       if (route === `company/${companyId}` && pause) {
         const held = pause;
         pause = undefined;
@@ -227,7 +338,102 @@ describe('A17 exact configuration and persisted operation recovery through actua
         return held.released.then(() => response);
       }
       return Promise.resolve(response);
+    };
+    readTransport = createReadTransport(
+      syntheticFetch,
+      async (incoming) => {
+        if (incoming.originalUrl === '/api/integrations/crm/connect') {
+          return object(object(incoming.body).settingsJson).companyId;
+        }
+        assert.ok(incoming.user?.tenantId);
+        const integration = await db.prisma.crmIntegration.findUnique({
+          where: { tenantId: incoming.user.tenantId },
+          select: { provider: true, baseUrl: true, settingsJson: true },
+        });
+        const settings = object(integration?.settingsJson);
+        assert.ok(
+          integration?.provider === 'yclients' &&
+            !integration.baseUrl &&
+            validCompanyId(settings.companyId),
+        );
+        return settings.companyId;
+      },
+      Date.now,
+      trace,
+    );
+    jest.spyOn(globalThis, 'fetch').mockImplementation(readTransport.fetch);
+    http = await bootHttp(undefined, (app) => {
+      app.use(
+        (
+          incoming: ExpressRequest,
+          response: ExpressResponse,
+          next: NextFunction,
+        ) => {
+          const address = app.getHttpServer().address();
+          assert.ok(
+            address && typeof address === 'object' && address.port > 1024,
+          );
+          const expectedHost = `127.0.0.1:${address.port}`;
+          const expectedOrigin = browserOrigin ?? `http://${expectedHost}`;
+          ingressEvidence.checked++;
+          const reason = !localBrowserBoundary(
+            incoming.headers,
+            expectedOrigin,
+            expectedHost,
+          )
+            ? 'local_onboarding_origin_refused'
+            : realReadIngress(
+                incoming.method,
+                incoming.originalUrl,
+                incoming.headers,
+                incoming.body,
+                expectedOrigin,
+              );
+          traceHttpRequest(incoming, response, trace, reason);
+          if (reason) {
+            ingressEvidence.denied.push({
+              method: incoming.method,
+              path: incoming.path,
+              code: reason,
+            });
+            response.status(403).json({
+              error: { code: reason },
+              message:
+                'Synthetic proof: current local profile refused this route.',
+            });
+            return;
+          }
+          readTransport.run(incoming, response, next);
+        },
+      );
     });
+    expect(readTransport.counters).toEqual({
+      calls: 0,
+      refused: 0,
+      routes: {},
+    });
+    http.app.get(ConfigService).set('EMAIL_LOGIN_ENABLED', 'false');
+    const factory = http.app.get(CrmAdapterFactory);
+    const create = factory.create.bind(factory);
+    jest.spyOn(factory, 'create').mockImplementation((provider, config) => {
+      assert.equal(provider, CrmProvider.YCLIENTS);
+      assert.ok(syntheticTokens.some((value) => config.apiToken === value));
+      assert.ok(!config.baseUrl);
+      process.env.YCLIENTS_PARTNER_TOKEN = 'SYNTHETIC_A17_PARTNER';
+      try {
+        const adapter = create(provider, config);
+        assert.ok(adapter instanceof YclientsCRMAdapter);
+        return adapter;
+      } finally {
+        delete process.env.YCLIENTS_PARTNER_TOKEN;
+      }
+    });
+    jest
+      .spyOn(http.app.get(AiCoreModelService), 'decide')
+      .mockImplementation(() => {
+        forbidden.push('model');
+        throw new Error('Model forbidden in A17 proof');
+      });
   });
   afterAll(async () => {
     releaseHeldRead?.();
@@ -908,6 +1114,25 @@ describe('A17 exact configuration and persisted operation recovery through actua
   };
   const proveCurrentForm = async () => {
     const owner = await createTenant('Synthetic current React A17');
+    const refusals = [
+      {
+        key: 'provider-denied',
+        apiToken: 'SYNTHETIC_A17_DENIED',
+        code: 'crm_credentials_rejected',
+        owner: await createTenant('Synthetic provider denied'),
+      },
+      {
+        key: 'company-unavailable',
+        apiToken: 'SYNTHETIC_A17_COMPANY_MISSING',
+        code: 'crm_company_not_found',
+        owner: await createTenant('Synthetic company unavailable'),
+      },
+    ];
+    const refused: Record<
+      string,
+      { requestId: string; reads: number; graphHash: string }
+    > = {};
+    const refusalEvidence: Array<Record<string, unknown>> = [];
     const names = [
       'initial',
       'loaded',
@@ -918,6 +1143,10 @@ describe('A17 exact configuration and persisted operation recovery through actua
       'activation-lost',
       'reload',
       'recovered',
+      ...refusals.flatMap((value) => [
+        value.key + '-result',
+        value.key + '-observed',
+      ]),
     ];
     const initialReads = providerReads.length;
     let index = 0,
@@ -967,16 +1196,120 @@ describe('A17 exact configuration and persisted operation recovery through actua
                 backendOrigin: await http.listenLoopback(),
                 output: path.dirname(reportPath),
                 email: owner.email,
+                tenantSlug: owner.slug,
+                password: owner.password,
                 branchId: owner.branchId,
                 branchName: 'Synthetic branch',
                 companyId,
+                apiToken: 'SYNTHETIC_A17_V1',
+                refusals: refusals.map((value) => ({
+                  key: value.key,
+                  apiToken: value.apiToken,
+                  tenantSlug: value.owner.slug,
+                  email: value.owner.email,
+                  password: value.owner.password,
+                  branchId: value.owner.branchId,
+                  branchName: 'Synthetic branch',
+                  companyId,
+                })),
               });
+              return;
+            }
+            if (message.type === 'web-ready') {
+              assert.equal(browserOrigin, undefined);
+              assert.equal(typeof message.origin, 'string');
+              const web = new URL(message.origin as string);
+              assert.equal(web.protocol, 'http:');
+              assert.equal(web.hostname, '127.0.0.1');
+              assert.equal(
+                web.username + web.password + web.search + web.hash,
+                '',
+              );
+              assert.equal(web.pathname, '/');
+              assert.ok(Number(web.port) > 1024);
+              browserOrigin = web.origin;
+              child.send({ type: 'continue:web-ready' });
               return;
             }
             expect(message.type).toBe('checkpoint');
             expect(message.name).toBe(names[index]);
             const current = await durable(owner.tenantId);
-            if (
+            const refusal = refusals.find(
+              (value) =>
+                message.name === value.key + '-result' ||
+                message.name === value.key + '-observed',
+            );
+            if (refusal) {
+              assert.ok(committedHash && committedReads !== undefined);
+              expect(hash(current)).toBe(committedHash);
+              const state = await durable(refusal.owner.tenantId);
+              expect(state.integration).toBeNull();
+              expect(state.executions).toEqual([]);
+              expect(state.mutations).toEqual([]);
+              expect(state.team).toEqual([]);
+              assert.equal(typeof message.requestId, 'string');
+              const requestId = message.requestId as string;
+              assert.match(
+                requestId,
+                /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/,
+              );
+              if (message.name === refusal.key + '-result') {
+                expect(message.code).toBe(refusal.code);
+                expect(refused[refusal.key]).toBeUndefined();
+                const startReads =
+                  refusalEvidence.length === 0
+                    ? committedReads
+                    : refused[refusals[0].key].reads;
+                expect(providerReads.slice(startReads)).toEqual(['companies']);
+                refused[refusal.key] = {
+                  requestId,
+                  reads: providerReads.length,
+                  graphHash: hash(state),
+                };
+              } else {
+                expect(message.status).toBe('NOT_OBSERVED');
+                const previous = refused[refusal.key];
+                assert.ok(previous);
+                expect(requestId).toBe(previous.requestId);
+                expect(providerReads).toHaveLength(previous.reads);
+                expect(hash(state)).toBe(previous.graphHash);
+                const result = await getOperation(
+                  await login(refusal.owner),
+                  'install',
+                  requestId,
+                );
+                expect(result.status).toBe(200);
+                expect(result.body).toMatchObject({
+                  operation: 'install',
+                  requestId,
+                  status: 'NOT_OBSERVED',
+                  phase: null,
+                  receipt: null,
+                  current: {
+                    configVersion: null,
+                    matchesCurrentVersion: false,
+                  },
+                });
+                expect(providerReads).toHaveLength(previous.reads);
+                expect(await durable(refusal.owner.tenantId)).toEqual(state);
+                refusalEvidence.push({
+                  case: refusal.key,
+                  httpStatus: 400,
+                  code: refusal.code,
+                  providerReads: 1,
+                  providerRoute: 'companies',
+                  operationHash: hash({ operation: 'install', requestId }),
+                  receiptStatus: 'NOT_OBSERVED',
+                  sameLocatorReload: true,
+                  recoveryProviderReads: 0,
+                  integrations: 0,
+                  executions: 0,
+                  mutations: 0,
+                });
+                observations.currentFormRefusals = refusalEvidence;
+              }
+              await noUnrelatedEffects(refusal.owner.tenantId);
+            } else if (
               [
                 'initial',
                 'loaded',
@@ -1008,6 +1341,13 @@ describe('A17 exact configuration and persisted operation recovery through actua
               expect(current.executions).toHaveLength(1);
               expect(current.mutations).toHaveLength(1);
               expect(current.integration?.status).toBe('pending_activation');
+              // Separate actual HTTP receipt read after save; no provider read
+              // or mutation is permitted by the status path.
+              await readSucceededWithoutEffects(
+                await login(owner),
+                owner,
+                install,
+              );
             } else if (message.name === 'activation-lost') {
               assert.ok(install);
               assert.equal(typeof message.requestId, 'string');
@@ -1043,6 +1383,10 @@ describe('A17 exact configuration and persisted operation recovery through actua
                 ).toBe(true);
                 observations.currentForm = {
                   actualReact: true,
+                  auth: 'ACTUAL_PASSWORD_LOGIN_SYNTHETIC_BCRYPT_USER',
+                  profile: 'read_setup_v1',
+                  profileScope:
+                    'Exact runtime ingress and read-transport functions; test AppModule environment and explicit synthetic grants, not full private launcher acceptance',
                   checkpoints: names,
                   installReceiptHash: hash(install),
                   recoveredReceiptHash: hash(receipt),
@@ -1052,7 +1396,7 @@ describe('A17 exact configuration and persisted operation recovery through actua
                   actualSetupExecutions: current.executions.length,
                   exactGraphHash: committedHash,
                   reloadQualification:
-                    'SAME_URL_RELOAD_AND_DEBUG_EMAIL_RELOGIN; not OAuth navigation or browser across PG restart',
+                    'SAME_URL_RELOAD_AND_ACTUAL_PASSWORD_RELOGIN; not OAuth navigation or browser across PG restart',
                 };
               }
             }
@@ -1086,6 +1430,130 @@ describe('A17 exact configuration and persisted operation recovery through actua
     );
   };
 
+  const proveAdditionalReadRefusals = async () => {
+    const owner = await createTenant(
+      'Synthetic exact profile refusal boundaries',
+    );
+    const token = await login(owner);
+    const before = await durable(owner.tenantId),
+      initialReads = providerReads.length;
+    const stale = await post(
+      token,
+      'install',
+      randomUUID(),
+      connectBody(owner.branchId, 'f'.repeat(64)),
+    );
+    expect(stale.status).toBe(409);
+    expect(stale.body).toMatchObject({
+      error: { code: 'crm_config_version_changed' },
+    });
+    expect(providerReads).toHaveLength(initialReads);
+    expect(await durable(owner.tenantId)).toEqual(before);
+    const key = randomUUID();
+    const forbiddenResponse = await post(token, 'install', key, {
+      ...connectBody(owner.branchId, null),
+      apiToken: 'SYNTHETIC_A17_FORBIDDEN',
+    });
+    expect(forbiddenResponse.status).toBe(400);
+    expect(forbiddenResponse.body).toMatchObject({
+      error: { code: 'crm_credentials_rejected' },
+    });
+    expect(providerReads.slice(initialReads)).toEqual(['companies']);
+    expect(await durable(owner.tenantId)).toEqual(before);
+    const status = await getOperation(token, 'install', key);
+    expect(status.status).toBe(200);
+    expect(status.body).toMatchObject({
+      status: 'NOT_OBSERVED',
+      phase: null,
+      receipt: null,
+    });
+    expect(providerReads).toHaveLength(initialReads + 1);
+    expect(await durable(owner.tenantId)).toEqual(before);
+    observations.additionalReadRefusals = {
+      staleVersion: {
+        status: 409,
+        code: 'crm_config_version_changed',
+        providerReads: 0,
+        canonicalActions: 0,
+      },
+      provider403: {
+        status: 400,
+        code: 'crm_credentials_rejected',
+        providerReads: 1,
+        canonicalActions: 0,
+        recoveryProviderReads: 0,
+        receiptStatus: 'NOT_OBSERVED',
+      },
+    };
+    await noUnrelatedEffects(owner.tenantId);
+    checks.push(
+      'Exact profile rejects stale install source before native reads; native 403 produces safe credential refusal and no admitted operation',
+    );
+  };
+
+  const proveReadProfileFence = async (owner: Login) => {
+    const before = await durable(owner.tenantId);
+    const reads = {
+      ...readTransport.counters,
+      routes: { ...readTransport.counters.routes },
+    };
+    const priorChecks = ingressEvidence.checked;
+    const denied: Array<{
+      method: string;
+      path: string;
+      status: number;
+      code: string;
+    }> = [];
+    for (const [route, body] of [
+      ['/api/auth/email/start', { email: owner.email }],
+      ['/api/auth/email/verify', { email: owner.email, code: '123456' }],
+      ['/api/ai/chat', { message: 'Synthetic request outside setup' }],
+      ['/api/widgets/resolve', { thread_page: { limit: 20 } }],
+      ['/api/integrations/crm/connect', connectBody(owner.branchId, null)],
+    ] as const) {
+      // In particular, connect lacks the required operation UUID. All requests
+      // are refused by the exact profile before auth/controller/provider work.
+      const result = await api().post(route).send(body);
+      expect(result.status).toBe(403);
+      expect(result.body).toMatchObject({
+        error: { code: 'local_yclients_read_route_disabled' },
+      });
+      denied.push({
+        method: 'POST',
+        path: route,
+        status: 403,
+        code: 'local_yclients_read_route_disabled',
+      });
+    }
+    const foreignOrigin = await api()
+      .post('/api/auth/login')
+      .set('Origin', 'https://synthetic-foreign.invalid')
+      .send({
+        tenantSlug: owner.slug,
+        email: owner.email,
+        password: owner.password,
+      });
+    expect(foreignOrigin.status).toBe(403);
+    expect(foreignOrigin.body).toMatchObject({
+      error: { code: 'local_onboarding_origin_refused' },
+    });
+    expect(ingressEvidence.checked - priorChecks).toBe(6);
+    expect(readTransport.counters).toEqual(reads);
+    expect(await durable(owner.tenantId)).toEqual(before);
+    observations.readProfileFence = {
+      profile: 'read_setup_v1',
+      installedBeforeControllers: true,
+      denied,
+      foreignOriginStatus: 403,
+      providerReads: 0,
+      providerAttempts: 0,
+      canonicalActionChanges: 0,
+    };
+    checks.push(
+      'Exact setup-read ingress runs before controllers; OTP, chat, widgets, missing operation key and foreign origin cannot reach provider or AE',
+    );
+  };
+
   it('pins versions, loses committed responses, and restores only existing A17 outcomes after actual restart', async () => {
     let passed = false;
     try {
@@ -1094,6 +1562,7 @@ describe('A17 exact configuration and persisted operation recovery through actua
         const otherOwner = await addUser(owner, UserRole.TENANT_OWNER);
         const client = await addUser(owner, UserRole.CLIENT);
         const foreign = await createTenant('Synthetic foreign A17');
+        await proveReadProfileFence(owner);
         const token = await login(owner);
         const missing = await getOperation(token, 'install', randomUUID());
         expect(missing.status).toBe(200);
@@ -1239,6 +1708,7 @@ describe('A17 exact configuration and persisted operation recovery through actua
         await proveProjectionRollback();
         await preparePreAdmissionRecovery();
         await prepareUnfinished();
+        await proveAdditionalReadRefusals();
         await proveCurrentForm();
         writeFileSync(receiptPath, JSON.stringify(saved) + '\n', {
           flag: 'wx',
@@ -1372,6 +1842,15 @@ describe('A17 exact configuration and persisted operation recovery through actua
         );
         await noUnrelatedEffects(saved.owner.tenantId);
       }
+      expect(invalidTrace).toBe(0);
+      expect(readTrace.length).toBeGreaterThan(0);
+      expect(readTrace.length).toBeLessThanOrEqual(64);
+      readTrace.forEach((value, index) => {
+        expect(value.sequence).toBe(index + 1);
+        expect(projectReadTrace(value)).toEqual(value);
+      });
+      expect(readTransport.counters.refused).toBe(0);
+      expect(readTransport.counters.calls).toBe(providerReads.length);
       expect(sourceHashes()).toEqual(initialSource);
       passed = true;
     } finally {
@@ -1395,12 +1874,21 @@ describe('A17 exact configuration and persisted operation recovery through actua
               workerCrash: false,
             },
             providerReadCount: providerReads.length,
+            readTransport: readTransport?.counters,
+            ingress: ingressEvidence,
+            readTrace,
+            traceQualification:
+              'Actual closed observer, first 64 events only; no request identity or body retention',
             forbidden,
             qualification:
               'LOCAL_SYNTHETIC_NATIVE_ADAPTER_ONLY; real canonical A17 writes in disposable PG; actual response-discard relay; no worker-crash or live-provider acceptance',
             boundaries: {
               model: 'forbidden spy',
-              providerWrites: 'finite GET-only transport',
+              providerWrites:
+                'exact local read_setup_v1 transport around finite synthetic native GETs',
+              nativeFactory:
+                'call-through; fixed synthetic partner scoped to construction',
+              auth: 'actual password HTTP; fixture bcrypt user and explicit test entitlements',
               outbound: 'no delivery rows and no admitted external transport',
               privateReceiptArchived: false,
             },

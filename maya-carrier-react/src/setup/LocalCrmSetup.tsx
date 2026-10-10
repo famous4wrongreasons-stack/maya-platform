@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { localCrmSetup, session } from '../runtime/compose.ts';
 import { usePortView } from '../runtime/useView.ts';
 import type { Tokens } from '../identity/tokens.ts';
@@ -12,6 +12,7 @@ export function LocalCrmSetup({ t, onClose }: { readonly t: Tokens; readonly onC
   const [branchId, setBranchId] = useState('');
   const [stageConfirmed, setStageConfirmed] = useState(false);
   const [activationConfirmed, setActivationConfirmed] = useState(false);
+  const stageHelpId = useId();
 
   useEffect(() => {
     const input = tokenInput.current;
@@ -27,6 +28,13 @@ export function LocalCrmSetup({ t, onClose }: { readonly t: Tokens; readonly onC
   const connectedBranch = view.branches.find((branch) => branch.id === connection?.branchId);
   const canStage = editable && hasToken && companyId.trim().length > 0 && !!selectedBranch && stageConfirmed;
   const canActivate = view.canActivate && !view.busy && activationConfirmed;
+  const stageHelp = view.busy ? 'Дождитесь завершения текущего запроса.'
+    : !view.canStage ? view.phase === 'idle' ? 'Сначала загрузите филиалы.' : view.notice || 'Сохранение сейчас недоступно. Проверьте подключение и результат.'
+    : !hasToken ? 'Введите пользовательский API-токен YCLIENTS.'
+    : !companyId.trim() ? 'Укажите ID компании YCLIENTS.'
+    : !selectedBranch ? 'Выберите филиал MAYA.'
+    : !stageConfirmed ? 'Подтвердите проверку и сохранение подключения.'
+    : null;
   const operation = view.operation;
   const resumingInstall = view.resuming && operation?.operation === 'install';
   const resumingActivation = view.resuming && operation?.operation === 'activate';
@@ -74,11 +82,11 @@ export function LocalCrmSetup({ t, onClose }: { readonly t: Tokens; readonly onC
       <div style={{ maxWidth: 620, margin: '0 auto' }}>
         <h2 style={{ fontSize: 24, lineHeight: 1.3, margin: '0 0 12px' }}>Локальное подключение YCLIENTS</h2>
         <p>Локальная форма в разработке. Сохранение подключения ещё не означает, что интеграция готова к работе.</p>
-        <p>Настройка для бизнеса, в который вы вошли. Сначала проверьте текущее подключение и доступные филиалы. Если запрос уже был отправлен, кнопка также проверит результат именно этой операции.</p>
+        <p>Настройка для бизнеса, в который вы вошли. Загрузка филиалов также проверяет текущее подключение. Если запрос уже был отправлен, кнопка проверит результат именно этой операции.</p>
         <button type="button" disabled={view.busy} onClick={load} style={{ padding: '12px 16px', border: '1px solid', borderRadius: 12, color: t.ink, background: 'transparent', font: 'inherit', cursor: view.busy ? 'default' : 'pointer' }}>
-          {view.phase === 'loading' ? 'Проверяем подключение и результат…' : 'Проверить подключение и результат'}
+          {view.phase === 'loading' ? 'Загружаем филиалы и подключение…' : view.phase === 'idle' ? 'Загрузить филиалы' : 'Проверить подключение и результат'}
         </button>
-        <p role="status" aria-live="polite">{view.notice || 'Данные пока не запрашивались.'}</p>
+        <p role="status" aria-live="polite">{view.notice || (view.phase === 'idle' ? 'Филиалы пока не загружены. Нажмите «Загрузить филиалы», затем выберите филиал MAYA.' : 'Данные пока не запрашивались.')}</p>
         {view.phase === 'uncertain' && !view.resuming ? <p>Результат пока не подтверждён. Проверьте состояние исходной операции; повторная отправка пока недоступна.</p> : null}
         {operationText ? <p>{operationText}</p> : null}
         {operation?.receipt && !operation.current.matchesCurrentVersion ? <p>Подключение изменилось. Это подтверждение относится к ранее показанной версии.</p> : null}
@@ -129,10 +137,11 @@ export function LocalCrmSetup({ t, onClose }: { readonly t: Tokens; readonly onC
             style={{ display: 'block', width: '100%', padding: 12, textAlign: 'left', border: '1px solid', borderRadius: 12, background: 'transparent', color: t.ink, font: 'inherit' }}>
             {stageConfirmed ? '✓ ' : '○ '}{resumingInstall ? resubmitting ? 'Разрешаю повторно отправить указанные компанию, филиал и токен в рамках той же операции подключения.' : 'Разрешаю продолжить исходное сохранение подключения с повторно введёнными компанией, филиалом и токеном.' : 'Разрешаю проверить токен в YCLIENTS и сохранить подключение с зашифрованным токеном на этом сервере.'} Активация и импорт требуют отдельного согласия.
           </button>
-          <button type="button" disabled={!canStage} onClick={stage}
+          <button type="button" disabled={!canStage} aria-describedby={stageHelp ? stageHelpId : undefined} onClick={stage}
             style={{ marginTop: 12, padding: '12px 16px', border: 0, borderRadius: 12, background: t.accent, color: t.accentOn, font: 'inherit', opacity: canStage ? 1 : 0.5 }}>
             {view.phase === 'staging' ? 'Проверяем и сохраняем…' : resumingInstall ? resubmitting ? 'Повторить отправку подключения' : 'Продолжить исходное сохранение' : 'Проверить и сохранить подключение'}
           </button>
+          {stageHelp ? <p id={stageHelpId}>{stageHelp}</p> : null}
           {view.stagedCounts ? <p>При подготовке найдено: услуг — {view.stagedCounts.services ?? 'неизвестно'}, мастеров — {view.stagedCounts.staff ?? 'неизвестно'}. Это ещё не подтверждение импорта.</p> : null}
         </section>
 

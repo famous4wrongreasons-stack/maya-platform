@@ -1,0 +1,193 @@
+{
+  "contract": "maya.owner-yc-read.observed-outcome/1",
+  "status": "OWNER_LOGIN_OBSERVED_CLEANLY_STOPPED_NO_COMMITTED_A17_FOUND",
+  "currentSourceHeadAtProjection": "f259208eea7e05ee82926531e40350fdc6ef55d5",
+  "runtimeSourceCommit": "f259208eea7e05ee82926531e40350fdc6ef55d5",
+  "runtime": {
+    "observedAt": "2026-10-10T19:26:59.997250+00:00",
+    "status": "stopped",
+    "stage": "stopped",
+    "preparationStep": null,
+    "credentialAccepted": true,
+    "firstFailure": null,
+    "cleanupFailures": [],
+    "readyAt": "2026-10-10T19:11:58.487Z",
+    "expiresAt": "2026-10-10T19:26:58.487Z",
+    "providerAdmission": "explicit_setup_reads_only",
+    "samePrivateState": true,
+    "sourceUnchanged": true,
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "providerReadSummary": {
+      "calls": 2,
+      "refused": 0,
+      "routes": {
+        "companies": 2
+      }
+    },
+    "providerReadSummaryStatus": "reported_at_clean_stop"
+  },
+  "uiObservations": [
+    {
+      "observedAt": "2026-10-10T19:13:52.172Z",
+      "surface": "observation_unavailable",
+      "fieldsAndSecretsRead": false,
+      "actionsSubmittedByObserver": false
+    },
+    {
+      "observedAt": "2026-10-10T19:15:09.571Z",
+      "surface": "observation_unavailable",
+      "fieldsAndSecretsRead": false,
+      "actionsSubmittedByObserver": false
+    },
+    {
+      "observedAt": "2026-10-10T19:15:20.169Z",
+      "surface": "password_login",
+      "noticeCode": null,
+      "tokenFieldEditable": false,
+      "branchChoices": 0,
+      "connection": null,
+      "staging": false,
+      "activating": false,
+      "canCheck": false,
+      "canSave": false,
+      "canActivate": false,
+      "fieldsAndSecretsRead": false,
+      "actionsSubmittedByObserver": false
+    },
+    {
+      "observedAt": "2026-10-10T19:21:14.658Z",
+      "surface": "password_login",
+      "noticeCode": null,
+      "hasStatusMessage": false,
+      "loginBusy": false,
+      "tokenFieldEditable": false,
+      "branchChoices": 0,
+      "connection": null,
+      "staging": false,
+      "activating": false,
+      "canCheck": false,
+      "canSave": false,
+      "canActivate": false,
+      "fieldsAndSecretsRead": false,
+      "actionsSubmittedByObserver": false
+    },
+    {
+      "observedAt": "2026-10-10T19:21:56.215Z",
+      "surface": "authenticated_crm_setup",
+      "noticeCode": "other_status",
+      "hasStatusMessage": true,
+      "loginBusy": false,
+      "tokenFieldEditable": false,
+      "branchChoices": 0,
+      "connection": null,
+      "staging": false,
+      "activating": false,
+      "canCheck": true,
+      "canSave": false,
+      "canActivate": false,
+      "fieldsAndSecretsRead": false,
+      "actionsSubmittedByObserver": false
+    },
+    {
+      "observedAt": "2026-10-10T19:25:43.661Z",
+      "surface": "authenticated_crm_setup",
+      "noticeCode": "loaded",
+      "hasStatusMessage": true,
+      "loginBusy": false,
+      "tokenFieldEditable": true,
+      "branchChoices": 1,
+      "connection": null,
+      "staging": false,
+      "activating": false,
+      "canCheck": true,
+      "canSave": false,
+      "canActivate": false,
+      "fieldsAndSecretsRead": false,
+      "actionsSubmittedByObserver": false
+    },
+    {
+      "observedAt": "2026-10-10T19:26:09.467Z",
+      "surface": "outside_scoped_page",
+      "fieldsAndSecretsRead": false,
+      "actionsSubmittedByObserver": false
+    }
+  ],
+  "evidenceLimits": {
+    "login": "Authenticated setup surface observed; observer did not read auth/session bodies.",
+    "credentialAccepted": "Launcher partner input accepted; does not show user API token installation.",
+    "branchChoices": "One selector choice observed; does not prove provider company-to-branch binding was committed.",
+    "providerReads": "Two allowed companies reads, no refused reads; no A17 mutation/activation conclusion follows.",
+    "outsideScopedPage": "The historical observer required exact initial href and also rejects URLs with a valid pending-operation query. Thus outside_scoped_page is not proof of navigation or tab closure. The cause of the specific historical marker was not independently observed."
+  },
+  "ownerReportedAction": {
+    "checkAndSaveClicked": true,
+    "evidenceOrigin": "Parent relayed owner statement; no form fields or secret values read."
+  },
+  "a17": {
+    "metadataObservedAt": "2026-10-10T19:30:17.236586+00:00",
+    "metadataStatus": "READ_COMPLETE",
+    "sameOwnedDatabaseAndSystem": true,
+    "committedIntegrationCount": 0,
+    "canonicalA17ExecutionCount": 0,
+    "canonicalSaveReceiptFound": false,
+    "installation": "NO_COMMITTED_SAVED_INTEGRATION_OBSERVED",
+    "activation": "NO_CANONICAL_ACTIVATION_OBSERVED",
+    "importConfirmation": "NO_CANONICAL_IMPORT_CONFIRMATION_OBSERVED",
+    "capabilitiesChecked": [
+      "package5.wave3.activate-crm-integration.execute.v1",
+      "package5.wave3.confirm-crm-import.execute.v1",
+      "package5.wave3.disconnect-crm-integration.execute.v1",
+      "package5.wave3.install-crm-credentials.execute.v1"
+    ],
+    "currentConfigurationVersion": "NOT_COMPUTED",
+    "requestOutcomeAndFailureCause": "UNKNOWN",
+    "noAutomaticRetry": true,
+    "qualification": "The owner reported check and save. Subsequent read-only metadata proves no current saved CRM integration and no execution for the four exact A17 capabilities. It does not reveal whether the request reached preview, failed validation, failed transport, or ended before canonical admission. Later read-only browser metadata confirms begin(install) and a retained non-authorizing recovery locator; it does not prove an HTTP dispatch time/status or grant retry authority.",
+    "browserInstallBegun": true,
+    "pendingRecoveryLocatorPreserved": true,
+    "historicalDispatchAt": "NOT_OBSERVED"
+  },
+  "archiveActions": {
+    "ownerDatabaseRead": false,
+    "ownerKeyRead": false,
+    "servicesStarted": false,
+    "networkCalls": false,
+    "docsEdited": false
+  },
+  "redaction": [
+    "No slug, PII, canonical IDs or private state paths.",
+    "No auth/session bodies, plaintext/ciphertext credentials, key/token/private-state hashes.",
+    "No saved-state or authentication aggregate hashes; no receipt revision computed from encrypted credential material."
+  ],
+  "metadataInspection": {
+    "executor": "Parent; archiver did not start PG or query the database.",
+    "credentialsRead": false,
+    "externalCalls": 0,
+    "applicationStarted": false,
+    "databaseBusinessWrites": 0,
+    "newKeys": false,
+    "queriesReadOnly": true,
+    "tcpListening": false,
+    "clusterStopped": true,
+    "sharedLockAbsent": true,
+    "cleanupFailures": [],
+    "priorGuardRefusalPreserved": "metadata-attempt01.redacted.json",
+    "completedRead": "metadata-attempt02.redacted.json"
+  },
+  "subsequentBrowserObservation": {
+    "contract": "maya.owner-a17-browser-safe-metadata/1",
+    "observedAt": "2026-10-10T19:34:44.161230+00:00",
+    "surface": "scoped_local_setup",
+    "pendingLocatorPresent": true,
+    "operation": "install",
+    "noticeCode": "uncertain",
+    "hasStatusMessage": true,
+    "tokenFieldPresent": true,
+    "fieldsOrSecretsRead": false,
+    "networkRequestsMade": false,
+    "observerCorrection": "The historical observer required exact initial href and also rejects URLs with a valid pending-operation query. Thus outside_scoped_page is not proof of navigation or tab closure. The cause of the specific historical marker was not independently observed.",
+    "historicalExactDispatchAt": "NOT_OBSERVED"
+  },
+  "runtimeSourceCommitEvidence": "Direct safe projection of completed resume source.head; no other private source fields copied."
+}

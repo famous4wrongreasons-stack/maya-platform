@@ -8,7 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { assertPrivateCwd, localBrowserBoundary } from './local-onboarding-profile.mjs';
 import { assertRealReadEnvironment, realReadIngress, companyId } from './local-yclients-read-profile.mjs';
 import { createReadTransport } from './local-yclients-read-transport.mjs';
-import { runtimeStatus } from './local-yclients-read-status.mjs';
+import { runtimeStatus, createReadTrace, traceHttpRequest } from './local-yclients-read-status.mjs';
 import { PUBLIC_DIAGNOSTIC_PARTNER } from './local-yclients-read-diagnostic.mjs';
 
 const require = createRequire(import.meta.url);
@@ -16,6 +16,7 @@ const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 export async function start() {
   let app, prisma, guard, closing, stage = 'environment_validating', code = 'environment_refused';
   const send = message => { if (process.connected) process.send(message); };
+  const trace = createReadTrace(send);
   const enter = (nextStage, nextCode) => { stage = nextStage; code = nextCode; send(runtimeStatus(stage)); };
   const stop = () => closing ??= (async () => {
     send(runtimeStatus('runtime_stopping'));
@@ -46,7 +47,7 @@ export async function start() {
       const integration = await prisma.crmIntegration.findUnique({ where: { tenantId: request.user.tenantId }, select: { provider: true, baseUrl: true, settingsJson: true } });
       assert.ok(integration?.provider === 'yclients' && !integration.baseUrl && companyId(integration.settingsJson?.companyId), 'Current YCLIENTS company required');
       return integration.settingsJson.companyId;
-    });
+    }, Date.now, trace);
     globalThis.fetch = guard.fetch;
     enter('app_importing', 'app_import_failed');
     require('reflect-metadata');
@@ -67,6 +68,7 @@ export async function start() {
       const boundary = localBrowserBoundary(request.headers, origin, `127.0.0.1:${process.env.PORT}`);
       const diagnosticRoute = request.method === 'GET' && ['/api/health', '/api/health/ready'].includes(request.originalUrl);
       const reason = !boundary ? 'local_onboarding_origin_refused' : diagnostic ? (diagnosticRoute ? null : 'local_yclients_diagnostic_route_disabled') : realReadIngress(request.method, request.originalUrl, request.headers, request.body, origin);
+      traceHttpRequest(request, response, trace, reason);
       if (reason) { response.status(403).json({ error: { code: reason }, message: 'Этот локальный профиль допускает только явно разрешённые действия.' }); return; }
       guard.run(request, response, next);
     });

@@ -260,7 +260,7 @@ async function main() {
     const before = page.apiRequests('/integrations/crm').length;
     assert.equal(await page.eval(`(${named('button', 'Активировать и импортировать')}).disabled`), true);
     assert.equal(await page.eval(`(${named('button', 'Проверить и сохранить подключение')}).disabled`), true);
-    await click(page, 'Проверить подключение и результат');
+    await click(page, 'Загрузить филиалы');
     const result = await until(() => page.apiRequests('/integrations/crm').slice(before).find(r => r.finishedAt), 'crm_status_missing');
     await quiet(page);
     assert.equal(page.apiRequests('/integrations/crm').length, before + 1);
@@ -286,7 +286,7 @@ async function main() {
   }
   async function passwordLogin(page, account, state, fromRecovery = false) {
     if (fromRecovery) await click(page, 'Перейти ко входу по паролю');
-    else await click(page, 'Войти по паролю');
+    else await visible(page, 'Вход по паролю');
     await fill(page, 'Короткое имя бизнеса для входа', account.slug); await fill(page, 'Email', account.email); await fill(page, 'Пароль', account.password);
     const before = state.verifiedLogins;
     await click(page, 'Войти'); await visible(page, 'Локальное подключение YCLIENTS');
@@ -343,7 +343,7 @@ async function main() {
             await passwordLogin(page, account, state, true); await crmRead(page, state, account);
             await checkpoint('lost-reply-recovered', account, state, { crmReadOutcome: state.crmReadOutcome });
           }
-          await page.reload(); await click(page, 'Войти по паролю');
+          await page.reload(); await visible(page, 'Вход по паролю');
           // Password form after reload must not contain an injected or persisted password.
           assert.equal(await page.eval(`(${named('input', 'Пароль')}).value`), '');
           await fill(page, 'Короткое имя бизнеса для входа', account.slug); await fill(page, 'Email', account.email); await fill(page, 'Пароль', account.password);

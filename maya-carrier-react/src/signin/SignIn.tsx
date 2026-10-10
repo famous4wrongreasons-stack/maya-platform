@@ -50,14 +50,16 @@ type EmailPhase = 'email' | 'code' | 'business';
 export function SignIn({
   t,
   reason = null,
+  localSetup = false,
 }: {
   readonly t: Tokens;
   readonly reason?: SignedOutReason | null;
+  readonly localSetup?: boolean;
 }) {
   const dark = t.dark;
   const [term, setTerm] = useState('');
   const [emailMode, setEmailMode] = useState(false);
-  const [extraMode, setExtraMode] = useState<'signup' | 'password' | null>(null);
+  const [extraMode, setExtraMode] = useState<'signup' | 'password' | null>(localSetup ? 'password' : null);
   const [recovery, setRecovery] = useState({ slug: '', email: '' });
   const [matches, setMatches] = useState<Matches>([]);
   const [failure, setFailure] = useState<Failure>(null);
@@ -156,7 +158,7 @@ export function SignIn({
           : signedOutSentence(reason);
 
   if (extraMode === 'signup') return <StandardOnboarding port={onboarding} t={t} back={(slug, address) => { setRecovery({ slug, email: address }); setExtraMode('password'); }} />;
-  if (extraMode === 'password') return <PasswordSignIn t={t} initialSlug={recovery.slug} initialEmail={recovery.email} signIn={session.signInPassword} back={() => setExtraMode(null)} />;
+  if (extraMode === 'password') return <PasswordSignIn t={t} initialSlug={recovery.slug} initialEmail={recovery.email} signIn={session.signInPassword} backLabel={localSetup ? 'Создать бизнес' : 'Другие способы входа'} back={() => setExtraMode(localSetup ? 'signup' : null)} />;
 
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: t.bg }}>

@@ -15,7 +15,7 @@ import type { PersonalSelection, PersonalFailure } from './types.ts';
 import { goodsPhotoQuery, projectGoodsPhotoContext, projectGoodsPhotoPreview, projectGoodsPhotoSearch, projectGoodsPhotoItem, projectGoodsPhotoProposal, projectGoodsPhotoReview } from './goods-photo.ts';
 import type { GoodsPhotoFile, GoodsPhotoFailure, GoodsPhotoProposal, GoodsPhotoRequestContext, GoodsPhotoResponse } from './types.ts';
 import { crmSetupBody, crmSetupKey, crmConfigVersion, projectCrmSetup, projectCrmOperation } from './crm-setup.ts';
-import type { CrmSetupBody, CrmSetupInstall, CrmSetupSnapshot, CrmSetupFailure, CrmOperationLocator, CrmOperationStatus, CrmSetupCompletion } from './types.ts';
+import type { CrmSetupBody, CrmSetupInstall, CrmSetupSnapshot, CrmSetupFailure, CrmSetupDiagnostic, CrmOperationLocator, CrmOperationStatus, CrmSetupCompletion } from './types.ts';
 import { projectTrialActivation, projectTrialSignup, trialSignupBody } from './onboarding.ts';
 import type { OnboardingInput, OnboardingFailure, TrialActivationProjection, TrialSignupProjection } from './types.ts';
 import { API_BASE } from './endpoint.ts';
@@ -643,13 +643,21 @@ const crmSetupOutcome = (ex: AuthorizedExchange, writing: boolean): Outcome<CrmS
   return fail({ reason: writing ? 'uncertain' : 'unavailable' });
 };
 
+const crmSetupDiagnostic = (ex: AuthorizedExchange): { readonly diagnostic?: CrmSetupDiagnostic } => {
+  if (ex.kind !== 'response') return {};
+  const code = errorCode(ex.body);
+  if (ex.status === 403 && code === 'local_yclients_read_route_disabled') return { diagnostic: code };
+  if (ex.status === 400 && (code === 'crm_credentials_rejected' || code === 'crm_company_not_found' || code === 'crm_provider_unreachable' || code === 'crm_platform_configuration_error' || code === 'crm_connection_failed')) return { diagnostic: code };
+  return {};
+};
 const crmSetupCompletion = (ex: AuthorizedExchange, locator: CrmOperationLocator): Outcome<CrmSetupCompletion, CrmSetupFailure> => {
-  if (ex.kind === 'signed_out' || (ex.kind === 'response' && [401, 403].includes(ex.status))) return fail({ reason: 'forbidden' });
+  const diagnostic = crmSetupDiagnostic(ex);
+  if (ex.kind === 'signed_out' || (ex.kind === 'response' && [401, 403].includes(ex.status))) return fail({ reason: 'forbidden', ...diagnostic });
   if (ex.kind === 'response' && isSuccess(ex.status)) {
     const snapshot = projectCrmSetup(ex.body), operation = projectCrmOperation(ex.body, locator);
     if (snapshot && operation?.status === 'SUCCEEDED') return { ok: true, value: { snapshot, operation } };
   }
-  return fail({ reason: 'uncertain' });
+  return fail({ reason: 'uncertain', ...diagnostic });
 };
 
 /** The two authenticated calls of P1, shaped as `shell/ports.ts` `Transport`. */

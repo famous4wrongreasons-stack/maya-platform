@@ -32,7 +32,7 @@ export function validateTeamResponse(payload, headers, selectedCompany) {
   if (ids.some(id => !companyId(id)) || new Set(ids.map(String)).size !== ids.length) fail('incomplete_team');
   if (!companyId(selectedCompany) || payload.data.some(item => Object.hasOwn(item, 'company_id') && String(item.company_id) !== String(selectedCompany))) fail('foreign_company_team');
 }
-export function createReadTransport(nativeFetch, resolveCompany, clock = Date.now) {
+export function createReadTransport(nativeFetch, resolveCompany, clock = Date.now, trace = () => {}) {
   const context = new AsyncLocalStorage();
   const counters = { calls: 0, refused: 0, routes: {} };
   function run(request, response, next) {
@@ -44,6 +44,9 @@ export function createReadTransport(nativeFetch, resolveCompany, clock = Date.no
   }
   async function guardedFetch(raw, init) {
     const scope = context.getStore();
+    let route = 'unlisted', status = null;
+    const method = init?.method === undefined ? 'GET' : ['GET', 'POST'].includes(init.method) ? init.method : 'OTHER';
+    const emit = (stage, code = null) => { try { trace({ surface: 'provider', route, method, stage, status, code }); } catch { /* Diagnostics never change transport behavior. */ } };
     try {
       if (!scope?.active || scope.poisoned || clock() >= scope.deadline || !['/api/integrations/crm/connect', '/api/integrations/crm/activate'].includes(scope.request.originalUrl) || scope.request.method !== 'POST') fail('explicit_request_required');
       // request.user is populated by the real Nest auth guards before any domain call.
@@ -52,15 +55,18 @@ export function createReadTransport(nativeFetch, resolveCompany, clock = Date.no
       if (!scope.active || clock() >= scope.deadline) fail('request_finished');
       if (!companyId(selected) || (scope.selected !== null && String(selected) !== scope.selected)) fail('company_changed');
       scope.selected = String(selected);
-      const route = admittedProviderRead(raw, init, selected);
-      if (!route || scope.calls >= READ_LIMITS.requestCalls || counters.calls >= READ_LIMITS.sessionCalls) fail('scope_or_budget');
+      route = admittedProviderRead(raw, init, selected) ?? 'unlisted';
+      if (route === 'unlisted' || scope.calls >= READ_LIMITS.requestCalls || counters.calls >= READ_LIMITS.sessionCalls) fail('scope_or_budget');
       scope.calls++; counters.calls++; counters.routes[route] = (counters.routes[route] ?? 0) + 1;
       const remaining = Math.min(READ_LIMITS.fetchMs, scope.deadline - clock());
       const signals = [scope.controller.signal, AbortSignal.timeout(Math.max(1, remaining))];
       if (init?.signal) signals.push(init.signal);
+      emit('entered');
       const response = await nativeFetch(raw, { ...init, redirect: 'error', signal: AbortSignal.any(signals) });
+      status = response.status;
       if (response.status < 200 || response.status >= 300) {
         await response.body?.cancel();
+        emit('refused', 'provider_http_error');
         // No provider text can enter normal error messages, logs or AE evidence.
         return new Response('{}', { status: response.status >= 400 && response.status <= 599 ? response.status : 502 });
       }
@@ -77,10 +83,13 @@ export function createReadTransport(nativeFetch, resolveCompany, clock = Date.no
       } catch (error) { await reader.cancel().catch(() => {}); throw error; }
       const rawBody = Buffer.concat(chunks).toString('utf8');
       let payload; try { payload = JSON.parse(rawBody); } catch { fail('response_json'); }
-      if (payload?.success === false) return new Response('{"success":false}', { status: 200 });
+      if (payload?.success === false) { emit('refused', 'provider_rejected'); return new Response('{"success":false}', { status: 200 }); }
       if (route === 'team') validateTeamResponse(payload, response.headers, selected);
+      // Parsed bounded wire only; selected-company and A17 validation happen later.
+      emit('completed', 'provider_response_read');
       return new Response(rawBody, { status: response.status, headers: { 'content-type': 'application/json' } });
     } catch (error) {
+      emit('refused', error?.code === 'LOCAL_YCLIENTS_READ_REFUSED' ? 'provider_scope_refused' : 'provider_transport_unavailable');
       counters.refused++;
       // Incomplete management staff must never fall through to a partial book_staff list.
       if (scope && error?.code === 'LOCAL_YCLIENTS_READ_REFUSED') scope.poisoned = true;

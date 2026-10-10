@@ -1,0 +1,29 @@
+{
+  "attempt": "02",
+  "sourceReportBasename": "result.json",
+  "contract": "maya.owner-a17-readonly-metadata/1",
+  "status": "READ_COMPLETE",
+  "observedAt": "2026-10-10T19:30:17.236586+00:00",
+  "externalCalls": 0,
+  "applicationStarted": false,
+  "credentialsRead": false,
+  "databaseBusinessWrites": 0,
+  "newKeys": false,
+  "queriesReadOnly": true,
+  "tcpListening": false,
+  "cleanupFailures": [],
+  "sameOwnedDatabaseAndSystem": true,
+  "projection": {
+    "integrations": [],
+    "executions": []
+  },
+  "clusterStopped": true,
+  "sharedLockAbsent": true,
+  "capabilitiesChecked": [
+    "package5.wave3.activate-crm-integration.execute.v1",
+    "package5.wave3.confirm-crm-import.execute.v1",
+    "package5.wave3.disconnect-crm-integration.execute.v1",
+    "package5.wave3.install-crm-credentials.execute.v1"
+  ],
+  "scopeQualification": "Parent confirmed exact existing owner tenant selection. No tenant/owner locator is included in this report."
+}

@@ -158,6 +158,49 @@ test('lost, malformed, conflict and server write results never automatically res
   }
 });
 
+test('known setup diagnostics survive as closed codes without changing write uncertainty or retrying', async () => {
+  const codes = ['crm_credentials_rejected', 'crm_company_not_found', 'crm_provider_unreachable', 'crm_platform_configuration_error', 'crm_connection_failed'];
+  for (const kind of ['install', 'activate']) for (const code of [...codes, 'local_yclients_read_route_disabled']) {
+    const status = code === 'local_yclients_read_route_disabled' ? 403 : 400;
+    await wire(() => response({ error: { code, detail: 'PRIVATE' }, message: 'PRIVATE', apiToken: 'PRIVATE' }, status), async (net, calls) => {
+      const result = kind === 'install' ? await net.crmSetupStage(install, key, signal()) : await net.crmSetupActivate(version, key, signal());
+      assert.deepEqual(result, { ok: false, failure: { reason: status === 403 ? 'forbidden' : 'uncertain', diagnostic: code } });
+      assert.equal(JSON.stringify(result).includes('PRIVATE'), false);
+      assert.equal(calls.length, 1);
+    });
+  }
+  for (const [code, status] of [['PRIVATE', 400], ['crm_credentials_rejected', 500], ['local_yclients_read_route_disabled', 400]]) {
+    await wire(() => response({ error: { code }, message: 'PRIVATE' }, status), async net => {
+      assert.deepEqual(await net.crmSetupStage(install, key, signal()), fail('uncertain'));
+    });
+  }
+});
+
+test('diagnosed failure retains the exact pending operation and blocks submit until an explicit recovery read', async () => {
+  const cases = [
+    ['crm_credentials_rejected', 'YCLIENTS отклонил проверку доступа'],
+    ['crm_company_not_found', 'компания YCLIENTS не найдена'],
+    ['crm_provider_unreachable', 'сервис временно недоступен'],
+    ['crm_platform_configuration_error', 'На сервере MAYA не настроен доступ'],
+    ['crm_connection_failed', 'Сервер не смог проверить подключение'],
+    ['local_yclients_read_route_disabled', 'Локальный сеанс отклонил запрос'],
+  ];
+  for (const [diagnostic, expected] of cases) {
+    const reason = diagnostic === 'local_yclients_read_route_disabled' ? 'forbidden' : 'uncertain';
+    const f = fixture({ crmSetupStage: async () => ({ ok: false, failure: { reason, diagnostic } }) });
+    await f.port.load(); await f.port.stage(input, true);
+    assert.ok(f.port.view().notice.includes(expected));
+    assert.ok(f.port.view().notice.includes('Результат действия ещё не подтверждён'));
+    assert.equal(f.port.view().canStage, false); assert.equal(f.port.view().canActivate, false);
+    assert.deepEqual(f.pending.read(), locator());
+    await f.port.stage(input, true); assert.equal(f.writes.length, 1);
+    await f.port.load(); assert.equal(f.port.view().operation.status, 'NOT_OBSERVED');
+    assert.deepEqual(f.receipts, [locator()]); assert.equal(f.writes.length, 1);
+    assert.equal(f.port.view().resuming, true); assert.deepEqual(f.pending.read(), locator());
+    f.port.dispose();
+  }
+});
+
 test('disabled composition, viewing and subscribing trigger no transport or pending write', async () => {
   const f = fixture({ enabled: false }); const stop = f.port.subscribe(() => {});
   f.port.view(); await f.port.load(); await f.port.stage(input, true); await f.port.activate(true);

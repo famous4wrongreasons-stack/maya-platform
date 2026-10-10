@@ -445,7 +445,12 @@ export interface CrmSetupBody {
     readonly contract: 'maya.crm-branch-binding/1'; readonly companyId: number; readonly branchId: string;
   } };
 }
-export interface CrmSetupFailure { readonly reason: 'forbidden' | 'invalid' | 'unavailable' | 'uncertain' }
+export type CrmSetupDiagnostic = 'crm_credentials_rejected' | 'crm_company_not_found' | 'crm_provider_unreachable' | 'crm_platform_configuration_error' | 'crm_connection_failed' | 'local_yclients_read_route_disabled';
+export interface CrmSetupFailure {
+  readonly reason: 'forbidden' | 'invalid' | 'unavailable' | 'uncertain';
+  /** Closed server codes only. A diagnosis never proves whether a write committed. */
+  readonly diagnostic?: CrmSetupDiagnostic;
+}
 export interface CrmSetupTransport {
   crmSetupStatus(signal: AbortSignal): Promise<Outcome<CrmSetupSnapshot, CrmSetupFailure>>;
   crmSetupStage(input: CrmSetupInstall, key: string, signal: AbortSignal): Promise<Outcome<CrmSetupCompletion, CrmSetupFailure>>;

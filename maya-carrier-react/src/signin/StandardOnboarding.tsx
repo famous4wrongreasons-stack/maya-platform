@@ -127,9 +127,10 @@ export function StandardOnboarding({ port, t, back }: { readonly port: Onboardin
   </div></main>;
 }
 
-export function PasswordSignIn({ t, initialSlug = '', initialEmail = '', signIn, back }: {
+export function PasswordSignIn({ t, initialSlug = '', initialEmail = '', signIn, back, backLabel = 'Другие способы входа' }: {
   readonly t: Tokens; readonly initialSlug?: string; readonly initialEmail?: string;
   readonly signIn: (slug: string, email: string, password: string) => Promise<SignInOutcome>; readonly back: () => void;
+  readonly backLabel?: string;
 }) {
   const [slug, setSlug] = useState(initialSlug), [email, setEmail] = useState(initialEmail);
   const [busy, setBusy] = useState(false), [failure, setFailure] = useState<SignInFailure | null>(null);
@@ -148,6 +149,6 @@ export function PasswordSignIn({ t, initialSlug = '', initialEmail = '', signIn,
     <label>Пароль<input type="password" aria-label="Пароль" ref={password} disabled={busy} autoComplete="current-password" style={{ width: '100%', boxSizing: 'border-box', padding: '13px 15px', borderRadius: 24, border: '1px solid ' + (t.dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.16)'), background: 'transparent', color: t.ink, fontSize: 16 }} /></label>
     <button type="button" disabled={busy} style={{  minHeight: 48, padding: '12px 18px', borderRadius: 24, border: '1px solid ' + (t.dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.16)'), background: MAYA_ACCENT, color: MAYA_ACCENT_ON, fontSize: 16 }} onClick={submit}>{busy ? 'Входим…' : 'Войти'}</button>
     <p role="status">{failure ? failureSentence(failure) : null}</p>
-    <button type="button" disabled={busy} style={{ minHeight: 48, padding: '12px 18px', borderRadius: 24, border: '1px solid ' + (t.dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.16)'), background: 'transparent', color: t.ink, fontSize: 16 }} onClick={() => back()}>Другие способы входа</button>
+    <button type="button" disabled={busy} style={{ minHeight: 48, padding: '12px 18px', borderRadius: 24, border: '1px solid ' + (t.dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.16)'), background: 'transparent', color: t.ink, fontSize: 16 }} onClick={() => back()}>{backLabel}</button>
   </div></main>;
 }

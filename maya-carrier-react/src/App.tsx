@@ -77,7 +77,7 @@ export function App() {
   useLandedFragment();
 
   const t = tokens(dark);
-  if (!sessionView.signedIn) return <SignIn t={t} reason={sessionView.reason} />;
+  if (!sessionView.signedIn) return <SignIn t={t} reason={sessionView.reason} localSetup={localCrmSetupEnabled} />;
   if (onboardingView.phase === 'completed') return <OnboardingComplete view={onboardingView} t={t} finish={() => onboarding.finish()} />;
   if (localCrmSetupEnabled && !setupClosed) return <LocalCrmSetup t={t} onClose={() => setSetupClosed(true)} />;
   return <ChatScreen t={t} view={chat} />;

@@ -208,3 +208,23 @@ test('hidden prompt has a finite deadline and preserves an already-raw terminal'
   assert.equal(fake.input.listenerCount('data'), 0);
   await assert.rejects(promptPartnerToken({ ...tty(), timeoutMs: 600001 }));
 });
+
+
+test('IPC trace is persisted in order within finite bound and malformed or unknown trace is refused', async () => {
+  const diagnostic = createDiagnostic(false), observer = runtimeObserver(diagnostic, { origin: 'http://127.0.0.1:55432', providerAdmission: 'explicit_setup_reads_only' }, () => {});
+  const event = { type: 'read-trace', contract: 'maya.local-yclients-read-trace/1', sequence: 1, elapsedMs: 10, surface: 'provider', route: 'companies', method: 'GET', stage: 'completed', status: 200, code: 'provider_response_read' };
+  const receiptStart = Date.now();
+  for (let sequence = 1; sequence <= 64; sequence++) observer.accept({ ...event, sequence });
+  const receiptEnd = Date.now();
+  assert.equal(diagnostic.readTraceClock, 'launcher_received_utc_not_provider_time');
+  assert.ok(diagnostic.readTrace.every(row => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(row.observedAt) && Date.parse(row.observedAt) >= receiptStart && Date.parse(row.observedAt) <= receiptEnd));
+  assert.equal(Object.hasOwn(event, 'observedAt'), false);
+  assert.equal(diagnostic.readTrace.length, 64); assert.equal(diagnostic.readTraceLimitReached, true);
+  observer.accept({ ...event, sequence: 65 });
+  await assert.rejects(observer.failure, { diagnosticCode: 'runtime_status_invalid' });
+  for (const changed of [{ sequence: 2 }, { observedAt: '2026-01-01T00:00:00.000Z' }, { body: 'PRIVATE_BODY' }, { code: 'PRIVATE_CODE' }, { type: 'unlisted' }]) {
+    const d = createDiagnostic(false), o = runtimeObserver(d, { origin: 'http://127.0.0.1:55432', providerAdmission: 'explicit_setup_reads_only' }, () => {});
+    o.accept({ ...event, ...changed }); await assert.rejects(o.failure, { diagnosticCode: 'runtime_status_invalid' });
+    assert.equal(d.readTrace.length, 0); assert.equal(JSON.stringify(d).includes('PRIVATE'), false);
+  }
+});

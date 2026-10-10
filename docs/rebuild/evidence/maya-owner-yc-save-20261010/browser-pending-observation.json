@@ -1,0 +1,14 @@
+{
+  "contract": "maya.owner-a17-browser-safe-metadata/1",
+  "observedAt": "2026-10-10T19:34:44.161230+00:00",
+  "surface": "scoped_local_setup",
+  "pendingLocatorPresent": true,
+  "operation": "install",
+  "noticeCode": "uncertain",
+  "hasStatusMessage": true,
+  "tokenFieldPresent": true,
+  "fieldsOrSecretsRead": false,
+  "networkRequestsMade": false,
+  "observerCorrection": "The historical observer required exact initial href and also rejects URLs with a valid pending-operation query. Thus outside_scoped_page is not proof of navigation or tab closure. The cause of the specific historical marker was not independently observed.",
+  "historicalExactDispatchAt": "NOT_OBSERVED"
+}

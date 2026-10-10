@@ -8,7 +8,7 @@ import test from 'node:test';
 import { PRIVATE_KEYS, assertProfileEnvironment } from './local-onboarding-profile.mjs';
 import { realReadEnvironment, assertRealReadEnvironment, realReadIngress } from './local-yclients-read-profile.mjs';
 import { createReadTransport, admittedProviderRead, validateTeamResponse, READ_LIMITS } from './local-yclients-read-transport.mjs';
-import { runtimeStatus, projectRuntimeStatus, safeRuntimeCause } from './local-yclients-read-status.mjs';
+import { runtimeStatus, projectRuntimeStatus, safeRuntimeCause, projectReadTrace, createReadTrace, traceHttpRequest, READ_TRACE_LIMIT } from './local-yclients-read-status.mjs';
 import { PUBLIC_DIAGNOSTIC_PARTNER, diagnosticSandboxPolicy, diagnosticRuntimeCommand } from './local-yclients-read-diagnostic.mjs';
 
 const requestId = '11111111-1111-4111-8111-111111111111';
@@ -138,4 +138,57 @@ test('actual native adapter setup methods execute through the exact read guard w
     assert.equal(seen.length, 5);
     assert.equal(transport.counters.calls, 5);
   } finally { globalThis.fetch = oldFetch; if (oldPartner === undefined) delete process.env.YCLIENTS_PARTNER_TOKEN; else process.env.YCLIENTS_PARTNER_TOKEN = oldPartner; }
+});
+
+
+test('finite trace excludes request query, headers, body and raw errors, and records one HTTP finish', () => {
+  const events = []; let now = 100;
+  const emit = createReadTrace(event => events.push(event), () => now);
+  const response = new EventEmitter(); response.statusCode = 400;
+  traceHttpRequest({ method: 'GET', originalUrl: '/api/integrations/crm/operation?operation=install&requestId=PRIVATE_QUERY', headers: { authorization: 'PRIVATE_HEADER' }, body: { token: 'PRIVATE_BODY' } }, response, emit);
+  now = 120; response.emit('finish'); response.emit('close');
+  assert.equal(events.length, 2); assert.equal(events[1].route, 'operation'); assert.equal(events[1].status, 400); assert.equal(events[1].stage, 'refused'); assert.equal(events[1].elapsedMs, 20);
+  assert.equal(JSON.stringify(events).includes('PRIVATE'), false);
+  for (const change of [{ url: 'PRIVATE' }, { code: 'PRIVATE' }, { route: 'PRIVATE' }, { status: '400' }, { sequence: 65 }, { elapsedMs: -1 }]) assert.equal(projectReadTrace({ ...events[0], ...change }), null);
+  const closed = new EventEmitter(); traceHttpRequest(request(), closed, emit); closed.emit('close'); closed.emit('finish');
+  assert.equal(events.at(-1).code, 'response_closed'); assert.equal(events.at(-1).status, null);
+  for (let i = 0; i < 100; i++) emit({ surface: 'provider', route: 'companies', method: 'GET', stage: 'entered', status: null, code: null });
+  assert.equal(events.length, READ_TRACE_LIMIT); assert.equal(events.at(-1).sequence, READ_TRACE_LIMIT);
+  assert.doesNotThrow(() => createReadTrace(() => { throw new Error('IPC_CLOSED'); })({ surface: 'provider', route: 'companies', method: 'GET', stage: 'entered', status: null, code: null }));
+});
+test('provider trace distinguishes denial, success false, accepted wire and transport failure without raw content', async () => {
+  for (const [fetch, expectedStatus, expectedCode, rejects] of [
+    [async () => new Response('PRIVATE_PROVIDER_BODY', { status: 401 }), 401, 'provider_http_error', false],
+    [async () => new Response('PRIVATE_PROVIDER_BODY', { status: 403 }), 403, 'provider_http_error', false],
+    [async () => reply([], { success: false, message: 'PRIVATE_PROVIDER_BODY' }), 200, 'provider_rejected', false],
+    [async () => reply([{ id: 888, title: 'PRIVATE_COMPANY_TITLE' }]), 200, 'provider_response_read', false],
+    [async () => { throw new Error('PRIVATE_ERROR'); }, null, 'provider_transport_unavailable', true],
+  ]) {
+    const events = [], transport = createReadTransport(fetch, async () => 424242, Date.now, createReadTrace(event => events.push(event)));
+    const work = transport.run(request(), new EventEmitter(), () => transport.fetch(source('companies?my=1')));
+    if (rejects) await assert.rejects(work); else await work;
+    assert.equal(events.length, 2); assert.equal(events[0].stage, 'entered');
+    assert.equal(events[1].status, expectedStatus); assert.equal(events[1].code, expectedCode);
+    assert.equal(events[1].route, 'companies'); assert.equal(JSON.stringify(events).includes('PRIVATE'), false);
+    assert.equal(transport.counters.calls, 1); assert.equal(transport.counters.refused, rejects ? 1 : 0);
+  }
+  const transport = createReadTransport(async () => reply([]), async () => 424242, Date.now, () => { throw new Error('PRIVATE_DIAGNOSTIC_ERROR'); });
+  await transport.run(request(), new EventEmitter(), () => transport.fetch(source('companies?my=1')));
+  assert.equal(transport.counters.refused, 0);
+});
+
+
+test('refused provider methods are closed and observer failure cannot alter their refusal', async () => {
+  for (const [attempted, expected] of [['POST','POST'], ['PUT','OTHER'], ['DELETE','OTHER'], ['PRIVATE_METHOD','OTHER']]) {
+    const events = [], transport = createReadTransport(async () => assert.fail('no_dispatch'), async () => 424242, Date.now, createReadTrace(e => events.push(e)));
+    await transport.run(request(), new EventEmitter(), () => assert.rejects(transport.fetch(source('companies?my=1'), { method: attempted })));
+    assert.equal(events.length, 1); assert.equal(events[0].method, expected); assert.equal(events[0].stage, 'refused'); assert.equal(transport.counters.calls, 0);
+    assert.equal(JSON.stringify(events).includes('PRIVATE_METHOD'), false);
+  }
+  const transport = createReadTransport(async () => assert.fail('no_dispatch'), async () => 424242, Date.now, () => { throw new Error('observer_closed'); });
+  await transport.run(request(), new EventEmitter(), () => assert.rejects(transport.fetch(source('companies?my=1'), { method: 'PUT' }), { code: 'LOCAL_YCLIENTS_READ_REFUSED' }));
+  assert.equal(transport.counters.refused, 1); assert.equal(transport.counters.calls, 0);
+  const events = [], emit = createReadTrace(e => events.push(e), () => 100);
+  emit({ type: 'forged', contract: 'forged', sequence: 60, elapsedMs: 9999, surface: 'provider', route: 'companies', method: 'GET', stage: 'entered', status: null, code: null });
+  assert.equal(events[0].sequence, 1); assert.equal(events[0].elapsedMs, 0); assert.equal(events[0].type, 'read-trace');
 });

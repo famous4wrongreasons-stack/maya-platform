@@ -15,7 +15,38 @@ CRM integrations: **0**; `crmConnected: false`, `providerAdmission: false`.
 что сервер сейчас работает. Этот state больше не используется для синтетических
 тестов. [Redacted owner status](evidence/maya-owner-registration-20261010/owner-status.redacted.json).
 
-## Следующий шаг владельца
+## Попытка подключения 10 октября, 19:11–19:26 UTC
+
+Сохранённая база владельца повторно открыта на `f259208eea7e05ee82926531e40350fdc6ef55d5`.
+Вход наблюдался в 19:21:56 UTC, загрузка одного филиала — в 19:25:43.
+Владелец сообщил о нажатии «Проверить и сохранить». После окончания сессии
+оставшаяся вкладка содержит исходный `install` locator и неопределённый результат.
+Авторитетная read-only проверка той же БД в 19:30:17 обнаружила **0 integrations
+и 0 executions четырёх canonical A17 capabilities**. Сохранения и активации нет;
+историческая причина попытки остаётся **UNKNOWN**.
+[Факты и границы](evidence/maya-owner-yc-save-20261010/outcome.redacted.json),
+[поэтапная диагностика](evidence/maya-owner-yc-save-20261010/historical-trace.json).
+
+Два `companies` dispatch и 0 guard refusals не означают успешного ответа YCLIENTS.
+Исторический runtime не сохранял HTTP/reply status и request timeline. Отметка
+старого observer «outside scoped page» не доказывает уход владельца со страницы:
+он сравнивал полный URL и также отвергал адрес с добавленными параметрами
+исходной операции. Причина конкретной прошлой отметки отдельно не наблюдалась.
+
+Окно закончилось в **19:26:58 UTC** и не продлевалось. Штатный stop подтвердил
+неизменный source, сохранённый state, отсутствие runtime group и остановку PG;
+cleanup failures нет. Отдельная metadata-проверка не запускала приложение,
+не читала credentials, работала read-only через private Unix socket, не делала
+внешних вызовов или business writes; после неё PG и lock также отсутствуют.
+Первая metadata-попытка остановилась на проверке выбора owner до чтения integration
+и сохранена отдельно. Owner state не используется для synthetic tests.
+
+До нового ввода необходимо завершить synthetic current React → exact local
+read-profile ingress/transport → HTTP/PG save/status и recovery. Исходный request
+locator сохраняется; автоматического повтора нет. Следующее окно не запускается
+самостоятельно, рабочий сайт и production не изменяются.
+
+## Предшествующая квалификация повторного запуска
 
 Подготовка повторного открытия **той же БД с теми же ключами** теперь проверена
 на отдельном синтетическом состоянии: настоящий PG restart сохранил canonical
@@ -29,11 +60,11 @@ calls/refusals и штатно остановился. Вход по парол�
 attempts сохранены.
 [Review](evidence/maya-same-db-read-resume-20261010/independent-actual-review.json).
 
-**Сохранённая БД владельца ещё не открывалась повторно.** Только по исходникам
-проверен переход от её runtime `03875b2` к candidate
-`c2079dd5b20de32995c8baa0a293547391cd5d33`: прежние paths сохранены, 117 canonical
-Prisma/migration files совпадают. Эта проверка не читала owner DB/keys и не
-заменяет actual owner-state preflight или обычный вход.
+До описанной выше owner-сессии переход от runtime `03875b2` к candidate
+`c2079dd5b20de32995c8baa0a293547391cd5d33` проверялся только по исходникам:
+прежние paths сохранены, 117 canonical Prisma/migration files совпадают.
+Эта отдельная историческая проверка не читала owner DB/keys; actual owner login
+позднее наблюдался на том же сохранённом состоянии, как описано выше.
 [Source-only проверка](evidence/maya-same-db-read-resume-20261010/owner-source-transition.source-only.json).
 
 Следующий handoff должен сохранить уже созданный бизнес и привести к обычному

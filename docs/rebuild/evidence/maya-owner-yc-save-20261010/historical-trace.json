@@ -1,0 +1,77 @@
+{
+  "contract": "maya.owner-a17-historical-safe-trace/1",
+  "runtimeSourceCommit": "f259208eea7e05ee82926531e40350fdc6ef55d5",
+  "historicalResult": "UNKNOWN",
+  "persistedSave": "ABSENT_AT_METADATA_READ",
+  "stages": [
+    {
+      "stage": "owner_submit",
+      "observation": "OWNER_REPORTED",
+      "reportedAt": "2026-10-10T19:27:43Z",
+      "qualification": "Owner reported entering API input, consent and clicking check/save; values and click timestamp were not observed."
+    },
+    {
+      "stage": "browser_begin",
+      "observation": "INSTALL_LOCATOR_OBSERVED",
+      "observedAt": "2026-10-10T19:34:44Z",
+      "qualification": "Remaining scoped tab carries valid non-authorizing install locator and uncertain notice. Raw locator, fields, auth and request body were not read."
+    },
+    {
+      "stage": "browser_http_dispatch",
+      "observation": "NOT_OBSERVED"
+    },
+    {
+      "stage": "http_route_and_status",
+      "observation": "NOT_OBSERVED",
+      "qualification": "Historical child stdout/stderr ignored and no per-request safe trace existed. No status is reconstructed from absence of an AE row."
+    },
+    {
+      "stage": "validation_and_policy_result",
+      "observation": "NOT_OBSERVED",
+      "qualification": "Source guard admits provider fetch only in explicit authenticated connect/activate POST scope. Aggregate dispatch supports that such a scope ran, but is not an owner-request correlation or an AE policy receipt."
+    },
+    {
+      "stage": "provider_dispatch",
+      "observation": "SESSION_AGGREGATE_OBSERVED",
+      "calls": 2,
+      "routes": {
+        "companies": 2
+      },
+      "guardRefusals": 0,
+      "qualification": "Provider HTTP status, payload success, per-call time and browser-request correlation were not retained. Zero guard refusals does not mean provider success."
+    },
+    {
+      "stage": "provider_reply",
+      "observation": "NOT_OBSERVED"
+    },
+    {
+      "stage": "canonical_a17_commit",
+      "observation": "NO_EXECUTION_OR_INTEGRATION_FOUND",
+      "observedAt": "2026-10-10T19:30:17.236586Z",
+      "integrationCount": 0,
+      "exactA17ExecutionCount": 0,
+      "qualification": "Same owned DB/system and exact previously confirmed owner tenant. Only safe metadata selected; install/activate/import/disconnect executions checked."
+    },
+    {
+      "stage": "expiry",
+      "observation": "CLEAN_STOP_OBSERVED",
+      "expiresAt": "2026-10-10T19:26:58.487Z",
+      "stopObservedAt": "2026-10-10T19:26:59.997250Z",
+      "qualification": "No precise submit/provider reply time relative to expiry is available."
+    }
+  ],
+  "observerCorrection": "The historical observer required exact initial href and also rejects URLs with a valid pending-operation query. Thus outside_scoped_page is not proof of navigation or tab closure. The cause of the specific historical marker was not independently observed.",
+  "interpretation": "Source preview runs before AE admission; a pre-admission failure can leave NOT_OBSERVED. This is a possible mechanism, not a proven cause of the owner attempt.",
+  "sourceReferences": [
+    "maya-carrier-react/src/runtime/crmPending.ts",
+    "maya-chat-shell/src/shell/local-crm-setup.ts",
+    "maya-saas-backend/scripts/local-yclients-read.mjs",
+    "maya-saas-backend/scripts/local-yclients-read-transport.mjs",
+    "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts"
+  ],
+  "noAutomaticRetry": true,
+  "newOwnerInputRequested": false,
+  "credentialsOrRequestBodiesRead": false,
+  "ownerDatabaseUsedForSyntheticTests": false,
+  "websiteChanged": false
+}
