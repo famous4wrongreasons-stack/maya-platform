@@ -1,3 +1,4 @@
+import type { Prisma } from '@prisma/client';
 import { ConflictException, Injectable } from '@nestjs/common';
 
 import { CrmService } from '../crm/crm.service';
@@ -109,10 +110,27 @@ export class Package5Wave3ProductionGatewayService implements Package5Wave3Provi
     return { snapshotHash: this.importEvidence(observed.preview).snapshotHash };
   }
 
-  async readCrmImport(input: { tenantId: string; provider: string }) {
+  async readCrmImport(input: {
+    tenantId: string;
+    provider: string;
+    atomicProjection?: boolean;
+  }) {
     const observed = await this.crm.readImportPreviewReadOnly(input.tenantId);
     this.assertProvider(input.provider, observed.connection.provider);
-    return this.importEvidence(observed.preview);
+    return {
+      ...this.importEvidence(observed.preview),
+      ...(input.atomicProjection
+        ? {
+            project: async (tx: Prisma.TransactionClient) => {
+              await this.crm.applyCanonicalImportProjection(
+                input.tenantId,
+                observed.preview,
+                tx,
+              );
+            },
+          }
+        : {}),
+    };
   }
 
   fingerprintEncryptedValue(input: {

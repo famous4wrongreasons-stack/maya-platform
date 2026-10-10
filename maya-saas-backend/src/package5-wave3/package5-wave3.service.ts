@@ -1,4 +1,10 @@
 import {
+  assertCrmConfiguration,
+  crmConfigurationVersion,
+  CRM_NO_CONFIGURATION,
+  type CrmCommitReceipt,
+} from '../crm/crm-configuration-version';
+import {
   lockClientConsent,
   effectiveClientConsents,
 } from '../crm/client-effective-consent';
@@ -80,6 +86,7 @@ export type Package5Wave3Command =
     }
   | {
       operation: 'install_crm_credentials';
+      expectedVersion?: string | null;
       sourceIntentRef: string;
       provider: string;
       encryptedApiToken: string;
@@ -87,8 +94,16 @@ export type Package5Wave3Command =
       baseUrl?: string | null;
       settingsJson?: Record<string, unknown>;
     }
-  | { operation: 'activate_crm_integration'; sourceIntentRef: string }
-  | { operation: 'confirm_crm_import'; sourceIntentRef: string }
+  | {
+      operation: 'activate_crm_integration';
+      sourceIntentRef: string;
+      expectedVersion?: string;
+    }
+  | {
+      operation: 'confirm_crm_import';
+      sourceIntentRef: string;
+      expectedVersion?: string;
+    }
   | { operation: 'disconnect_crm_integration'; sourceIntentRef: string }
   | {
       operation: 'update_client_profile';
@@ -165,7 +180,12 @@ export interface Package5Wave3ProviderGateway {
   readCrmImport(input: {
     tenantId: string;
     provider: string;
-  }): Promise<{ snapshotHash: string; teamChildHashes: string[] }>;
+    atomicProjection?: boolean;
+  }): Promise<{
+    snapshotHash: string;
+    teamChildHashes: string[];
+    project?: (tx: Tx) => Promise<void>;
+  }>;
   fingerprintEncryptedValue(input: {
     namespace: string;
     encryptedValue: string;
@@ -173,6 +193,7 @@ export interface Package5Wave3ProviderGateway {
 }
 
 interface Facts {
+  project?: (tx: Tx) => Promise<void>;
   targetRef: string;
   before: unknown;
   desired: unknown;
@@ -214,6 +235,7 @@ export interface Package5Wave3ExecutionValue {
   businessMutations: 1;
   providerWrites: 0 | 1;
   unknownApplicable: boolean;
+  crmCommit?: CrmCommitReceipt;
 }
 
 export class Package5Wave3Error extends Error {}
@@ -313,6 +335,15 @@ export class Package5Wave3ShadowService {
     if (prior.length > 1)
       throw new Package5Wave3Error('Source identity has multiple executions');
     if (prior[0]) {
+      if (
+        'expectedVersion' in command &&
+        (!prior[0].payloadRetentionUntil ||
+          prior[0].payloadRetentionUntil.getTime() <= Date.now())
+      )
+        throw new ConflictException({
+          message: 'CRM operation evidence expired',
+          error: { code: 'crm_operation_evidence_unavailable' },
+        });
       const input = await this.kernel.readTrustedNormalizedInput(
         scoped,
         prior[0].id,
@@ -325,6 +356,23 @@ export class Package5Wave3ShadowService {
               effectiveAt: new Date(this.inputText(input.consentEffectiveAt)),
             }
           : command;
+      if (
+        'expectedVersion' in command &&
+        (input.actorIdentityHash !== authority.actorIdentityHash ||
+          prior[0].actorUserId !== actor.userId)
+      )
+        throw new ForbiddenException({
+          message: 'Operation belongs to another actor',
+          error: { code: 'crm_operation_actor_mismatch' },
+        });
+      if (
+        'expectedVersion' in command &&
+        input.requestMaterialHash !== this.requestMaterialHash(replayCommand)
+      )
+        throw new ConflictException({
+          message: 'Operation request material differs',
+          error: { code: 'crm_operation_material_changed' },
+        });
       if (
         input.operation !== command.operation ||
         input.requestMaterialHash !== this.requestMaterialHash(replayCommand) ||
@@ -492,6 +540,189 @@ export class Package5Wave3ShadowService {
     ) {
       throw new ConflictException('Wave 3 target changed after planning');
     }
+    return facts;
+  }
+
+  async assertCrmOperationActor(tenantId: string, actor: Package5Wave3Actor) {
+    const scoped = this.tenantContext.assertTenantId(tenantId);
+    await this.resolveActor(scoped, actor, {
+      operation: 'activate_crm_integration',
+      sourceIntentRef: 'crm-operation-read',
+    });
+  }
+
+  async readCrmOperation(
+    tenantId: string,
+    actor: Package5Wave3Actor,
+    operation:
+      | 'install_crm_credentials'
+      | 'activate_crm_integration'
+      | 'confirm_crm_import',
+    sourceIntentRef: string,
+  ) {
+    const scoped = this.tenantContext.assertTenantId(tenantId);
+    const authority = await this.resolveActor(scoped, actor, {
+      operation,
+      sourceIntentRef,
+    } as Package5Wave3Command);
+    const registration = PACKAGE5_WAVE3_REGISTRATIONS.find(
+      (row) => row.operation === operation,
+    )!;
+    const sourceRef = `p5w3:${wave3Hash({ sourceIntentRef })}`;
+    const rows = await this.prisma.actionExecution.findMany({
+      where: {
+        tenantId: scoped,
+        capability: registration.executableCapability,
+        sourceRef,
+      },
+      take: 2,
+    });
+    if (rows.length > 1)
+      throw new ConflictException('CRM operation identity conflict');
+    if (!rows[0]) return null;
+    const execution = rows[0];
+    if (execution.actorUserId !== actor.userId)
+      throw new ForbiddenException({
+        message: 'Operation belongs to another actor',
+        error: { code: 'crm_operation_actor_mismatch' },
+      });
+    if (
+      !execution.payloadRetentionUntil ||
+      execution.payloadRetentionUntil.getTime() <= Date.now()
+    )
+      throw new ConflictException('CRM operation payload retention expired');
+    const input = await this.kernel.readTrustedNormalizedInput(
+      scoped,
+      execution.id,
+    );
+    if (
+      input.operation !== operation ||
+      input.actorIdentityHash !== authority.actorIdentityHash ||
+      input.actorMembershipId !== authority.membershipId ||
+      execution.targetRef !== `crm:${scoped}` ||
+      input.targetRef !== execution.targetRef ||
+      execution.dryRun
+    )
+      throw new ForbiddenException('CRM operation authority mismatch');
+    await this.resolveActor(scoped, actor, {
+      operation,
+      sourceIntentRef,
+    } as Package5Wave3Command);
+    return { execution, input };
+  }
+
+  async assertQualifiedCrmLocked(
+    tenantId: string,
+    actor: Package5Wave3Actor,
+    command: Package5Wave3Command,
+    input: Record<string, unknown>,
+    db: Tx,
+  ) {
+    if (!('expectedVersion' in command))
+      throw new ConflictException('Qualified CRM command required');
+    const authority = await this.resolveActor(tenantId, actor, command, db);
+    if (
+      authority.membershipId !== input.actorMembershipId ||
+      authority.actorIdentityHash !== input.actorIdentityHash
+    )
+      throw new ForbiddenException('CRM operation authority changed');
+    const current = await db.crmIntegration.findUnique({ where: { tenantId } });
+    assertCrmConfiguration(current, command.expectedVersion ?? null);
+    if (current) await this.assertCrmBranchSource(tenantId, current, db);
+    if (command.operation === 'confirm_crm_import')
+      await this.assertNoUnqualifiedCrmHistory(tenantId, db);
+    if (
+      input.sourceIdentityHash !==
+        (command.expectedVersion ?? CRM_NO_CONFIGURATION) ||
+      input.requestMaterialHash !== this.requestMaterialHash(command) ||
+      input.beforeStateHash !==
+        (current ? wave3Hash(this.safeIntegration(current)) : null)
+    )
+      throw new ConflictException({
+        message: 'CRM operation source changed',
+        error: { code: 'crm_config_version_changed' },
+      });
+  }
+
+  private async assertCrmBranchSource(
+    tenantId: string,
+    integration: { provider: string; settingsJson: unknown },
+    db: PrismaClient | Tx,
+  ) {
+    const settings =
+      integration.settingsJson &&
+      typeof integration.settingsJson === 'object' &&
+      !Array.isArray(integration.settingsJson)
+        ? (integration.settingsJson as Record<string, unknown>)
+        : {};
+    const binding = normalizeCrmBranchBinding(
+      settings.branchBinding,
+      settings.companyId,
+    );
+    if (
+      binding &&
+      (!['yclients', 'altegio'].includes(integration.provider) ||
+        !(await db.branch.findFirst({
+          where: { id: binding.branchId, tenantId },
+          select: { id: true },
+        })))
+    )
+      throw new ConflictException({
+        message: 'Current CRM branch binding unavailable',
+        error: { code: 'crm_branch_binding_unavailable' },
+      });
+  }
+
+  private refuseCrmIdentityMigration(): never {
+    throw new ConflictException({
+      message:
+        'Imported CRM identity migration requires proven source ownership',
+      error: { code: 'crm_import_scope_migration_unsupported' },
+    });
+  }
+  private async hasCrmIdentityHistory(tenantId: string, db: PrismaClient | Tx) {
+    return (
+      Boolean(
+        await db.staffProviderLink.findFirst({
+          where: { tenantId },
+          select: { id: true },
+        }),
+      ) ||
+      Boolean(
+        await db.crmClientLink.findFirst({
+          where: { tenantId },
+          select: { id: true },
+        }),
+      ) ||
+      Boolean(
+        await db.crmStaffAccess.findFirst({
+          where: { tenantId },
+          select: { id: true },
+        }),
+      )
+    );
+  }
+  private async assertNoUnqualifiedCrmHistory(
+    tenantId: string,
+    db: PrismaClient | Tx,
+  ) {
+    // These identities have no company key. Do not reactivate a disconnected
+    // source's historical principal merely because an external number matches.
+    if (
+      (await db.staffProviderLink.findFirst({
+        where: { tenantId, unlinkedAt: { not: null } },
+        select: { id: true },
+      })) ||
+      (await db.crmClientLink.findFirst({
+        where: { tenantId, unlinkedAt: { not: null } },
+        select: { id: true },
+      })) ||
+      (await db.crmStaffAccess.findFirst({
+        where: { tenantId, status: 'disabled' },
+        select: { id: true },
+      }))
+    )
+      this.refuseCrmIdentityMigration();
   }
 
   private async resolveActor(
@@ -667,12 +898,29 @@ export class Package5Wave3ShadowService {
       const existing = await db.crmIntegration.findUnique({
         where: { tenantId },
       });
+      if ('expectedVersion' in command)
+        assertCrmConfiguration(existing, command.expectedVersion ?? null);
       const existingSettings =
         existing?.settingsJson &&
         typeof existing.settingsJson === 'object' &&
         !Array.isArray(existing.settingsJson)
           ? (existing.settingsJson as Record<string, unknown>)
           : {};
+      if (
+        'expectedVersion' in command &&
+        (!existing ||
+          existing.provider !== command.provider ||
+          (existing.baseUrl ?? null) !== (command.baseUrl ?? null) ||
+          wave3Hash(existingSettings.companyId ?? null) !==
+            wave3Hash(command.settingsJson?.companyId ?? null) ||
+          wave3Hash(existingSettings.branchBinding ?? null) !==
+            wave3Hash(command.settingsJson?.branchBinding ?? null))
+      ) {
+        const imported =
+          Boolean(existingSettings.acceptedImportSnapshotHash) ||
+          (await this.hasCrmIdentityHistory(tenantId, db));
+        if (imported) this.refuseCrmIdentityMigration();
+      }
       if (
         existing?.provider === command.provider &&
         existing.status === 'pending_activation' &&
@@ -702,18 +950,32 @@ export class Package5Wave3ShadowService {
         desired,
         changedFields: ['credential_version', 'provider', 'status'],
         credentialFingerprint: command.credentialFingerprint,
+        sourceIdentityHash:
+          'expectedVersion' in command
+            ? (command.expectedVersion ?? CRM_NO_CONFIGURATION)
+            : null,
       };
     }
     if (command.operation === 'activate_crm_integration') {
-      const integration = await this.requiredIntegration(tenantId);
+      const integration = await this.requiredIntegration(tenantId, db);
+      if ('expectedVersion' in command) {
+        assertCrmConfiguration(integration, command.expectedVersion ?? null);
+        await this.assertCrmBranchSource(tenantId, integration, db);
+      }
       if (integration.status !== 'pending_activation')
         throw new ConflictException('Only pending integration can activate');
       const verification = await this.provider.verifyCrm({
         tenantId,
         provider: integration.provider,
       });
+      if ('expectedVersion' in command)
+        assertCrmConfiguration(
+          await db.crmIntegration.findUnique({ where: { tenantId } }),
+          command.expectedVersion ?? null,
+        );
       return {
         ...empty,
+        sourceIdentityHash: command.expectedVersion ?? null,
         targetRef: `crm:${tenantId}`,
         before: this.safeIntegration(integration),
         desired: {
@@ -726,13 +988,28 @@ export class Package5Wave3ShadowService {
       };
     }
     if (command.operation === 'confirm_crm_import') {
-      const integration = await this.requiredIntegration(tenantId);
+      const integration = await this.requiredIntegration(tenantId, db);
+      if ('expectedVersion' in command) {
+        assertCrmConfiguration(integration, command.expectedVersion ?? null);
+        await this.assertCrmBranchSource(tenantId, integration, db);
+      }
       if (integration.status !== 'active')
         throw new ConflictException('Active CRM required for import');
+      if ('expectedVersion' in command)
+        await this.assertNoUnqualifiedCrmHistory(tenantId, db);
       const snapshot = await this.provider.readCrmImport({
         tenantId,
         provider: integration.provider,
+        ...('expectedVersion' in command ? { atomicProjection: true } : {}),
       });
+      if ('expectedVersion' in command) {
+        assertCrmConfiguration(
+          await db.crmIntegration.findUnique({ where: { tenantId } }),
+          command.expectedVersion ?? null,
+        );
+        if (!snapshot.project)
+          throw new ConflictException('Atomic CRM projection unavailable');
+      }
       if (
         snapshot.teamChildHashes.length >
           PACKAGE5_WAVE3_MAX_CRM_TEAM_CHILDREN ||
@@ -761,11 +1038,13 @@ export class Package5Wave3ShadowService {
           teamChildren: snapshot.teamChildHashes.length,
         },
         changedFields: ['accepted_import_snapshot'],
+        sourceIdentityHash: command.expectedVersion ?? null,
+        project: snapshot.project,
         providerSnapshotHash: snapshot.snapshotHash,
       };
     }
     if (command.operation === 'disconnect_crm_integration') {
-      const integration = await this.requiredIntegration(tenantId);
+      const integration = await this.requiredIntegration(tenantId, db);
       return {
         ...empty,
         targetRef: `crm:${tenantId}`,
@@ -910,8 +1189,11 @@ export class Package5Wave3ShadowService {
     };
   }
 
-  private async requiredIntegration(tenantId: string) {
-    const integration = await this.prisma.crmIntegration.findUnique({
+  private async requiredIntegration(
+    tenantId: string,
+    db: PrismaClient | Tx = this.prisma,
+  ) {
+    const integration = await db.crmIntegration.findUnique({
       where: { tenantId },
     });
     if (!integration) throw new NotFoundException('CRM integration missing');
@@ -1045,13 +1327,15 @@ export class Package5Wave3ExecutableService {
       execution.tenantId,
       execution.id,
     );
-    if (prepared.command.operation !== 'record_client_consent')
-      await this.planner.assertStillCurrent(
-        execution.tenantId,
-        prepared.actor,
-        prepared.command,
-        input,
-      );
+    const freshFacts =
+      prepared.command.operation !== 'record_client_consent'
+        ? await this.planner.assertStillCurrent(
+            execution.tenantId,
+            prepared.actor,
+            prepared.command,
+            input,
+          )
+        : null;
     return this.serializable(async (tx) => {
       if (prepared.command.operation === 'record_client_consent')
         await lockClientConsent(
@@ -1083,8 +1367,25 @@ export class Package5Wave3ExecutableService {
       if (locked.state === ActionExecutionState.SUCCEEDED)
         return this.restore(locked);
       this.assertExecutable(locked, registration.actionClass);
-      await this.assertActor(tx, locked, input);
-      if (
+      if (!('expectedVersion' in prepared.command))
+        await this.assertActor(tx, locked, input);
+      if ('expectedVersion' in prepared.command) {
+        await this.planner.assertQualifiedCrmLocked(
+          execution.tenantId,
+          prepared.actor,
+          prepared.command,
+          input,
+          tx,
+        );
+        if (prepared.command.operation === 'install_crm_credentials')
+          await this.planner.assertStillCurrent(
+            execution.tenantId,
+            prepared.actor,
+            prepared.command,
+            input,
+            tx,
+          );
+      } else if (
         prepared.command.operation === 'record_client_consent' ||
         prepared.command.operation === 'install_crm_credentials'
       ) {
@@ -1102,8 +1403,37 @@ export class Package5Wave3ExecutableService {
         'package5.wave3.local-command',
       );
       await this.mutate(tx, locked, prepared.command, input);
+      if (
+        prepared.command.operation === 'confirm_crm_import' &&
+        'expectedVersion' in prepared.command
+      ) {
+        if (!freshFacts?.project)
+          throw new ConflictException('Atomic CRM projection unavailable');
+        await freshFacts.project(tx);
+      }
       await this.recordMutation(tx, locked, input);
       const value = this.value(locked, input, 0, false);
+      if ('expectedVersion' in prepared.command) {
+        const current = await tx.crmIntegration.findUniqueOrThrow({
+          where: { tenantId: execution.tenantId },
+        });
+        if (prepared.command.operation !== 'install_crm_credentials')
+          assertCrmConfiguration(
+            current,
+            prepared.command.expectedVersion ?? null,
+          );
+        value.crmCommit = {
+          contract: 'maya.crm-config-commit/1',
+          configVersion: crmConfigurationVersion(current)!,
+          phase:
+            prepared.command.operation === 'install_crm_credentials'
+              ? 'installed'
+              : prepared.command.operation === 'activate_crm_integration'
+                ? 'activated'
+                : 'import_confirmed',
+          atomicProjection: prepared.command.operation === 'confirm_crm_import',
+        };
+      }
       await this.finalize(tx, locked, attemptId, value);
       return value;
     });

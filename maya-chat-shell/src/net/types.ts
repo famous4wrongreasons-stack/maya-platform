@@ -372,7 +372,7 @@ export interface PersonalBranch extends PersonalChoice { readonly timezone: stri
 
 // Local owner setup: only public connection metadata crosses the network boundary.
 export interface CrmSetupConnection {
-  readonly id: string; readonly tenantId: string; readonly updatedAt: string;
+  readonly id: string; readonly tenantId: string; readonly updatedAt: string; readonly configVersion: string;
   readonly provider: 'yclients' | 'other'; readonly status: 'pending_activation' | 'active' | 'other';
   readonly hasCredentials: boolean; readonly companyId: string | null; readonly branchId: string | null;
 }
@@ -381,8 +381,21 @@ export interface CrmSetupSnapshot {
   readonly counts: { readonly services: number | null; readonly staff: number | null } | null;
 }
 export interface CrmSetupInput { readonly apiToken: string; readonly companyId: string; readonly branchId: string }
+export interface CrmSetupInstall extends CrmSetupInput { readonly expectedVersion: string | null }
+export interface CrmOperationLocator { readonly operation: 'install' | 'activate'; readonly requestId: string }
+export interface CrmOperationReceipt extends CrmOperationLocator {
+  readonly phase: 'installed' | 'activated' | 'import_confirmed'; readonly configVersion: string;
+  readonly executionId: string; readonly atomicProjection: boolean;
+}
+export interface CrmOperationStatus extends CrmOperationLocator {
+  readonly status: 'NOT_OBSERVED' | 'READY' | 'SUCCEEDED' | 'UNAVAILABLE';
+  readonly phase: 'install' | 'activate' | 'confirm' | null;
+  readonly receipt: CrmOperationReceipt | null;
+  readonly current: { readonly configVersion: string | null; readonly matchesCurrentVersion: boolean };
+}
+export interface CrmSetupCompletion { readonly snapshot: CrmSetupSnapshot; readonly operation: CrmOperationStatus }
 export interface CrmSetupBody {
-  readonly provider: 'yclients'; readonly apiToken: string;
+  readonly provider: 'yclients'; readonly apiToken: string; readonly expectedVersion: string | null;
   readonly settingsJson: { readonly companyId: number; readonly branchBinding: {
     readonly contract: 'maya.crm-branch-binding/1'; readonly companyId: number; readonly branchId: string;
   } };
@@ -390,7 +403,9 @@ export interface CrmSetupBody {
 export interface CrmSetupFailure { readonly reason: 'forbidden' | 'invalid' | 'unavailable' | 'uncertain' }
 export interface CrmSetupTransport {
   crmSetupStatus(signal: AbortSignal): Promise<Outcome<CrmSetupSnapshot, CrmSetupFailure>>;
-  crmSetupStage(input: CrmSetupInput, key: string, signal: AbortSignal): Promise<Outcome<CrmSetupSnapshot, CrmSetupFailure>>;
+  crmSetupStage(input: CrmSetupInstall, key: string, signal: AbortSignal): Promise<Outcome<CrmSetupCompletion, CrmSetupFailure>>;
+  crmSetupActivate(expectedVersion: string, key: string, signal: AbortSignal): Promise<Outcome<CrmSetupCompletion, CrmSetupFailure>>;
+  crmSetupOperation(locator: CrmOperationLocator, signal: AbortSignal): Promise<Outcome<CrmOperationStatus, CrmSetupFailure>>;
   personalBranches(signal: AbortSignal): Promise<Outcome<readonly PersonalBranch[], PersonalFailure>>;
 }
 export interface PersonalSlot { readonly start: string; readonly staffId: string; readonly branchId: string | null }

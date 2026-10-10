@@ -231,6 +231,8 @@ export const P1_PATHS = [
   '/widgets/resolve',
   '/integrations/crm',
   '/integrations/crm/connect',
+  '/integrations/crm/activate',
+  '/integrations/crm/operation',
   '/branches',
   '/services',
   '/staff',

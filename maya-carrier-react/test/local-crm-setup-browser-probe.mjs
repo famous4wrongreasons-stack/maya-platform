@@ -20,9 +20,9 @@ try {
   await page.click('Q.byName("button", /^Войти$/)');
   assert.ok(await page.waitFor('document.body.innerText.includes("Локальное подключение YCLIENTS")'));
   assert.equal(page.apiRequests('/integrations/crm').length, 0, 'Mount must not read or connect');
-  assert.equal(await page.eval('!!Q.byName("button", /^Активировать и импортировать$/)'), false);
+  assert.equal(await page.eval('Q.byName("button", /^Активировать и импортировать$/).disabled'), true);
   assert.equal(await page.eval('Q.byName("button", /^Проверить и сохранить подключение$/).disabled'), true);
-  await page.click('Q.byName("button", /^Проверить локальное подключение$/)');
+  await page.click('Q.byName("button", /^Проверить подключение и результат$/)');
   assert.ok(await page.waitFor('document.body.innerText.includes("Не удалось подтвердить актуальное подключение")'));
   assert.equal(await page.eval('Q.byName("button", /^Проверить и сохранить подключение$/).disabled'), true);
   const setupCalls = page.apiRequests('/integrations/crm');
@@ -35,7 +35,7 @@ try {
     else assert.ok(['data:', 'about:'].includes(url.protocol), 'Unexpected non-HTTP resource');
   }
   const text = await page.eval('document.body.innerText');
-  assert.match(text, /сервер должен подтвердить именно показанную версию подключения/);
+  assert.match(text, /Сервер проверит именно показанную версию перед импортом/);
   const capture = async (name, width, height) => {
     await page.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
     await page.eval('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))');
@@ -49,7 +49,7 @@ try {
   assert.ok(await page.waitFor('!!Q.composer()'));
   const evidence = { contract: 'maya.local-crm-setup.ui-only/1', profile: 'existing happy mock', actualBackend: false, actualYclients: false, modelCalls: 0,
     setupCalls: setupCalls.map(r => ({ method: r.method, path: new URL(r.url).pathname, status: r.status })),
-    noAutomaticSetupRead: true, noSetupPosts: true, activationAbsent: true, blockedStatusIsTruthful: true, closeReturnsToChat: true, sizes: ['1280x1100', '390x844'] };
+    noAutomaticSetupRead: true, noSetupPosts: true, activationDisabledWithoutSource: true, blockedStatusIsTruthful: true, closeReturnsToChat: true, sizes: ['1280x1100', '390x844'] };
   fs.writeFileSync(output + '/summary.json', JSON.stringify(evidence, null, 2) + '\n');
   console.log(JSON.stringify(evidence));
   await page.close();

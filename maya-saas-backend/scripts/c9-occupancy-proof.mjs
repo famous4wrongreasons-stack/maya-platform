@@ -23,7 +23,7 @@ export function proofEnvironment(source, databaseUrl) {
   for (const key of ['PATH', 'HOME', 'TMPDIR', 'SYSTEMROOT']) if (source[key]) env[key] = source[key];
   return env;
 }
-export function proofCommands({ pgBin, cluster, log, port, database, receipt, output, browser = false, branchBinding = false, compound = false }) {
+export function proofCommands({ pgBin, cluster, log, port, database, receipt, output, browser = false, branchBinding = false, compound = false, crmSetup = false }) {
   assert.match(database, /^maya_widget_gate_proof_c9occ_[a-f0-9]+$/);
   assert.ok(Number.isInteger(port) && port > 1024 && port <= 65535 && port !== 5432);
   assert.ok(path.isAbsolute(cluster) && !/\s|'/.test(cluster), 'private cluster path must fit pg_ctl options');
@@ -32,9 +32,10 @@ export function proofCommands({ pgBin, cluster, log, port, database, receipt, ou
   // Explicit probe suffix keeps this mandatory two-process entry out of the
   // ordinary widgets-live aggregate. It still uses the exact existing harness.
   assert.ok(!(branchBinding && (browser || compound)), 'proof modes are exclusive');
-  const probe = branchBinding ? 'crm-branch-binding-restart' : 'c9-occupancy-restart';
+  assert.ok(!(crmSetup && (branchBinding || browser || compound)), 'CRM setup proof is an isolated HTTP mode');
+  const probe = crmSetup ? 'crm-a17-operation-restart' : branchBinding ? 'crm-branch-binding-restart' : 'c9-occupancy-restart';
   const jestArgs = ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--testRegex', probe + '\\.probe-spec\\.ts$', '--runInBand', '--runTestsByPath', `test/widgets-live/${probe}.probe-spec.ts`];
-  const stage = (name) => ({ name, command: process.execPath, args: [...jestArgs, '--json', '--outputFile=' + path.join(output, name + '-jest.json'), ...(name === 'browser' ? ['--testTimeout=240000'] : [])], env: { JEST_C9_OCCUPANCY_STAGE: name, ...(compound ? { JEST_C9_OCCUPANCY_COMPOUND: 'true' } : {}), JEST_C9_OCCUPANCY_RECEIPT: receipt, JEST_C9_OCCUPANCY_REPORT: path.join(output, name + '.json') } });
+  const stage = (name) => ({ name, command: process.execPath, args: [...jestArgs, '--json', '--outputFile=' + path.join(output, name + '-jest.json'), ...(name === 'browser' || (crmSetup && name === 'prepare') ? ['--testTimeout=240000'] : [])], ...(crmSetup && name === 'prepare' ? { timeoutMs: 270000 } : {}), env: { JEST_C9_OCCUPANCY_STAGE: name, ...(compound ? { JEST_C9_OCCUPANCY_COMPOUND: 'true' } : {}), JEST_C9_OCCUPANCY_RECEIPT: receipt, JEST_C9_OCCUPANCY_REPORT: path.join(output, name + '.json') } });
   const setup = [
     { name: 'initdb', command: executable('initdb'), args: ['-D', cluster, '--auth=trust', '--username=c9_proof', '--encoding=UTF8', '--locale=C'] },
     { name: 'pg-start', command: executable('pg_ctl'), args: [...pgArgs, '-l', log, '-o', `-h 127.0.0.1 -p ${port} -k '' -c shared_buffers=64MB -c work_mem=4MB -c max_connections=30`, 'start'] },
@@ -46,7 +47,8 @@ export function proofCommands({ pgBin, cluster, log, port, database, receipt, ou
     stage('browser'),
   ];
   return [...setup,
-    ...(branchBinding ? [] : [{ name: 'carrier-bundle', command: process.execPath, args: ['../maya-carrier-react/test/build-harness.mjs'] }]),
+    ...(crmSetup ? [{ name: 'react-web-build', command: process.execPath, args: ['build.mjs', '--target=web'], cwd: path.resolve(backend, '../maya-carrier-react') }] : []),
+    ...(branchBinding || crmSetup ? [] : [{ name: 'carrier-bundle', command: process.execPath, args: ['../maya-carrier-react/test/build-harness.mjs'] }]),
     stage('prepare'),
     { name: 'pg-restart', command: executable('pg_ctl'), args: [...pgArgs, '-m', 'fast', 'restart'] },
     stage('resume'),
@@ -93,9 +95,9 @@ export async function runCommand(spec, env, output, control) {
   } finally { fs.closeSync(fd); }
 }
 export async function main(args) {
-  const { values } = parseArgs({ args, options: { run: { type: 'boolean' }, browser: { type: 'boolean' }, compound: { type: 'boolean' }, 'branch-binding': { type: 'boolean' }, output: { type: 'string' }, 'pg-bin': { type: 'string', default: '/opt/homebrew/opt/postgresql@16/bin' } }, strict: true });
+  const { values } = parseArgs({ args, options: { run: { type: 'boolean' }, browser: { type: 'boolean' }, compound: { type: 'boolean' }, 'branch-binding': { type: 'boolean' }, 'crm-setup': { type: 'boolean' }, output: { type: 'string' }, 'pg-bin': { type: 'string', default: '/opt/homebrew/opt/postgresql@16/bin' } }, strict: true });
   if (!values.run) {
-    process.stdout.write('Preparation only. After parent assigns the heavy slot: node scripts/c9-occupancy-proof.mjs --run --output=/absolute/new/evidence-directory [--compound] [--browser] [--pg-bin=/path/to/postgresql/bin]\n');
+    process.stdout.write('Preparation only. After parent assigns the heavy slot: node scripts/c9-occupancy-proof.mjs --run --output=/absolute/new/evidence-directory [--compound] [--browser] [--crm-setup] [--pg-bin=/path/to/postgresql/bin]\n');
     return;
   }
   assert.ok(values.output && path.isAbsolute(values.output), 'new absolute output directory required');
@@ -107,8 +109,8 @@ export async function main(args) {
   fs.chmodSync(privateRoot, 0o700);
   const cluster = path.join(privateRoot, 'pg'), port = await freePort(), database = 'maya_widget_gate_proof_c9occ_' + randomBytes(6).toString('hex');
   const env = proofEnvironment(process.env, `postgresql://c9_proof@127.0.0.1:${port}/${database}`);
-  const commands = proofCommands({ pgBin: values['pg-bin'], cluster, log: path.join(values.output, 'postgres.log'), port, database, receipt: path.join(privateRoot, 'private-restart.json'), output: values.output, browser: values.browser, branchBinding: values['branch-binding'], compound: values.compound });
-  const manifest = { contract: 'maya.c9-occupancy-owned-cluster/1', database, port, cluster, mode: values.compound ? (values.browser ? 'compound-browser' : 'compound-http-pg-restart') : values['branch-binding'] ? 'branch-binding-http-pg-restart' : values.browser ? 'browser' : 'http-pg-restart', status: 'running', completed: [], resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, pgWorkMemMb: 4, pgMaxConnections: 30, jestWorkers: 1 } };
+  const commands = proofCommands({ pgBin: values['pg-bin'], cluster, log: path.join(values.output, 'postgres.log'), port, database, receipt: path.join(privateRoot, 'private-restart.json'), output: values.output, browser: values.browser, branchBinding: values['branch-binding'], compound: values.compound, crmSetup: values['crm-setup'] });
+  const manifest = { contract: 'maya.c9-occupancy-owned-cluster/1', database, port, cluster, mode: values['crm-setup'] ? 'crm-a17-operation-http-pg-restart' : values.compound ? (values.browser ? 'compound-browser' : 'compound-http-pg-restart') : values['branch-binding'] ? 'branch-binding-http-pg-restart' : values.browser ? 'browser' : 'http-pg-restart', status: 'running', completed: [], resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, pgWorkMemMb: 4, pgMaxConnections: 30, jestWorkers: 1 } };
   const save = () => fs.writeFileSync(path.join(values.output, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n', { mode: 0o600 });
   const control = { cancelled: null, terminateActive: null, activeCleanup: false };
   const cancel = (signal) => {
@@ -141,7 +143,7 @@ export async function main(args) {
     process.off('SIGINT', onInt); process.off('SIGTERM', onTerm);
   }
   assert.equal(manifest.status, 'passed');
-  process.stdout.write(`${values.compound ? (values.browser ? 'Compound current React browser' : 'Compound HTTP/PG/current text-carrier') : values['branch-binding'] ? 'Branch binding HTTP/PG restart' : values.browser ? 'Local React browser' : 'HTTP/PG/current text-carrier'} proof passed. Evidence: ${values.output}\n`);
+  process.stdout.write(`${values['crm-setup'] ? 'CRM A17 operation HTTP/PG restart' : values.compound ? (values.browser ? 'Compound current React browser' : 'Compound HTTP/PG/current text-carrier') : values['branch-binding'] ? 'Branch binding HTTP/PG restart' : values.browser ? 'Local React browser' : 'HTTP/PG/current text-carrier'} proof passed. Evidence: ${values.output}\n`);
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
   await main(process.argv.slice(2));

@@ -27,7 +27,11 @@ import { attendanceFromWritableCode, attendanceToCode } from './crm-attendance';
 import { CrmService } from './crm.service';
 import { CrmOutcomeUnknownError } from './crm-request.errors';
 import { Package5Wave3CanonicalCutoverService } from '../package5-wave3/package5-wave3-canonical-cutover.service';
-import { ConnectCrmIntegrationDto } from './dto/connect-crm-integration.dto';
+import {
+  QualifiedConnectCrmIntegrationDto,
+  ActivateCrmIntegrationDto,
+  CrmOperationQueryDto,
+} from './dto/crm-operation.dto';
 import { DiscoverCrmCompaniesDto } from './dto/discover-crm-companies.dto';
 import { ListCrmJournalDto } from './dto/list-crm-journal.dto';
 import {
@@ -127,12 +131,12 @@ export class CrmIntegrationController {
     summary: 'Verify CRM credentials, store them encrypted and return preview',
   })
   async connect(
-    @Body() dto: ConnectCrmIntegrationDto,
+    @Body() dto: QualifiedConnectCrmIntegrationDto,
     @CurrentUser() actor: AuthenticatedUser,
     @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     const tenantId = this.tenantId(actor);
-    const result = await this.canonicalWave3.installCrmCredentials(
+    const result = await this.canonicalWave3.installQualifiedCrmCredentials(
       tenantId,
       actor,
       dto,
@@ -144,11 +148,10 @@ export class CrmIntegrationController {
       userId: actor.userId,
       action: 'crm.connection_staged',
       entityType: 'crm_integration',
-      entityId: result.connection.id,
+      entityId: result.receipt?.executionId ?? tenantId,
       metadata: {
-        provider: result.connection.provider,
-        service_count: result.preview.services.count,
-        staff_count: result.preview.staff.count,
+        status: result.status,
+        config_version: result.receipt?.configVersion ?? null,
       },
     });
 
@@ -551,16 +554,31 @@ export class CrmIntegrationController {
     return result;
   }
 
+  @Get('operation')
+  async operation(
+    @Query() query: CrmOperationQueryDto,
+    @CurrentUser() actor: AuthenticatedUser,
+  ) {
+    return this.canonicalWave3.crmOperationStatus(
+      this.tenantId(actor),
+      actor,
+      query.operation,
+      query.requestId,
+    );
+  }
+
   @Post('activate')
   @ApiOperation({ summary: 'Recheck and activate the staged CRM connection' })
   async activate(
+    @Body() dto: ActivateCrmIntegrationDto,
     @CurrentUser() actor: AuthenticatedUser,
     @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     const tenantId = this.tenantId(actor);
-    const result = await this.canonicalWave3.activateCrmIntegration(
+    const result = await this.canonicalWave3.activateQualifiedCrmIntegration(
       tenantId,
       actor,
+      dto.expectedVersion,
       idempotencyKey,
     );
 
@@ -569,8 +587,11 @@ export class CrmIntegrationController {
       userId: actor.userId,
       action: 'crm.activated',
       entityType: 'crm_integration',
-      entityId: result.connection.id,
-      metadata: { provider: result.connection.provider },
+      entityId: result.receipt?.executionId ?? tenantId,
+      metadata: {
+        status: result.status,
+        config_version: result.receipt?.configVersion ?? null,
+      },
     });
 
     return result;

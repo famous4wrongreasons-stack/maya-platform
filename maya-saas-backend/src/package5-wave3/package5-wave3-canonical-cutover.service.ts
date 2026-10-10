@@ -1,3 +1,11 @@
+import { ActionExecutionState } from '@prisma/client';
+import {
+  assertCrmConfiguration,
+  crmConfigurationVersion,
+  crmExpectedVersion,
+  crmOperationRequestId,
+} from '../crm/crm-configuration-version';
+import type { QualifiedConnectCrmIntegrationDto } from '../crm/dto/crm-operation.dto';
 import {
   BadRequestException,
   ConflictException,
@@ -67,6 +75,261 @@ export class Package5Wave3CanonicalCutoverService {
     return prepared.existingExecution
       ? this.executor.resume(prepared)
       : this.executor.execute(prepared);
+  }
+
+  /** Exact READ of the existing AE occurrence. Never builds or resumes an action. */
+  async crmOperationStatus(
+    tenantId: string,
+    actor: Package5Wave3Actor,
+    operation: 'install' | 'activate',
+    requestIdValue: string,
+  ) {
+    const requestId = crmOperationRequestId(requestIdValue);
+    if (operation !== 'install' && operation !== 'activate')
+      throw new BadRequestException('CRM operation invalid');
+    type Observation = Awaited<
+      ReturnType<Package5Wave3ShadowService['readCrmOperation']>
+    >;
+    let first: Observation = null;
+    let confirm: Observation = null;
+    let unavailable = false;
+    try {
+      first = await this.planner.readCrmOperation(
+        tenantId,
+        actor,
+        operation === 'install'
+          ? 'install_crm_credentials'
+          : 'activate_crm_integration',
+        operation === 'install' ? requestId : `${requestId}:activate`,
+      );
+      if (operation === 'activate')
+        confirm = await this.planner.readCrmOperation(
+          tenantId,
+          actor,
+          'confirm_crm_import',
+          `${requestId}:confirm`,
+        );
+    } catch (error) {
+      if (error instanceof ForbiddenException) throw error;
+      unavailable = true;
+    }
+    const observed = confirm ?? first;
+    const phase = observed ? (confirm ? 'confirm' : operation) : null;
+    let status: 'NOT_OBSERVED' | 'READY' | 'SUCCEEDED' | 'UNAVAILABLE' =
+      unavailable ? 'UNAVAILABLE' : observed ? 'READY' : 'NOT_OBSERVED';
+    let reason: string | null = unavailable
+      ? 'crm_operation_evidence_unavailable'
+      : null;
+    let receipt: {
+      contract: 'maya.crm-operation-receipt/1';
+      operation: 'install' | 'activate';
+      requestId: string;
+      phase: 'installed' | 'activated' | 'import_confirmed';
+      configVersion: string;
+      executionId: string;
+      atomicProjection: boolean;
+    } | null = null;
+    if (observed && !unavailable) {
+      const { execution, input } = observed;
+      const safe = this.record(execution.safeResultSummaryJson);
+      const committed = this.record(safe.crmCommit);
+      const expectedPhase = confirm
+        ? 'import_confirmed'
+        : operation === 'install'
+          ? 'installed'
+          : 'activated';
+      const qualified =
+        typeof input.sourceIdentityHash === 'string' &&
+        /^[a-f0-9]{64}$/.test(input.sourceIdentityHash);
+      if (!qualified) {
+        status = 'UNAVAILABLE';
+        reason = 'crm_operation_unqualified';
+      } else if (execution.state === ActionExecutionState.SUCCEEDED) {
+        if (
+          safe.actionExecutionId !== execution.id ||
+          committed.contract !== 'maya.crm-config-commit/1' ||
+          committed.phase !== expectedPhase ||
+          typeof committed.configVersion !== 'string' ||
+          !/^[a-f0-9]{64}$/.test(committed.configVersion) ||
+          committed.atomicProjection !== Boolean(confirm)
+        ) {
+          status = 'UNAVAILABLE';
+          reason = 'crm_operation_unqualified';
+        } else {
+          receipt = {
+            contract: 'maya.crm-operation-receipt/1',
+            operation,
+            requestId,
+            phase: expectedPhase,
+            configVersion: committed.configVersion,
+            executionId: execution.id,
+            atomicProjection: Boolean(confirm),
+          };
+          status = operation === 'install' || confirm ? 'SUCCEEDED' : 'READY';
+          reason =
+            status === 'READY' ? 'crm_import_confirmation_pending' : null;
+        }
+      } else if (execution.state !== ActionExecutionState.READY) {
+        status = 'UNAVAILABLE';
+        reason = 'crm_operation_not_resumable';
+      }
+    }
+    // Resolve current authority once more after every awaited receipt/current read.
+    const currentIntegration = await this.prisma.crmIntegration.findUnique({
+      where: { tenantId },
+    });
+    await this.planner.assertCrmOperationActor(tenantId, actor);
+    const configVersion = crmConfigurationVersion(currentIntegration);
+    return {
+      contract: 'maya.crm-operation-status/1' as const,
+      operation,
+      requestId,
+      status,
+      phase,
+      receipt,
+      current: {
+        configVersion,
+        matchesCurrentVersion:
+          receipt !== null && receipt.configVersion === configVersion,
+      },
+      reason,
+    };
+  }
+
+  async installQualifiedCrmCredentials(
+    tenantId: string,
+    actor: Package5Wave3Actor,
+    dto: QualifiedConnectCrmIntegrationDto,
+    idempotencyKey?: string,
+  ) {
+    const requestId = crmOperationRequestId(idempotencyKey);
+    const expectedVersion = crmExpectedVersion(dto.expectedVersion, true);
+    const token = dto.apiToken?.trim();
+    if (!token)
+      throw new BadRequestException({
+        message: 'Explicit credential required for installation',
+        error: { code: 'crm_credential_required' },
+      });
+    // Qualified request material is self-contained, never merged with a later connection.
+    const settings = normalizeCrmProviderSettings(
+      dto.provider,
+      dto.settingsJson ?? {},
+    );
+    const command: Package5Wave3Command = {
+      operation: 'install_crm_credentials',
+      sourceIntentRef: requestId,
+      expectedVersion,
+      provider: dto.provider,
+      encryptedApiToken: this.encryption.encrypt(token),
+      credentialFingerprint: this.encryption.opaqueReference(
+        'package5.wave3.crm-credential',
+        `${dto.provider}\0${token}`,
+      ),
+      baseUrl: null,
+      settingsJson: settings,
+    };
+    const prepared = await this.planner.build(
+      tenantId,
+      actor,
+      command,
+      'execute',
+    );
+    if (prepared.existingExecution?.state !== ActionExecutionState.SUCCEEDED) {
+      // Provider observation is ephemeral and occurs before AE admission. Failure
+      // here intentionally remains NOT_OBSERVED; recovery never invents a receipt.
+      await this.crm.previewCredentials(dto.provider, token, settings, null);
+      assertCrmConfiguration(
+        await this.prisma.crmIntegration.findUnique({ where: { tenantId } }),
+        expectedVersion,
+      );
+    }
+    await this.executor.execute(prepared);
+    const outcome = await this.crmOperationStatus(
+      tenantId,
+      actor,
+      'install',
+      requestId,
+    );
+    const current = await this.crm.getIntegrationStatus(tenantId);
+    await this.planner.assertCrmOperationActor(tenantId, actor);
+    const configVersion = current.connection?.configVersion ?? null;
+    return {
+      ...outcome,
+      configured: current.configured,
+      connection: current.connection,
+      current: {
+        configVersion,
+        matchesCurrentVersion:
+          outcome.receipt !== null &&
+          outcome.receipt.configVersion === configVersion,
+      },
+    };
+  }
+
+  async activateQualifiedCrmIntegration(
+    tenantId: string,
+    actor: Package5Wave3Actor,
+    expectedVersionValue: string,
+    idempotencyKey?: string,
+  ) {
+    const requestId = crmOperationRequestId(idempotencyKey);
+    const expectedVersion = crmExpectedVersion(expectedVersionValue)!;
+    const first = await this.planner.readCrmOperation(
+      tenantId,
+      actor,
+      'activate_crm_integration',
+      `${requestId}:activate`,
+    );
+    const confirmed = await this.planner.readCrmOperation(
+      tenantId,
+      actor,
+      'confirm_crm_import',
+      `${requestId}:confirm`,
+    );
+    for (const observed of [first, confirmed])
+      if (observed && observed.input.sourceIdentityHash !== expectedVersion)
+        throw new ConflictException({
+          message: 'Operation configuration version differs',
+          error: { code: 'crm_config_version_changed' },
+        });
+    if (confirmed?.execution.state !== ActionExecutionState.SUCCEEDED) {
+      assertCrmConfiguration(
+        await this.prisma.crmIntegration.findUnique({ where: { tenantId } }),
+        expectedVersion,
+      );
+      await this.execute(
+        tenantId,
+        actor,
+        { operation: 'activate_crm_integration', expectedVersion },
+        `${requestId}:activate`,
+      );
+      await this.execute(
+        tenantId,
+        actor,
+        { operation: 'confirm_crm_import', expectedVersion },
+        `${requestId}:confirm`,
+      );
+    }
+    const outcome = await this.crmOperationStatus(
+      tenantId,
+      actor,
+      'activate',
+      requestId,
+    );
+    const current = await this.crm.getIntegrationStatus(tenantId);
+    await this.planner.assertCrmOperationActor(tenantId, actor);
+    const configVersion = current.connection?.configVersion ?? null;
+    return {
+      ...outcome,
+      configured: current.configured,
+      connection: current.connection,
+      current: {
+        configVersion,
+        matchesCurrentVersion:
+          outcome.receipt !== null &&
+          outcome.receipt.configVersion === configVersion,
+      },
+    };
   }
 
   async updateExternalStaffScheduleDay(

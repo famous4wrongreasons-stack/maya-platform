@@ -1,3 +1,4 @@
+import { crmConfigurationVersion } from './crm-configuration-version';
 import {
   goodsSearchQuery,
   type GoodsSearchRead,
@@ -807,19 +808,28 @@ export class CrmService {
     };
   }
 
-  /** AC5 projection after one exact provider snapshot was accepted. */
+  /** AC5 projection after one exact provider snapshot was accepted.
+   * A supplied transaction owns all projection reads/writes and completion;
+   * failures must reach its caller so no partial import can be committed.
+   */
   async applyCanonicalImportProjection(
     tenantId: string,
     preview: CrmImportPreview,
-  ) {
+    db?: Prisma.TransactionClient,
+  ): Promise<void> {
     const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
     await this.reconcileCrmTeamAccess(
       scopedTenantId,
       preview.team.items.slice(0, 50),
+      db,
     );
-    await this.syncTenantPresentationFromCrm(scopedTenantId, preview.company);
+    await this.syncTenantPresentationFromCrm(
+      scopedTenantId,
+      preview.company,
+      db,
+    );
     const checkedAt = new Date();
-    await this.prisma.crmIntegration.update({
+    await (db ?? this.prisma).crmIntegration.update({
       where: { tenantId: scopedTenantId },
       data: {
         lastCheckedAt: checkedAt,
@@ -841,6 +851,7 @@ export class CrmService {
   private async syncTenantTimezoneFromCrm(
     tenantId: string,
     profile: CrmCompanyProfile | null,
+    db: Prisma.TransactionClient = this.prisma,
   ): Promise<void> {
     const timezone = profile?.timezone?.trim();
 
@@ -857,7 +868,7 @@ export class CrmService {
       return;
     }
 
-    const tenant = await this.prisma.tenant.findUnique({
+    const tenant = await db.tenant.findUnique({
       where: { id: tenantId },
       select: { defaultTimezone: true },
     });
@@ -868,7 +879,7 @@ export class CrmService {
 
     const previousTimezone = tenant?.defaultTimezone ?? null;
 
-    await this.prisma.tenant.update({
+    await db.tenant.update({
       where: { id: tenantId },
       data: { defaultTimezone: timezone },
     });
@@ -883,7 +894,7 @@ export class CrmService {
     // с прежним значением по умолчанию либо не задан вовсе. Филиал с собственным
     // поясом — законный случай для сети в разных регионах, и синхронизация с
     // одной компанией CRM не имеет права его перетирать.
-    const followers = await this.prisma.branch.updateMany({
+    const followers = await db.branch.updateMany({
       where: {
         tenantId,
         OR: [
@@ -927,11 +938,12 @@ export class CrmService {
   private async syncTenantBrandingFromCrm(
     tenantId: string,
     profile: CrmCompanyProfile | null,
+    db: Prisma.TransactionClient = this.prisma,
   ): Promise<void> {
     const logoUrl = this.safeRemoteLogoUrl(profile?.logo_url);
     if (!logoUrl) return;
 
-    const current = await this.prisma.brandingSettings.findUnique({
+    const current = await db.brandingSettings.findUnique({
       where: { tenantId },
       select: { logoUrl: true },
     });
@@ -939,7 +951,7 @@ export class CrmService {
     // A logo uploaded explicitly in MAYA always wins over the CRM copy.
     if (this.isTenantUploadedLogo(current?.logoUrl)) return;
 
-    await this.prisma.brandingSettings.upsert({
+    await db.brandingSettings.upsert({
       where: { tenantId },
       create: {
         tenantId,
@@ -969,8 +981,17 @@ export class CrmService {
   private async syncTenantPresentationFromCrm(
     tenantId: string,
     profile: CrmCompanyProfile | null,
+    db?: Prisma.TransactionClient,
   ): Promise<void> {
     if (!profile) return;
+
+    if (db) {
+      // The canonical import shares its caller's transaction: do not defer a
+      // failed projection or leave sibling writes running after rejection.
+      await this.syncTenantTimezoneFromCrm(tenantId, profile, db);
+      await this.syncTenantBrandingFromCrm(tenantId, profile, db);
+      return;
+    }
 
     try {
       await Promise.all([
@@ -5794,8 +5815,11 @@ export class CrmService {
    * провайдер убрал из состава команды, не даёт доступа.
    */
   /** Провайдер, подключённый у арендатора. Единственный источник квалификации. */
-  private async providerOfTenant(tenantId: string): Promise<string> {
-    const integration = await this.prisma.crmIntegration.findUnique({
+  private async providerOfTenant(
+    tenantId: string,
+    db: Prisma.TransactionClient = this.prisma,
+  ): Promise<string> {
+    const integration = await db.crmIntegration.findUnique({
       where: { tenantId },
       select: { provider: true },
     });
@@ -6579,6 +6603,7 @@ export class CrmService {
   }
 
   private serializeIntegration(integration: {
+    encryptedApiToken: string;
     id: string;
     tenantId: string;
     provider: string;
@@ -6595,6 +6620,7 @@ export class CrmService {
   }) {
     return {
       id: integration.id,
+      configVersion: crmConfigurationVersion(integration),
       tenant_id: integration.tenantId,
       provider: integration.provider,
       base_url: integration.baseUrl,
@@ -6727,8 +6753,10 @@ export class CrmService {
   private async reconcileCrmTeamAccess(
     tenantId: string,
     team: CrmTeamMember[],
+    db?: Prisma.TransactionClient,
   ): Promise<void> {
-    const accesses = await this.prisma.crmStaffAccess.findMany({
+    const reader = db ?? this.prisma;
+    const accesses = await reader.crmStaffAccess.findMany({
       where: { tenantId },
       select: {
         id: true,
@@ -6748,8 +6776,8 @@ export class CrmService {
     // 🔴 Сопоставление идёт по паре (провайдер, внешний id), а не по голой
     // строке. Именно голое равенство позволяло при смене CRM отдать права
     // нового человека старому — достаточно было совпадения числового id.
-    const provider = await this.providerOfTenant(tenantId);
-    const links = await this.prisma.staffProviderLink.findMany({
+    const provider = await this.providerOfTenant(tenantId, reader);
+    const links = await reader.staffProviderLink.findMany({
       where: { tenantId, provider },
       select: { id: true, staffId: true, externalId: true, unlinkedAt: true },
     });
@@ -6758,7 +6786,7 @@ export class CrmService {
     );
     const now = new Date();
 
-    await this.prisma.$transaction(async (tx) => {
+    const project = async (tx: Prisma.TransactionClient) => {
       for (const access of accesses) {
         const member = teamById.get(access.externalStaffId);
         if (this.isOwnerAccessRole(access.role)) {
@@ -6882,7 +6910,9 @@ export class CrmService {
           },
         });
       }
-    });
+    };
+    if (db) await project(db);
+    else await this.prisma.$transaction(project);
   }
 
   private isOwnerAccessRole(role: string): boolean {
