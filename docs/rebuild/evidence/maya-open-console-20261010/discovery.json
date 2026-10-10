@@ -1,0 +1,49 @@
+{
+  "contract": "maya.open-console-readonly-discovery/1",
+  "recordedAt": "2026-10-10T11:03:25.567753+00:00",
+  "sourceCommit": "972d21f14e6bfa92fa11d10a7f9386408e03652a",
+  "parentThread": "01a10b14-bd01-7513-8d9f-86c0c75010f5",
+  "authorization": {
+    "metadataReadAnswer": "Sentinel_dee4f07ef0e081919c571ebea8f4e987",
+    "metadataReadAnswerAt": "2026-10-10T09:49:14Z",
+    "consoleOpenedAnswer": "Sentinel_434a52c9919481918d145e6bafc0da0c",
+    "consoleOpenedAnswerAt": "2026-10-10T11:00:06Z"
+  },
+  "browserMetadataObserved": {
+    "Google Chrome": [
+      {
+        "window": 1,
+        "tab": 1,
+        "host": "console.yandex.cloud"
+      },
+      {
+        "window": 1,
+        "tab": 4,
+        "host": "cp.beget.com",
+        "activeInChrome": true
+      }
+    ],
+    "TerminalOpenTabs": 0,
+    "unrelatedTabMetadataRetained": false
+  },
+  "status": "BLOCKED_BROWSER_JAVASCRIPT_AUTOMATION_DISABLED",
+  "browserError": "Выполнение JavaScript через AppleScript отключено. Вид > Разработчикам > Разрешить JavaScript из событий Apple.",
+  "backendHostEstablished": false,
+  "backendAccountEstablished": false,
+  "backendConsoleSessionEstablished": false,
+  "passwordPromptObserved": null,
+  "pageContentObtained": false,
+  "serverCommandsExecuted": 0,
+  "mappingQueryExecuted": false,
+  "currentMappingEstablished": false,
+  "screenshotsTaken": 0,
+  "browserSettingsChanged": false,
+  "credentialsReadOrCopied": false,
+  "sshAttempts": 0,
+  "providerCalls": 0,
+  "modelCalls": 0,
+  "serverChanges": 0,
+  "websiteChanges": 0,
+  "automaticApprovalRejection": false,
+  "nextAction": "Owner enables the explicit Chrome Apple Events JavaScript permission if continuing through browser automation, then target host/account must be verified before the already authorized read-only query. No repeated server-scope approval is needed."
+}

@@ -61,3 +61,14 @@ Parent уточнил: прежнее ограничение «одна попы
 [Receipt](evidence/maya-beget-route-readonly-20261010/attempt.json), [наблюдение на Beget](evidence/maya-beget-route-readonly-20261010/route-observation.json), [точная команда](evidence/maya-beget-route-readonly-20261010/command.json), [qualification и минимальный следующий шаг](evidence/maya-beget-route-readonly-20261010/qualification.json), [hash inventory](evidence/maya-beget-route-readonly-20261010/artifact-hashes.json). Raw artifacts первой попытки сохранены без изменений; её широкий timeout marker остаётся неквалифицированным и не заменён результатом второго наблюдения. Локальные и remote timestamps записаны отдельно; длительности измерены monotonic clock.
 
 Проверены syntax локальных collectors и совпадение архивных bytes/hashes. Это documentation/transport checkpoint: новый продуктовый код, тесты приложения, real YCLIENTS/model acceptance и полный MAYA/C10 acceptance не заявляются. Следующих network attempts не запланировано.
+
+
+## Открытая владельцем консоль: обнаружение браузера после 11:00 UTC
+
+Владелец подтвердил «открыл» в **11:00:06 UTC**, `Sentinel_434a52c9919481918d145e6bafc0da0c`, для исполнения того же разрешённого read-only запроса через существующую серверную консоль. SSH-маршрут не повторялся.
+
+По metadata открытого Chrome найдены `console.yandex.cloud` (window1/tab1) и `cp.beget.com` (window1/tab4, active). **Точный backend host/account и авторизованная terminal session не установлены.** Наличие панели хостинга не выдано за вход на `89.169.160.55`. Terminal не содержит открытых вкладок. Нерелевантные вкладки не включены в evidence.
+
+Обе попытки whitelist DOM-проекции вернули встроенный отказ Chrome: **«Выполнение JavaScript через AppleScript отключено»**. Содержимое страниц не получено, наличие парольного prompt неизвестно. Это техническая настройка браузерной автоматизации, а не отказ SSH/backend или automatic approval review. Настройку не меняли и другой способ извлечения страницы не применяли. Скриншотов, чтения credentials/ключей/PII, серверных команд, SQL, provider calls и изменений — ноль.
+
+Минимальный следующий шаг для этого способа управления: владелец включает в Chrome **Вид → Разработчикам → Разрешить JavaScript из событий Apple**. После этого сначала проверяется точный target/account открытой консоли; при password prompt вход остаётся владельцу. Повторное разрешение на уже согласованный read-only server scope не требуется. [Sanitized discovery receipt](evidence/maya-open-console-20261010/discovery.json) и [hash](evidence/maya-open-console-20261010/artifact-hashes.json).
