@@ -1,17 +1,39 @@
 {
   "contract": "maya.registration-form-ui/1",
-  "status": "QUALIFIED_LOCAL_UI_CHECKPOINT",
+  "status": "QUALIFIED_LOCAL_UI_AND_HTTP_PG_PASS",
   "base": "ae2054f6ffdc6dc71776c64fdc7d7b706ee41570",
   "componentBrowserChecks": 63,
   "carrierTests": 9,
   "shellTests": 25,
   "ratchetCases": 117,
   "carrierTypesAndBuild": "PASS",
-  "actualBackendOnThisUi": "PENDING",
+  "actualBackendOnThisUi": "PASS",
   "collision": "Existing backend P2002 produces generic500; no safe field-specific retry added",
   "preview": "Static-only, no signup API; explicitly labelled; delivered separately from real backend",
   "realYclientsAcceptance": false,
   "ownerDatabaseAndKeys": "RETAINED_UNMODIFIED",
   "websiteProductionChanged": false,
-  "initialFailuresRetained": true
+  "initialFailuresRetained": true,
+  "actualRuntimeSource": "03875b23523a578fad13ec0e8f7035dcd4e5a66b",
+  "actual": {
+    "normalAppModule": true,
+    "freshPostgreSQLMigrations": true,
+    "currentReactBundleVerified": true,
+    "syntheticBusinesses": 2,
+    "browserDatabaseCheckpoints": 9,
+    "passwordLogins": 5,
+    "lostReplyAfterCommitRecovered": true,
+    "collisionHttpStatus": 500,
+    "collisionNewBusinessRows": 0,
+    "collisionAdditionalPendingActivation": 1,
+    "domainEffectTablesZero": 17,
+    "boundaryRefusals": 12,
+    "ownedCleanup": true
+  },
+  "limits": [
+    "Not real owner signup or YCLIENTS acceptance",
+    "Collision remains generic500/uncertain; safe server field error is still missing",
+    "No database restart in this new UI proof; earlier restart checkpoint remains historical",
+    "Chrome builtin sandbox preserved; OS-wide Chrome packet closure not qualified"
+  ]
 }

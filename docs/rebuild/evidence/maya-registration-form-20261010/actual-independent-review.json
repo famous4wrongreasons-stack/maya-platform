@@ -1,0 +1,31 @@
+{
+  "status": "QUALIFIED_PASS",
+  "reviewer": "checkpoint_review",
+  "method": "independent_read_only_source_and_evidence_review",
+  "blockers": [],
+  "runtimeSource": "03875b23523a578fad13ec0e8f7035dcd4e5a66b",
+  "sessionSourceBindingsVerified": 2015,
+  "proofFilesVerified": 3,
+  "gitBlobAndShaMismatches": 0,
+  "currentBuiltBundleMatches": true,
+  "verifiedBrowserDatabaseCheckpoints": 9,
+  "verifiedPasswordLogins": 5,
+  "canonicalBusinessDelta": 2,
+  "activationCompletedDelta": 2,
+  "activationPendingDelta": 1,
+  "effectTablesVerifiedZero": 17,
+  "routeRefusals403": 12,
+  "ownedCleanupVerified": true,
+  "sourceUnchangedVerified": true,
+  "limits": [
+    "No real owner signup or YCLIENTS acceptance",
+    "Fresh15min stage0 only; universal owner resume/migration not added",
+    "Collision remains generic500/uncertain/no retry",
+    "Reviewer did not execute services or tests"
+  ],
+  "evidenceSha256": {
+    "actual-parent.json": "f49757b92f797a13f488bd67999f12edc7ef46b51f1e649fcf9848a2862084e0",
+    "actual-browser.json": "c675ff529566c2bcdc40356888e76fe59d86a8bfeb60d155204a1f31f1238c81",
+    "actual-session-final.json": "e46952755be9cd4496ff8ce9f26a960714de5490ccc84da477f94fcbb633abc8"
+  }
+}

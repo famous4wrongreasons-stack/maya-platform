@@ -37,6 +37,12 @@ without completed registration. `owner-handoff-final-safe.json` contains only
 closed status fields. The live consent state was not observed. Existing owner
 database/key files and the earlier UNKNOWN failure were preserved.
 
-Current React + actual HTTP/PG proof is tracked separately and was pending when
-this UI source checkpoint was prepared. No website, production, provider, model,
-phone, or background-autonomy acceptance is claimed.
+The subsequent actual proof at `03875b23523a578fad13ec0e8f7035dcd4e5a66b` passed
+9 current React/HTTP/PG checkpoints: two synthetic businesses, five password logins,
+lost successful response recovered without a duplicate, and slug collision rollback
+with only one additional pending activation. `actual-parent.json` and
+`actual-browser.json` preserve evidence; `actual-session-final.json` records source
+bindings and clean owned shutdown. Seventeen domain-effect tables stayed empty.
+The first actual driver preflight failure (inet address representation) is retained.
+No website, production, provider, model, phone, or background-autonomy acceptance is
+claimed. See the runnable [owner registration profile](../../MAYA-LOCAL-REGISTRATION-HANDOFF-20261010.md).

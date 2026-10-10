@@ -1,0 +1,155 @@
+{
+  "contract": "maya.registration-actual-publication-scan/1",
+  "recordedAt": "2026-10-10T18:23:12.981816+00:00",
+  "verdict": "QUALIFIED_GO_FOR_EXACT_BYTE_MANIFEST",
+  "blockers": [],
+  "sourceCommit": "03875b23523a578fad13ec0e8f7035dcd4e5a66b",
+  "coverage": {
+    "incrementalFiles": 14,
+    "bytes": 816927,
+    "unchangedPreviouslyScannedFiles": 22,
+    "textOnly": true,
+    "gitleaksStrictFindings": 0,
+    "customSecretContactFindings": 0,
+    "websiteDesignProductionPathChanges": false,
+    "privateOwnerStateEnvironmentKeysRead": false,
+    "servicesTestsNetworkOrPushRun": false,
+    "repositoryEdited": false
+  },
+  "boundedFacts": {
+    "actualParentStatus": "PASS",
+    "actualBrowserStatus": "PASS",
+    "syntheticAccounts": true,
+    "browserDatabaseCheckpoints": 9,
+    "domainEffectTablesChecked": [
+      "CrmIntegration",
+      "CrmStaffAccess",
+      "Client",
+      "Appointment",
+      "ActionExecution",
+      "ActionExecutionIdempotencyBinding",
+      "AiApprovalRequest",
+      "AiToolExecution",
+      "Opportunity",
+      "AgentTask",
+      "OwnerReportRun",
+      "NativeFeedbackRequest",
+      "TeamMessage",
+      "ExpenseReminderRun",
+      "MarketingCampaign",
+      "MarketingDeliveryAttempt",
+      "Expense"
+    ],
+    "domainEffectTableCount": 17,
+    "domainEffectTablesZeroBeforeAndAfter": true,
+    "sourceBindings": 2015,
+    "fullSourceBindingsVerification": "Parent independently reports all2015 source bytes match; scanner checked closed field shape, source identity, archive bytes and dedicated proof-file hashes without repeating that full source audit.",
+    "dedicatedProofFileChecks": [
+      {
+        "path": "maya-carrier-react/test/local-onboarding-browser.probe.mjs",
+        "sha256Matches": true,
+        "gitBlobMatches": true
+      },
+      {
+        "path": "maya-chat-shell/test/cdp-verify.mjs",
+        "sha256Matches": true,
+        "gitBlobMatches": true
+      },
+      {
+        "path": "maya-saas-backend/scripts/local-onboarding-ui-proof.mjs",
+        "sha256Matches": true,
+        "gitBlobMatches": true
+      }
+    ],
+    "ownerStateUsed": false,
+    "rawCredentialsPiiOrProviderResponsesObserved": false,
+    "privatePathMetadata": "One scratch browser report path is metadata only; no private path was followed.",
+    "sessionCleanup": {
+      "clusterStopped": true,
+      "runtimeGroupAbsent": true
+    },
+    "actualQualification": "Current React / real local HTTP+PG with two synthetic businesses; no real owner signup or YCLIENTS acceptance.",
+    "collision": "500 with uncertain/no-repeat remains; no new business rows, one pending activation.",
+    "browserOsWidePacketClosure": "NOT_QUALIFIED",
+    "databaseRestartInThisProof": false,
+    "finalIndependentReviewIncluded": true
+  },
+  "limits": [
+    "Bounded static publication scan of listed bytes, not universal absence proof.",
+    "No functional checks or private-state reads performed by scanner.",
+    "Prior published/scanned unchanged files were not rescanned.",
+    "A metadata-only commit may include these exact bytes; later byte changes need a bounded delta scan."
+  ],
+  "byteManifest": [
+    {
+      "path": "docs/rebuild/MAYA-DELIVERY-PLAN-20261010.md",
+      "bytes": 48984,
+      "sha256": "eb6a90ca53daaa34ceb3d42f6830ebb9ef7df5087d1382de751c047ca30364db"
+    },
+    {
+      "path": "docs/rebuild/MAYA-FINAL-COMPLETION-MAP.md",
+      "bytes": 213767,
+      "sha256": "bfe850202f132e0041233a50795303e5890c627da1364ebd63c42195104d6d37"
+    },
+    {
+      "path": "docs/rebuild/MAYA-LOCAL-REGISTRATION-HANDOFF-20261010.md",
+      "bytes": 6085,
+      "sha256": "0902be9403291951741c0660616e8f11e476cc061c4d9795841cd1d543ddbf17"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/README.md",
+      "bytes": 3215,
+      "sha256": "678f08248cb2480594ae0650ca0d3f819104238fd8fd623985b3020a0da5ace1"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/actual-attempt-01.json",
+      "bytes": 581,
+      "sha256": "8cdd9818040f432697579e1b27cd89a38830087bb5bae8576179787eebd32a62"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/actual-browser.json",
+      "bytes": 7429,
+      "sha256": "c675ff529566c2bcdc40356888e76fe59d86a8bfeb60d155204a1f31f1238c81"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/actual-parent.json",
+      "bytes": 14954,
+      "sha256": "f49757b92f797a13f488bd67999f12edc7ef46b51f1e649fcf9848a2862084e0"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/actual-session-final.json",
+      "bytes": 484953,
+      "sha256": "e46952755be9cd4496ff8ce9f26a960714de5490ccc84da477f94fcbb633abc8"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/carrier-build.log",
+      "bytes": 185,
+      "sha256": "d8dc77471c282f50a9b51bffec629c5c351698c585148d28b919e18b4cf7ebc3"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/independent-source-review.json",
+      "bytes": 1014,
+      "sha256": "1d48ec7a929c16581c707ea9e14e5f5ec81779db7fc3d5638e0fc4c8ee2834f1"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/publication-scan.json",
+      "bytes": 7309,
+      "sha256": "e00b46e0ffa3b31ce2ce0286ed8c0754ff061001bd68bb98cee0be52f93e1a3a"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/summary.json",
+      "bytes": 1545,
+      "sha256": "80e7a15a64ebe7666127bc3246e23a1405d64ac30ccc43622eeb3c323677f6bd"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding-ui-proof.mjs",
+      "bytes": 25696,
+      "sha256": "0e8929c850756797454e37cf623a76bf7437c3ed972bafe37e7820a21eedd927"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-registration-form-20261010/actual-independent-review.json",
+      "bytes": 1210,
+      "sha256": "315751abf2a0333e40dae04729b446577e5f82fd78ddb3cb8e4b26431ecd632f"
+    }
+  ]
+}

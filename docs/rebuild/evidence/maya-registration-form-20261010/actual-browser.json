@@ -1,0 +1,304 @@
+{
+  "contract": "maya.local-onboarding.browser/1",
+  "mode": "prepare",
+  "status": "PASS",
+  "actualCurrentReact": true,
+  "bundleSha256": "e5cdcec53eb16c8eaa01cd6dc8d97e35c06303d6a3db1133f741398fd6774345",
+  "normalLocalWebHost": true,
+  "syntheticAccounts": true,
+  "authInjection": false,
+  "syntheticResponses": false,
+  "providerBrowserRequests": 0,
+  "modelBrowserRequests": 0,
+  "crmMutationRequests": 0,
+  "backendEffectsAndDatabaseRequireParentEvidence": true,
+  "checkpoints": [
+    {
+      "name": "success-created",
+      "account": "success",
+      "signupRequests": 1,
+      "activationRequests": 1,
+      "verifiedLogins": 0
+    },
+    {
+      "name": "success-crm-read",
+      "account": "success",
+      "signupRequests": 1,
+      "activationRequests": 1,
+      "verifiedLogins": 0,
+      "crmReadOutcome": "unconnected"
+    },
+    {
+      "name": "success-reload-login",
+      "account": "success",
+      "signupRequests": 1,
+      "activationRequests": 1,
+      "verifiedLogins": 1,
+      "crmReadOutcome": "unconnected"
+    },
+    {
+      "name": "success-signout-login",
+      "account": "success",
+      "signupRequests": 1,
+      "activationRequests": 1,
+      "verifiedLogins": 2,
+      "crmReadOutcome": "unconnected"
+    },
+    {
+      "name": "lost-reply-committed",
+      "account": "lost-reply",
+      "signupRequests": 1,
+      "activationRequests": 1,
+      "verifiedLogins": 0
+    },
+    {
+      "name": "lost-reply-recovered",
+      "account": "lost-reply",
+      "signupRequests": 1,
+      "activationRequests": 1,
+      "verifiedLogins": 1,
+      "crmReadOutcome": "unconnected"
+    },
+    {
+      "name": "lost-reply-reload-login",
+      "account": "lost-reply",
+      "signupRequests": 1,
+      "activationRequests": 1,
+      "verifiedLogins": 2,
+      "crmReadOutcome": "unconnected"
+    },
+    {
+      "name": "lost-reply-signout-login",
+      "account": "lost-reply",
+      "signupRequests": 1,
+      "activationRequests": 1,
+      "verifiedLogins": 3,
+      "crmReadOutcome": "unconnected"
+    },
+    {
+      "name": "slug-collision-rejected",
+      "account": "success",
+      "signupRequests": 1,
+      "activationRequests": 1,
+      "verifiedLogins": 0,
+      "collision": true,
+      "httpStatus": 500,
+      "errorCode": null
+    }
+  ],
+  "accounts": [
+    {
+      "key": "success",
+      "identityHash": "00e2704338ef1ebe0f8798f8849da08898393a953e865324c811bb5bfdda11e5",
+      "signupRequests": 1,
+      "activationRequests": 1,
+      "loginRequests": 2,
+      "logoutRequests": 1,
+      "verifiedLogins": 2,
+      "responseLossInjectedAfterCommit": false,
+      "crmReadOutcome": "unconnected",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/onboarding/trial-activations",
+          "status": 201,
+          "failed": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/onboarding/trial",
+          "status": 201,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/ai/conversation",
+          "status": 403,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/integrations/crm",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/branches",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/login",
+          "status": 201,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/ai/conversation",
+          "status": 403,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/integrations/crm",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/branches",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/logout",
+          "status": 201,
+          "failed": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/login",
+          "status": 201,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/ai/conversation",
+          "status": 403,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/integrations/crm",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/branches",
+          "status": 200,
+          "failed": false
+        }
+      ]
+    },
+    {
+      "key": "lost-reply",
+      "identityHash": "a06b33b7851cc35b7496480ce7d9104a070e00ff6a32bfa9a65d8f8865339e19",
+      "signupRequests": 1,
+      "activationRequests": 1,
+      "loginRequests": 3,
+      "logoutRequests": 1,
+      "verifiedLogins": 3,
+      "responseLossInjectedAfterCommit": true,
+      "crmReadOutcome": "unconnected",
+      "requests": [
+        {
+          "method": "POST",
+          "path": "/api/onboarding/trial-activations",
+          "status": 201,
+          "failed": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/onboarding/trial",
+          "status": null,
+          "failed": true
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/login",
+          "status": 201,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/ai/conversation",
+          "status": 403,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/integrations/crm",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/branches",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/login",
+          "status": 201,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/ai/conversation",
+          "status": 403,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/integrations/crm",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/branches",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/logout",
+          "status": 201,
+          "failed": false
+        },
+        {
+          "method": "POST",
+          "path": "/api/auth/login",
+          "status": 201,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/ai/conversation",
+          "status": 403,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/integrations/crm",
+          "status": 200,
+          "failed": false
+        },
+        {
+          "method": "GET",
+          "path": "/api/branches",
+          "status": 200,
+          "failed": false
+        }
+      ]
+    }
+  ],
+  "cleanup": {
+    "chromeClosed": true,
+    "privateProfileRemoved": true,
+    "clean": true
+  },
+  "collision": {
+    "httpStatus": 500,
+    "errorCode": null,
+    "ui": "uncertain_no_repeat",
+    "signupRequests": 1,
+    "activationRequests": 1,
+    "rollbackRequiresParentDatabaseEvidence": true
+  }
+}
