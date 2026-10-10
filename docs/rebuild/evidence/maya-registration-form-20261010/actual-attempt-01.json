@@ -1,0 +1,20 @@
+{
+  "status": "PREFLIGHT_REFUSED_BEFORE_BROWSER",
+  "source": "7688a1c511e32cbca4605ffebeeac69c4a5642e9",
+  "stage": "owned_PG_address_representation",
+  "sourceLine": 100,
+  "evidence": {
+    "inetTextMatches": false,
+    "hostMatches": true,
+    "directoryMatches": true
+  },
+  "diagnosis": "inet text includes address mask; use PostgreSQL host() for exact loopback comparison",
+  "browserStarted": false,
+  "businessSignupRequests": 0,
+  "launcherFinal": {
+    "status": "cancelled",
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "sourceUnchanged": true
+  }
+}

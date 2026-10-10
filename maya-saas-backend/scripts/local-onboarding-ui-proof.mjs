@@ -95,7 +95,7 @@ function pgReader(state, env) {
     return JSON.parse(result.stdout.trim());
   };
   const identity = () => {
-    const value = read(`SELECT json_build_object('database',current_database(),'user',current_user,'address',inet_server_addr()::text,'port',inet_server_port(),'directory',current_setting('data_directory'),'started',extract(epoch FROM pg_postmaster_start_time()),'system',(SELECT system_identifier::text FROM pg_control_system()),'readOnly',current_setting('default_transaction_read_only'));`);
+    const value = read(`SELECT json_build_object('database',current_database(),'user',current_user,'address',host(inet_server_addr()),'port',inet_server_port(),'directory',current_setting('data_directory'),'started',extract(epoch FROM pg_postmaster_start_time()),'system',(SELECT system_identifier::text FROM pg_control_system()),'readOnly',current_setting('default_transaction_read_only'));`);
     assert.equal(value.database, database.pathname.slice(1)); assert.equal(value.user, 'maya_local_onboarding');
     assert.equal(value.address, '127.0.0.1'); assert.equal(value.port, Number(database.port)); assert.equal(value.directory, cluster);
     assert.equal(Math.floor(Number(value.started)), Number(lines[2])); assert.equal(value.readOnly, 'on');
