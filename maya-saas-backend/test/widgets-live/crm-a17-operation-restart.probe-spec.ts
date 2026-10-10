@@ -6,7 +6,6 @@ import { createHash, randomUUID } from 'node:crypto';
 import { execFileSync, spawn } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createServer, request as nodeRequest } from 'node:http';
-import { createRequire } from 'node:module';
 import type {
   NextFunction,
   Request as ExpressRequest,
@@ -54,7 +53,11 @@ const syntheticTokens = [
   'SYNTHETIC_A17_FORBIDDEN',
   'SYNTHETIC_A17_COMPANY_MISSING',
 ] as const;
-const nativeRequire = createRequire(__filename);
+// Jest wraps imported createRequire with its CJS loader. Use Node's actual
+// built-in loader to execute the unchanged ESM profile and transport modules.
+const nativeRequire = process
+  .getBuiltinModule('module')
+  .createRequire(__filename);
 type ProfileRequest = ExpressRequest & {
   user?: { tenantId: string; userId: string; membershipStatus: string };
 };
