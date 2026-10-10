@@ -1,0 +1,221 @@
+{
+  "contract": "maya.local-owner-crm-activation-checkpoint/1",
+  "sourceHead": "bfc832425f031975ec6a59a7eb72bb40b967d000",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "scope": "existing_local_owner_setup_only",
+  "notProductionRelease": true,
+  "http": [
+    {
+      "route": "connect",
+      "method": "POST",
+      "status": 201,
+      "observedAt": "2026-10-10T23:16:30.141Z"
+    },
+    {
+      "route": "activate",
+      "method": "POST",
+      "status": 201,
+      "observedAt": "2026-10-10T23:19:16.198Z"
+    }
+  ],
+  "ui": {
+    "activationConfirmationObserved": true,
+    "activeConnectionObserved": true,
+    "savedStatusRereadActive": true,
+    "ownerLoginAfterApplicationRestart": "NOT_PERFORMED"
+  },
+  "provider": {
+    "completedGetCounts": {
+      "companies": 5,
+      "book_services": 5,
+      "company": 5,
+      "categories": 5,
+      "team": 5
+    },
+    "allObservedCompletedStatus200": true,
+    "traceEvents": 54,
+    "traceLimitReached": false,
+    "teamCompleteness": "management_collection_contract",
+    "countIsIndependentTotal": false,
+    "rawPayloadRetainedInRepository": false,
+    "finalRealSessionSummary": "missing_or_unclean"
+  },
+  "persisted": {
+    "integrations": [
+      {
+        "provider": "yclients",
+        "status": "active",
+        "verifiedAt": "2026-10-10T23:19:14.582",
+        "lastCheckedAt": "2026-10-10T23:19:16.181",
+        "lastSyncAt": "2026-10-10T23:19:16.181",
+        "lastErrorCode": null,
+        "lastErrorAt": null,
+        "createdAt": "2026-10-10T23:16:30.119",
+        "updatedAt": "2026-10-10T23:19:16.182",
+        "acceptedImportPresent": true
+      }
+    ],
+    "executions": [
+      {
+        "capability": "package5.wave3.install-crm-credentials.execute.v1",
+        "state": "SUCCEEDED",
+        "dryRun": false,
+        "revision": 2,
+        "finalOutcomeCode": "local_transaction_committed",
+        "finalizedAt": "2026-10-10T23:16:30.124",
+        "commitPhase": "installed",
+        "atomicProjection": false,
+        "receiptExecutionMatches": true
+      },
+      {
+        "capability": "package5.wave3.activate-crm-integration.execute.v1",
+        "state": "SUCCEEDED",
+        "dryRun": false,
+        "revision": 2,
+        "finalOutcomeCode": "local_transaction_committed",
+        "finalizedAt": "2026-10-10T23:19:14.597",
+        "commitPhase": "activated",
+        "atomicProjection": false,
+        "receiptExecutionMatches": true
+      },
+      {
+        "capability": "package5.wave3.confirm-crm-import.execute.v1",
+        "state": "SUCCEEDED",
+        "dryRun": false,
+        "revision": 2,
+        "finalOutcomeCode": "local_transaction_committed",
+        "finalizedAt": "2026-10-10T23:19:16.184",
+        "commitPhase": "import_confirmed",
+        "atomicProjection": true,
+        "receiptExecutionMatches": true
+      }
+    ],
+    "teamCounts": {
+      "staffAccess": [
+        {
+          "status": "pending_contact",
+          "count": 6
+        }
+      ],
+      "staffCount": 6,
+      "providerLinkCount": 6
+    }
+  },
+  "restart": {
+    "databasePersistence": "PASS",
+    "sameDatabaseSystemVerified": true,
+    "applicationNetworkClosedStartup": "PASS",
+    "health": [
+      {
+        "path": "/api/health",
+        "status": 200,
+        "bodySha256": "43ea514c737ab0372fb6a67802291298eecda87bc680f18bbc1e588aa344dfe8"
+      },
+      {
+        "path": "/api/health/ready",
+        "status": 200,
+        "bodySha256": "0d990d168c2cb30ea7aef9367c99924688ae2bc2f830c9beea3c30941b281157"
+      }
+    ],
+    "finalStatus": "stopped",
+    "finalProviderSummary": {
+      "calls": 0,
+      "refused": 0,
+      "routes": {}
+    },
+    "sourceUnchanged": true,
+    "samePrivateState": true,
+    "runtimeGroupAbsent": true,
+    "clusterStopped": true,
+    "readOnlyPostRestartMetadata": "PASS",
+    "newKeys": false,
+    "migrationApplied": false
+  },
+  "preservedFailures": [
+    {
+      "sourceReceipt": "/private/tmp/maya-owner-same-db-read-20261011-07/resume.json",
+      "code": "runtime_summary_missing",
+      "stage": "stopping",
+      "processExit": 1,
+      "scope": "final_provider_summary_missing; no_reinterpretation_as_clean_stop",
+      "savedDataUnaffected": true
+    },
+    {
+      "sourceReceipt": "/private/tmp/maya-owner-activated-keyless-restart-20261011-01/resume.json",
+      "code": "runtime_summary_missing",
+      "stage": "stopping",
+      "processExit": 1,
+      "scope": "final_provider_summary_missing; no_reinterpretation_as_clean_stop",
+      "savedDataUnaffected": true
+    }
+  ],
+  "boundaries": {
+    "paidModelCalls": 0,
+    "realOtpOrSms": 0,
+    "customerOrAppointmentReads": 0,
+    "providerBusinessWrites": 0,
+    "productionChanged": false,
+    "iPhoneChanged": false,
+    "entitlementGrant": false,
+    "fullServicesCatalogMaterialized": false,
+    "realBookingAcceptance": "NOT_ISSUED",
+    "fullMayaCertification": "NOT_ISSUED",
+    "pushAttempted": false
+  },
+  "privateArtifacts": [
+    {
+      "localPath": "/private/tmp/maya-owner-same-db-read-20261011-07/resume.json",
+      "sha256": "f08fdd45f50531352235517a55c786390f50d282090381c018bb828bec19486b",
+      "bytes": 532320,
+      "rawCommitted": false
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-yc-saved-20261011-01/summary.json",
+      "sha256": "98c1ac072f3ae2206a1aec9fe22f37877790c5d1483b7ec01046a8d34a84f7af",
+      "bytes": 1649,
+      "rawCommitted": false
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-yc-activated-20261011-01/summary.json",
+      "sha256": "8b945338b55e0d1d9dd46ce403d66d5b9a0b447cf64fb225388abe42a6db266f",
+      "bytes": 1892,
+      "rawCommitted": false
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-a17-metadata-20261011-07/result.json",
+      "sha256": "cbbe2b2ec947e1822e2cb6b16d8aff0a42a472e3cec6c8e2255f56306c824b64",
+      "bytes": 3405,
+      "rawCommitted": false
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-a17-metadata-20261011-08/result.json",
+      "sha256": "c97b905033eaeab8d09c24933e54cdcf115f26d885fc0f134e6fbc68106597db",
+      "bytes": 3405,
+      "rawCommitted": false
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-activated-keyless-restart-20261011-01/resume.json",
+      "sha256": "d71a39540eb38777714ca72a4309e094bccda5a7fc7f7048e39d6618498333ed",
+      "bytes": 511623,
+      "rawCommitted": false
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-activated-keyless-restart-20261011-02/resume.json",
+      "sha256": "4675aa47daf31beb018a409a3d33a7154eed8011a349882dfd1fa3ea1ddfc44c",
+      "bytes": 511681,
+      "rawCommitted": false
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-activated-keyless-restart-20261011-02/health-proof.json",
+      "sha256": "4368b064fe6a0049d95f33733649e28f92591ef58af5f6923d950871bda04112",
+      "bytes": 575,
+      "rawCommitted": false
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-a17-metadata-20261011-09/result.json",
+      "sha256": "45f4e0d4b39aa1a6205057e3a2d645be55f5a2dd68668033e3f93ed942763a3f",
+      "bytes": 3405,
+      "rawCommitted": false
+    }
+  ]
+}
