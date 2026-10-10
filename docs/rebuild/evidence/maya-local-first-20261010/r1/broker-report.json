@@ -1,0 +1,72 @@
+{
+  "contract": "maya.core-conversation-broker/1",
+  "mode": "DRY_HTTP",
+  "runId": "aa54242c-92fd-4516-adf4-b4af81b4ce98",
+  "candidateCommit": "f1e6f2f3f09b66fc944f6236551ff7746b93f8c3",
+  "profile": "core-react-diagnostic-20261009/1",
+  "limitsSha256": "754a7d2ba93f07c263330496c8675854ba6b245dae19c612062523c5d655b9e1",
+  "manifestSha256": "bb4fd54f3ad3834f6c69235bf3f54c11ccc61ede52c17bb15852d9fa2f9aabeb",
+  "paidAuthorized": false,
+  "credentialsLoaded": false,
+  "upstreamCalls": 0,
+  "upstreamCountMeaning": "attempts started; delivery may be unknown",
+  "startedAt": "2026-10-10T11:14:08.584Z",
+  "expiresAt": "2026-10-10T11:24:08.584Z",
+  "requests": [
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 1,
+      "bytes": 69071,
+      "bodySha256": "5f14ce49b5c1df3c17e03b7c7b7394f885bcb1327415e80e8d9cf46443002d6b",
+      "status": 200
+    },
+    {
+      "caseId": "core-client-create-followup",
+      "turn": 2,
+      "bytes": 69913,
+      "bodySha256": "6891ab2b6f86e76e76f13f965afdbb26c609c79226a0687bdfeb22050b190ee7",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 1,
+      "bytes": 93197,
+      "bodySha256": "06c4cf56f5b14432fddf559b0348836480366d5ea0832e538404922e1a10e128",
+      "status": 200
+    },
+    {
+      "caseId": "core-owner-compound-clarification",
+      "turn": 2,
+      "bytes": 94537,
+      "bodySha256": "4855f0079e00df4f550995cf800f889c9a98c145cd1d890921e1981b66fb78ee",
+      "status": 200
+    },
+    {
+      "caseId": "core-admin-private-data-refusal",
+      "turn": 1,
+      "bytes": 80825,
+      "bodySha256": "71e0b8e94ff6659e85a7473308e1258a302bc27e5dda4df9663d8504c9a45f18",
+      "status": 200
+    }
+  ],
+  "rejections": [],
+  "stopped": true,
+  "qualification": "CANNED_WIRING_ONLY_NOT_MODEL_QUALITY",
+  "recordedReplay": false,
+  "usageValidation": "OFFLINE_SYNTHETIC_NOT_ACTUAL_USAGE",
+  "replayFixture": null,
+  "port": 52715,
+  "stopReason": "SIGTERM",
+  "connectionsAtStop": 0,
+  "requestsAtStop": 0,
+  "stoppedAt": "2026-10-10T11:14:39.880Z",
+  "stats": {
+    "dialogs": 3,
+    "turns": 5,
+    "attempts": 5,
+    "inputTokens": 428023,
+    "outputTokens": 6000,
+    "reservedNanoUsd": 588750360,
+    "halted": false
+  }
+}

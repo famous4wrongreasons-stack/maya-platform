@@ -1,0 +1,30 @@
+{
+  "contract": "maya.local-first-checkpoint/1",
+  "candidate": "f1e6f2f3f09b66fc944f6236551ff7746b93f8c3",
+  "r1": "Dry transport only; all replies canned clarification; no domain acceptance",
+  "r2": "5 actual React HTTP201 rendered replies,3 canonical debug logins; scripted semantics and syntheticCRM; saved C9 revision1/evidence2; zero observed business writes and zero live model/CRM calls",
+  "viewer": {
+    "url": "http://127.0.0.1:8791/",
+    "server": "existing dev/serve.mjs",
+    "profile": "happy mock",
+    "currentReact": true,
+    "realBackend": false,
+    "realCRM": false,
+    "scope": "visual/manual UI only; separate from stopped actual AppModule/PG proof",
+    "login": "existing synthetic fixture account only",
+    "conversationHistory": "mock API GET /ai/conversation404; UI states history unsupported"
+  },
+  "credentialsPresence": {
+    "scope": "only current executor environment and current worktree env-file existence; no secret values or other process config inspected",
+    "YCLIENTS_PARTNER_TOKEN": false,
+    "CRM_ENCRYPTION_KEY": false,
+    "JWT_SECRET": false,
+    "DATABASE_URL": false,
+    "worktreeEnvFilesPresent": false,
+    "storedRealTenantApiToken": "unknown; no real local tenant DB/session established"
+  },
+  "uploadedFile": "Classified separately in private scratch outside Git as potentially sensitive YCLIENTS material; intended credential type and validity unconfirmed; no file bytes/values/hashes/transfer metadata included here; no configuration performed",
+  "serverLane": "paused by owner; not a local acceptance gate",
+  "liveYclientsAcceptance": false,
+  "fullMayaC10Acceptance": false
+}

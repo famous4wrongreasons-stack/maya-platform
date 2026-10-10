@@ -1,0 +1,31 @@
+{
+  "contract": "maya.local-react-mock-viewer/1",
+  "origin": "http://127.0.0.1:8791",
+  "synthetic": true,
+  "realBackend": false,
+  "realCrm": false,
+  "modelCalls": 0,
+  "status": "mock_login_pass",
+  "startedAt": "2026-10-10T11:17:56.914Z",
+  "composerVisible": true,
+  "visibleText": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nЭтот сервер пока не поддерживает восстановление переписки. Здесь начнётся новый разговор.\nТовар по фото накладной\n\nСообщение для MAYA\n↑",
+  "requests": [
+    {
+      "path": "/api/auth/email/start",
+      "method": "POST",
+      "status": 201
+    },
+    {
+      "path": "/api/auth/email/verify",
+      "method": "POST",
+      "status": 201
+    },
+    {
+      "path": "/api/ai/conversation",
+      "method": "GET",
+      "status": 404
+    }
+  ],
+  "browserClosed": true,
+  "finishedAt": "2026-10-10T11:17:58.033Z"
+}
