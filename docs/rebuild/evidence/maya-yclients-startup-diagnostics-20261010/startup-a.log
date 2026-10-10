@@ -1,0 +1,7 @@
+backend-build
+react-build
+initdb
+pg-start
+createdb
+migrations
+{"stage":"launcher","outcome":"failed","code":"child_boot_failed"}

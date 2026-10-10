@@ -1,0 +1,45 @@
+✔ macOS injected encoding metadata has a finite exception, not general environment inheritance (1.537958ms)
+✔ environment construction ignores inherited credentials, loaders, proxies and DB (0.872667ms)
+✔ runtime validator accepts explicit local development; production HTTP prohibition remains intact (89.660458ms)
+✔ profile refuses altered scheduler, external DB, reused key or provider environment (1.759667ms)
+✔ admits exact standard onboarding/password routes for existing owners (0.157375ms)
+✔ direct-backend fence rejects other owners, ambiguous routes, query and body variants (0.08325ms)
+✔ web relay and direct backend reject cross-origin effects before Origin is dropped (0.072459ms)
+✔ fresh owned PG plan omits seeds/fixtures and migrations use controlled empty cwd (2.141917ms)
+✔ private state cannot be existing or enter the repository through a symlink (0.8565ms)
+✔ restart metadata requires the exact completed launcher session and unchanged committed source (1.377375ms)
+✔ runtime diagnostics discard arbitrary errors and accept only closed stage/code records (0.757458ms)
+✔ diagnostic runtime command enforces per-process network closure and exact public fixture (2.965125ms)
+✔ separate real-read profile excludes inherited credentials and cannot weaken stage0 (0.482125ms)
+✔ only existing exact A17 install/activate/status and ordinary onboarding are admitted (0.318625ms)
+✔ native request destination refuses redirects, other tenants companies, writes, client/record and bookable-only team (0.295334ms)
+✔ team completeness rejects truncated, paginated, duplicate, unknown or bookable-only evidence (8.944166ms)
+✔ zero external calls without explicit current authenticated action; close and revocation refuse (1.393208ms)
+✔ size/call bounds and poisoned incomplete staff do not fall through to native fallback (5.309042ms)
+✔ provider denial text is stripped; redirect:error and bounded signal reach transport (0.348833ms)
+✔ actual native adapter setup methods execute through the exact read guard with synthetic wire data (272.793833ms)
+✔ read session reuses exact preparation and cleanup without changing stage 0 (3.157583ms)
+✔ all finite read-profile sources are explicitly bound and landing uses current form (0.119209ms)
+✔ diagnostic mode is fixed to one minute and selects the public constant without owner input (0.4195ms)
+✔ safe diagnostic keeps the first failure when cleanup also fails (0.242125ms)
+✔ runtime status before ready cannot be mistaken for application readiness (0.163792ms)
+✔ owner cancellation and relay startup retain distinct outcomes without hiding cleanup failure (0.063167ms)
+✔ closed runtime failure retains its safe stage and cause through cleanup (0.126041ms)
+✔ raw or oversized IPC is refused without retaining its content (0.221541ms)
+✔ persistable preparation environment has no inherited partner or user credentials (0.963792ms)
+✔ local web CSP and no-store headers override shared static/relay values (0.17525ms)
+✔ partner shape is bounded printable ASCII without comma, whitespace or controls (0.075041ms)
+✔ runtime summary projects only closed bounded route-kind counters (0.122958ms)
+✔ hidden prompt returns exact explicit TTY bytes without echo and restores terminal (0.365333ms)
+✔ hidden prompt refuses prebuffer, encoding or another reader before enabling raw input (0.238333ms)
+✔ hidden prompt refuses non-TTY, malformed, oversized and multiple values (0.593125ms)
+✔ hidden prompt cancels on Ctrl-C, Ctrl-D, EOF and abort without echo (0.204208ms)
+✔ hidden prompt has a finite deadline and preserves an already-raw terminal (6.472625ms)
+ℹ tests 37
+ℹ suites 0
+ℹ pass 37
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 335.6565

@@ -1,0 +1,9 @@
+backend-build
+react-build
+initdb
+pg-start
+createdb
+migrations
+Network-closed diagnostic session ready: http://127.0.0.1:62739/__local-yclients-read
+No owner credential was requested. Only health reads are admitted; no provider network.
+Owned setup-read session stopped. Private database and service keys retained; partner token was not persisted by the launcher.
