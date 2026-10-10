@@ -1,0 +1,42 @@
+{
+  "contract": "maya.native-console-followup/1",
+  "recordedAt": "2026-10-10T11:11:22.027760+00:00",
+  "status": "NATIVE_GUI_AVAILABLE_HOSTING_PANEL_MAINTENANCE_NO_TARGET_CONSOLE",
+  "attemptedTools": [
+    {
+      "tool": "ALL_TOOLS discovery",
+      "result": "No callable native CUA/Simulator or connected browser-extension tools in this execution context; installed extension absence not claimed."
+    },
+    {
+      "tool": "skills.list executor",
+      "result": "Empty skill list."
+    },
+    {
+      "tool": "System Events UI elements enabled / AXIsProcessTrusted",
+      "result": "true / true"
+    },
+    {
+      "tool": "CGPreflightScreenCaptureAccess via CoreGraphics ctypes",
+      "result": false,
+      "screenCaptureAttempted": false
+    },
+    {
+      "tool": "System Events native Accessibility tree",
+      "result": "Available. Beget active page is Управление DNS; no backend terminal established."
+    },
+    {
+      "tool": "System Events native tab click and whitelist AX read",
+      "result": "Selected existing console.yandex.cloud tab; visible page: The service is temporarily unavailable. Technical work is underway. Try connecting later."
+    }
+  ],
+  "temporaryAccessibilityPresentation": "AXEnhancedUserInterface false -> true -> false; no security permission changed",
+  "backendHostOrAccountEstablished": false,
+  "serverCommandsExecuted": 0,
+  "mappingQueryExecuted": false,
+  "sshAttempts": 0,
+  "providerOrModelCalls": 0,
+  "screenshotsTaken": 0,
+  "credentialsReadOrCopied": false,
+  "serverOrWebsiteChanges": false,
+  "nextMinimalAction": "Open the actual console for backend 89.169.160.55 when the hosting console is available. Existing native GUI works; enabling Chrome JavaScript from Apple Events is not required."
+}
