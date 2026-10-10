@@ -16,6 +16,8 @@ import { goodsPhotoQuery, projectGoodsPhotoContext, projectGoodsPhotoPreview, pr
 import type { GoodsPhotoFile, GoodsPhotoFailure, GoodsPhotoProposal, GoodsPhotoRequestContext, GoodsPhotoResponse } from './types.ts';
 import { crmSetupBody, crmSetupKey, crmConfigVersion, projectCrmSetup, projectCrmOperation } from './crm-setup.ts';
 import type { CrmSetupBody, CrmSetupInstall, CrmSetupSnapshot, CrmSetupFailure, CrmOperationLocator, CrmOperationStatus, CrmSetupCompletion } from './types.ts';
+import { projectTrialActivation, projectTrialSignup, trialSignupBody } from './onboarding.ts';
+import type { OnboardingInput, OnboardingFailure, TrialActivationProjection, TrialSignupProjection } from './types.ts';
 import { API_BASE } from './endpoint.ts';
 import {
   errorCode,
@@ -74,6 +76,8 @@ const PATHS = {
   emailStart: '/auth/email/start',
   emailVerify: '/auth/email/verify',
   login: '/auth/login',
+  onboardingActivation: '/onboarding/trial-activations',
+  onboardingSignup: '/onboarding/trial',
   refresh: '/auth/refresh',
   logout: '/auth/logout',
   chat: '/ai/chat',
@@ -109,6 +113,8 @@ export const TRANSCRIBE_TIMEOUT_MS = 30_000;
 export const DEFAULT_RETRY_AFTER_SEC = 60;
 
 type RequestBody =
+  | { readonly source: 'web' }
+  | { readonly trialActivationToken: string; readonly name: string; readonly slug: string; readonly ownerEmail: string; readonly password: string; readonly branchName: string; readonly branchTimezone: string; readonly calendarSource: 'external' }
   | FormData
   | (GoodsPhotoRequestContext & { readonly query: string })
   | (GoodsPhotoRequestContext & { readonly goods_id: string })
@@ -320,6 +326,30 @@ export async function passwordLogin(request: PasswordLoginRequest, timeoutMs: nu
     return value === null ? fail({ state: 'unexpected_response', status: ex.status }) : { ok: true, value };
   }
   return fail(signInFailure('login', ex));
+}
+
+/** Public canonical onboarding; no auth refresh, automatic retry, provider or feature grants. */
+export async function createTrialActivation(signal: AbortSignal, timeoutMs: number): Promise<Outcome<TrialActivationProjection, OnboardingFailure>> {
+  const ex = await exchange('onboardingActivation', { source: 'web' }, null, signal, timeoutMs);
+  if (ex.kind === 'response' && isSuccess(ex.status)) {
+    const value = projectTrialActivation(ex.body);
+    return value === null ? fail({ reason: 'unavailable' }) : { ok: true, value };
+  }
+  if (ex.kind === 'response' && ex.status === 403 && errorCode(ex.body) === 'self_serve_signup_disabled') return fail({ reason: 'closed' });
+  if (ex.kind === 'response' && ex.status === 429) return fail({ reason: 'rate_limited', retryAfterSec: ex.retryAfterSec ?? errorRetryAfter(ex.body) ?? DEFAULT_RETRY_AFTER_SEC });
+  return fail({ reason: 'unavailable' });
+}
+
+export async function createTrialSignup(input: OnboardingInput, activation: TrialActivationProjection, signal: AbortSignal, timeoutMs: number): Promise<Outcome<TrialSignupProjection, OnboardingFailure>> {
+  const body = trialSignupBody(input, activation.token);
+  if (body === null) return fail({ reason: 'uncertain' });
+  const ex = await exchange('onboardingSignup', body, null, signal, timeoutMs);
+  if (ex.kind === 'response' && isSuccess(ex.status)) {
+    const value = projectTrialSignup(ex.body, input, activation);
+    if (value !== null) return { ok: true, value };
+  }
+  // Bootstrap commits before session issuance. Even a failure can mean the business exists.
+  return fail({ reason: 'uncertain' });
 }
 
 // ── the first run: find a business, then hand the browser to Telegram ─────────────────────

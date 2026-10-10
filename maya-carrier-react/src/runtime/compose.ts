@@ -193,6 +193,7 @@ export const voice = voiceMachine;
 cancelPrivacyVoice = () => voiceMachine.cancel();
 
 export const session = net.session;
+export const onboarding = net.onboarding;
 export const conversation = runtime.conversation;
 export const goodsPhoto = runtime.goodsPhoto;
 export const privacy = runtime.privacy;
@@ -211,6 +212,7 @@ export const personalBooking = createPersonalBooking({ transport: net.transport,
 export const landFragment = (): void => void runtime.landFragment();
 
 export const dispose = (): void => {
+  onboarding.dispose();
   localCrmSetup.dispose();
   personalBooking.dispose();
   voiceMachine.dispose();

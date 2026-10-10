@@ -37,6 +37,50 @@ export interface PasswordLoginRequest {
   readonly password: string;
 }
 
+/** Finite standard signup fields; calendar source is fixed to the existing external CRM flow. */
+export interface OnboardingInput {
+  readonly name: string;
+  readonly slug: string;
+  readonly ownerEmail: string;
+  readonly password: string;
+  readonly branchName: string;
+  readonly branchTimezone: string;
+}
+export type OnboardingField = keyof OnboardingInput;
+export type OnboardingFailure =
+  | { readonly reason: 'invalid'; readonly field: OnboardingField }
+  | { readonly reason: 'closed' | 'unavailable' | 'expired' | 'uncertain' }
+  | { readonly reason: 'rate_limited'; readonly retryAfterSec: number };
+export interface TrialActivationProjection {
+  readonly id: string;
+  readonly token: string;
+  readonly expiresAt: string;
+  readonly days: number;
+}
+export interface TrialSignupProjection {
+  readonly grant: SessionGrant;
+  readonly display: SignInDisplay;
+  readonly trialDays: number;
+  readonly trialEndsAt: string;
+}
+/** No activation/session credential, submitted password or feature permission reaches a view. */
+export interface OnboardingView {
+  readonly phase: 'idle' | 'creating' | 'completed' | 'failed' | 'uncertain';
+  readonly busy: boolean;
+  readonly failure: OnboardingFailure | null;
+  readonly display: SignInDisplay | null;
+  readonly trialDays: number | null;
+  readonly trialEndsAt: string | null;
+}
+export interface OnboardingPort {
+  view(): OnboardingView;
+  subscribe(listener: (view: OnboardingView) => void): () => void;
+  submit(input: OnboardingInput, confirmed: boolean): Promise<void>;
+  cancel(): void;
+  finish(): void;
+  dispose(): void;
+}
+
 /** `POST /auth/refresh` — `RefreshSessionDto`. Built only by the session module. */
 export interface RefreshRequest {
   readonly refreshToken: string;

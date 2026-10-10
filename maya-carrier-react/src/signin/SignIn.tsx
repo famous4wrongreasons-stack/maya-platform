@@ -27,7 +27,8 @@ import type {
   SignInFailure,
 } from '../../../maya-chat-shell/src/net/types.ts';
 import type { SignInStep, TelegramLanding } from '../../../maya-chat-shell/src/shell/ports.ts';
-import { session } from '../runtime/compose.ts';
+import { StandardOnboarding, PasswordSignIn } from './StandardOnboarding.tsx';
+import { onboarding, session } from '../runtime/compose.ts';
 import {
   failureSentence,
   firstRunSentence,
@@ -56,6 +57,8 @@ export function SignIn({
   const dark = t.dark;
   const [term, setTerm] = useState('');
   const [emailMode, setEmailMode] = useState(false);
+  const [extraMode, setExtraMode] = useState<'signup' | 'password' | null>(null);
+  const [recovery, setRecovery] = useState({ slug: '', email: '' });
   const [matches, setMatches] = useState<Matches>([]);
   const [failure, setFailure] = useState<Failure>(null);
   const [busy, setBusy] = useState(false);
@@ -151,6 +154,9 @@ export function SignIn({
         : emailFailure !== null
           ? failureSentence(emailFailure)
           : signedOutSentence(reason);
+
+  if (extraMode === 'signup') return <StandardOnboarding port={onboarding} t={t} back={(slug, address) => { setRecovery({ slug, email: address }); setExtraMode('password'); }} />;
+  if (extraMode === 'password') return <PasswordSignIn t={t} initialSlug={recovery.slug} initialEmail={recovery.email} signIn={session.signInPassword} back={() => setExtraMode(null)} />;
 
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: t.bg }}>
@@ -476,6 +482,8 @@ export function SignIn({
           </>
         )}
 
+        <button type="button" disabled={busy || landing.state === 'running'} onClick={() => setExtraMode('password')} style={{ minHeight: 48, borderRadius: 24, background: 'transparent', color: t.ink, fontSize: 16 }}>Войти по паролю</button>
+        <button type="button" disabled={busy || landing.state === 'running'} onClick={() => setExtraMode('signup')} style={{ minHeight: 48, borderRadius: 24, background: 'transparent', color: t.ink, fontSize: 16 }}>Создать бизнес</button>
         {sentence === null ? null : (
           <p
             role="status"

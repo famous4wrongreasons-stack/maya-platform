@@ -5,8 +5,9 @@
 // The access token is never decoded (its `role` claim is never read): its expiry is
 // `receivedAt + expires_in`. The tenant is the one the server bound at sign-in.
 //
-// `createNet()` hands out two objects and keeps the rest private:
+// `createNet()` hands out three objects and keeps the rest private:
 //   session    — shaped as `shell/ports.ts` `SessionPort`: sign-in, sign-out, the signed-in view
+//   onboarding — explicit standard signup; uncertain creation recovers through normal login
 //   transport  — shaped as `shell/ports.ts` `Transport`: `/ai/chat` and `/ai/transcribe`
 // The bearer reaches `client.ts` through an internal `Authorizer`; no token is ever exposed.
 //
@@ -17,6 +18,8 @@ import {
   REQUEST_TIMEOUT_MS,
   TRANSCRIBE_TIMEOUT_MS,
   createTransport,
+  createTrialActivation,
+  createTrialSignup,
   emailStart,
   emailVerify,
   logoutSession,
@@ -27,6 +30,8 @@ import {
   telegramStart,
 } from './client.ts';
 import type { Authorization, Authorizer, RefreshResult, Timeouts } from './client.ts';
+import { onboardingInput } from './onboarding.ts';
+import type { OnboardingPort, OnboardingView } from './types.ts';
 import type { BusinessChoice, BusinessMatch, FirstRunFailure, SessionGrant, SignedOutReason, SignInDisplay, SignInFailure, TelegramCallback } from './types.ts';
 
 /** A refresh starts when the access token has less than this left. */
@@ -247,7 +252,8 @@ export function createNet(options: NetOptions = {}) {
     return grant;
   };
 
-  const signIn = (issued: SessionGrant, display: SignInDisplay): void => {
+  const signIn = (issued: SessionGrant, display: SignInDisplay, fromOnboarding = false): void => {
+    if (!fromOnboarding) cancelOnboarding(true);
     // Every new login ends the previous local epoch, even when display names
     // happen to match. All carriers clear old context before the new grant.
     if (grant !== null) {
@@ -327,6 +333,80 @@ export function createNet(options: NetOptions = {}) {
     },
   };
 
+  let authIntent = 0;
+  let onboardingGeneration = 0;
+  let onboardingAbort: AbortController | null = null;
+  let onboardingDisposed = false;
+  let signupDispatched = false;
+  // Once a signup may have reached the server, recovery is normal login, never new signup.
+  let signupUncertain = false;
+  const idleOnboarding = (): OnboardingView => ({ phase: 'idle', busy: false, failure: null, display: null, trialDays: null, trialEndsAt: null });
+  let onboardingView = idleOnboarding();
+  const onboardingListeners = new Set<(view: OnboardingView) => void>();
+  const publishOnboarding = (view: OnboardingView): void => {
+    onboardingView = view;
+    for (const listener of [...onboardingListeners]) {
+      if (onboardingView !== view) break;
+      try { listener(view); }
+      catch (error) { setTimeout(() => { throw error; }, 0); }
+    }
+  };
+  const cancelOnboarding = (clearCompleted = false): void => {
+    if (!clearCompleted && onboardingView.phase === 'completed') return;
+    authIntent += 1;
+    onboardingGeneration += 1;
+    onboardingAbort?.abort();
+    onboardingAbort = null;
+    if (signupDispatched) signupUncertain = true;
+    signupDispatched = false;
+    publishOnboarding(signupUncertain ? { ...idleOnboarding(), phase: 'uncertain', failure: { reason: 'uncertain' } } : idleOnboarding());
+  };
+  const onboarding: OnboardingPort = {
+    view: () => onboardingView,
+    subscribe(listener) { onboardingListeners.add(listener); return () => { onboardingListeners.delete(listener); }; },
+    async submit(input, confirmed) {
+      if (onboardingDisposed || grant !== null || onboardingView.busy || signupUncertain || onboardingView.phase === 'completed' || !confirmed) return;
+      const parsed = onboardingInput(input);
+      if (!parsed.ok) { publishOnboarding({ ...idleOnboarding(), phase: 'failed', failure: parsed.failure }); return; }
+      const intent = ++authIntent;
+      const generation = ++onboardingGeneration;
+      const abort = new AbortController();
+      onboardingAbort = abort;
+      const current = (): boolean => !onboardingDisposed && intent === authIntent && generation === onboardingGeneration && !abort.signal.aborted && grant === null;
+      publishOnboarding({ ...idleOnboarding(), phase: 'creating', busy: true });
+      if (!current()) return;
+      const activation = await createTrialActivation(abort.signal, timeouts.requestMs);
+      if (!current()) return;
+      if (!activation.ok || Date.parse(activation.value.expiresAt) <= now()) {
+        onboardingAbort = null;
+        publishOnboarding({ ...idleOnboarding(), phase: 'failed', failure: activation.ok ? { reason: 'expired' } : activation.failure });
+        return;
+      }
+      signupDispatched = true;
+      const result = await createTrialSignup(parsed.value, activation.value, abort.signal, timeouts.requestMs);
+      if (!current()) return;
+      signupDispatched = false;
+      onboardingAbort = null;
+      if (!result.ok || !(Date.parse(result.value.grant.refreshExpiresAt) > now()) || !(Date.parse(result.value.trialEndsAt) > now())) {
+        signupUncertain = true;
+        publishOnboarding({ ...idleOnboarding(), phase: 'uncertain', failure: { reason: 'uncertain' } });
+        return;
+      }
+      // The successful form may unmount synchronously on session publication. Its cleanup must
+      // see completion, not cancel an in-flight signup. Publish only after the private install;
+      // sign-out/dispose from a session subscriber still wins via the generation guard.
+      const completed: OnboardingView = { phase: 'completed', busy: false, failure: null, display: result.value.display,
+        trialDays: result.value.trialDays, trialEndsAt: result.value.trialEndsAt };
+      onboardingView = completed;
+      signIn(result.value.grant, result.value.display, true);
+      if (onboardingDisposed || intent !== authIntent || generation !== onboardingGeneration || abort.signal.aborted || grant === null) return;
+      publishOnboarding(completed);
+    },
+    cancel: () => cancelOnboarding(),
+    finish() { if (onboardingView.phase === 'completed') publishOnboarding(idleOnboarding()); },
+    dispose() { onboardingDisposed = true; cancelOnboarding(true); onboardingListeners.clear(); },
+  };
+
   const session = {
     view(): SessionSnapshot {
       return snapshot;
@@ -351,9 +431,12 @@ export function createNet(options: NetOptions = {}) {
      * that runs here: on success this page is leaving, so no session is installed on this side.
      */
     async startTelegram(tenantSlug: string): Promise<TelegramOutcome> {
+      cancelOnboarding(true);
+      const intent = authIntent;
       const business = tenantSlug.trim();
       if (business === '') return { step: 'failed', failure: { state: 'business_unavailable' } };
       const r = await telegramStart(business, webCallbackUrl, timeouts.requestMs);
+      if (intent !== authIntent || onboardingDisposed) return { step: 'failed', failure: { state: 'no_connection' } };
       if (!r.ok) return { step: 'failed', failure: r.failure };
       // Recorded BEFORE the browser goes anywhere: on iOS the provider's page opens outside this
       // web view and the callback can arrive the moment it closes.
@@ -379,6 +462,8 @@ export function createNet(options: NetOptions = {}) {
      * validated, or this page's own URL — it is the same three strings and the same path from here.
      */
     async completeTelegram(payload: unknown): Promise<TelegramLandingOutcome> {
+      cancelOnboarding(true);
+      const intent = authIntent;
       const callback = readCallback(payload);
       const expected = pendingTelegram;
       // Spent on sight, before anything can fail: whatever happens next, a second delivery of the
@@ -394,6 +479,7 @@ export function createNet(options: NetOptions = {}) {
       if (callback.code === null) return refuse({ state: 'telegram_declined' });
       setLanding({ state: 'running' });
       const r = await telegramComplete(expected, callback.code, timeouts.requestMs);
+      if (intent !== authIntent || onboardingDisposed) return { step: 'failed', failure: { state: 'no_connection' } };
       if (!r.ok) return refuse(r.failure);
       signIn(r.value.grant, r.value.display);
       setLanding({ state: 'none' });
@@ -401,14 +487,19 @@ export function createNet(options: NetOptions = {}) {
     },
 
     async startEmail(email: string): Promise<SignInOutcome> {
+      cancelOnboarding(true);
+      const intent = authIntent;
       const address = email.trim();
       if (!EMAIL_SHAPE.test(address)) return failed({ state: 'field_invalid', field: 'email' });
       const r = await emailStart({ email: address }, timeouts.requestMs);
+      if (intent !== authIntent || onboardingDisposed) return failed({ state: 'no_connection' });
       return r.ok ? { step: 'code_sent' } : failed(r.failure);
     },
 
     /** `tenantSlug` is null on first verify and the chosen `businesses[].slug` on re-verify (echoed as is). */
     async verifyEmail(email: string, code: string, tenantSlug: string | null): Promise<SignInOutcome> {
+      cancelOnboarding(true);
+      const intent = authIntent;
       const address = email.trim();
       const digits = code.trim();
       if (!EMAIL_SHAPE.test(address)) return failed({ state: 'field_invalid', field: 'email' });
@@ -418,6 +509,7 @@ export function createNet(options: NetOptions = {}) {
         tenantSlug === null ? { email: address, code: digits } : { email: address, code: digits, tenantSlug },
         timeouts.requestMs,
       );
+      if (intent !== authIntent || onboardingDisposed) return failed({ state: 'no_connection' });
       if (!r.ok) return failed(r.failure);
       if (r.value.next_step === 'select_business') return { step: 'select_business', businesses: r.value.businesses };
       signIn(r.value.grant, r.value.display);
@@ -429,12 +521,15 @@ export function createNet(options: NetOptions = {}) {
      * request (V2-6), then the email shape and the password length, in form order.
      */
     async signInPassword(tenantSlug: string, email: string, password: string): Promise<SignInOutcome> {
+      cancelOnboarding(true);
+      const intent = authIntent;
       const business = tenantSlug.trim();
       if (business === '') return failed({ state: 'field_invalid', field: 'business' });
       const address = email.trim();
       if (!EMAIL_SHAPE.test(address)) return failed({ state: 'field_invalid', field: 'email' });
       if (password.length < PASSWORD_MIN) return failed({ state: 'field_invalid', field: 'password' });
       const r = await passwordLogin({ tenantSlug: business, email: address, password }, timeouts.requestMs);
+      if (intent !== authIntent || onboardingDisposed) return failed({ state: 'no_connection' });
       if (!r.ok) return failed(r.failure);
       signIn(r.value.grant, r.value.display);
       return { step: 'signed_in', display: r.value.display };
@@ -445,6 +540,7 @@ export function createNet(options: NetOptions = {}) {
      * effort: with the current access token, or with the one an in-flight or needed refresh yields.
      */
     async signOut(): Promise<void> {
+      cancelOnboarding(true);
       const current = grant;
       if (current === null) return;
       const pending = flight !== null && flight.serial === current.serial ? flight.result : null;
@@ -461,5 +557,5 @@ export function createNet(options: NetOptions = {}) {
     },
   };
 
-  return { session, transport: createTransport(authorizer, timeouts) };
+  return { session, transport: createTransport(authorizer, timeouts), onboarding };
 }

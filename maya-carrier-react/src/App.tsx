@@ -9,8 +9,9 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { ChatScreen } from './chat/ChatScreen.tsx';
 import { SignIn } from './signin/SignIn.tsx';
+import { OnboardingComplete } from './signin/StandardOnboarding.tsx';
 import { LocalCrmSetup } from './setup/LocalCrmSetup.tsx';
-import { conversation, landFragment, localCrmSetupEnabled, session } from './runtime/compose.ts';
+import { conversation, landFragment, localCrmSetupEnabled, onboarding, session } from './runtime/compose.ts';
 import { usePortView } from './runtime/useView.ts';
 import { tokens } from './identity/tokens.ts';
 
@@ -69,6 +70,7 @@ export function App() {
   const dark = useDark();
   const sessionView = usePortView(session);
   const chat = usePortView(conversation);
+  const onboardingView = usePortView(onboarding);
   const [setupClosed, setSetupClosed] = useState(false);
   useEffect(() => { if (!sessionView.signedIn) setSetupClosed(false); }, [sessionView.signedIn]);
   useVisibleViewport();
@@ -76,6 +78,7 @@ export function App() {
 
   const t = tokens(dark);
   if (!sessionView.signedIn) return <SignIn t={t} reason={sessionView.reason} />;
+  if (onboardingView.phase === 'completed') return <OnboardingComplete view={onboardingView} t={t} finish={() => onboarding.finish()} />;
   if (localCrmSetupEnabled && !setupClosed) return <LocalCrmSetup t={t} onClose={() => setSetupClosed(true)} />;
   return <ChatScreen t={t} view={chat} />;
 }

@@ -218,6 +218,8 @@ export const P1_PATHS = [
   '/auth/email/start',
   '/auth/email/verify',
   '/auth/login',
+  '/onboarding/trial-activations',
+  '/onboarding/trial',
   '/auth/refresh',
   '/auth/logout',
   '/auth/oauth/telegram/start',
