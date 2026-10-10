@@ -1,5 +1,7 @@
 # YCLIENTS unresolved collection refusal: closed structural diagnosis — 2026-10-11
 
+The subsequent real witness resolved the unknown predicate: metadata has a matching `count` field. [Exact count-field correction](MAYA-YCLIENTS-TEAM-COUNT-FIELD-20261011.md) supersedes only that admission condition; this diagnostic checkpoint remains historical.
+
 Base: `f3aceca9e5a1609545be9ce519e240c9cf201286`. Same local CRM branch/database. Diagnostic-only continuation; no broader compatibility acceptance, certification or saved connection is claimed.
 
 ## Observed owner attempt

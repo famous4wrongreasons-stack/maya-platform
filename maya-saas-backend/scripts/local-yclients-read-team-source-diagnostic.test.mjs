@@ -23,7 +23,7 @@ function response(p, { status = 200, headers, responseUrl = url, redirected = fa
 }
 const changes = [
   ['exact collection', {}, p => p, true],
-  ['count metadata', {}, p => ({ ...p, meta: { count: 1 } }), false],
+  ['count metadata', {}, p => ({ ...p, meta: { count: 1 } }), true],
   ['page metadata', {}, p => ({ ...p, meta: { page: 1 } }), false],
   ['both metadata fields', {}, p => ({ ...p, meta: { count: 1, page: 1 } }), false],
   ['extra outer field', {}, p => ({ ...p, PRIVATE_FIELD: 'PRIVATE_VALUE' }), false],
@@ -94,24 +94,27 @@ test('complete structural diagnosis survives launcher receipt persistence', asyn
   assert.equal(JSON.stringify(saved).includes('PRIVATE'), false);
 });
 
-test('all admission predicates are byte-identical and the complete matrix matches prior committed transport', async () => {
+test('only the exact matching count variant changes historical admission; all other vectors match', async () => {
   const scripts = path.dirname(fileURLToPath(import.meta.url));
   const repo = path.resolve(scripts, '../..');
   const base = execFileSync('git', ['show', 'f3aceca9e5a1609545be9ce519e240c9cf201286:maya-saas-backend/scripts/local-yclients-read-transport.mjs'], { cwd: repo, encoding: 'utf8' });
-  const current = fs.readFileSync(path.join(scripts, 'local-yclients-read-transport.mjs'), 'utf8');
-  const predicates = s => s.slice(s.indexOf('const MANAGEMENT_COLLECTION'), s.indexOf('// Called only AFTER'));
-  assert.equal(predicates(current), predicates(base));
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'maya-team-source-admission-'));
   const file = path.join(dir, 'baseline.mjs');
   fs.writeFileSync(file, base.replaceAll("'./local-yclients-read-profile.mjs'", JSON.stringify(pathToFileURL(path.join(scripts, 'local-yclients-read-profile.mjs')).href)).replaceAll("'./local-yclients-read-status.mjs'", JSON.stringify(pathToFileURL(path.join(scripts, 'local-yclients-read-status.mjs')).href)));
   const prior = await import(pathToFileURL(file).href);
-  for (const [, options, change] of changes) {
+  for (const [name, options, change] of changes) {
     const p = change(body());
     const before = await observe(prior.createReadTransport, options, p);
     for (const throws of [false, true]) {
       const after = await observe(createReadTransport, options, p, throws);
-      assert.deepEqual(after.outcome, before.outcome);
-      assert.deepEqual(after.counters, before.counters);
+      if (name === 'count metadata') {
+        assert.equal(before.outcome.code, 'LOCAL_YCLIENTS_READ_REFUSED');
+        assert.deepEqual(after.outcome, { status: 200, body: JSON.stringify(p) });
+        assert.equal(after.counters.calls, 1); assert.equal(after.counters.refused, 0);
+      } else {
+        assert.deepEqual(after.outcome, before.outcome);
+        assert.deepEqual(after.counters, before.counters);
+      }
     }
   }
 });

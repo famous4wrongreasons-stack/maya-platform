@@ -42,7 +42,29 @@ test('regression: exact unfiltered management collection accepts empty meta with
 });
 
 test('all bounded collection sizes 0..50 preserve exact wire bytes and staff identities', async () => {
-  for (let count = 0; count <= 50; count++) await exercise(body(count), {}, true);
+  for (let count = 0; count <= 50; count++) {
+    await exercise(body(count), {}, true);
+    const p = body(count); p.meta = { count }; await exercise(p, {}, true);
+  }
+});
+
+test('regression: matching count-only metadata qualifies only at the canonical management source', async () => {
+  const p = body(); p.meta = { count: 2 };
+  const { events } = await exercise(p, { responseUrl: url }, true);
+  assert.equal(events.at(-1).teamCountEncoding, 'missing');
+  assert.equal(events.at(-1).teamCompleteness, 'management_collection_contract');
+  assert.deepEqual(p.meta, { count: 2 });
+  assert.throws(() => validateTeamResponse(p, new Headers(), 424242));
+  for (const options of [{ source: 'https://api.yclients.com/api/v1/staff/424242' }, { source: url + '?page=1' }, { init: {} }, { status: 206 }, { redirected: true }, { responseUrl: url.replace('424242', '424243') }]) await exercise(p, options);
+});
+
+test('count-only metadata must contain an exact matching integer; no aliases or coercion', async () => {
+  for (const count of [null, true, false, '2', '02', '2.0', [], {}, -1, 2.5, 9007199254740992, 1, 3]) {
+    const p = body(); p.meta = { count }; await exercise(p);
+  }
+  for (const additions of [{ page: 1 }, { total_count: null }, { total_count: 3 }, { next_page: 2 }, { total: 2 }]) {
+    const p = body(); p.meta = { count: 2, ...additions }; await exercise(p);
+  }
 });
 
 test('standalone validation cannot obtain source authority from flags, copied strings or a new Symbol', () => {
@@ -83,7 +105,7 @@ for (const [name, change] of [
   ['contradictory total', p => { p.meta.total_count = 3; }],
   ['null total', p => { p.meta.total_count = null; }],
   ['malformed total', p => { p.meta.total_count = '2.0'; }],
-  ['count without total', p => { p.meta.count = 2; }],
+  ['count mismatch without total', p => { p.meta.count = 1; }],
   ['first page without total', p => { p.meta.page = 1; }],
   ['pagination metadata', p => { p.meta.next_page = 2; }],
   ['pagination object', p => { p.pagination = {}; }],

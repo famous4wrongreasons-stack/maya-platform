@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const baseline = '2f55da13a0b32f0d7cede07ccf27aa2fa58f4ff9';
+const countOnlyBaseline = '1a385e363fc450e5dfe8b31a203340c7f473c60d';
 const testFile = 'maya-saas-backend/scripts/local-yclients-read-team-collection.test.mjs';
 const transportFile = 'maya-saas-backend/scripts/local-yclients-read-transport.mjs';
 const statusFile = 'maya-saas-backend/scripts/local-yclients-read-status.mjs';
@@ -28,7 +29,7 @@ copyClosure(testFile);
 fs.symlinkSync(path.join(repo, 'maya-saas-backend/node_modules'), path.join(root, 'maya-saas-backend/node_modules'), 'dir');
 const current = fs.readFileSync(path.join(root, transportFile), 'utf8');
 const currentStatus = fs.readFileSync(path.join(root, statusFile), 'utf8');
-const result = { contract: 'maya.team-collection-offline-proof/1', baseline, sourceHead: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repo, encoding: 'utf8' }).trim(), sources: Object.fromEntries([...copied].sort().map(p => [p, createHash('sha256').update(fs.readFileSync(path.join(repo, p))).digest('hex')])), runs: [] };
+const result = { contract: 'maya.team-collection-offline-proof/1', baseline, countOnlyBaseline, sourceHead: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repo, encoding: 'utf8' }).trim(), sources: Object.fromEntries([...copied].sort().map(p => [p, createHash('sha256').update(fs.readFileSync(path.join(repo, p))).digest('hex')])), runs: [] };
 function run(name, shouldPass, requiredFailure) {
   const child = spawnSync(process.execPath, ['--test', '--test-reporter=tap', testFile], { cwd: root, encoding: 'utf8', timeout: 30000 });
   const log = (child.stdout ?? '') + (child.stderr ?? '');
@@ -37,7 +38,7 @@ function run(name, shouldPass, requiredFailure) {
   assert.equal(child.error, undefined, name + ': process completed');
   const pass = Number(log.match(/^# pass (\d+)$/m)?.[1]);
   const fail = Number(log.match(/^# fail (\d+)$/m)?.[1]);
-  assert.ok(Number.isFinite(pass) && Number.isFinite(fail) && pass + fail === 46, name + ': entire expected test corpus executed');
+  assert.ok(Number.isFinite(pass) && Number.isFinite(fail) && pass + fail === 48, name + ': entire expected test corpus executed');
   assert.equal(child.status === 0, shouldPass, name);
   if (shouldPass) assert.equal(fail, 0);
   else assert.ok(fail > 0 && log.split('\n').some(line => line.startsWith('not ok ') && line.includes(requiredFailure)), name + ': expected assertion detects change');
@@ -46,6 +47,10 @@ function run(name, shouldPass, requiredFailure) {
 run('unmutated', true);
 for (const file of [transportFile, statusFile]) fs.writeFileSync(path.join(root, file), execFileSync('git', ['show', baseline + ':' + file], { cwd: repo }));
 run('historical-baseline', false, 'regression: exact unfiltered management collection');
+// Exact immediate predecessor: proves the observed count-only refusal, separately
+// from the earlier missing-total/empty-meta compatibility regression.
+for (const file of [transportFile, statusFile]) fs.writeFileSync(path.join(root, file), execFileSync('git', ['show', countOnlyBaseline + ':' + file], { cwd: repo }));
+run('before-count-only-fix', false, 'regression: matching count-only metadata');
 fs.writeFileSync(path.join(root, statusFile), currentStatus);
 for (const [name, before, after, failure] of [
   ['source-binding', 'return String(raw) === exact', 'return true', 'countless collection refuses deprecated endpoint'],
@@ -55,6 +60,7 @@ for (const [name, before, after, failure] of [
   ['partial-response', '&& response.status === 200', '&& response.status >= 200', 'countless collection refuses partial HTTP'],
   ['current-actor', "scope.request.user.membershipStatus !== 'active'", 'false', 'countless collection refuses inactive principal'],
   ['private-evidence', 'sourceEvidence === MANAGEMENT_COLLECTION', 'true', 'standalone validation cannot obtain source authority'],
+  ['count-consistency', '&& payload.meta.count === payload.data.length', '', 'countless collection refuses count mismatch without total'],
 ]) {
   assert.equal(current.split(before).length, 2, name + ': exact single mutation site');
   fs.writeFileSync(path.join(root, transportFile), current.replace(before, after));
@@ -63,4 +69,4 @@ for (const [name, before, after, failure] of [
 fs.writeFileSync(path.join(root, transportFile), current);
 run('restored', true);
 fs.writeFileSync(path.join(root, 'summary.json'), JSON.stringify(result, null, 2) + '\n');
-console.log(JSON.stringify({ output: root, unmutated: 'PASS', historicalRegression: 'DETECTED', mutationsKilled: 7, restored: 'PASS' }));
+console.log(JSON.stringify({ output: root, unmutated: 'PASS', historicalRegression: 'DETECTED', countOnlyRegression: 'DETECTED', mutationsKilled: 8, restored: 'PASS' }));

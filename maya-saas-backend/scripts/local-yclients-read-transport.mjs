@@ -41,7 +41,7 @@ function teamCountEncoding(value) {
 }
 // Private transport evidence, never a provider/caller-authored completeness flag.
 // The current management collection contract has no pagination parameters and
-// does not require meta.total_count. Its narrow empty-meta variant is admissible
+// does not require meta.total_count. Empty meta or an exact matching count is admissible
 // only at this exact unfiltered source; legacy/subset sources still need a total.
 const MANAGEMENT_COLLECTION = Symbol('management_collection_contract');
 function teamSourceEvidence(raw, init, response, selectedCompany) {
@@ -54,7 +54,10 @@ function teamSourceEvidence(raw, init, response, selectedCompany) {
 function isManagementCollection(payload, headers, sourceEvidence) {
   return sourceEvidence === MANAGEMENT_COLLECTION && payload?.meta
     && typeof payload.meta === 'object' && !Array.isArray(payload.meta)
-    && Object.keys(payload.meta).length === 0
+    && (Object.keys(payload.meta).length === 0
+      || (Object.keys(payload.meta).length === 1 && Object.hasOwn(payload.meta, 'count')
+        && Number.isSafeInteger(payload.meta.count) && Array.isArray(payload.data)
+        && payload.meta.count === payload.data.length))
     && !headers?.has('link') && !headers?.has('content-range')
     && Object.keys(payload).length === 3
     && ['success', 'data', 'meta'].every(key => Object.hasOwn(payload, key));

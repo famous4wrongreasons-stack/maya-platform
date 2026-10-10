@@ -1,0 +1,187 @@
+{
+  "contract": "maya.team-matching-count-compatibility/1",
+  "baseSource": "1a385e363fc450e5dfe8b31a203340c7f473c60d",
+  "observedFailure": {
+    "teamHttp": 200,
+    "teamIssues": [
+      "total_count_type"
+    ],
+    "teamCountEncoding": "missing",
+    "teamCollectionCheck": {
+      "requestRoute": "management_exact",
+      "v2Accept": true,
+      "responseUrl": "exact",
+      "http200": true,
+      "redirected": false,
+      "metaFields": [
+        "count"
+      ],
+      "outerFields": [
+        "success",
+        "data",
+        "meta"
+      ],
+      "paginationHeader": false,
+      "everyRowCompanyPresent": true
+    },
+    "rawPayloadRetained": false,
+    "numericCountEqualsDataLength": "PROVEN_BY_ABSENCE_OF_COUNT_MISMATCH_IN_EXECUTED_STRICT_DIAGNOSTIC",
+    "rootCause": "matching count-only metadata refused by empty-meta-only collection predicate",
+    "connectHttp": 400,
+    "operationStatus": "NOT_OBSERVED",
+    "integrations": 0,
+    "a17Executions": 0
+  },
+  "delta": {
+    "sameExactUnfilteredManagementV2Source": true,
+    "matchingIntegerCountOnlyMetaAccepted": true,
+    "countTreatedAsIndependentTotal": false,
+    "countStringCoercion": false,
+    "countOrTotalSynthesis": false,
+    "missingTotalStillRejectedWithoutSourceEvidence": true,
+    "legacyCountOnlyAccepted": false,
+    "paginationOrMismatchAccepted": false,
+    "responseBytesChanged": false,
+    "newEndpointOrAuthority": false
+  },
+  "proof": {
+    "tests": 151,
+    "fail": 0,
+    "mutationsKilled": 8,
+    "runs": [
+      {
+        "name": "unmutated",
+        "exit": 0,
+        "pass": 48,
+        "fail": 0,
+        "logSha256": "ff612227e9ff756462f3bacd5ac8b7ef40fed405409c3626798d7fbf826517c0"
+      },
+      {
+        "name": "historical-baseline",
+        "exit": 1,
+        "pass": 41,
+        "fail": 7,
+        "logSha256": "ab7a5a8ce9764c677a729c752c6ace8970214c3c3fbace0aebde770ed98132a8"
+      },
+      {
+        "name": "before-count-only-fix",
+        "exit": 1,
+        "pass": 46,
+        "fail": 2,
+        "logSha256": "45b7548ec8220718c40e9bd4b2a701f1d1af1c27889cf4447d6af0126c6ba080"
+      },
+      {
+        "name": "source-binding",
+        "exit": 1,
+        "pass": 44,
+        "fail": 4,
+        "logSha256": "fc0b991d4f9a736098a28706654713e22a88c46f3df0896419205b14edbe20bb"
+      },
+      {
+        "name": "company-witness",
+        "exit": 1,
+        "pass": 46,
+        "fail": 2,
+        "logSha256": "4bc31f082f9406e7c3de80a03d2a6a1485c37de9bdcebb2c9eb8394fed79a6b6"
+      },
+      {
+        "name": "metadata-shape",
+        "exit": 1,
+        "pass": 40,
+        "fail": 8,
+        "logSha256": "42dfb84292bfbcd6eddf4f78ab3b765c080377277829f9f2f40346fa110fd753"
+      },
+      {
+        "name": "duplicate-staff",
+        "exit": 1,
+        "pass": 47,
+        "fail": 1,
+        "logSha256": "decd6852e28a15f9b59a8ab67691b88e4fb2a4029e251c54b025f8dbe3249b73"
+      },
+      {
+        "name": "partial-response",
+        "exit": 1,
+        "pass": 45,
+        "fail": 3,
+        "logSha256": "ce75638969d68530543f5f26d9d76389211e45861626dd172151ff13928af6a6"
+      },
+      {
+        "name": "current-actor",
+        "exit": 1,
+        "pass": 47,
+        "fail": 1,
+        "logSha256": "86b78edf8851b3841d951edf5271f2b9d206a2da849a1be8abf841fcc9fa31d4"
+      },
+      {
+        "name": "private-evidence",
+        "exit": 1,
+        "pass": 37,
+        "fail": 11,
+        "logSha256": "21a77c902139dbf0211297b88a66444638b7c3e3ba537c3739602e33bac17b2b"
+      },
+      {
+        "name": "count-consistency",
+        "exit": 1,
+        "pass": 46,
+        "fail": 2,
+        "logSha256": "55cf863d0e6acd4d4af427a2616cf7a911e2ea0efe166f28e777873fa4a7453b"
+      },
+      {
+        "name": "restored",
+        "exit": 0,
+        "pass": 48,
+        "fail": 0,
+        "logSha256": "bb66f4647c5b54f13e84a88a5f04d622ada670dba09777e3c5a0b4655fc45f1b"
+      }
+    ],
+    "sourceHashes": {
+      "maya-chat-shell/dev/local-api-env.mjs": "a73446eb0c3b91e8b0aff8eb2d82d6721f6f60c310147a95b15aec2fb221b550",
+      "maya-chat-shell/dev/scenarios.mjs": "f2249b6c0bea7dd99e7c140e091a6c14c72fc5fc0dfb4ce8c754bb9b005041c8",
+      "maya-chat-shell/dev/serve.mjs": "f0985920ab617d366fefe937ca257f00edbbc1bca90ba7a378dd5a25b03d711d",
+      "maya-saas-backend/scripts/local-onboarding-profile.mjs": "ac53a8a0885d4f8918ee2437050d0dd952ecd52bf5c6ace864e31b2350c685e0",
+      "maya-saas-backend/scripts/local-onboarding.mjs": "4718fcb23730d0a6e3e9489d2236811644d03f6d7d502620d0b01e29ae9ad53b",
+      "maya-saas-backend/scripts/local-yclients-read-diagnostic.mjs": "042e74fe44e26570edfa90900f81eba4bf162a19777766513fd763490feb5243",
+      "maya-saas-backend/scripts/local-yclients-read-profile.mjs": "d3dd8395f4bdaf49e4df343799c51e739ef8373e7ff0d98b041518441c3c0869",
+      "maya-saas-backend/scripts/local-yclients-read-status.mjs": "2f5c6d25e27acdb800794be5365b49ca6a6ba10408085d41f5d35efb8599df2c",
+      "maya-saas-backend/scripts/local-yclients-read-team-collection.test.mjs": "e302ba7dcc9e6670b949cafe1bc5e6b6427fdea999c58198b4c811fbaff98a7a",
+      "maya-saas-backend/scripts/local-yclients-read-transport.mjs": "628eef6c5973adc8a40288972e91adddfd45d4535b9b6b75e8afd5ec21e79e05",
+      "maya-saas-backend/scripts/local-yclients-read.mjs": "23d44ad86ecef6e9e37872760ea71f00830c2c0fea995a35c910c208d72bd730"
+    },
+    "historicalAdmissionComparison": {
+      "vectors": 18,
+      "intendedChangedVector": "matching count-only metadata",
+      "allOtherOutcomesUnchanged": true
+    },
+    "actualNativeAdapter": "PASS for explicit number/string total, empty meta and matching count",
+    "finalHeadStartup": "PENDING_AT_THIS_SOURCE_COMMIT",
+    "realSaveAfterFix": "NOT_RUN"
+  },
+  "preservation": {
+    "sourceUnchanged": true,
+    "samePrivateState": true,
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "metadataBusinessWrites": 0,
+    "metadataExternalCalls": 0
+  },
+  "receipts": [
+    {
+      "path": "/private/tmp/maya-owner-same-db-read-20261011-06/resume.json",
+      "sha256": "4d714a759113fe32f5f5219708056b6e6e0ce4283fb6c720e3e6d97de2c4af40"
+    },
+    {
+      "path": "/private/tmp/maya-owner-a17-metadata-20261011-06/result.json",
+      "sha256": "2a5eb8b9f37344d28067db8dfe155972141d9576d3205a5349353c340c54f7ab"
+    },
+    {
+      "path": "/tmp/maya-team-count-field-tests-20261011-01.txt",
+      "sha256": "e89e18146e6137159675e91c6cf09d9599d0388d059fb9ddc758cb06c8767c79"
+    },
+    {
+      "path": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-team-collection-proof-RTipxg/summary.json",
+      "sha256": "d3665fa74b4083ba5be15d697c2f44fb03e0af9133f0ffc598dbd395da5e1114"
+    }
+  ],
+  "certified": false,
+  "published": false
+}
