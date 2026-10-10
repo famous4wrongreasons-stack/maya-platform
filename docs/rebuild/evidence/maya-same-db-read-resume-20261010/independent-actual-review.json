@@ -1,0 +1,156 @@
+{
+  "contract": "maya.same-db-actual.independent-review/1",
+  "reviewedAt": "2026-10-10T19:02:41.476856+00:00",
+  "candidateCommit": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+  "verdict": "QUALIFIED_SYNTHETIC_ACTUAL_PASS",
+  "blockers": [],
+  "artifactLocations": {
+    "uiParent": "/private/tmp/maya-onboarding-ui-proof-resume-20261010-02/parent.json",
+    "uiBrowser": "/private/tmp/maya-onboarding-ui-proof-resume-20261010-02/browser.json",
+    "snapshot": "/private/tmp/maya-read-resume-proof-20261010-02/snapshot.json",
+    "verify": "/private/tmp/maya-read-resume-proof-20261010-02/verify.json",
+    "stage0Restart": "/private/tmp/maya-synthetic-stage0-restart-20261010-02/restart.json",
+    "resume": "/private/tmp/maya-synthetic-read-resume-20261010-03/resume.json"
+  },
+  "checks": {
+    "sourceBinding": {
+      "currentShaAndGitBlobMatches": true,
+      "readProfileRows": 2026,
+      "stage0Rows": 2016,
+      "uiProofFiles": 3,
+      "uniquePaths": 2029,
+      "mismatches": 0,
+      "scratchHelperSha256": "eaddf724b7debb5cb04fb99ce0f85b6c5ecf2ce013d47230fb1e331de6dc7bd7"
+    },
+    "actualUi": {
+      "checkpoints": 9,
+      "businessesCreated": 2,
+      "passwordLoginsBeforeDiagnostic": 5,
+      "lostReplyRecoveryWithoutDuplicate": true,
+      "collisionStatus": 409,
+      "collisionCode": "trial_signup_slug_taken",
+      "collisionExtraBusinessRows": 0,
+      "collisionPendingActivation": 1,
+      "freshConsentRequired": true,
+      "automaticRetry": false,
+      "browserCleanup": {
+        "chromeClosed": true,
+        "privateProfileRemoved": true,
+        "clean": true
+      },
+      "parentBrowserGroupAbsent": true
+    },
+    "preservation": {
+      "sameSavedKeys": true,
+      "sameDirectoryIdentities": true,
+      "sameDatabaseAndSystem": true,
+      "newPostmasterStart": true,
+      "sameUserPasswordMembershipSessionRefreshAggregates": true,
+      "sameSelectedRowsAndCounts": true,
+      "sameCanonicalSchema": true,
+      "receiptLinkMatched": true,
+      "aggregateValuesRedacted": true,
+      "counts": {
+        "Tenant": 4,
+        "User": 2,
+        "Branch": 3,
+        "Membership": 2,
+        "TrialActivation": 3,
+        "AuthSession": 7,
+        "AuthRefreshToken": 7,
+        "CrmIntegration": 0,
+        "CrmStaffAccess": 0,
+        "Client": 0,
+        "Appointment": 0,
+        "ActionExecution": 0,
+        "ActionExecutionIdempotencyBinding": 0,
+        "AiApprovalRequest": 0,
+        "AiToolExecution": 0,
+        "Opportunity": 0,
+        "AgentTask": 0,
+        "OwnerReportRun": 0,
+        "NativeFeedbackRequest": 0,
+        "TeamMessage": 0,
+        "ExpenseReminderRun": 0,
+        "MarketingCampaign": 0,
+        "MarketingDeliveryAttempt": 0,
+        "Expense": 0
+      }
+    },
+    "diagnostic": {
+      "health": {
+        "backend": 200,
+        "web": 200
+      },
+      "authLogin": {
+        "backend": 403,
+        "web": 403
+      },
+      "authCode": "local_yclients_diagnostic_route_disabled",
+      "providerCalls": 0,
+      "providerRefusals": 0,
+      "credentialAccepted": false,
+      "mode": "network_closed",
+      "passwordLoginAfterResume": "NOT_ADMITTED_DIAGNOSTIC_HEALTH_ONLY",
+      "effectTables": 17,
+      "effectTablesZero": true,
+      "readyAt": "2026-10-10T19:00:06.824Z",
+      "expiresAt": "2026-10-10T19:01:06.824Z",
+      "finalStatus": "stopped"
+    },
+    "cleanup": {
+      "stage0RestartStopped": true,
+      "resumeStopped": true,
+      "clusterStopped": true,
+      "runtimeGroupAbsent": true,
+      "sourceUnchanged": true,
+      "syntheticPostmasterPidAbsent": true,
+      "sharedRestartLockAbsent": true
+    }
+  },
+  "preservedFailures": [
+    {
+      "attempt": "UI proof 01",
+      "status": "FAIL",
+      "phase": "startup",
+      "completedCheckpoints": 0,
+      "completedAccountRecords": 0,
+      "cleanup": {
+        "chromeClosed": true,
+        "privateProfileRemoved": true,
+        "clean": true
+      },
+      "cause": "No narrower cause assigned by this review."
+    },
+    {
+      "attempt": "Read resume 02",
+      "status": "failed",
+      "code": "child_boot_failed",
+      "runtimeIpcStatuses": 0,
+      "clusterStopped": true,
+      "runtimeGroupAbsent": true,
+      "sourceUnchanged": true,
+      "samePrivateState": true,
+      "cause": "No exact causal claim. Parent reports redundant outer proof sandbox removed; canonical internal diagnostic sandbox source remains unchanged."
+    }
+  ],
+  "ownerSourceOnlyTransition": {
+    "initialCommit": "03875b23523a578fad13ec0e8f7035dcd4e5a66b",
+    "candidateCommit": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+    "allOriginalCapturedPathsRetained": true,
+    "identicalCanonicalPrismaFiles": 117,
+    "ownerDatabaseOrKeysRead": false,
+    "ownerRuntimeStartedByReviewer": false,
+    "qualification": "Git/source compatibility only; not owner private-state or live-provider acceptance."
+  },
+  "limits": [
+    "Reviewer read/hash verification only; no processes, services, tests, TTY, network or PG were launched.",
+    "Only explicitly identified synthetic artifacts and PID/lock file absence were inspected; no owner state or service-key files were read.",
+    "Private-state hashes, authentication-row hashes and private receipt hashes are intentionally excluded from this review.",
+    "Actual password login is proved in stage0 before diagnostic restart. Diagnostic login is deliberately refused403; resumed sign-in is not claimed.",
+    "The current-script actual source transition used the same candidate for synthetic phases. Historical03875→c207 compatibility is source-only with117 identical Prisma/migration files.",
+    "No real YCLIENTS credential, provider read/write, model, owner-session acceptance or full MAYA acceptance is established.",
+    "Collision correction and fresh consent are proven; the actual UI proof does not submit a third corrected business. Explicit corrected resubmission remains supported by component/headless tests.",
+    "This is finite stopped-state reuse, not a universal migration/repair tool."
+  ]
+}

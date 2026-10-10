@@ -1,0 +1,73 @@
+{
+  "contract": "maya.signup-slug-fix.synthetic-browser-summary/1",
+  "status": "PASS",
+  "checksPassed": 91,
+  "uniqueChecks": [
+    "Enter submits and clears password",
+    "Space consent enables create",
+    "cancel unmounts; late completion cannot reopen form",
+    "editing alone never resubmits",
+    "editing slug dismisses its old refusal",
+    "exact rollback preserves remaining fields and secret only in active DOM, requires fresh consent",
+    "explicit retry after preparation failure",
+    "initial unchecked consent blocks submit",
+    "invalid email focuses inline error and keeps public fields",
+    "manual slug preserved after business edit",
+    "missing timezone stays local, focuses error and preserves password",
+    "native keyboard typeahead selects exact IANA",
+    "no horizontal overflow at 1280px",
+    "no horizontal overflow at 320px",
+    "no horizontal overflow at 390px",
+    "no implicit device or Moscow timezone",
+    "only explicit corrected consent resubmits with unchanged remaining fields",
+    "pending state freezes fields and hands exact fixture to runtime",
+    "preparation failure preserves public fields and asks fresh secret and consent",
+    "recovery carries only slug and email",
+    "repeated activation makes one submit",
+    "rollback refusal focuses and explains exact slug field",
+    "slug suggested from Cyrillic name",
+    "synthetic success continues",
+    "synthetic success retains CRM qualification",
+    "unknown outcome removes repeat creation"
+  ],
+  "syntheticPort": true,
+  "httpSignup": false,
+  "database": false,
+  "providerCalls": 0,
+  "realAcceptance": false,
+  "bundleSha256": "907b54906ce806c7450780880bb91f860cd1494eec748061a8b0cac018e45e82",
+  "sourceHashes": [
+    {
+      "path": "maya-carrier-react/src/signin/StandardOnboarding.tsx",
+      "sha256": "b39ad8b697b59ccff7ed3c1148db7f27870b4a93e3587a99692d9e0c5bd9619a"
+    },
+    {
+      "path": "maya-carrier-react/src/signin/onboardingSlug.ts",
+      "sha256": "5c70dd17ce0f7f07fe123b2339831c6a0cbf48631f0814c611c004ddf3a01f8f"
+    },
+    {
+      "path": "maya-carrier-react/src/signin/onboardingTimezones.ts",
+      "sha256": "cb20abea99db5b335974af93a50fbb7310e6d138a091f35358b8bea12410f015"
+    },
+    {
+      "path": "maya-carrier-react/src/styles.css",
+      "sha256": "69d66a10a31bcd8c75329a23a0b7afc7409787e411d8917cc6d0a0c3c89128e1"
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding-ui.fixture.tsx",
+      "sha256": "3ad242716d86fa3b373758b04813ef2a85bef6ab4bba64e57f7d8b1306fb9d89"
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding-ui.browser.mjs",
+      "sha256": "c735bb60ecf07cdcb7da5f5e64f1424018cb4c0e4434a3dc839b06d4e5c44596"
+    }
+  ],
+  "cleanup": {
+    "staticHostStopped": true,
+    "ownedBrowserStopped": true,
+    "profileRemoved": true
+  },
+  "chromiumBuiltinSandbox": true,
+  "chromeOsWideNetworkClosure": "NOT_QUALIFIED",
+  "qualification": "Current React with synthetic OnboardingPort. This does not prove the new HTTP409 path or PostgreSQL rollback."
+}

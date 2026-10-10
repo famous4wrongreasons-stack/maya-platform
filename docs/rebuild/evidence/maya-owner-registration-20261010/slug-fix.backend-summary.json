@@ -1,0 +1,28 @@
+{
+  "contract": "maya.signup-slug-fix.backend-unit-summary/1",
+  "status": "PASS",
+  "testsPassed": 45,
+  "testsFailed": 0,
+  "suitesPassed": 2,
+  "suitesFailed": 0,
+  "wasInterrupted": false,
+  "suites": [
+    {
+      "path": "maya-saas-backend/src/onboarding/onboarding.service.spec.ts",
+      "status": "passed",
+      "assertions": 4
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave2/trial-activation-bootstrap.service.spec.ts",
+      "status": "passed",
+      "assertions": 41
+    }
+  ],
+  "coverage": [
+    "Exact Prisma P2002 singleton slug/subdomain via target and adapter constraint fields.",
+    "Unknown, mixed, foreign-model and contradictory metadata remain unchanged failures.",
+    "No downstream bootstrap writes after qualified tenant-create refusal; rejection propagates through the unit transaction seam.",
+    "Later bootstrap writes, outer transaction and post-activation session faults are not classified as a slug refusal."
+  ],
+  "qualification": "Finite unit mocks, not an actual PostgreSQL transaction rollback or HTTP proof."
+}

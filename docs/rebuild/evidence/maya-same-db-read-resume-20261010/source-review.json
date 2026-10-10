@@ -1,0 +1,135 @@
+{
+  "contract": "maya.same-db-read-resume.source-review-evidence/1",
+  "candidateCommit": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+  "reviewedAt": "2026-10-10T18:53:44.278719+00:00",
+  "baseCommit": "9aab0db141e3b624be0f81c745b8fa68caf06b01",
+  "verdict": "QUALIFIED_SOURCE_PASS",
+  "blockers": [],
+  "checks": [
+    {
+      "id": "saved_receipts",
+      "status": "PASS",
+      "detail": "Exact pinned initial stopped stage0 manifest, completed stopped restart receipt and existing service-key file are required. Current source is an explicit approved commit; historical file identities join to Git."
+    },
+    {
+      "id": "schema_transition",
+      "status": "PASS",
+      "detail": "All original captured paths must remain; full captured Prisma tree and configuration must remain identical. No initdb, migration, seed, signup or key rotation is selected by resumePlan."
+    },
+    {
+      "id": "same_database",
+      "status": "PASS",
+      "detail": "Owned directory device/inode and stopped PG16 metadata are checked. After start a read-only SQL probe joins exact saved database, role, loopback port, data directory and pre-start system identifier before runtime/prompt."
+    },
+    {
+      "id": "lock_cleanup",
+      "status": "PASS",
+      "detail": "The existing restart-proof.lock is created exclusively with no symlink following; concurrent/replaced claims are refused. Cleanup checks the captured directories/system before signalling the same cluster, checks stopped state, and revalidates source/input bytes. Cleanup failure does not become success."
+    },
+    {
+      "id": "credentials",
+      "status": "PASS",
+      "detail": "No credential RNG/file creation is introduced. Existing service keys and DB credentials are used unchanged. Live partner input uses the existing hidden bounded TTY reader; partner enters child environment in memory and is removed from parent runtime environment after spawn. Reports use closed diagnostic fields."
+    },
+    {
+      "id": "profile_boundaries",
+      "status": "PASS",
+      "detail": "Stage0 sources and provider guard/runtime/transport are unchanged. Resume changes only its in-memory profile to the existing explicit setup-read profile. Diagnostic mode skips owner input, uses the fixed public diagnostic constant and existing sandboxed health-only runtime."
+    },
+    {
+      "id": "bounded_execution",
+      "status": "PASS",
+      "detail": "Default invocation is prepared-only. Explicit run requires current committed sources. Builds and own PG start are finite; live runtime is 1–15 minutes after readiness; diagnostic runtime 1 minute; existing prompt bound 600000 ms is retained."
+    }
+  ],
+  "authorReportedChecks": {
+    "syntax": "PASS",
+    "pureNodeTests": {
+      "total": 28,
+      "passed": 28,
+      "resume": 11,
+      "existingLauncher": 17
+    },
+    "evidenceOrigin": "booking_scope message; no rerun by reviewer"
+  },
+  "actualProof": {
+    "syntheticSavedDatabase": "NOT_RUN_AT_REVIEW",
+    "ownerState": "NOT_READ",
+    "liveProvider": "NOT_RUN"
+  },
+  "qualifications": [
+    "Static source review and hash checks only. No services, PG, browser, TTY, external network or test execution by reviewer.",
+    "The old stage0 receipt contains no historical PG system identifier. The implementation proves identity from the captured pre-start directory/system through this run; it does not invent a historical system-ID receipt.",
+    "Application changes require explicit approved commit while canonical schema/migrations stay identical; this is a finite stopped-stage0 transition, not a universal state migration or repair tool.",
+    "Live setup-read permits previously approved local A17 effects only after explicit owner actions; no provider-write or complete YCLIENTS acceptance is established here.",
+    "Partner is RAM/child-environment only. JavaScript reference clearing does not claim secure memory zeroization or isolation from another process running as the same OS user.",
+    "Only this reviewer JSON was written; owner state, private keys and separate live handoff were not inspected."
+  ],
+  "sourceHashes": [
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-resume.mjs",
+      "sha256": "48f932005f2b9e136d7adc60fe913ee6937cad46b016d3017cd23bb005a37a5f"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-resume.test.mjs",
+      "sha256": "2dc4585db90311011c51999c48c7e30eadcb679c3197ac28459018c32f91ce8e"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.mjs",
+      "sha256": "dcdd1d90ab91f6b7890c26e628ce276c95f919616c06cd60071de0c75c250c27"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.test.mjs",
+      "sha256": "df434be0cd48fc35bac3b1b5438aac0b1f43c3d8c159a8444de80e56e6570dfb"
+    }
+  ],
+  "unchangedBoundaries": [
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding.mjs",
+      "unchangedFromBase": true,
+      "sha256": "4718fcb23730d0a6e3e9489d2236811644d03f6d7d502620d0b01e29ae9ad53b"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding-profile.mjs",
+      "unchangedFromBase": true,
+      "sha256": "ac53a8a0885d4f8918ee2437050d0dd952ecd52bf5c6ace864e31b2350c685e0"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding-runtime.mjs",
+      "unchangedFromBase": true,
+      "sha256": "37508284365adadc96b844929dde07d0e06e0826278af1f7403366fa0c9c18e2"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding-proof.mjs",
+      "unchangedFromBase": true,
+      "sha256": "8f8d3ff65ab09914fcbd4ea3aff3c3ccf656d865ad3b1cbecdd5ac4c2c045d94"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-profile.mjs",
+      "unchangedFromBase": true,
+      "sha256": "f850e8c558f6f52e3b283efbcce69c3cb889656a164b58e97ec44f5c3ca2b869"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-runtime.mjs",
+      "unchangedFromBase": true,
+      "sha256": "c469061739798886f99869f5472363c6afb16531dfb028bb07a256dc73bd5ff1"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-transport.mjs",
+      "unchangedFromBase": true,
+      "sha256": "f108783172dce316371376ae933137c3e717dfd843fb2df0e6bc0c7b525e62dc"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-diagnostic.mjs",
+      "unchangedFromBase": true,
+      "sha256": "042e74fe44e26570edfa90900f81eba4bf162a19777766513fd763490feb5243"
+    },
+    {
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "unchangedFromBase": true,
+      "sha256": "77d37c8f8709f34b7eddd0081bf4aac3a10fdbf9092ad590196aa61c2a9e9977"
+    }
+  ],
+  "bindingVerification": "All 13 reviewed paths match the candidate Git blobs and working bytes. The 9 unchanged boundaries also match the review base commit.",
+  "sourceReport": "maya-read-resume-independent-review-20261010.json"
+}

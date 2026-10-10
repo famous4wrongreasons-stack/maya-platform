@@ -1,0 +1,148 @@
+{
+  "contract": "maya.same-db-read-resume.source-bindings/1",
+  "candidateCommit": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+  "reviewBaseCommit": "9aab0db141e3b624be0f81c745b8fa68caf06b01",
+  "verification": "Exact Git blob and SHA-256 checks; no service or test execution during archiving.",
+  "files": [
+    {
+      "path": "maya-carrier-react/test/local-onboarding-browser.probe.mjs",
+      "gitBlob": "8b66c54e4ac267cd5b09eb257dd09bf758ebc79c",
+      "sha256": "266161d3c9e54316983eaea602aefddf0b56cf2535d22c4dfef1ea351a54e831",
+      "roles": [
+        "ui-proof-01",
+        "ui-proof-02"
+      ]
+    },
+    {
+      "path": "maya-chat-shell/test/cdp-verify.mjs",
+      "gitBlob": "74c27e3482c1a4b6ca93a02978505fffe203f5e5",
+      "sha256": "02de453056df1ec95091086dedd0485f2f1385655e777d9a2d7c55353e44a999",
+      "roles": [
+        "ui-proof-01",
+        "ui-proof-02"
+      ]
+    },
+    {
+      "path": "maya-saas-backend/prisma/schema.prisma",
+      "gitBlob": "c1ba8524340bb78fb5546c61395c8b40db909160",
+      "sha256": "77d37c8f8709f34b7eddd0081bf4aac3a10fdbf9092ad590196aa61c2a9e9977",
+      "roles": [
+        "reviewed-unchanged-boundary"
+      ],
+      "unchangedFromReviewBase": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding-profile.mjs",
+      "gitBlob": "bec162158afa91e771ee40657ec680fcad843885",
+      "sha256": "ac53a8a0885d4f8918ee2437050d0dd952ecd52bf5c6ace864e31b2350c685e0",
+      "roles": [
+        "reviewed-unchanged-boundary"
+      ],
+      "unchangedFromReviewBase": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding-proof.mjs",
+      "gitBlob": "55653a79fa0dea2f209394ef24ea1a98e2c622a8",
+      "sha256": "8f8d3ff65ab09914fcbd4ea3aff3c3ccf656d865ad3b1cbecdd5ac4c2c045d94",
+      "roles": [
+        "reviewed-unchanged-boundary"
+      ],
+      "unchangedFromReviewBase": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding-runtime.mjs",
+      "gitBlob": "d5ee16313c3d810aeedbfaea36cf3443460d8f05",
+      "sha256": "37508284365adadc96b844929dde07d0e06e0826278af1f7403366fa0c9c18e2",
+      "roles": [
+        "reviewed-unchanged-boundary"
+      ],
+      "unchangedFromReviewBase": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding-ui-proof.mjs",
+      "gitBlob": "25d9d4ce1472e85144edd97c997aafc47b1ad68c",
+      "sha256": "c566f5ec408d8a5291a8ef33f945c1b8bf034ade629fb75a7ea0d7105bc4a577",
+      "roles": [
+        "ui-proof-01",
+        "ui-proof-02"
+      ]
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding.mjs",
+      "gitBlob": "ab4cc89369189061674c18c22bca8b2df9b23ebb",
+      "sha256": "4718fcb23730d0a6e3e9489d2236811644d03f6d7d502620d0b01e29ae9ad53b",
+      "roles": [
+        "reviewed-unchanged-boundary"
+      ],
+      "unchangedFromReviewBase": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-diagnostic.mjs",
+      "gitBlob": "d1d4ff15468086c6c613fbd181138ad7fc3855f6",
+      "sha256": "042e74fe44e26570edfa90900f81eba4bf162a19777766513fd763490feb5243",
+      "roles": [
+        "reviewed-unchanged-boundary"
+      ],
+      "unchangedFromReviewBase": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-profile.mjs",
+      "gitBlob": "89ca6a031a2a9b2b20628e8600915acf4b20b64a",
+      "sha256": "f850e8c558f6f52e3b283efbcce69c3cb889656a164b58e97ec44f5c3ca2b869",
+      "roles": [
+        "reviewed-unchanged-boundary"
+      ],
+      "unchangedFromReviewBase": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-resume.mjs",
+      "gitBlob": "c386118a8bb13c51b98b2ba9432e0b439ea40a93",
+      "sha256": "48f932005f2b9e136d7adc60fe913ee6937cad46b016d3017cd23bb005a37a5f",
+      "roles": [
+        "reviewed-resume-change"
+      ]
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-resume.test.mjs",
+      "gitBlob": "1721cf5fd93661bad72b9ed1fb6bd0f11c324277",
+      "sha256": "2dc4585db90311011c51999c48c7e30eadcb679c3197ac28459018c32f91ce8e",
+      "roles": [
+        "reviewed-resume-change"
+      ]
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-runtime.mjs",
+      "gitBlob": "2d0abcb5987df3cdd408571e03b7381b72542b90",
+      "sha256": "c469061739798886f99869f5472363c6afb16531dfb028bb07a256dc73bd5ff1",
+      "roles": [
+        "reviewed-unchanged-boundary"
+      ],
+      "unchangedFromReviewBase": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-transport.mjs",
+      "gitBlob": "6a2543a25a4d632544b8b7dcee2aa95d99dd6e6c",
+      "sha256": "f108783172dce316371376ae933137c3e717dfd843fb2df0e6bc0c7b525e62dc",
+      "roles": [
+        "reviewed-unchanged-boundary"
+      ],
+      "unchangedFromReviewBase": true
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.mjs",
+      "gitBlob": "93f709aa201d20c64e6ee29521d0c5149dfe71e6",
+      "sha256": "dcdd1d90ab91f6b7890c26e628ce276c95f919616c06cd60071de0c75c250c27",
+      "roles": [
+        "reviewed-resume-change"
+      ]
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.test.mjs",
+      "gitBlob": "6dd8df03ce493ce2d6f148e59596a9c25d3c6d47",
+      "sha256": "df434be0cd48fc35bac3b1b5438aac0b1f43c3d8c159a8444de80e56e6570dfb",
+      "roles": [
+        "reviewed-resume-change"
+      ]
+    }
+  ]
+}

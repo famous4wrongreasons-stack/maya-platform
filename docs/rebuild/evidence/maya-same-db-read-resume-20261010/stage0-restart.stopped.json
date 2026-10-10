@@ -1,0 +1,33 @@
+{
+  "contract": "maya.same-db-read-resume.stage0-restart-evidence/1",
+  "sourceReport": "maya-synthetic-stage0-restart-20261010-02/restart.json",
+  "candidateCommit": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+  "status": "stopped",
+  "providerAdmission": false,
+  "qualifiedAcceptance": false,
+  "samePrivateState": true,
+  "completed": [
+    "pg-start",
+    "runtime"
+  ],
+  "runtimeDurationMs": 60000,
+  "preparationStageDeadlineMs": 180000,
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30
+  },
+  "helperExecutesNoInitdbMigrationSeedOrSignup": true,
+  "scope": "Actual owned PostgreSQL stop/start and the same application; UI assertions are recorded separately.",
+  "readyAt": "2026-10-10T18:57:43.108Z",
+  "expiresAt": "2026-10-10T18:58:43.109Z",
+  "runtimeGroupAbsent": true,
+  "clusterStopped": true,
+  "sourceUnchanged": true,
+  "initialManifestUnchanged": true,
+  "limits": [
+    "The launcher report records actual owned PostgreSQL stop/start and the same application; UI login assertions remain separate.",
+    "Private-state digest, state paths and original receipt digests are not archived."
+  ]
+}

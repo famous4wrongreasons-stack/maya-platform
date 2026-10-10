@@ -1,0 +1,142 @@
+{
+  "contract": "maya.same-db-read-resume.diagnostic-evidence/1",
+  "attempt": "03",
+  "status": "PASS",
+  "runtimeStatus": "stopped",
+  "sourceReport": "maya-synthetic-read-resume-20261010-03/resume.json",
+  "candidateCommit": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+  "initialSourceHead": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+  "qualifiedAcceptance": false,
+  "qualification": "Qualified only as synthetic same-state health-only diagnostic startup and clean stop; no owner/provider acceptance.",
+  "providerAdmission": "diagnostic_network_closed",
+  "completed": [
+    "backend-build",
+    "react-build",
+    "pg-start"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30
+  },
+  "readyAt": "2026-10-10T19:00:06.824Z",
+  "expiresAt": "2026-10-10T19:01:06.824Z",
+  "privateStateRetained": true,
+  "partnerTokenPersistence": false,
+  "executesNoInitdbMigrationSeedOrSignup": true,
+  "diagnostic": {
+    "contract": "maya.local-yclients-read-diagnostic/1",
+    "mode": "network_closed",
+    "stage": "stopped",
+    "outcome": "completed",
+    "credentialAccepted": false,
+    "preparationStep": null,
+    "firstFailure": null,
+    "cleanupFailures": [],
+    "runtimeStatuses": [
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "environment_validating",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "network_guard_installing",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "app_importing",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "app_creating",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "http_configuring",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "backend_listening",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "runtime_ready",
+        "outcome": "completed",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "runtime_stopping",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "runtime_stopping",
+        "outcome": "completed",
+        "code": null,
+        "cause": null
+      }
+    ]
+  },
+  "databaseChecks": {
+    "samePreStartSystem": true,
+    "exactOwnedDirectory": true,
+    "exactOwnedPort": true,
+    "exactOwnedRole": true,
+    "queryReadOnly": true,
+    "historicalSystemIdentity": "not_recorded_in_stage0"
+  },
+  "cleanup": {
+    "runtimeGroupAbsent": true,
+    "clusterStopped": true,
+    "samePrivateState": true,
+    "sourceUnchanged": true
+  },
+  "externalCleanupChecks": {
+    "postmasterAbsent": true,
+    "restartLockAbsent": true,
+    "evidenceOrigin": "Parent message after final stopped receipt; not re-read by archiver."
+  },
+  "providerReadSummary": {
+    "calls": 0,
+    "refused": 0,
+    "routes": {}
+  },
+  "providerReadSummaryStatus": "reported_at_clean_stop",
+  "limits": [
+    "Diagnostic uses the fixed public test constant and existing closed network/runtime profile; it never prompts for owner credentials.",
+    "Source and PostgreSQL identity were retained; this does not qualify a historical owner database or real YCLIENTS setup.",
+    "The previous failed attempt remains archived with unknown cause."
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "contract": "maya.signup-slug-fix.source-review-summary/1",
+  "reviewedAt": "2026-10-10T18:50:08.582360+00:00",
+  "baseCommit": "e40d512de402f38211672dada26fcecf81217820",
+  "verdict": "QUALIFIED_SOURCE_PASS",
+  "blockers": [],
+  "scope": "Exact pre-commit tenant slug/subdomain collision projection, headless retry boundary, UI secret lifetime and scoped synthetic proof. No resume-profile review.",
+  "findings": [
+    {
+      "id": "exact_precommit_mapping",
+      "status": "PASS",
+      "detail": "Only Prisma P2002 from the awaited tx.tenant.create is projected. One exact slug/subdomain field and consistent metadata are required. Unknown, contradictory, unrelated, outer transaction and later session failures are not relabelled."
+    },
+    {
+      "id": "client_session_boundary",
+      "status": "PASS",
+      "detail": "Only HTTP409 with nested trial_signup_slug_taken becomes failed/slug_taken. Current generation/auth checks precede state update; late cancellation cannot clear uncertainty. No automatic retry or grant from refusal."
+    },
+    {
+      "id": "password_lifetime",
+      "status": "PASS",
+      "detail": "Secret restoration is limited to the same mounted submission and exact failed/slug_taken result, into the DOM only. Epoch and forget callback cover leave/unmount/finally; consent is cleared. No state/view/storage secret field added."
+    },
+    {
+      "id": "stale_proof_limit",
+      "status": "FIXED",
+      "detail": "The old generic500/uncertain proof limitation was removed and replaced with the exact409 correction qualification before a new actual run."
+    }
+  ],
+  "sourceHashes": [
+    {
+      "path": "maya-saas-backend/src/package5-wave2/trial-activation-bootstrap.service.ts",
+      "sha256": "806d86e39a84b978607e18f947f96549009eb30a90ff9be40eecc6a52750f865",
+      "gitBlob": "27992e38f98cb95a99a85f46466c7359e12edb3a"
+    },
+    {
+      "path": "maya-saas-backend/src/package5-wave2/trial-activation-bootstrap.service.spec.ts",
+      "sha256": "4c8a32748359272db9312753e28760bec22377f820b66c2b7e7e54b90d968651",
+      "gitBlob": "b0c150564bed2143b2d700389c3e24f7a233bf40"
+    },
+    {
+      "path": "maya-saas-backend/src/onboarding/onboarding.service.spec.ts",
+      "sha256": "b7e59fbeb7c834af889d11a3d338eecdede8f63d12aea4766303860fe2a9d0b0",
+      "gitBlob": "84f1fae584e47d35990aa7831f976c03fc4b6791"
+    },
+    {
+      "path": "maya-chat-shell/src/net/client.ts",
+      "sha256": "f4298a9a886d032464a49ca3a26911e5fd2c4dbff8712b0bfd6a92aec0f4517e",
+      "gitBlob": "8ae3fcb59f3f3bf71dcbfa60ac8be5770056d1b2"
+    },
+    {
+      "path": "maya-chat-shell/src/net/session.ts",
+      "sha256": "97346d84a1617231f645fece136ee1e786562643b5d0b9f1e5994386465b7dd4",
+      "gitBlob": "35a95bdccc5e6d315b09315ab73dc08c0d77b75e"
+    },
+    {
+      "path": "maya-chat-shell/src/net/types.ts",
+      "sha256": "d440492933d1eeb51ed052c7050efc2fa5f686e1fff8b422d55ca59937852f73",
+      "gitBlob": "4e9fc88e08190068f68bf538ab79aee6866060ac"
+    },
+    {
+      "path": "maya-chat-shell/test/onboarding.test.mjs",
+      "sha256": "7a77b2adc8b61862b49a35952a7a47681f0b5cbcd688ff343701e7dcb3538027",
+      "gitBlob": "880c8d44e171d3553e7843bb5fe98a214bcc5d6b"
+    },
+    {
+      "path": "maya-chat-shell/dist/manifest.json",
+      "sha256": "9045a8baea98e66bde6bbe7b0023900b8d1751653c8a310e72e6045f5a14214a",
+      "gitBlob": "e7c9b3fcf051d443ba83b6c516c13230d0cec709"
+    },
+    {
+      "path": "maya-carrier-react/src/signin/StandardOnboarding.tsx",
+      "sha256": "b39ad8b697b59ccff7ed3c1148db7f27870b4a93e3587a99692d9e0c5bd9619a",
+      "gitBlob": "c3b3765fea5c33ab2746ce60686de606d431312d"
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding.test.mjs",
+      "sha256": "89e642edf3c14a9a987b852ca5f4de95ace961f392be5933f4c11bfd10f1df74",
+      "gitBlob": "e91e5ed3fc81b3de504f20b6dded0928094fb1a3"
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding-ui.fixture.tsx",
+      "sha256": "3ad242716d86fa3b373758b04813ef2a85bef6ab4bba64e57f7d8b1306fb9d89",
+      "gitBlob": "0388c574b703ae4507eb24f40214488f61194223"
+    },
+    {
+      "path": "maya-carrier-react/test/onboarding-ui.browser.mjs",
+      "sha256": "c735bb60ecf07cdcb7da5f5e64f1424018cb4c0e4434a3dc839b06d4e5c44596",
+      "gitBlob": "d92021952a2587c5e57887879f5db7fa767315af"
+    },
+    {
+      "path": "maya-carrier-react/test/local-onboarding-browser.probe.mjs",
+      "sha256": "266161d3c9e54316983eaea602aefddf0b56cf2535d22c4dfef1ea351a54e831",
+      "gitBlob": "8b66c54e4ac267cd5b09eb257dd09bf758ebc79c"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding-ui-proof.mjs",
+      "sha256": "c566f5ec408d8a5291a8ef33f945c1b8bf034ade629fb75a7ea0d7105bc4a577",
+      "gitBlob": "25d9d4ce1472e85144edd97c997aafc47b1ad68c"
+    }
+  ],
+  "capturedFilesMatchReview": true,
+  "directlyInspectedEvidence": {
+    "browserChecks": 91,
+    "backendTests": 45,
+    "backendSuites": 2
+  },
+  "authorReportedChecksNotRerunByArchiver": {
+    "backendTargetedLint": "PASS after style-only fixes in two spec files",
+    "backendProductionTypes": "PASS",
+    "headlessNormalBuild": "PASS with regenerated tracked manifest",
+    "carrierFullBuildAndTypes": "PASS UZOOG5IT",
+    "shellFocusedTests": "35 PASS",
+    "carrierSSR": "10 PASS"
+  },
+  "qualifications": [
+    "Source review and existing report inspection only; reviewer executed no tests, services, browser, network or PG.",
+    "Backend tests use finite mocks; they do not establish an actual PostgreSQL rollback.",
+    "PASS91 uses a synthetic OnboardingPort and does not establish the new409 actual HTTP/PG path.",
+    "No new actual HTTP/PG proof is claimed for this fix. Historical generic500 actual proof remains historical.",
+    "No owner DB, keys, private reports or newly prepared YCLIENTS same-state resume code were read or changed.",
+    "JavaScript reference clearing is not a secure-memory-zeroization claim."
+  ],
+  "publishedFixCommit": "9aab0db141e3b624be0f81c745b8fa68caf06b01",
+  "publishedFilesMatchReview": true
+}

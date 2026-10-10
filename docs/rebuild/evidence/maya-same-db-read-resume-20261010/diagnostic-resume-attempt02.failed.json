@@ -1,0 +1,62 @@
+{
+  "contract": "maya.same-db-read-resume.diagnostic-evidence/1",
+  "attempt": "02",
+  "status": "FAIL",
+  "sourceReport": "maya-synthetic-read-resume-20261010-02/resume.json",
+  "candidateCommit": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+  "initialSourceHead": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+  "qualifiedAcceptance": false,
+  "providerAdmission": "not_started",
+  "completed": [
+    "backend-build",
+    "react-build",
+    "pg-start"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30
+  },
+  "privateStateRetained": true,
+  "partnerTokenPersistence": false,
+  "executesNoInitdbMigrationSeedOrSignup": true,
+  "diagnostic": {
+    "contract": "maya.local-yclients-read-diagnostic/1",
+    "mode": "network_closed",
+    "stage": "stopped",
+    "outcome": "failed",
+    "credentialAccepted": false,
+    "preparationStep": null,
+    "firstFailure": {
+      "stage": "backend_starting",
+      "code": "child_boot_failed",
+      "runtimeStage": null
+    },
+    "cleanupFailures": [],
+    "runtimeStatuses": []
+  },
+  "databaseChecks": {
+    "samePreStartSystem": true,
+    "exactOwnedDirectory": true,
+    "exactOwnedPort": true,
+    "exactOwnedRole": true,
+    "queryReadOnly": true,
+    "historicalSystemIdentity": "not_recorded_in_stage0"
+  },
+  "cleanup": {
+    "runtimeGroupAbsent": true,
+    "clusterStopped": true,
+    "samePrivateState": true,
+    "sourceUnchanged": true
+  },
+  "providerReadSummary": null,
+  "providerReadSummaryStatus": "missing_or_unclean",
+  "cause": "NOT_ESTABLISHED",
+  "causalQualification": "The parent reported an extra outer sandbox around the existing diagnostic sandbox. This failed attempt alone does not establish why the child could not boot.",
+  "limits": [
+    "Builds and own PG identity checks completed. No runtime status or ready receipt was received.",
+    "No resumed app, current React resume, provider-zero-call or live-provider acceptance is claimed from this attempt.",
+    "Database identity/private state hashes, paths, original manifest digests and raw logs are omitted."
+  ]
+}

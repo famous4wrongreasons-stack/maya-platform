@@ -1,0 +1,14 @@
+{
+  "contract": "maya.saved-owner-source-transition/1",
+  "status": "PASS",
+  "initialSource": "03875b23523a578fad13ec0e8f7035dcd4e5a66b",
+  "candidate": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+  "oldPathsRetained": true,
+  "canonicalPrismaAndMigrationsUnchanged": true,
+  "schemaFiles": 117,
+  "initialSourceBindingSha256": "bc80a76f5cba3e845790c4c869c9bda88e2eee7fbd5bef89257b0883802006ea",
+  "candidateSourceBindingSha256": "c9d097e6f575a7b71306f2831740f9fa5fcae03e8182590b374333c9562cda00",
+  "ownerDatabaseOrKeysRead": false,
+  "ownerRuntimeStarted": false,
+  "limit": "Source transition only; no owner private-state preflight or runtime acceptance."
+}

@@ -1,0 +1,91 @@
+{
+  "contract": "maya.owner-registration.checkpoint/1",
+  "ownerRegistration": "REGISTERED_AND_SIGNED_IN_THEN_CLEANLY_STOPPED",
+  "crmIntegrations": 0,
+  "providerAdmission": false,
+  "ownerRuntimeSource": "03875b23523a578fad13ec0e8f7035dcd4e5a66b",
+  "sourceHeadAtCapture": "9aab0db141e3b624be0f81c745b8fa68caf06b01",
+  "slugFixBaseCommit": "e40d512de402f38211672dada26fcecf81217820",
+  "slugFixCandidateCommit": "9aab0db141e3b624be0f81c745b8fa68caf06b01",
+  "sourceQualification": "All 14 reviewed source SHA256 values also match exact Git blobs in the published fix commit; actual HTTP/PostgreSQL qualification is separate.",
+  "slugFix": {
+    "backendUnitTests": 45,
+    "syntheticBrowserChecks": 91,
+    "independentReview": "QUALIFIED_SOURCE_PASS",
+    "new409ActualHTTPPostgreSQL": "PASS_ON_LATER_SYNTHETIC_CANDIDATE",
+    "new409ActualHTTPPostgreSQLAtInitialCapture": "NOT_RUN",
+    "actualEvidence": "../maya-same-db-read-resume-20261010/actual-ui-attempt02.passed.json"
+  },
+  "sameDatabaseResume": "SYNTHETIC_DIAGNOSTIC_PASS_OWNER_RESUME_NOT_RUN",
+  "nextOwnerTokenWindow": "NOT_OPENED_REQUIRE_FRESH_OWNER_READINESS",
+  "historicalGeneric500": {
+    "source": "03875b23523a578fad13ec0e8f7035dcd4e5a66b",
+    "evidence": "../maya-registration-form-20261010/summary.json",
+    "qualification": "Historical actual HTTP/PG proof only. It does not establish the new409 behavior."
+  },
+  "sourceReports": [
+    {
+      "kind": "owner_status",
+      "basename": "status-final.json",
+      "sha256": "3ccaf52805c35ed4c25c18ed791c0f601258d76f86d15180dae64ca2941eeb13"
+    },
+    {
+      "kind": "independent_review",
+      "basename": "maya-slugfix-independent-review-20261010.json",
+      "sha256": "b519dfdefac036b582ae341fd6d6ba45ea0e982798788b93387c304f33c10da8"
+    },
+    {
+      "kind": "synthetic_browser",
+      "basename": "report.json",
+      "sha256": "12552190c1d43192e9608a699eacdd33151242fb05d36ddd3acaff045b60506a"
+    },
+    {
+      "kind": "backend_unit",
+      "basename": "maya-signup-slug-backend-20261010-final.json",
+      "sha256": "c988d97d08989883a8a627e284efa50542cefd66bf8138f344e577b7c67f2659"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "owner-status.redacted.json",
+      "sha256": "d4f09861d5a41b48ab35a35ad8c59ab52951b01b49355e3eaae097ebbc55ff4b"
+    },
+    {
+      "path": "slug-fix.browser-summary.json",
+      "sha256": "df766b478c148841cef5a479cb265e036f3b7c7060569178dc3f8f013706e1c5"
+    },
+    {
+      "path": "slug-fix.backend-summary.json",
+      "sha256": "34c25f5ce9529fd108fa639fae322f22c99632af076b32fc06424b677624929e"
+    },
+    {
+      "path": "slug-fix.review-summary.json",
+      "sha256": "575af490040444839d170d325d13581f6d7e0566a26274ac71b5d20fb63b3ddc"
+    }
+  ],
+  "hashScope": "Only source code and supplied safe evidence reports are hashed. No password, key file, private state contents or owner identifier hash is included.",
+  "archiveActions": {
+    "ownerDatabaseRead": false,
+    "ownerKeyRead": false,
+    "serviceRun": false,
+    "networkRun": false,
+    "testsRun": false,
+    "commitOrPush": false
+  },
+  "publication": {
+    "commit": "9aab0db141e3b624be0f81c745b8fa68caf06b01",
+    "remoteVerification": "PARENT_REPORTED_LS_REMOTE_VERIFIED",
+    "archiverPerformedNetworkLookup": false
+  },
+  "sameDatabaseResumeAtInitialCapture": "PREPARING_NOT_ACTUALLY_QUALIFIED",
+  "laterQualification": {
+    "candidateCommit": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+    "evidence": "../maya-same-db-read-resume-20261010/summary.json",
+    "syntheticActualUi409": "PASS",
+    "syntheticSameDatabaseDiagnostic": "PASS_HEALTH_ONLY",
+    "ownerDatabaseOrKeysRead": false,
+    "ownerRuntimeStarted": false,
+    "passwordLoginAfterResume": "NOT_ADMITTED_DIAGNOSTIC_HEALTH_ONLY",
+    "qualification": "Later evidence supersedes the earlier NOT_RUN/preparing status for the synthetic checks only; the owner registration observation remains bound to its historical runtime."
+  }
+}

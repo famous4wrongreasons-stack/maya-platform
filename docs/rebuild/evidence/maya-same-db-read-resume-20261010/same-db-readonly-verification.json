@@ -1,0 +1,110 @@
+{
+  "contract": "maya.same-db-read-resume.readonly-evidence/1",
+  "status": "PASS",
+  "candidateCommit": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+  "sourceReports": [
+    "maya-read-resume-proof-20261010-02/snapshot.json",
+    "maya-read-resume-proof-20261010-02/verify.json"
+  ],
+  "helper": {
+    "basename": "maya-same-db-qualification-20261010.mjs",
+    "sha256": "eaddf724b7debb5cb04fb99ce0f85b6c5ecf2ce013d47230fb1e331de6dc7bd7",
+    "kind": "Scratch finite synthetic-only read-only qualification; exact source bytes checked during archiving.",
+    "archived": false
+  },
+  "runtimeSourceBinding": {
+    "sha256": "c9d097e6f575a7b71306f2831740f9fa5fcae03e8182590b374333c9562cda00",
+    "capturedPaths": 2026,
+    "matchesFinalRuntimeReport": true,
+    "qualification": "Full binding digest joined to supplied runtime report. Independently rechecked candidate Git blobs for the 16 selected paths are in source-bindings.json."
+  },
+  "syntheticOnly": true,
+  "ownerStateUsed": false,
+  "schemaProjection": {
+    "models": 6,
+    "fields": 36,
+    "schemaSha256": "77d37c8f8709f34b7eddd0081bf4aac3a10fdbf9092ad590196aa61c2a9e9977"
+  },
+  "sameDatabaseRestart": true,
+  "comparisons": {
+    "sourceHeadUnchanged": true,
+    "sourceBindingUnchanged": true,
+    "stateDirectoryIdentityUnchanged": true,
+    "clusterDirectoryIdentityUnchanged": true,
+    "privateStateAndServiceKeysUnchanged": true,
+    "sameDatabase": true,
+    "samePgSystem": true,
+    "laterPgStart": true,
+    "schemaProjectionUnchanged": true,
+    "uiBaselineUnchanged": true,
+    "rowCountsUnchanged": true,
+    "canonicalAggregatesUnchanged": {
+      "tenant": true,
+      "branch": true,
+      "membership": true,
+      "userAndPassword": true,
+      "session": true,
+      "refreshTokenState": true
+    }
+  },
+  "databaseChecks": {
+    "exactOwnedDirectory": true,
+    "exactOwnedRole": true,
+    "exactOwnedPort": true,
+    "queriesReadOnly": true
+  },
+  "uiBaseline": {
+    "twoUiBusinesses": true,
+    "canonicalSeedTenantRetained": true
+  },
+  "countsAfterResume": {
+    "Tenant": 4,
+    "User": 2,
+    "Branch": 3,
+    "Membership": 2,
+    "TrialActivation": 3,
+    "AuthSession": 7,
+    "AuthRefreshToken": 7,
+    "CrmIntegration": 0,
+    "CrmStaffAccess": 0,
+    "Client": 0,
+    "Appointment": 0,
+    "ActionExecution": 0,
+    "ActionExecutionIdempotencyBinding": 0,
+    "AiApprovalRequest": 0,
+    "AiToolExecution": 0,
+    "Opportunity": 0,
+    "AgentTask": 0,
+    "OwnerReportRun": 0,
+    "NativeFeedbackRequest": 0,
+    "TeamMessage": 0,
+    "ExpenseReminderRun": 0,
+    "MarketingCampaign": 0,
+    "MarketingDeliveryAttempt": 0,
+    "Expense": 0
+  },
+  "effectsChecked": 17,
+  "routes": [
+    {
+      "surface": "backend",
+      "health": 200,
+      "auth": 403,
+      "code": "local_yclients_diagnostic_route_disabled"
+    },
+    {
+      "surface": "web",
+      "health": 200,
+      "auth": 403,
+      "code": "local_yclients_diagnostic_route_disabled"
+    }
+  ],
+  "databaseWritesMadeByQualification": 0,
+  "providerCallsMadeByQualification": 0,
+  "passwordLoginAfterResume": "NOT_ADMITTED_DIAGNOSTIC_HEALTH_ONLY",
+  "limits": [
+    "Comparisons were recomputed from the supplied snapshot and verify reports; raw private/authentication aggregates are not archived.",
+    "This is a real stop/start of the same synthetic PostgreSQL state and a health-only diagnostic AppModule.",
+    "No password login after resume was admitted; preserved authentication rows are not an authentication-success claim.",
+    "No owner state or real provider credentials were used."
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "contract": "maya.same-db-read-resume.checkpoint/1",
+  "candidateCommit": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+  "status": "QUALIFIED_LOCAL_CHECKPOINT",
+  "actualUiHttpPg": "PASS",
+  "slugCollision": {
+    "status": 409,
+    "code": "trial_signup_slug_taken",
+    "newBusinessDuplicates": 0,
+    "additionalPendingActivation": 1
+  },
+  "uiCheckpoints": 9,
+  "verifiedPasswordLogins": 5,
+  "domainEffectTablesZero": 17,
+  "sameDatabaseDiagnosticResume": "ACTUAL_SYNTHETIC_SAME_DATABASE_PASS_HEALTH_ONLY",
+  "sourceReview": "QUALIFIED_SOURCE_PASS",
+  "reviewedPathsBound": 13,
+  "proofPathsBound": 3,
+  "preservedFailures": [
+    "actual-ui-attempt01.failed.json",
+    "diagnostic-resume-attempt02.failed.json"
+  ],
+  "ownerStateUsed": false,
+  "liveProviderAcceptance": "NOT_RUN",
+  "modelAcceptance": "NOT_RUN",
+  "limits": [
+    "The UI registration/login proof and subsequent diagnostic same-DB restart are distinct measured stages.",
+    "The resumed diagnostic runtime admits health only; auth requests are refused, so no password-login-after-resume success is claimed.",
+    "The owner database and keys were not read or resumed. Historical owner source compatibility is source-only.",
+    "Failed attempts remain failures; suspected OS sandbox interactions are not established causes.",
+    "No live provider, model, production/HTTPS or owner-token-window acceptance.",
+    "Only booleans derived from supplied private/authentication comparisons are archived; no underlying hashes or private state paths.",
+    "The actual collision proof does not submit a third corrected business; corrected resubmission is covered separately by component/headless tests."
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "2265672fade86566cc156fef291398bca7e02cd96d99acde4b0d589ba0d90dd4"
+    },
+    {
+      "path": "actual-ui-attempt01.failed.json",
+      "sha256": "bb0b6969901d9e47279ad6518fd2f0f2629b080705037117adedf60f29f66707"
+    },
+    {
+      "path": "actual-ui-attempt02.passed.json",
+      "sha256": "461c57f4294d37ee1b19343cc0a5cdeb4233caf1153f929659c0078b95bf0418"
+    },
+    {
+      "path": "diagnostic-resume-attempt02.failed.json",
+      "sha256": "70d71c464717606b8767a3dca561cee8dc7d304bb47c7e97b4b8450debae8b4f"
+    },
+    {
+      "path": "diagnostic-resume-attempt03.passed.json",
+      "sha256": "eb06af5491ecd2207005ccbd48518b151af7d5bd7a7b8a772b63e87f9e0ea315"
+    },
+    {
+      "path": "independent-actual-review.json",
+      "sha256": "bb7b37d97fb112afd113ce9a926e368b8ec6bba06dabee7e2f35d381a90d80a3"
+    },
+    {
+      "path": "owner-source-transition.source-only.json",
+      "sha256": "106bd9bffb6911046709adfa3b0bcc0076874782f77b7b1004da3a22a663d8a9"
+    },
+    {
+      "path": "same-db-readonly-verification.json",
+      "sha256": "2cb4fb8b3c44f0c3a9d690653bb1d8cf10b4de7b9d5129cce404ec89a202ceae"
+    },
+    {
+      "path": "source-bindings.json",
+      "sha256": "0ac6c01e18677b9816dd65efc341bffb426af26b8e707a3b6c36bd5b6868b52a"
+    },
+    {
+      "path": "source-review.json",
+      "sha256": "f93a460e932d7c393df05024f38ce1baa24be16ab4ba30ace64b603db3c1dbc0"
+    },
+    {
+      "path": "stage0-restart.stopped.json",
+      "sha256": "e7604d7d50b50e44f91030b9a6a2891672b1da7e378ee4316df179ed99fc3980"
+    }
+  ],
+  "diagnosticCleanup": "PASS",
+  "diagnosticProviderReads": {
+    "calls": 0,
+    "refused": 0
+  },
+  "ownerSameDatabaseResume": "NOT_RUN",
+  "passwordLoginAfterResume": "NOT_ADMITTED_DIAGNOSTIC_HEALTH_ONLY",
+  "historicalOwnerSourceTransition": {
+    "status": "SOURCE_ONLY_PASS",
+    "canonicalPrismaAndMigrationFilesUnchanged": 117,
+    "evidence": "owner-source-transition.source-only.json"
+  },
+  "publication": {
+    "commit": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+    "remoteVerification": "PARENT_REPORTED_LS_REMOTE_VERIFIED",
+    "branch": "codex/maya-local-crm-setup-20261010",
+    "archiverPerformedNetworkLookup": false
+  },
+  "independentActualReview": {
+    "verdict": "QUALIFIED_SYNTHETIC_ACTUAL_PASS",
+    "blockers": [],
+    "sourcePathsVerified": 2029,
+    "artifact": "independent-actual-review.json",
+    "sha256": "bb7b37d97fb112afd113ce9a926e368b8ec6bba06dabee7e2f35d381a90d80a3"
+  }
+}

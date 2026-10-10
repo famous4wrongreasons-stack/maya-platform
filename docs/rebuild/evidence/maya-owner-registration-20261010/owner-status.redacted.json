@@ -1,0 +1,48 @@
+{
+  "contract": "maya.owner-registration.redacted-summary/1",
+  "observedAt": "2026-10-10T18:40:51.185Z",
+  "status": "registered_and_signed_in",
+  "counts": {
+    "newTenants": 1,
+    "newUsers": 1,
+    "newBranches": 1,
+    "activeOwners": 1,
+    "completedActivations": 1,
+    "activeOwnerSessions": 1,
+    "crmIntegrations": 0
+  },
+  "manualOwnerSignup": true,
+  "crmConnected": false,
+  "providerAdmission": false,
+  "runtimeSource": "03875b23523a578fad13ec0e8f7035dcd4e5a66b",
+  "publishedCheckpointAtObservation": "e40d512de402f38211672dada26fcecf81217820",
+  "preservation": {
+    "keysPreserved": true,
+    "newKeysCreated": false,
+    "databaseAndKeysStillPresent": true,
+    "postmasterAbsent": true,
+    "noFurtherSyntheticUse": true,
+    "agentEndedAfterOwnerSuccess": true
+  },
+  "lifecycle": {
+    "status": "stopped",
+    "providerAdmission": false,
+    "samePrivateState": true,
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "sourceUnchanged": true,
+    "initialManifestUnchanged": true
+  },
+  "sameDatabaseResume": "PREPARING_NOT_ACTUALLY_QUALIFIED",
+  "nextOwnerTokenWindow": "NOT_OPENED_REQUIRE_FRESH_OWNER_READINESS",
+  "limits": [
+    "Safe parent status projection only; the archiving agent did not inspect owner database or keys.",
+    "Active owner session count was observed at sign-in; it does not mean a server is currently running.",
+    "No real YCLIENTS connection or provider acceptance is established."
+  ],
+  "redactions": [
+    "owner names, email, slug and canonical identifiers",
+    "private state directory",
+    "credentials, key hashes, screenshots and raw responses"
+  ]
+}

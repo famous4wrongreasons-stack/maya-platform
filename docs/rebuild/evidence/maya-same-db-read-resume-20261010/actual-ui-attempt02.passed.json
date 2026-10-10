@@ -1,0 +1,575 @@
+{
+  "contract": "maya.same-db-read-resume.ui-evidence/1",
+  "attempt": "02",
+  "status": "PASS",
+  "sourceReports": [
+    "maya-onboarding-ui-proof-resume-20261010-02/parent.json",
+    "maya-onboarding-ui-proof-resume-20261010-02/browser.json"
+  ],
+  "source": {
+    "candidateCommit": "c2079dd5b20de32995c8baa0a293547391cd5d33",
+    "sessionSourceSha256": "60ae8ad104d6d17eb2f29e653ec06df131ea6da89f1073b1117be364e15ad31c",
+    "browserBundleSha256": "5cd5b6f6d2fa1c9a6ef34a35c0b22bc12f9a7bf77201cdb9327f518e50cd2598",
+    "sourceUnchanged": true,
+    "proofFilesBoundIn": "source-bindings.json"
+  },
+  "syntheticAccounts": true,
+  "ownerStateUsed": false,
+  "providerAdmission": false,
+  "databaseChecks": {
+    "exactOwnedDirectory": true,
+    "exactOwnedPort": true,
+    "queriesReadOnly": true
+  },
+  "sameOwnedDatabase": true,
+  "baseline": {
+    "Tenant": 2,
+    "User": 0,
+    "Branch": 1,
+    "Membership": 0,
+    "TrialActivation": 0,
+    "CrmIntegration": 0,
+    "CrmStaffAccess": 0,
+    "Client": 0,
+    "Appointment": 0,
+    "ActionExecution": 0,
+    "ActionExecutionIdempotencyBinding": 0,
+    "AiApprovalRequest": 0,
+    "AiToolExecution": 0,
+    "Opportunity": 0,
+    "AgentTask": 0,
+    "OwnerReportRun": 0,
+    "NativeFeedbackRequest": 0,
+    "TeamMessage": 0,
+    "ExpenseReminderRun": 0,
+    "MarketingCampaign": 0,
+    "MarketingDeliveryAttempt": 0,
+    "Expense": 0,
+    "activationCompleted": 0,
+    "activationPending": 0
+  },
+  "checkpoints": [
+    {
+      "name": "success-created",
+      "canonicalOwnership": {
+        "tenant": 1,
+        "user": 1,
+        "membership": 1,
+        "branch": 1,
+        "activation": 1
+      },
+      "counts": {
+        "Tenant": 3,
+        "User": 1,
+        "Branch": 2,
+        "Membership": 1,
+        "TrialActivation": 1,
+        "CrmIntegration": 0,
+        "CrmStaffAccess": 0,
+        "Client": 0,
+        "Appointment": 0,
+        "ActionExecution": 0,
+        "ActionExecutionIdempotencyBinding": 0,
+        "AiApprovalRequest": 0,
+        "AiToolExecution": 0,
+        "Opportunity": 0,
+        "AgentTask": 0,
+        "OwnerReportRun": 0,
+        "NativeFeedbackRequest": 0,
+        "TeamMessage": 0,
+        "ExpenseReminderRun": 0,
+        "MarketingCampaign": 0,
+        "MarketingDeliveryAttempt": 0,
+        "Expense": 0,
+        "activationCompleted": 1,
+        "activationPending": 0
+      }
+    },
+    {
+      "name": "success-crm-read",
+      "canonicalOwnership": {
+        "tenant": 1,
+        "user": 1,
+        "membership": 1,
+        "branch": 1,
+        "activation": 1
+      },
+      "counts": {
+        "Tenant": 3,
+        "User": 1,
+        "Branch": 2,
+        "Membership": 1,
+        "TrialActivation": 1,
+        "CrmIntegration": 0,
+        "CrmStaffAccess": 0,
+        "Client": 0,
+        "Appointment": 0,
+        "ActionExecution": 0,
+        "ActionExecutionIdempotencyBinding": 0,
+        "AiApprovalRequest": 0,
+        "AiToolExecution": 0,
+        "Opportunity": 0,
+        "AgentTask": 0,
+        "OwnerReportRun": 0,
+        "NativeFeedbackRequest": 0,
+        "TeamMessage": 0,
+        "ExpenseReminderRun": 0,
+        "MarketingCampaign": 0,
+        "MarketingDeliveryAttempt": 0,
+        "Expense": 0,
+        "activationCompleted": 1,
+        "activationPending": 0
+      }
+    },
+    {
+      "name": "success-reload-login",
+      "canonicalOwnership": {
+        "tenant": 1,
+        "user": 1,
+        "membership": 1,
+        "branch": 1,
+        "activation": 1
+      },
+      "counts": {
+        "Tenant": 3,
+        "User": 1,
+        "Branch": 2,
+        "Membership": 1,
+        "TrialActivation": 1,
+        "CrmIntegration": 0,
+        "CrmStaffAccess": 0,
+        "Client": 0,
+        "Appointment": 0,
+        "ActionExecution": 0,
+        "ActionExecutionIdempotencyBinding": 0,
+        "AiApprovalRequest": 0,
+        "AiToolExecution": 0,
+        "Opportunity": 0,
+        "AgentTask": 0,
+        "OwnerReportRun": 0,
+        "NativeFeedbackRequest": 0,
+        "TeamMessage": 0,
+        "ExpenseReminderRun": 0,
+        "MarketingCampaign": 0,
+        "MarketingDeliveryAttempt": 0,
+        "Expense": 0,
+        "activationCompleted": 1,
+        "activationPending": 0
+      }
+    },
+    {
+      "name": "success-signout-login",
+      "canonicalOwnership": {
+        "tenant": 1,
+        "user": 1,
+        "membership": 1,
+        "branch": 1,
+        "activation": 1
+      },
+      "counts": {
+        "Tenant": 3,
+        "User": 1,
+        "Branch": 2,
+        "Membership": 1,
+        "TrialActivation": 1,
+        "CrmIntegration": 0,
+        "CrmStaffAccess": 0,
+        "Client": 0,
+        "Appointment": 0,
+        "ActionExecution": 0,
+        "ActionExecutionIdempotencyBinding": 0,
+        "AiApprovalRequest": 0,
+        "AiToolExecution": 0,
+        "Opportunity": 0,
+        "AgentTask": 0,
+        "OwnerReportRun": 0,
+        "NativeFeedbackRequest": 0,
+        "TeamMessage": 0,
+        "ExpenseReminderRun": 0,
+        "MarketingCampaign": 0,
+        "MarketingDeliveryAttempt": 0,
+        "Expense": 0,
+        "activationCompleted": 1,
+        "activationPending": 0
+      }
+    },
+    {
+      "name": "lost-reply-committed",
+      "canonicalOwnership": {
+        "tenant": 1,
+        "user": 1,
+        "membership": 1,
+        "branch": 1,
+        "activation": 1
+      },
+      "counts": {
+        "Tenant": 4,
+        "User": 2,
+        "Branch": 3,
+        "Membership": 2,
+        "TrialActivation": 2,
+        "CrmIntegration": 0,
+        "CrmStaffAccess": 0,
+        "Client": 0,
+        "Appointment": 0,
+        "ActionExecution": 0,
+        "ActionExecutionIdempotencyBinding": 0,
+        "AiApprovalRequest": 0,
+        "AiToolExecution": 0,
+        "Opportunity": 0,
+        "AgentTask": 0,
+        "OwnerReportRun": 0,
+        "NativeFeedbackRequest": 0,
+        "TeamMessage": 0,
+        "ExpenseReminderRun": 0,
+        "MarketingCampaign": 0,
+        "MarketingDeliveryAttempt": 0,
+        "Expense": 0,
+        "activationCompleted": 2,
+        "activationPending": 0
+      }
+    },
+    {
+      "name": "lost-reply-recovered",
+      "canonicalOwnership": {
+        "tenant": 1,
+        "user": 1,
+        "membership": 1,
+        "branch": 1,
+        "activation": 1
+      },
+      "counts": {
+        "Tenant": 4,
+        "User": 2,
+        "Branch": 3,
+        "Membership": 2,
+        "TrialActivation": 2,
+        "CrmIntegration": 0,
+        "CrmStaffAccess": 0,
+        "Client": 0,
+        "Appointment": 0,
+        "ActionExecution": 0,
+        "ActionExecutionIdempotencyBinding": 0,
+        "AiApprovalRequest": 0,
+        "AiToolExecution": 0,
+        "Opportunity": 0,
+        "AgentTask": 0,
+        "OwnerReportRun": 0,
+        "NativeFeedbackRequest": 0,
+        "TeamMessage": 0,
+        "ExpenseReminderRun": 0,
+        "MarketingCampaign": 0,
+        "MarketingDeliveryAttempt": 0,
+        "Expense": 0,
+        "activationCompleted": 2,
+        "activationPending": 0
+      }
+    },
+    {
+      "name": "lost-reply-reload-login",
+      "canonicalOwnership": {
+        "tenant": 1,
+        "user": 1,
+        "membership": 1,
+        "branch": 1,
+        "activation": 1
+      },
+      "counts": {
+        "Tenant": 4,
+        "User": 2,
+        "Branch": 3,
+        "Membership": 2,
+        "TrialActivation": 2,
+        "CrmIntegration": 0,
+        "CrmStaffAccess": 0,
+        "Client": 0,
+        "Appointment": 0,
+        "ActionExecution": 0,
+        "ActionExecutionIdempotencyBinding": 0,
+        "AiApprovalRequest": 0,
+        "AiToolExecution": 0,
+        "Opportunity": 0,
+        "AgentTask": 0,
+        "OwnerReportRun": 0,
+        "NativeFeedbackRequest": 0,
+        "TeamMessage": 0,
+        "ExpenseReminderRun": 0,
+        "MarketingCampaign": 0,
+        "MarketingDeliveryAttempt": 0,
+        "Expense": 0,
+        "activationCompleted": 2,
+        "activationPending": 0
+      }
+    },
+    {
+      "name": "lost-reply-signout-login",
+      "canonicalOwnership": {
+        "tenant": 1,
+        "user": 1,
+        "membership": 1,
+        "branch": 1,
+        "activation": 1
+      },
+      "counts": {
+        "Tenant": 4,
+        "User": 2,
+        "Branch": 3,
+        "Membership": 2,
+        "TrialActivation": 2,
+        "CrmIntegration": 0,
+        "CrmStaffAccess": 0,
+        "Client": 0,
+        "Appointment": 0,
+        "ActionExecution": 0,
+        "ActionExecutionIdempotencyBinding": 0,
+        "AiApprovalRequest": 0,
+        "AiToolExecution": 0,
+        "Opportunity": 0,
+        "AgentTask": 0,
+        "OwnerReportRun": 0,
+        "NativeFeedbackRequest": 0,
+        "TeamMessage": 0,
+        "ExpenseReminderRun": 0,
+        "MarketingCampaign": 0,
+        "MarketingDeliveryAttempt": 0,
+        "Expense": 0,
+        "activationCompleted": 2,
+        "activationPending": 0
+      }
+    },
+    {
+      "name": "slug-collision-rejected",
+      "canonicalOwnership": {
+        "tenant": 1,
+        "user": 1,
+        "membership": 1,
+        "branch": 1,
+        "activation": 1
+      },
+      "counts": {
+        "Tenant": 4,
+        "User": 2,
+        "Branch": 3,
+        "Membership": 2,
+        "TrialActivation": 3,
+        "CrmIntegration": 0,
+        "CrmStaffAccess": 0,
+        "Client": 0,
+        "Appointment": 0,
+        "ActionExecution": 0,
+        "ActionExecutionIdempotencyBinding": 0,
+        "AiApprovalRequest": 0,
+        "AiToolExecution": 0,
+        "Opportunity": 0,
+        "AgentTask": 0,
+        "OwnerReportRun": 0,
+        "NativeFeedbackRequest": 0,
+        "TeamMessage": 0,
+        "ExpenseReminderRun": 0,
+        "MarketingCampaign": 0,
+        "MarketingDeliveryAttempt": 0,
+        "Expense": 0,
+        "activationCompleted": 2,
+        "activationPending": 1
+      }
+    }
+  ],
+  "routes": [
+    {
+      "host": "web",
+      "route": "/api/ai/chat",
+      "status": 403,
+      "code": "local_onboarding_route_disabled"
+    },
+    {
+      "host": "web",
+      "route": "/api/integrations/crm/connect",
+      "status": 403,
+      "code": "local_provider_admission_required"
+    },
+    {
+      "host": "web",
+      "route": "/api/auth/email/start",
+      "status": 403,
+      "code": "local_onboarding_route_disabled"
+    },
+    {
+      "host": "web",
+      "boundary": "Origin",
+      "status": 403,
+      "code": "local_onboarding_origin_refused",
+      "transport": "node:http"
+    },
+    {
+      "host": "web",
+      "boundary": "Host",
+      "status": 403,
+      "code": "local_onboarding_origin_refused",
+      "transport": "node:http"
+    },
+    {
+      "host": "web",
+      "boundary": "Sec-Fetch-Site",
+      "status": 403,
+      "code": "local_onboarding_origin_refused",
+      "transport": "node:http"
+    },
+    {
+      "host": "backend",
+      "route": "/api/ai/chat",
+      "status": 403,
+      "code": "local_onboarding_route_disabled"
+    },
+    {
+      "host": "backend",
+      "route": "/api/integrations/crm/connect",
+      "status": 403,
+      "code": "local_provider_admission_required"
+    },
+    {
+      "host": "backend",
+      "route": "/api/auth/email/start",
+      "status": 403,
+      "code": "local_onboarding_route_disabled"
+    },
+    {
+      "host": "backend",
+      "boundary": "Origin",
+      "status": 403,
+      "code": "local_onboarding_origin_refused",
+      "transport": "node:http"
+    },
+    {
+      "host": "backend",
+      "boundary": "Host",
+      "status": 403,
+      "code": "local_onboarding_origin_refused",
+      "transport": "node:http"
+    },
+    {
+      "host": "backend",
+      "boundary": "Sec-Fetch-Site",
+      "status": 403,
+      "code": "local_onboarding_origin_refused",
+      "transport": "node:http"
+    }
+  ],
+  "collision": {
+    "httpStatus": 409,
+    "errorCode": "trial_signup_slug_taken",
+    "exactPrecommitRefusal": true,
+    "existingBusinessUnchanged": true,
+    "additionalTenantUserBranchMembership": 0,
+    "additionalPendingActivation": 1,
+    "explicitCorrectionAllowed": true,
+    "automaticRetry": false
+  },
+  "browser": {
+    "actualCurrentReact": true,
+    "normalLocalWebHost": true,
+    "syntheticAccounts": true,
+    "authInjection": false,
+    "syntheticResponses": false,
+    "providerBrowserRequests": 0,
+    "modelBrowserRequests": 0,
+    "crmMutationRequests": 0,
+    "backendEffectsAndDatabaseRequireParentEvidence": true
+  },
+  "accounts": [
+    {
+      "key": "success",
+      "signupRequests": 1,
+      "activationRequests": 1,
+      "loginRequests": 2,
+      "logoutRequests": 1,
+      "verifiedLogins": 2,
+      "responseLossInjectedAfterCommit": false,
+      "crmReadOutcome": "unconnected"
+    },
+    {
+      "key": "lost-reply",
+      "signupRequests": 1,
+      "activationRequests": 1,
+      "loginRequests": 3,
+      "logoutRequests": 1,
+      "verifiedLogins": 3,
+      "responseLossInjectedAfterCommit": true,
+      "crmReadOutcome": "unconnected"
+    }
+  ],
+  "cleanup": {
+    "driver": {
+      "ownedBrowserGroupAbsent": true,
+      "syntheticPasswordConfigRemoved": true,
+      "launcherAndDatabaseNotStoppedByDriver": true,
+      "ownClaimRetained": true
+    },
+    "browser": {
+      "chromeClosed": true,
+      "privateProfileRemoved": true,
+      "clean": true
+    },
+    "launcherStillReadyAtDriverCompletion": true
+  },
+  "limits": [
+    "Local development HTTP only; no production/provider/model acceptance.",
+    "Zero listed domain-effect rows and closed ingress are checked; no packet-level outbound claim.",
+    "No database/process restart in this UI proof; the existing launcher owns all PG lifecycle.",
+    "Exact HTTP409/trial_signup_slug_taken permits explicit field correction with fresh consent; ambiguous failures still prohibit repeated creation."
+  ],
+  "redaction": [
+    "No account identities or identity hashes.",
+    "No database/system/private-state hashes or private state paths.",
+    "No credentials, cookies, auth bodies, screenshots or raw logs."
+  ],
+  "after": {
+    "Tenant": 4,
+    "User": 2,
+    "Branch": 3,
+    "Membership": 2,
+    "TrialActivation": 3,
+    "CrmIntegration": 0,
+    "CrmStaffAccess": 0,
+    "Client": 0,
+    "Appointment": 0,
+    "ActionExecution": 0,
+    "ActionExecutionIdempotencyBinding": 0,
+    "AiApprovalRequest": 0,
+    "AiToolExecution": 0,
+    "Opportunity": 0,
+    "AgentTask": 0,
+    "OwnerReportRun": 0,
+    "NativeFeedbackRequest": 0,
+    "TeamMessage": 0,
+    "ExpenseReminderRun": 0,
+    "MarketingCampaign": 0,
+    "MarketingDeliveryAttempt": 0,
+    "Expense": 0,
+    "activationCompleted": 2,
+    "activationPending": 1
+  },
+  "listedDomainEffectTables": {
+    "count": 17,
+    "tables": [
+      "CrmIntegration",
+      "CrmStaffAccess",
+      "Client",
+      "Appointment",
+      "ActionExecution",
+      "ActionExecutionIdempotencyBinding",
+      "AiApprovalRequest",
+      "AiToolExecution",
+      "Opportunity",
+      "AgentTask",
+      "OwnerReportRun",
+      "NativeFeedbackRequest",
+      "TeamMessage",
+      "ExpenseReminderRun",
+      "MarketingCampaign",
+      "MarketingDeliveryAttempt",
+      "Expense"
+    ],
+    "allZero": true
+  },
+  "verifiedPasswordLogins": 5
+}
