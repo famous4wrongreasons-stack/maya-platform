@@ -498,17 +498,19 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
           where: { id: s.appointmentId },
           data: { branchId: null },
         });
-      if (mode === 'missing-origin')
-        await db.prisma.actionExecution.updateMany({
-          where: {
-            tenantId: s.tenantId,
-            capability: 'crm.appointment.create.v1',
-          },
-          data: {
-            bookingIntentEncrypted: null,
-            payloadRetentionUntil: new Date(Date.now() - 1000),
-          },
+      if (mode === 'missing-origin') {
+        // A mirror record without canonical create provenance. Never rewrite
+        // the accepted B31 intent or its immutable retention contract.
+        await db.prisma.appointment.update({
+          where: { id: s.appointmentId },
+          data: { crmExternalId: '5002' },
         });
+        const direct = await cancelHttp(s, randomUUID());
+        expect(direct.status).toBe(409);
+        expect(direct.body).toMatchObject({
+          error: { code: 'booking_appointment_source_unproven' },
+        });
+      }
       if (mode === 'provider-change')
         await db.prisma.crmIntegration.update({
           where: { tenantId: s.tenantId },
@@ -651,9 +653,16 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
       const result = await pending;
       expect(result).toMatchObject({
         receipt_outcome: 'REFUSED',
-        action_receipt_ref: null,
         owner_decision: null,
       });
+      expect(
+        await db.prisma.widgetIntentReceipt.findFirstOrThrow({
+          where: {
+            tenantId: s.tenantId,
+            widgetId: String(s.confirmation!.widget_id),
+          },
+        }),
+      ).toMatchObject({ outcome: 'REFUSED', actionReceiptRef: null });
       expect(deletes(s)).toHaveLength(1);
       expect((await executions(s))[0]).toMatchObject({
         state: 'SUCCEEDED',
