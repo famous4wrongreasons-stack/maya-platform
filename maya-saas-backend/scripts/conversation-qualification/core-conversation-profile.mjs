@@ -14,6 +14,7 @@ import {
   CORE_OFFLINE_PROFILE,
   CORE_OFFLINE_LIMITS,
   CORE_OFFLINE_LIMITS_SHA256,
+  CORE_OWNER_READ_PROFILE, CORE_OWNER_READ_LIMITS, CORE_OWNER_READ_LIMITS_SHA256,
 } from './current-candidate-budget.mjs';
 
 const diagnostic = Object.freeze({
@@ -74,6 +75,7 @@ const offline = Object.freeze({
 });
 
 export function coreConversationProfile(profile = CORE_DIAGNOSTIC_PROFILE) {
+  if (profile === CORE_OWNER_READ_PROFILE) return ownerRead;
   if (profile === CORE_DIAGNOSTIC_PROFILE) return diagnostic;
   if (profile === CORE_UI_PROFILE) return ui;
   if (profile === CORE_FOLLOWUP_PROFILE) return followup;
@@ -81,3 +83,12 @@ export function coreConversationProfile(profile = CORE_DIAGNOSTIC_PROFILE) {
   if (profile === CORE_OFFLINE_PROFILE) return offline;
   throw new Error('core_profile_refused');
 }
+
+const ownerRead = Object.freeze({
+  id: CORE_OWNER_READ_PROFILE,
+  datasetPath: 'maya-saas-backend/datasets/conversation-intelligence/core-owner-salon-read-20261011.json',
+  datasetSha256: 'efa6ca03b3436fb24a636c45816bee3348061640dce13254bf653fa953f4fc29',
+  casesSha256: 'd38e109b1811690f74da8b748df3f992bec09fd7d6c6003c8f3d24dda678f08c',
+  limits: CORE_OWNER_READ_LIMITS, limitsSha256: CORE_OWNER_READ_LIMITS_SHA256,
+  dialogs: 3, userTurns: 3,
+});

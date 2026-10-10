@@ -24,6 +24,7 @@ import {
   CORE_UI_PROFILE,
   CORE_UNION_PROFILE,
   CORE_OFFLINE_PROFILE,
+  CORE_OWNER_READ_PROFILE,
 } from './current-candidate-budget.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
 import { proofCommands, proofEnvironment } from '../c9-occupancy-proof.mjs';
@@ -83,6 +84,7 @@ assert.ok(
   'core_runner_recorded_replay_dry_only',
 );
 const profile = coreConversationProfile(values.profile);
+assert.notEqual(profile.id, CORE_OWNER_READ_PROFILE, 'core_owner_read_requires_retained_state_launcher');
 assert.ok(
   profile.id !== CORE_OFFLINE_PROFILE ||
     (values.mode === 'dry' &&

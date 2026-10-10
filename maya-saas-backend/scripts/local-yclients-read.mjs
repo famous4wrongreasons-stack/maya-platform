@@ -15,6 +15,7 @@ import { realReadEnvironment } from './local-yclients-read-profile.mjs';
 import { projectRuntimeStatus, RUNTIME_STAGES, RUNTIME_CODES, projectReadTrace, READ_TRACE_LIMIT } from './local-yclients-read-status.mjs';
 import { PUBLIC_DIAGNOSTIC_PARTNER, diagnosticRuntimeCommand } from './local-yclients-read-diagnostic.mjs';
 export { PUBLIC_DIAGNOSTIC_PARTNER };
+import { OWNER_CHAT_QUESTIONS } from './local-owner-chat-policy.mjs';
 
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repo = path.dirname(backend);
@@ -263,6 +264,8 @@ export const LANDING_HTML = '<!doctype html><html lang="ru"><meta charset="utf-8
 
 export const DIAGNOSTIC_HTML = '<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>MAYA — диагностика локального запуска</title><main><h1>Диагностика локального запуска MAYA</h1><p>Текущие React, backend и отдельная PostgreSQL запущены для проверки. Внешняя сеть закрыта. Не вводите токены или другие реквизиты: разрешены только health-запросы.</p><p><a href="/">Открыть текущий интерфейс для проверки отображения</a></p></main></html>';
 
+export const OWNER_CHAT_HTML = '<!doctype html><html lang="ru"><meta charset="utf-8"><title>MAYA — проверка сведений о салоне</title><main><h1>AChat: чтение сведений о вашем салоне</h1><p>Сохранённый бизнес и подключение. Только три вопроса по порядку; до 10 минут, 12 обращений к модели, не более $2. Услуги, мастера и сведения о салоне читаются из YCLIENTS. Запись, изменения, клиенты, сообщения и голос закрыты.</p><ol>' + OWNER_CHAT_QUESTIONS.map(text => '<li>'+text+'</li>').join('') + '</ol><p>Ключи в чат Maya не вводить. При отказе остановитесь, автоматического повтора нет.</p><a href="/">Открыть AChat</a></main></html>';
+
 export async function runReadRuntime(plan, runtimeEnv, state, control, manifest, save) {
   const diagnostic = manifest.diagnostic;
   const command = plan.diagnosticNoProvider ? diagnosticRuntimeCommand(plan, runtimeEnv) : plan.runtime;
@@ -299,7 +302,7 @@ export async function runReadRuntime(plan, runtimeEnv, state, control, manifest,
       }
       if (request.method === 'GET' && request.url === '/__local-yclients-read') {
         response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-        response.end(plan.diagnosticNoProvider ? DIAGNOSTIC_HTML : LANDING_HTML); return;
+        response.end(plan.ownerChat ? OWNER_CHAT_HTML : plan.diagnosticNoProvider ? DIAGNOSTIC_HTML : LANDING_HTML); return;
       }
       for (const handler of handlers) handler.call(dev.server, request, response);
     });
@@ -310,7 +313,7 @@ export async function runReadRuntime(plan, runtimeEnv, state, control, manifest,
     manifest.webUrl = runtimeEnv.CORS_ALLOWED_ORIGINS + '/'; manifest.apiOrigin = origin;
     manifest.expiresAt = new Date(Date.now() + plan.durationMs).toISOString();
     diagnosticStage(diagnostic, 'ready'); save(); wasReady = true;
-    process.stdout.write(`${plan.diagnosticNoProvider ? 'Network-closed diagnostic' : 'Local YCLIENTS setup-read'} session ready: ${manifest.landingUrl}\n${plan.diagnosticNoProvider ? 'No owner credential was requested. Only health reads are admitted; no provider network.' : 'Provider writes, model and outbound notifications remain closed.'}\n`);
+    process.stdout.write(`${plan.diagnosticNoProvider ? 'Network-closed diagnostic' : 'Local YCLIENTS setup-read'} session ready: ${manifest.landingUrl}\n${plan.diagnosticNoProvider ? 'No owner credential was requested. Only health reads are admitted; no provider network.' : plan.ownerChat ? 'Three owner catalog questions only; bounded model broker. Business writes and notifications remain closed.' : 'Provider writes, model and outbound notifications remain closed.'}\n`);
     await Promise.race([
       observer.failure,
       new Promise(resolve => { cancelled = resolve; timer = setTimeout(resolve, plan.durationMs); if (control.cancelled) resolve(); }),

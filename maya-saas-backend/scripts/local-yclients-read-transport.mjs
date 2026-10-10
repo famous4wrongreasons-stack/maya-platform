@@ -127,7 +127,7 @@ export function teamCollectionCheck(raw, init, response, payload, selectedCompan
     everyRowCompanyPresent: Array.isArray(payload?.data) ? payload.data.every(row => row !== null && typeof row === 'object' && !Array.isArray(row) && Object.hasOwn(row, 'company_id')) : null,
   };
 }
-export function createReadTransport(nativeFetch, resolveCompany, clock = Date.now, trace = () => {}, { allowUserAuth = false } = {}) {
+export function createReadTransport(nativeFetch, resolveCompany, clock = Date.now, trace = () => {}, { allowUserAuth = false, allowOwnerChat = null } = {}) {
   const context = new AsyncLocalStorage();
   const counters = { calls: 0, refused: 0, routes: {} };
   function run(request, response, next) {
@@ -146,7 +146,10 @@ export function createReadTransport(nativeFetch, resolveCompany, clock = Date.no
     const method = init?.method === undefined ? 'GET' : ['GET', 'POST'].includes(init.method) ? init.method : 'OTHER';
     const emit = (stage, code = null) => { try { trace({ surface: 'provider', route, method, stage, status, code, ...(stage === 'refused' && code === 'provider_scope_refused' && teamIssues?.length ? { teamIssues } : {}), ...(stage === 'refused' && code === 'provider_scope_refused' && collectionCheck ? { teamCollectionCheck: collectionCheck } : {}), ...(countEncoding && ['provider_response_read', 'provider_scope_refused'].includes(code) ? { teamCountEncoding: countEncoding } : {}), ...(stage === 'completed' && completeness ? { teamCompleteness: completeness } : {}) }); } catch { /* Diagnostics never change transport behavior. */ } };
     try {
-      if (!scope?.active || scope.poisoned || clock() >= scope.deadline || !['/api/integrations/crm/connect', '/api/integrations/crm/activate'].includes(scope.request.originalUrl) || scope.request.method !== 'POST') fail('explicit_request_required');
+      if (!scope?.active || scope.poisoned || clock() >= scope.deadline || scope.request.method !== 'POST') fail('explicit_request_required');
+      const chat = scope.request.originalUrl === '/api/ai/chat' && typeof allowOwnerChat === 'function'
+        && await allowOwnerChat(scope.request) === true;
+      if (!chat && !['/api/integrations/crm/connect', '/api/integrations/crm/activate'].includes(scope.request.originalUrl)) fail('explicit_request_required');
       // request.user is populated by the real Nest auth guards before any domain call.
       if (!scope.request.user?.tenantId || !scope.request.user?.userId || scope.request.user.membershipStatus !== 'active') fail('current_actor_required');
       const selected = await resolveCompany(scope.request);
@@ -154,6 +157,7 @@ export function createReadTransport(nativeFetch, resolveCompany, clock = Date.no
       if (!companyId(selected) || (scope.selected !== null && String(selected) !== scope.selected)) fail('company_changed');
       scope.selected = String(selected);
       route = admittedProviderRead(raw, init, selected, allowUserAuth) ?? 'unlisted';
+      if (chat && ['unlisted', 'auth', 'companies'].includes(route)) fail('chat_catalog_scope');
       if (route === 'unlisted' || scope.calls >= READ_LIMITS.requestCalls || counters.calls >= READ_LIMITS.sessionCalls) fail('scope_or_budget');
       if (route === 'auth') {
         const login = scope.request.body?.yclientsLogin;

@@ -12,6 +12,8 @@ import { assertCompletedSession } from './local-onboarding-proof.mjs';
 import { stage } from './local-onboarding.mjs';
 import { realReadEnvironment } from './local-yclients-read-profile.mjs';
 import { createDiagnostic, diagnosticFailure, diagnosticStage, promptPartnerToken, readSessionPlan, readSourceBinding, runReadRuntime, runtimeCredential } from './local-yclients-read.mjs';
+import { readOwnerChatLaunch } from './local-owner-chat-launch.mjs';
+import { startCoreBroker } from './conversation-qualification/core-conversation-broker.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -212,12 +214,16 @@ export async function main(args) {
     'restart-receipt': { type: 'string' }, 'restart-receipt-sha256': { type: 'string' },
     'session-manifest-sha256': { type: 'string' }, 'private-state-sha256': { type: 'string' },
     'approved-source-commit': { type: 'string' }, minutes: { type: 'string', default: '15' },
+    'owner-chat-plan': { type: 'string' }, 'owner-chat-plan-sha256': { type: 'string' },
     'pg-bin': { type: 'string', default: '/opt/homebrew/opt/postgresql@16/bin' },
   } });
   if (!values.run) { process.stdout.write('Prepared only. Explicit --run with pinned completed stage-0 state, restart receipt and approved source resumes the same database and existing keys. No service or credential prompt started.\n'); return; }
   assert.equal(process.platform, 'darwin');
   const diagnosticNoProvider = values['diagnostic-no-provider'] === true;
   const allowUserAuth = values['allow-user-auth'] === true;
+  assert.equal(Boolean(values['owner-chat-plan']), Boolean(values['owner-chat-plan-sha256']), 'owner_chat_plan_pair');
+  const chatLaunch = values['owner-chat-plan'] ? readOwnerChatLaunch(values['owner-chat-plan'], values['owner-chat-plan-sha256'], null) : null;
+  assert.ok(!chatLaunch || (!diagnosticNoProvider && !allowUserAuth && Number(values.minutes) === 10), 'owner_chat_mode_refused');
   assert.ok(!diagnosticNoProvider || !allowUserAuth);
   if (!diagnosticNoProvider) { assert.equal(process.stdin.isTTY, true, 'owner_terminal_required'); assert.equal(process.stderr.isTTY, true, 'owner_terminal_required'); }
   assert.ok(typeof values.state === 'string' && path.isAbsolute(values.state), 'state_required');
@@ -240,12 +246,22 @@ export async function main(args) {
   assert.ok(initial.landingUrl === env.CORS_ALLOWED_ORIGINS + '/__local-onboarding' && receipt.landingUrl === initial.landingUrl, 'saved_origin_mismatch');
   const output = externalStatePath(values.output, repo);
   const plan = resumePlan(env, state, values['pg-bin'], Number(values.minutes), output, diagnosticNoProvider, allowUserAuth);
+  if (chatLaunch) {
+    const scope = chatLaunch.manifest.ownerScope;
+    assert.ok(scope.stateDirectory === state && scope.restartReceiptPath === receiptPath
+      && scope.initialManifestSha256 === pins.initial && scope.privateStateSha256 === pins.privateState
+      && scope.restartReceiptSha256 === pins.receipt && chatLaunch.manifest.candidateCommit === source.head
+      && output === path.join(chatLaunch.root, 'session'), 'owner_chat_saved_state_binding');
+    plan.ownerChat = true;
+    plan.providerAdmission = 'explicit_owner_catalog_and_bounded_model';
+    plan.runtime.args.push('--owner-chat-plan', values['owner-chat-plan'], values['owner-chat-plan-sha256']);
+  }
   const stateIdentity = ownedDirectoryIdentity(state), clusterIdentity = ownedDirectoryIdentity(plan.cluster);
   const directoriesUnchanged = () => { ownedDirectoryIdentity(state, stateIdentity); ownedDirectoryIdentity(plan.cluster, clusterIdentity); };
   assertClusterStopped(state); const pgpassHash = checkPgpass(state, env);
   for (const name of ['pg_ctl', 'pg_controldata', 'psql']) fs.accessSync(path.join(values['pg-bin'], name), fs.constants.X_OK);
   const claim = claimResume(state, { contract: 'maya.local-yclients-read-resume-claim/1', pid: process.pid, initialManifestSha256: pins.initial, restartReceiptSha256: pins.receipt, approvedSource: source.head });
-  let report, save, attempted = false, timer, failed = false, phase = 'preflight', runtimeEnv, systemIdentity;
+  let report, save, broker, attempted = false, timer, failed = false, phase = 'preflight', runtimeEnv, systemIdentity;
   const control = { cancelled: null, terminate: null };
   const cancel = signal => { control.cancelled ??= signal; control.terminate?.(); };
   const int = () => cancel('SIGINT'), term = () => cancel('SIGTERM');
@@ -289,8 +305,15 @@ export async function main(args) {
     runtimeEnv = resumeEnvironment(env, partner, diagnosticNoProvider, allowUserAuth); partner = undefined;
     report.diagnostic.credentialAccepted = !diagnosticNoProvider;
     assert.ok(inputsUnchanged() && jsonEqual(readSourceBinding(), source), 'resume_inputs_or_source_changed'); assert.equal(control.cancelled, null);
+    if (chatLaunch) {
+      broker = await startCoreBroker({ mode: 'admitted-local', ...chatLaunch.common, output: path.join(chatLaunch.root, 'broker') });
+      await broker.ready;
+      void broker.closed.then(() => { if (phase === 'runtime') cancel('MODEL_WINDOW_STOP'); }, () => cancel('MODEL_WINDOW_STOP'));
+      assert.equal(control.cancelled, null);
+    }
     phase = 'runtime'; report.status = 'backend_starting'; diagnosticStage(report.diagnostic, 'backend_starting'); save();
     await runReadRuntime(plan, runtimeEnv, state, control, report, save);
+    phase = 'stopping';
     report.status = control.cancelled ? 'cancelled' : 'stopped';
   } catch (error) {
     failed = true;
@@ -304,6 +327,9 @@ export async function main(args) {
     // fails. Never signal a replacement directory/system during cleanup.
     try {
       clearTimeout(timer); control.terminate = null;
+      phase = 'stopping';
+      try { await broker?.stop('owner_read_session_stopped'); }
+      catch { failed = true; if (report) diagnosticFailure(report.diagnostic, 'cleanup_failed', { cleanup: true }); }
       if (runtimeEnv) delete runtimeEnv.YCLIENTS_PARTNER_TOKEN;
       if (attempted) {
         try {

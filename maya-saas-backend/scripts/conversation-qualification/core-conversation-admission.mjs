@@ -5,7 +5,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { CORE_OFFLINE_PROFILE } from './current-candidate-budget.mjs';
+import { CORE_OFFLINE_PROFILE, CORE_OWNER_READ_PROFILE } from './current-candidate-budget.mjs';
+import { assertOwnerChatScope } from '../local-owner-chat-policy.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
 const manifests = new WeakMap();
 const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -136,7 +137,13 @@ function readPinned(file, expectedSha, maxBytes, pin) {
   }
 }
 function validateManifest(value, localStdin) {
+  const owner = value?.profile === CORE_OWNER_READ_PROFILE;
+  if (owner) {
+    requireThat(localStdin || value.mode === 'DRY_HTTP');
+    try { assertOwnerChatScope(value.ownerScope); } catch { deny(); }
+  }
   record(value, [
+    ...(owner ? ['ownerScope'] : []),
     'contract',
     'mode',
     'profile',
@@ -428,7 +435,9 @@ function checkPermit(config, previous, time) {
     typeof process.getuid === 'function' &&
       process.getuid() === config.target[config.role + 'Uid'],
   );
-  requireThat(fs.realpathSync(process.cwd()) === config.target.workDirectory);
+  const expectedCwd = config.manifest.profile === CORE_OWNER_READ_PROFILE && config.role === 'runner'
+    ? config.manifest.ownerScope.stateDirectory : config.target.workDirectory;
+  requireThat(fs.realpathSync(process.cwd()) === expectedCwd);
   const start = instant(permit.startsAt),
     end = instant(permit.expiresAt);
   requireThat(

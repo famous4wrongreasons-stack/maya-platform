@@ -3,7 +3,9 @@
 const ts = require('typescript');
 module.exports = {
   process(sourceText, sourcePath) {
+    const ownerLocal = /\/scripts\/(?:local-owner-chat-policy|local-owner-chat-runtime|local-onboarding-profile|local-yclients-read-transport|local-yclients-read-profile|local-yclients-read-status)\.mjs$/.test(sourcePath);
     if (
+      !ownerLocal &&
       !/\/scripts\/conversation-qualification\/(?:replay|current-candidate-budget|core-conversation-profile|core-react-bridge|owned-child-cleanup|core-conversation-admission|core-conversation-socket|core-conversation-assessment|core-full-offline-model|core-full-offline-assessment)\.mjs$/.test(
         sourcePath,
       )

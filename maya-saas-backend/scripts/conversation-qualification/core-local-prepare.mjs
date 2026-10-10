@@ -18,9 +18,10 @@ import {
   CORE_UI_PROFILE,
   CORE_UNION_PROFILE,
   CORE_OFFLINE_PROFILE,
+  CORE_OWNER_READ_PROFILE,
 } from './current-candidate-budget.mjs';
 
-export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE) {
+export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE, ownerScope) {
   const profile = coreConversationProfile(profileId);
   assert.notEqual(
     profile.id,
@@ -70,6 +71,7 @@ export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE) {
     'ADMITTED_LOCAL_MODEL_HTTP',
     context,
     profile.id,
+    ownerScope,
   );
   // Exclusive root creation; failures leave this nonsecret, non-reusable root intact.
   fs.mkdirSync(output, { mode: 0o700 });
@@ -176,6 +178,14 @@ export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE) {
       ],
       effects: 'SYNTHETIC_SOURCES_READ_AND_PROPOSAL_ONLY_NO_BUSINESS_DISPATCH',
     };
+  if (profile.id === CORE_OWNER_READ_PROFILE) {
+    // Owner-salon reads reuse the retained-state launcher, never the fixture runner.
+    plan.runnerArgv = null;
+    plan.ownerScope = manifest.ownerScope;
+    plan.terminalInput.inputsPerRun = 2;
+    plan.terminalInput.recipient = 'partner token: retained-state runtime; model key: existing local broker only';
+    plan.effectBoundary = 'EXACT_OWNER_PUBLIC_CATALOG_READS_ONLY_NO_BUSINESS_MUTATIONS';
+  }
   fs.writeFileSync(
     path.join(output, 'local-plan.json'),
     JSON.stringify(plan, null, 2) + '\n',
@@ -205,6 +215,20 @@ export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE) {
       { flag: 'wx', mode: 0o700 },
     );
   }
+  if (profile.id === CORE_OWNER_READ_PROFILE) {
+    const quote = value => "'" + value.replaceAll("'", "'\\''") + "'";
+    const planPath = path.join(output, 'local-plan.json');
+    const scope = manifest.ownerScope;
+    const args = [process.execPath, 'scripts/local-yclients-read-resume.mjs', '--run',
+      '--state', scope.stateDirectory, '--output', path.join(output, 'session'),
+      '--restart-receipt', scope.restartReceiptPath, '--restart-receipt-sha256', scope.restartReceiptSha256,
+      '--session-manifest-sha256', scope.initialManifestSha256, '--private-state-sha256', scope.privateStateSha256,
+      '--approved-source-commit', manifest.candidateCommit, '--minutes', '10',
+      '--owner-chat-plan', planPath, '--owner-chat-plan-sha256', coreHash(fs.readFileSync(planPath))];
+    fs.writeFileSync(path.join(output, 'launch.command'), '#!/bin/sh\nset -eu\ncd '+quote(coreBackend)
+      +'\nexec env -i PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin HOME=/Users/stanislavmosin TMPDIR=/tmp TZ=UTC '
+      +args.map(quote).join(' ')+'\n', { flag: 'wx', mode: 0o700 });
+  }
   return plan;
 }
 
@@ -217,11 +241,13 @@ if (
       prepare: { type: 'boolean' },
       output: { type: 'string' },
       profile: { type: 'string' },
+      'owner-scope': { type: 'string' },
     },
     strict: true,
   });
   assert.equal(values.prepare, true, 'core_local_preparation_only');
   console.log(
-    JSON.stringify(prepareLocalCore(values.output, values.profile), null, 2),
+    JSON.stringify(prepareLocalCore(values.output, values.profile,
+      values['owner-scope'] ? JSON.parse(fs.readFileSync(values['owner-scope'], 'utf8')) : undefined), null, 2),
   );
 }

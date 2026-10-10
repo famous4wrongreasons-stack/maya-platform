@@ -1,0 +1,39 @@
+{
+  "contract": "maya.core-owner-salon-read/1",
+  "status": "FROZEN_QUESTIONS_NOT_EXECUTION_AUTHORITY",
+  "qualification": "LOCAL_REAL_SOURCE_READ_ONLY_NOT_BOOKING_ACCEPTANCE",
+  "dialogs": 3,
+  "userTurns": 3,
+  "cases": [
+    {
+      "id": "owner-salon-services",
+      "role": "owner",
+      "runtimeRole": "tenant_owner",
+      "audience": "owner",
+      "userTurns": [
+        "Какие услуги есть в нашем салоне и сколько они стоят?"
+      ],
+      "proof": "CURRENT_CANONICAL_SOURCE_OR_EXPLICIT_UNAVAILABLE_NO_FABRICATION"
+    },
+    {
+      "id": "owner-salon-staff",
+      "role": "owner",
+      "runtimeRole": "tenant_owner",
+      "audience": "owner",
+      "userTurns": [
+        "Какие мастера работают в нашем салоне?"
+      ],
+      "proof": "CURRENT_CANONICAL_SOURCE_OR_EXPLICIT_UNAVAILABLE_NO_FABRICATION"
+    },
+    {
+      "id": "owner-salon-company",
+      "role": "owner",
+      "runtimeRole": "tenant_owner",
+      "audience": "owner",
+      "userTurns": [
+        "Какой адрес и часы работы у нашего салона?"
+      ],
+      "proof": "CURRENT_CANONICAL_SOURCE_OR_EXPLICIT_UNAVAILABLE_NO_FABRICATION"
+    }
+  ]
+}

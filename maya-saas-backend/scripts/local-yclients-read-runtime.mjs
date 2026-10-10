@@ -10,16 +10,20 @@ import { assertRealReadEnvironment, realReadIngress, companyId } from './local-y
 import { createReadTransport } from './local-yclients-read-transport.mjs';
 import { runtimeStatus, createReadTrace, traceHttpRequest } from './local-yclients-read-status.mjs';
 import { PUBLIC_DIAGNOSTIC_PARTNER } from './local-yclients-read-diagnostic.mjs';
+import { ownerChatIngress } from './local-owner-chat-policy.mjs';
+import { installOwnerChat } from './local-owner-chat-runtime.mjs';
+import { readOwnerChatLaunch } from './local-owner-chat-launch.mjs';
 
 const require = createRequire(import.meta.url);
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export async function start() {
-  let app, prisma, guard, closing, stage = 'environment_validating', code = 'environment_refused';
+  let app, prisma, guard, ownerChat, closing, stage = 'environment_validating', code = 'environment_refused';
   const send = message => { if (process.connected) process.send(message); };
   const trace = createReadTrace(send);
   const enter = (nextStage, nextCode) => { stage = nextStage; code = nextCode; send(runtimeStatus(stage)); };
   const stop = () => closing ??= (async () => {
     send(runtimeStatus('runtime_stopping'));
+    ownerChat?.stop();
     try { await app?.close(); await prisma?.$disconnect(); }
     catch (error) { send(runtimeStatus('runtime_stopping', 'failed', 'runtime_cleanup_failed', error)); throw new Error('Runtime cleanup failed'); }
     finally {
@@ -33,8 +37,10 @@ export async function start() {
     assert.equal(process.connected, true, 'Use the bounded local launcher');
     code = 'environment_refused';
     const args = process.argv.slice(2);
-    assert.ok(args.length === 0 || (args.length === 1 && args[0] === '--diagnostic-no-provider'));
+    const ownerChatRequested = args.length === 3 && args[0] === '--owner-chat-plan';
+    assert.ok(args.length === 0 || ownerChatRequested || (args.length === 1 && args[0] === '--diagnostic-no-provider'));
     const diagnostic = args.length === 1;
+    const chatLaunch = ownerChatRequested ? readOwnerChatLaunch(args[1], args[2]) : null;
     assertRealReadEnvironment(process.env, true);
     const allowUserAuth = process.env.MAYA_LOCAL_YCLIENTS_USER_AUTH === 'owner_login_v1';
     assert.ok(!diagnostic || !allowUserAuth);
@@ -42,6 +48,7 @@ export async function start() {
     code = 'private_state_refused';
     assertPrivateCwd(process.cwd());
     assert.equal(process.cwd(), process.env.MAYA_LOCAL_ONBOARDING_STATE);
+    if (chatLaunch) assert.equal(chatLaunch.manifest.ownerScope.stateDirectory, process.cwd(), 'owner_chat_wrong_database');
     enter('network_guard_installing', 'network_guard_failed');
     const nativeFetch = diagnostic ? async () => { throw new Error('Diagnostic provider dispatch forbidden'); } : globalThis.fetch;
     guard = createReadTransport(nativeFetch, async request => {
@@ -49,7 +56,7 @@ export async function start() {
       const integration = await prisma.crmIntegration.findUnique({ where: { tenantId: request.user.tenantId }, select: { provider: true, baseUrl: true, settingsJson: true } });
       assert.ok(integration?.provider === 'yclients' && !integration.baseUrl && companyId(integration.settingsJson?.companyId), 'Current YCLIENTS company required');
       return integration.settingsJson.companyId;
-    }, Date.now, trace, { allowUserAuth });
+    }, Date.now, trace, { allowUserAuth, allowOwnerChat: chatLaunch ? request => ownerChat?.allowProvider(request) : null });
     globalThis.fetch = guard.fetch;
     enter('app_importing', 'app_import_failed');
     require('reflect-metadata');
@@ -60,6 +67,10 @@ export async function start() {
     enter('app_creating', 'app_create_failed');
     app = await NestFactory.create(AppModule, { bodyParser: false, logger: false, abortOnError: false });
     prisma = app.get(PrismaService);
+    if (chatLaunch) {
+      ownerChat = await installOwnerChat({ app, prisma, require, backend, launch: chatLaunch, providerFetch: guard.fetch });
+      globalThis.fetch = ownerChat.fetch;
+    }
     const terminate = () => { void stop().catch(() => { process.exitCode = 1; }).finally(() => { if (process.connected) process.disconnect(); }); };
     process.once('SIGINT', terminate); process.once('SIGTERM', terminate); process.once('disconnect', terminate);
     enter('http_configuring', 'http_setup_failed');
@@ -69,7 +80,9 @@ export async function start() {
     app.use((request, response, next) => {
       const boundary = localBrowserBoundary(request.headers, origin, `127.0.0.1:${process.env.PORT}`);
       const diagnosticRoute = request.method === 'GET' && ['/api/health', '/api/health/ready'].includes(request.originalUrl);
-      const reason = !boundary ? 'local_onboarding_origin_refused' : diagnostic ? (diagnosticRoute ? null : 'local_yclients_diagnostic_route_disabled') : realReadIngress(request.method, request.originalUrl, request.headers, request.body, origin, allowUserAuth);
+      const reason = !boundary ? 'local_onboarding_origin_refused' : chatLaunch
+        ? ownerChatIngress(request.method, request.originalUrl, request.headers, request.body, origin, chatLaunch.manifest.ownerScope)
+        : diagnostic ? (diagnosticRoute ? null : 'local_yclients_diagnostic_route_disabled') : realReadIngress(request.method, request.originalUrl, request.headers, request.body, origin, allowUserAuth);
       traceHttpRequest(request, response, trace, reason);
       if (reason) { response.status(403).json({ error: { code: reason }, message: 'Этот локальный профиль допускает только явно разрешённые действия.' }); return; }
       guard.run(request, response, next);
@@ -82,7 +95,7 @@ export async function start() {
     assert.equal(guard.counters.calls, 0, 'Startup provider dispatch forbidden');
     assert.equal(guard.counters.refused, 0, 'Startup provider attempt forbidden');
     send(runtimeStatus('runtime_ready', 'completed'));
-    send({ type: 'ready', contract: 'maya.local-yclients-read/1', origin: `http://127.0.0.1:${process.env.PORT}`, providerAdmission: diagnostic ? 'diagnostic_network_closed' : allowUserAuth ? 'explicit_setup_auth_and_reads_only' : 'explicit_setup_reads_only' });
+    send({ type: 'ready', contract: 'maya.local-yclients-read/1', origin: `http://127.0.0.1:${process.env.PORT}`, providerAdmission: chatLaunch ? 'explicit_owner_catalog_and_bounded_model' : diagnostic ? 'diagnostic_network_closed' : allowUserAuth ? 'explicit_setup_auth_and_reads_only' : 'explicit_setup_reads_only' });
   } catch (error) {
     send(runtimeStatus(stage, 'failed', code, error));
     await stop().catch(() => {});

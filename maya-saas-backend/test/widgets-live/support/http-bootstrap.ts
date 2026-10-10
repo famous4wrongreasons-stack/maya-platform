@@ -105,7 +105,7 @@ export function fixturesForHttp(
 /** Throws — never skips — when the application cannot be constructed; the error names what it needed. */
 export async function bootHttp(
   evidence: EvidenceWriter = new EvidenceWriter(),
-  beforeInit?: (app: NestExpressApplication) => void,
+  beforeInit?: (app: NestExpressApplication) => void | Promise<void>,
 ): Promise<HttpHarness> {
   assertProofDatabase(process.env);
   assertNoEnvFiles();
@@ -143,7 +143,7 @@ export async function bootHttp(
   configureHttpApp(app);
   // Opt-in test transport fence, installed before Nest registers controllers.
   // Callers that omit this hook retain the established HTTP harness unchanged.
-  beforeInit?.(app);
+  await beforeInit?.(app);
   await app.init();
 
   const gateway = app.get(IntentGatewayService);

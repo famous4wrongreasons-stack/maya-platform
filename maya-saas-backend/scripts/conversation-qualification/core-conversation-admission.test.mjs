@@ -16,6 +16,7 @@ import {
   CORE_UI_PROFILE,
   CORE_FOLLOWUP_PROFILE,
   CORE_UNION_PROFILE,
+  CORE_OWNER_READ_PROFILE,
 } from './current-candidate-budget.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
 
@@ -39,7 +40,7 @@ function fixture(
   );
   t.mock.method(Date, 'now', () => at);
   const dir = fs.realpathSync(
-    fs.mkdtempSync(path.join(os.tmpdir(), 'maya-core-admission-unit-')),
+    fs.mkdtempSync(path.join(profileId === CORE_OWNER_READ_PROFILE ? '/private/tmp' : os.tmpdir(), 'maya-core-admission-unit-')),
   );
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const manifestPath = path.join(dir, 'manifest.json'),
@@ -48,6 +49,7 @@ function fixture(
   if (localStdin) {
     fs.mkdirSync(path.join(dir, 'dedicated-socket'));
     fs.chmodSync(path.join(dir, 'dedicated-socket'), 0o700);
+    fs.chownSync(path.join(dir, 'dedicated-socket'), process.getuid(), process.getgid());
   }
   const target = {
     host: localStdin ? 'localhost' : 'SYNTHETIC.invalid',
@@ -68,6 +70,11 @@ function fixture(
     reader: process.getuid(),
   };
   const raw = {
+    ...(profileId === CORE_OWNER_READ_PROFILE ? { ownerScope: {
+      stateDirectory: dir, initialManifestSha256: 'a'.repeat(64), privateStateSha256: 'b'.repeat(64),
+      restartReceiptPath: '/private/tmp/synthetic-owner-restart/restart.json', restartReceiptSha256: 'c'.repeat(64),
+      tenantId: 'synthetic-tenant', userId: 'synthetic-owner', branchId: 'synthetic-branch', tenantSlug: 'synthetic-salon', companyId: '321',
+    } } : {}),
     contract: 'maya.core-conversation-run/1',
     mode,
     profile: profile.id,
@@ -741,4 +748,34 @@ test('React profile keeps ten-minute expiry and single-use claim', (t) => {
   denied(() => claimCorePermit(f.options));
   t.mock.method(Date, 'now', () => at + 60000);
   denied(() => validate(f.binding));
+});
+
+test('owner READ profile needs its own exact permit and one-use claim; missing authorization is refused', t => {
+  const f=fixture(t,'ADMITTED_LOCAL_MODEL_HTTP',CORE_OWNER_READ_PROFILE);
+  denied(()=>assertCoreAdmission({...f.options,role:'runner'}));
+  const validate=claimCorePermit(f.options);validate(f.binding);
+  denied(()=>claimCorePermit(f.options));
+  denied(()=>validate({...f.binding,profile:CORE_UI_PROFILE}));
+});
+
+test('owner runner is bound to its retained-state directory, broker remains bound to backend', t => {
+  const f=fixture(t,'ADMITTED_LOCAL_MODEL_HTTP',CORE_OWNER_READ_PROFILE);
+  claimCorePermit(f.options);
+  denied(()=>assertCoreAdmission({...f.options,role:'runner'}));
+  t.mock.method(process,'cwd',()=>f.raw.ownerScope.stateDirectory);
+  const runner=assertCoreAdmission({...f.options,role:'runner'});runner(f.binding);
+  denied(()=>assertCoreAdmission(f.options));
+});
+
+test('owner scope changed after claim invalidates admission; no tenant or database substitution', t => {
+  const f=fixture(t,'ADMITTED_LOCAL_MODEL_HTTP',CORE_OWNER_READ_PROFILE);
+  const validate=claimCorePermit(f.options);
+  f.raw.ownerScope.tenantId='foreign-tenant';f.write(f.manifestPath,f.raw);
+  denied(()=>validate(f.binding));
+});
+
+test('owner READ scope is mandatory and must not enter the historical fixture profile', t => {
+  const f=fixture(t,'ADMITTED_LOCAL_MODEL_HTTP',CORE_OWNER_READ_PROFILE);
+  delete f.raw.ownerScope;
+  denied(()=>readCoreManifest(f.manifestPath,f.write(f.manifestPath,f.raw),{localStdin:true}));
 });

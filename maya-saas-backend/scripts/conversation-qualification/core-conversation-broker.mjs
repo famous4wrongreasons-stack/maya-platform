@@ -10,6 +10,7 @@ import {
   CORE_DIAGNOSTIC_PROFILE,
   CORE_UI_PROFILE,
   CORE_OFFLINE_PROFILE,
+  CORE_OWNER_READ_PROFILE,
   candidateReservation,
 } from './current-candidate-budget.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
@@ -197,7 +198,9 @@ export async function startCoreBroker(values, batch = null) {
     rejections: [],
     stopped: false,
     qualification: live
-      ? 'ACTUAL_MODEL_SYNTHETIC_DATA_UNGRADED'
+      ? profile.id === CORE_OWNER_READ_PROFILE
+        ? 'ACTUAL_MODEL_OWNER_PUBLIC_CATALOG_UNGRADED'
+        : 'ACTUAL_MODEL_SYNTHETIC_DATA_UNGRADED'
       : recordedReplay
         ? CORE_RECORDED_REPLAY_QUALIFICATION
         : fullOffline
