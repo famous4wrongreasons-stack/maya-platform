@@ -1,0 +1,64 @@
+{
+  "contract": "maya.owner-connect400-checkpoint/1",
+  "runtimeCommit": "bcb5246a6937a96322130ddbca729ff0eb0988dd",
+  "outcome": "INSTALL_NOT_SAVED",
+  "http": {
+    "failedEndpoint": "POST /api/integrations/crm/connect",
+    "attempts": 2,
+    "status": 400,
+    "providerRoute": "companies",
+    "providerHttpStatus": 200,
+    "providerCompletedCode": "provider_response_read",
+    "recoveryEndpoint": "GET /api/integrations/crm/operation",
+    "recoveryHttpStatus": 200,
+    "recoveryStatus": "NOT_OBSERVED"
+  },
+  "sourceLocalizedStage": "CrmService.previewCredentials -> loadConnectionPreview -> native testConnection, before catalog/team reads and AE admission",
+  "exactFailureCode": "UNKNOWN_NOT_RETAINED",
+  "scopeEvidence": {
+    "currentUrlMatchesExistingPendingLocator": true,
+    "exactRequestEnvelopeAndMatchingBindingCompanyIdsRequiredBeforeProviderDispatch": true,
+    "scopedActorAndLocalBranchCheckedBeforeProviderDispatch": true,
+    "failedRequestCompanyIdEqualsLaterVisibleDraft": "UNKNOWN_NO_RETAINED_REQUEST_BODY"
+  },
+  "activationDisabled": {
+    "connectionAbsentInUI": true,
+    "pendingOperation": "install",
+    "persistedIntegrationCount": 0,
+    "persistedA17ExecutionCount": 0,
+    "noSavedRevisionToActivate": true,
+    "guardsBypassed": false
+  },
+  "screenshot": {
+    "actualUserAttachmentViewed": true,
+    "privateImageIncludedInArchive": false,
+    "maskedInputPresent": true,
+    "companyInputPresent": true,
+    "branchSelected": true,
+    "installConsentChecked": true,
+    "sameIdRetryButtonEnabled": true,
+    "activationConsentAndButtonDisabled": true
+  },
+  "cleanup": {
+    "sessionStopped": true,
+    "postgresStopped": true,
+    "runtimeGroupAbsent": true,
+    "sourceUnchangedDuringSession": true,
+    "privateStateRetained": true,
+    "metadataProjectionReadOnly": true,
+    "metadataProjectionExternalCalls": 0,
+    "metadataProjectionCredentialsRead": false
+  },
+  "limits": [
+    "Provider HTTP200 alone is not selected-company acceptance",
+    "NOT_OBSERVED alone is not proof of provider refusal",
+    "The final read-only database projection establishes no persisted installation in the exact owner database",
+    "Native response payload and canonical HTTP error code were not retained; missing company and malformed company payload must not be conflated",
+    "Synthetic reproduction cannot recover the actual historical provider payload",
+    "No new owner attempt, token input, provider redispatch, activation or model acceptance"
+  ],
+  "artifacts": {
+    "owner-session-closed.json": "e35ff56b771c121e16df2e9777cb3f3db60200b0f4c580793fa3c21dc84e97cf",
+    "a17-readonly-metadata.json": "4877736754fe9498944a339265444200b13118028d4bd0050397f113b830df83"
+  }
+}

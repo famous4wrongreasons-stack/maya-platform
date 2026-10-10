@@ -13,6 +13,7 @@ export function LocalCrmSetup({ t, onClose }: { readonly t: Tokens; readonly onC
   const [stageConfirmed, setStageConfirmed] = useState(false);
   const [activationConfirmed, setActivationConfirmed] = useState(false);
   const stageHelpId = useId();
+  const activationHelpId = useId();
 
   useEffect(() => {
     const input = tokenInput.current;
@@ -36,6 +37,12 @@ export function LocalCrmSetup({ t, onClose }: { readonly t: Tokens; readonly onC
     : !stageConfirmed ? 'Подтвердите проверку и сохранение подключения.'
     : null;
   const operation = view.operation;
+  const activationHelp = view.busy ? 'Дождитесь завершения текущего запроса.'
+    : view.canActivate ? null
+    : view.phase === 'idle' ? 'Сначала загрузите филиалы и проверьте текущее подключение.'
+    : !connection || (operation?.operation === 'install' && operation.status !== 'SUCCEEDED')
+      ? 'Сначала должно завершиться сохранение подключения в шаге 1. Сейчас оно не подтверждено, поэтому активация и импорт недоступны.'
+      : 'Активация и импорт сейчас недоступны. Проверьте подключение и результат.';
   const resumingInstall = view.resuming && operation?.operation === 'install';
   const resumingActivation = view.resuming && operation?.operation === 'activate';
   const resubmitting = view.resuming && operation?.status === 'NOT_OBSERVED';
@@ -148,15 +155,16 @@ export function LocalCrmSetup({ t, onClose }: { readonly t: Tokens; readonly onC
         <section aria-label="Активация подключения" style={{ marginTop: 28 }}>
           <h3 style={{ fontSize: 18 }}>2. Активация и импорт</h3>
           <p>Проверьте компанию и филиал сохранённого подключения выше. Сервер проверит именно показанную версию перед импортом.</p>
-          <button type="button" role="checkbox" aria-checked={activationConfirmed} disabled={!view.canActivate || view.busy}
+          <button type="button" role="checkbox" aria-checked={activationConfirmed} disabled={!view.canActivate || view.busy} aria-describedby={activationHelp ? activationHelpId : undefined}
             onClick={() => setActivationConfirmed(!activationConfirmed)}
             style={{ display: 'block', width: '100%', padding: 12, textAlign: 'left', border: '1px solid', borderRadius: 12, background: 'transparent', color: t.ink, font: 'inherit' }}>
             {activationConfirmed ? '✓ ' : '○ '}{resumingActivation ? resubmitting ? 'Разрешаю повторно отправить запрос активации показанной версии подключения в рамках той же операции.' : 'Разрешаю продолжить исходную операцию активации и импорта.' : 'Разрешаю активировать показанную версию подключения и импортировать данные компании YCLIENTS в этот бизнес.'}
           </button>
-          <button type="button" disabled={!canActivate} onClick={activate}
+          <button type="button" disabled={!canActivate} aria-describedby={activationHelp ? activationHelpId : undefined} onClick={activate}
             style={{ marginTop: 12, padding: '12px 16px', border: 0, borderRadius: 12, background: t.accent, color: t.accentOn, font: 'inherit', opacity: canActivate ? 1 : 0.5 }}>
             {view.phase === 'activating' ? 'Активация и импорт…' : resumingActivation ? resubmitting ? 'Повторить отправку активации' : 'Продолжить исходную активацию' : 'Активировать и импортировать'}
           </button>
+          {activationHelp ? <p id={activationHelpId}>{activationHelp}</p> : null}
         </section>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20, marginTop: 28 }}>

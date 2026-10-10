@@ -38,8 +38,10 @@ const stage = process.env.JEST_C9_OCCUPANCY_STAGE;
 const receiptPath = process.env.JEST_C9_OCCUPANCY_RECEIPT!;
 const reportPath = process.env.JEST_C9_OCCUPANCY_REPORT!;
 assert.ok(
-  ['prepare', 'resume'].includes(stage ?? '') && receiptPath && reportPath,
-  'Use owned driver --crm-setup',
+  ['prepare', 'resume', 'matrix'].includes(stage ?? '') &&
+    receiptPath &&
+    reportPath,
+  'Use owned driver --crm-setup or --crm-setup-matrix',
 );
 assertProofDatabase(process.env);
 const companyId = 424242;
@@ -227,11 +229,17 @@ describe('A17 exact configuration and persisted operation recovery through actua
   let readTransport: ReadTransport;
   const readTrace: Record<string, unknown>[] = [];
   let invalidTrace = 0;
-  const trace = createReadTrace((value) => {
+  const globalTrace = createReadTrace((value) => {
     const projected = projectReadTrace(value);
     if (projected === null) invalidTrace++;
     else readTrace.push(projected);
   });
+  let matrixTrace: ((value: Record<string, unknown>) => void) | undefined;
+  let matrixCompanies: { payload: unknown } | undefined;
+  const trace = (value: Record<string, unknown>) => {
+    globalTrace(value);
+    matrixTrace?.(value);
+  };
   let browserOrigin: string | undefined;
   const ingressEvidence: {
     checked: number;
@@ -275,6 +283,14 @@ describe('A17 exact configuration and persisted operation recovery through actua
         'Only fixed public synthetic adapter material is admitted',
       );
       providerReads.push(route);
+      if (stage === 'matrix' && route === 'companies' && matrixCompanies) {
+        assert.equal(material, 'SYNTHETIC_A17_V1');
+        return Promise.resolve(
+          new Response(JSON.stringify(matrixCompanies.payload), {
+            status: 200,
+          }),
+        );
+      }
       if (
         material === 'SYNTHETIC_A17_DENIED' ||
         material === 'SYNTHETIC_A17_FORBIDDEN'
@@ -1557,10 +1573,318 @@ describe('A17 exact configuration and persisted operation recovery through actua
     );
   };
 
+  const provePreAdmission400Matrix = async () => {
+    const results: Array<Record<string, unknown>> = [];
+    observations.preAdmission400Matrix = results;
+    const base = {
+      id: companyId,
+      title: 'Synthetic A17 company',
+      active: true,
+    };
+    const preceding = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({
+        ...base,
+        id: companyId + i + 1,
+      }));
+    type MatrixCase = {
+      key: string;
+      payload?: unknown;
+      control?: 'extra' | 'company' | 'key' | 'branch' | 'role' | 'version';
+      status: number;
+      code: string | null;
+    };
+    const cases: MatrixCase[] = [
+      {
+        key: 'selected-missing',
+        payload: { success: true, data: [{ ...base, id: companyId + 1 }] },
+        status: 400,
+        code: 'crm_company_not_found',
+      },
+      {
+        key: 'selected-inactive-boolean',
+        payload: { success: true, data: [{ ...base, active: false }] },
+        status: 400,
+        code: 'crm_company_not_found',
+      },
+      {
+        key: 'selected-beyond-200',
+        payload: { success: true, data: [...preceding(200), base] },
+        status: 400,
+        code: 'crm_company_not_found',
+      },
+      {
+        key: 'data-absent',
+        payload: { success: true },
+        status: 400,
+        code: 'crm_company_not_found',
+      },
+      {
+        key: 'data-non-array',
+        payload: { success: true, data: {} },
+        status: 400,
+        code: 'crm_connection_failed',
+      },
+      {
+        key: 'envelope-null',
+        payload: null,
+        status: 400,
+        code: 'crm_connection_failed',
+      },
+      {
+        key: 'envelope-array',
+        payload: [base],
+        status: 400,
+        code: 'crm_company_not_found',
+      },
+      {
+        key: 'item-null',
+        payload: { success: true, data: [null] },
+        status: 400,
+        code: 'crm_connection_failed',
+      },
+      {
+        key: 'items-primitive',
+        payload: { success: true, data: [1, true, 'synthetic'] },
+        status: 400,
+        code: 'crm_company_not_found',
+      },
+      {
+        key: 'title-invalid-type',
+        payload: { success: true, data: [{ ...base, title: 42 }] },
+        status: 400,
+        code: 'crm_company_not_found',
+      },
+      {
+        key: 'address-invalid-type',
+        payload: { success: true, data: [{ ...base, address: 42 }] },
+        status: 400,
+        code: 'crm_company_not_found',
+      },
+      {
+        key: 'unrelated-row-invalid-title',
+        payload: {
+          success: true,
+          data: [base, { ...base, id: companyId + 1, title: 42 }],
+        },
+        status: 400,
+        code: 'crm_company_not_found',
+      },
+      {
+        key: 'outer-shape',
+        control: 'extra',
+        status: 403,
+        code: 'local_yclients_read_route_disabled',
+      },
+      {
+        key: 'company-binding-mismatch',
+        control: 'company',
+        status: 403,
+        code: 'local_yclients_read_route_disabled',
+      },
+      {
+        key: 'request-key-missing',
+        control: 'key',
+        status: 403,
+        code: 'local_yclients_read_route_disabled',
+      },
+      { key: 'foreign-branch', control: 'branch', status: 404, code: null },
+      { key: 'client-role', control: 'role', status: 403, code: null },
+      {
+        key: 'stale-version',
+        control: 'version',
+        status: 409,
+        code: 'crm_config_version_changed',
+      },
+      {
+        key: 'positive-selected-first',
+        payload: { success: true, data: [base] },
+        status: 201,
+        code: null,
+      },
+      {
+        key: 'positive-selected-200th-string-id',
+        payload: {
+          success: true,
+          data: [...preceding(199), { ...base, id: String(companyId) }],
+        },
+        status: 201,
+        code: null,
+      },
+    ];
+    const foreign = await createTenant('Synthetic matrix foreign branch');
+    const foreignBefore = await durable(foreign.tenantId);
+    for (const entry of cases) {
+      const owner = await createTenant('Synthetic matrix ' + entry.key);
+      const ownerToken = await login(owner);
+      const actorToken =
+        entry.control === 'role'
+          ? await login(await addUser(owner, UserRole.CLIENT))
+          : ownerToken;
+      const key = randomUUID(),
+        before = await durable(owner.tenantId);
+      const body: Record<string, unknown> = connectBody(owner.branchId, null);
+      if (entry.control === 'extra') body.extra = true;
+      if (entry.control === 'company')
+        body.settingsJson = {
+          ...object(body.settingsJson),
+          companyId: companyId + 1,
+        };
+      if (entry.control === 'branch')
+        body.settingsJson = {
+          ...object(body.settingsJson),
+          branchBinding: {
+            ...object(object(body.settingsJson).branchBinding),
+            branchId: foreign.branchId,
+          },
+        };
+      if (entry.control === 'version') body.expectedVersion = 'f'.repeat(64);
+      const events: Record<string, unknown>[] = [];
+      matrixTrace = createReadTrace((value) => {
+        const projected = projectReadTrace(value);
+        if (projected === null) invalidTrace++;
+        else events.push(projected);
+      });
+      matrixCompanies = entry.control ? undefined : { payload: entry.payload };
+      const firstRead = providerReads.length;
+      const invocation = api()
+        .post('/api/integrations/crm/connect')
+        .set('Authorization', 'Bearer ' + actorToken);
+      if (entry.control !== 'key') invocation.set('Idempotency-Key', key);
+      const response = await invocation
+        .send(body)
+        .timeout({ response: 15000, deadline: 25000 });
+      const responseError = object(response.body).error;
+      const code =
+        responseError !== null &&
+        typeof responseError === 'object' &&
+        !Array.isArray(responseError)
+          ? (object(responseError).code ?? null)
+          : null;
+      const state = await durable(owner.tenantId);
+      const connectTrace = events.slice();
+      const routes = providerReads.slice(firstRead);
+      const row: Record<string, unknown> = {
+        case: entry.key,
+        boundary: entry.control
+          ? 'before_provider'
+          : entry.status === 201
+            ? 'positive_install'
+            : 'native_connection_check',
+        httpStatus: response.status,
+        errorCode: code,
+        providerRoutes: routes,
+        executions: state.executions.length,
+        mutations: state.mutations.length,
+        integrationStatus: state.integration?.status ?? null,
+        trace: connectTrace,
+        submittedRequestKey: entry.control !== 'key',
+      };
+      // Persist the observed result before checking a predicted classification.
+      // A mismatch stays a failed measured case, never rewritten as a passing plan.
+      results.push(row);
+      expect(response.status).toBe(entry.status);
+      expect(code).toBe(entry.code);
+      expect(await durable(foreign.tenantId)).toEqual(foreignBefore);
+      const httpEnd = connectTrace.filter(
+        (event) =>
+          event.surface === 'http' &&
+          event.route === 'connect' &&
+          event.stage !== 'entered',
+      );
+      expect(httpEnd).toHaveLength(1);
+      expect(httpEnd[0].status).toBe(entry.status);
+      const providerEvents = connectTrace.filter(
+        (event) => event.surface === 'provider',
+      );
+      if (entry.status === 201) {
+        const receipt = receiptOf(response.body, 'install', key);
+        expect(state.executions).toHaveLength(1);
+        expect(state.executions[0].state).toBe('SUCCEEDED');
+        expect(state.executions[0].executionAttemptCount).toBe(1);
+        expect(state.mutations).toHaveLength(1);
+        expect(state.integration?.status).toBe('pending_activation');
+        expect(routes.slice().sort()).toEqual(
+          [
+            'companies',
+            `book_services/${companyId}`,
+            `service_categories/${companyId}`,
+            `company/${companyId}/staff`,
+            `company/${companyId}`,
+          ].sort(),
+        );
+        await readSucceededWithoutEffects(ownerToken, owner, receipt);
+        row.receiptStatus = 'SUCCEEDED';
+        row.receiptHash = hash(receipt);
+      } else {
+        expect(await durable(owner.tenantId)).toEqual(before);
+        expect(state.executions).toEqual([]);
+        expect(state.mutations).toEqual([]);
+        expect(state.integration).toBeNull();
+        if (entry.control) {
+          expect(routes).toEqual([]);
+          expect(providerEvents).toEqual([]);
+        } else {
+          expect(routes).toEqual(['companies']);
+          expect(
+            providerEvents.map((event) => ({
+              stage: event.stage,
+              status: event.status,
+              code: event.code,
+            })),
+          ).toEqual([
+            { stage: 'entered', status: null, code: null },
+            { stage: 'completed', status: 200, code: 'provider_response_read' },
+          ]);
+          // Historical owner trace did not capture the response error code.
+          // The new closed observer must preserve this actual canonical code.
+          expect(httpEnd[0].code).toBe(entry.code);
+        }
+        const status = await getOperation(ownerToken, 'install', key);
+        expect(status.status).toBe(200);
+        expect(status.body).toMatchObject({
+          status: 'NOT_OBSERVED',
+          receipt: null,
+          phase: null,
+        });
+        expect(providerReads).toHaveLength(firstRead + routes.length);
+        expect(await durable(owner.tenantId)).toEqual(before);
+        row.receiptStatus = 'NOT_OBSERVED';
+      }
+      row.recoveryTrace = events.slice(connectTrace.length);
+      row.recoveryProviderReads = 0;
+      await noUnrelatedEffects(owner.tenantId);
+      row.noUnrelatedEffects = true;
+      matrixCompanies = undefined;
+      matrixTrace = undefined;
+    }
+    expect(results).toHaveLength(20);
+    expect(providerReads).toHaveLength(22);
+    checks.push(
+      'Twelve parsed HTTP200 companies payload classes fail before AE, with exact HTTP error codes and closed traces; status reads remain NOT_OBSERVED without redispatch',
+    );
+    checks.push(
+      'Six malformed/scope/version/role controls refuse before provider dispatch; first and 200th selected-company controls install exactly once',
+    );
+    observations.matrixQualification = {
+      cases: 20,
+      providerReads: 22,
+      realProviderCalls: 0,
+      modelCalls: 0,
+      perCaseObserver:
+        'Existing closed trace projector, first64 per synthetic case; production global cap unchanged',
+      historicalOwnerCause:
+        'UNKNOWN; equal metadata trace does not identify the original provider payload',
+      browserRun: false,
+      restartRun: false,
+    };
+  };
+
   it('pins versions, loses committed responses, and restores only existing A17 outcomes after actual restart', async () => {
     let passed = false;
     try {
-      if (stage === 'prepare') {
+      if (stage === 'matrix') {
+        await provePreAdmission400Matrix();
+      } else if (stage === 'prepare') {
         const owner = await createTenant('Synthetic A17 recovery');
         const otherOwner = await addUser(owner, UserRole.TENANT_OWNER);
         const client = await addUser(owner, UserRole.CLIENT);
@@ -1884,7 +2208,9 @@ describe('A17 exact configuration and persisted operation recovery through actua
               'Actual closed observer, first 64 events only; no request identity or body retention',
             forbidden,
             qualification:
-              'LOCAL_SYNTHETIC_NATIVE_ADAPTER_ONLY; real canonical A17 writes in disposable PG; actual response-discard relay; no worker-crash or live-provider acceptance',
+              stage === 'matrix'
+                ? 'LOCAL_SYNTHETIC_NATIVE_ADAPTER_ONLY; actual HTTP pre-AE400 matrix and positive canonical installs; no browser/restart/live-provider acceptance'
+                : 'LOCAL_SYNTHETIC_NATIVE_ADAPTER_ONLY; real canonical A17 writes in disposable PG; actual response-discard relay; no worker-crash or live-provider acceptance',
             boundaries: {
               model: 'forbidden spy',
               providerWrites:

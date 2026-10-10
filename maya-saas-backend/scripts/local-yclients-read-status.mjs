@@ -24,7 +24,8 @@ export function runtimeStatus(stage, outcome = 'entered', code = null, error) {
 // First 64 closed events only. Relative timing is diagnostic, never request identity.
 export const READ_TRACE_LIMIT = 64;
 const TRACE_ROUTES = Object.freeze(['connect', 'activate', 'operation', 'companies', 'company', 'book_services', 'services', 'categories', 'team', 'unlisted']);
-const TRACE_CODES = Object.freeze(['provider_response_read', 'provider_http_error', 'provider_rejected', 'provider_scope_refused', 'provider_transport_unavailable', 'response_closed', 'local_onboarding_origin_refused', 'local_yclients_diagnostic_route_disabled', 'local_yclients_read_route_disabled']);
+const CONNECTION_FAILURE_CODES = Object.freeze(['crm_credentials_rejected', 'crm_company_not_found', 'crm_provider_unreachable', 'crm_platform_configuration_error', 'crm_connection_failed']);
+const TRACE_CODES = Object.freeze([...CONNECTION_FAILURE_CODES, 'provider_response_read', 'provider_http_error', 'provider_rejected', 'provider_scope_refused', 'provider_transport_unavailable', 'response_closed', 'local_onboarding_origin_refused', 'local_yclients_diagnostic_route_disabled', 'local_yclients_read_route_disabled']);
 export function projectReadTrace(message) {
   const fields = ['type', 'contract', 'sequence', 'elapsedMs', 'surface', 'route', 'method', 'stage', 'status', 'code'];
   if (!message || typeof message !== 'object' || Array.isArray(message) || Object.keys(message).length !== fields.length || !fields.every(key => Object.hasOwn(message, key))) return null;
@@ -52,10 +53,27 @@ export function traceHttpRequest(request, response, emit, refusal = null) {
   const base = { surface: 'http', route, method: request.method };
   const code = TRACE_CODES.includes(refusal) ? refusal : null;
   emit({ ...base, stage: 'entered', status: null, code });
+  // Retain only a canonical public failure code. Never stringify/copy the body,
+  // invoke its getters, or change the application's response or error behavior.
+  let connectionFailure = null;
+  if (['connect', 'activate'].includes(route) && typeof response.json === 'function') {
+    const originalJson = response.json;
+    response.json = function (...args) {
+      try {
+        const body = args[0];
+        const error = body && typeof body === 'object' && !Array.isArray(body)
+          ? Object.getOwnPropertyDescriptor(body, 'error')?.value : null;
+        const candidate = error && typeof error === 'object' && !Array.isArray(error)
+          ? Object.getOwnPropertyDescriptor(error, 'code')?.value : null;
+        connectionFailure = CONNECTION_FAILURE_CODES.includes(candidate) ? candidate : null;
+      } catch { connectionFailure = null; }
+      return Reflect.apply(originalJson, this, args);
+    };
+  }
   let finished = false;
   response.once('finish', () => {
     if (finished) return; finished = true;
-    emit({ ...base, stage: response.statusCode >= 400 ? 'refused' : 'completed', status: response.statusCode, code });
+    emit({ ...base, stage: response.statusCode >= 400 ? 'refused' : 'completed', status: response.statusCode, code: code ?? (response.statusCode >= 400 ? connectionFailure : null) });
   });
   response.once('close', () => {
     if (finished) return; finished = true;

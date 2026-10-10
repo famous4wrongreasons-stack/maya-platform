@@ -28,3 +28,14 @@ test('A17 operation proof cannot broaden into another proof mode', () => {
     assert.throws(() => proofCommands({ ...input, [option]: true }), /isolated HTTP mode/);
   }
 });
+
+test('pre-AE matrix reuses actual A17 probe in one isolated HTTP stage, without browser or restart', () => {
+  const matrix = { ...input, crmSetup: false, crmSetupMatrix: true };
+  const commands = proofCommands(matrix);
+  assert.deepEqual(commands.map(command => command.name), ['initdb', 'pg-start', 'createdb', 'migrations', 'matrix']);
+  assert.ok(commands[4].args.includes('test/widgets-live/crm-a17-operation-restart.probe-spec.ts'));
+  assert.ok(commands[4].args.includes('--runInBand'));
+  assert.equal(commands[4].env.JEST_C9_OCCUPANCY_STAGE, 'matrix');
+  for (const option of ['crmSetup', 'browser', 'branchBinding', 'compound'])
+    assert.throws(() => proofCommands({ ...matrix, [option]: true }), /isolated HTTP mode/);
+});

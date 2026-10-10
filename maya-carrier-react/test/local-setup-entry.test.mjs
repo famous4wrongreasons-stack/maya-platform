@@ -93,3 +93,67 @@ test('empty or refused branch read stays qualified; it cannot enable stage or ac
   }
   assert.deepEqual(m.fixture.calls, []);
 });
+
+const activationControls = p => {
+  const section = findAll(p.root, el => el.tag === 'section' && el.attrs['aria-label'] === 'Активация подключения')[0];
+  const controls = findAll(section, el => el.tag === 'button');
+  assert.equal(controls.length, 2);
+  return controls;
+};
+const disabledActivationHelp = p => {
+  const [consent, action] = activationControls(p);
+  assert.ok('disabled' in consent.attrs);
+  assert.ok('disabled' in action.attrs);
+  assert.equal(consent.attrs['aria-checked'], 'false');
+  assert.ok(consent.attrs['aria-describedby']);
+  assert.equal(action.attrs['aria-describedby'], consent.attrs['aria-describedby']);
+  const help = findAll(p.root, el => el.attrs.id === consent.attrs['aria-describedby']);
+  assert.equal(help.length, 1);
+  return textOf(help[0]);
+};
+const savedConnection = { id: 'synthetic-integration', tenantId: 'synthetic-tenant', provider: 'yclients', status: 'pending_activation', hasCredentials: true, companyId: '123', branchId: 'synthetic-branch', configVersion: 'a'.repeat(64) };
+
+test('unsaved connection and pending install explain both disabled activation controls without retry instructions', () => {
+  m.fixture.reset(); const idle = m.localCrmSetup.view();
+  const states = [{ ...idle, phase: 'ready', canStage: true }];
+  for (const status of ['NOT_OBSERVED', 'READY', 'UNAVAILABLE']) states.push({
+    ...idle, phase: 'uncertain', connection: status === 'READY' ? savedConnection : null,
+    operation: { operation: 'install', requestId: '11111111-1111-4111-8111-111111111111', status, phase: status === 'READY' ? 'install' : null, receipt: null, current: { configVersion: null, matchesCurrentVersion: false } },
+    resuming: status !== 'UNAVAILABLE', canStage: status !== 'UNAVAILABLE',
+  });
+  for (const state of states) {
+    m.fixture.setSetup(state);
+    const help = disabledActivationHelp(render(m.LocalCrmSetup, { onClose() {} }));
+    assert.equal(help, 'Сначала должно завершиться сохранение подключения в шаге 1. Сейчас оно не подтверждено, поэтому активация и импорт недоступны.');
+    assert.doesNotMatch(help, /Введите|токен|повтор|сохранено|успешно/);
+  }
+  assert.deepEqual(m.fixture.calls, []);
+});
+
+test('idle, busy and blocked activation help stays qualified to the displayed state', () => {
+  m.fixture.reset(); const idle = m.localCrmSetup.view();
+  for (const [state, expected] of [
+    [idle, 'Сначала загрузите филиалы и проверьте текущее подключение.'],
+    [{ ...idle, phase: 'loading', busy: true }, 'Дождитесь завершения текущего запроса.'],
+    [{ ...idle, phase: 'activating', busy: true, connection: savedConnection }, 'Дождитесь завершения текущего запроса.'],
+    [{ ...idle, phase: 'blocked', connection: savedConnection }, 'Активация и импорт сейчас недоступны. Проверьте подключение и результат.'],
+  ]) {
+    m.fixture.setSetup(state);
+    assert.equal(disabledActivationHelp(render(m.LocalCrmSetup, { onClose() {} })), expected);
+  }
+  assert.deepEqual(m.fixture.calls, []);
+});
+
+test('ready activation removes blocked help but still requires separate unchecked consent', () => {
+  m.fixture.reset();
+  m.fixture.setSetup({ ...m.localCrmSetup.view(), phase: 'ready', connection: savedConnection, canActivate: true });
+  const p = render(m.LocalCrmSetup, { onClose() {} });
+  const [consent, action] = activationControls(p);
+  assert.equal('disabled' in consent.attrs, false);
+  assert.equal(consent.attrs['aria-checked'], 'false');
+  assert.ok('disabled' in action.attrs);
+  assert.equal(consent.attrs['aria-describedby'], undefined);
+  assert.equal(action.attrs['aria-describedby'], undefined);
+  assert.doesNotMatch(p.text, /Сначала должно завершиться сохранение|Активация и импорт сейчас недоступны/);
+  assert.deepEqual(m.fixture.calls, []);
+});

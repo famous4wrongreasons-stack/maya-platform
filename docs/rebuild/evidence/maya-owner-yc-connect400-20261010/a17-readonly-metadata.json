@@ -1,0 +1,21 @@
+{
+  "contract": "maya.owner-a17-readonly-metadata/1",
+  "status": "READ_COMPLETE",
+  "externalCalls": 0,
+  "applicationStarted": false,
+  "credentialsRead": false,
+  "databaseBusinessWrites": 0,
+  "newKeys": false,
+  "queriesReadOnly": true,
+  "tcpListening": false,
+  "cleanupFailures": [],
+  "sameOwnedDatabaseAndSystem": true,
+  "projection": {
+    "integrations": [],
+    "executions": []
+  },
+  "observedAt": "2026-10-10T20:25:29.922288+00:00",
+  "expiry": "2026-10-10T20:24:05.529Z",
+  "clusterStopped": true,
+  "sharedLockAbsent": true
+}
