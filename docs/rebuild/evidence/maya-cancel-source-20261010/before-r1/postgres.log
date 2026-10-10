@@ -1,0 +1,14 @@
+2026-10-10 08:00:03.287 UTC [38176] LOG:  starting PostgreSQL 16.14 (Homebrew) on aarch64-apple-darwin25.4.0, compiled by Apple clang version 21.0.0 (clang-2100.0.123.102), 64-bit
+2026-10-10 08:00:03.287 UTC [38176] LOG:  listening on IPv4 address "127.0.0.1", port 50893
+2026-10-10 08:00:03.290 UTC [38179] LOG:  database system was shut down at 2026-10-10 08:00:03 UTC
+2026-10-10 08:00:03.292 UTC [38176] LOG:  database system is ready to accept connections
+2026-10-10 08:00:10.898 UTC [38259] ERROR:  update or delete on table "Staff" violates foreign key constraint "Appointment_staffId_tenantId_fkey" on table "Appointment"
+2026-10-10 08:00:10.898 UTC [38259] DETAIL:  Key (id, tenantId)=(cmv23ti7d000qh1c9nn02fy7i, cmv23thus0000h1c9elbqj9je) is still referenced from table "Appointment".
+2026-10-10 08:00:10.898 UTC [38259] STATEMENT:  DELETE FROM "public"."Staff" WHERE "public"."Staff"."tenantId" = $1
+2026-10-10 08:01:09.831 UTC [38176] LOG:  received fast shutdown request
+2026-10-10 08:01:09.831 UTC [38176] LOG:  aborting any active transactions
+2026-10-10 08:01:09.832 UTC [38176] LOG:  background worker "logical replication launcher" (PID 38182) exited with exit code 1
+2026-10-10 08:01:09.832 UTC [38177] LOG:  shutting down
+2026-10-10 08:01:09.832 UTC [38177] LOG:  checkpoint starting: shutdown immediate
+2026-10-10 08:01:09.897 UTC [38177] LOG:  checkpoint complete: wrote 1956 buffers (23.9%); 0 WAL file(s) added, 0 removed, 1 recycled; write=0.031 s, sync=0.032 s, total=0.065 s; sync files=1467, longest=0.001 s, average=0.001 s; distance=13325 kB, estimate=13325 kB; lsn=0/22211F8, redo lsn=0/22211F8
+2026-10-10 08:01:09.900 UTC [38176] LOG:  database system is shut down

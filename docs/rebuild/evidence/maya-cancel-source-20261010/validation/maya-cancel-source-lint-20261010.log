@@ -1,0 +1,10 @@
+
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-pricing-semantic-integration/maya-saas-backend/test/widgets-live/cancel-source.probe-spec.ts
+  593:24  error  A method that is not declared with `this: void` may cause unintentional scoping of `this` when separated from its object.
+Consider using an arrow function or explicitly `.bind()`ing the method to avoid calling the method with an unintended `this` value. 
+If a function does not access `this`, it can be annotated with `this: void`  @typescript-eslint/unbound-method
+  655:28  error  Async arrow function 'afterDelete' has no 'await' expression                                                                                                                                                                                                                                                                                @typescript-eslint/require-await
+  671:28  error  Async arrow function 'afterDelete' has no 'await' expression                                                                                                                                                                                                                                                                                @typescript-eslint/require-await
+
+✖ 3 problems (3 errors, 0 warnings)
+

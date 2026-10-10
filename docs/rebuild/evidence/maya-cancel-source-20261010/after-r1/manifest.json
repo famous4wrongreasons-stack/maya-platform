@@ -1,0 +1,21 @@
+{
+  "contract": "maya.cancel-source-proof/1",
+  "baselineCommit": "aa8feb8a726cc8a162d4527da0e2333c0977c28a",
+  "candidateCommit": "b251a36fe2b0e9ac8201463b08cd54b7a66e7e74",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-cancel-source-M8UUb8/pg",
+  "port": 51766,
+  "database": "maya_widget_gate_proof_c9occ_a18aa55b8d39",
+  "status": "failed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations"
+  ],
+  "realProviderCalls": 0,
+  "realModelCalls": 0,
+  "qualification": "SYNTHETIC_NATIVE_YCLIENTS_ACTUAL_HTTP_PG_ONLY",
+  "error": "regression exited 1; inspect its log",
+  "clusterStopped": true,
+  "sourcesUnchanged": true
+}

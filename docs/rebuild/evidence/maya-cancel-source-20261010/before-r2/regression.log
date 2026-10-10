@@ -1,0 +1,39 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_0f9845ad2f61 on 127.0.0.1:51075 (local)
+[31m[Nest] 39580  - [39m10/10/2026, 8:02:38 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 39580  - [39m10/10/2026, 8:02:38 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/cancel-source.probe-spec.ts
+  Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
+    ✕ company A preview → company B integration → confirm never deletes the B record with the same ID (1060 ms)
+
+  ● Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] › company A preview → company B integration → confirm never deletes the B record with the same ID
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 7
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "company": 430002,
+    +     "method": "DELETE",
+    +     "route": "record/430002/5001",
+    +   },
+    + ]
+
+      380 |     expect(
+      381 |       transport.slice(before).filter((row) => row.method === 'DELETE'),
+    > 382 |     ).toEqual([]);
+          |       ^
+      383 |     expect(records.get(s.companyB)).toEqual({ canceled: false, own: false });
+      384 |     expect(records.get(s.companyA)?.canceled).toBe(false);
+      385 |     expect(appointment.status).toBe('confirmed');
+
+      at Object.<anonymous> (widgets-live/cancel-source.probe-spec.ts:382:7)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        2.065 s, estimated 7 s
+Ran all test suites within paths "test/widgets-live/cancel-source.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-cancel-source-before-20261010-r2/regression-jest.json

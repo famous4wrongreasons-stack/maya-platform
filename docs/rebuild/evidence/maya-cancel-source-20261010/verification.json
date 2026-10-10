@@ -1,0 +1,67 @@
+{
+  "contract": "maya.cancel-source-archive/1",
+  "baselineCommit": "aa8feb8a726cc8a162d4527da0e2333c0977c28a",
+  "runtimeFixCommit": "9099199a76f20ce3ebe499c58ef049281be289c2",
+  "finalProofCommit": "1cb7f4dd0a85cc915459672a9727de328de82129",
+  "qualification": "ACTUAL_HTTP_OWNED_PG_SYNTHETIC_NATIVE_YCLIENTS_ONLY",
+  "beforeRuntimeEqualsBaseline": true,
+  "attempts": [
+    {
+      "attempt": "before-r1",
+      "candidateCommit": "0f168c9ebb9a6076d092784b0d03ad9097e62a3c",
+      "status": "failed",
+      "gitBoundFiles": 2014,
+      "clusterStopped": true,
+      "postmasterPidAbsent": true,
+      "sourcesUnchanged": true
+    },
+    {
+      "attempt": "before-r2",
+      "candidateCommit": "7ed93a17529c4ef197996e61827c5372a345a0cd",
+      "status": "failed",
+      "gitBoundFiles": 2014,
+      "clusterStopped": true,
+      "postmasterPidAbsent": true,
+      "sourcesUnchanged": true
+    },
+    {
+      "attempt": "after-r1",
+      "candidateCommit": "b251a36fe2b0e9ac8201463b08cd54b7a66e7e74",
+      "status": "failed",
+      "gitBoundFiles": 2014,
+      "clusterStopped": true,
+      "postmasterPidAbsent": true,
+      "sourcesUnchanged": true
+    },
+    {
+      "attempt": "after-r2",
+      "candidateCommit": "9099199a76f20ce3ebe499c58ef049281be289c2",
+      "status": "failed",
+      "gitBoundFiles": 2014,
+      "clusterStopped": true,
+      "postmasterPidAbsent": true,
+      "sourcesUnchanged": true
+    },
+    {
+      "attempt": "after-r3",
+      "candidateCommit": "1cb7f4dd0a85cc915459672a9727de328de82129",
+      "status": "passed",
+      "gitBoundFiles": 2014,
+      "clusterStopped": true,
+      "postmasterPidAbsent": true,
+      "sourcesUnchanged": true
+    }
+  ],
+  "finalCurrentFilesMatchGit": true,
+  "supplementalTypecheckConfig": {
+    "path": "maya-saas-backend/test/tsconfig.widgets-live.json",
+    "sha256": "e706c049b156acd2f2837d23a67429714515f593628b1589dd6fbe3f482d8987",
+    "qualification": "post-run Git/disk comparison"
+  },
+  "httpCasesPassed": 21,
+  "unitTestsPassed": 220,
+  "unitSuitesPassed": 6,
+  "realProviderCalls": 0,
+  "realModelCalls": 0,
+  "websiteProductionChanged": false
+}

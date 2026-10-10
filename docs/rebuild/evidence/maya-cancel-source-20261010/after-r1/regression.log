@@ -1,0 +1,172 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_a18aa55b8d39 on 127.0.0.1:51766 (local)
+[31m[Nest] 44694  - [39m10/10/2026, 8:13:05 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 44694  - [39m10/10/2026, 8:13:05 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/cancel-source.probe-spec.ts (14.036 s)
+  Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
+    ✓ company A preview → company B integration → confirm never deletes the B record with the same ID (1017 ms)
+    ✓ refuses branch-remap after preview before any DELETE (649 ms)
+    ✓ refuses missing-branch after preview before any DELETE (588 ms)
+    ✕ refuses missing-origin after preview before any DELETE (584 ms)
+    ✓ refuses provider-change after preview before any DELETE (573 ms)
+    ✓ refuses internal-source after preview before any DELETE (581 ms)
+    ✕ refuses revoked-link after preview before any DELETE (566 ms)
+    ✓ unchanged source cancellation, concurrent same-key callers and replay share one AE/DELETE (695 ms)
+    ✕ rechecks current Client after a concurrent waiter receives the completed AE result (654 ms)
+    ✕ widget COMMIT preserves late Client revocation instead of disclosing a completed cancel (631 ms)
+    ✓ rechecks source inside the native DELETE seam (629 ms)
+    ✓ rechecks revoke inside the native DELETE seam (638 ms)
+    ✓ rechecks record-identity inside the native DELETE seam (619 ms)
+    ✓ source changes after DELETE (ok): UNKNOWN, no company-B read/mirror/retry (677 ms)
+    ✓ source changes after DELETE (gone): UNKNOWN, no company-B read/mirror/retry (672 ms)
+    ✓ source changes after DELETE (lost): UNKNOWN, no company-B read/mirror/retry (656 ms)
+    ✕ stable UNKNOWN reconciles the original provider without another DELETE (651 ms)
+    ✕ source changes during UNKNOWN readback: retains UNKNOWN without mirror or company-B access (675 ms)
+    ✓ foreign tenant cannot cancel the owned appointment (1097 ms)
+
+  ● Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] › refuses missing-origin after preview before any DELETE
+
+    DriverAdapterError: B31 snapshot permits only terminal retention cleanup
+
+      495 |         });
+      496 |       if (mode === 'missing-origin')
+    > 497 |         await db.prisma.actionExecution.updateMany({
+          |         ^
+      498 |           where: {
+      499 |             tenantId: s.tenantId,
+      500 |             capability: 'crm.appointment.create.v1',
+
+      at PgTransaction.onError (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:678:11)
+      at PgTransaction.performIO (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:673:12)
+      at PgTransaction.executeRaw (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:643:13)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:168:18)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:272:41)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:262:25)
+      at e.run (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:94:23)
+      at execute (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/LocalExecutor.ts:81:12)
+      at jt.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/ClientEngine.ts:504:22)
+      at Object.singleLoader (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:112:26)
+      at zr.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:149:14)
+      at a (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:24)
+      at widgets-live/cancel-source.probe-spec.ts:497:9
+
+  ● Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] › refuses revoked-link after preview before any DELETE
+
+    DriverAdapterError: new row for relation "ClientChannelLink" violates check constraint "ClientChannelLink_revocation_check"
+
+      513 |         });
+      514 |       if (mode === 'revoked-link')
+    > 515 |         await db.prisma.clientChannelLink.update({
+          |         ^
+      516 |           where: { id: s.linkId },
+      517 |           data: { revokedAt: new Date() },
+      518 |         });
+
+      at PrismaPgAdapter.onError (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:678:11)
+      at PrismaPgAdapter.performIO (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:673:12)
+      at PrismaPgAdapter.queryRaw (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:604:30)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:186:26)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:213:41)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:128:29)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:272:41)
+      at e.run (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:94:23)
+      at execute (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/LocalExecutor.ts:81:12)
+      at jt.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/ClientEngine.ts:504:22)
+      at Object.singleLoader (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:112:26)
+      at zr.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:149:14)
+      at a (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:24)
+      at widgets-live/cancel-source.probe-spec.ts:515:9
+
+  ● Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] › rechecks current Client after a concurrent waiter receives the completed AE result
+
+    DriverAdapterError: new row for relation "ClientChannelLink" violates check constraint "ClientChannelLink_revocation_check"
+
+      574 |       expect((await Promise.race([first, second])).status).toBe(201);
+      575 |       await entered;
+    > 576 |       await db.prisma.clientChannelLink.update({
+          |       ^
+      577 |         where: { id: s.linkId },
+      578 |         data: { revokedAt: new Date() },
+      579 |       });
+
+      at PrismaPgAdapter.onError (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:678:11)
+      at PrismaPgAdapter.performIO (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:673:12)
+      at PrismaPgAdapter.queryRaw (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:604:30)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:186:26)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:213:41)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:128:29)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:272:41)
+      at e.run (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:94:23)
+      at execute (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/LocalExecutor.ts:81:12)
+      at jt.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/ClientEngine.ts:504:22)
+      at Object.singleLoader (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:112:26)
+      at zr.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:149:14)
+      at a (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:24)
+      at Object.<anonymous> (widgets-live/cancel-source.probe-spec.ts:576:7)
+
+  ● Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] › widget COMMIT preserves late Client revocation instead of disclosing a completed cancel
+
+    DriverAdapterError: new row for relation "ClientChannelLink" violates check constraint "ClientChannelLink_revocation_check"
+
+      613 |       const pending = submit(http, s.token, s.confirmation!, 'COMMIT');
+      614 |       await entered;
+    > 615 |       await db.prisma.clientChannelLink.update({
+          |       ^
+      616 |         where: { id: s.linkId },
+      617 |         data: { revokedAt: new Date() },
+      618 |       });
+
+      at PrismaPgAdapter.onError (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:678:11)
+      at PrismaPgAdapter.performIO (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:673:12)
+      at PrismaPgAdapter.queryRaw (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:604:30)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:186:26)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:213:41)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:128:29)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:272:41)
+      at e.run (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:94:23)
+      at execute (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/LocalExecutor.ts:81:12)
+      at jt.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/ClientEngine.ts:504:22)
+      at Object.singleLoader (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:112:26)
+      at zr.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:149:14)
+      at a (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:24)
+      at Object.<anonymous> (widgets-live/cancel-source.probe-spec.ts:615:7)
+
+  ● Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] › stable UNKNOWN reconciles the original provider without another DELETE
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 503
+
+      709 |     expect((await executions(s))[0].state).toBe('UNKNOWN');
+      710 |     readbackReady = true;
+    > 711 |     expect((await cancelHttp(s, key)).status).toBe(201);
+          |                                               ^
+      712 |     expect(deletes(s)).toHaveLength(1);
+      713 |     expect((await ownedRow(s)).status).toBe('canceled');
+      714 |     expect((await executions(s))[0]).toMatchObject({
+
+      at Object.<anonymous> (widgets-live/cancel-source.probe-spec.ts:711:47)
+
+  ● Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] › source changes during UNKNOWN readback: retains UNKNOWN without mirror or company-B access
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 409
+    Received: 503
+
+      733 |     ).toEqual([]);
+      734 |     const retryBefore = transport.length;
+    > 735 |     expect((await cancelHttp(s, key)).status).toBe(409);
+          |                                               ^
+      736 |     expect(transport.slice(retryBefore)).toEqual([]);
+      737 |     expect(deletes(s)).toHaveLength(1);
+      738 |     expect((await ownedRow(s)).status).toBe('confirmed');
+
+      at Object.<anonymous> (widgets-live/cancel-source.probe-spec.ts:735:47)
+
+Test Suites: 1 failed, 1 total
+Tests:       6 failed, 13 passed, 19 total
+Snapshots:   0 total
+Time:        14.057 s
+Ran all test suites within paths "test/widgets-live/cancel-source.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-cancel-source-after-20261010-r1/regression-jest.json

@@ -1,0 +1,420 @@
+{
+  "qualification": "SYNTHETIC_NATIVE_YCLIENTS_ONLY",
+  "realModelCalls": 0,
+  "realProviderCalls": 0,
+  "forbidden": 0,
+  "transport": [
+    {
+      "method": "GET",
+      "company": null,
+      "route": "companies"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_services/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "service_categories/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "company/430001/staff"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "company/430001"
+    },
+    {
+      "method": "GET",
+      "company": null,
+      "route": "companies"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_services/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "service_categories/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "company/430001/staff"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "company/430001"
+    },
+    {
+      "method": "GET",
+      "company": null,
+      "route": "companies"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_services/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "service_categories/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "company/430001/staff"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "company/430001"
+    },
+    {
+      "method": "GET",
+      "company": null,
+      "route": "companies"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_services/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "service_categories/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "company/430001/staff"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "company/430001"
+    },
+    {
+      "method": "GET",
+      "company": null,
+      "route": "companies"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_services/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "service_categories/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "company/430001/staff"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "company/430001"
+    },
+    {
+      "method": "GET",
+      "company": null,
+      "route": "companies"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_services/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "service_categories/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "company/430001/staff"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "company/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_times/430001/71/2026-10-12"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_services/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "service_categories/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "company/430001/staff"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_services/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_times/430001/71/2026-10-12"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_services/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_times/430001/71/2026-10-12"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_services/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_times/430001/71/2026-10-12"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_services/430001"
+    },
+    {
+      "method": "POST",
+      "company": 430001,
+      "route": "book_record/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_services/430001"
+    },
+    {
+      "method": "GET",
+      "company": 430001,
+      "route": "book_times/430001/71/2026-10-12"
+    },
+    {
+      "method": "GET",
+      "company": null,
+      "route": "companies"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "book_services/430002"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "service_categories/430002"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "company/430002/staff"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "company/430002"
+    },
+    {
+      "method": "GET",
+      "company": null,
+      "route": "companies"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "book_services/430002"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "service_categories/430002"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "company/430002/staff"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "company/430002"
+    },
+    {
+      "method": "GET",
+      "company": null,
+      "route": "companies"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "book_services/430002"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "service_categories/430002"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "company/430002/staff"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "company/430002"
+    },
+    {
+      "method": "GET",
+      "company": null,
+      "route": "companies"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "book_services/430002"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "service_categories/430002"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "company/430002/staff"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "company/430002"
+    },
+    {
+      "method": "GET",
+      "company": null,
+      "route": "companies"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "book_services/430002"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "service_categories/430002"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "company/430002/staff"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "company/430002"
+    },
+    {
+      "method": "GET",
+      "company": null,
+      "route": "companies"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "book_services/430002"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "service_categories/430002"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "company/430002/staff"
+    },
+    {
+      "method": "GET",
+      "company": 430002,
+      "route": "company/430002"
+    },
+    {
+      "method": "DELETE",
+      "company": 430002,
+      "route": "record/430002/5001"
+    }
+  ],
+  "observations": [
+    {
+      "case": "company-switch-before-confirm",
+      "result": {
+        "contract": "maya.widget.intent/1",
+        "outcome": "terminate",
+        "code": null,
+        "reason_text": null,
+        "stopped_at_gate": "13",
+        "gates_run": 14,
+        "gates_total": 15,
+        "next_envelope": null,
+        "resolved_widget": null,
+        "owner_decision": {
+          "state": "SUCCEEDED",
+          "outcomeCode": "provider_applied"
+        },
+        "receipt_outcome": "ACCEPTED"
+      },
+      "providerAfterConfirm": [
+        {
+          "method": "DELETE",
+          "company": 430002,
+          "route": "record/430002/5001"
+        }
+      ],
+      "companyA": {
+        "canceled": false,
+        "own": true
+      },
+      "companyB": {
+        "canceled": true,
+        "own": false
+      },
+      "appointmentStatus": "canceled"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+[Nest] 46344  - 10/10/2026, 11:15:50 AM    WARN [CrmService] CRM preview failed provider=yclients operation=connection_check status=unknown
+[Nest] 46344  - 10/10/2026, 11:15:50 AM    WARN [CrmService] CRM connection failed provider=yclients code=crm_credentials_rejected detail=401 token
+[Nest] 46344  - 10/10/2026, 11:15:50 AM    WARN [CrmService] CRM connection failed provider=yclients code=crm_platform_configuration_error detail=YCLIENTS_PARTNER_TOKEN is not configured
+[Nest] 46344  - 10/10/2026, 11:15:50 AM    WARN [CrmService] CRM team access synchronization deferred tenant=tenant-1: unavailable
+
+Test Suites: 6 passed, 6 total
+Tests:       220 passed, 220 total
+Snapshots:   0 total
+Time:        1.766 s, estimated 2 s
+Ran all test suites matching src/crm/client-appointment-cancel.service.spec.ts|src/crm/client-appointment-cancel.architecture.spec.ts|src/crm/crm.service.spec.ts|src/crm/adapters/yclients-crm.adapter.spec.ts|src/widgets/owner-ports/commit-booking.adapter.spec.ts|src/widgets/owner-ports/noun-resolution.owners.provider.spec.ts.

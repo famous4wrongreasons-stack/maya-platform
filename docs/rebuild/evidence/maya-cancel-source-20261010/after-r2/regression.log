@@ -1,0 +1,82 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_0715626158fa on 127.0.0.1:52165 (local)
+[31m[Nest] 46219  - [39m10/10/2026, 8:15:37 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 46219  - [39m10/10/2026, 8:15:37 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/cancel-source.probe-spec.ts (15.141 s)
+  Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
+    ✓ company A preview → company B integration → confirm never deletes the B record with the same ID (1007 ms)
+    ✓ refuses branch-remap after preview before any DELETE (662 ms)
+    ✓ refuses missing-branch after preview before any DELETE (580 ms)
+    ✕ refuses missing-origin after preview before any DELETE (562 ms)
+    ✓ refuses provider-change after preview before any DELETE (568 ms)
+    ✓ refuses internal-source after preview before any DELETE (560 ms)
+    ✓ refuses revoked-link after preview before any DELETE (560 ms)
+    ✓ unchanged source cancellation, concurrent same-key callers and replay share one AE/DELETE (678 ms)
+    ✓ rechecks current Client after a concurrent waiter receives the completed AE result (635 ms)
+    ✕ widget COMMIT preserves late Client revocation instead of disclosing a completed cancel (613 ms)
+    ✓ rechecks source inside the native DELETE seam (598 ms)
+    ✓ rechecks revoke inside the native DELETE seam (604 ms)
+    ✓ rechecks record-identity inside the native DELETE seam (612 ms)
+    ✓ source changes after DELETE (ok): UNKNOWN, no company-B read/mirror/retry (654 ms)
+    ✓ source changes after DELETE (gone): UNKNOWN, no company-B read/mirror/retry (647 ms)
+    ✓ source changes after DELETE (lost): UNKNOWN, no company-B read/mirror/retry (644 ms)
+    ✓ lost DELETE response reconciles the original provider within the existing finite attempt budget (614 ms)
+    ✓ source changes during UNKNOWN readback: retains UNKNOWN without mirror or company-B access (654 ms)
+    ✓ UNKNOWN readback unavailable reaches the existing manual bound and replay never redispatches (683 ms)
+    ✓ UNKNOWN readback foreign-record reaches the existing manual bound and replay never redispatches (690 ms)
+    ✓ foreign tenant cannot cancel the owned appointment (1088 ms)
+
+  ● Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] › refuses missing-origin after preview before any DELETE
+
+    DriverAdapterError: ActionExecution immutable contract fields changed
+
+      500 |         });
+      501 |       if (mode === 'missing-origin')
+    > 502 |         await db.prisma.actionExecution.updateMany({
+          |         ^
+      503 |           where: {
+      504 |             tenantId: s.tenantId,
+      505 |             capability: 'crm.appointment.create.v1',
+
+      at PgTransaction.onError (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:678:11)
+      at PgTransaction.performIO (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:673:12)
+      at PgTransaction.executeRaw (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:643:13)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:168:18)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:272:41)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:262:25)
+      at e.run (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:94:23)
+      at execute (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/LocalExecutor.ts:81:12)
+      at jt.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/ClientEngine.ts:504:22)
+      at Object.singleLoader (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:112:26)
+      at zr.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:149:14)
+      at a (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:24)
+      at widgets-live/cancel-source.probe-spec.ts:502:9
+
+  ● Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] › widget COMMIT preserves late Client revocation instead of disclosing a completed cancel
+
+    expect(received).toMatchObject(expected)
+
+    - Expected  - 1
+    + Received  + 0
+
+      Object {
+    -   "action_receipt_ref": null,
+        "owner_decision": null,
+        "receipt_outcome": "REFUSED",
+      }
+
+      650 |       release();
+      651 |       const result = await pending;
+    > 652 |       expect(result).toMatchObject({
+          |                      ^
+      653 |         receipt_outcome: 'REFUSED',
+      654 |         action_receipt_ref: null,
+      655 |         owner_decision: null,
+
+      at Object.<anonymous> (widgets-live/cancel-source.probe-spec.ts:652:22)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 19 passed, 21 total
+Snapshots:   0 total
+Time:        15.163 s
+Ran all test suites within paths "test/widgets-live/cancel-source.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-cancel-source-after-20261010-r2/regression-jest.json

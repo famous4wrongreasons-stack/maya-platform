@@ -1,0 +1,140 @@
+widgets-live: proof database maya_widget_gate_proof_c9occ_c0c5968d6ac7 on 127.0.0.1:50893 (local)
+[31m[Nest] 38197  - [39m10/10/2026, 8:00:09 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 38197  - [39m10/10/2026, 8:00:09 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/cancel-source.probe-spec.ts (6.165 s)
+  ● Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] › company A preview → company B integration → confirm never deletes the B record with the same ID
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 7
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "company": 430002,
+    +     "method": "DELETE",
+    +     "route": "record/430002/5001",
+    +   },
+    + ]
+
+      377 |     expect(
+      378 |       transport.slice(before).filter((row) => row.method === 'DELETE'),
+    > 379 |     ).toEqual([]);
+          |       ^
+      380 |     expect(records.get(s.companyB)).toEqual({ canceled: false, own: false });
+      381 |     expect(records.get(s.companyA)?.canceled).toBe(false);
+      382 |     expect(appointment.status).toBe('confirmed');
+
+      at Object.<anonymous> (widgets-live/cancel-source.probe-spec.ts:379:7)
+
+
+  ● Test suite failed to run
+
+    PrismaClientKnownRequestError: 
+    Invalid `db.staff.deleteMany()` invocation in
+    /Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-pricing-semantic-integration/maya-saas-backend/test/widgets-live/support/fixtures.ts:1000:22
+
+       997 await db.widgetErasureTombstone.deleteMany({ where });
+       998 await db.widgetEmission.deleteMany({ where });
+       999 await db.widgetTimelineTurn.deleteMany({ where });
+    → 1000 await db.staff.deleteMany(
+    Foreign key constraint violated on the constraint: `Appointment_staffId_tenantId_fkey`
+
+       998 |       await db.widgetEmission.deleteMany({ where });
+       999 |       await db.widgetTimelineTurn.deleteMany({ where });
+    > 1000 |       await db.staff.deleteMany({ where });
+           |       ^
+      1001 |       await db.tenantEntitlement.deleteMany({ where });
+      1002 |       await db.authSession.deleteMany({ where });
+      1003 |       await db.membership.deleteMany({ where });
+
+      at zr.handleRequestError (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:237:13)
+      at zr.handleAndLogRequestError (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:183:12)
+      at zr.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:152:12)
+      at a (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:24)
+      at Fixtures.teardown (widgets-live/support/fixtures.ts:1000:7)
+      at Object.<anonymous> (widgets-live/cancel-source.probe-spec.ts:217:5)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        6.185 s
+Ran all test suites within paths "test/widgets-live/cancel-source.probe-spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-cancel-source-before-20261010-r1/regression-jest.json
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.
+
+ReferenceError: You are trying to `require` a file after the Jest environment has been torn down. From widgets-live/cancel-source.probe-spec.ts.
+
+      51 |               new OperationalAlertStore(
+      52 |                 this.prisma,
+    > 53 |                 this.context,
+         |                              ^
+      54 |                 this.ingress,
+      55 |                 this.config,
+      56 |               ),
+
+      at getStream (../../../maya-development-integration/maya-saas-backend/node_modules/pg/lib/stream.js:22:17)
+      at new Connection (../../../maya-development-integration/maya-saas-backend/node_modules/pg/lib/connection.js:19:36)
+      at new Client (../../../maya-development-integration/maya-saas-backend/node_modules/pg/lib/client.js:91:7)
+      at BoundPool.newClient (../../../maya-development-integration/maya-saas-backend/node_modules/pg-pool/index.js:241:20)
+      at BoundPool.connect (../../../maya-development-integration/maya-saas-backend/node_modules/pg-pool/index.js:235:10)
+      at BoundPool.query (../../../maya-development-integration/maya-saas-backend/node_modules/pg-pool/index.js:449:10)
+      at PrismaPgAdapter.performIO (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:654:40)
+      at PrismaPgAdapter.queryRaw (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:604:41)
+      at ../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:188:16
+      at callback (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/tracing.ts:80:12)
+      at e.withQuerySpanAndEvent (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:373:12)
+      at e.#withQuerySpanAndEvent [as interpretNode] (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:186:37)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:272:52)
+      at e.run (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:94:34)
+      at execute (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/LocalExecutor.ts:81:36)
+      at jt.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/ClientEngine.ts:504:37)
+      at Object.singleLoader (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:112:26)
+      at zr.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:149:14)
+      at a (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:24)
+      at WaveRcPayloadRetentionService.tick (../src/package5-wave6/package5-wave-rc-retention.service.ts:53:33)
+      at IngestionRetentionScheduler.tickPayloads (../src/events/ingestion-retention.scheduler.ts:99:13)
+[33m[Nest] 38197  - [39m10/10/2026, 8:01:09 AM [33m   WARN[39m [38;5;3m[IngestionRetentionScheduler] [39m[33mAC6 payload retention held for retry[39m
+
+ReferenceError: You are trying to `require` a file after the Jest environment has been torn down. From widgets-live/cancel-source.probe-spec.ts.
+
+      121 |         const tenants: { id: string }[] = await this.prisma.tenant.findMany({
+      122 |           where: { status: 'active' },
+    > 123 |           select: { id: true },
+          |                                ^
+      124 |           orderBy: { id: 'asc' },
+      125 |           take: 100,
+      126 |           ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+
+      at getStream (../../../maya-development-integration/maya-saas-backend/node_modules/pg/lib/stream.js:22:17)
+      at new Connection (../../../maya-development-integration/maya-saas-backend/node_modules/pg/lib/connection.js:19:36)
+      at new Client (../../../maya-development-integration/maya-saas-backend/node_modules/pg/lib/client.js:91:7)
+      at BoundPool.newClient (../../../maya-development-integration/maya-saas-backend/node_modules/pg-pool/index.js:241:20)
+      at BoundPool.connect (../../../maya-development-integration/maya-saas-backend/node_modules/pg-pool/index.js:235:10)
+      at BoundPool.query (../../../maya-development-integration/maya-saas-backend/node_modules/pg-pool/index.js:449:10)
+      at PrismaPgAdapter.performIO (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:654:40)
+      at PrismaPgAdapter.queryRaw (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/adapter-pg/dist/index.js:604:41)
+      at ../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:188:16
+      at callback (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/tracing.ts:80:12)
+      at e.withQuerySpanAndEvent (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:373:12)
+      at e.#withQuerySpanAndEvent [as interpretNode] (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:186:37)
+      at e.interpretNode (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:272:52)
+      at e.run (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client-engine-runtime/src/interpreter/query-interpreter.ts:94:34)
+      at execute (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/LocalExecutor.ts:81:36)
+      at jt.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/core/engines/client/ClientEngine.ts:504:37)
+      at Object.singleLoader (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:112:26)
+      at zr.request (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/RequestHandler.ts:149:14)
+      at a (../../../maya-development-integration/maya-saas-backend/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:963:24)
+      at NativeFeedbackScheduler.tick (../src/native-feedback/native-feedback.scheduler.ts:123:33)
+/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-saas-backend/node_modules/pg/lib/stream.js:23
+    return new net.Socket()
+                   ^
+
+[TypeError: Cannot read properties of undefined (reading 'Socket')] {
+  clientVersion: '7.9.1'
+}
+
+Node.js v24.15.0
