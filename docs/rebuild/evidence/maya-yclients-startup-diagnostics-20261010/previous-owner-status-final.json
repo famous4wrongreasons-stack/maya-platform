@@ -1,0 +1,39 @@
+{
+  "observedAt": "2026-10-10T14:55:08.147934+00:00",
+  "source": "46479aa49c9a79a76ebe6ce420aabd28bc422708",
+  "status": "failed",
+  "providerAdmission": "not_started",
+  "backendReady": false,
+  "landingUrl": null,
+  "completedPreparationStages": [
+    "backend-build",
+    "react-build",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations"
+  ],
+  "clusterStopped": true,
+  "sourceUnchanged": true,
+  "knownOwnedProcesses": {
+    "launcherPid": 57006,
+    "postgresPid": 57304,
+    "metadata": "",
+    "allAbsent": true
+  },
+  "ownedPgListener": {
+    "port": 59505,
+    "metadata": "",
+    "absent": true
+  },
+  "retainedState": {
+    "directoryExists": true,
+    "postgresDataExists": true,
+    "serviceKeysFileExists": true,
+    "postmasterPidFileAbsent": true
+  },
+  "secretAccess": "No Terminal/clipboard/token fields/process environment/screenshots read. Service key contents not read.",
+  "inputAcceptance": "Not evidenced. Last pre-outcome metadata showed live launcher without backend child.",
+  "failureReason": "Launcher retains generic failed status; exact cause unavailable in safe manifest. Failure occurred at the end of the configured input window; not claimed as proven timeout.",
+  "actions": "No duplicate window, timeout extension, restart, state deletion or new provider/model call. Launcher performed own PostgreSQL cleanup."
+}

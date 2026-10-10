@@ -1,0 +1,205 @@
+{
+  "contract": "maya.yclients-startup-diagnostic-independent-review/1",
+  "verdict": "QUALIFIED_ACTUAL_STARTUP_AND_RENDER_PASS",
+  "blockers": [],
+  "sourceCommit": "3480485443f9301666bdd70015f9da1bbcc44328",
+  "method": "Independent read-only source, harness and archived-artifact review; source/Git/build hashing only. Reviewer launched no tests, services, PG, browser or network and read no private state, credentials, process environment or Terminal.",
+  "sourceVerification": {
+    "files": 2021,
+    "uniquePaths": 2021,
+    "allCurrentSha256AndCommittedGitBlobHashesMatch": true,
+    "sourceBindingSha256": "1ed851214dd351cc00ac04a85fb04f67edc81cbf57f3f7b74aa97b7b2785a460"
+  },
+  "actualEvidence": {
+    "successfulRuntimeAttempts": [
+      "B",
+      "C"
+    ],
+    "failedRuntimeAttemptPreserved": "A; migrations and own PostgreSQL completed, then runtime failed before IPC due documented nested sandbox refusal; cleanup confirmed.",
+    "ordinaryAppModuleAndCanonicalMigrations": true,
+    "bothSuccessfulAttempts": {
+      "status": "stopped",
+      "diagnosticOutcome": "completed",
+      "ownerCredentialAccepted": false,
+      "providerCalls": 0,
+      "providerRefusals": 0,
+      "firstFailure": null,
+      "cleanupFailures": [],
+      "ownRuntimeGroupAbsent": true,
+      "ownPgStopped": true,
+      "sourceUnchanged": true
+    },
+    "C": {
+      "healthHttp200": 4,
+      "forbiddenConnectAndChatHttp403": 2,
+      "browserStaticRequests": 3,
+      "browserRefused": 0,
+      "currentReactSignupAndPasswordEntryVisible": true,
+      "servedBundleMatchesCurrentBuild": true,
+      "bundlePath": "maya-carrier-react/dist/web/m/RBIMRE3X/main.js",
+      "bundleSha256": "e6502a05afd84049abcc705566ba9245ab91dcc07b8851b70f71762fb28a6b1d",
+      "screenshotsTaken": false,
+      "chromeGroupAbsent": true
+    },
+    "negativeActualIpc": {
+      "result": "PASS",
+      "stage": "environment_validating",
+      "code": "environment_refused",
+      "cause": "assertion",
+      "exitCode": 1,
+      "unexpectedIpc": false
+    },
+    "osNetworkPolicyProbe": {
+      "result": "PASS",
+      "ownLoopbackConnectionAndApiBindAllowed": true,
+      "otherLoopbackBlocked": "EPERM",
+      "externalConnectionAttempts": 0
+    },
+    "cleanup": "Archived status/cleanup evidence confirms stopped owned PG, absent B/C API/web listeners and runtime/Chrome groups. Reviewer did not independently contact ports or private PG.",
+    "focusedTests": {
+      "loggedPassed": 37,
+      "loggedFailed": 0,
+      "rerunByReviewer": false,
+      "exitCode": "Parent-reported; raw combined log independently shows37/37, no separate exit file."
+    }
+  },
+  "sourceReviewFindingsClosed": [
+    "Only finite stage/outcome/code/cause enums are retained. Error message/stack/raw IPC and credential metadata are excluded; accepted-input marker is set only after successful owner prompt validation and stays false in public diagnostic mode.",
+    "Immutable firstFailure is preserved alongside separate bounded cleanupFailures. Relay startup, preflight refusal, owner cancellation, input timeout/refusal and backend failures have separate closed diagnostic codes.",
+    "Runtime stage messages cannot satisfy ready. Exact ready contract/origin/admission is required; malformed IPC or missing clean-stop summary fails the run.",
+    "Explicit diagnostic mode uses only the public constant, no prompt, exact health-only backend routes and one-minute runtime. Native fetch fallback is replaced with a rejecting transport; runtime also receives per-process deny-network policy allowing only its own PG outbound and API bind/inbound.",
+    "Normal real-provider profile retains existing admission; diagnostic mode supplies no A17/user authority or credentials."
+  ],
+  "preservedFailuresAndUnknowns": {
+    "A": "Preserved failed before runtime IPC; not converted into an AppModule/provider failure.",
+    "BAndBrowserHarness": "B runtime succeeded. Relative-script-URL oracle error and failed nested Chrome sandbox/SingletonSocket probes remain documented; final Chrome uses builtin sandbox without --no-sandbox.",
+    "previousOwnerAttempt": "Reason, credential acceptance and external dispatch remain UNKNOWN. The safe retained status does not prove a timeout or absence of prior provider traffic. Previous private state was not read or changed by this review.",
+    "postgresCounting": "Two successful runtime/PG startups B/C; A also created and stopped its own PG before failing runtime startup. Do not interpret2 as the total number of all PG preparations."
+  },
+  "limits": [
+    "Startup and finite current-React DOM/render only, not visual design acceptance or successful onboarding/login/A17/import/branch-binding proof.",
+    "Public synthetic partner constant only; no actual owner credential, YCLIENTS compatibility, booking, client/record read, model, notification or C10/full MAYA acceptance.",
+    "Runtime OS policy is independently tested for allowed/forbidden loopback and statically denies other network; no external connection was attempted as a test.",
+    "Browser proof has builtin Chrome sandbox, empty owned profile, proxy/DNS/background restrictions and exact same-origin static GET interception before navigation. Browser OS-wide packet closure is explicitly NOT_QUALIFIED. Launcher/build preparation is trusted local source, not covered by the runtime OS policy.",
+    "Archived safe runtime projections and their sourceUnchanged/cleanup fields are reviewed; original private manifests/keyfiles/PG state are intentionally not re-read. Evidence provenance beyond the archived projections is parent execution evidence.",
+    "Harness files are hashed as archived; reviewed archive does not establish a separate immutable pre-execution hash for every scratch harness revision. Final served source and bundle hashes are independently matched.",
+    "No new owner prompt or inference of real credential readiness follows from this checkpoint."
+  ],
+  "artifacts": [
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/attempt-a.json",
+      "bytes": 1147,
+      "sha256": "b1fced25484097d77a9210da0d0cff3df4d3c13f4aca25bd839d1df4f88892e3"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/attempt-b.json",
+      "bytes": 3333,
+      "sha256": "441c025b64c35d9ed4eb2bcb53b010141884efbf314cd43d8978f423dee6fe54"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/attempt-c.json",
+      "bytes": 3333,
+      "sha256": "453498e02cabafd33cb0c29ace4d1c649a2977c4f2597903fcd723d722e6f835"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/cleanup.json",
+      "bytes": 453,
+      "sha256": "4036c9d9b21b9467c169bed2a4ec7dc5fe90270e9a7fefc3b9bf811802184efa"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/negative-runtime-proof.json",
+      "bytes": 1142,
+      "sha256": "5e59f398149126acf35198061452552e31bd0e04180b3cd20559a4782979da24"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/negative-runtime-proof.mjs",
+      "bytes": 1815,
+      "sha256": "cabe5179258d886ee506af8fce01508fa1c71c9531ff8a39626c337130355871"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/network-proof.json",
+      "bytes": 607,
+      "sha256": "dddb2698a476f26229ae2f156b1a1d86d36925c530e7fea85bfbdcabdf1af436"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/network-proof.mjs",
+      "bytes": 3035,
+      "sha256": "d52b70e538078b71f442653192f0b22c004469265cad8fe4f1a568bbffacad53"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/previous-owner-status-final.json",
+      "bytes": 1363,
+      "sha256": "90c7a7f58681d93d1a2bbd26f5be4cf8c4bd0827541415ec5d61e30ce6f3e801"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/proof-corrections.json",
+      "bytes": 1686,
+      "sha256": "90d09f8eb30c9a63a3ced39175917ebe0f120083db5bdf0cc0ec2a5f085b920f"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/source-binding.json",
+      "bytes": 485567,
+      "sha256": "1ed851214dd351cc00ac04a85fb04f67edc81cbf57f3f7b74aa97b7b2785a460"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/startup-a.log",
+      "bytes": 129,
+      "sha256": "645fed17057c6d245d25478928755f37b301190fbb3494b1953afe8d7a79f6d8"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/startup-b.log",
+      "bytes": 363,
+      "sha256": "226be08424670ff5a5067b934e3c8259799c7b0947d372909376360099c46134"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/startup-c.log",
+      "bytes": 363,
+      "sha256": "fa9a4a6fc79625f946171895ec17e9a7b452e17a44edb9547a8d98c5ef80cb8b"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/summary.json",
+      "bytes": 2182,
+      "sha256": "6d5c11b618267d0754acdbc7b3b2b13a4b33a46fc04c863b51feb7219adcda7a"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/targeted-tests-final.log",
+      "bytes": 3787,
+      "sha256": "5fa8d98036425fdf78a7aefa28e6ff33a82b5673ed025bc86f00b1794d45c67a"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-a.json",
+      "bytes": 239,
+      "sha256": "dc6f44d8480cc1171b7cb4ce222de0ff524ca3b8617daeb19e4906bf39de005b"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-b.json",
+      "bytes": 1043,
+      "sha256": "97b612b8d6200f23c4c3623f62d7bee11019f962dbfc05f536ef5f4f3ff9bfc0"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-b2.json",
+      "bytes": 1610,
+      "sha256": "03643016714f10707cf30bc56faa1bcd0c3b44b1942e0a9813f917b35f653a9b"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-c.json",
+      "bytes": 1838,
+      "sha256": "e1f09463b6e5774d0b16adb73d5e30d15e14ce89cf3efa4e4b14be211d019c9b"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-v1.mjs",
+      "bytes": 7518,
+      "sha256": "7ac2df5fd8867c91a6d41c727ee7fa51a9de3772ee79299c276159d2ea6f998e"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-v2.mjs",
+      "bytes": 7574,
+      "sha256": "9855e8d951cb6cd46d9a6dea600d6654e1d11209aa5911f107cb2e2327e32a8c"
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof.mjs",
+      "bytes": 7498,
+      "sha256": "a922e1c949b913a3ea13059e016ecca33566980a443a2bbd9139030f8289f17c"
+    }
+  ]
+}

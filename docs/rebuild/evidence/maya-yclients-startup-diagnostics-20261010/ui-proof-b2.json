@@ -1,0 +1,51 @@
+{
+  "contract": "maya.local-yclients-read-actual-ui-readiness/1",
+  "result": "FAIL",
+  "http": [
+    {
+      "through": "backend",
+      "path": "/api/health",
+      "status": 200,
+      "sha256": "a0cb7a851a7d25b20c816455d346d58560a06d0af9d2342899579726b31da108"
+    },
+    {
+      "through": "backend",
+      "path": "/api/health/ready",
+      "status": 200,
+      "sha256": "872441265a65cbb5f5c84ab86c14a8b986a8cf92b2090e0acac5cd723832cfd4"
+    },
+    {
+      "through": "relay",
+      "path": "/api/health",
+      "status": 200,
+      "sha256": "0b4fd71a980fad5c6474dfa23accd71098bea11f4ad484de341f4f5afb1cfcb1"
+    },
+    {
+      "through": "relay",
+      "path": "/api/health/ready",
+      "status": 200,
+      "sha256": "0a188d3d93e1c305c47c4fd0ded248449ef4c1c127fd50d17d3c22acdf32826b"
+    },
+    {
+      "through": "backend",
+      "path": "/api/integrations/crm/connect",
+      "status": 403
+    },
+    {
+      "through": "backend",
+      "path": "/api/ai/chat",
+      "status": 403
+    }
+  ],
+  "screenshots": false,
+  "ownerCredentialsEntered": false,
+  "browserRequests": 0,
+  "browserRefused": 0,
+  "source": "3480485443f9301666bdd70015f9da1bbcc44328",
+  "origin": "http://127.0.0.1:62307",
+  "bundleSha256": "e6502a05afd84049abcc705566ba9245ab91dcc07b8851b70f71762fb28a6b1d",
+  "browserSandboxPolicy": "(version 1)(allow default)(deny network*)(allow network-bind (local ip \"localhost:62461\"))(allow network-inbound (local ip \"localhost:62461\"))(allow network-outbound (remote ip \"localhost:62307\"))",
+  "chromePid": 71644,
+  "failedStage": "browser_start",
+  "chromeGroupAbsent": true
+}

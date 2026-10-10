@@ -1,0 +1,62 @@
+{
+  "contract": "maya.local-yclients-read-actual-ui-readiness/1",
+  "result": "PASS",
+  "http": [
+    {
+      "through": "backend",
+      "path": "/api/health",
+      "status": 200,
+      "sha256": "654e64646d4528bac34dc9365ca062ffcaeecd9767502619828cae8279a23a7e"
+    },
+    {
+      "through": "backend",
+      "path": "/api/health/ready",
+      "status": 200,
+      "sha256": "640306bc2c7c073fc79cc6268e74f876a871e0de454e583e502af6c930e42e57"
+    },
+    {
+      "through": "relay",
+      "path": "/api/health",
+      "status": 200,
+      "sha256": "2a29a9f8c3ad67b07286c37d3c70aae489ed98276044b551918d018cf0181ea4"
+    },
+    {
+      "through": "relay",
+      "path": "/api/health/ready",
+      "status": 200,
+      "sha256": "a58c4466345d6d24991467ce8ea088b228f4efdac787dbafc9cd70dc60169f03"
+    },
+    {
+      "through": "backend",
+      "path": "/api/integrations/crm/connect",
+      "status": 403
+    },
+    {
+      "through": "backend",
+      "path": "/api/ai/chat",
+      "status": 403
+    }
+  ],
+  "screenshots": false,
+  "ownerCredentialsEntered": false,
+  "browserRequests": 3,
+  "browserRefused": 0,
+  "source": "3480485443f9301666bdd70015f9da1bbcc44328",
+  "origin": "http://127.0.0.1:62739",
+  "bundleSha256": "e6502a05afd84049abcc705566ba9245ab91dcc07b8851b70f71762fb28a6b1d",
+  "browserIsolation": {
+    "builtinSandbox": true,
+    "outerOsSandbox": false,
+    "osWidePacketClosure": "NOT_QUALIFIED",
+    "freshOwnedProfile": true,
+    "proxy": "unserved_loopback",
+    "dns": "deny_external",
+    "targetRequestInterception": "exact_same_origin_static_GET_only"
+  },
+  "chromePid": 73492,
+  "currentReactRendered": true,
+  "normalSignupAndPasswordEntryVisible": true,
+  "actualServedBundleMatchesBuild": true,
+  "providerDispatch": "Backend OS network denied; no provider action performed",
+  "chromeGroupAbsent": true
+}

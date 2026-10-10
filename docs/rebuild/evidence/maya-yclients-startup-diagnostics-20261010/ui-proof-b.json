@@ -1,0 +1,37 @@
+{
+  "contract": "maya.local-yclients-read-actual-ui-readiness/1",
+  "result": "FAIL",
+  "http": [
+    {
+      "through": "backend",
+      "path": "/api/health",
+      "status": 200,
+      "sha256": "ce09011aea994f053ee96f4d6e27e621b147c9cfd0d435cfa9cd732f2d411d5c"
+    },
+    {
+      "through": "backend",
+      "path": "/api/health/ready",
+      "status": 200,
+      "sha256": "2025121c0b06e4f2e18c513ea6032107a1bd87f7fc7fad1b8fb9543d821facf5"
+    },
+    {
+      "through": "relay",
+      "path": "/api/health",
+      "status": 200,
+      "sha256": "ccacdcc7a4ef459b651a86ece8c3595c3f45ddd9f6a2fa485f9afab9af4564e3"
+    },
+    {
+      "through": "relay",
+      "path": "/api/health/ready",
+      "status": 200,
+      "sha256": "e4ca2a46995c9e6aea7a84890f3e169e23e96f08e9686a1297de9a8212416fbe"
+    }
+  ],
+  "screenshots": false,
+  "ownerCredentialsEntered": false,
+  "browserRequests": 0,
+  "browserRefused": 0,
+  "source": "3480485443f9301666bdd70015f9da1bbcc44328",
+  "origin": "http://127.0.0.1:62307",
+  "failedStage": "http_readiness"
+}

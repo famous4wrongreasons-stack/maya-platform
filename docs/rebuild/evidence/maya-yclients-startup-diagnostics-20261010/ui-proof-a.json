@@ -1,0 +1,10 @@
+{
+  "contract": "maya.local-yclients-read-actual-ui-readiness/1",
+  "result": "FAIL",
+  "http": [],
+  "screenshots": false,
+  "ownerCredentialsEntered": false,
+  "browserRequests": 0,
+  "browserRefused": 0,
+  "failedStage": "wait_ready"
+}

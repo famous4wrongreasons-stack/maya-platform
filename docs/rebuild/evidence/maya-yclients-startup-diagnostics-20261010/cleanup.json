@@ -1,0 +1,26 @@
+{
+  "result": "PASS",
+  "listeners": [
+    {
+      "port": 62307,
+      "result": "absent"
+    },
+    {
+      "port": 62306,
+      "result": "absent"
+    },
+    {
+      "port": 62739,
+      "result": "absent"
+    },
+    {
+      "port": 62738,
+      "result": "absent"
+    }
+  ],
+  "ownedPgPostmasterFilesAbsent": true,
+  "runtimeGroupsAbsent": true,
+  "chromeGroupAbsent": true,
+  "syntheticStateRetained": true,
+  "previousOwnerStateUntouched": true
+}

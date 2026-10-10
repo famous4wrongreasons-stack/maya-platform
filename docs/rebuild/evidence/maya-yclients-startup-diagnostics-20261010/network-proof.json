@@ -1,0 +1,17 @@
+{
+  "contract": "maya.local-yclients-read-os-network-proof/1",
+  "externalConnectionAttempts": 0,
+  "policy": "(version 1)(allow default)(deny network*)(allow network-bind (local ip \"localhost:61332\"))(allow network-inbound (local ip \"localhost:61332\"))(allow network-outbound (remote ip \"localhost:61330\"))",
+  "result": "PASS",
+  "allowedOwnLoopbackConnection": true,
+  "blockedOtherLoopbackConnection": true,
+  "blockedCode": "EPERM",
+  "allowedOwnApiBind": true,
+  "allowedAccepted": 1,
+  "forbiddenAccepted": 0,
+  "exit": {
+    "code": 0,
+    "signal": null
+  },
+  "ownedListenersClosed": true
+}

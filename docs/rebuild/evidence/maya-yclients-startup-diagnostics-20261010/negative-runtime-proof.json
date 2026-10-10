@@ -1,0 +1,45 @@
+{
+  "contract": "maya.local-yclients-read-negative-startup/1",
+  "result": "PASS",
+  "environment": "empty synthetic environment",
+  "networkPolicy": "(version 1)(allow default)(deny network*)",
+  "statuses": [
+    {
+      "type": "runtime-status",
+      "contract": "maya.local-yclients-read-status/1",
+      "stage": "environment_validating",
+      "outcome": "entered",
+      "code": null,
+      "cause": null
+    },
+    {
+      "type": "runtime-status",
+      "contract": "maya.local-yclients-read-status/1",
+      "stage": "environment_validating",
+      "outcome": "failed",
+      "code": "environment_refused",
+      "cause": "assertion"
+    },
+    {
+      "type": "runtime-status",
+      "contract": "maya.local-yclients-read-status/1",
+      "stage": "runtime_stopping",
+      "outcome": "entered",
+      "code": null,
+      "cause": null
+    },
+    {
+      "type": "runtime-status",
+      "contract": "maya.local-yclients-read-status/1",
+      "stage": "runtime_stopping",
+      "outcome": "completed",
+      "code": null,
+      "cause": null
+    }
+  ],
+  "unexpectedIpc": false,
+  "exit": {
+    "code": 1,
+    "signal": null
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "attempt": "b",
+  "contract": "maya.local-yclients-read-session/1",
+  "status": "stopped",
+  "providerAdmission": "diagnostic_network_closed",
+  "qualifiedAcceptance": false,
+  "completed": [
+    "backend-build",
+    "react-build",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30
+  },
+  "deadlines": {
+    "preparationMs": 900000,
+    "promptMs": 600000,
+    "runtimeMs": 60000
+  },
+  "privateStateRetained": true,
+  "partnerTokenPersistence": false,
+  "diagnostic": {
+    "contract": "maya.local-yclients-read-diagnostic/1",
+    "mode": "network_closed",
+    "stage": "stopped",
+    "outcome": "completed",
+    "credentialAccepted": false,
+    "preparationStep": null,
+    "firstFailure": null,
+    "cleanupFailures": [],
+    "runtimeStatuses": [
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "environment_validating",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "network_guard_installing",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "app_importing",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "app_creating",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "http_configuring",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "backend_listening",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "runtime_ready",
+        "outcome": "completed",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "runtime_stopping",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "runtime_stopping",
+        "outcome": "completed",
+        "code": null,
+        "cause": null
+      }
+    ]
+  },
+  "readyAt": "2026-10-10T15:10:58.220Z",
+  "expiresAt": "2026-10-10T15:11:58.221Z",
+  "landingUrl": "http://127.0.0.1:62307/__local-yclients-read",
+  "webUrl": "http://127.0.0.1:62307/",
+  "apiOrigin": "http://127.0.0.1:62306",
+  "runtimeGroupAbsent": true,
+  "providerReadSummary": {
+    "calls": 0,
+    "refused": 0,
+    "routes": {}
+  },
+  "providerReadSummaryStatus": "reported_at_clean_stop",
+  "clusterStopped": true,
+  "sourceUnchanged": true
+}

@@ -1,0 +1,48 @@
+{
+  "attempt": "a",
+  "contract": "maya.local-yclients-read-session/1",
+  "status": "failed",
+  "providerAdmission": "not_started",
+  "qualifiedAcceptance": false,
+  "completed": [
+    "backend-build",
+    "react-build",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations"
+  ],
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "pgWorkMemMb": 4,
+    "pgMaxConnections": 30
+  },
+  "deadlines": {
+    "preparationMs": 900000,
+    "promptMs": 600000,
+    "runtimeMs": 60000
+  },
+  "privateStateRetained": true,
+  "partnerTokenPersistence": false,
+  "diagnostic": {
+    "contract": "maya.local-yclients-read-diagnostic/1",
+    "mode": "network_closed",
+    "stage": "stopped",
+    "outcome": "failed",
+    "credentialAccepted": false,
+    "preparationStep": null,
+    "firstFailure": {
+      "stage": "backend_starting",
+      "code": "child_boot_failed",
+      "runtimeStage": null
+    },
+    "cleanupFailures": [],
+    "runtimeStatuses": []
+  },
+  "runtimeGroupAbsent": true,
+  "providerReadSummary": null,
+  "providerReadSummaryStatus": "missing_or_unclean",
+  "clusterStopped": true,
+  "sourceUnchanged": true
+}

@@ -1,0 +1,49 @@
+{
+  "contract": "maya.local-yclients-read-startup-checkpoint/1",
+  "result": "QUALIFIED_ACTUAL_STARTUP_PASS",
+  "source": "3480485443f9301666bdd70015f9da1bbcc44328",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "sourceFiles": 2021,
+  "focusedTests": {
+    "passed": 37,
+    "failed": 0,
+    "log": "targeted-tests-final.log"
+  },
+  "actual": {
+    "ordinaryAppModule": true,
+    "canonicalMigrations": true,
+    "currentReactRendered": true,
+    "currentBundleSha256": "e6502a05afd84049abcc705566ba9245ab91dcc07b8851b70f71762fb28a6b1d",
+    "healthHttp200": 4,
+    "diagnosticRouteRefusals403": 2,
+    "browserStaticRequests": 3,
+    "providerCalls": 0,
+    "providerRefusals": 0,
+    "cleanup": "PASS",
+    "negativeEarlyRuntimeError": "environment_refused/assertion",
+    "successfulFreshPostgresqlRuns": 2,
+    "failedFreshPostgresqlRuns": 1
+  },
+  "isolation": {
+    "runtime": "OS deny all network except own PostgreSQL outbound and own API bind/inbound",
+    "runtimePolicyProof": "network-proof.json; forbidden own loopback port EPERM; no external connection probe",
+    "launcherPreparation": "Trusted local source; no overall OS network sandbox (nested sandbox is refused)",
+    "browser": "Builtin Chrome sandbox, fresh owned profile, dead proxy/DNS/background restrictions, exact same-origin static GET interception before navigation",
+    "browserOsWidePacketClosure": "NOT_QUALIFIED"
+  },
+  "priorOwnerAttempt": {
+    "result": "failed before readiness",
+    "reason": "UNKNOWN",
+    "credentialAcceptance": "UNKNOWN",
+    "externalDispatch": "UNKNOWN: old profile did not retain transport summary",
+    "stateAndKeys": "preserved untouched",
+    "newOwnerPrompt": false
+  },
+  "limits": [
+    "Synthetic public partner constant only; no real owner credential or YCLIENTS acceptance",
+    "Startup/render only; no signup/login, A17 install/import, branch binding or provider compatibility exercised",
+    "No model/booking/notification, production/site/design/phone change",
+    "No C10, full MAYA, schema, retention or autonomy acceptance",
+    "Owner readiness must be coordinated before any next real session; do not prompt again from this checkpoint"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "previousOwnerFailure": {
+    "reason": "UNKNOWN",
+    "credentialAcceptance": "UNKNOWN",
+    "externalDispatch": "UNKNOWN: old runtime has no final transport summary; status not_started is not packet evidence",
+    "state": "DB and key files retained untouched; no new owner prompt"
+  },
+  "attemptA": {
+    "result": "FAIL",
+    "sourceDefect": false,
+    "stage": "before_runtime_ipc",
+    "cause": "Nested macOS sandbox-exec is refused",
+    "isolatedProbe": {
+      "exitCode": 71,
+      "safeMessage": "sandbox_apply: Operation not permitted"
+    },
+    "correction": "Use checked-in runtime OS policy without redundant outer launcher wrapper"
+  },
+  "attemptB": {
+    "runtime": "PASS",
+    "uiFirstProbe": "FAIL: test expected absolute src; current React emits ./m/hash/main.js",
+    "uiSecondProbe": "FAIL: outer Chrome OS sandbox denies SingletonSocket",
+    "correction": "Permit relative bundle src; retain exact built bytes hash"
+  },
+  "browserBlankProbes": {
+    "first": {
+      "exitCode": 21,
+      "cause": "Private SingletonSocket bind denied"
+    },
+    "second": {
+      "exitCode": 21,
+      "cause": "Chrome ignores custom TMPDIR for SingletonSocket"
+    },
+    "third": {
+      "signal": "SIGTRAP",
+      "cause": "Chrome builtin sandbox initialization refuses nested OS sandbox after Unix bind is admitted"
+    },
+    "correction": "Keep builtin Chrome sandbox; do not use --no-sandbox. Final browser proof uses request interception, dead proxy/DNS/background restrictions and fresh profile, without claiming OS-wide Chrome packet closure"
+  },
+  "attemptC": {
+    "runtime": "PASS",
+    "browser": "PASS",
+    "productionSourceChangesSinceB": false
+  }
+}

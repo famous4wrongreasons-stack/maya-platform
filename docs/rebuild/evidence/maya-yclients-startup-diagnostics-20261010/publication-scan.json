@@ -1,0 +1,487 @@
+{
+  "contract": "maya.yclients-startup-diagnostic-publication-scan/1",
+  "recordedAt": "2026-10-10T15:19:42.875862+00:00",
+  "verdict": "QUALIFIED_GO_FOR_EXACT_BYTE_MANIFEST",
+  "blockers": [],
+  "baseCommit": "7062c612e56ab5d4bd7aa7a6b520fb20cfa37114",
+  "sourceCommit": "3480485443f9301666bdd70015f9da1bbcc44328",
+  "candidateState": "Committed source delta plus three modified canonical documents and the named new evidence archive; final docs/evidence commit may change HEAD only if these exact bytes are preserved.",
+  "coverage": {
+    "committedDeltaCommits": 2,
+    "sourceFiles": 6,
+    "canonicalDocuments": 3,
+    "evidenceFiles": 25,
+    "payloadFiles": 34,
+    "payloadBytes": 902706,
+    "uniqueTextBlobsScanned": 36,
+    "historicalChangedBlobVersions": 8,
+    "binaryFiles": 0,
+    "rawLogs": [
+      "startup-a.log",
+      "startup-b.log",
+      "startup-c.log",
+      "targeted-tests-final.log"
+    ],
+    "outsideScopeChanges": [],
+    "websiteDesignNeighbourChanges": false,
+    "privateStateCredentialsEnvironmentTerminalRead": false,
+    "servicesTestsDatabaseNetworkOrPushRun": false,
+    "repositoryEdits": false
+  },
+  "secretAndPrivacyScan": {
+    "engine": "Gitleaks 8.30.1 strict rules; repository allowlists, ignore file exclusions and allow-comment suppression disabled; redact=100",
+    "gitleaksExitCode": 0,
+    "gitleaksFindings": 0,
+    "customPatterns": [
+      "email",
+      "JWT",
+      "PEM private key",
+      "provider key",
+      "phone"
+    ],
+    "classifiedCandidates": [
+      {
+        "path": "maya-saas-backend/scripts/local-yclients-read-profile.test.mjs",
+        "line": 76,
+        "category": "email-like URL userinfo",
+        "classification": "PUBLIC_SYNTHETIC_NEGATIVE_TEST",
+        "reason": "The URL is deliberately rejected by admittedProviderRead; no actual contact or credential."
+      }
+    ],
+    "unresolvedCandidates": [],
+    "observedActualSecretsOrPersonalData": false,
+    "rawProviderPayloadsOrPrivateStateContentsIncluded": false,
+    "errorEvidence": "Finite diagnostic stage/code/cause enums, bounded test failures and known non-secret OS refusal descriptions; no raw credential-bearing Error objects or stacks observed."
+  },
+  "bindings": {
+    "sourceBindingSha256": "1ed851214dd351cc00ac04a85fb04f67edc81cbf57f3f7b74aa97b7b2785a460",
+    "sourceBindingHead": "3480485443f9301666bdd70015f9da1bbcc44328",
+    "sourceCount": 2021,
+    "sourceHashAndGitBlobFailures": [],
+    "independentReviewArtifactCount": 23,
+    "independentReviewArtifactChecks": [
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/attempt-a.json",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/attempt-b.json",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/attempt-c.json",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/cleanup.json",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/negative-runtime-proof.json",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/negative-runtime-proof.mjs",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/network-proof.json",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/network-proof.mjs",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/previous-owner-status-final.json",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/proof-corrections.json",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/source-binding.json",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/startup-a.log",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/startup-b.log",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/startup-c.log",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/summary.json",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/targeted-tests-final.log",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-a.json",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-b.json",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-b2.json",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-c.json",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-v1.mjs",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-v2.mjs",
+        "matches": true
+      },
+      {
+        "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof.mjs",
+        "matches": true
+      }
+    ],
+    "byteManifestRecheckedAfterLateReviewFiles": true
+  },
+  "boundedEvidenceFacts": {
+    "focusedTestsLoggedPass": 37,
+    "focusedTestsLoggedFail": 0,
+    "testsRerunByScanner": false,
+    "successfulActualStartupAttempts": [
+      "B",
+      "C"
+    ],
+    "failedAttemptPreserved": "A",
+    "actualAppModuleAndFreshPgReported": true,
+    "currentReactRenderOnly": "Current built bundle rendered; no signup/login/A17/import or branch-binding execution claimed.",
+    "backendProviderCountersReported": {
+      "calls": 0,
+      "refused": 0
+    },
+    "priorOwnerFailureReason": "UNKNOWN",
+    "priorOwnerInputAcceptance": "UNKNOWN",
+    "priorOwnerExternalDispatch": "UNKNOWN",
+    "browserOsWidePacketClosure": "NOT_QUALIFIED",
+    "realYclientsOrOwnerCredentialAcceptance": false,
+    "C10OrFullMayaAcceptance": false,
+    "cleanup": "Archived cleanup reviewed; scanner did not contact services, ports or private state."
+  },
+  "limits": [
+    "Bounded static payload review, not universal proof that no sensitive data can exist.",
+    "Only the exact manifest bytes and the two new committed-history deltas were scanned; previously published history was not rescanned.",
+    "No live credential, database, private environment, Terminal, clipboard or retained private state was read.",
+    "Production source hashes and artifact bindings were checked; no functional test, process or network verification was rerun by this scanner.",
+    "Independent review and archive preserve failed attempts and harness corrections; immutable pre-execution pins for every scratch harness revision are not claimed.",
+    "This receipt excludes its own eventual archived copy. Changes to any other included bytes require a bounded delta rescan."
+  ],
+  "byteManifest": [
+    {
+      "path": "docs/rebuild/MAYA-DELIVERY-PLAN-20261010.md",
+      "version": "working-payload",
+      "bytes": 47584,
+      "sha256": "7426918aa6686e0ed794a3c3da2e3d540f49d5c3e1ce25251ef647c69f9b272b",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/MAYA-FINAL-COMPLETION-MAP.md",
+      "version": "working-payload",
+      "bytes": 212367,
+      "sha256": "03a03ae333d247cf88d7e67c3fa09b2a6d88bbff1c014a026a952e5f7786b0d6",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/MAYA-LOCAL-YCLIENTS-ONE-TIME-HANDOFF-20261010.md",
+      "version": "working-payload",
+      "bytes": 18795,
+      "sha256": "c04ee022919cf0796ddb6925a67f63d685e411eb58af7ff28f1d50d3a522ca38",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/attempt-a.json",
+      "version": "working-payload",
+      "bytes": 1147,
+      "sha256": "b1fced25484097d77a9210da0d0cff3df4d3c13f4aca25bd839d1df4f88892e3",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/attempt-b.json",
+      "version": "working-payload",
+      "bytes": 3333,
+      "sha256": "441c025b64c35d9ed4eb2bcb53b010141884efbf314cd43d8978f423dee6fe54",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/attempt-c.json",
+      "version": "working-payload",
+      "bytes": 3333,
+      "sha256": "453498e02cabafd33cb0c29ace4d1c649a2977c4f2597903fcd723d722e6f835",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/cleanup.json",
+      "version": "working-payload",
+      "bytes": 453,
+      "sha256": "4036c9d9b21b9467c169bed2a4ec7dc5fe90270e9a7fefc3b9bf811802184efa",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/negative-runtime-proof.json",
+      "version": "working-payload",
+      "bytes": 1142,
+      "sha256": "5e59f398149126acf35198061452552e31bd0e04180b3cd20559a4782979da24",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/negative-runtime-proof.mjs",
+      "version": "working-payload",
+      "bytes": 1815,
+      "sha256": "cabe5179258d886ee506af8fce01508fa1c71c9531ff8a39626c337130355871",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/network-proof.json",
+      "version": "working-payload",
+      "bytes": 607,
+      "sha256": "dddb2698a476f26229ae2f156b1a1d86d36925c530e7fea85bfbdcabdf1af436",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/network-proof.mjs",
+      "version": "working-payload",
+      "bytes": 3035,
+      "sha256": "d52b70e538078b71f442653192f0b22c004469265cad8fe4f1a568bbffacad53",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/previous-owner-status-final.json",
+      "version": "working-payload",
+      "bytes": 1363,
+      "sha256": "90c7a7f58681d93d1a2bbd26f5be4cf8c4bd0827541415ec5d61e30ce6f3e801",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/proof-corrections.json",
+      "version": "working-payload",
+      "bytes": 1686,
+      "sha256": "90d09f8eb30c9a63a3ced39175917ebe0f120083db5bdf0cc0ec2a5f085b920f",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/source-binding.json",
+      "version": "working-payload",
+      "bytes": 485567,
+      "sha256": "1ed851214dd351cc00ac04a85fb04f67edc81cbf57f3f7b74aa97b7b2785a460",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/startup-a.log",
+      "version": "working-payload",
+      "bytes": 129,
+      "sha256": "645fed17057c6d245d25478928755f37b301190fbb3494b1953afe8d7a79f6d8",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/startup-b.log",
+      "version": "working-payload",
+      "bytes": 363,
+      "sha256": "226be08424670ff5a5067b934e3c8259799c7b0947d372909376360099c46134",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/startup-c.log",
+      "version": "working-payload",
+      "bytes": 363,
+      "sha256": "fa9a4a6fc79625f946171895ec17e9a7b452e17a44edb9547a8d98c5ef80cb8b",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/summary.json",
+      "version": "working-payload",
+      "bytes": 2182,
+      "sha256": "6d5c11b618267d0754acdbc7b3b2b13a4b33a46fc04c863b51feb7219adcda7a",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/targeted-tests-final.log",
+      "version": "working-payload",
+      "bytes": 3787,
+      "sha256": "5fa8d98036425fdf78a7aefa28e6ff33a82b5673ed025bc86f00b1794d45c67a",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-a.json",
+      "version": "working-payload",
+      "bytes": 239,
+      "sha256": "dc6f44d8480cc1171b7cb4ce222de0ff524ca3b8617daeb19e4906bf39de005b",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-b.json",
+      "version": "working-payload",
+      "bytes": 1043,
+      "sha256": "97b612b8d6200f23c4c3623f62d7bee11019f962dbfc05f536ef5f4f3ff9bfc0",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-b2.json",
+      "version": "working-payload",
+      "bytes": 1610,
+      "sha256": "03643016714f10707cf30bc56faa1bcd0c3b44b1942e0a9813f917b35f653a9b",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-c.json",
+      "version": "working-payload",
+      "bytes": 1838,
+      "sha256": "e1f09463b6e5774d0b16adb73d5e30d15e14ce89cf3efa4e4b14be211d019c9b",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-v1.mjs",
+      "version": "working-payload",
+      "bytes": 7518,
+      "sha256": "7ac2df5fd8867c91a6d41c727ee7fa51a9de3772ee79299c276159d2ea6f998e",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof-v2.mjs",
+      "version": "working-payload",
+      "bytes": 7574,
+      "sha256": "9855e8d951cb6cd46d9a6dea600d6654e1d11209aa5911f107cb2e2327e32a8c",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/ui-proof.mjs",
+      "version": "working-payload",
+      "bytes": 7498,
+      "sha256": "a922e1c949b913a3ea13059e016ecca33566980a443a2bbd9139030f8289f17c",
+      "binary": false
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-diagnostic.mjs",
+      "version": "working-payload",
+      "bytes": 1604,
+      "sha256": "042e74fe44e26570edfa90900f81eba4bf162a19777766513fd763490feb5243",
+      "binary": false
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-profile.test.mjs",
+      "version": "working-payload",
+      "bytes": 14014,
+      "sha256": "fa7543619620db1f13c819d1523f76d9d984ee5ed5cbc29b3e1adb739e892921",
+      "binary": false
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-runtime.mjs",
+      "version": "working-payload",
+      "bytes": 6434,
+      "sha256": "c469061739798886f99869f5472363c6afb16531dfb028bb07a256dc73bd5ff1",
+      "binary": false
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-status.mjs",
+      "version": "working-payload",
+      "bytes": 2587,
+      "sha256": "a99b3b7834ef26891904f6b435149a7329f37bdc2360917e5aa6e7b8f3687cb8",
+      "binary": false
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.mjs",
+      "version": "working-payload",
+      "bytes": 32929,
+      "sha256": "b308fadcc34a66cba6a1989c45048479018c5e770aab50fb102830b640ad6ca6",
+      "binary": false
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.test.mjs",
+      "version": "working-payload",
+      "bytes": 16031,
+      "sha256": "546f93c2e123b68ee2770ce6dca3461ddb585358804bb9f3567796ea92495cef",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/README.md",
+      "version": "working-payload",
+      "bytes": 1771,
+      "sha256": "1b02b9801204061a9777f39fbf2ad685e746234944cd37b4cb481edbd9bb147d",
+      "binary": false
+    },
+    {
+      "path": "docs/rebuild/evidence/maya-yclients-startup-diagnostics-20261010/independent-review.json",
+      "version": "working-payload",
+      "bytes": 10965,
+      "sha256": "a2b5baa5089338a3b6724b15d3e834c1d459351e77df60893a9486d2afa2606d",
+      "binary": false
+    }
+  ],
+  "committedHistoricalVersions": [
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-diagnostic.mjs",
+      "version": "3480485443f9301666bdd70015f9da1bbcc44328",
+      "bytes": 1604,
+      "sha256": "042e74fe44e26570edfa90900f81eba4bf162a19777766513fd763490feb5243",
+      "binary": false
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-profile.test.mjs",
+      "version": "3480485443f9301666bdd70015f9da1bbcc44328",
+      "bytes": 14014,
+      "sha256": "fa7543619620db1f13c819d1523f76d9d984ee5ed5cbc29b3e1adb739e892921",
+      "binary": false
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-runtime.mjs",
+      "version": "3480485443f9301666bdd70015f9da1bbcc44328",
+      "bytes": 6434,
+      "sha256": "c469061739798886f99869f5472363c6afb16531dfb028bb07a256dc73bd5ff1",
+      "binary": false
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-status.mjs",
+      "version": "3480485443f9301666bdd70015f9da1bbcc44328",
+      "bytes": 2587,
+      "sha256": "a99b3b7834ef26891904f6b435149a7329f37bdc2360917e5aa6e7b8f3687cb8",
+      "binary": false
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.mjs",
+      "version": "3480485443f9301666bdd70015f9da1bbcc44328",
+      "bytes": 32929,
+      "sha256": "b308fadcc34a66cba6a1989c45048479018c5e770aab50fb102830b640ad6ca6",
+      "binary": false
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.test.mjs",
+      "version": "3480485443f9301666bdd70015f9da1bbcc44328",
+      "bytes": 16031,
+      "sha256": "546f93c2e123b68ee2770ce6dca3461ddb585358804bb9f3567796ea92495cef",
+      "binary": false
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.mjs",
+      "version": "46479aa49c9a79a76ebe6ce420aabd28bc422708",
+      "bytes": 23994,
+      "sha256": "3943f4e594bcb2f239c1a90017a9747a6b0efe28ea8cf7a1312100376d6c463a",
+      "binary": false
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.test.mjs",
+      "version": "46479aa49c9a79a76ebe6ce420aabd28bc422708",
+      "bytes": 9801,
+      "sha256": "dccae0bfab92b0c4f77901fd6cad49a4dfc9719a0d991f88b3ccd27a833e1af9",
+      "binary": false
+    }
+  ]
+}
