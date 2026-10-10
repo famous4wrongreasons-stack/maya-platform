@@ -214,9 +214,12 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
       ) + '\n',
     );
     jest.restoreAllMocks();
-    await fx?.teardown();
-    await http?.close();
-    await db?.close();
+    // This private cluster is stopped by the driver; preserve its proof rows.
+    try {
+      await http?.close();
+    } finally {
+      await db?.close();
+    }
   });
   async function connect(
     s: Scenario,
