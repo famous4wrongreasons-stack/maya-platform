@@ -197,5 +197,7 @@ serveCandidateBroker({
     bind();
     return { gate, manifest };
   },
-  reserve: candidateReservation,
+  // The server's third argument is turn metadata, not a budget profile.
+  // This legacy dry entry uses the default candidate limits only.
+  reserve: (url, init) => candidateReservation(url, init),
 });

@@ -21,4 +21,3 @@ export function readOwnerChatLaunch(planPath, planSha256, role = 'runner') {
   return { ...launch, common, admission, binding,
     assertCurrent() { assert.ok(admission, 'owner_chat_claim_required'); admission(binding); assertCoreSources(launch.manifest); } };
 }
-
