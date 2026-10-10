@@ -191,5 +191,163 @@
     "networkOrDatabaseQueries": false,
     "privateKeyOrConfigReads": false
   },
-  "conclusion": "Qualified evidence PASS for two normal UI registrations, one post-commit response loss followed by password recovery, and both original accounts logging in after actual owned PostgreSQL/application restart. Qualifications remain explicit."
+  "conclusion": "Qualified evidence PASS for two normal UI registrations, one post-commit response loss followed by password recovery, and both original accounts logging in after actual owned PostgreSQL/application restart. Qualifications remain explicit.",
+  "archiveReview": {
+    "status": "QUALIFIED_CLAIMS_AND_PACKAGING_PASS",
+    "reviewedSummaryBeforeFinalReviewInclusion": {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/docs/rebuild/evidence/maya-normal-onboarding-actual-20261010/summary.json",
+      "sha256": "917598dc2bc7f820eab3d125271dda9563d5752d62769774bf078e2638694315",
+      "independentReviewFieldAtRead": "QUALIFIED_EVIDENCE_REVIEW_PASS"
+    },
+    "listedArtifactsVerified": [
+      {
+        "path": "failed-parent-probe.json",
+        "bytes": 2230,
+        "sha256": "c326bf3d7f99c451037905fefb92b6b7f17b6ba02f38a2c95c5d3248c0040981"
+      },
+      {
+        "path": "failed-startup-manifest.json",
+        "bytes": 504096,
+        "sha256": "489c83c66f5000fff732c102d35329a43fa182e23d11e2d9d2ef893c0009df32"
+      },
+      {
+        "path": "final-pure-tests.log",
+        "bytes": 1124,
+        "sha256": "594eb8463a308731d86de9406803b76b34cde3ddd4e09dfee1b9eaf6b763f68a"
+      },
+      {
+        "path": "independent-review.json",
+        "bytes": 9272,
+        "sha256": "df3332b1b6cfb255e1e2202b7eb189530d089672e3cd3fd456304d1d0511d8ca"
+      },
+      {
+        "path": "initial-backend-build.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "initial-browser.json",
+        "bytes": 6982,
+        "sha256": "2ab0988ec30dffd2a15337e894d6b8136b4b2e9bbecb0396b444e9e165b8f563"
+      },
+      {
+        "path": "initial-createdb.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "initial-initdb.log",
+        "bytes": 906,
+        "sha256": "486218845b5c5f8c790b1fae97e0b0e57d1a5daf6ede7ef57caed5beef5caad7"
+      },
+      {
+        "path": "initial-manifest.json",
+        "bytes": 504729,
+        "sha256": "a89db62fc2bcad0612f808ac91e1b42f3f48bbb8768d407efcb7f2588e5d51c4"
+      },
+      {
+        "path": "initial-migrations.log",
+        "bytes": 14830,
+        "sha256": "07b2371e7d77311854c7d5df16935c5cde0bb5a89507ae2830c9aa9e5e0dfa91"
+      },
+      {
+        "path": "initial-parent.json",
+        "bytes": 8843,
+        "sha256": "42267a1fd74853c232f6f01350de62ceae3c0a0ca26eba7a474d9e9bf7f0c76a"
+      },
+      {
+        "path": "initial-pg-start.log",
+        "bytes": 52,
+        "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+      },
+      {
+        "path": "initial-pg-stop.log",
+        "bytes": 56,
+        "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+      },
+      {
+        "path": "initial-react-build.log",
+        "bytes": 185,
+        "sha256": "e1304acedaa411bddb232b81a4da168cd8735b39e1268113a069d134b79b06de"
+      },
+      {
+        "path": "pre-source-publication-scan.json",
+        "bytes": 1669,
+        "sha256": "7c6132234664f849bd0b21073253e971c0df1098199bac84e5f63c965b7201c1"
+      },
+      {
+        "path": "private-value-exclusion.json",
+        "bytes": 332,
+        "sha256": "2a173d0a9751cdc9f9f8b74ddc2331f228ffae093503eb59d4473d27dd2b9e87"
+      },
+      {
+        "path": "restart-browser.json",
+        "bytes": 2900,
+        "sha256": "fd68abdce01a88fab5a5c2f9bc343ed809d56efea9436886a8d4d415f6490318"
+      },
+      {
+        "path": "restart-manifest.json",
+        "bytes": 505107,
+        "sha256": "6767eeef60bef4c6ae2562bd0147c22ffdfbffd0efb2da6dc58dba8dc4a23660"
+      },
+      {
+        "path": "restart-parent-driver.mjs",
+        "bytes": 9951,
+        "sha256": "e392c1f2ba686b1e7b408a95927ece29bd0bd9f46a0b68d963c15cf5a0d41a25"
+      },
+      {
+        "path": "restart-parent.json",
+        "bytes": 4824,
+        "sha256": "30015cd5f6df290ca2a020b67e95959f9b7212dcd1d63991d1fbd2b1e3e3095a"
+      },
+      {
+        "path": "restart-pg-start.log",
+        "bytes": 52,
+        "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+      },
+      {
+        "path": "restart-pg-stop.log",
+        "bytes": 56,
+        "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+      },
+      {
+        "path": "scoped-lint-3072.exit",
+        "bytes": 2,
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+      },
+      {
+        "path": "scoped-lint-3072.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "listedArtifactCount": 24,
+    "canonicalDocs": [
+      {
+        "path": "docs/rebuild/MAYA-DELIVERY-PLAN-20261010.md",
+        "sha256": "65cdb14f729007d4ce5ab936da0e19c35b7f27c9f0609e2283e11a444f5cc17e",
+        "bytes": 46463
+      },
+      {
+        "path": "docs/rebuild/MAYA-FINAL-COMPLETION-MAP.md",
+        "sha256": "60c10c1c26b588c8d3fe9951daca2348a8ed8067ee8e21915a1f15888e58b0c3",
+        "bytes": 209771
+      },
+      {
+        "path": "docs/rebuild/MAYA-LOCAL-YCLIENTS-ONE-TIME-HANDOFF-20261010.md",
+        "sha256": "775d7b2e363c1267e70cbf3776edf9df089764c2e91c2f20853a877417576e77",
+        "bytes": 16622
+      }
+    ],
+    "consistency": [
+      "8 initial + 2 restart UI/DB checkpoints and 7 password logins match actual reports.",
+      "Two created businesses remain distinct from migration baseline and retained pending activation.",
+      "Real YCLIENTS/provider/model, widgets.runtime, revocation, production/site and broad completion remain explicitly unqualified.",
+      "Initial wrapper was not retrospectively pinned; final wrapper qualification remains restart-only.",
+      "Ten pure test PASS directly observed in curated final-pure-tests.log; scoped lint exit file reports 0.",
+      "Final docs/evidence commit still requires the separately planned incremental publication scan."
+    ],
+    "knownValueScanQualification": "Parent reports 19 private strings and zero matches; reviewer neither read the private strings nor repeated their scan.",
+    "packagingNote": "Root will add this final review and update the summary independent_review field/list. This records the reviewed pre-finalization summary snapshot, not its future self-referential digest."
+  }
 }
