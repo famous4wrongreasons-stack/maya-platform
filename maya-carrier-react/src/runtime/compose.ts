@@ -21,7 +21,7 @@ import { createLocalCrmSetup } from '../../../maya-chat-shell/src/shell/local-cr
 import { createCrmPendingLocation } from './crmPending.ts';
 import { createPersonalBooking } from '../../../maya-chat-shell/src/shell/personal-booking.ts';
 import { createNet } from '../../../maya-chat-shell/src/net/session.ts';
-import { createShellRuntime } from '../../../maya-chat-shell/src/shell/shell.ts';
+import { createShellRuntime, type ShellRuntimeDeps } from '../../../maya-chat-shell/src/shell/shell.ts';
 import { createLiveSubmission } from '../../../maya-chat-shell/src/shell/intents.ts';
 import { createVoiceControl } from '../../../maya-chat-shell/src/shell/voice-state.ts';
 import { createCapture } from '../voice/capture.ts';
@@ -132,6 +132,8 @@ const net = createNet({
   webCallbackUrl: origin.startsWith('http') ? `${origin}/${WEB_CALLBACK_FILE}` : null,
   navigate: (target) => window.location.assign(target),
 });
+export const localCrmSetupEnabled = (window.location.protocol === 'http:' || window.location.protocol === 'https:') &&
+  ['127.0.0.1', 'localhost'].includes(window.location.hostname) && new URLSearchParams(window.location.search).get('local_crm_setup') === '1';
 
 // ── the OAuth landing, between the factories (entry/main.ts:174-184) ───────────────────────────
 const land = (payload: unknown): void => void net.session.completeTelegram(payload);
@@ -155,8 +157,12 @@ if (oauthLanded) {
 // createUnavailableSubmission, every widget answers `unavailable`, and booking looks broken with no
 // error anywhere. `render` is the pure renderer, injected — the shell may not import it.
 let cancelPrivacyVoice = (): void => {};
+// The explicit setup screen has no conversation to restore on login. Omit only the optional
+// history reader from this runtime; keep the original transport for A17 and ordinary chat.
+const runtimeTransport: ShellRuntimeDeps['transport'] = localCrmSetupEnabled ? { ...net.transport } : net.transport;
+if (localCrmSetupEnabled) delete runtimeTransport.conversation;
 const runtime = createShellRuntime({
-  transport: net.transport,
+  transport: runtimeTransport,
   session: net.session,
   submission: createLiveSubmission(net.transport),
   render,
@@ -198,8 +204,6 @@ export const conversation = runtime.conversation;
 export const goodsPhoto = runtime.goodsPhoto;
 export const privacy = runtime.privacy;
 export const widgets = runtime.widgetPort;
-export const localCrmSetupEnabled = (window.location.protocol === 'http:' || window.location.protocol === 'https:') &&
-  ['127.0.0.1', 'localhost'].includes(window.location.hostname) && new URLSearchParams(window.location.search).get('local_crm_setup') === '1';
 export const localCrmSetup = createLocalCrmSetup({ enabled: localCrmSetupEnabled, transport: net.transport, session, newAbort, newId: () => crypto.randomUUID(),
   pending: createCrmPendingLocation({ href: () => window.location.href, replace: relative => window.history.replaceState(null, '', relative) }),
 });
