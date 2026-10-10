@@ -9,7 +9,6 @@ import { createServer, request as nodeRequest } from 'node:http';
 import path from 'node:path';
 import request from 'supertest';
 import { ConfigService } from '@nestjs/config';
-import { CanonicalActionIngressService } from '../../src/action-engine/action-engine.ingress';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import {
   CalendarSource,
@@ -26,6 +25,9 @@ import {
   type HttpHarness,
 } from './support/http-bootstrap';
 import { assertProofDatabase } from './support/proof-db-guard';
+// Preserve the established bootstrap/module evaluation order before importing
+// the test-only call-through seam for durable admission.
+import { CanonicalActionIngressService } from '../../src/action-engine/action-engine.ingress';
 
 const stage = process.env.JEST_C9_OCCUPANCY_STAGE;
 const receiptPath = process.env.JEST_C9_OCCUPANCY_RECEIPT!;
