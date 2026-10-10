@@ -1,0 +1,157 @@
+{
+  "contract": "maya.independent-source-differential-review/1",
+  "reviewedAt": "2026-10-10T20:48:25.764284+00:00",
+  "verdict": "QUALIFIED_READ_ONLY_DIFFERENTIAL_PASS",
+  "blockers": [],
+  "sourceCommit": "146c2573ac31f48b8b82d09bffa0db5f22386c96",
+  "runtimeCommit": "b46e3d09748d6e38549fcaeb3cb0565077f77345",
+  "document": {
+    "path": "docs/rebuild/MAYA-YCLIENTS-CONNECTION-DIFFERENTIAL-20261010.md",
+    "sha256": "7691a83f972d77a907607c9fdd2329eca49f91d43c11b96b85f0bf087286357e"
+  },
+  "artifacts": {
+    "native-history.json": "c0f1e07c1dc96f9bc17594ff695866bd63515a34ef9e201548cbb5c73f172131",
+    "source-bindings.json": "46b6ce98f507cb828839e67cb2872acdae1762b7a89490c89c9e425f7829efdc"
+  },
+  "integrity": {
+    "historicalAdapterBlobsChecked": 8,
+    "historicalSha256GitBlobCommitDateMatched": true,
+    "currentSourceBindingsChecked": 11,
+    "allCurrentSha256GitBlobAndBytesMatched": true,
+    "historicalProviderTraceTransportSameAsReviewedSource": true,
+    "historicalRuntimeLoggingBlobsChecked": 2,
+    "historicalRuntimeLoggingShaAndGitBlobMatched": true
+  },
+  "confirmedSourceClaims": [
+    "Initial native testConnection read selected-company staff; immediately before the switch this was staff/{companyId}. The 31 July 9f647fe39 commit switches the check to selected-company membership in discoverCompanies.",
+    "my=1 was introduced by aa0048af; neither current local form nor October remediation introduced that endpoint.",
+    "Initial native, pre/post switch and current native use the same Bearer partner plus User token/v2 Accept/JSON Content-Type template. Python source has the same template; no actual credential equality is inferred.",
+    "The local slice200 and provider-side pagination are distinct. Remediation only ensures selected-row selection before local presentation cap and rejects malformed selected data without a false absence code.",
+    "The historical provider_response_read event is emitted only after bounded JSON parse and excluding literal success:false. It is not selected-company acceptance.",
+    "No following catalog/team reads plus source order supports pre-AE connection_check localization. This does not reveal which selected-company/schema branch failed.",
+    "Canonical historical error.code was not captured. Even company_not_found would remain ambiguous under the old presentation-error classifier.",
+    "No direct fallback bypass, new owner attempt or credential request is proposed.",
+    "Exact historical bcb runtime sets Nest logger:false and launcher ignores child stdout/stderr. The ordinary service warning did not produce a retained diagnostic backend log in this path. This does not establish absence of every possible external/browser record."
+  ],
+  "evidenceQualifications": {
+    "oldProduction": "The 5 October canonical document reports an active/live integration and authenticated provider reads. It is documentary evidence, not a reviewed raw connect receipt or current production-state assertion.",
+    "newLocalOwner": "Separate 10 October registration and later closed-connect metadata record a local business with no persisted integration. Empty local state does not prove production deletion or failure.",
+    "historicalKnown": "Two connect HTTP400 responses after companies HTTP200/provider_response_read, NOT_OBSERVED recovery and no persisted integration/A17 execution.",
+    "historicalUnknown": "Original response error.code, provider payload, selected company presence and exact root cause; credentials/current production state were not inspected.",
+    "publication": "Two automatic-review publication rejections are parent-reported; this reviewer made no publication attempt or workaround."
+  },
+  "sourceBindings": {
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": {
+      "sha256": "3d00e50996be486ce5b6005988c00efe875605f62b5a0bb4d00eb814deef9ffd",
+      "gitBlob": "f4200d0db35f6f1e59067619834d5e63a304c22e"
+    },
+    "maya-saas-backend/src/crm/crm.service.ts": {
+      "sha256": "8fd8cbc067ca25c32fdd72d93b93b7c69e2217a6a0956de76b9f6500576f8e5a",
+      "gitBlob": "8cad9ecd584101c41777a2976272ce497564710d"
+    },
+    "maya-saas-backend/scripts/local-yclients-read-transport.mjs": {
+      "sha256": "031255c1b0d3842fafbc47405c6b7feb5fb9ac0bceb4fa109e91d0168288ba96",
+      "gitBlob": "e75b6e18d7a60e8bf77aed16f8bc98d3990b731a"
+    },
+    "ai администратор/yclients.py": {
+      "sha256": "5a2263a72029589acdac1d9347c42ccb1f05a3d4dcf678c0462a4012e606103b",
+      "gitBlob": "8ca9c07c1eb73e4a0213762fa3d29e3bafec9373"
+    },
+    "maya-chat-shell/src/net/crm-setup.ts": {
+      "sha256": "4b61612ed740e363028f71813bfa7bd82a0ef292df47db16b659bcd19910c401",
+      "gitBlob": "d7cffe04438d24b6d5d31947651e484f1e178c28"
+    },
+    "maya-saas-backend/src/crm/crm-provider-settings.ts": {
+      "sha256": "9e1c8efb41332dd788d92453d768afcf8f785d3b482340d362ceb81858c9c161",
+      "gitBlob": "6896a3bdcd22de028c084ecee419ed6d20304c59"
+    },
+    "maya-saas-backend/src/crm/dto/crm-operation.dto.ts": {
+      "sha256": "f079ead59eb4467aa4fa0617d131e5f23785f15842311ca0a110c596d027b266",
+      "gitBlob": "885df19841edc209103ee839088dd17cd3461708"
+    },
+    "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts": {
+      "sha256": "3cd6bf70e92010e78127fcabd2d792520f5fb8306fe9496f59bfeb758215c06e",
+      "gitBlob": "659fd44d7923126b2882508eda5ece3d2775d49b"
+    },
+    "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts": {
+      "sha256": "0e678563f1fa2273170f79916def92f7c94cb415171130cae838cb1257d962c0",
+      "gitBlob": "c6c3218ce9ac148ce6edeb6a501fe2db39d68de2"
+    },
+    "maya-saas-backend/scripts/local-yclients-read-profile.mjs": {
+      "sha256": "f850e8c558f6f52e3b283efbcce69c3cb889656a164b58e97ec44f5c3ca2b869",
+      "gitBlob": "89ca6a031a2a9b2b20628e8600915acf4b20b64a"
+    },
+    "docs/rebuild/WEBSITE-GUEST-ONE-RECORD-ACCEPTANCE.md": {
+      "sha256": "7a240c91eef5e40e63c2ed22d858a548775da25cd0b143bd0824a66c77360195",
+      "gitBlob": "0216929b4c63e59fd2dd09486e14527a6771b1f6"
+    }
+  },
+  "historicalBindings": {
+    "895abcecba7145b873a4db8daf4d4489a68c1545": {
+      "committedAt": "2026-07-03T03:13:26+03:00",
+      "adapterGitBlob": "54c652afeee4b386c1b16262f497ae82be2eafe0",
+      "adapterSha256": "e6e716aa21fb2bf14d41c82e36c6cfbefad1218ea698c3a42963eeae1f50caae"
+    },
+    "a511ef862a57ca42c2a334b7312746fa11dfba30": {
+      "committedAt": "2026-07-31T01:44:36+03:00",
+      "adapterGitBlob": "70398fd2f29f094667b9b6c1e0c836daedfa09d5",
+      "adapterSha256": "a0d5a7c1eb03f18fd2d7a2b2a3d09e51491d37544fd08a6d9f7d76439e8b3e78"
+    },
+    "aa0048af96a6297adecf29a09c4a65ec6934f35f": {
+      "committedAt": "2026-07-31T10:30:59+03:00",
+      "adapterGitBlob": "aebcdfdee4bea771da6caad922b17d7fd4c8a756",
+      "adapterSha256": "cf7e2d01d032a6d64d6a234f694579877ad624e0018931ed7f0d41fea9798cc9"
+    },
+    "9485133b1a73ab8a7d65426cd15d6307d9b284b4": {
+      "committedAt": "2026-07-31T10:50:02+03:00",
+      "adapterGitBlob": "01148b372340b8428369abb30b74a2bbfe6c9635",
+      "adapterSha256": "a136d03f89c99777c194a1e539c388fe5276ac18b789a09fd88129c812feeaba"
+    },
+    "9f647fe39f14da0eb637e383b93d0c9f0a918895": {
+      "committedAt": "2026-07-31T12:27:13+03:00",
+      "adapterGitBlob": "a7fc44700d20cd29c2408bb872e76808176a18f5",
+      "adapterSha256": "bd8f22a7df7eba43a3ce21646ae808286ab925fe2aef5ef0e604aaa3da479027"
+    },
+    "ff25cc133c3efbd1f264d8d591f74aa9e9b26285": {
+      "committedAt": "2026-08-15T21:52:47+03:00",
+      "adapterGitBlob": "3acf86c933d3855d6531af5741c1a93ff69b6530",
+      "adapterSha256": "fdcdb84eae8342c75b516294a38b9622329da5a2b921b9104a3eaeb9919e3987"
+    },
+    "f8327626979e09696c8d93e8573d72667eb2ae85": {
+      "committedAt": "2026-10-09T18:52:51+03:00",
+      "adapterGitBlob": "ce407598612fb9c9a27213abeeaf1a795b3c561f",
+      "adapterSha256": "7762201bde96587408700083000ec9d9e092b679930f0268ac9501ec95173d95"
+    },
+    "b46e3d09748d6e38549fcaeb3cb0565077f77345": {
+      "committedAt": "2026-10-10T23:36:21+03:00",
+      "adapterGitBlob": "f4200d0db35f6f1e59067619834d5e63a304c22e",
+      "adapterSha256": "3d00e50996be486ce5b6005988c00efe875605f62b5a0bb4d00eb814deef9ffd"
+    }
+  },
+  "actions": {
+    "sourceAndSavedArtifactReadsOnly": true,
+    "testsRun": false,
+    "servicesStarted": false,
+    "networkProviderOrModelCalls": false,
+    "ownerDatabaseOrCredentialsRead": false,
+    "repositoryFilesEdited": false,
+    "commitOrPushAttempted": false
+  },
+  "limits": [
+    "No claim that the July endpoint switch caused the historical October failure, or that the owner used identical credentials/configuration to the older production integration.",
+    "No newly established full provider-list completeness, real-provider acceptance or complete MAYA/C10.",
+    "No raw historical receipt was reviewed; its absence is qualified to the available local archive/source investigation rather than all possible external evidence."
+  ],
+  "historicalRuntimeLogging": {
+    "maya-saas-backend/scripts/local-yclients-read-runtime.mjs": {
+      "sourceCommit": "bcb5246a6937a96322130ddbca729ff0eb0988dd",
+      "sha256": "15d37d38bdaa098aa3d4b0cf40459b5095c8f40f5ef456027ea63e9cfa04e351",
+      "gitBlob": "e796a04310ab5225b09f48c72b7d79c8f7449c0b"
+    },
+    "maya-saas-backend/scripts/local-yclients-read.mjs": {
+      "sourceCommit": "bcb5246a6937a96322130ddbca729ff0eb0988dd",
+      "sha256": "9cf3c8dc539b991241a40fd003796adc3acc30e57475e56f32eb220b381da29e",
+      "gitBlob": "f6f9143762b03de0560c130788e14f1cfacd300d"
+    }
+  }
+}

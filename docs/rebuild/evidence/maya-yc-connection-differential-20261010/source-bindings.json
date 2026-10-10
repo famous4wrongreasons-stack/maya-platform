@@ -1,0 +1,51 @@
+{
+  "sourceCommit": "146c2573ac31f48b8b82d09bffa0db5f22386c96",
+  "additionalSources": {
+    "ai администратор/yclients.py": {
+      "sha256": "5a2263a72029589acdac1d9347c42ccb1f05a3d4dcf678c0462a4012e606103b",
+      "gitBlob": "8ca9c07c1eb73e4a0213762fa3d29e3bafec9373"
+    },
+    "maya-chat-shell/src/net/crm-setup.ts": {
+      "sha256": "4b61612ed740e363028f71813bfa7bd82a0ef292df47db16b659bcd19910c401",
+      "gitBlob": "d7cffe04438d24b6d5d31947651e484f1e178c28"
+    },
+    "maya-saas-backend/src/crm/crm-provider-settings.ts": {
+      "sha256": "9e1c8efb41332dd788d92453d768afcf8f785d3b482340d362ceb81858c9c161",
+      "gitBlob": "6896a3bdcd22de028c084ecee419ed6d20304c59"
+    },
+    "maya-saas-backend/src/crm/dto/crm-operation.dto.ts": {
+      "sha256": "f079ead59eb4467aa4fa0617d131e5f23785f15842311ca0a110c596d027b266",
+      "gitBlob": "885df19841edc209103ee839088dd17cd3461708"
+    },
+    "maya-saas-backend/src/package5-wave3/package5-wave3-canonical-cutover.service.ts": {
+      "sha256": "3cd6bf70e92010e78127fcabd2d792520f5fb8306fe9496f59bfeb758215c06e",
+      "gitBlob": "659fd44d7923126b2882508eda5ece3d2775d49b"
+    },
+    "maya-saas-backend/src/package5-wave3/package5-wave3.service.ts": {
+      "sha256": "0e678563f1fa2273170f79916def92f7c94cb415171130cae838cb1257d962c0",
+      "gitBlob": "c6c3218ce9ac148ce6edeb6a501fe2db39d68de2"
+    },
+    "maya-saas-backend/scripts/local-yclients-read-profile.mjs": {
+      "sha256": "f850e8c558f6f52e3b283efbcce69c3cb889656a164b58e97ec44f5c3ca2b869",
+      "gitBlob": "89ca6a031a2a9b2b20628e8600915acf4b20b64a"
+    },
+    "docs/rebuild/WEBSITE-GUEST-ONE-RECORD-ACCEPTANCE.md": {
+      "sha256": "7a240c91eef5e40e63c2ed22d858a548775da25cd0b143bd0824a66c77360195",
+      "gitBlob": "0216929b4c63e59fd2dd09486e14527a6771b1f6"
+    }
+  },
+  "originalNativeHistorySha256": "ebfae4001051e053ad1644ca8260ad538208c55bc9375524ef5ec3aa54412e68",
+  "archiveTransform": "Replace two local synthetic summary paths with committed relative evidence links",
+  "historicalRuntimeLogging": {
+    "maya-saas-backend/scripts/local-yclients-read-runtime.mjs": {
+      "sourceCommit": "bcb5246a6937a96322130ddbca729ff0eb0988dd",
+      "sha256": "15d37d38bdaa098aa3d4b0cf40459b5095c8f40f5ef456027ea63e9cfa04e351",
+      "gitBlob": "e796a04310ab5225b09f48c72b7d79c8f7449c0b"
+    },
+    "maya-saas-backend/scripts/local-yclients-read.mjs": {
+      "sourceCommit": "bcb5246a6937a96322130ddbca729ff0eb0988dd",
+      "sha256": "9cf3c8dc539b991241a40fd003796adc3acc30e57475e56f32eb220b381da29e",
+      "gitBlob": "f6f9143762b03de0560c130788e14f1cfacd300d"
+    }
+  }
+}

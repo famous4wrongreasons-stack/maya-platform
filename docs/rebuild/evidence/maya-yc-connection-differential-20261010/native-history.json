@@ -1,0 +1,235 @@
+{
+  "contract": "maya.yclients-native-history-differential/1",
+  "status": "READ_ONLY_SOURCE_CONCLUSION",
+  "sourceHead": "146c2573ac31f48b8b82d09bffa0db5f22386c96",
+  "mainConclusion": "Native testConnection changed from a selected-company staff GET to companies?my=1 on 2026-07-31, not in October. No testConnection direct-services implementation was found in the tracked native adapter history. October preserved the endpoint and Authorization contract.",
+  "chronology": [
+    {
+      "commit": "895abcecba7145b873a4db8daf4d4489a68c1545",
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "lines": [
+        86,
+        89,
+        90,
+        228,
+        231,
+        239,
+        242,
+        263,
+        266,
+        267
+      ],
+      "change": "Initial testConnection calls getStaff; GET company/{companyId}/staff. Services independently use book_services/{companyId}. Both use Bearer partner plus User token and v2 Accept."
+    },
+    {
+      "commit": "a511ef862a57ca42c2a334b7312746fa11dfba30",
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "lines": [
+        131,
+        132,
+        140
+      ],
+      "change": "Adds discoverCompanies GET companies, with local active filter, display cap 200 and title/address projection. Discovery is not yet testConnection."
+    },
+    {
+      "commit": "aa0048af96a6297adecf29a09c4a65ec6934f35f",
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "lines": [
+        138,
+        140,
+        141
+      ],
+      "change": "Adds my=1 to discovery; no page/count query. Also adds optional company profile read and onboarding credential preview."
+    },
+    {
+      "commit": "9485133b1a73ab8a7d65426cd15d6307d9b284b4",
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "lines": [
+        219,
+        222,
+        223
+      ],
+      "change": "Selected-company staff endpoint changes from company/{id}/staff to staff/{id}; testConnection still reads staff."
+    },
+    {
+      "commit": "9f647fe39f14da0eb637e383b93d0c9f0a918895",
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "lines": [
+        138,
+        140,
+        152,
+        153,
+        578,
+        581,
+        582,
+        585,
+        596,
+        642,
+        645,
+        646
+      ],
+      "change": "testConnection now requires selected ID from discoverCompanies, before importing services/staff/profile. Inherits pre-selection slice200 and unrelated presentation projection. Adds staff endpoint fallbacks and book_services to services fallback."
+    },
+    {
+      "commit": "ff25cc133c3efbd1f264d8d591f74aa9e9b26285",
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "change": "HTTP200 success:false becomes a refusal, not empty data. Current historical owner provider_response_read excludes this class."
+    },
+    {
+      "commit": "f8327626979e09696c8d93e8573d72667eb2ae85",
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "change": "Extracts readCompanyOptions/preserveMissingTitle for public facts. Does not introduce the mandatory companies check or change its endpoint/header."
+    },
+    {
+      "commit": "b46e3d09748d6e38549fcaeb3cb0565077f77345",
+      "path": "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts",
+      "currentLines": [
+        390,
+        421,
+        433,
+        439,
+        449,
+        521,
+        3357,
+        3361
+      ],
+      "change": "Validates response/identity shape, filters selected ID before local display cap and validates text only on projected selection. Typed malformed payload maps to existing crm_connection_failed."
+    }
+  ],
+  "requestDifferential": {
+    "baseUrl": "Default https://api.yclients.com/api/v1, unchanged between initial adapter and current; no actual runtime configuration read.",
+    "authorization": "Authorization: Bearer <partner>, User <user>; Accept: application/vnd.yclients.v2+json; Content-Type: application/json. Same template in initial July snapshot, before/after July31 switch, and current lines4402-4404. No credential values inspected.",
+    "oldConnectionCheck": "GET company/{id}/staff originally; GET staff/{id} immediately before July31 switch. HTTP successful staff mapping, including an empty list, yielded ok:true. No selected-company list membership test.",
+    "currentConnectionCheck": "GET companies?my=1; requires selected ID among rows with active !== false; malformed envelope/rows refuse. Follow-up parallel services/staff/team/company reads occur only after testConnection passes.",
+    "pagination": "Neither old discovery nor current readCompanyOptions sets page/count or follows pagination metadata. The fixed 200 limit is a local display cap. b46 fixes selection beyond that local cap within returned data; provider pagination/completeness is not established by this source review.",
+    "exactLocalTransport": {
+      "path": "maya-saas-backend/scripts/local-yclients-read-transport.mjs",
+      "lines": [
+        13,
+        64,
+        70,
+        85,
+        86,
+        89,
+        90
+      ],
+      "meaning": "Exact companies?my=1 allowed; redirect error, bounded body, valid JSON and success!==false before provider_response_read. That event does not validate selected company or native schema."
+    }
+  },
+  "crmServiceOrder": {
+    "firstPreviewOwnerCommit": "a73195d6d23facab714e4d2c4968c3fe9d639c39",
+    "historicalLines": [
+      693,
+      699,
+      705
+    ],
+    "currentPath": "maya-saas-backend/src/crm/crm.service.ts",
+    "currentLines": [
+      472,
+      479,
+      488,
+      491,
+      497,
+      6677,
+      6683,
+      6684,
+      6691,
+      6987,
+      7027,
+      7028
+    ],
+    "meaning": "Credential normalization then loadConnectionPreview; testConnection precedes all catalogue/team/profile parallel reads; exception converted to closed HTTP400 code. A17 version/actor/admission changes do not explain an already completed companies dispatch with no follow-up source reads."
+  },
+  "measuredRegressions": [
+    {
+      "regression": "Local display cap was used before selected-company lookup; selected row after first200 returned rows was rejected as absent.",
+      "introducedIntoConnectionCheck": "9f647fe39f14da0eb637e383b93d0c9f0a918895",
+      "baseline": "9f935d688f0c1728f837d0216abc93d7896e88c6",
+      "fixedBy": "b46e3d09748d6e38549fcaeb3cb0565077f77345",
+      "actualSyntheticEvidence": "../maya-yc-pre-ae400-reproduction-20261010/remediation/matrix/summary.json"
+    },
+    {
+      "regression": "Unrelated malformed title could abort selected-company connection; selected malformed title/address TypeError matched company string classifier and was mislabeled missing company.",
+      "introducedIntoConnectionCheck": "9f647fe39f14da0eb637e383b93d0c9f0a918895",
+      "fixedBy": "b46e3d09748d6e38549fcaeb3cb0565077f77345",
+      "actualSyntheticEvidence": "../maya-yc-pre-ae400-reproduction-20261010/remediation/matrix/summary.json"
+    }
+  ],
+  "historicalOwnerClassification": {
+    "safeReceipt": "docs/rebuild/evidence/maya-owner-yc-connect400-20261010/summary.json",
+    "observed": "Two companies provider_response_read HTTP200 events, then connect400 with no catalogue/team calls; operation NOT_OBSERVED and exact read-only DB projection show no persisted integration or A17 execution.",
+    "excludedByTrace": [
+      "No provider dispatch",
+      "Invalid JSON at bounded transport parser",
+      "Provider success:false refusal",
+      "Failure only in later service/team/profile import",
+      "A17 execution or commit failure after admission"
+    ],
+    "notProven": "Which native selected-company/schema/classification branch failed; synthetic matches are not historical causation.",
+    "singleMissingRedactedDatum": "Original connect HTTP response error.code (closed code only, no provider body/credentials/IDs). It was not retained by that runtime and cannot be recovered by source inspection. Even that code would not uniquely reconstruct malformed payload details under the historical classifier.",
+    "oldWorkingIntegrationQualification": "2026-10-05 active/live production integration appears in a canonical document summary; this source-only task does not possess a raw old connection receipt bound to endpoint and commit. Current owner attempted a separate newly created local tenant, not migration of that existing production connection."
+  },
+  "sourceBindings": {
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": {
+      "sha256": "3d00e50996be486ce5b6005988c00efe875605f62b5a0bb4d00eb814deef9ffd",
+      "gitBlob": "f4200d0db35f6f1e59067619834d5e63a304c22e"
+    },
+    "maya-saas-backend/src/crm/crm.service.ts": {
+      "sha256": "8fd8cbc067ca25c32fdd72d93b93b7c69e2217a6a0956de76b9f6500576f8e5a",
+      "gitBlob": "8cad9ecd584101c41777a2976272ce497564710d"
+    },
+    "maya-saas-backend/scripts/local-yclients-read-transport.mjs": {
+      "sha256": "031255c1b0d3842fafbc47405c6b7feb5fb9ac0bceb4fa109e91d0168288ba96",
+      "gitBlob": "e75b6e18d7a60e8bf77aed16f8bc98d3990b731a"
+    }
+  },
+  "historicalAdapterBindings": {
+    "895abcecba7145b873a4db8daf4d4489a68c1545": {
+      "committedAt": "2026-07-03T03:13:26+03:00",
+      "adapterGitBlob": "54c652afeee4b386c1b16262f497ae82be2eafe0",
+      "adapterSha256": "e6e716aa21fb2bf14d41c82e36c6cfbefad1218ea698c3a42963eeae1f50caae"
+    },
+    "a511ef862a57ca42c2a334b7312746fa11dfba30": {
+      "committedAt": "2026-07-31T01:44:36+03:00",
+      "adapterGitBlob": "70398fd2f29f094667b9b6c1e0c836daedfa09d5",
+      "adapterSha256": "a0d5a7c1eb03f18fd2d7a2b2a3d09e51491d37544fd08a6d9f7d76439e8b3e78"
+    },
+    "aa0048af96a6297adecf29a09c4a65ec6934f35f": {
+      "committedAt": "2026-07-31T10:30:59+03:00",
+      "adapterGitBlob": "aebcdfdee4bea771da6caad922b17d7fd4c8a756",
+      "adapterSha256": "cf7e2d01d032a6d64d6a234f694579877ad624e0018931ed7f0d41fea9798cc9"
+    },
+    "9485133b1a73ab8a7d65426cd15d6307d9b284b4": {
+      "committedAt": "2026-07-31T10:50:02+03:00",
+      "adapterGitBlob": "01148b372340b8428369abb30b74a2bbfe6c9635",
+      "adapterSha256": "a136d03f89c99777c194a1e539c388fe5276ac18b789a09fd88129c812feeaba"
+    },
+    "9f647fe39f14da0eb637e383b93d0c9f0a918895": {
+      "committedAt": "2026-07-31T12:27:13+03:00",
+      "adapterGitBlob": "a7fc44700d20cd29c2408bb872e76808176a18f5",
+      "adapterSha256": "bd8f22a7df7eba43a3ce21646ae808286ab925fe2aef5ef0e604aaa3da479027"
+    },
+    "ff25cc133c3efbd1f264d8d591f74aa9e9b26285": {
+      "committedAt": "2026-08-15T21:52:47+03:00",
+      "adapterGitBlob": "3acf86c933d3855d6531af5741c1a93ff69b6530",
+      "adapterSha256": "fdcdb84eae8342c75b516294a38b9622329da5a2b921b9104a3eaeb9919e3987"
+    },
+    "f8327626979e09696c8d93e8573d72667eb2ae85": {
+      "committedAt": "2026-10-09T18:52:51+03:00",
+      "adapterGitBlob": "ce407598612fb9c9a27213abeeaf1a795b3c561f",
+      "adapterSha256": "7762201bde96587408700083000ec9d9e092b679930f0268ac9501ec95173d95"
+    },
+    "b46e3d09748d6e38549fcaeb3cb0565077f77345": {
+      "committedAt": "2026-10-10T23:36:21+03:00",
+      "adapterGitBlob": "f4200d0db35f6f1e59067619834d5e63a304c22e",
+      "adapterSha256": "3d00e50996be486ce5b6005988c00efe875605f62b5a0bb4d00eb814deef9ffd"
+    }
+  },
+  "limits": [
+    "No repository edits.",
+    "No configuration files, credentials, owner DB or provider payload inspected.",
+    "No services, tests, provider/model calls, network requests or push attempted.",
+    "No new architecture or permission relaxation proposed.",
+    "No claim of an October endpoint/header regression or definitive historical owner root cause."
+  ]
+}
