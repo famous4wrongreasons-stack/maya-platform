@@ -25,6 +25,27 @@ const { installOwnerTelegram } = nativeRequire(
 const { ownerTelegramIngress } = nativeRequire(
   path.resolve('scripts/local-owner-telegram-policy.mjs'),
 ) as typeof import('../../scripts/local-owner-telegram-policy.mjs');
+type LocalReadEvent = {
+  surface: string;
+  route: string;
+  stage: string;
+  status: number | null;
+  code: string | null;
+  telegramBindingOutcome?: string;
+};
+const { createReadTrace, traceHttpRequest } = nativeRequire(
+  path.resolve('scripts/local-yclients-read-status.mjs'),
+) as {
+  createReadTrace: (
+    send: (event: LocalReadEvent) => void,
+  ) => (event: LocalReadEvent) => void;
+  traceHttpRequest: (
+    req: Request,
+    res: ExpressResponse,
+    emit: (event: LocalReadEvent) => void,
+    refusal: string | null,
+  ) => void;
+};
 const ownerModules: Record<string, unknown> = {
   '@nestjs/config': { ConfigService },
   '@nestjs/common': { ForbiddenException },
@@ -59,6 +80,8 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
     | 'malformed'
     | 'invalid_client'
     | 'invalid_grant';
+  let registryReply: 'unique' | 'missing' | 'ambiguous';
+  let httpTrace: LocalReadEvent[];
   let trace: Array<{
     route: string;
     stage: string;
@@ -70,6 +93,8 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
     subject = 'synthetic-owner-telegram';
     dispatches = 0;
     tokenReply = 'signed';
+    registryReply = 'unique';
+    httpTrace = [];
     trace = [];
     db = await bootFixtureContext();
     fx = new Fixtures(db, null);
@@ -182,16 +207,31 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
       )
         return Response.json({
           success: true,
-          data: [
-            {
-              id: 123,
-              name: 'Synthetic client',
-              phone: '+12025550123',
-              visits_count: 1,
-              sold_amount: 0,
-              last_visit_date: null,
-            },
-          ],
+          data:
+            registryReply === 'missing'
+              ? []
+              : [
+                  {
+                    id: 123,
+                    name: 'Synthetic client',
+                    phone: '+12025550123',
+                    visits_count: 1,
+                    sold_amount: 0,
+                    last_visit_date: null,
+                  },
+                  ...(registryReply === 'ambiguous'
+                    ? [
+                        {
+                          id: 124,
+                          name: 'Synthetic duplicate',
+                          phone: '+12025550123',
+                          visits_count: 0,
+                          sold_amount: 0,
+                          last_visit_date: null,
+                        },
+                      ]
+                    : []),
+                ],
         });
       throw new Error('Unlisted external wire request');
     };
@@ -225,6 +265,7 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
       jest
         .spyOn(globalThis, 'fetch')
         .mockImplementation(runtime.fetch.bind(runtime));
+      const emitHttp = createReadTrace((event) => httpTrace.push(event));
       app.use((req: Request, res: ExpressResponse, next: () => void) => {
         const reason = ownerTelegramIngress(
           req.method,
@@ -234,6 +275,7 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
           origin,
           scope,
         );
+        traceHttpRequest(req, res, emitHttp, reason);
         if (reason) {
           res.status(403).json({ error: { code: reason } });
           return;
@@ -371,6 +413,13 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
       (r.body as { client_binding: { status: string }; user: { role: string } })
         .client_binding.status,
     ).toBe('linked');
+    expect(
+      httpTrace.find(
+        (e) => e.route === 'telegram_login_complete' && e.stage === 'completed',
+      )?.telegramBindingOutcome,
+    ).toBe('linked');
+    expect(JSON.stringify(httpTrace)).not.toContain('+12025550123');
+    expect(JSON.stringify(httpTrace)).not.toContain('access_token');
     expect((r.body as { user: { role: string } }).user.role).toBe(
       UserRole.TENANT_OWNER,
     );
@@ -424,6 +473,39 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
         ).status,
       ).toBe(403);
   });
+  it.each(['missing', 'ambiguous'] as const)(
+    'canonical %s match remains unlinked and emits only a safe diagnostic reason',
+    async (mode) => {
+      await linked();
+      registryReply = mode;
+      const state = await start(false);
+      const r = await post('auth/oauth/telegram/complete', {
+        state,
+        code: 'synthetic-code',
+      });
+      const reason =
+        mode === 'missing' ? 'client_not_found' : 'client_phone_ambiguous';
+      expect(r.status).toBe(201);
+      expect((r.body as { client_binding: unknown }).client_binding).toEqual({
+        status: 'unlinked',
+        reason,
+      });
+      expect(
+        httpTrace.find(
+          (e) =>
+            e.route === 'telegram_login_complete' && e.stage === 'completed',
+        )?.telegramBindingOutcome,
+      ).toBe(reason);
+      expect(
+        await db.prisma.clientChannelLink.count({
+          where: { tenantId: tenant.id },
+        }),
+      ).toBe(0);
+      expect(runtime.counters.routes.client_registry).toBe(1);
+      expect(JSON.stringify(httpTrace)).not.toContain('+12025550123');
+      expect(JSON.stringify(httpTrace)).not.toContain('access_token');
+    },
+  );
   it('finder remains bounded and hides a tenant that is not client-ready', async () => {
     for (const route of [
       '/api/mobile/pwa/search?q=other',

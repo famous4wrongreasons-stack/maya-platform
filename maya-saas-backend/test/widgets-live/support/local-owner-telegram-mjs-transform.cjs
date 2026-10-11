@@ -3,7 +3,7 @@ const ts = require('typescript');
 module.exports = {
   process(sourceText, sourcePath) {
     if (
-      !/\/scripts\/(?:local-owner-telegram-(?:policy|transport|runtime)|local-owner-scope|local-onboarding-profile)\.mjs$/.test(
+      !/\/scripts\/(?:local-owner-telegram-(?:policy|transport|runtime)|local-owner-scope|local-onboarding-profile|local-yclients-read-status)\.mjs$/.test(
         sourcePath,
       )
     )

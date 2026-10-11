@@ -27,6 +27,19 @@ const TRACE_ROUTES = Object.freeze(['auth', 'connect', 'activate', 'operation', 
 const CONNECTION_FAILURE_CODES = Object.freeze(['crm_credentials_rejected', 'crm_company_not_found', 'crm_provider_unreachable', 'crm_platform_configuration_error', 'crm_connection_failed']);
 const TELEGRAM_FAILURE_CODES = Object.freeze(['social_exchange_failed', 'social_token_invalid', 'social_state_invalid', 'social_callback_invalid', 'social_identity_conflict', 'social_link_forbidden', 'social_link_tenant_mismatch', 'social_phone_required', 'social_provider_unavailable', 'social_business_access_suspended', 'social_business_link_required', 'local_owner_telegram_scope_refused']);
 const TELEGRAM_TOKEN_OUTCOMES = Object.freeze(['id_token_present', 'missing_id_token', 'unexpected_shape', 'contradictory_token_error', 'oauth_invalid_client', 'oauth_invalid_grant', 'oauth_invalid_request', 'oauth_unauthorized_client', 'oauth_unsupported_grant_type', 'oauth_invalid_scope', 'oauth_access_denied', 'oauth_server_error', 'oauth_temporarily_unavailable', 'oauth_other_error']);
+const TELEGRAM_BINDING_REASONS = Object.freeze(['verified_telegram_phone_required', 'current_complete_client_registry_required',
+  'client_not_found', 'client_phone_ambiguous', 'client_identity_unresolved', 'client_already_bound', 'client_reverification_required',
+  'client_source_changed', 'client_source_unavailable', 'fresh_telegram_verification_required', 'current_telegram_login_required', 'client_binding_unavailable']);
+const TELEGRAM_BINDING_OUTCOMES = Object.freeze(['linked', 'already_linked', 'not_attempted_phone_required', 'unexpected_binding_result', ...TELEGRAM_BINDING_REASONS]);
+function bindingOutcome(body) {
+  const own = (value, key) => value && typeof value === 'object' && !Array.isArray(value)
+    ? Object.getOwnPropertyDescriptor(value, key)?.value : undefined;
+  const binding = own(body, 'client_binding'), status = own(binding, 'status'), reason = own(binding, 'reason');
+  if (status === 'linked' || status === 'already_linked') return status;
+  if (status === 'not_attempted' && reason === 'verified_telegram_phone_required') return 'not_attempted_phone_required';
+  if (status === 'unlinked' && TELEGRAM_BINDING_REASONS.includes(reason)) return reason;
+  return 'unexpected_binding_result';
+}
 const TRACE_CODES = Object.freeze([...CONNECTION_FAILURE_CODES, ...TELEGRAM_FAILURE_CODES, 'provider_response_read', 'provider_http_error', 'provider_rejected', 'provider_scope_refused', 'provider_transport_unavailable', 'response_closed', 'local_onboarding_origin_refused', 'local_yclients_diagnostic_route_disabled', 'local_yclients_read_route_disabled']);
 export const TEAM_ISSUES = Object.freeze(['payload_shape', 'success_unconfirmed', 'data_shape', 'member_limit', 'pagination_present', 'meta_shape', 'unknown_meta_fields', 'total_count_type', 'total_count_mismatch', 'count_mismatch', 'page_not_first', 'row_shape', 'invalid_staff_id', 'duplicate_staff_id', 'foreign_company']);
 export const TEAM_COUNT_ENCODINGS = Object.freeze(['number', 'decimal_string', 'missing', 'null', 'invalid_number', 'invalid_string', 'other']);
@@ -48,6 +61,7 @@ export function projectReadTrace(message) {
   if (message && Object.hasOwn(message, 'teamCompleteness')) fields.push('teamCompleteness');
   if (message && Object.hasOwn(message, 'teamCollectionCheck')) fields.push('teamCollectionCheck');
   if (message && Object.hasOwn(message, 'telegramTokenOutcome')) fields.push('telegramTokenOutcome');
+  if (message && Object.hasOwn(message, 'telegramBindingOutcome')) fields.push('telegramBindingOutcome');
   if (!message || typeof message !== 'object' || Array.isArray(message) || Object.keys(message).length !== fields.length || !fields.every(key => Object.hasOwn(message, key))) return null;
   if (message.type !== 'read-trace' || message.contract !== 'maya.local-yclients-read-trace/1' || !Number.isSafeInteger(message.sequence) || message.sequence < 1 || message.sequence > READ_TRACE_LIMIT || !Number.isSafeInteger(message.elapsedMs) || message.elapsedMs < 0 || message.elapsedMs > 1200000) return null;
   if (!['http', 'provider'].includes(message.surface) || !TRACE_ROUTES.includes(message.route) || !['GET', 'POST', 'OTHER'].includes(message.method) || !['entered', 'completed', 'refused', 'closed'].includes(message.stage)) return null;
@@ -59,6 +73,13 @@ export function projectReadTrace(message) {
     if (message.surface !== 'provider' || message.route !== 'telegram_token' || message.method !== 'POST'
       || message.stage !== 'completed' || message.code !== 'provider_response_read'
       || message.status < 200 || message.status >= 300 || !TELEGRAM_TOKEN_OUTCOMES.includes(telegramTokenOutcome)) return null;
+  }
+  let telegramBindingOutcome;
+  if (fields.includes('telegramBindingOutcome')) {
+    telegramBindingOutcome = Object.getOwnPropertyDescriptor(message, 'telegramBindingOutcome')?.value;
+    if (message.surface !== 'http' || message.route !== 'telegram_login_complete' || message.method !== 'POST'
+      || message.stage !== 'completed' || message.code !== null || message.status < 200 || message.status >= 300
+      || !TELEGRAM_BINDING_OUTCOMES.includes(telegramBindingOutcome)) return null;
   }
   if (fields.includes('teamIssues')) {
     const issues = message.teamIssues;
@@ -77,7 +98,7 @@ export function projectReadTrace(message) {
     collectionCheck = projectTeamCollectionCheck(message.teamCollectionCheck);
     if (!collectionCheck || collectionCheck.http200 !== (message.status === 200)) return null;
   }
-  return Object.fromEntries(fields.map(key => [key, key === 'teamIssues' ? [...message[key]] : key === 'teamCollectionCheck' ? collectionCheck : key === 'telegramTokenOutcome' ? telegramTokenOutcome : message[key]]));
+  return Object.fromEntries(fields.map(key => [key, key === 'teamIssues' ? [...message[key]] : key === 'teamCollectionCheck' ? collectionCheck : key === 'telegramTokenOutcome' ? telegramTokenOutcome : key === 'telegramBindingOutcome' ? telegramBindingOutcome : message[key]]));
 }
 export function createReadTrace(send, clock = Date.now) {
   const start = clock(); let sequence = 0;
@@ -99,12 +120,13 @@ export function traceHttpRequest(request, response, emit, refusal = null) {
   emit({ ...base, stage: 'entered', status: null, code });
   // Retain only a canonical public failure code. Never stringify/copy the body,
   // invoke its getters, or change the application's response or error behavior.
-  let connectionFailure = null;
+  let connectionFailure = null, telegramBindingOutcome = null;
   const failureCodes = ['connect', 'activate'].includes(route) ? CONNECTION_FAILURE_CODES
     : ['telegram_link_complete', 'telegram_login_complete'].includes(route) ? TELEGRAM_FAILURE_CODES : [];
   if (failureCodes.length && typeof response.json === 'function') {
     const originalJson = response.json;
     response.json = function (...args) {
+      telegramBindingOutcome = null;
       try {
         const body = args[0];
         const error = body && typeof body === 'object' && !Array.isArray(body)
@@ -112,6 +134,8 @@ export function traceHttpRequest(request, response, emit, refusal = null) {
         const candidate = error && typeof error === 'object' && !Array.isArray(error)
           ? Object.getOwnPropertyDescriptor(error, 'code')?.value : null;
         connectionFailure = failureCodes.includes(candidate) ? candidate : null;
+        if (route === 'telegram_login_complete' && response.statusCode >= 200 && response.statusCode < 300)
+          telegramBindingOutcome = bindingOutcome(body);
       } catch { connectionFailure = null; }
       return Reflect.apply(originalJson, this, args);
     };
@@ -119,7 +143,8 @@ export function traceHttpRequest(request, response, emit, refusal = null) {
   let finished = false;
   response.once('finish', () => {
     if (finished) return; finished = true;
-    emit({ ...base, stage: response.statusCode >= 400 ? 'refused' : 'completed', status: response.statusCode, code: code ?? (response.statusCode >= 400 ? connectionFailure : null) });
+    emit({ ...base, stage: response.statusCode >= 400 ? 'refused' : 'completed', status: response.statusCode, code: code ?? (response.statusCode >= 400 ? connectionFailure : null),
+      ...(telegramBindingOutcome !== null && response.statusCode >= 200 && response.statusCode < 300 ? { telegramBindingOutcome } : {}) });
   });
   response.once('close', () => {
     if (finished) return; finished = true;

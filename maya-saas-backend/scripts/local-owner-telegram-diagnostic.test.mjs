@@ -167,3 +167,74 @@ test('token response category never inspects non-OK bodies or adds a category to
   assert.equal(events.length, 4);
   for (const e of events) assert.equal(Object.hasOwn(e, 'telegramTokenOutcome'), false);
 });
+
+test('login binding diagnosis preserves exact response and only closed canonical outcome', () => {
+  const cases = [
+    [{ status: 'linked' }, 'linked'], [{ status: 'already_linked' }, 'already_linked'],
+    [{ status: 'not_attempted', reason: 'verified_telegram_phone_required' }, 'not_attempted_phone_required'],
+    ...['verified_telegram_phone_required', 'current_complete_client_registry_required', 'client_not_found',
+      'client_phone_ambiguous', 'client_identity_unresolved', 'client_already_bound', 'client_reverification_required',
+      'client_source_changed', 'client_source_unavailable', 'fresh_telegram_verification_required',
+      'current_telegram_login_required', 'client_binding_unavailable'].map(reason => [{ status: 'unlinked', reason }, reason]),
+    [{ status: 'unlinked', reason: 'SYNTHETIC_PRIVATE' }, 'unexpected_binding_result'],
+    [{ status: 'SYNTHETIC_PRIVATE' }, 'unexpected_binding_result'],
+    [null, 'unexpected_binding_result'], [[], 'unexpected_binding_result'],
+  ];
+  for (const [binding, expected] of cases) {
+    const f = httpFixture('/api/auth/oauth/telegram/complete', 201);
+    const body = { access_token: 'SYNTHETIC_PRIVATE_TOKEN', user: { phone: 'SYNTHETIC_PRIVATE_PHONE' }, client_binding: binding };
+    f.response.json(body);
+    assert.equal(f.wire(), JSON.stringify(body));
+    assert.equal(f.events[1].telegramBindingOutcome, expected);
+    assert.equal(f.events[1].code, null);
+    assert.equal(JSON.stringify(f.events).includes('SYNTHETIC_PRIVATE'), false);
+  }
+});
+test('binding diagnostic never invokes getters or reads inherited or private fields', () => {
+  let reads = 0;
+  const bodies = [
+    Object.create({ client_binding: { status: 'linked' } }),
+    { get client_binding() { reads++; } },
+    { client_binding: { get status() { reads++; } } },
+    { client_binding: { status: 'unlinked', get reason() { reads++; } } },
+    { client_binding: Object.create({ status: 'linked' }) },
+    { client_binding: { status: 'linked' }, get access_token() { reads++; } },
+  ];
+  for (const body of bodies) {
+    const response = new EventEmitter(), events = []; response.statusCode = 201;
+    response.json = function(value) { this.emit('finish'); return value; };
+    traceHttpRequest({ method: 'POST', originalUrl: '/api/auth/oauth/telegram/complete' }, response, createReadTrace(e => events.push(e)));
+    assert.equal(response.json(body), body);
+    assert.ok(['unexpected_binding_result', 'linked'].includes(events[1].telegramBindingOutcome));
+  }
+  assert.equal(reads, 0);
+});
+test('binding outcome survives strict IPC only on successful login completion', async () => {
+  const f = httpFixture('/api/auth/oauth/telegram/complete', 201);
+  f.response.json({ client_binding: { status: 'unlinked', reason: 'client_phone_ambiguous' } });
+  const event = f.events[1], d = createDiagnostic(false);
+  const observer = runtimeObserver(d, { origin: 'http://127.0.0.1:56151', providerAdmission: 'explicit_setup_reads_only' }, () => {});
+  f.events.forEach(e => observer.accept(e));
+  assert.equal(d.readTrace[1].telegramBindingOutcome, 'client_phone_ambiguous');
+  for (const changed of [
+    { telegramBindingOutcome: 'SYNTHETIC_PRIVATE' }, { telegramBindingOutcome: null }, { telegramBindingOutcome: {} },
+    { route: 'telegram_link_complete' }, { surface: 'provider' }, { method: 'GET' }, { stage: 'refused' },
+    { stage: 'entered' }, { code: 'provider_http_error' }, { status: 401 }, { status: null }, { raw: 'SYNTHETIC_PRIVATE' },
+  ]) assert.equal(projectReadTrace({ ...event, ...changed }), null);
+  for (const [route, status] of [['/api/auth/oauth/telegram/link/complete', 201], ['/api/auth/oauth/telegram/complete', 400]]) {
+    const other = httpFixture(route, status); other.response.json({ client_binding: { status: 'linked' } });
+    assert.equal(Object.hasOwn(other.events[1], 'telegramBindingOutcome'), false);
+  }
+});
+test('diagnostic failure cannot retain an earlier binding result or alter response identity', () => {
+  const response = new EventEmitter(), events = []; response.statusCode = 201;
+  response.json = value => value;
+  traceHttpRequest({ method: 'POST', originalUrl: '/api/auth/oauth/telegram/complete' }, response, createReadTrace(e => events.push(e)));
+  const earlier = { client_binding: { status: 'linked' } };
+  assert.equal(response.json(earlier), earlier);
+  const opaque = new Proxy({}, { getOwnPropertyDescriptor() { throw Error('SYNTHETIC_PRIVATE'); } });
+  assert.equal(response.json(opaque), opaque);
+  response.emit('finish');
+  assert.equal(Object.hasOwn(events[1], 'telegramBindingOutcome'), false);
+  assert.equal(JSON.stringify(events).includes('SYNTHETIC_PRIVATE'), false);
+});
