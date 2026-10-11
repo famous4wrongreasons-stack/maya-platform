@@ -53,7 +53,7 @@ const edits = [
   [
     'current-session',
     resolver,
-    'const now = await this.assertLogin(tx, p);',
+    'const { now } = await this.assertLogin(tx, p, before.admission);',
     'const now = new Date();',
     'session revocation after',
   ],
@@ -85,6 +85,42 @@ const edits = [
     '.then((result) => result.profile.profile_id)',
     'signed login automatically',
   ],
+  [
+    'incoming-expiry', resolver,
+    '(!admission && p.expiresAt <= now.getTime())',
+    'false',
+    'stale/substituted login: expired-proof',
+  ],
+  [
+    'operation-expiry', resolver,
+    'admission.expiresAt <= now.getTime()',
+    'false',
+    'original admitted deadline',
+  ],
+  [
+    'operation-bound', resolver,
+    'const TELEGRAM_BINDING_OPERATION_MS = 120_000;',
+    'const TELEGRAM_BINDING_OPERATION_MS = 600_000;',
+    'fixed 120-second deadline',
+  ],
+  [
+    'session-deadline', resolver,
+    '        sessionExpiresAt,',
+    '        Number.POSITIVE_INFINITY,',
+    'original session limit',
+  ],
+  [
+    'flow-deadline', resolver,
+    '        flowExpiresAt,',
+    '        Number.POSITIVE_INFINITY,',
+    'original flow limit',
+  ],
+  [
+    'freshness-deadline', resolver,
+    '        p.issuedAt + 600_000,',
+    '        Number.POSITIVE_INFINITY,',
+    'original signed-issue-freshness limit',
+  ],
 ];
 const expected = { ...originals };
 function restore(f) {
@@ -103,12 +139,13 @@ const summary = {
   baseline: null,
   restored: null,
 };
-function run(name) {
+function run(name, pattern) {
   const dir = path.join(out, name);
   const proc = spawnSync(
     process.execPath,
     [path.join(cwd, 'scripts/telegram-client-binding-proof.mjs'), dir],
-    { cwd, encoding: 'utf8', timeout: 180000, maxBuffer: 1024 * 1024 },
+    { cwd, encoding: 'utf8', timeout: 180000, maxBuffer: 1024 * 1024,
+      env: { ...process.env, JEST_TELEGRAM_TEST_PATTERN: pattern ?? '' } },
   );
   fs.writeFileSync(
     path.join(out, name + '.runner.log'),
@@ -123,6 +160,7 @@ function run(name) {
   );
   assert.equal(manifest.sourceUnchanged, true);
   assert.equal(manifest.clusterStopped, true);
+  assert.equal(manifest.testNamePattern, pattern ?? null);
   return {
     exit: proc.status,
     passed: receipt.numPassedTests,
@@ -158,7 +196,7 @@ try {
     console.log(name);
     let r;
     try {
-      r = run(name);
+      r = run(name, expectedTest);
     } finally {
       restore(f);
     }

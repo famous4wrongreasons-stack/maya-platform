@@ -300,6 +300,28 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
     return { complete, state };
   }
 
+  // Deterministic long-deadline negative: only the binding clock is advanced.
+  // All authority/source reads and writes still use the disposable PostgreSQL.
+  function bindingClockOffset(offset: () => number) {
+    const appDb = http.app.get(PrismaService);
+    const transaction = appDb.$transaction.bind(appDb);
+    return jest
+      .spyOn(appDb, '$transaction')
+      .mockImplementation((fn: unknown, options: unknown) =>
+        transaction(async (tx) => {
+          const original = tx.$queryRaw.bind(tx);
+          tx.$queryRaw = ((query: Prisma.Sql, ...values: unknown[]) => {
+            if (offset() && query.sql?.includes('clock_timestamp()'))
+              return Promise.resolve([
+                { now: new Date(Date.now() + offset()) },
+              ]);
+            return original(query, ...values);
+          }) as typeof tx.$queryRaw;
+          return (fn as (tx: unknown) => Promise<unknown>)(tx);
+        }, options as never),
+      );
+  }
+
   it.each(['active', 'trial'] as const)(
     'existing %s business owner with no phone/Telegram: authenticated A23 link, then fresh login creates personal Client without account duplication',
     async (status) => {
@@ -634,7 +656,7 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
     expect(await f.count()).toBe(1);
   });
 
-  it('keeps login but refuses a 30-second signed Telegram proof that expires during the exact CRM lookup', async () => {
+  it('finishes the admitted operation when a 30-second signed Telegram token expires during the exact CRM lookup', async () => {
     const f = await fixture(UserRole.TENANT_OWNER);
     const issuedAt = Math.floor(Date.now() / 1000);
     const expiresAt = (issuedAt + 30) * 1000;
@@ -651,11 +673,10 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
     const result = await login.complete();
     expect(result.status).toBe(201);
     expect((result.body as LoginBody).client_binding).toEqual({
-      status: 'unlinked',
-      reason: 'fresh_telegram_verification_required',
+      status: 'linked',
     });
     expect(f.source).toHaveBeenCalledTimes(1);
-    expect(await f.count()).toBe(0);
+    expect(await f.count()).toBe(1);
     expect(
       await db.prisma.auditLog.count({
         where: {
@@ -663,10 +684,170 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
           action: 'client.telegram_initial_link',
         },
       }),
-    ).toBe(0);
+    ).toBe(1);
+    const audit = await db.prisma.auditLog.findFirstOrThrow({
+      where: { tenantId: f.tenant.id, action: 'client.telegram_initial_link' },
+    });
+    const operation = (
+      audit.metadataJson as unknown as {
+        operation: {
+          contract: string;
+          acceptedAt: number;
+          expiresAt: number;
+          originalTokenExpiresAt: number;
+          proofHash: string;
+        };
+      }
+    ).operation;
+    expect(operation.contract).toBe('a18.telegram-oidc-phone.operation.v1');
+    expect(operation.originalTokenExpiresAt).toBe(expiresAt);
+    expect(operation.acceptedAt).toBeLessThan(expiresAt);
+    expect(operation.expiresAt - operation.acceptedAt).toBe(120_000);
+    expect(operation.proofHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(Date.now()).toBeGreaterThan(expiresAt);
+    expect(result.body).not.toHaveProperty('operation');
     expect((await login.complete()).status).toBe(400);
-    expect(await f.count()).toBe(0);
+    expect(await f.count()).toBe(1);
   }, 65_000);
+
+  it('refuses an admitted operation after its fixed 120-second deadline even if the Telegram token is still valid', async () => {
+    const f = await fixture();
+    let offset = 0;
+    bindingClockOffset(() => offset);
+    f.source.mockImplementation(() => {
+      offset = 121_000;
+      return Promise.resolve({
+        ...f.registry,
+        generated_at: new Date().toISOString(),
+      });
+    });
+    expect(await f.run()).toEqual({
+      status: 'unlinked',
+      reason: 'fresh_telegram_verification_required',
+    });
+    expect(f.source).toHaveBeenCalledTimes(1);
+    expect(await f.count()).toBe(0);
+  });
+
+  it.each(['session', 'flow', 'signed-issue-freshness'])(
+    'clips the admitted deadline to the original %s limit',
+    async (limit) => {
+      const f = await fixture();
+      const deadline = new Date(Date.now() + 45_000);
+      if (limit === 'session')
+        await db.prisma.authSession.update({
+          where: { id: f.proof.sessionId },
+          data: { expiresAt: deadline },
+        });
+      if (limit === 'flow')
+        await db.prisma.authFlowState.update({
+          where: { id: f.proof.flowId },
+          data: { expiresAt: deadline },
+        });
+      const issuedAt = deadline.getTime() - 600_000;
+      if (limit === 'signed-issue-freshness')
+        await db.prisma.authFlowState.update({
+          where: { id: f.proof.flowId },
+          data: { createdAt: new Date(issuedAt) },
+        });
+      expect(
+        (await f.run(limit === 'signed-issue-freshness' ? { issuedAt } : {}))
+          .status,
+      ).toBe('linked');
+      const audit = await db.prisma.auditLog.findFirstOrThrow({
+        where: {
+          tenantId: f.tenant.id,
+          action: 'client.telegram_initial_link',
+        },
+      });
+      const metadata = audit.metadataJson as unknown as {
+        operation: { expiresAt: number };
+      };
+      expect(metadata.operation.expiresAt).toBe(deadline.getTime());
+    },
+  );
+
+  it('does not extend the original admitted deadline when the flow is prolonged during lookup', async () => {
+    const f = await fixture();
+    const deadline = new Date(Date.now() + 45_000);
+    await db.prisma.authFlowState.update({
+      where: { id: f.proof.flowId },
+      data: { expiresAt: deadline },
+    });
+    let offset = 0;
+    bindingClockOffset(() => offset);
+    f.source.mockImplementation(async () => {
+      await db.prisma.authFlowState.update({
+        where: { id: f.proof.flowId },
+        data: { expiresAt: new Date(Date.now() + 600_000) },
+      });
+      offset = 46_000;
+      return { ...f.registry, generated_at: new Date().toISOString() };
+    });
+    expect(await f.run()).toEqual({
+      status: 'unlinked',
+      reason: 'fresh_telegram_verification_required',
+    });
+    expect(await f.count()).toBe(0);
+  });
+
+  it.each([
+    'session-expired',
+    'membership-suspended',
+    'identity-phone-changed',
+    'flow-expired',
+    'flow-unconsumed',
+  ])('rereads %s during the admitted CRM lookup', async (mode) => {
+    const f = await fixture();
+    f.source.mockImplementation(async () => {
+      if (mode === 'session-expired')
+        await db.prisma.authSession.update({
+          where: { id: f.proof.sessionId },
+          data: { expiresAt: new Date(0) },
+        });
+      if (mode === 'membership-suspended')
+        await db.prisma.membership.update({
+          where: {
+            userId_tenantId: { userId: f.user.id, tenantId: f.tenant.id },
+          },
+          data: { status: 'suspended' },
+        });
+      if (mode === 'identity-phone-changed')
+        await db.prisma.authIdentity.updateMany({
+          where: {
+            tenantId: f.tenant.id,
+            userId: f.user.id,
+            provider: 'telegram',
+          },
+          data: { phone: '+12025550124' },
+        });
+      if (mode === 'flow-expired' || mode === 'flow-unconsumed')
+        await db.prisma.authFlowState.update({
+          where: { id: f.proof.flowId },
+          data:
+            mode === 'flow-expired'
+              ? { expiresAt: new Date(0) }
+              : { consumedAt: null },
+        });
+      return { ...f.registry, generated_at: new Date().toISOString() };
+    });
+    expect(await f.run()).toEqual({
+      status: 'unlinked',
+      reason: 'current_telegram_login_required',
+    });
+    expect(await f.count()).toBe(0);
+  });
+
+  it('refuses caller-authored operation admission and deadlines at the HTTP ingress', async () => {
+    const f = await fixture();
+    const login = await signedLogin(f);
+    const result = await login.complete({
+      admission: { acceptedAt: Date.now(), expiresAt: Date.now() + 600_000 },
+    });
+    expect(result.status).toBe(400);
+    expect(f.source).not.toHaveBeenCalled();
+    expect(await f.count()).toBe(0);
+  });
 
   it.each([false, undefined, 'true', 1])(
     'does not use an unverified phone claim (%s), including a stored matching phone',

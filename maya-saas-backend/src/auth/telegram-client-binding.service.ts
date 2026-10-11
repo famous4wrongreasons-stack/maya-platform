@@ -14,6 +14,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 
 export const TELEGRAM_CLIENT_RESOLVER = 'a18.telegram-oidc-phone.initial.v1';
+const TELEGRAM_BINDING_OPERATION = 'a18.telegram-oidc-phone.operation.v1';
+const TELEGRAM_BINDING_OPERATION_MS = 120_000;
 const hash = (value: unknown) =>
   createHash('sha256').update(JSON.stringify(value)).digest('hex');
 
@@ -30,6 +32,15 @@ export type VerifiedTelegramClientLogin = Readonly<{
   tokenHash: string;
   issuedAt: number;
   expiresAt: number;
+}>;
+
+/** In-process only, minted once by this coordinator after the incoming token
+ * and current login pass verification. Never supplied by an HTTP caller. */
+type AdmittedTelegramLogin = Readonly<{
+  login: VerifiedTelegramClientLogin;
+  acceptedAt: number;
+  expiresAt: number;
+  proofHash: string;
 }>;
 
 class BindingPending extends Error {
@@ -95,8 +106,30 @@ export class TelegramClientBindingService {
       p.providerUserId,
     );
     const before = await this.prisma.$transaction(async (tx) => {
-      await this.assertLogin(tx, p);
-      return { existing: await this.existing(tx, p, subject, telegramSubject) };
+      const { now, sessionExpiresAt, flowExpiresAt } = await this.assertLogin(
+        tx,
+        p,
+      );
+      const acceptedAt = now.getTime();
+      const expiresAt = Math.min(
+        acceptedAt + TELEGRAM_BINDING_OPERATION_MS,
+        p.issuedAt + 600_000,
+        sessionExpiresAt,
+        flowExpiresAt,
+      );
+      const admission: AdmittedTelegramLogin = Object.freeze({
+        login: p,
+        acceptedAt,
+        expiresAt,
+        proofHash: this.encryption.opaqueReference(
+          TELEGRAM_BINDING_OPERATION,
+          JSON.stringify({ login: p, acceptedAt, expiresAt }),
+        ),
+      });
+      return {
+        admission,
+        existing: await this.existing(tx, p, subject, telegramSubject),
+      };
     });
     if (before.existing) return { status: 'already_linked' as const };
     const source = await this.prisma.$transaction((tx) =>
@@ -153,7 +186,7 @@ export class TelegramClientBindingService {
               'initial_client',
               registered.clientId,
             );
-            const now = await this.assertLogin(tx, p);
+            const { now } = await this.assertLogin(tx, p, before.admission);
             if (
               now.getTime() - observedAt > 60_000 ||
               hash(await this.source(tx, p.tenantId)) !== hash(source)
@@ -237,14 +270,11 @@ export class TelegramClientBindingService {
                 p.flowId,
                 telegramSubject,
                 subject,
+                before.admission.proofHash,
               ]),
               clientAuthorityProofHash: authorityHash,
               validUntil: new Date(
-                Math.min(
-                  p.expiresAt,
-                  p.issuedAt + 600_000,
-                  now.getTime() + 60_000,
-                ),
+                Math.min(before.admission.expiresAt, now.getTime() + 60_000),
               ),
             });
             await tx.auditLog.create({
@@ -265,6 +295,13 @@ export class TelegramClientBindingService {
                   verificationEvidenceHash:
                     result.link.verificationEvidenceHash,
                   clientAuthorityProofHash: authorityHash,
+                  operation: {
+                    contract: TELEGRAM_BINDING_OPERATION,
+                    acceptedAt: before.admission.acceptedAt,
+                    expiresAt: before.admission.expiresAt,
+                    originalTokenExpiresAt: p.expiresAt,
+                    proofHash: before.admission.proofHash,
+                  },
                 },
               },
             });
@@ -308,6 +345,7 @@ export class TelegramClientBindingService {
   private async assertLogin(
     tx: Prisma.TransactionClient,
     p: VerifiedTelegramClientLogin,
+    admission?: AdmittedTelegramLogin,
   ) {
     const [clock] = await tx.$queryRaw<Array<{ now: Date }>>(
       Prisma.sql`SELECT (clock_timestamp() AT TIME ZONE 'UTC')::timestamp(3) AS now`,
@@ -318,7 +356,14 @@ export class TelegramClientBindingService {
       !Number.isFinite(p.expiresAt) ||
       p.issuedAt > now.getTime() + 30_000 ||
       p.issuedAt < now.getTime() - 600_000 ||
-      p.expiresAt <= now.getTime()
+      (!admission && p.expiresAt <= now.getTime()) ||
+      (admission &&
+        (admission.login !== p ||
+          admission.acceptedAt > now.getTime() ||
+          admission.acceptedAt >= p.expiresAt ||
+          admission.expiresAt >
+            admission.acceptedAt + TELEGRAM_BINDING_OPERATION_MS ||
+          admission.expiresAt <= now.getTime()))
     )
       throw new BindingPending('fresh_telegram_verification_required');
     const session = await tx.authSession.findUnique({
@@ -360,7 +405,11 @@ export class TelegramClientBindingService {
       p.issuedAt < flow.createdAt.getTime() - 30_000
     )
       throw new BindingPending('current_telegram_login_required');
-    return now;
+    return {
+      now,
+      sessionExpiresAt: session.expiresAt.getTime(),
+      flowExpiresAt: flow.expiresAt.getTime(),
+    };
   }
 
   private async source(tx: Prisma.TransactionClient, tenantId: string) {

@@ -16,6 +16,8 @@ const { proofCommands, proofEnvironment, runCommand } = await import(
 );
 const output = process.argv[2];
 const withBrowser = process.argv[3] === '--browser';
+const testNamePattern = process.env.JEST_TELEGRAM_TEST_PATTERN;
+assert.ok(!testNamePattern || (testNamePattern.length <= 500 && !/[\r\n]/.test(testNamePattern)));
 assert.ok(process.argv.length === (withBrowser ? 4 : 3), 'unknown proof arguments');
 assert.ok(output && path.isAbsolute(output) && !fs.existsSync(output));
 for (const f of ['.env', '.env.local'])
@@ -106,6 +108,7 @@ const manifest = {
       '--',
       ...scopes,
     ]).trim() !== '',
+  testNamePattern: testNamePattern ?? null,
   cluster,
   database,
   port,
@@ -165,6 +168,7 @@ commands.push({
     ...(process.env.JEST_TELEGRAM_WITH_SUCCESSOR === '1'
       ? ['test/widgets-live/sb1-successor.live-spec.ts']
       : []),
+    ...(testNamePattern ? ['--testNamePattern', testNamePattern] : []),
     '--json',
     '--outputFile=' + path.join(output, 'telegram-initial-jest.json'),
   ],
