@@ -1,0 +1,108 @@
+{
+  "qualification": "LOCAL_DIAGNOSTICS_NOT_RELEASE_CERTIFICATION",
+  "head": "bf030ae97f32321ea9548026532c9efea87aedc6",
+  "liveAttempt": {
+    "head": "99033d2752eb4015f67ad1ce96dc7082d17ade5d",
+    "status": "cancelled",
+    "providerReadSummary": {
+      "calls": 1,
+      "refused": 0,
+      "routes": {
+        "telegram_token": 1
+      }
+    },
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "sourceUnchanged": true,
+    "samePrivateState": true,
+    "rootCause": "UNKNOWN_NOT_RETAINED",
+    "linkSaved": false
+  },
+  "units": [
+    {
+      "name": "units",
+      "exit": 0,
+      "signal": null,
+      "tests": 229,
+      "passed": 229,
+      "failed": 0
+    },
+    {
+      "name": "types",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "lint",
+      "exit": 0,
+      "signal": null
+    }
+  ],
+  "http": {
+    "passed": 86,
+    "failed": 0,
+    "skipped": 0,
+    "clusterStopped": true,
+    "sourceUnchanged": true
+  },
+  "binary": {
+    "status": "passed",
+    "checks": [
+      "actual-child-ipc-web-ready",
+      "health-through-actual-relay",
+      "current-react-payload-served",
+      "canonical-password-session",
+      "canonical-telegram-link-start-no-provider-dispatch",
+      "canonical-telegram-refusal-through-child-ipc-safe-receipt",
+      "business-model-sms-consent-routes-refused",
+      "foreign-tenant-refused",
+      "live-permit-revocation-refused",
+      "clean-child-stop-zero-provider-dispatch",
+      "second-child-refused"
+    ],
+    "providerReadSummary": {
+      "calls": 0,
+      "refused": 0,
+      "routes": {}
+    },
+    "clusterStopped": true,
+    "sourceUnchanged": true
+  },
+  "mutations": {
+    "baseline": 38,
+    "killed": 11,
+    "restored": 38,
+    "workingSourceUnchanged": true
+  },
+  "counterfactual": {
+    "base": "99033d2752eb4015f67ad1ce96dc7082d17ade5d",
+    "testsFrom": "bf030ae97f32321ea9548026532c9efea87aedc6",
+    "testSha256": "c3282aecfb9c985eff1efaefb454d78f528c19dbe08d72a7e8f952d94e597682",
+    "exit": 1,
+    "signal": null,
+    "passed": 1,
+    "failed": 7,
+    "failures": [
+      "closed canonical HTTP failure on /api/auth/oauth/telegram/link/complete",
+      "closed canonical HTTP failure on /api/auth/oauth/telegram/complete",
+      "Telegram diagnostic does not copy arbitrary codes, inherited fields, getters or success payloads",
+      "token/JWKS HTTP status and exact successful response preserved without payload/header diagnostics",
+      "non-OK provider body remains unread/cancelled and erased; only HTTP status retained",
+      "transport failure and unlisted URL cannot leak exception, URL or credentials",
+      "Telegram trace survives strict launcher IPC; raw additions are refused; 64-event cap unchanged"
+    ],
+    "sourceCopyOnly": true,
+    "infrastructureFailure": false
+  },
+  "unchangedProductPaths": [
+    "maya-saas-backend/src",
+    "maya-saas-backend/prisma",
+    "maya-carrier-react/src",
+    "maya-chat-shell/src",
+    "maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html"
+  ],
+  "realAcceptance": "NOT_PROVEN",
+  "productionChanged": false,
+  "realYclientsCalls": 0,
+  "realModelCalls": 0
+}

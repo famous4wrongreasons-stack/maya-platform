@@ -1,0 +1,58 @@
+[
+  {
+    "kind": "live",
+    "path": "/private/tmp/maya-owner-telegram-20261012-01/session/resume.json",
+    "sha256": "cd809e81f414816f8173648d5c976d2f1e0b712467265e24d34a52c5a8d7507b",
+    "size": 546838,
+    "rawCommitted": false,
+    "reason": "Only closed allowlisted projection archived; raw execution/session details remain local."
+  },
+  {
+    "kind": "units",
+    "path": "/private/tmp/maya-telegram-diagnostic-checks-20261012-02/summary.json",
+    "sha256": "ef687f4554ccb86986e10d91b0f73bb71bd269b9388ff64080fa16bc8b922011",
+    "size": 354,
+    "rawCommitted": false,
+    "reason": "Only closed allowlisted projection archived; raw execution/session details remain local."
+  },
+  {
+    "kind": "http",
+    "path": "/private/tmp/maya-telegram-diagnostic-http-20261012-02/manifest.json",
+    "sha256": "be588e29c1acabec60b6dd87755766a24a99380df1de6244677e369cb31894ac",
+    "size": 692,
+    "rawCommitted": false,
+    "reason": "Only closed allowlisted projection archived; raw execution/session details remain local."
+  },
+  {
+    "kind": "jest",
+    "path": "/private/tmp/maya-telegram-diagnostic-http-20261012-02/telegram-initial-jest.json",
+    "sha256": "1e7268e806177cb6481e8b9afac9484e7265a8059512c1712da87a56a6ae8ce1",
+    "size": 47990,
+    "rawCommitted": false,
+    "reason": "Only closed allowlisted projection archived; raw execution/session details remain local."
+  },
+  {
+    "kind": "binary",
+    "path": "/private/tmp/maya-telegram-diagnostic-binary-20261012-02/summary.json",
+    "sha256": "6a57d1aeeb29a522d7d1acacac94c1246abd09cdffe7c832f459439b8062488a",
+    "size": 5283,
+    "rawCommitted": false,
+    "reason": "Only closed allowlisted projection archived; raw execution/session details remain local."
+  },
+  {
+    "kind": "mutations",
+    "path": "/private/tmp/maya-telegram-diagnostic-mutations-20261012-02/summary.json",
+    "sha256": "d942fffb1a0463360c0ece0fc4f74771787111bf0acd0f1cf4957e2ca56161b8",
+    "size": 3391,
+    "rawCommitted": false,
+    "reason": "Only closed allowlisted projection archived; raw execution/session details remain local."
+  },
+  {
+    "kind": "before",
+    "path": "/private/tmp/maya-telegram-diagnostic-before-20261012-02/summary.json",
+    "sha256": "e3c2fbb959f08ca9a8c8b1943406733d8a04e0d22f49449c5920c1f7a2075638",
+    "size": 980,
+    "rawCommitted": false,
+    "reason": "Only closed allowlisted projection archived; raw execution/session details remain local."
+  }
+]
