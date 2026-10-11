@@ -1,5 +1,5 @@
 // Child of the isolated HTTP/PG proof. Actual emitted React/runtime/callback;
-// exact HTTP requests relay to the owned AppModule, never a production host.
+// actual owner-launcher HTTP server/relay to the owned AppModule; no production host.
 // Only the Telegram authorization page is synthetic in this browser. The parent
 // owns a synthetic signed issuer, CRM source and model response; guards are real.
 import assert from 'node:assert/strict';
@@ -9,9 +9,10 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { Browser, Page } from '../../maya-chat-shell/test/cdp-verify.mjs';
+import { createReadWebServer } from '../../maya-saas-backend/scripts/local-yclients-read.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const origin = 'https://maya.example';
+let origin, web;
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function until(read, label) {
@@ -37,15 +38,17 @@ const verified = execFileSync(process.execPath, ['build.mjs', '--target=web', '-
 fs.writeFileSync(path.join(input.output, 'packaging.log'), verified);
 const report = { contract: 'maya.telegram-personal-browser/1', status: 'running',
   candidate: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),
-  actualReact: true, actualRuntime: true, actualBackendHttp: true, realTelegram: false,
+  actualReact: true, actualRuntime: true, actualBackendHttp: true, actualLocalWebBoundary: true, realTelegram: false,
+  actualLauncherRuntimeAdmission: false, callbackRequests: [], apiResponses: 0,
   syntheticIssuerCrmModel: true, externalRequestsDispatched: 0,
-  networkBoundary: 'CDP finite relay to owned loopback backend plus deny proxy/resolver; no OS packet claim',
+  networkBoundary: 'browser HTTP to actual loopback launcher/relay plus CDP synthetic provider and deny proxy/resolver; no OS packet claim',
   checks: [], starts: 0, completes: 0, accountLinks: 0, passwordLogins: 0, chat: [], history: [] };
-const callback = fs.readFileSync(path.join(root, '../maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html'));
 const errors = [];
 let browser, page, popup, providerReady = false, state, stopping;
 const stop = () => stopping ??= (async () => {
   await browser?.close();
+  if (web) { web.server.closeAllConnections(); await web.close(); }
+  report.webListenerStopped = !web || !web.server.listening;
   report.browserStopped = !browser || browser.child.exitCode !== null || browser.child.signalCode !== null;
   fs.writeFileSync(path.join(input.output, 'browser.json'), JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
 })();
@@ -59,6 +62,81 @@ const allowed = new Map([
   ['/api/auth/oauth/telegram/complete', 'POST'], ['/api/ai/conversation', 'GET'],
   ['/api/ai/chat', 'POST'], ['/api/widgets/resolve', 'POST'],
 ]);
+// Test-only pass-through observer: never substitutes bytes or sends a request.
+// All values here belong to the isolated synthetic fixture, not the saved owner DB.
+function observeHttp(req, res) {
+  const url = new URL(req.url, origin);
+  if (url.pathname === '/oauth-callback.html') {
+    report.callbackRequests.push({ method: req.method, site: req.headers['sec-fetch-site'] ?? null,
+      mode: req.headers['sec-fetch-mode'] ?? null, destination: req.headers['sec-fetch-dest'] ?? null });
+    let callbackCsp;
+    const writeHead = res.writeHead;
+    res.writeHead = function(status, reasonOrHeaders, explicitHeaders) {
+      const headers = typeof reasonOrHeaders === 'string' ? explicitHeaders : reasonOrHeaders;
+      callbackCsp = Object.entries(headers ?? {}).find(([key]) => key.toLowerCase() === 'content-security-policy')?.[1];
+      return writeHead.apply(this, arguments);
+    };
+    res.once('finish', () => {
+      if (res.statusCode !== 200 || !String(callbackCsp).includes("script-src 'sha256-"))
+        errors.push('canonical callback status/CSP refused');
+    });
+  }
+  if (allowed.get(url.pathname) !== req.method) return;
+  const requestChunks = [], responseChunks = [];
+  req.on('data', chunk => requestChunks.push(Buffer.from(chunk)));
+  const write = res.write, end = res.end;
+  const capture = (chunk, encoding) => {
+    if (chunk !== undefined && chunk !== null) responseChunks.push(Buffer.isBuffer(chunk) ? Buffer.from(chunk) : Buffer.from(chunk, typeof encoding === 'string' ? encoding : undefined));
+  };
+  res.write = function(chunk, encoding, ...rest) { capture(chunk, encoding); return write.call(this, chunk, encoding, ...rest); };
+  res.end = function(chunk, encoding, ...rest) { capture(chunk, encoding); return end.call(this, chunk, encoding, ...rest); };
+  res.once('finish', () => {
+    try {
+      const reqData = Buffer.concat(requestChunks).toString();
+      const body = reqData ? JSON.parse(reqData) : undefined;
+      const bytes = Buffer.concat(responseChunks).toString();
+      assert.ok(url.pathname === '/api/mobile/pwa/search' || url.search === '');
+      assert.ok((res.statusCode >= 200 && res.statusCode < 300) || (url.pathname === '/api/widgets/resolve' && res.statusCode === 403), url.pathname + ' status=' + res.statusCode);
+      report.apiResponses++;
+      if (url.pathname === '/api/auth/oauth/telegram/start') {
+        assert.deepEqual(body, { tenantSlug: input.tenantSlug, platform: 'web', redirectUri: origin + '/oauth-callback.html' }); report.starts++;
+      }
+      if (url.pathname === '/api/auth/oauth/telegram/complete') {
+        assert.deepEqual(body, { state, code: 'synthetic-code' }); report.completes++;
+      }
+      if (url.pathname === '/api/auth/login') {
+        assert.ok(input.syntheticOwner); assert.equal(report.passwordLogins, 0);
+        assert.deepEqual(body, { tenantSlug: input.tenantSlug, email: input.syntheticOwner.email, password: input.syntheticOwner.password });
+        report.passwordLogins++;
+      }
+      if (url.pathname === '/api/auth/oauth/telegram/link/start') {
+        assert.ok(input.syntheticOwner); assert.deepEqual(body, { platform: 'web', redirectUri: origin + '/oauth-callback.html' });
+      }
+      if (url.pathname === '/api/auth/oauth/telegram/link/complete') {
+        assert.ok(input.syntheticOwner); assert.equal(report.accountLinks, 0);
+        assert.deepEqual(body, { state, code: 'synthetic-code' });
+        report.accountLinks++;
+      }
+      if (url.pathname === '/api/ai/chat') {
+        assert.deepEqual(Object.keys(body).sort(), ['surface', 'requestId', 'messages', ...(body.conversationId ? ['conversationId'] : [])].sort());
+        assert.equal(body.messages.at(-1).content, input.questions[report.chat.length]);
+        assert.equal(body.surface, 'web');
+      }
+
+      if (url.pathname === '/api/ai/chat') {
+        const value = JSON.parse(bytes); assert.equal(value.grounding.status, 'verified'); assert.equal(value.action, null);
+        const index = report.chat.length; assert.ok(value.reply.includes(index < 2 ? 'визит состоялся' : 'Предстоящих: 1'));
+        assert.doesNotMatch(value.reply, /foreign-same-time|Synthetic provider private note|Synthetic source-only name/);
+        report.chat.push({ reply: value.reply, responseSha256: hash(bytes), requestIdSha256: hash(body.requestId), authorityFieldsSent: false });
+      }
+      if (url.pathname === '/api/ai/conversation') {
+        const value = JSON.parse(bytes); report.history.push({ conversationIdSha256: value.conversationId ? hash(value.conversationId) : null, roles: value.turns.map(t => t.role) });
+      }
+
+    } catch (error) { errors.push(error.message); }
+    finally { for (const chunk of [...requestChunks, ...responseChunks]) chunk.fill(0); }
+  });
+}
 async function intercept(sessionId, event) {
   const req = event.request, url = new URL(req.url);
   const fulfill = (code, body, headers = []) => browser.send('Fetch.fulfillRequest', {
@@ -78,62 +156,15 @@ async function intercept(sessionId, event) {
     return fulfill(200, '<!doctype html><title>Synthetic Telegram</title><p>Isolated authorization fixture</p>', [{ name: 'Content-Type', value: 'text/html' }]);
   }
   if (url.origin === 'https://oauth.telegram.org' && url.pathname === '/favicon.ico' && req.method === 'GET') return fulfill(204, '');
-  if (url.origin === origin && allowed.get(url.pathname) === req.method) {
-    assert.ok(url.pathname === '/api/mobile/pwa/search' || url.search === '');
-    const body = req.postData === undefined ? undefined : JSON.parse(req.postData);
-    if (url.pathname === '/api/auth/oauth/telegram/start') {
-      assert.deepEqual(body, { tenantSlug: input.tenantSlug, platform: 'web', redirectUri: origin + '/oauth-callback.html' }); report.starts++;
-    }
-    if (url.pathname === '/api/auth/oauth/telegram/complete') {
-      assert.deepEqual(body, { state, code: 'synthetic-code' }); report.completes++;
-    }
-    if (url.pathname === '/api/auth/login') {
-      assert.ok(input.syntheticOwner); assert.equal(report.passwordLogins, 0);
-      assert.deepEqual(body, { tenantSlug: input.tenantSlug, email: input.syntheticOwner.email, password: input.syntheticOwner.password });
-      report.passwordLogins++;
-    }
-    if (url.pathname === '/api/auth/oauth/telegram/link/start') {
-      assert.ok(input.syntheticOwner); assert.deepEqual(body, { platform: 'web', redirectUri: origin + '/oauth-callback.html' });
-    }
-    if (url.pathname === '/api/auth/oauth/telegram/link/complete') {
-      assert.ok(input.syntheticOwner); assert.equal(report.accountLinks, 0);
-      assert.deepEqual(body, { state, code: 'synthetic-code' });
-      report.accountLinks++;
-    }
-    if (url.pathname === '/api/ai/chat') {
-      assert.deepEqual(Object.keys(body).sort(), ['surface', 'requestId', 'messages', ...(body.conversationId ? ['conversationId'] : [])].sort());
-      assert.equal(body.messages.at(-1).content, input.questions[report.chat.length]);
-      assert.equal(body.surface, 'web');
-    }
-    // The test relay forwards only protocol headers. Tokens never enter a file,
-    // report, command-line argument, parent IPC or diagnostic message.
-    const headers = {};
-    for (const [key, value] of Object.entries(req.headers)) if (['authorization', 'content-type'].includes(key.toLowerCase())) headers[key] = value;
-    const response = await fetch(input.backendOrigin + url.pathname + url.search, {
-      method: req.method, headers, body: req.postData, redirect: 'error', signal: AbortSignal.timeout(15000),
-    });
-    const bytes = await response.text();
-    assert.ok((response.status >= 200 && response.status < 300) || (url.pathname === '/api/widgets/resolve' && response.status === 403), url.pathname + ' status=' + response.status);
-    if (url.pathname === '/api/ai/chat') {
-      const value = JSON.parse(bytes); assert.equal(value.grounding.status, 'verified'); assert.equal(value.action, null);
-      const index = report.chat.length; assert.ok(value.reply.includes(index < 2 ? 'визит состоялся' : 'Предстоящих: 1'));
-      assert.doesNotMatch(value.reply, /foreign-same-time|Synthetic provider private note|Synthetic source-only name/);
-      report.chat.push({ reply: value.reply, responseSha256: hash(bytes), requestIdSha256: hash(body.requestId), authorityFieldsSent: false });
-    }
-    if (url.pathname === '/api/ai/conversation') {
-      const value = JSON.parse(bytes); report.history.push({ conversationIdSha256: value.conversationId ? hash(value.conversationId) : null, roles: value.turns.map(t => t.role) });
-    }
-    return fulfill(response.status, bytes, [{ name: 'Content-Type', value: 'application/json' }]);
-  }
-  if (url.origin === origin && req.method === 'GET' && url.pathname === '/oauth-callback.html') {
-    return fulfill(200, callback, [{ name: 'Content-Type', value: 'text/html' }]);
-  }
+  if (url.origin === origin && req.method === 'GET' && url.pathname === '/oauth-callback.html')
+    return browser.send('Fetch.continueRequest', { requestId: event.requestId }, sessionId);
+  if (url.origin === origin && allowed.get(url.pathname) === req.method)
+    return browser.send('Fetch.continueRequest', { requestId: event.requestId }, sessionId);
   if (url.origin === origin && req.method === 'GET' && !url.search) {
     const dist = path.join(root, 'dist/web');
     const file = path.resolve(dist, '.' + (url.pathname === '/' ? '/index.html' : url.pathname));
-    if (file.startsWith(dist + path.sep) && fs.existsSync(file) && fs.statSync(file).isFile()) {
-      return fulfill(200, fs.readFileSync(file), [{ name: 'Content-Type', value: ({ '.js': 'text/javascript', '.css': 'text/css', '.html': 'text/html', '.png': 'image/png', '.webmanifest': 'application/manifest+json' })[path.extname(file)] ?? 'application/octet-stream' }]);
-    }
+    if (file.startsWith(dist + path.sep) && fs.existsSync(file) && fs.statSync(file).isFile())
+      return browser.send('Fetch.continueRequest', { requestId: event.requestId }, sessionId);
   }
   errors.push('undeclared request refused: ' + req.method + ' ' + url.origin + url.pathname);
   await browser.send('Fetch.failRequest', { requestId: event.requestId, errorReason: 'BlockedByClient' }, sessionId);
@@ -176,8 +207,13 @@ async function linkExistingOwner() {
   assert.equal(report.completes, 0); assert.equal(report.accountLinks, 1);
 }
 try {
+  const env = { PORT: backend.port, CORS_ALLOWED_ORIGINS: 'http://127.0.0.1:59992' };
+  web = createReadWebServer({ diagnosticNoProvider: true }, env);
+  web.server.prependListener('request', observeHttp);
+  await web.listen(0);
+  origin = 'http://127.0.0.1:' + web.server.address().port; env.CORS_ALLOWED_ORIGINS = origin;
   browser = await Browser.launch('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', [
-    '--proxy-server=http://127.0.0.1:9', '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1', '--disable-quic',
+    '--proxy-server=http://127.0.0.1:9', '--proxy-bypass-list=127.0.0.1', '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1', '--disable-quic',
   ]);
   browser.listeners.add(msg => {
     if (msg.method === 'Fetch.requestPaused') void intercept(msg.sessionId, msg.params).catch(error => { errors.push(error.message); void browser.send('Fetch.failRequest', { requestId: msg.params.requestId, errorReason: 'BlockedByClient' }, msg.sessionId).catch(() => {}); });
@@ -213,6 +249,10 @@ try {
   await check(`document.querySelectorAll('[data-chat-message="maya"]').length === 3 && document.querySelectorAll('[data-chat-message="user"]').length === 3`, 'relogin restores exactly three message pairs');
   assert.deepEqual(report.history.at(-1).roles, ['user','assistant','user','assistant','user','assistant']);
   assert.equal(report.starts, 2); assert.equal(report.completes, 2); assert.equal(report.chat.length, 3);
+  assert.equal(report.callbackRequests.length, input.syntheticOwner ? 3 : 2);
+  assert.ok(report.callbackRequests.every(r => r.method === 'GET' && r.site === 'cross-site' && r.mode === 'navigate' && r.destination === 'document'));
+  assert.ok(report.apiResponses >= 10);
+  report.checks.push('actual cross-site returns through owner launcher and canonical HTTP relay');
   assert.deepEqual(errors, []);
   // Retain a synthetic-only UI screenshot. Reports contain no raw private reply.
   const shot = await page.send('Page.captureScreenshot', { format: 'png' });

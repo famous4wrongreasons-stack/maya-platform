@@ -1044,14 +1044,18 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
                 .get(ClientChannelRuntimeService)
                 .cabinetProjection(proof),
             ),
-          consent: (privacy: boolean) =>
-            context.runAsAuthPrincipal(actor, () =>
-              http.app.get(ClientChannelRuntimeService).submitConsent(proof, {
+          consent: async (privacy: boolean) => {
+            const response = await request(http.app.getHttpServer())
+              .post('/api/client-channel/consent')
+              .set('Authorization', `Bearer ${body.access_token}`)
+              .send({
                 privacy,
                 marketing: false,
                 idempotencyKey: randomUUID(),
-              }),
-            ),
+              });
+            expect(response.status).toBe(201);
+            return response.body as unknown;
+          },
         };
       };
       return { ...f, entries, journal, sync, state, login };
@@ -1061,27 +1065,40 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
       f: Awaited<ReturnType<typeof historyFixture>>,
     ) {
       const owner = await fx.user(f.tenant, UserRole.TENANT_OWNER);
-      const actor = await fx.actor(f.tenant, owner);
-      return context.runAsAuthPrincipal(actor, async () => {
-        const current = await http.app
-          .get(GovernedSettingsReadService)
-          .read(f.tenant.id, owner.id, 'client_capabilities');
-        return http.app
-          .get(Package5Wave1CanonicalCutoverService)
-          .updateGoverned(
-            f.tenant.id,
-            owner.id,
-            'tenant_business_configuration',
-            {
-              confirmed: true,
-              namespace: 'client_capabilities',
-              expectedRevision: current.revision,
-              previousRevisionId: current.previousRevisionId,
-              content: { client_self_visit_history: true },
-            },
-            randomUUID(),
-          );
+      const token = await http.login(
+        f.tenant.slug,
+        owner.email,
+        owner.password,
+      );
+      const current = await request(http.app.getHttpServer())
+        .get('/api/governed-settings/tenant/client_capabilities')
+        .set('Authorization', `Bearer ${token}`);
+      expect(current.status).toBe(200);
+      const revision = current.body as {
+        revision: number;
+        previousRevisionId: string | null;
+      };
+      const result = await request(http.app.getHttpServer())
+        .post('/api/governed-settings/tenant')
+        .set('Authorization', `Bearer ${token}`)
+        .set('Idempotency-Key', randomUUID())
+        .send({
+          confirmed: true,
+          namespace: 'client_capabilities',
+          expectedRevision: revision.revision,
+          previousRevisionId: revision.previousRevisionId,
+          content: { client_self_visit_history: true },
+        });
+      expect(result.status).toBe(201);
+      const after = await request(http.app.getHttpServer())
+        .get('/api/governed-settings/tenant/client_capabilities')
+        .set('Authorization', `Bearer ${token}`);
+      expect(after.status).toBe(200);
+      expect(after.body).toMatchObject({
+        revision: revision.revision + 1,
+        content: { client_self_visit_history: true },
       });
+      return result.body as unknown;
     }
 
     // Only the remote planner response is scripted. The real serializer, parser,
@@ -1340,6 +1357,9 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
           expect(report).toMatchObject({
             status: 'PASS',
             browserStopped: true,
+            webListenerStopped: true,
+            actualLocalWebBoundary: true,
+            actualBackendHttp: true,
             starts: 2,
             completes: 2,
             accountLinks: role === UserRole.TENANT_OWNER ? 1 : 0,
