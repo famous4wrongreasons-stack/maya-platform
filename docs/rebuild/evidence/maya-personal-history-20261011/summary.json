@@ -1,0 +1,825 @@
+{
+  "contract": "maya.personal-history.local-proof/1",
+  "createdAt": "2026-10-11T09:44:19.755379+00:00",
+  "qualification": "LOCAL_SYNTHETIC_NOT_RELEASE_CERTIFICATION_NOT_REAL_ACCEPTANCE",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "testedHead": "178b3cc315257527e022c0477342949990f1e810",
+  "productCommit": "437cda66670a9be39c9577698fc6f8ff02624d10",
+  "sourceUnchanged": true,
+  "sourceFilesVerified": 2072,
+  "units": {
+    "passed": 800,
+    "failed": 0,
+    "suites": [
+      {
+        "file": "src/ai-tools/ai-core.service.spec.ts",
+        "passed": 361,
+        "failed": 0
+      },
+      {
+        "file": "src/crm/client-appointment-read.architecture.spec.ts",
+        "passed": 9,
+        "failed": 0
+      },
+      {
+        "file": "src/ai-tools/ai-tool-runtime.service.spec.ts",
+        "passed": 164,
+        "failed": 0
+      },
+      {
+        "file": "src/ai-tools/ai-tool-handler.service.spec.ts",
+        "passed": 96,
+        "failed": 0
+      },
+      {
+        "file": "src/ai-tools/ai-core.personal-appointments-source-trace.spec.ts",
+        "passed": 16,
+        "failed": 0
+      },
+      {
+        "file": "src/crm/appointment-mirror.service.spec.ts",
+        "passed": 8,
+        "failed": 0
+      },
+      {
+        "file": "src/widgets/owner-ports/personal-schedule.adapter.spec.ts",
+        "passed": 6,
+        "failed": 0
+      },
+      {
+        "file": "src/ai-tools/personal-history-source.spec.ts",
+        "passed": 4,
+        "failed": 0
+      },
+      {
+        "file": "src/crm/appointment-reconciliation.service.spec.ts",
+        "passed": 8,
+        "failed": 0
+      },
+      {
+        "file": "src/crm/client-channel-cabinet-projection.service.spec.ts",
+        "passed": 6,
+        "failed": 0
+      },
+      {
+        "file": "src/crm/adapters/yclients-journal-source.spec.ts",
+        "passed": 8,
+        "failed": 0
+      },
+      {
+        "file": "src/package5-wave1/governed-settings.spec.ts",
+        "passed": 18,
+        "failed": 0
+      },
+      {
+        "file": "src/conversation-intelligence/conversation-intelligence.service.spec.ts",
+        "passed": 27,
+        "failed": 0
+      },
+      {
+        "file": "src/conversation-intelligence/reschedule-preference-carry.spec.ts",
+        "passed": 25,
+        "failed": 0
+      },
+      {
+        "file": "src/conversation-intelligence/semantic-slot-normalization.spec.ts",
+        "passed": 8,
+        "failed": 0
+      },
+      {
+        "file": "src/conversation-intelligence/conversation-capability.spec.ts",
+        "passed": 5,
+        "failed": 0
+      },
+      {
+        "file": "src/ai-tools/personal-history-presentation.spec.ts",
+        "passed": 29,
+        "failed": 0
+      },
+      {
+        "file": "src/widgets/booking/personal-schedule.presenter.spec.ts",
+        "passed": 2,
+        "failed": 0
+      }
+    ]
+  },
+  "httpPostgres": {
+    "passed": 72,
+    "failed": 0,
+    "suites": [
+      {
+        "file": "test/widgets-live/telegram-client-binding.live-spec.ts",
+        "passed": 53,
+        "failed": 0,
+        "assertions": [
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining client role",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining tenant_owner role",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (false), including a stored matching phone",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (undefined), including a stored matching phone",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (true), including a stored matching phone",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (1), including a stored matching phone",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] links a first-time Telegram registrant to the existing CRM card, without an existing Maya account",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses forged/expired signed claims {\"aud\":\"foreign-client\"} before binding",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses forged/expired signed claims {\"iss\":\"https://forged.example\"} before binding",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses forged/expired signed claims {\"exp\":1} before binding",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses caller-selected Client, phone, tenant and channel in the login body",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rejects a token with a forged signature before any Client lookup",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] allows account login, but not Client binding, when CRM is unavailable",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] matches the complete international number despite source formatting",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] retries a serializable CRM identity registration conflict through the same owner",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one concurrent callback winner, with one link and one audit",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 1",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 2",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 3",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 4",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 5",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 6",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 7",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 8",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: absent",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: duplicate",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: same-tail-foreign-country",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: incomplete",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: provider-mismatch",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: stale",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: expired-proof",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: future-proof",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: old-proof",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: foreign-tenant",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: foreign-user",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: foreign-session",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: unclaimed-flow",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: revoked-session",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: suspended-membership",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses a source switch during CRM resolution",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rereads session revocation after CRM resolution",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] leaves revoked historical verification byte-identical and denies automatic relink",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rolls back the link when its mandatory audit cannot be written",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses a CRM card already bound to a different account",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] profile/personal context resolve the exact linked Client without changing owner role or consent",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history source-to-card history uses exact Client after signed client login, with explicit consent and no GET writes",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history source-to-card history uses exact Client after signed tenant_owner login, with explicit consent and no GET writes",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history late exact identity resolves the existing mirror rows only on reconciliation, never on login/GET",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history canonical salon history setting admits only own saved history and withdrawal blocks the next read",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history same provider record identifiers in two salons never cross the authenticated tenant",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history provider failure or a truncated refresh never erases the last synchronized personal history",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history session revocation closes card and history while preserving the synchronized records",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history privacy withdrawal hides the card again without deleting canonical visit history",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "test/widgets-live/sb1-successor.live-spec.ts",
+        "passed": 19,
+        "failed": 0,
+        "assertions": [
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-01 happy successor verification creates usable explicit personal context and actual actor audit",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-02 wrong OTP has no link or consumption effect",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-03 replay fails closed",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-04 expired OTP fails under database time",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-05 Client substitution cannot transfer a challenge",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-06 tenant substitution fails closed",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-07 predecessor changed after resolver read is rejected inside identity lock",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-08 active predecessor never authorizes issuance or consumption",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-09 non-latest revoked predecessor cannot be consumed",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-10 revoked episode remains byte-for-byte immutable",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-11 successful consume creates exactly one successor and one outcome",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-12 concurrent consume serializes to one success and one refusal",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-JSON all four V2 fields are mandatory, exact and immutable",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-CHANNEL canonical channel changed after issuance invalidates exact Client proof",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-SESSION current revocation is checked on consume",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-LIMIT failed OTP attempts survive rollback and cannot be reset with correct code",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-DELIVERY failed SMS grants nothing and discloses no OTP",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-V1 historical V1 remains immutable and initial-only; V1 consumption still works for a fresh subject",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+            "status": "passed"
+          }
+        ]
+      }
+    ],
+    "sourceBoundary": "synthetic Telegram issuer and canonical CRM source; real HTTP/AppModule/PG/identity/reconciliation/consent/A22 readers and writers"
+  },
+  "mutations": {
+    "status": "passed",
+    "sourceRestored": true,
+    "baseline": {
+      "code": 0,
+      "signal": null,
+      "passed": 394,
+      "failed": 0,
+      "failedAssertions": [],
+      "json": "/private/tmp/maya-history-mutations-20261011-final/baseline.json"
+    },
+    "liveBaseline": {
+      "code": 0,
+      "signal": null,
+      "passed": 53,
+      "failed": 0,
+      "failedAssertions": [],
+      "json": "/private/tmp/maya-history-mutations-20261011-final/live-baseline/telegram-initial-jest.json"
+    },
+    "restored": {
+      "code": 0,
+      "signal": null,
+      "passed": 394,
+      "failed": 0,
+      "failedAssertions": [],
+      "json": "/private/tmp/maya-history-mutations-20261011-final/restored.json"
+    },
+    "liveRestored": {
+      "code": 0,
+      "signal": null,
+      "passed": 53,
+      "failed": 0,
+      "failedAssertions": [],
+      "json": "/private/tmp/maya-history-mutations-20261011-final/live-restored/telegram-initial-jest.json"
+    },
+    "cases": [
+      {
+        "name": "private-history-route",
+        "file": "src/ai-tools/ai-core.service.ts",
+        "killed": true,
+        "code": 1,
+        "signal": null,
+        "passed": 392,
+        "failed": 2,
+        "failedAssertions": [
+          "AiCoreService personal appointment details in the canonical chat answers authorized personal history period past without a second model call",
+          "AiCoreService personal appointment details in the canonical chat answers authorized personal history period last_visit without a second model call"
+        ],
+        "json": "/private/tmp/maya-history-mutations-20261011-final/private-history-route.json"
+      },
+      {
+        "name": "history-permission",
+        "file": "src/ai-tools/personal-history-presentation.ts",
+        "killed": true,
+        "code": 1,
+        "signal": null,
+        "passed": 391,
+        "failed": 3,
+        "failedAssertions": [
+          "private history server presentation refuses disabled history even if rows were supplied",
+          "private history server presentation refuses missing/foreign/unqualified history scope {\"source\":\"maya_canonical\",\"coverage\":\"last_synchronized\"}",
+          "private history server presentation refuses missing/foreign/unqualified history scope {\"source\":\"maya_canonical\",\"enabled\":\"true\",\"coverage\":\"last_synchronized\"}"
+        ],
+        "json": "/private/tmp/maya-history-mutations-20261011-final/history-permission.json"
+      },
+      {
+        "name": "strict-setting",
+        "file": "src/ai-tools/ai-tool-handler.service.ts",
+        "killed": true,
+        "code": 1,
+        "signal": null,
+        "passed": 392,
+        "failed": 2,
+        "failedAssertions": [
+          "own history source setting and private projection publishes history only for the existing strict enabled setting (undefined)",
+          "own history source setting and private projection publishes history only for the existing strict enabled setting (\"true\")"
+        ],
+        "json": "/private/tmp/maya-history-mutations-20261011-final/strict-setting.json"
+      },
+      {
+        "name": "source-binding",
+        "file": "src/ai-tools/personal-history-presentation.ts",
+        "killed": true,
+        "code": 1,
+        "signal": null,
+        "passed": 393,
+        "failed": 1,
+        "failedAssertions": [
+          "private history server presentation refuses missing/foreign/unqualified history scope {\"source\":\"remote\",\"enabled\":true,\"coverage\":\"last_synchronized\"}"
+        ],
+        "json": "/private/tmp/maya-history-mutations-20261011-final/source-binding.json"
+      },
+      {
+        "name": "coverage",
+        "file": "src/ai-tools/personal-history-presentation.ts",
+        "killed": true,
+        "code": 1,
+        "signal": null,
+        "passed": 393,
+        "failed": 1,
+        "failedAssertions": [
+          "private history server presentation refuses missing/foreign/unqualified history scope {\"source\":\"maya_canonical\",\"enabled\":true,\"coverage\":\"complete\"}"
+        ],
+        "json": "/private/tmp/maya-history-mutations-20261011-final/coverage.json"
+      },
+      {
+        "name": "attendance-proof",
+        "file": "src/ai-tools/personal-history-presentation.ts",
+        "killed": true,
+        "code": 1,
+        "signal": null,
+        "passed": 390,
+        "failed": 4,
+        "failedAssertions": [
+          "private history server presentation completion without arrived evidence (null) is not a last attended visit",
+          "private history server presentation completion without arrived evidence (awaiting) is not a last attended visit",
+          "private history server presentation completion without arrived evidence (confirmed_by_client) is not a last attended visit",
+          "private history server presentation completion without arrived evidence (no_show) is not a last attended visit"
+        ],
+        "json": "/private/tmp/maya-history-mutations-20261011-final/attendance-proof.json"
+      },
+      {
+        "name": "latest-order",
+        "file": "src/ai-tools/personal-history-presentation.ts",
+        "killed": true,
+        "code": 1,
+        "signal": null,
+        "passed": 393,
+        "failed": 1,
+        "failedAssertions": [
+          "private history server presentation shows at most five latest saved records, not an all-time visit total"
+        ],
+        "json": "/private/tmp/maya-history-mutations-20261011-final/latest-order.json"
+      },
+      {
+        "name": "attendance-projection",
+        "file": "src/ai-tools/ai-tool-handler.service.ts",
+        "killed": true,
+        "code": 1,
+        "signal": null,
+        "passed": 393,
+        "failed": 1,
+        "failedAssertions": [
+          "own history source setting and private projection publishes history only for the existing strict enabled setting (true)"
+        ],
+        "json": "/private/tmp/maya-history-mutations-20261011-final/attendance-projection.json"
+      },
+      {
+        "name": "terminal-status",
+        "file": "src/ai-tools/personal-history-presentation.ts",
+        "killed": true,
+        "code": 1,
+        "signal": null,
+        "passed": 379,
+        "failed": 15,
+        "failedAssertions": [
+          "own history source setting and private projection publishes history only for the existing strict enabled setting (true)",
+          "AiCoreService personal appointment details in the canonical chat past CRM status completed does not block an upcoming appointment reply",
+          "AiCoreService personal appointment details in the canonical chat past CRM status no_show does not block an upcoming appointment reply",
+          "AiCoreService personal appointment details in the canonical chat answers authorized personal history period past without a second model call",
+          "AiCoreService personal appointment details in the canonical chat answers authorized personal history period last_visit without a second model call",
+          "private history server presentation uses the visit branch timezone and exposes no identifiers, contacts or notes",
+          "private history server presentation shows at most five latest saved records, not an all-time visit total",
+          "private history server presentation completion without arrived evidence (null) is not a last attended visit",
+          "private history server presentation completion without arrived evidence (awaiting) is not a last attended visit",
+          "private history server presentation completion without arrived evidence (confirmed_by_client) is not a last attended visit",
+          "private history server presentation completion without arrived evidence (no_show) is not a last attended visit",
+          "private history server presentation does not present a no_show row as a last attended visit",
+          "private history server presentation keeps the literal recorded outcome {\"attendance\":\"no_show\"}",
+          "private history server presentation keeps the literal recorded outcome {\"attendance\":null}",
+          "private history server presentation uses only qualified tenant display timezone for a branchless native Date row"
+        ],
+        "json": "/private/tmp/maya-history-mutations-20261011-final/terminal-status.json"
+      },
+      {
+        "name": "canonical-attendance-read",
+        "file": "src/crm/client-appointment-read.service.ts",
+        "killed": true,
+        "code": 1,
+        "signal": null,
+        "passed": 50,
+        "failed": 3,
+        "failedAssertions": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history source-to-card history uses exact Client after signed client login, with explicit consent and no GET writes",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history source-to-card history uses exact Client after signed tenant_owner login, with explicit consent and no GET writes",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history canonical salon history setting admits only own saved history and withdrawal blocks the next read"
+        ],
+        "json": "/private/tmp/maya-history-mutations-20261011-final/canonical-attendance-read/telegram-initial-jest.json"
+      }
+    ]
+  },
+  "staticChecks": [
+    {
+      "check": "build-types",
+      "result": "PASS",
+      "exitStatus": 0,
+      "log": "/private/tmp/maya-history-build-types-178b3cc3.log"
+    },
+    {
+      "check": "live-types",
+      "result": "PASS",
+      "exitStatus": 0,
+      "log": "/private/tmp/maya-history-live-types-178b3cc3.log"
+    },
+    {
+      "check": "lint",
+      "result": "PASS",
+      "exitStatus": 0,
+      "log": "/private/tmp/maya-history-lint-178b3cc3.log"
+    }
+  ],
+  "stoppedOwnedClusters": [
+    {
+      "manifest": "/private/tmp/maya-history-http-20261011-03/manifest.json",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-telegram-initial-HL6ns6/pg",
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-history-http-20261011-04/manifest.json",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-telegram-initial-JGlstq/pg",
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-history-http-20261011-05/manifest.json",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-telegram-initial-eyRImQ/pg",
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-history-http-20261011-02/manifest.json",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-telegram-initial-wWvApE/pg",
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-history-http-20261011-head/manifest.json",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-telegram-initial-S74GmY/pg",
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-history-http-20261011-final/manifest.json",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-telegram-initial-BgL9GC/pg",
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-history-http-20261011-01/manifest.json",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-telegram-initial-gpQ2e6/pg",
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-history-http-178b3cc3/manifest.json",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-telegram-initial-8mw4hK/pg",
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-history-mutations-20261011-01/canonical-attendance-read/manifest.json",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-telegram-initial-8cueNp/pg",
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-history-mutations-20261011-01/live-baseline/manifest.json",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-telegram-initial-0UO8Mh/pg",
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-history-mutations-20261011-01/live-restored/manifest.json",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-telegram-initial-LRPPwQ/pg",
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-history-mutations-20261011-final/canonical-attendance-read/manifest.json",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-telegram-initial-GOCR05/pg",
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-history-mutations-20261011-final/live-baseline/manifest.json",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-telegram-initial-OV7P9T/pg",
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-history-mutations-20261011-final/live-restored/manifest.json",
+      "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-telegram-initial-KkkF3c/pg",
+      "pgCtlStatusExit": 3
+    }
+  ],
+  "rawReceipts": [
+    {
+      "path": "/private/tmp/maya-history-related-178b3cc3.json",
+      "sha256": "d841b88b9fe4780c9707aca06fce7ce64bc6168e1ba2553ce9e1d5081a992de0",
+      "bytes": 405194,
+      "repositoryCopy": "projection only; full synthetic logs remain local"
+    },
+    {
+      "path": "/private/tmp/maya-history-related-178b3cc3.log",
+      "sha256": "1becb62825e5d9062cf7a754da207d75ffe865f39e60957ee9a7b922e5dd625d",
+      "bytes": 1111,
+      "repositoryCopy": "projection only; full synthetic logs remain local"
+    },
+    {
+      "path": "/private/tmp/maya-history-http-178b3cc3/telegram-initial-jest.json",
+      "sha256": "ac704b20d5504b03af351c2615f30942c52c59b84f917669b308fc0c2eefc30b",
+      "bytes": 37361,
+      "repositoryCopy": "projection only; full synthetic logs remain local"
+    },
+    {
+      "path": "/private/tmp/maya-history-http-178b3cc3/telegram-initial.log",
+      "sha256": "c1ae195dbfcab876e5c7d0d0eec5668cdbd515768432067314e507273bdf60e5",
+      "bytes": 2623,
+      "repositoryCopy": "projection only; full synthetic logs remain local"
+    },
+    {
+      "path": "/private/tmp/maya-history-http-178b3cc3/manifest.json",
+      "sha256": "0e3d0c663641d8212fc0b6b230b9501da2d8aef3daf6d932d9c069c28bc4bf2c",
+      "bytes": 692,
+      "repositoryCopy": "projection only; full synthetic logs remain local"
+    },
+    {
+      "path": "/private/tmp/maya-history-http-178b3cc3/source-hashes.json",
+      "sha256": "0043aef8aa49662e64d7db7614bcd78c7350beb4b9649184316817f4e64bc1ee",
+      "bytes": 252977,
+      "repositoryCopy": "projection only; full synthetic logs remain local"
+    },
+    {
+      "path": "/private/tmp/maya-history-mutations-20261011-final/summary.json",
+      "sha256": "c718810ca8196c520dbb2c6588b731b41d6f20bdc8ba6dba005b2b2a4cd73385",
+      "bytes": 9672,
+      "repositoryCopy": "projection only; full synthetic logs remain local"
+    },
+    {
+      "path": "/private/tmp/maya-history-build-types-178b3cc3.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "repositoryCopy": "projection only; full synthetic logs remain local"
+    },
+    {
+      "path": "/private/tmp/maya-history-live-types-178b3cc3.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "repositoryCopy": "projection only; full synthetic logs remain local"
+    },
+    {
+      "path": "/private/tmp/maya-history-lint-178b3cc3.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "repositoryCopy": "projection only; full synthetic logs remain local"
+    },
+    {
+      "path": "/private/tmp/maya-history-status-before-20261011.json",
+      "sha256": "e481b9e5560a2424558f1ec0ad66523210c68131863ab038a528e647e2f06d0c",
+      "bytes": 183143,
+      "repositoryCopy": "projection only; full synthetic logs remain local"
+    },
+    {
+      "path": "/private/tmp/maya-history-http-20261011-01/telegram-initial-jest.json",
+      "sha256": "9b4f5001b20651815c24595269b37d7f4b92ab56709cd8912ebcf33e36069dfd",
+      "bytes": 40238,
+      "repositoryCopy": "projection only; full synthetic logs remain local"
+    },
+    {
+      "path": "/private/tmp/maya-history-http-20261011-04/telegram-initial-jest.json",
+      "sha256": "cd3f190abf6763e1141bd7e7c70a40c092ca203e688c07e0ea14c4ead9f0b4e1",
+      "bytes": 30099,
+      "repositoryCopy": "projection only; full synthetic logs remain local"
+    },
+    {
+      "path": "/private/tmp/maya-history-mutations-20261011-head/baseline.json",
+      "sha256": "4a557785aa1ec857bb7ec400a8c148f024d0128bb26df0c73821e687bbc59652",
+      "bytes": 201788,
+      "repositoryCopy": "projection only; full synthetic logs remain local"
+    }
+  ],
+  "failedAttempts": [
+    {
+      "path": "/private/tmp/maya-history-status-before-20261011.json",
+      "meaning": "Two genuine past CRM terminal-status composer refusals before product correction"
+    },
+    {
+      "path": "/private/tmp/maya-history-http-20261011-01/telegram-initial-jest.json",
+      "meaning": "New fixture used purpose instead of canonical consent kind; test-only correction"
+    },
+    {
+      "path": "/private/tmp/maya-history-http-20261011-04/telegram-initial-jest.json",
+      "meaning": "Second signed login stacked ConfigService spies recursively; test-only correction"
+    },
+    {
+      "path": "/private/tmp/maya-history-mutations-20261011-head/baseline.json",
+      "meaning": "Unmutated old dossier privacy assertion saw 7346 in random opaque nonce; synthetic fixture now deterministic; no assertion removed"
+    }
+  ],
+  "effects": {
+    "productionWrites": 0,
+    "ownerDatabaseReads": 0,
+    "ownerDatabaseWrites": 0,
+    "realPrivateCrmReads": 0,
+    "realProviderMutations": 0,
+    "realOtpSms": 0,
+    "realModelCalls": 0,
+    "deploys": 0,
+    "phoneInstalls": 0,
+    "pushes": 0,
+    "newMigrations": 0
+  },
+  "limitations": [
+    "No real Telegram/CRM acceptance",
+    "No full remote history import at login",
+    "Real history window/settings still require bounded owner acceptance",
+    "No real model interpretation/linguistic acceptance for new periods",
+    "No browser/carrier/iOS acceptance in this unit",
+    "Revoked owner binding not reactivated",
+    "Messenger notifications separate",
+    "No release certificate inherited"
+  ]
+}

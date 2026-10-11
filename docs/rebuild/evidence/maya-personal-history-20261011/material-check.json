@@ -1,0 +1,24 @@
+{
+  "scope": "new commits since d1160608 plus current documentation/evidence only; not a historical whole-repository scan",
+  "status": "PASS",
+  "files": [
+    "docs/rebuild/MAYA-DELIVERY-PLAN-20261010.md",
+    "docs/rebuild/MAYA-PERSONAL-HISTORY-20261011.md",
+    "docs/rebuild/evidence/maya-personal-history-20261011/source-hashes.json",
+    "docs/rebuild/evidence/maya-personal-history-20261011/summary.json",
+    "maya-saas-backend/scripts/personal-history-mutations.mjs",
+    "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts",
+    "maya-saas-backend/src/ai-tools/personal-history-presentation.spec.ts",
+    "maya-saas-backend/src/ai-tools/personal-history-presentation.ts",
+    "maya-saas-backend/src/ai-tools/personal-history-source.spec.ts",
+    "maya-saas-backend/src/conversation-intelligence/conversation-taxonomy.ts",
+    "maya-saas-backend/src/crm/client-appointment-read.service.ts",
+    "maya-saas-backend/test/widgets-live/telegram-client-binding.live-spec.ts"
+  ],
+  "findings": [],
+  "piiReview": "No real client/provider data fetched for this unit. Contact/name literals in new tests are synthetic; repository evidence stores aggregate checks and local artifact hashes, not raw provider/session payloads.",
+  "privateKeysPublished": false,
+  "pushed": false
+}
