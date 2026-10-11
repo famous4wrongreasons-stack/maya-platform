@@ -14,6 +14,7 @@ import { AuthRateLimitService } from './auth-rate-limit.service';
 import { AuthSessionService } from './auth-session.service';
 import { SocialAuthService } from './social-auth.service';
 import { TenantAuthRepository } from './tenant-auth.repository';
+import { TelegramClientBindingService } from './telegram-client-binding.service';
 
 type TenantRecord = {
   id: string;
@@ -211,6 +212,9 @@ describe('SocialAuthService', () => {
     const rateLimitPreflightMock = jest.fn().mockResolvedValue(undefined);
     const rateLimitTenantMock = jest.fn().mockResolvedValue(undefined);
     const canonicalExecuteMock = jest.fn().mockResolvedValue({});
+    const telegramClientBindingMock = jest
+      .fn()
+      .mockResolvedValue({ status: 'linked' });
 
     const configService: Pick<ConfigService, 'get'> = {
       get: configGetMock,
@@ -277,6 +281,9 @@ describe('SocialAuthService', () => {
         {
           execute: canonicalExecuteMock,
         } as unknown as Package5Wave2CanonicalCutoverService,
+        {
+          afterLogin: telegramClientBindingMock,
+        } as unknown as TelegramClientBindingService,
       ),
       tenantContext,
       mocks: {
@@ -303,6 +310,7 @@ describe('SocialAuthService', () => {
         serializeCurrentUserMock,
         issueSessionMock,
         canonicalExecuteMock,
+        telegramClientBindingMock,
       },
     };
   };
@@ -1324,6 +1332,7 @@ describe('SocialAuthService', () => {
       id: 987654321,
       name: 'John Doe',
       phone_number: '79995554433',
+      phone_number_verified: true,
       iat: now,
       exp: now + 3600,
     };

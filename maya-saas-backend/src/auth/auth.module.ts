@@ -28,6 +28,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { PhoneAuthDeliveryService } from './phone-auth-delivery.service';
 import { SocialAuthService } from './social-auth.service';
 import { TenantAuthRepository } from './tenant-auth.repository';
+import { TelegramClientBindingService } from './telegram-client-binding.service';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { TenantAuthRepository } from './tenant-auth.repository';
     PhoneAuthDeliveryService,
     SocialAuthService,
     TenantAuthRepository,
+    TelegramClientBindingService,
   ],
   exports: [AuthRateLimitService, AuthService],
 })

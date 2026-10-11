@@ -37,6 +37,7 @@ import { AuthSessionService } from './auth-session.service';
 import { CompleteOauthLoginDto } from './dto/complete-oauth-login.dto';
 import { StartOauthLoginDto } from './dto/start-oauth-login.dto';
 import { TenantAuthRepository } from './tenant-auth.repository';
+import { TelegramClientBindingService } from './telegram-client-binding.service';
 
 type SocialProvider = 'telegram' | 'yandex';
 
@@ -62,6 +63,11 @@ type SocialProfile = {
   name: string | null;
   avatarUrl: string | null;
   raw: Record<string, unknown>;
+  telegramClientVerification?: {
+    tokenHash: string;
+    issuedAt: number;
+    expiresAt: number;
+  };
 };
 
 type TelegramTokenResponse = {
@@ -81,6 +87,7 @@ type TelegramIdTokenClaims = Record<string, unknown> & {
   iss?: string;
   name?: string;
   phone_number?: string;
+  phone_number_verified?: boolean;
   picture?: string;
   preferred_username?: string;
   sub?: string;
@@ -133,6 +140,7 @@ export class SocialAuthService {
     private readonly rateLimitService: AuthRateLimitService,
     private readonly sessionService: AuthSessionService,
     private readonly canonicalWave2: Package5Wave2CanonicalCutoverService,
+    private readonly telegramClients: TelegramClientBindingService,
   ) {}
 
   async startYandexLogin(
@@ -299,11 +307,39 @@ export class SocialAuthService {
         tenant: flow.tenant,
       });
 
+      const session = await this.sessionService.issueSession(
+        result.user,
+        metadata,
+      );
+      const binding =
+        profile.phone && profile.telegramClientVerification
+          ? await this.tenantContext.runAsAuthPrincipal(
+              {
+                tenantId: flow.tenant.id,
+                userId: result.user.id,
+                role: result.user.role,
+              },
+              () =>
+                this.telegramClients.afterLogin({
+                  ...profile.telegramClientVerification!,
+                  tenantId: flow.tenant.id,
+                  userId: result.user.id,
+                  sessionId: session.session.id,
+                  flowId: flow.id,
+                  providerUserId: profile.providerUserId,
+                  phone: profile.phone!,
+                }),
+            )
+          : {
+              status: 'not_attempted',
+              reason: 'verified_telegram_phone_required',
+            };
       return {
-        ...(await this.sessionService.issueSession(result.user, metadata)),
+        ...session,
         user: this.usersService.serializeUser(result.user),
         is_new_user: result.isNewUser,
         provider: 'telegram',
+        client_binding: binding,
       };
     });
   }
@@ -890,13 +926,28 @@ export class SocialAuthService {
       );
     }
 
+    // Only a freshly signed verified phone can participate in account/Client
+    // matching. An unverified/missing claim never falls back to stored phone.
+    const phone =
+      claims.phone_number_verified === true &&
+      typeof claims.phone_number === 'string' &&
+      /^\+?[1-9]\d{7,14}$/.test(claims.phone_number)
+        ? `+${claims.phone_number.replace(/^\+/, '')}`
+        : null;
     return {
       provider: 'telegram',
       providerUserId,
       email: null,
-      phone: this.normalizeProviderPhone(
-        this.asTrimmedString(claims.phone_number ?? null),
-      ),
+      phone,
+      telegramClientVerification: phone
+        ? {
+            tokenHash: createHash('sha256')
+              .update(tokenJson.id_token)
+              .digest('hex'),
+            issuedAt: Number(claims.iat) * 1000,
+            expiresAt: Number(claims.exp) * 1000,
+          }
+        : undefined,
       name:
         this.asTrimmedString(claims.name ?? null) ??
         this.asTrimmedString(claims.preferred_username ?? null) ??

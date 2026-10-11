@@ -1162,7 +1162,9 @@ export class UsersService {
         this.profiles
           ? this.profiles
               .forAccount(tenantId, serialized.id)
-              .then((result) => result.profile.profile_id)
+              // The verified Client link establishes personal access. Optional
+              // preference/consent rows need not exist for a new linked client.
+              .then((result) => result.clientId)
               .catch(() => null)
           : Promise.resolve(null),
         this.prisma.authIdentity.findFirst({

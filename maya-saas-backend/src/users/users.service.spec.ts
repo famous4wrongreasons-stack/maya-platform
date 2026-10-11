@@ -178,10 +178,9 @@ describe('UsersService', () => {
       decrypt: decryptMock,
     };
     const tenantContext = new TenantContextService();
-    const verifiedProfileReadMock = jest.fn().mockResolvedValue({
-      clientId: 'client-1',
-      profile: { profile_id: null },
-    });
+    const verifiedProfileReadMock = jest
+      .fn()
+      .mockRejectedValue(new Error('client_link_required'));
 
     return {
       service: new UsersService(
@@ -300,34 +299,37 @@ describe('UsersService', () => {
     ]);
   });
 
-  it('grants a linked client one client mode without a chooser', async () => {
-    const {
-      service,
-      mocks: { verifiedProfileReadMock },
-    } = createService();
-    verifiedProfileReadMock.mockResolvedValue({
-      clientId: 'client-1',
-      profile: { profile_id: 'customer-1' },
-    });
+  it.each([null, 'customer-1'])(
+    'grants a verified Client mode independently of optional profile row %s',
+    async (profileId) => {
+      const {
+        service,
+        mocks: { verifiedProfileReadMock },
+      } = createService();
+      verifiedProfileReadMock.mockResolvedValue({
+        clientId: 'client-1',
+        profile: { profile_id: profileId },
+      });
 
-    const result = await service.serializeCurrentUser(tenantUser());
+      const result = await service.serializeCurrentUser(tenantUser());
 
-    expect(result.app_access).toEqual({
-      schema_version: 1,
-      default_mode: 'client',
-      available_modes: [
-        {
-          mode: 'client',
-          access: 'granted',
-          tenant_id: 'tenant-1',
-          role: UserRole.CLIENT,
-          profile_linked: true,
-        },
-      ],
-      can_switch_mode: false,
-      chooser_required: false,
-    });
-  });
+      expect(result.app_access).toEqual({
+        schema_version: 1,
+        default_mode: 'client',
+        available_modes: [
+          {
+            mode: 'client',
+            access: 'granted',
+            tenant_id: 'tenant-1',
+            role: UserRole.CLIENT,
+            profile_linked: true,
+          },
+        ],
+        can_switch_mode: false,
+        chooser_required: false,
+      });
+    },
+  );
 
   it('returns a tenant-scoped Telegram avatar from the verified identity', async () => {
     const {

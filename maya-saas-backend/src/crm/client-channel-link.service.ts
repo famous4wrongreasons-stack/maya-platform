@@ -269,6 +269,21 @@ export class ClientChannelLinkService {
     return this.bindVerified(proof, undefined, tx, true);
   }
 
+  /** Fresh Telegram OIDC login coordinator only. Never a successor/rebind. */
+  async bindTelegramLoginInTransaction(
+    tx: Tx,
+    proof: VerifiedClientChannelProof,
+  ) {
+    if (
+      proof.method !== 'proven_user_client_link' ||
+      proof.provider !== 'maya_user' ||
+      proof.verifier !== 'a18.telegram-oidc-phone.initial.v1' ||
+      proof.supersedesLinkId
+    )
+      throw new ForbiddenException('Initial verified Telegram login required');
+    return this.bindVerified(proof, undefined, tx, true);
+  }
+
   /** V2 coordinator only: never revokes/reactivates an episode. */
   async bindSuccessorChallengeInTransaction(
     tx: Tx,

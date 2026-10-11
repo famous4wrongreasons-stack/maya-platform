@@ -1,4 +1,77 @@
-# First Client binding: exact remaining decision
+# First Client binding: current Telegram path and historical decisions
+
+## Current owner decision and implementation — 2026-10-11
+
+The owner clarified the intended first-client journey: Telegram login shares the
+verified phone, Maya finds that person's card in the selected salon, and the
+person can read their own card/history. The subsequent “работай по плану”
+authorizes implementing this bounded path. This supersedes the earlier claim
+that a trusted initial source is still entirely undecided. SMS is not a required
+step for this **initial** path. It does not replace the historical SB-1 successor
+contract or authorize restoring a revoked binding.
+
+Canonical resolver: `a18.telegram-oidc-phone.initial.v1` in
+`maya-saas-backend/src/auth/telegram-client-binding.service.ts`. Only the existing
+Telegram OAuth completion owner calls it, after signature/issuer/audience/expiry
+validation, single-use state claim and session issuance. The fresh signed token
+must explicitly carry `phone_number_verified: true` and a complete international
+phone; missing, false, string-valued or numeric flags do not authorize binding.
+The token's issuance must be within ten minutes and after the login flow began
+(with the bounded 30-second clock skew). There is no client-supplied Client id,
+provider subject, tenant, destination, phone or stored-profile fallback at this
+new entry. A skipped binding attempt does not revoke an existing link.
+
+The server reuses the current complete tenant CRM registry, compares full
+normalized numbers (not the last-ten-digit index), and requires exactly one
+card. The existing CRM registrar resolves/observes that card by exact
+provider/external id; it can register a Maya identity for an already existing
+CRM card, but creates no new CRM customer and does not merge people by phone.
+Missing or duplicate cards remain unresolved. Account-registration geography
+is unchanged: existing new-account phone validation remains Russia-only.
+
+Before persistence, the coordinator rechecks the current session, active
+membership, exact Telegram identity, claimed unexpired login flow and unchanged
+CRM integration. The source snapshot must remain within 60 seconds. Existing
+identity locks plus a serializable transaction protect the canonical initial
+link and mandatory AuditLog together. Retryable serialization/unique-link races
+reread the winner. Another account's Client, an unresolved identity hold, a
+merged card, a changed mapping/source, or a revoked Maya/Telegram tip cannot be
+adopted. No predecessor is mutated. No new table, SQL column or migration.
+
+`ClientChannelLinkService` remains the sole link writer. Evidence records hashes
+of the signed token/session/flow and the exact source resolution; it contains no
+raw phone, OTP, provider token or customer name. The audit preserves the actual
+account, session and role. `TENANT_OWNER != CLIENT`: personal context still has
+to be explicitly selected and resolved through the existing personal-context
+owner. Login creates no privacy/marketing consent, confirmation, entitlement,
+appointment or messaging permission. Missing optional CustomerProfile preferences
+do not suppress an already verified personal link in `/api/me`; access is derived
+from the existing verified profile reader's Client resolution.
+
+The matching rule intentionally trusts the verified Telegram number and the
+salon's unique current phone attribution for an as-yet-unbound CRM card. It
+cannot independently detect a wrongly entered CRM number or number recycling.
+Duplicate/currently or historically bound cards are refused rather than silently
+chosen. The source currently reads a complete registry; its cost at large salon
+sizes has not been qualified. No cached/raw phone shortcut was added.
+
+Verification receipts will be recorded in
+`docs/rebuild/evidence/maya-telegram-client-binding-20261011/`. Qualification is
+synthetic signed Telegram + synthetic CRM source, real local HTTP/PostgreSQL.
+It is not a real Telegram/CRM acceptance or a release certificate. Existing
+private-card/history readers remain owners; local mirrored history is tested,
+not a new import of the salon's entire remote history. The automatic login path
+adds no React design or presentation behavior. Actual account acceptance,
+full current CRM history synchronization, and messenger delivery remain separate
+checks. The former owner's revoked episode is not repaired by this first-link unit.
+
+Protocol source: [Telegram Login/OIDC](https://core.telegram.org/bots/telegram-login),
+inspected 2026-10-11. Phone sharing and permission for direct bot messages are
+separate scopes. No real messenger/SMS/OTP or provider-business request was made
+for this implementation.
+
+## Historical inventory and SMS proposal — not the current first-login path
+
 
 **Owner steering, 2026-10-11:** notifications must use messengers; SMS must not be
 made a mandatory launch prerequisite. The initial-only SMS proposal below remains
