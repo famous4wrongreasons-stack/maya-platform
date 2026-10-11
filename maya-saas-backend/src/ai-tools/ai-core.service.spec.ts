@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import crypto from 'node:crypto';
 import { resolve } from 'node:path';
 import type { C9Orchestrator } from '../orchestration/c9.orchestrator';
 import {
@@ -5017,6 +5018,21 @@ describe('AiCoreService', () => {
   });
 
   describe('exact client dossier selection [scripted model only]', () => {
+    let nonce: jest.SpyInstance;
+    beforeEach(() => {
+      let sequence = 0;
+      // Test input contains the phone suffix 7346. A random opaque UUID can
+      // coincidentally contain those bytes; keep nonce generation deterministic
+      // here without weakening the full-payload no-PII assertions below.
+      // Distinct per-call tokens and the production UUID grammar are preserved.
+      nonce = jest
+        .spyOn(crypto, 'randomUUID')
+        .mockImplementation(
+          () =>
+          `aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa${(++sequence).toString(16).padStart(2, '0')}`,
+        );
+    });
+    afterEach(() => nonce.mockRestore());
     const tool = 'clients.dossier.read';
     const ambiguous = {
       found: false,
