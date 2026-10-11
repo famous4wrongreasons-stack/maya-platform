@@ -1,0 +1,32 @@
+{
+  "qualification": "SYNTHETIC_LOCAL_ADMISSION_NOT_RELEASE_CERTIFICATION",
+  "executedHead": "c06745c8dea79a49933ae3c53c18799d9e4e3027",
+  "tests": {
+    "httpPgBrowser": 104,
+    "httpPgBrowserFailures": 0,
+    "launcherUnits": 132,
+    "launcherUnitFailures": 0,
+    "initialHistoryBrowser": 78,
+    "successor": 19,
+    "ownerAdmission": 7
+  },
+  "guardMutations": {
+    "greenBaseline": 38,
+    "killed": 11,
+    "restoredGreen": 38
+  },
+  "callbackMutations": {
+    "greenBaseline": 25,
+    "killed": 8,
+    "restoredGreen": 25
+  },
+  "typecheckWidgetsLive": "PASS",
+  "scopedEslint": "PASS",
+  "sourceUnchanged": true,
+  "workingPatch": false,
+  "clusterStopped": true,
+  "pidFileAbsent": true,
+  "liveTelegram": "NOT_EXECUTED",
+  "liveCrm": "NOT_EXECUTED",
+  "releaseCertification": "NOT_PERFORMED"
+}

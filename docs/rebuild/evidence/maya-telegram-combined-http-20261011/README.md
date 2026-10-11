@@ -1,5 +1,9 @@
 # Telegram → personal Client/history through the actual local relay
 
+Historical checkpoint below. The previously open finite local-admission work
+is now qualified separately in the [c06745c8 report](../maya-owner-telegram-admission-20261011/README.md).
+Neither checkpoint proves a real Telegram/CRM acceptance session.
+
 Executed source: `0157b600fcfdf4edd9e38d4c5e4fe5b40aa794e7`.
 Parent: `f256ea716d1bb03714933ee611607e9be4c5a0b8`.
 Branch: `codex/maya-local-crm-setup-20261010`. Date: 2026-10-11.

@@ -47,12 +47,20 @@ the separate web/backend proof gap, not the live launch admission work below.
 
 ## Exact remaining engineering work (agent-owned)
 
+Update after `c06745c8`: the finite initial-binding launch mode below is now
+implemented and qualified on synthetic data. See the
+[fresh admission report](../maya-owner-telegram-admission-20261011/README.md)
+for 104 HTTP/browser tests, 132 launcher units, 19 targeted mutations and the
+actual network-closed binary startup proof. No real session has been authorized
+or executed by that qualification. History import remains separate.
+
 - Qualify the concrete app/callback address together after the provider-allowed
   URL is established. The local serving defect is now fixed. No generic return
   relay, cross-origin message bridge or frontend identity authority is proposed.
-- Extend the **existing** local launcher with a finite, separately admitted mode
+- **Implemented/qualified in `c06745c8`:** extend the existing local launcher with a finite, separately admitted mode
   for this tenant/account/source; do not enable it in `read_setup_v1` or the
-  three-question catalog mode. That mode is **not implemented by this unit**.
+  three-question catalog mode. The new mode admits initial binding and existing
+  local profile/history reads only, not history import or model calls.
   Reuse retained-database/source pins, scoped environment, current canonical
   identity owners, finite request budgets, strict transport and cleanup.
 - Bind Telegram exchanges to the canonical start/complete owners and verified

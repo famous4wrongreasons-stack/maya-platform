@@ -1,0 +1,13 @@
+{
+  "qualification": "READ_ONLY_RETAINED_FILE_PREFLIGHT_NOT_LIVE_APPROVAL",
+  "candidate": "c06745c8dea79a49933ae3c53c18799d9e4e3027",
+  "retainedFilePins": "PASS",
+  "completedOriginalAndRestartReceipts": "PASS",
+  "schemaAndMigrationsUnchanged": "PASS",
+  "originalClusterPidAbsent": true,
+  "selectedScopeMatchesPreviouslyApprovedSavedOwner": true,
+  "currentDatabaseMembership": "NOT_RECHECKED_DATABASE_NOT_STARTED",
+  "liveAuthorization": "NOT_ISSUED",
+  "realProviderRequests": 0,
+  "ownerDatabaseStarted": false
+}

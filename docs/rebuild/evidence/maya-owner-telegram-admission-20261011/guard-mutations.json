@@ -1,0 +1,147 @@
+{
+  "qualification": "SYNTHETIC_LOCAL_GUARD_NOT_RELEASE_CERTIFICATION",
+  "head": "c06745c8dea79a49933ae3c53c18799d9e4e3027",
+  "hashes": {
+    "policy": "133ab40a97b90898cf14574696a862bdd0ae96ee2f824bd36adbadc53cb8c1d6",
+    "transport": "07a5aa8d217e237859cd157cd71467d3675a2982b66c718de9f5cdbc7b1ac9d8",
+    "launch": "2a13051b2ee9dce20f34f3096cc28d03bdfa8b1af457617aa53dfc4c4724e890"
+  },
+  "baseline": {
+    "exit": 0,
+    "passed": 38,
+    "failed": 0,
+    "failures": [],
+    "assertion": false
+  },
+  "mutations": [
+    {
+      "name": "foreign-company",
+      "exit": 1,
+      "passed": 37,
+      "failed": 1,
+      "failures": [
+        "provider refuses other company"
+      ],
+      "assertion": true,
+      "killed": true
+    },
+    {
+      "name": "unverified-owner",
+      "exit": 1,
+      "passed": 37,
+      "failed": 1,
+      "failures": [
+        "exact OIDC exchange and canonical paginated registry read only"
+      ],
+      "assertion": true,
+      "killed": true
+    },
+    {
+      "name": "substituted-verifier",
+      "exit": 1,
+      "passed": 37,
+      "failed": 1,
+      "failures": [
+        "exact OIDC exchange and canonical paginated registry read only"
+      ],
+      "assertion": true,
+      "killed": true
+    },
+    {
+      "name": "repeat-exchange",
+      "exit": 1,
+      "passed": 37,
+      "failed": 1,
+      "failures": [
+        "background, replay, concurrent exchange and repeated page fail closed"
+      ],
+      "assertion": true,
+      "killed": true
+    },
+    {
+      "name": "repeat-registry-page",
+      "exit": 1,
+      "passed": 37,
+      "failed": 1,
+      "failures": [
+        "background, replay, concurrent exchange and repeated page fail closed"
+      ],
+      "assertion": true,
+      "killed": true
+    },
+    {
+      "name": "expired-operation",
+      "exit": 1,
+      "passed": 37,
+      "failed": 1,
+      "failures": [
+        "expired, stopped and changed current authority cannot dispatch"
+      ],
+      "assertion": true,
+      "killed": true
+    },
+    {
+      "name": "aborted-request",
+      "exit": 1,
+      "passed": 37,
+      "failed": 1,
+      "failures": [
+        "aborted browser request cannot dispatch or accept an in-flight response"
+      ],
+      "assertion": true,
+      "killed": true
+    },
+    {
+      "name": "stale-authority-after-response",
+      "exit": 1,
+      "passed": 37,
+      "failed": 1,
+      "failures": [
+        "current authority reread after provider response; oversized response refused"
+      ],
+      "assertion": true,
+      "killed": true
+    },
+    {
+      "name": "candidate-substitution",
+      "exit": 1,
+      "passed": 37,
+      "failed": 1,
+      "failures": [
+        "execution plan refuses changed candidate"
+      ],
+      "assertion": true,
+      "killed": true
+    },
+    {
+      "name": "source-substitution",
+      "exit": 1,
+      "passed": 37,
+      "failed": 1,
+      "failures": [
+        "execution plan refuses changed source"
+      ],
+      "assertion": true,
+      "killed": true
+    },
+    {
+      "name": "expired-permit",
+      "exit": 1,
+      "passed": 37,
+      "failed": 1,
+      "failures": [
+        "execution plan refuses expired"
+      ],
+      "assertion": true,
+      "killed": true
+    }
+  ],
+  "restored": {
+    "exit": 0,
+    "passed": 38,
+    "failed": 0,
+    "failures": [],
+    "assertion": false
+  },
+  "workingSourceUnchanged": true
+}

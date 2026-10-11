@@ -1,0 +1,14 @@
+{
+  "executedHead": "c06745c8dea79a49933ae3c53c18799d9e4e3027",
+  "parent": "8ccdb9e734895f477aa90f18899bd7b7b38c0749",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "unchangedComparedWithParent": {
+    "maya-saas-backend/src": true,
+    "maya-saas-backend/prisma": true,
+    "maya-carrier-react/src": true,
+    "maya-chat-shell/src": true,
+    "maya-ios-carrier": true,
+    "maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html": true
+  },
+  "pushPerformed": false
+}

@@ -1,0 +1,65 @@
+{
+  "candidate": "c06745c8dea79a49933ae3c53c18799d9e4e3027",
+  "receipts": [
+    {
+      "path": "/private/tmp/maya-telegram-http-final-c06745c8/manifest.json",
+      "sha256": "694a41ddace30c8df003d747d34f421473a6765a601ddbb069d3d76a9fcc3d71",
+      "size": 719,
+      "archivalForm": "safe projection or hash; raw local log not committed"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-http-final-c06745c8/telegram-initial-jest.json",
+      "sha256": "91b248c9165b6e9542c0f4d8f2e9c9212466a394817b238f760390aeb3493e8a",
+      "size": 57067,
+      "archivalForm": "safe projection or hash; raw local log not committed"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-http-final-c06745c8/telegram-initial.log",
+      "sha256": "4c8ce25caaf965796598bfe637e9c04c69608a37384b25d4753fd37471b3de50",
+      "size": 3080,
+      "archivalForm": "safe projection or hash; raw local log not committed"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-http-final-c06745c8/source-hashes.json",
+      "sha256": "7e7a0c9ac9accf2d2e9a1367c15b8a16fc30496bee2eb8cd780f76e59566c97a",
+      "size": 277005,
+      "archivalForm": "safe projection or hash; raw local log not committed"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-binary-c06745c8/summary.json",
+      "sha256": "20e4e740ccd4ff71d1424d565034557f03b371a85960a8ca2893d3f094b0acce",
+      "size": 4440,
+      "archivalForm": "safe projection or hash; raw local log not committed"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-units-c06745c8.log",
+      "sha256": "9acbef880a0fb41d338f9470e5f801c8d9a3373b0a15e8e59f034b0d14928e82",
+      "size": 27162,
+      "archivalForm": "safe projection or hash; raw local log not committed"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-types-c06745c8.log",
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "size": 128,
+      "archivalForm": "safe projection or hash; raw local log not committed"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-lint-c06745c8.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "archivalForm": "safe projection or hash; raw local log not committed"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-guard-mutations-c06745c8/summary.json",
+      "sha256": "cb06afd19a7dd9bd7d5c8ea337102660309a3a8e8c0f871993777962d717fb61",
+      "size": 3391,
+      "archivalForm": "safe projection or hash; raw local log not committed"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-return-mutations-c06745c8/summary.json",
+      "sha256": "d9656029e4e06f478c15af9f40e348d22b6de4f9492c0781de6036e3979d6961",
+      "size": 3291,
+      "archivalForm": "safe projection or hash; raw local log not committed"
+    }
+  ]
+}

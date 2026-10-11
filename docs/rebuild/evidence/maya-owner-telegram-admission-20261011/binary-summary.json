@@ -1,0 +1,36 @@
+{
+  "qualification": "SYNTHETIC_NETWORK_CLOSED_BINARY_NOT_LIVE_ACCEPTANCE",
+  "head": "c06745c8dea79a49933ae3c53c18799d9e4e3027",
+  "status": "passed",
+  "checks": [
+    "actual-child-ipc-web-ready",
+    "health-through-actual-relay",
+    "current-react-payload-served",
+    "canonical-password-session",
+    "canonical-telegram-link-start-no-provider-dispatch",
+    "business-model-sms-consent-routes-refused",
+    "foreign-tenant-refused",
+    "live-permit-revocation-refused",
+    "clean-child-stop-zero-provider-dispatch",
+    "second-child-refused"
+  ],
+  "completed": [
+    "backend-build",
+    "react-build",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations"
+  ],
+  "realProviderCalls": 0,
+  "runtimeGroupAbsent": true,
+  "providerReadSummary": {
+    "calls": 0,
+    "refused": 0,
+    "routes": {}
+  },
+  "providerReadSummaryStatus": "reported_at_clean_stop",
+  "clusterStopped": true,
+  "pidFileAbsent": true,
+  "sourceUnchanged": true
+}
