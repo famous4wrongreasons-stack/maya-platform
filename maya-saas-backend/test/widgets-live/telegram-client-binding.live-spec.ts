@@ -20,6 +20,13 @@ import { ClientChannelLinkService } from '../../src/crm/client-channel-link.serv
 import { ClientProfileReadService } from '../../src/crm/client-profile-read.service';
 import { ClientAppointmentReadService } from '../../src/crm/client-appointment-read.service';
 import { PersonalClientContextService } from '../../src/appointments/personal-client-context.service';
+import { AppointmentReconciliationService } from '../../src/crm/appointment-reconciliation.service';
+import { ClientChannelRuntimeService } from '../../src/crm/client-channel-runtime.service';
+import type { CrmJournalAppointment } from '../../src/crm/crm-adapter.interface';
+import { AiToolHandlerService } from '../../src/ai-tools/ai-tool-handler.service';
+import { personalHistoryReply } from '../../src/ai-tools/personal-history-presentation';
+import { GovernedSettingsReadService } from '../../src/package5-wave1/governed-settings.read';
+import { Package5Wave1CanonicalCutoverService } from '../../src/package5-wave1/package5-wave1-canonical-cutover.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { TenantContextService } from '../../src/tenancy/tenant-context.service';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
@@ -180,7 +187,7 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
     forgedSignature = false,
   ) {
     const config = http.app.get(ConfigService),
-      get = config.get.bind(config);
+      get = ConfigService.prototype.get.bind(config);
     const values: Record<string, unknown> = {
       TELEGRAM_LOGIN_ENABLED: 'true',
       TELEGRAM_CLIENT_ID: 'synthetic-telegram-client',
@@ -682,5 +689,380 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
         })
       ).role,
     ).toBe(UserRole.TENANT_OWNER);
+  });
+
+  describe('existing CRM reconciliation → first login → private history', () => {
+    async function historyFixture(role = UserRole.CLIENT) {
+      const f = await fixture(role);
+      await context.runAsSystemTenant(f.tenant.id, () =>
+        http.app.get(ClientIdentityService).registerCrmClient({
+          tenantId: f.tenant.id,
+          provider: 'yclients',
+          externalId: 'another-exact-crm-card',
+        }),
+      );
+      const now = Date.now();
+      const from = new Date(now - 4 * 86_400_000);
+      const to = new Date(now + 4 * 86_400_000);
+      const entry = (
+        id: string,
+        externalClientId: string,
+        days: number,
+      ): CrmJournalAppointment => ({
+        id: `crm-${id}`,
+        client: { id: externalClientId, name: 'Synthetic source-only name' },
+        provider: { id: 'synthetic-staff', name: 'Synthetic staff' },
+        branch: null,
+        service_ids: ['synthetic-service'],
+        services: [],
+        start_at: new Date(now + days * 86_400_000).toISOString(),
+        end_at: new Date(now + days * 86_400_000 + 3_600_000).toISOString(),
+        status: days < 0 ? 'completed' : 'confirmed',
+        attendance: days < 0 ? 'arrived' : 'awaiting',
+        notes: 'Synthetic provider private note must not be exposed',
+        total_price: 1700,
+        currency: 'RUB',
+      });
+      const entries = [
+        entry('own-past', f.registry.clients[0].external_id, -2),
+        entry('own-upcoming', f.registry.clients[0].external_id, 2),
+        entry('foreign-same-time', 'another-exact-crm-card', -2),
+      ];
+      // The source boundary is synthetic; all reconciliation/observation,
+      // canonical writes, authentication, consent and private readers are real.
+      const journal = jest.spyOn(crm, 'getJournal').mockImplementation(() =>
+        Promise.resolve({
+          calendar_source: 'external',
+          completeness: 'complete',
+          timezone: 'Europe/Moscow',
+          range: { from: from.toISOString(), to: to.toISOString() },
+          provider_id: null,
+          count: entries.length,
+          appointments: entries,
+        }),
+      );
+      jest.spyOn(crm, 'resolveStaffIdForBooking').mockResolvedValue(null);
+      jest.spyOn(crm, 'getServices').mockResolvedValue([]);
+      jest.spyOn(crm, 'getStaff').mockResolvedValue([]);
+      const sync = () =>
+        context.runAsSystemTenant(f.tenant.id, () =>
+          http.app.get(AppointmentReconciliationService).run({
+            tenantId: f.tenant.id,
+            from,
+            to,
+            holder: 'synthetic-first-client-history',
+          }),
+        );
+      const state = () =>
+        db.prisma.appointment.findMany({
+          where: { tenantId: f.tenant.id },
+          orderBy: { crmExternalId: 'asc' },
+        });
+      const login = async () => {
+        const result = await (await signedLogin(f)).complete();
+        expect(result.status).toBe(201);
+        const body = result.body as LoginBody;
+        expect(body.client_binding.status).toBe('linked');
+        const actor = await fx.actorFromAccessToken(body.access_token);
+        const proof = JSON.stringify({
+          type: 'maya_jwt',
+          credential: body.access_token,
+        });
+        return {
+          actor,
+          read: () =>
+            request(http.app.getHttpServer())
+              .get('/api/client-channel/appointments')
+              .set('Authorization', `Bearer ${body.access_token}`),
+          cabinet: () =>
+            context.runAsAuthPrincipal(actor, () =>
+              http.app
+                .get(ClientChannelRuntimeService)
+                .cabinetProjection(proof),
+            ),
+          consent: (privacy: boolean) =>
+            context.runAsAuthPrincipal(actor, () =>
+              http.app.get(ClientChannelRuntimeService).submitConsent(proof, {
+                privacy,
+                marketing: false,
+                idempotencyKey: randomUUID(),
+              }),
+            ),
+        };
+      };
+      return { ...f, entries, journal, sync, state, login };
+    }
+
+    it.each([UserRole.CLIENT, UserRole.TENANT_OWNER])(
+      'source-to-card history uses exact Client after signed %s login, with explicit consent and no GET writes',
+      async (role) => {
+        const f = await historyFixture(role),
+          login = await f.login();
+        expect((await login.read()).body).toEqual([]);
+        expect(f.journal).not.toHaveBeenCalled();
+        expect(await f.state()).toEqual([]);
+        expect(await login.cabinet()).toMatchObject({
+          linked: true,
+          needs_consent: true,
+        });
+        await login.consent(true);
+        expect(await f.sync()).toMatchObject({
+          status: 'ran',
+          created: 3,
+          events_emitted: 0,
+          completeness: 'complete',
+        });
+        const before = await f.state();
+        expect(before.every((row) => row.clientId === null)).toBe(true);
+        const replies = await Promise.all(
+          Array.from({ length: 5 }, () => login.read()),
+        );
+        for (const response of replies) {
+          expect(response.status).toBe(200);
+          expect(
+            (response.body as Array<{ crm_external_id: string }>).map(
+              (row) => row.crm_external_id,
+            ),
+          ).toEqual(['own-past', 'own-upcoming']);
+          expect(JSON.stringify(response.body)).not.toMatch(
+            /foreign-same-time|Synthetic provider private note|Synthetic source-only name/,
+          );
+          expect(
+            (response.body as Array<{ attendance: string }>).map(
+              (row) => row.attendance,
+            ),
+          ).toEqual(['arrived', 'awaiting']);
+        }
+        expect(await login.cabinet()).toMatchObject({
+          linked: true,
+          full_name: 'Synthetic Client',
+          history: [{ record_id: 'own-past', attendance: 'arrived' }],
+          upcoming: [{ record_id: 'own-upcoming' }],
+          business_mutations: 0,
+        });
+        expect(await f.state()).toEqual(before);
+        expect(f.journal).toHaveBeenCalledTimes(1);
+        expect(await f.sync()).toMatchObject({
+          created: 0,
+          updated: 0,
+          unchanged: 3,
+          events_emitted: 0,
+        });
+        expect(await f.state()).toEqual(before);
+        expect(login.actor.role).toBe(role);
+        expect(
+          await db.prisma.clientConsentFact.findMany({
+            where: {
+              tenantId: f.tenant.id,
+              kind: 'marketing',
+              decision: 'grant',
+            },
+          }),
+        ).toEqual([]);
+      },
+    );
+
+    it('late exact identity resolves the existing mirror rows only on reconciliation, never on login/GET', async () => {
+      const f = await historyFixture();
+      await f.sync();
+      const before = await f.state();
+      expect(
+        before
+          .filter((row) => row.crmExternalId?.startsWith('own-'))
+          .every((row) => row.mayaClientId === null),
+      ).toBe(true);
+      expect(
+        before.find((row) => row.crmExternalId === 'foreign-same-time')
+          ?.mayaClientId,
+      ).not.toBeNull();
+      const login = await f.login();
+      expect((await login.read()).body).toEqual([]);
+      expect(await f.state()).toEqual(before);
+      expect(f.journal).toHaveBeenCalledTimes(1);
+      expect(await f.sync()).toMatchObject({
+        created: 0,
+        updated: 2,
+        unchanged: 1,
+        events_emitted: 0,
+      });
+      expect((await f.state()).map((row) => row.id)).toEqual(
+        before.map((row) => row.id),
+      );
+      expect((await login.read()).body).toHaveLength(2);
+    });
+
+    it('canonical salon history setting admits only own saved history and withdrawal blocks the next read', async () => {
+      const f = await historyFixture(),
+        login = await f.login();
+      await f.sync();
+      const owner = await fx.user(f.tenant, UserRole.TENANT_OWNER);
+      const ownerActor = await fx.actor(f.tenant, owner);
+      const governed = http.app.get(GovernedSettingsReadService);
+      const canonical = http.app.get(Package5Wave1CanonicalCutoverService);
+      const handler = http.app.get(AiToolHandlerService);
+      const read = () =>
+        context.runAsAuthPrincipal(login.actor, () =>
+          handler.execute(
+            'appointments.own.list',
+            { ...login.actor, tenantId: f.tenant.id, surface: 'native' },
+            {},
+            'synthetic-private-history',
+          ),
+        );
+      const set = (enabled: boolean) =>
+        context.runAsAuthPrincipal(ownerActor, async () => {
+          const current = await governed.read(
+            f.tenant.id,
+            owner.id,
+            'client_capabilities',
+          );
+          return canonical.updateGoverned(
+            f.tenant.id,
+            owner.id,
+            'tenant_business_configuration',
+            {
+              confirmed: true,
+              namespace: 'client_capabilities',
+              expectedRevision: current.revision,
+              previousRevisionId: current.previousRevisionId,
+              content: { client_self_visit_history: enabled },
+            },
+            randomUUID(),
+          );
+        });
+      expect(personalHistoryReply(await read(), false, 'past').status).toBe(
+        'blocked',
+      );
+      await context.runAsAuthPrincipal(login.actor, () =>
+        expect(
+          canonical.updateGoverned(
+            f.tenant.id,
+            login.actor.userId,
+            'tenant_business_configuration',
+            {
+              confirmed: true,
+              namespace: 'client_capabilities',
+              expectedRevision: 0,
+              previousRevisionId: null,
+              content: { client_self_visit_history: true },
+            },
+            randomUUID(),
+          ),
+        ).rejects.toThrow(),
+      );
+      await set(true);
+      const source = await read();
+      expect(source).toMatchObject({
+        history_scope: { enabled: true, source: 'maya_canonical' },
+      });
+      const answer = personalHistoryReply(source, false, 'last_visit');
+      expect(answer.status).toBe('verified');
+      expect(answer.reply).toContain('визит состоялся');
+      expect(JSON.stringify(source)).not.toMatch(
+        /foreign-same-time|Synthetic provider private note/,
+      );
+      await set(false);
+      expect(personalHistoryReply(await read(), false, 'past').status).toBe(
+        'blocked',
+      );
+      expect(await f.state()).toHaveLength(3);
+      expect(f.journal).toHaveBeenCalledTimes(1);
+    });
+
+    it('same provider record identifiers in two salons never cross the authenticated tenant', async () => {
+      const first = await historyFixture(),
+        a = await first.login();
+      await first.sync();
+      const second = await historyFixture();
+      await db.prisma.crmIntegration.update({
+        where: { tenantId: second.tenant.id },
+        data: { settingsJson: { companyId: 67890 } },
+      });
+      const b = await second.login();
+      await second.sync();
+      const left = await a.read(),
+        right = await b.read();
+      expect(left.status).toBe(200);
+      expect(right.status).toBe(200);
+      type Row = { id: string; tenant_id: string; crm_external_id: string };
+      const l = left.body as Row[],
+        r = right.body as Row[];
+      expect(l).toHaveLength(2);
+      expect(r).toHaveLength(2);
+      expect(l.every((row) => row.tenant_id === first.tenant.id)).toBe(true);
+      expect(r.every((row) => row.tenant_id === second.tenant.id)).toBe(true);
+      expect(l.map((row) => row.crm_external_id)).toEqual(
+        r.map((row) => row.crm_external_id),
+      );
+      expect(l.some((row) => r.some((other) => row.id === other.id))).toBe(
+        false,
+      );
+    });
+
+    it('provider failure or a truncated refresh never erases the last synchronized personal history', async () => {
+      const f = await historyFixture(),
+        login = await f.login();
+      await f.sync();
+      const before = await f.state();
+      f.journal.mockRejectedValueOnce(
+        new Error('Synthetic provider unavailable'),
+      );
+      await expect(f.sync()).rejects.toThrow('Synthetic provider unavailable');
+      expect(await f.state()).toEqual(before);
+      f.journal.mockResolvedValueOnce({
+        calendar_source: 'external',
+        completeness: 'truncated',
+        timezone: 'Europe/Moscow',
+        range: { from: f.entries[0].start_at, to: f.entries[1].end_at },
+        provider_id: null,
+        count: 0,
+        appointments: [],
+      });
+      expect(await f.sync()).toMatchObject({
+        completeness: 'truncated',
+        fetched: 0,
+      });
+      expect(await f.state()).toEqual(before);
+      expect((await login.read()).body).toHaveLength(2);
+      const runs = await db.prisma.reconciliationRun.findMany({
+        where: { tenantId: f.tenant.id },
+        orderBy: { startedAt: 'asc' },
+      });
+      expect(runs.map((run) => [run.completeness, run.failureCode])).toEqual([
+        ['complete', null],
+        [null, 'reconciliation_failed'],
+        ['truncated', null],
+      ]);
+    });
+
+    it('session revocation closes card and history while preserving the synchronized records', async () => {
+      const f = await historyFixture(),
+        login = await f.login();
+      await login.consent(true);
+      await f.sync();
+      const before = await f.state();
+      await db.prisma.authSession.update({
+        where: { id: login.actor.sessionId },
+        data: { revokedAt: new Date() },
+      });
+      expect((await login.read()).status).toBe(401);
+      await expect(login.cabinet()).rejects.toThrow();
+      expect(await f.state()).toEqual(before);
+    });
+
+    it('privacy withdrawal hides the card again without deleting canonical visit history', async () => {
+      const f = await historyFixture(),
+        login = await f.login();
+      await login.consent(true);
+      await f.sync();
+      const before = await f.state();
+      await login.consent(false);
+      const card = await login.cabinet();
+      expect(card).toMatchObject({ linked: true, needs_consent: true });
+      expect(JSON.stringify(card)).not.toMatch(
+        /own-past|own-upcoming|Synthetic Client/,
+      );
+      expect(await f.state()).toEqual(before);
+    });
   });
 });

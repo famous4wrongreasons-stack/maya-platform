@@ -4003,6 +4003,117 @@ describe('AiCoreService', () => {
         ...dto,
         messages: [{ role: 'user', content: 'Когда я записан?' }],
       });
+    it.each(['completed', 'no_show'])(
+      'past CRM status %s does not block an upcoming appointment reply',
+      async (status) => {
+        const mocks = fixture({
+          appointments: [
+            appointment({
+              start_at: '2026-10-01T09:00:00.000Z',
+              is_upcoming: false,
+              status,
+            }),
+            appointment(),
+          ],
+        });
+        const answer = await ask(mocks);
+        expect(answer.grounding.status).toBe('verified');
+        expect(answer.reply).toContain('07.10.2026');
+        expect(answer.reply).not.toContain('01.10.2026');
+      },
+    );
+    it.each(['past', 'last_visit'])(
+      'answers authorized personal history period %s without a second model call',
+      async (period) => {
+        const mocks = fixture({
+          history_scope: {
+            source: 'maya_canonical',
+            enabled: true,
+            coverage: 'last_synchronized',
+          },
+          appointments: [
+            appointment({
+              start_at: '2026-10-01T09:00:00.000Z',
+              is_upcoming: false,
+              status: 'completed',
+              attendance: 'arrived',
+              services: [{ name: 'Стрижка в истории' }],
+            }),
+            appointment(),
+          ],
+        });
+        mocks.model.decide.mockResolvedValue(
+          decision({
+            reply: null,
+            toolCall: { name: tool, arguments: {} },
+            semanticPlan: new ConversationIntelligenceService().validatePlan(
+              {
+                dialogue_act: 'request',
+                tasks: [{ intent: 'booking.list_own', entities: { period } }],
+              },
+              UserRole.CLIENT,
+              [tool],
+            ),
+          }),
+        );
+        const answer = await mocks.service.chat(client, {
+          ...dto,
+          messages: [{ role: 'user', content: 'Покажи прошлые визиты' }],
+        });
+        expect(answer.grounding.status).toBe('verified');
+        expect(answer.reply).toContain('01.10.2026');
+        expect(answer.reply).toContain('16:00');
+        expect(answer.reply).toContain('Стрижка в истории');
+        expect(answer.reply).not.toContain('07.10.2026');
+        expect(answer.reply).not.toContain('private-appointment');
+        expect(answer.reply).toContain('сохранён');
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(mocks.model.decide.mock.calls[0][0].toolResults).toEqual([]);
+        expect(mocks.runtime.execute.mock.calls[0][3]).toMatchObject({
+          suppressWidgetTrigger: true,
+        });
+        expect(answer.action).toBeNull();
+      },
+    );
+    it('does not substitute an unfiltered history for an explicit status selection', async () => {
+      const mocks = fixture({
+        history_scope: {
+          source: 'maya_canonical',
+          enabled: true,
+          coverage: 'last_synchronized',
+        },
+        appointments: [
+          appointment({
+            start_at: '2026-10-01T09:00:00.000Z',
+            is_upcoming: false,
+            attendance: 'arrived',
+          }),
+        ],
+      });
+      mocks.model.decide.mockResolvedValue(
+        decision({
+          reply: null,
+          toolCall: { name: tool, arguments: {} },
+          semanticPlan: new ConversationIntelligenceService().validatePlan(
+            {
+              dialogue_act: 'request',
+              tasks: [
+                {
+                  intent: 'booking.list_own',
+                  entities: { period: 'past', status: 'canceled' },
+                },
+              ],
+            },
+            UserRole.CLIENT,
+            [tool],
+          ),
+        }),
+      );
+      const answer = await ask(mocks);
+      expect(answer.grounding.status).toBe('blocked');
+      expect(answer.reply).not.toContain('01.10.2026');
+      expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+    });
     it.each([false, true])(
       'preserves the reschedule intent after an authorized own READ, stale=%s',
       async (stale) => {

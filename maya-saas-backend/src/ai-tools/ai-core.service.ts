@@ -36,6 +36,10 @@ import { goodsReadReply } from './goods-presentation';
 import { reviewsReply } from './reviews-presentation';
 import { ownTasksReply } from './own-tasks-presentation';
 import {
+  personalHistoryReply,
+  isPersonalAppointmentReadStatus,
+} from './personal-history-presentation';
+import {
   employeeScheduleTask,
   readEmployeeSchedule,
 } from './employee-schedule-read';
@@ -3599,12 +3603,13 @@ export class AiCoreService {
           ['employees.list_public', 'company.public_info'].includes(
             activeSemanticPlan.tasks[0].intent,
           );
-        const personalPeriod =
+        const personalReadTask =
           decision.toolCall.name === 'appointments.own.list'
             ? activeSemanticPlan?.tasks.find(
                 (task) => task.intent === 'booking.list_own',
-              )?.entities.period
+              )
             : undefined;
+        const personalPeriod = personalReadTask?.entities.period;
         const scopedPersonalRead =
           personalPeriod !== undefined && personalPeriod !== null;
         const reschedulePreparation =
@@ -3820,6 +3825,7 @@ export class AiCoreService {
                             execution.stale === true,
                             personalPeriod,
                             businessTimezone,
+                            personalReadTask?.entities.status,
                           )
                         : decision.toolCall.name ===
                             'support.integration-status.read'
@@ -5876,7 +5882,17 @@ export class AiCoreService {
     stale: boolean,
     requestedPeriod?: unknown,
     businessTimezone?: string,
+    requestedStatus?: unknown,
   ): { reply: string; status: 'verified' | 'blocked' } {
+    if (requestedPeriod === 'past' || requestedPeriod === 'last_visit') {
+      if (requestedStatus !== undefined && requestedStatus !== null)
+        return {
+          reply:
+            'Пока не могу надёжно отфильтровать историю по этому статусу. Могу показать последние сохранённые записи без такого фильтра.',
+          status: 'blocked',
+        };
+      return personalHistoryReply(result, stale, requestedPeriod);
+    }
     const data = this.record(result);
     const unavailable = {
       reply:
@@ -5969,9 +5985,7 @@ export class AiCoreService {
       for (const entry of appointments) {
         const item = this.record(entry);
         if (
-          !Object.values(AppointmentStatus).includes(
-            item.status as AppointmentStatus,
-          ) ||
+          !isPersonalAppointmentReadStatus(item.status) ||
           typeof item.is_upcoming !== 'boolean'
         )
           return unavailable;
@@ -5980,6 +5994,7 @@ export class AiCoreService {
           continue;
         }
         if (!item.is_upcoming) continue;
+        if (item.status !== AppointmentStatus.CONFIRMED) return unavailable;
         const start = instant(item.start_at);
         if (!start) return unavailable;
         if (start.getTime() < Date.now()) continue;

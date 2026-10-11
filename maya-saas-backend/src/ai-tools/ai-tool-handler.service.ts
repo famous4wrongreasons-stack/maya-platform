@@ -759,10 +759,16 @@ export class AiToolHandlerService {
       principal.tenantId,
       principal.userId,
     );
+    const historyEnabled =
+      (await this.governedSettings?.ownHistoryEnabled(principal.tenantId)) ===
+      true;
     return {
-      appointments: ((await this.governedSettings?.ownHistoryEnabled(
-        principal.tenantId,
-      ))
+      history_scope: {
+        source: 'maya_canonical',
+        enabled: historyEnabled,
+        coverage: 'last_synchronized',
+      },
+      appointments: (historyEnabled
         ? appointments
         : appointments.filter(
             (item) => Date.parse(String(item.start_at)) >= Date.now(),
@@ -4058,6 +4064,7 @@ export class AiToolHandlerService {
     return {
       id: item.id ?? null,
       status: item.status ?? null,
+      attendance: item.attendance ?? null,
       start_at: item.start_at ?? null,
       end_at: item.end_at ?? null,
       is_upcoming: item.is_upcoming ?? null,
