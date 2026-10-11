@@ -1,0 +1,66 @@
+{
+  "qualification": "Local executed receipt hashes; raw logs/customer data are not copied.",
+  "testedHead": "6f48df0542468d0557e386d65f91cb9bb7b6a97f",
+  "receipts": [
+    {
+      "localPath": "/private/tmp/maya-regression-final-backend-6f48df05.json",
+      "size": 4879555,
+      "sha256": "33cf8266a9cdfe8dd2ec712c251056138c9a75e524dbf0b3c520b784020e06c9"
+    },
+    {
+      "localPath": "/private/tmp/maya-regression-final-backend-6f48df05.log",
+      "size": 962923,
+      "sha256": "1f1e6bb52e33a8f793661a58cca0374d112c6d13a9411112bda2c79094ad2e3c"
+    },
+    {
+      "localPath": "/private/tmp/maya-regression-planner-mutations-6f48df05/summary.json",
+      "size": 8417,
+      "sha256": "b95dcdad311f8a7edbaa50dbfb00d54adbf0c48da37386974fa7fd643a1c4a9b"
+    },
+    {
+      "localPath": "/private/tmp/maya-regression-crm-witness-20261011.json",
+      "size": 31085,
+      "sha256": "44eaf660a500e721305c1d5ac24dbbfd6e5dee04e6f98783017137efc3bce57f"
+    },
+    {
+      "localPath": "/private/tmp/maya-regression-ratchets-20261011.json",
+      "size": 90969,
+      "sha256": "1d3c32b56aed4448a3f45b8525ba3df519eac90949a3df97ca577df7d7c16da5"
+    },
+    {
+      "localPath": "/private/tmp/maya-regression-model-denial-20261011.json",
+      "size": 143532,
+      "sha256": "1fe809e5c510ee2e2ea6d7808b21a8e9e911d0d16efda720802c9420a8d131de"
+    },
+    {
+      "localPath": "/private/tmp/maya-regression-routing-step1-20261011.json",
+      "size": 45874,
+      "sha256": "5f71646c66f9c1bd74673b420de61737399e2138e8b8372d805d840716b10f9e"
+    },
+    {
+      "localPath": "/private/tmp/maya-regression-planner-step2-20261011.json",
+      "size": 16841,
+      "sha256": "238ae02660abd4cc674f3d009b8d0e2326dfe0c370871e0641a4743431abe33b"
+    },
+    {
+      "localPath": "/private/tmp/maya-regression-lint-final-20261011.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "localPath": "/private/tmp/maya-regression-types-20261011.log",
+      "size": 103,
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d"
+    },
+    {
+      "localPath": "/private/tmp/maya-regression-build-20261011.log",
+      "size": 158,
+      "sha256": "b74e5c60033b62edf5aa47fcace858704866272bf6c05a53d7b76d4f3abdaf15"
+    },
+    {
+      "localPath": "/private/tmp/maya-regression-widget-contract-20261011.log",
+      "size": 6777,
+      "sha256": "bebe953a66851b7112f6a081047c0918731c0ad9a69715eb8b557352c8f916f8"
+    }
+  ]
+}

@@ -94,3 +94,11 @@ No production change, real OTP/SMS, YCLIENTS business effect, grant, migration o
 owner/production DB, iPhone install or design-package migration occurred.
 Old release certificates are not inherited. This checkpoint remains local;
 pushing was not attempted in this turn.
+
+## Follow-up, preserving this historical checkpoint
+
+The 37 backend failures recorded here are resolved by the subsequent
+[backend regression repair](../maya-backend-regression-repair-20261011/README.md)
+on `6f48df0542468d0557e386d65f91cb9bb7b6a97f`: 9,601 passes / zero failures.
+The original receipts and this checkpoint's counts remain unchanged. Live owner
+Telegram/history acceptance is still not run.

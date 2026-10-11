@@ -1,0 +1,121 @@
+{
+  "qualification": "TARGETED_SYNTHETIC_NOT_RELEASE_CERTIFICATION",
+  "head": "6f48df0542468d0557e386d65f91cb9bb7b6a97f",
+  "sourceHash": "db5e19d31dd73849b361c9d270c0305da2d47615e1c02121de7b6b85724738fe",
+  "baseline": {
+    "exit": 0,
+    "passed": 31,
+    "failed": 0,
+    "failures": []
+  },
+  "mutations": [
+    {
+      "name": "alias-loss",
+      "exit": 1,
+      "passed": 22,
+      "failed": 9,
+      "failures": [
+        "Bounded planner stage wire context (no language acceptance) interns complete slot/tool values by equality without sharing changed aliases or permissions",
+        "Bounded planner stage wire context (no language acceptance) booking preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) personal preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) admin preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) staff_config preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) bi preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) lifecycle preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) occupancy preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) goods preserves every tool field and all canonical intent fields exactly"
+      ],
+      "killed": true
+    },
+    {
+      "name": "tool-substitution",
+      "exit": 1,
+      "passed": 22,
+      "failed": 9,
+      "failures": [
+        "Bounded planner stage wire context (no language acceptance) interns complete slot/tool values by equality without sharing changed aliases or permissions",
+        "Bounded planner stage wire context (no language acceptance) booking preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) personal preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) admin preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) staff_config preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) bi preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) lifecycle preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) occupancy preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) goods preserves every tool field and all canonical intent fields exactly"
+      ],
+      "killed": true
+    },
+    {
+      "name": "readiness-loss",
+      "exit": 1,
+      "passed": 22,
+      "failed": 9,
+      "failures": [
+        "Bounded planner stage wire context (no language acceptance) interns complete slot/tool values by equality without sharing changed aliases or permissions",
+        "Bounded planner stage wire context (no language acceptance) booking preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) personal preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) admin preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) staff_config preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) bi preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) lifecycle preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) occupancy preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) goods preserves every tool field and all canonical intent fields exactly"
+      ],
+      "killed": true
+    },
+    {
+      "name": "permission-escalation",
+      "exit": 1,
+      "passed": 22,
+      "failed": 9,
+      "failures": [
+        "Bounded planner stage wire context (no language acceptance) interns complete slot/tool values by equality without sharing changed aliases or permissions",
+        "Bounded planner stage wire context (no language acceptance) booking preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) personal preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) admin preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) staff_config preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) bi preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) lifecycle preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) occupancy preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) goods preserves every tool field and all canonical intent fields exactly"
+      ],
+      "killed": true
+    },
+    {
+      "name": "reference-substitution",
+      "exit": 1,
+      "passed": 22,
+      "failed": 9,
+      "failures": [
+        "Bounded planner stage wire context (no language acceptance) interns complete slot/tool values by equality without sharing changed aliases or permissions",
+        "Bounded planner stage wire context (no language acceptance) booking preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) personal preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) admin preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) staff_config preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) bi preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) lifecycle preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) occupancy preserves every tool field and all canonical intent fields exactly",
+        "Bounded planner stage wire context (no language acceptance) goods preserves every tool field and all canonical intent fields exactly"
+      ],
+      "killed": true
+    },
+    {
+      "name": "original-oversize",
+      "originalHash": "ef11581064b5accbf91dd722167c682837b2bd38eab2f66ea06927744508c69b",
+      "exit": 1,
+      "passed": 0,
+      "failed": 2,
+      "failures": [
+        "Bounded planner stage wire context (no language acceptance) fits the recorded owner compound follow-up without dropping actual history or authority fields",
+        "Bounded planner stage wire context (no language acceptance) openai serializes occupancy through the real provider serializer on first and later planning passes"
+      ],
+      "killed": true
+    }
+  ],
+  "restored": {
+    "exit": 0,
+    "passed": 31,
+    "failed": 0,
+    "failures": []
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "qualification": "LOCAL_REGRESSION_REPAIR_NOT_RELEASE_CERTIFICATION",
+  "baseline": "2709baf65779c7f08169d6b2fdf41b7bc9953191",
+  "productAndProofHead": "6f48df0542468d0557e386d65f91cb9bb7b6a97f",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "changedFileHashes": {
+    "maya-saas-backend/scripts/planner-wire-mutations.mjs": "6134a2ec119793ca557a93e84273d78aa64aa80dc28043e8b107308910549252",
+    "maya-saas-backend/src/action-engine/beget-relay-release.architecture.spec.ts": "ee50ace0f48ca7311d52ef635df2fa6a17836ef67adfd6b8c6f2d83825187c96",
+    "maya-saas-backend/src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts": "0a252fe51f80703a5df5d8e40200ca1b5091b54dea5022fd592cc77382e163e9",
+    "maya-saas-backend/src/ai-tools/ai-core.development-integration.spec.ts": "e1acf46d8bed4fa88fbc65a9ca4243a66f2bea5a0b587781d8cc194b53ba683c",
+    "maya-saas-backend/src/ai-tools/planner-wire-context.spec.ts": "d7da6169390501173632c5c9cbe467867c40883d0c7430c4d706fd928f8d6d4b",
+    "maya-saas-backend/src/ai-tools/planner-wire-context.ts": "db5e19d31dd73849b361c9d270c0305da2d47615e1c02121de7b6b85724738fe",
+    "maya-saas-backend/src/ai-tools/routing-regression.acceptance.spec.ts": "e4a029a2d1b16d4fea396c96a922f64b05d1c644d96d71fa8c57146ce4b3aacf",
+    "maya-saas-backend/src/crm/client-appointment-status.spec.ts": "f9c19adc09d1157ebe68887ffb317fddac70032e39549668b537aba4f82f5fd1",
+    "maya-saas-backend/src/crm/client-identity-registration-guard.architecture.spec.ts": "83e026ea096665fbb58aa6e5618a5cf39b9f0ef368f51dd546f1b98f723f0373",
+    "maya-saas-backend/src/crm/crm-branch-binding.spec.ts": "7292d7fc3eac3b91ca39b801356d9be985ab0e9926afc0dc9d88b4ccab1f2178",
+    "maya-saas-backend/src/entitlements/widget-release-profile.contract.spec.ts": "45e3e12adbfacf03ca821b9e324d1f27e7d71fbb3bd4abc991899e41c5ee771c",
+    "maya-saas-backend/src/widget-contract/reason-table.ts": "1c1418c82fec1e7b2c2fe44935ed0110c16f074061770d03950c435e770eba9d",
+    "maya-saas-backend/src/widgets/authority/business-rules-admission.spec.ts": "9926c489a608cfdd49026025a77e5fb67e530d701301d6995ab3724b3c0560b1",
+    "maya-saas-backend/src/widgets/consent/consent.spec.ts": "5eb18c62187140acec1ea2934891e585370a7dc28ade9ca513a1cd8d11b58b90",
+    "maya-saas-backend/src/widgets/proactive/proactive.spec.ts": "985233a2aa6ba375156f79910337f7e45aaebcb79f305ddbef5f83a0de6a9f1e",
+    "maya-saas-backend/src/widgets/projection/projector-fences.architecture.spec.ts": "f5beae49afa99bc00b3896a6580d3245a9b1c512876a96761f5e2ee203c0505a",
+    "maya-saas-backend/src/widgets/rendering/denial-projection.ratchet.spec.ts": "ba87593d1d16902521ee30d724a78a8280cd3c0c468db5b45a832269400c4e29"
+  },
+  "unchangedCriticalFiles": {
+    "maya-saas-backend/src/entitlements/widget-release-profile.registry.ts": "e3d492284cd44b6426f92004f3279da13c9f08e754e2dfdc574bda60867ba47b",
+    "maya-saas-backend/src/entitlements/widget-release-profile.contract.ts": "16ecc6d46d903e3830c2f9f1ff22e60f1b1597fc83ff16259c21e8578cd8e388",
+    "maya-saas-backend/src/entitlements/widget-release-access.service.ts": "4b0a0f64ad843a5e98f2a6845789668fa22cd0095ba48c20a5bda1acdc8f9953",
+    "maya-saas-backend/src/orchestration/c9.registry.ts": "14132b5af591d183facbce9ca6ae5c58623100aadd06f56e777321da778408fd",
+    "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts": "34c637bdcd6b0b51f62b24171de8690cf023d0e4af0a9549539b0ef3cdf41a6b",
+    "maya-saas-backend/src/conversation-intelligence/conversation-taxonomy.ts": "490706c55eb7ab0c24507fe9415551257d8461d1cbe7e119bf1a52de1eee255a",
+    "maya-saas-backend/src/ai-tools/ai-core-model.service.ts": "d2ee60223dceb24c0ed3fcca1d979b04d5779a41867768a65e8803e568614333",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "e4b58b3e45181dfbe445b7371b74dc59858ebb060e10c662b52012bc58e5ad1b"
+  },
+  "databaseSchemaChanged": false,
+  "runtimeCarrierChanged": false,
+  "productionChanges": false,
+  "realProviderModelCalls": false
+}

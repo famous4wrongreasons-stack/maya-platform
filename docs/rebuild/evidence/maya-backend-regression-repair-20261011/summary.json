@@ -1,0 +1,64 @@
+{
+  "qualification": "LOCAL_FUNCTIONAL_REGRESSION_PROOF_NOT_RELEASE_CERTIFICATION",
+  "testedHead": "6f48df0542468d0557e386d65f91cb9bb7b6a97f",
+  "baselineHead": "2709baf65779c7f08169d6b2fdf41b7bc9953191",
+  "originalFailedCases": 37,
+  "remainingFailedCases": 0,
+  "fullBackend": {
+    "passed": 9601,
+    "failed": 0,
+    "skipped": 0,
+    "suites": 717,
+    "status": "PASS"
+  },
+  "targetedMutations": {
+    "killed": 6,
+    "total": 6,
+    "baseline": 31,
+    "restored": 31,
+    "status": "PASS"
+  },
+  "typecheck": "PASS",
+  "scopedLint": "PASS",
+  "backendBuild": "PASS",
+  "widgetContractChecker": {
+    "passed": 31,
+    "failed": 0,
+    "declaredPendingNotCheckedByThisScript": 4,
+    "qualification": "This checker is not the complete live/mutation release certification programme."
+  },
+  "wireBudget": {
+    "limitBytes": 98304,
+    "before": {
+      "recordedUserOnly": 98702,
+      "actualAssistantRetained": 99228
+    },
+    "after": {
+      "recordedUserOnly": 96914,
+      "actualAssistantRetained": 97440
+    },
+    "completeHistoryRetained": true,
+    "roleAuthorityUnchanged": true,
+    "actualLiveModelAcceptance": false
+  },
+  "effects": {
+    "production": 0,
+    "ownerDatabaseWrites": 0,
+    "schemaChanges": 0,
+    "grants": 0,
+    "realModelCalls": 0,
+    "realTelegramLogin": 0,
+    "realOtpSms": 0,
+    "realYclientsEffects": 0,
+    "iphoneInstalls": 0,
+    "pushes": 0
+  },
+  "releaseCertified": false,
+  "liveOwnerAcceptance": "NOT_RUN",
+  "readyForLivePrivateReadLaunch": false,
+  "nextPrerequisites": [
+    "Qualify current React/callback on authorized exact HTTPS Telegram return.",
+    "Qualify bounded private-read mode of existing local launcher.",
+    "Existing history setting/consent and fresh actual private-data/model allowance; user completes real Telegram sign-in."
+  ]
+}
