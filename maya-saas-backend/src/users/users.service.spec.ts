@@ -504,58 +504,103 @@ describe('UsersService', () => {
     expect(userUpdateMock).not.toHaveBeenCalled();
   });
 
-  it('attaches a phone verified by a social identity in the same tenant', async () => {
-    const {
-      service,
-      tenantContext,
-      mocks: {
-        authIdentityFindFirstMock,
-        userFindFirstMock,
-        userFindManyMock,
-        userUpdateManyMock,
-      },
-    } = createService();
-    const userWithoutPhone = tenantUser({ phone: null });
-    const userWithPhone = tenantUser({ phone: '+79991112233' });
+  it.each([
+    ['8 (999) 111-22-33', '+79991112233'],
+    ['+12025550123', '+12025550123'],
+  ])(
+    'attaches verified social phone %s in the same tenant',
+    async (input, normalized) => {
+      const {
+        service,
+        tenantContext,
+        mocks: {
+          authIdentityFindFirstMock,
+          userFindFirstMock,
+          userFindManyMock,
+          userUpdateManyMock,
+        },
+      } = createService();
+      const userWithoutPhone = tenantUser({ phone: null });
+      const userWithPhone = tenantUser({ phone: normalized });
 
-    userFindFirstMock
-      .mockResolvedValueOnce(userWithoutPhone)
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(userWithPhone);
-    userFindManyMock.mockResolvedValueOnce([]);
-    authIdentityFindFirstMock.mockResolvedValueOnce({ id: 'identity-1' });
+      userFindFirstMock
+        .mockResolvedValueOnce(userWithoutPhone)
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(userWithPhone);
+      userFindManyMock.mockResolvedValueOnce([]);
+      authIdentityFindFirstMock.mockResolvedValueOnce({ id: 'identity-1' });
 
-    const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
-      service.attachVerifiedSocialPhone(
-        'user-1',
-        'tenant-1',
-        '8 (999) 111-22-33',
-      ),
-    );
+      const result = await tenantContext.runAsSystemTenant('tenant-1', () =>
+        service.attachVerifiedSocialPhone('user-1', 'tenant-1', input),
+      );
 
-    expect(authIdentityFindFirstMock).toHaveBeenCalledWith({
-      where: {
-        tenantId: 'tenant-1',
-        userId: 'user-1',
-        phone: '+79991112233',
-      },
-      select: { id: true },
-    });
-    expect(userUpdateManyMock).toHaveBeenCalledWith({
-      where: {
-        id: 'user-1',
-        phone: null,
-        memberships: {
-          some: {
-            tenantId: 'tenant-1',
-            status: 'active',
+      expect(authIdentityFindFirstMock).toHaveBeenCalledWith({
+        where: {
+          tenantId: 'tenant-1',
+          userId: 'user-1',
+          phone: normalized,
+        },
+        select: { id: true },
+      });
+      expect(userUpdateManyMock).toHaveBeenCalledWith({
+        where: {
+          id: 'user-1',
+          phone: null,
+          memberships: {
+            some: {
+              tenantId: 'tenant-1',
+              status: 'active',
+            },
           },
         },
-      },
-      data: { phone: '+79991112233' },
-    });
-    expect(result.phone).toBe('+79991112233');
-  });
+        data: { phone: normalized },
+      });
+      expect(result.phone).toBe(normalized);
+    },
+  );
+
+  it.each([
+    'missing-proof',
+    'conflicting-phone',
+    'lost-cas',
+    'foreign-tenant',
+    'invalid-phone',
+  ])(
+    'refuses social phone attachment on %s without an unchecked write',
+    async (negative) => {
+      const { service, tenantContext, mocks } = createService();
+      const {
+        userFindFirstMock,
+        userFindManyMock,
+        authIdentityFindFirstMock,
+        userUpdateManyMock,
+      } = mocks;
+      userFindFirstMock
+        .mockResolvedValueOnce(
+          tenantUser({
+            phone: negative === 'conflicting-phone' ? '+12025550199' : null,
+          }),
+        )
+        .mockResolvedValueOnce(null);
+      userFindManyMock.mockResolvedValueOnce([]);
+      authIdentityFindFirstMock.mockResolvedValueOnce(
+        negative === 'missing-proof' ? null : { id: 'identity-1' },
+      );
+      userUpdateManyMock.mockResolvedValueOnce({ count: 0 });
+      await expect(
+        tenantContext.runAsSystemTenant('tenant-1', () =>
+          service.attachVerifiedSocialPhone(
+            'user-1',
+            negative === 'foreign-tenant' ? 'tenant-2' : 'tenant-1',
+            negative === 'invalid-phone' ? 'invalid' : '+12025550123',
+          ),
+        ),
+      ).rejects.toThrow();
+      if (negative !== 'lost-cas')
+        expect(userUpdateManyMock).not.toHaveBeenCalled();
+      else expect(userUpdateManyMock).toHaveBeenCalledTimes(1);
+    },
+  );
 
   it('loads a tenant user through tenant and active membership predicates', async () => {
     const {

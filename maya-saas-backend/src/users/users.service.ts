@@ -346,10 +346,19 @@ export class UsersService {
   }
 
   async ensurePhoneIsAvailable(tenantId: string | null, phone: string) {
+    return this.assertNormalizedPhoneAvailable(
+      tenantId,
+      normalizeRussianPhone(phone),
+    );
+  }
+
+  private async assertNormalizedPhoneAvailable(
+    tenantId: string | null,
+    normalizedPhone: string,
+  ) {
     const scopedTenantId = tenantId
       ? this.tenantContext.assertTenantId(tenantId)
       : null;
-    const normalizedPhone = normalizeRussianPhone(phone);
     const exact = await this.prisma.user.findFirst({
       where: {
         phone: normalizedPhone,
@@ -951,7 +960,12 @@ export class UsersService {
     phone: string,
   ) {
     const tenantId = this.tenantContext.assertTenantId(expectedTenantId);
-    const normalizedPhone = normalizeRussianPhone(phone);
+    // A verified social identity uses the same international normalization as
+    // identity lookup. The Russian-only SMS/booking policy is a different owner.
+    const normalizedPhone = normalizePhoneE164(phone);
+    if (!normalizedPhone) {
+      throw new BadRequestException('Verified social phone is invalid');
+    }
     const currentUser = await this.getTenantUserOrThrow(userId, tenantId);
 
     if (currentUser.phone) {
@@ -980,7 +994,7 @@ export class UsersService {
       });
     }
 
-    await this.ensurePhoneIsAvailable(tenantId, normalizedPhone);
+    await this.assertNormalizedPhoneAvailable(tenantId, normalizedPhone);
     const update = await this.prisma.user.updateMany({
       where: {
         id: userId,

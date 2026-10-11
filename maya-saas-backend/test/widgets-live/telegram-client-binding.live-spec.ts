@@ -94,7 +94,7 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
     await db?.close();
   });
 
-  async function fixture(role = UserRole.CLIENT) {
+  async function fixture(role = UserRole.CLIENT, linkedIdentity = true) {
     const tenant = await fx.tenant(
       'Telegram initial binding',
       CalendarSource.EXTERNAL,
@@ -109,16 +109,18 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
       },
     });
     const providerUserId = randomUUID();
-    await db.prisma.authIdentity.create({
-      data: {
-        tenantId: tenant.id,
-        userId: user.id,
-        provider: 'telegram',
-        providerUserId,
-        phone,
-      },
-    });
-    await db.prisma.user.update({ where: { id: user.id }, data: { phone } });
+    if (linkedIdentity)
+      await db.prisma.authIdentity.create({
+        data: {
+          tenantId: tenant.id,
+          userId: user.id,
+          provider: 'telegram',
+          providerUserId,
+          phone,
+        },
+      });
+    if (linkedIdentity)
+      await db.prisma.user.update({ where: { id: user.id }, data: { phone } });
     const actor = await fx.actor(tenant, user);
     await db.prisma.crmIntegration.create({
       data: {
@@ -294,6 +296,124 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
         .send({ state, code: 'synthetic-code', ...extra });
     return { complete, state };
   }
+
+  it.each(['active', 'trial'] as const)(
+    'existing %s business owner with no phone/Telegram: authenticated A23 link, then fresh login creates personal Client without account duplication',
+    async (status) => {
+      const f = await fixture(UserRole.TENANT_OWNER, false);
+      await db.prisma.tenant.update({
+        where: { id: f.tenant.id },
+        data: {
+          status,
+          trialFullAccess: status === 'trial',
+          trialEndsAt:
+            status === 'trial' ? new Date(Date.now() + 86400000) : null,
+        },
+      });
+      const bearer = await http.login(
+        f.tenant.slug,
+        f.user.email,
+        f.user.password,
+      );
+      const flow = await signedLogin(f);
+      const link = () =>
+        request(http.app.getHttpServer())
+          .post('/api/auth/oauth/telegram/link/complete')
+          .set('Authorization', `Bearer ${bearer}`)
+          .send({ state: flow.state, code: 'synthetic-code' });
+      const result = await link();
+      expect(result.status).toBe(201);
+      expect(result.body).toMatchObject({
+        linked: true,
+        provider: 'telegram',
+        user: { id: f.user.id, role: UserRole.TENANT_OWNER },
+      });
+      expect(await f.count()).toBe(0);
+      expect(f.source).not.toHaveBeenCalled();
+      expect(
+        await db.prisma.client.count({ where: { tenantId: f.tenant.id } }),
+      ).toBe(0);
+      expect(
+        await db.prisma.authIdentity.count({
+          where: {
+            tenantId: f.tenant.id,
+            userId: f.user.id,
+            provider: 'telegram',
+          },
+        }),
+      ).toBe(1);
+      expect((await link()).status).toBeGreaterThanOrEqual(400);
+      const login = await (await signedLogin(f)).complete();
+      if (login.status !== 201) {
+        const error = login.body as {
+          error?: { code?: string };
+          message?: string;
+        };
+        throw new Error(
+          `Fresh post-link login refused: ${login.status} ${error.error?.code ?? error.message ?? 'unknown'}`,
+        );
+      }
+      expect(login.status).toBe(201);
+      expect(login.body).toMatchObject({
+        is_new_user: false,
+        user: { id: f.user.id, role: UserRole.TENANT_OWNER },
+        client_binding: { status: 'linked' },
+      });
+      expect(await f.count()).toBe(1);
+      expect(f.source).toHaveBeenCalledTimes(1);
+      expect(
+        await db.prisma.user.count({ where: { tenantId: f.tenant.id } }),
+      ).toBe(1);
+      expect(
+        await db.prisma.membership.count({ where: { tenantId: f.tenant.id } }),
+      ).toBe(1);
+    },
+  );
+
+  it.each(['missing-session', 'foreign-tenant', 'forged-signature'] as const)(
+    'first business Telegram link refuses %s without creating an identity or Client',
+    async (negative) => {
+      const f = await fixture(UserRole.TENANT_OWNER, false);
+      const other =
+        negative === 'foreign-tenant'
+          ? await fixture(UserRole.TENANT_OWNER, false)
+          : f;
+      const bearer =
+        negative === 'missing-session'
+          ? null
+          : await http.login(
+              other.tenant.slug,
+              other.user.email,
+              other.user.password,
+            );
+      const flow = await signedLogin(f, {}, negative === 'forged-signature');
+      let call = request(http.app.getHttpServer()).post(
+        '/api/auth/oauth/telegram/link/complete',
+      );
+      if (bearer) call = call.set('Authorization', `Bearer ${bearer}`);
+      const result = await call.send({
+        state: flow.state,
+        code: 'synthetic-code',
+      });
+      expect(result.status).toBe(
+        negative === 'missing-session'
+          ? 401
+          : negative === 'foreign-tenant'
+            ? 403
+            : 400,
+      );
+      expect(
+        await db.prisma.authIdentity.count({
+          where: { tenantId: f.tenant.id },
+        }),
+      ).toBe(0);
+      expect(
+        await db.prisma.client.count({ where: { tenantId: f.tenant.id } }),
+      ).toBe(0);
+      expect(await f.count()).toBe(0);
+      expect(f.source).not.toHaveBeenCalled();
+    },
+  );
 
   it('OAuth fixture hygiene preserves the real 30-attempt refusal and all non-preflight buckets', async () => {
     const f = await fixture();
