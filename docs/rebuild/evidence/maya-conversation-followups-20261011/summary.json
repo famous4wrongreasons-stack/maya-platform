@@ -1,0 +1,206 @@
+{
+  "qualification": "LOCAL_SCRIPTED_CONVERSATION_MECHANICS_NOT_RELEASE_CERTIFICATION",
+  "candidateCommit": "c9e012e7e8b1810b24db29ca890238097ff33d97",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "parentBeforeWork": "d2b0cd721828cb63403225e58d43c1d5858e1956",
+  "commits": {
+    "preferenceCarry": "37114e99b47c66e7ec8eb9cbc730d5e852749d07",
+    "naturalClarification": "c9e012e7e8b1810b24db29ca890238097ff33d97"
+  },
+  "rootCause": "Validated short reschedule continuations omitted prior new_date/new_time; existing carry covered only create/find/prepare booking intents.",
+  "redBeforeFix": {
+    "numPassedTests": 0,
+    "numFailedTests": 4,
+    "numPendingTests": 0,
+    "numPassedTestSuites": 0,
+    "numFailedTestSuites": 1
+  },
+  "units": {
+    "numPassedTests": 433,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numPassedTestSuites": 5,
+    "numFailedTestSuites": 0
+  },
+  "http": {
+    "sourceBinding": "CLEAN_COMMITTED_HEAD",
+    "rescheduleStop": {
+      "numPassedTests": 6,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 1,
+      "numFailedTestSuites": 0
+    },
+    "bookingAndUnknown": {
+      "numPassedTests": 9,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 2,
+      "numFailedTestSuites": 0
+    },
+    "sourceFilesVerified": 2064,
+    "sourcesUnchanged": true
+  },
+  "focusedMutations": {
+    "killed": 5,
+    "total": 5,
+    "greenBaseline": 381,
+    "greenRestored": 381,
+    "sourceRestored": true,
+    "results": [
+      {
+        "name": "drop-carry",
+        "status": 1,
+        "passed": 376,
+        "failed": 5,
+        "failedAssertions": [
+          "unselected personal reschedule preference continuation retains day through a time answer (read prerequisite false → false)",
+          "unselected personal reschedule preference continuation retains day through a time answer (read prerequisite false → true)",
+          "unselected personal reschedule preference continuation retains day through a time answer (read prerequisite true → false)",
+          "unselected personal reschedule preference continuation retains day through a time answer (read prerequisite true → true)",
+          "unselected personal reschedule preference continuation replaces only the corrected day/time and never mutates the saved plan"
+        ],
+        "killed": true
+      },
+      {
+        "name": "overwrite-correction",
+        "status": 1,
+        "passed": 380,
+        "failed": 1,
+        "failedAssertions": [
+          "unselected personal reschedule preference continuation replaces only the corrected day/time and never mutates the saved plan"
+        ],
+        "killed": true
+      },
+      {
+        "name": "new-request-inherits",
+        "status": 1,
+        "passed": 380,
+        "failed": 1,
+        "failedAssertions": [
+          "unselected personal reschedule preference continuation does not carry into dialogue act request"
+        ],
+        "killed": true
+      },
+      {
+        "name": "selected-appointment-carries",
+        "status": 1,
+        "passed": 379,
+        "failed": 2,
+        "failedAssertions": [
+          "unselected personal reschedule preference continuation refuses carry across previous-selection",
+          "unselected personal reschedule preference continuation refuses carry across current-selection"
+        ],
+        "killed": true
+      },
+      {
+        "name": "stale-relative-day",
+        "status": 1,
+        "passed": 379,
+        "failed": 2,
+        "failedAssertions": [
+          "AiCoreService explicit preparation stop does not reinterpret a retained reschedule day on the next local day: friday",
+          "AiCoreService explicit preparation stop does not reinterpret a retained reschedule day on the next local day: tomorrow"
+        ],
+        "killed": true
+      }
+    ]
+  },
+  "syntheticObservedFollowups": {
+    "case": "reschedule_preference_followups",
+    "replies": [
+      "В доступном списке нет записей. Источник: ваши записи в MAYA.\n\nПоняла: пятница. Какую запись хотите перенести? Доступность ещё нужно проверить; перенос пока не выполнен.",
+      "В доступном списке нет записей. Источник: ваши записи в MAYA.\n\nПоняла: пятница, 20:00. Какую запись хотите перенести? Доступность ещё нужно проверить; перенос пока не выполнен.",
+      "Поняла: пятница, 19:00. Какую запись хотите перенести? Доступность ещё нужно проверить; перенос пока не выполнен.",
+      "Поняла: суббота, 19:00. Какую запись хотите перенести? Доступность ещё нужно проверить; перенос пока не выполнен."
+    ],
+    "afterStop": "Поняла: 18:00. Какую запись хотите перенести? Доступность ещё нужно проверить; перенос пока не выполнен.",
+    "appointmentsUnchanged": true,
+    "actionExecutions": 0
+  },
+  "cleanup": {
+    "clusterStopped": true,
+    "pidFileAbsent": true,
+    "sourceUnchanged": true,
+    "independentPgCtlStatus": 3
+  },
+  "limits": [
+    "Scripted model plans; not real-language understanding or tone acceptance.",
+    "Existing ten-turn booking cohort uses a synthetic INTERNAL calendar and a separate headless carrier, not a browser.",
+    "Reschedule regression preserves preferences before appointment selection. It performs no move and creates no confirmation.",
+    "New reschedule HTTP path uses login/session continuation, not app/PostgreSQL restart.",
+    "No production, paid model, owner database, real YCLIENTS, SMS/OTP, notification or iPhone effects.",
+    "No full release recertification or production readiness claim.",
+    "No first Client binding through a messenger was implemented or authorized by this unit."
+  ],
+  "receipts": [
+    {
+      "localPath": "/private/tmp/maya-reschedule-carry-unit-20261011-head.json",
+      "sha256": "ca64db7d077e498151f25ac1a66eda709087424930f9a2b239e88b56206cd557",
+      "bytes": 213168
+    },
+    {
+      "localPath": "/private/tmp/maya-reschedule-carry-red-20261011.json",
+      "sha256": "1575b454c70210535646a60a63762c335111ea3c59b2fcf0d388cd38f2f4e1de",
+      "bytes": 18299
+    },
+    {
+      "localPath": "/private/tmp/maya-reschedule-http-20261011-final/manifest.json",
+      "sha256": "7c6ac84d848f6aba7cd0cb5bdc9b3a3c25834f60e673732a4b77d64dcf112d4f",
+      "bytes": 672
+    },
+    {
+      "localPath": "/private/tmp/maya-reschedule-http-20261011-final/source-hashes.json",
+      "sha256": "86eb85000009a11f03a7f178ed96b1a9cf83ca5f174fb716ff25cb07dc49137b",
+      "bytes": 252010
+    },
+    {
+      "localPath": "/private/tmp/maya-reschedule-http-20261011-final/reschedule-stop-jest.json",
+      "sha256": "8319298c7e88e7157d1e449a006afdc8880523629a2a43e73a609f7631db3f6e",
+      "bytes": 4237
+    },
+    {
+      "localPath": "/private/tmp/maya-reschedule-http-20261011-final/booking-lifecycle-jest.json",
+      "sha256": "2856d9fcef5db173992bfafece4f472c193bc4aea4b9145f93e72cd1086cb692",
+      "bytes": 6408
+    },
+    {
+      "localPath": "/private/tmp/maya-reschedule-http-20261011-final/reschedule-stop-report.json",
+      "sha256": "f1b588a635676601f04f1cd64337ea8863f571800c201bbdf274e78cefd43ee2",
+      "bytes": 66277
+    },
+    {
+      "localPath": "/private/tmp/maya-reschedule-proof-20261011.mjs",
+      "sha256": "147cbd3396d52408145f0db21415739860173de142c2f9d43b04b658687caf63",
+      "bytes": 4838
+    },
+    {
+      "localPath": "/private/tmp/maya-reschedule-mutations-20261011-final.mjs",
+      "sha256": "2a525e04a7b07467119430f66bf5a865155559efaae44a7f8db73975dcb1266a",
+      "bytes": 3428
+    },
+    {
+      "localPath": "/private/tmp/maya-reschedule-mutations-20261011-final/summary.json",
+      "sha256": "de42f0172efb584a096eb023499bd060d54ad8b3b4aad4be34fed95f6d24092e",
+      "bytes": 2816
+    },
+    {
+      "localPath": "/private/tmp/maya-reschedule-lint-20261011-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "localPath": "/private/tmp/maya-reschedule-types-20261011-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "localPath": "/private/tmp/maya-reschedule-build-types-20261011-head.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "backendBuildTypes": "PASS",
+  "widgetsLiveTypes": "PASS",
+  "scopedLint": "PASS"
+}

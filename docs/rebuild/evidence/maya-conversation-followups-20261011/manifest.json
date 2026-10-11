@@ -1,0 +1,14 @@
+{
+  "preceding-owner-read-outcome.json": {
+    "sha256": "bfa79f784bb3b4b45c0822611cbee335a6271ed1cbb3da0774491ceb25ab7943",
+    "bytes": 3063
+  },
+  "preceding-owner-read-provenance.json": {
+    "sha256": "a3451b382650723beb2c2c59fe8a3299a062e2b2f82cabbf5a3ab34f5e607dd7",
+    "bytes": 303
+  },
+  "summary.json": {
+    "sha256": "efccbcb81599a02ea21db09b7f0daac46ae7952c6b4a6ae8dcfbd1dcda34d2c6",
+    "bytes": 8879
+  }
+}

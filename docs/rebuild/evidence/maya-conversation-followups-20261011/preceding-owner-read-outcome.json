@@ -1,0 +1,98 @@
+{
+  "contract": "maya.owner-chat-attempt-outcome/1",
+  "recordedAt": "2026-10-11T07:58:28.919Z",
+  "candidateCommit": "6d46f7b229da1bbf7d46f20e8aa80f25ba7e3aad",
+  "profile": "core-owner-salon-read-20261011/1",
+  "qualification": "LOCAL_OWNER_READ_UI_SMOKE_COMPLETED_NOT_RELEASE_CERTIFICATION",
+  "questions": {
+    "planned": 3,
+    "submitted": 3,
+    "completedAnswers": 3,
+    "servicesAndPrices": "RESPONSE_VISIBLE",
+    "publicStaff": "FIVE_STAFF_VISIBLE",
+    "addressAndHours": "CRM_ADDRESS_HOURS_TIMEZONE_VISIBLE"
+  },
+  "uiProof": {
+    "observer": "CUA Chrome native AX plus screenshot",
+    "servicesApparentTruncation": "AX observation truncated; screenshot confirms full answer is rendered",
+    "additionalCallsBeyondFixedQuestions": false
+  },
+  "model": {
+    "upstreamAttempts": 4,
+    "completedResponses": 4,
+    "unresolvedAttempts": 0,
+    "allUsageValidated": true,
+    "rejections": 0,
+    "reservedUpperBoundUsd": 0.39740316,
+    "completedUsagePeakNoCacheUpperBoundUsd": 0.07737972,
+    "actualProviderBill": "NOT_READ"
+  },
+  "providerReads": {
+    "calls": 3,
+    "refused": 0,
+    "routes": {
+      "book_services": 1,
+      "team": 1,
+      "company": 1
+    }
+  },
+  "effects": {
+    "providerBusinessWrites": 0,
+    "bookingActions": 0,
+    "otp": 0,
+    "productionChanges": 0,
+    "sourceChanges": 0
+  },
+  "window": {
+    "permitStarts": "2026-10-11T07:51:41.190Z",
+    "permitExpires": "2026-10-11T08:01:41.190Z",
+    "readyAt": "2026-10-11T07:53:15.311Z",
+    "stoppedAt": "2026-10-11T07:57:58.229Z",
+    "stoppedEarlyAfterCompletion": true
+  },
+  "cleanup": {
+    "ownedSessionStopped": true,
+    "requestsInFlightAtStop": 0,
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "savedStatePreserved": true
+  },
+  "worktreeClean": true,
+  "limitations": [
+    "Three fixed local read scenarios only; no unrestricted assistant or release certification claim.",
+    "Booking, customer data, voice, SMS and production were outside this run.",
+    "Responses were observed in UI; no separate exhaustive service-price reconciliation was performed."
+  ],
+  "sources": [
+    {
+      "path": "permit.json",
+      "sha256": "ce9f8165cd3f39f04d0480ca4bdb3ade834ef691853c7e7e81b377f80316ee68",
+      "bytes": 1525
+    },
+    {
+      "path": "candidate-manifest.json",
+      "sha256": "0cf0f0b6688578ad42510d34763e84ab48de90554d14407a9a7f71676a4eb6e2",
+      "bytes": 374679
+    },
+    {
+      "path": "session/resume.json",
+      "sha256": "0b40a67b3308211d6a1de4b03786922f4c0bc848c80c7d5bcf81917b2d2ffa01",
+      "bytes": 544071
+    },
+    {
+      "path": "broker/broker-report.json",
+      "sha256": "817dd4c12beca8897609c728c4397575747a2ed39477203205fe8e8b415a8d42",
+      "bytes": 2061
+    },
+    {
+      "path": "broker/broker-ledger.jsonl",
+      "sha256": "71fc55177af1e1ea7106466af9b639c32d485ccd09d6f0f46431ec6251e87f53",
+      "bytes": 1978
+    },
+    {
+      "path": "broker/model-responses.jsonl",
+      "sha256": "c4251b709e4cd84cbd85abf7ad21520373b97517b4f26434dd039682af545f8c",
+      "bytes": 5026
+    }
+  ]
+}

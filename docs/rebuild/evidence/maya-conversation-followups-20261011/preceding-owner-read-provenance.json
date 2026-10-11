@@ -1,0 +1,9 @@
+{
+  "source": {
+    "localPath": "/private/tmp/maya-owner-chat-20261011-02/attempt-outcome.json",
+    "sha256": "bfa79f784bb3b4b45c0822611cbee335a6271ed1cbb3da0774491ceb25ab7943",
+    "bytes": 3063
+  },
+  "classification": "HISTORICAL_EXECUTED_LOCAL_OWNER_UI_SMOKE",
+  "notReexecutedByThisUnit": true
+}

@@ -1,5 +1,13 @@
 # First Client binding: exact remaining decision
 
+**Owner steering, 2026-10-11:** notifications must use messengers; SMS must not be
+made a mandatory launch prerequisite. The initial-only SMS proposal below remains
+historical and unapproved as the current path. Existing V2 code is preserved, not
+executed. A new initial messenger trust source still needs an exact contract;
+Telegram login alone is not ownership of a particular Client. The existing A18
+transfer from an already verified exact Client channel remains independent of
+this missing bootstrap. [Current development checkpoint](MAYA-CONVERSATION-FOLLOWUPS-20261011.md).
+
 This is a code/contract inventory, not a new identity admission or production acceptance. It corrects the overly narrow first-link boundary in the earlier [owner React checkpoint](MAYA-PERSONAL-OWNER-REACT-CHECKPOINT-20261007.md): SB-1 V2 is not the only A18 path.
 
 | Current evidence | Existing approved owner and result |
