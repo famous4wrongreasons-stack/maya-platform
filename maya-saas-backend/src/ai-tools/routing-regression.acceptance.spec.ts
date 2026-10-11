@@ -854,7 +854,7 @@ describe('КОРПУС: промах подсказки больше не отк
     expect(answer.grounding.domain).toBe('client_appointments');
   });
 
-  it('ни одного инструмента данных для роли — прежний честный отказ', async () => {
+  it('клиентский каталог не открывает внутреннюю выручку бизнеса', async () => {
     const harness = createHarness(CLIENT);
 
     const answer = await harness.ask('Какая выручка бизнеса за этот месяц?');
@@ -866,6 +866,29 @@ describe('КОРПУС: промах подсказки больше не отк
       status: 'blocked',
       domain: 'business_query',
     });
+    // Public/personal tools now exist for CLIENT. Planning may inspect that
+    // allowed catalog, but no business tool or source data can be exposed.
+    expect(harness.decide).toHaveBeenCalledTimes(1);
+    const planned = harness.decide.mock.calls[0][0];
+    expect(planned.tools.map((t) => t.name)).not.toContain(
+      'analytics.business.query',
+    );
+    expect(planned.toolResults).toEqual([]);
+    expect(harness.executed).toEqual([]);
+    expect(harness.approvals).toEqual([]);
+  });
+
+  it('без доступного каталога сохраняет отказ до обращения к модели', async () => {
+    const harness = createHarness(CLIENT, {
+      'ai.admin': true,
+      'ai.consultant': true,
+    });
+    const answer = await harness.ask('Какая выручка бизнеса за этот месяц?');
+    expect(answer.grounding).toMatchObject({
+      status: 'blocked',
+      domain: 'business_query',
+    });
     expect(harness.decide).not.toHaveBeenCalled();
+    expect(harness.executed).toEqual([]);
   });
 });

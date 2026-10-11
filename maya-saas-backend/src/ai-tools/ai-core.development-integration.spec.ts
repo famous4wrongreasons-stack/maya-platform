@@ -1,3 +1,4 @@
+import { ConversationIntelligenceService } from '../conversation-intelligence/conversation-intelligence.service';
 import { AiCoreService } from './ai-core.service';
 import { StaffScheduleCommandService } from './staff-schedule-command.service';
 import { AI_SCHEDULE_WIDGET } from './ai-schedule-widget.port';
@@ -25,7 +26,35 @@ const modelDecision = (toolCall: unknown = null, reply = 'Здравствуйт
   model: 'SCRIPTED_SYNTHETIC',
   reply,
   toolCall,
-  semanticPlan: null,
+  semanticPlan:
+    (toolCall as { name?: string } | null)?.name ===
+    'catalog.service.price.update'
+      ? new ConversationIntelligenceService().validatePlan(
+          {
+            parent_request: 'Синтетическая подготовка цены',
+            language: 'ru',
+            dialogue_act: 'request',
+            tasks: [
+              {
+                id: 'price',
+                intent: 'services.price_update',
+                entities: { service: 'Стрижка', requested_price: 1900 },
+                depends_on: [],
+                confidence: 1,
+                requires_clarification: false,
+                clarification_question: null,
+              },
+            ],
+            context: {
+              carried_slots: [],
+              replaced_slots: [],
+              unresolved_references: [],
+            },
+          },
+          UserRole.TENANT_OWNER,
+          ['catalog.services.read', 'catalog.service.price.update'],
+        )
+      : null,
   usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 });
 function fixture() {
@@ -43,6 +72,7 @@ function fixture() {
     ]),
   };
   const crm = {
+    servicePriceReadIdentity: jest.fn().mockResolvedValue('a'.repeat(64)),
     getStaff: jest
       .fn()
       .mockResolvedValue([{ id: 'staff-a', name: 'Антон Тестовый' }]),
@@ -168,6 +198,7 @@ function fixture() {
       get: (token: string) =>
         token === AI_SCHEDULE_WIDGET ? scheduleWidget : timeline,
     } as never,
+    crm as never,
   );
   const dto = (
     content: string,
