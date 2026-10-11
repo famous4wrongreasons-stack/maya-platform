@@ -1,0 +1,431 @@
+{
+  "contract": "maya.personal-chat.http-proof/1",
+  "qualification": "SYNTHETIC_ISSUER_SOURCE_MODEL_REAL_HTTP_PG_NOT_RELEASE_CERTIFICATION",
+  "testedHead": "a53c6546c8b4fa35fdc1fa0d141cc74838d605c6",
+  "previousHead": "f13c0077111845fe78dbb8ec1a2e827b0e998514",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "sourceUnchanged": true,
+  "sourceFilesVerified": 2072,
+  "passed": 79,
+  "failed": 0,
+  "suites": [
+    {
+      "file": "test/widgets-live/telegram-client-binding.live-spec.ts",
+      "passed": 60,
+      "failed": 0,
+      "assertions": [
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining client role",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining tenant_owner role",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (false), including a stored matching phone",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (undefined), including a stored matching phone",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (true), including a stored matching phone",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (1), including a stored matching phone",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] links a first-time Telegram registrant to the existing CRM card, without an existing Maya account",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses forged/expired signed claims {\"aud\":\"foreign-client\"} before binding",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses forged/expired signed claims {\"iss\":\"https://forged.example\"} before binding",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses forged/expired signed claims {\"exp\":1} before binding",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses caller-selected Client, phone, tenant and channel in the login body",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rejects a token with a forged signature before any Client lookup",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] allows account login, but not Client binding, when CRM is unavailable",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] matches the complete international number despite source formatting",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] retries a serializable CRM identity registration conflict through the same owner",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one concurrent callback winner, with one link and one audit",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 1",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 2",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 3",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 4",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 5",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 6",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 7",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 8",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: absent",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: duplicate",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: same-tail-foreign-country",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: incomplete",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: provider-mismatch",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: stale",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: expired-proof",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: future-proof",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: old-proof",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: foreign-tenant",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: foreign-user",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: foreign-session",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: unclaimed-flow",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: revoked-session",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: suspended-membership",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses a source switch during CRM resolution",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rereads session revocation after CRM resolution",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] leaves revoked historical verification byte-identical and denies automatic relink",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rolls back the link when its mandatory audit cannot be written",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses a CRM card already bound to a different account",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] profile/personal context resolve the exact linked Client without changing owner role or consent",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history signed client login → canonical sync → three HTTP AChat replies, with no private model continuation",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history signed tenant_owner login → canonical sync → three HTTP AChat replies, with no private model continuation",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history HTTP AChat explains disabled history; does not turn it into an empty or complete history",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history HTTP AChat rereads revoked Client authority despite a successful previous turn",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history revoked session cannot send another history turn or restore the private conversation",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history HTTP AChat refuses caller-selected Client and same-tenant foreign conversation before private history disclosure",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history HTTP AChat refuses caller-selected Client and foreign-tenant foreign conversation before private history disclosure",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history source-to-card history uses exact Client after signed client login, with explicit consent and no GET writes",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history source-to-card history uses exact Client after signed tenant_owner login, with explicit consent and no GET writes",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history late exact identity resolves the existing mirror rows only on reconciliation, never on login/GET",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history canonical salon history setting admits only own saved history and withdrawal blocks the next read",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history same provider record identifiers in two salons never cross the authenticated tenant",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history provider failure or a truncated refresh never erases the last synchronized personal history",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history session revocation closes card and history while preserving the synchronized records",
+          "status": "passed"
+        },
+        {
+          "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing CRM reconciliation → first login → private history privacy withdrawal hides the card again without deleting canonical visit history",
+          "status": "passed"
+        }
+      ]
+    },
+    {
+      "file": "test/widgets-live/sb1-successor.live-spec.ts",
+      "passed": 19,
+      "failed": 0,
+      "assertions": [
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-01 happy successor verification creates usable explicit personal context and actual actor audit",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-02 wrong OTP has no link or consumption effect",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-03 replay fails closed",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-04 expired OTP fails under database time",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-05 Client substitution cannot transfer a challenge",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-06 tenant substitution fails closed",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-07 predecessor changed after resolver read is rejected inside identity lock",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-08 active predecessor never authorizes issuance or consumption",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-09 non-latest revoked predecessor cannot be consumed",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-10 revoked episode remains byte-for-byte immutable",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-11 successful consume creates exactly one successor and one outcome",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-12 concurrent consume serializes to one success and one refusal",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-JSON all four V2 fields are mandatory, exact and immutable",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-CHANNEL canonical channel changed after issuance invalidates exact Client proof",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-SESSION current revocation is checked on consume",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-LIMIT failed OTP attempts survive rollback and cannot be reset with correct code",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-DELIVERY failed SMS grants nothing and discloses no OTP",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-V1 historical V1 remains immutable and initial-only; V1 consumption still works for a fresh subject",
+          "status": "passed"
+        },
+        {
+          "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+          "status": "passed"
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "types": "PASS",
+    "lint": "PASS",
+    "productionSourceChanged": false,
+    "runtimeCarrierChanged": false
+  },
+  "cleanup": [
+    {
+      "manifest": "/private/tmp/maya-personal-chat-chain-20261011-01/manifest.json",
+      "sha256": "2306e4093afec4d3d1ac74b1093ec3d76f785174838d08774573c0dc70c1ded7",
+      "status": "passed",
+      "pgCtlStatusExit": 3,
+      "pidFileAbsent": true
+    },
+    {
+      "manifest": "/private/tmp/maya-personal-chat-chain-20261011-02/manifest.json",
+      "sha256": "a6f559a6d0389282d43a1254df0a83ae92c7492d104098c3d4c2ec8ea493a043",
+      "status": "failed",
+      "pgCtlStatusExit": 3,
+      "pidFileAbsent": true
+    },
+    {
+      "manifest": "/private/tmp/maya-personal-chat-chain-20261011-03/manifest.json",
+      "sha256": "3751b97b197fe80a1019354cf2e6090f07a5f04545659077a4240f96960d92b9",
+      "status": "passed",
+      "pgCtlStatusExit": 3,
+      "pidFileAbsent": true
+    },
+    {
+      "manifest": "/private/tmp/maya-personal-chat-chain-a53c6546-20261011/manifest.json",
+      "sha256": "ff2c897e00249270359ef7602ca37a50459bbc75882063609b988bb7453db90e",
+      "status": "passed",
+      "pgCtlStatusExit": 3,
+      "pidFileAbsent": true
+    }
+  ],
+  "receipts": [
+    {
+      "path": "/private/tmp/maya-personal-chat-chain-a53c6546-20261011/manifest.json",
+      "sha256": "ff2c897e00249270359ef7602ca37a50459bbc75882063609b988bb7453db90e",
+      "bytes": 692
+    },
+    {
+      "path": "/private/tmp/maya-personal-chat-chain-a53c6546-20261011/source-hashes.json",
+      "sha256": "f6f14415208caf6a070576d564e2c15081ad37d025d42a117ca9fe83e845f0dc",
+      "bytes": 252977
+    },
+    {
+      "path": "/private/tmp/maya-personal-chat-chain-a53c6546-20261011/telegram-initial-jest.json",
+      "sha256": "904e84fd8e025eb56103b05dbfbe16a7659bee97efe71318f0875fb8dab2fd23",
+      "bytes": 42202
+    },
+    {
+      "path": "/private/tmp/maya-personal-chat-chain-a53c6546-20261011/telegram-initial.log",
+      "sha256": "55a5539c8f7543707b209f7cde14e981771a6282464dadece52a9ae3496eb56e",
+      "bytes": 2661
+    },
+    {
+      "path": "/private/tmp/maya-personal-chat-types-final-20261011.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/private/tmp/maya-personal-chat-lint-final-20261011.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "notExecuted": [
+    "real Telegram",
+    "real CRM/private reads",
+    "real model",
+    "browser acceptance",
+    "production",
+    "owner database",
+    "new certification",
+    "push"
+  ],
+  "failedAttempts": [
+    {
+      "path": "/private/tmp/maya-personal-chat-chain-20261011-02",
+      "reason": "New test expected 403; canonical timeline already returns 409 conversation_scope_conflict. Only test expectation corrected."
+    },
+    {
+      "path": "/private/tmp/maya-personal-chat-lint-20261011.log",
+      "reason": "New test HTTP bodies lacked static types; types added without lint exceptions."
+    }
+  ]
+}

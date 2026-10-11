@@ -1,0 +1,15 @@
+{
+  "scope": "Current changed tests/documents and new receipts only; not whole-repository historical audit",
+  "highConfidenceSecretScan": "PASS",
+  "realCustomerDataUsed": false,
+  "review": "Synthetic contacts and provider values only in new test code; no owner database or private key file opened",
+  "paths": [
+    "maya-saas-backend/test/widgets-live/telegram-client-binding.live-spec.ts",
+    "docs/rebuild/MAYA-PERSONAL-CHAT-ACCEPTANCE-20261011.md",
+    "docs/rebuild/MAYA-DELIVERY-PLAN-20261010.md",
+    "docs/rebuild/MAYA-FINAL-COMPLETION-MAP.md",
+    "docs/rebuild/evidence/maya-personal-chat-20261011/source-hashes.json",
+    "docs/rebuild/evidence/maya-personal-chat-20261011/summary.json"
+  ],
+  "findings": []
+}
