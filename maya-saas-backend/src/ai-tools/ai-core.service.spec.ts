@@ -5029,7 +5029,7 @@ describe('AiCoreService', () => {
         .spyOn(crypto, 'randomUUID')
         .mockImplementation(
           () =>
-          `aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa${(++sequence).toString(16).padStart(2, '0')}`,
+            `aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa${(++sequence).toString(16).padStart(2, '0')}`,
         );
     });
     afterEach(() => nonce.mockRestore());
