@@ -1,0 +1,16 @@
+{
+  "scope": "New implementation diff and projected local evidence only; not a historical repository scan",
+  "forbiddenMaterialDetections": {
+    "private_key_material": 0,
+    "literal_jwt": 0,
+    "database_password_url": 0,
+    "telegram_bot_credential": 0,
+    "provider_api_secret": 0
+  },
+  "contactLiterals": "Explicit synthetic test fixtures only",
+  "rawCustomerDataCopied": false,
+  "realSecretsReadOrGenerated": false,
+  "productSourcesMatchFreshCommittedReceipt": true,
+  "sourceFilesChecked": 2069,
+  "pushed": false
+}

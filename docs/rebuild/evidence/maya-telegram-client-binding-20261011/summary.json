@@ -1,0 +1,1500 @@
+{
+  "qualification": "LOCAL_SYNTHETIC_TELEGRAM_CRM_IDENTITY_UNIT_NOT_RELEASE_CERTIFICATION",
+  "productCandidate": "8f6d9fa5750f756c7206aa714dd81f43ee1e86bd",
+  "executedOnCommittedCleanProductCandidate": true,
+  "unit": {
+    "passed": 223,
+    "failed": 0,
+    "skipped": 0,
+    "suites": [
+      {
+        "file": "client-profile-read.architecture.spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "B28 shared private CustomerProfile read protection scans every production backend/AI/helper source",
+            "status": "passed"
+          },
+          {
+            "name": "B28 shared private CustomerProfile read protection rejects User profile lookup in any new production helper",
+            "status": "passed"
+          },
+          {
+            "name": "B28 shared private CustomerProfile read protection rejects unverified Client selector in any new production helper",
+            "status": "passed"
+          },
+          {
+            "name": "B28 shared private CustomerProfile read protection rejects hidden profile create in any new production helper",
+            "status": "passed"
+          },
+          {
+            "name": "B28 shared private CustomerProfile read protection rejects hidden profile update in any new production helper",
+            "status": "passed"
+          },
+          {
+            "name": "B28 shared private CustomerProfile read protection rejects hidden Client create in any new production helper",
+            "status": "passed"
+          },
+          {
+            "name": "B28 shared private CustomerProfile read protection rejects hidden link mutation in any new production helper",
+            "status": "passed"
+          },
+          {
+            "name": "B28 shared private CustomerProfile read protection rejects hidden consent mutation in any new production helper",
+            "status": "passed"
+          },
+          {
+            "name": "B28 shared private CustomerProfile read protection rejects User relation in any new production helper",
+            "status": "passed"
+          },
+          {
+            "name": "B28 shared private CustomerProfile read protection keeps the bulk internal policy read limited to current consent/preferences",
+            "status": "passed"
+          },
+          {
+            "name": "B28 shared private CustomerProfile read protection limits R08 internal invitation policy to qualified effective consent/preferences",
+            "status": "passed"
+          },
+          {
+            "name": "B28 shared private CustomerProfile read protection rejects predicate mismatch, stripped verified binding and missing database fence",
+            "status": "passed"
+          },
+          {
+            "name": "B28 shared private CustomerProfile read protection rejects a portal bypass and changes outside narrowly classified internal methods",
+            "status": "passed"
+          },
+          {
+            "name": "B28 shared private CustomerProfile read protection rejects any reintroduced profile authority in the retired issuer",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "users.service.spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "UsersService serializes a decrypted profile name and completion flags",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService marks an owner linked to CRM staff as a hybrid staff profile",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService does not invent a staff profile for an unlinked owner",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService grants a verified Client mode independently of optional profile row null",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService grants a verified Client mode independently of optional profile row customer-1",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService returns a tenant-scoped Telegram avatar from the verified identity",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService does not expose an insecure social avatar URL",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService keeps tenant and user fences on linked app profiles",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService returns a platform-only mode outside tenant context",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService grants founder surfaces only through the explicit server allowlist",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService updates the current user profile with an encrypted name",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService rejects an unverified phone added through the profile endpoint",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService attaches a phone verified by a social identity in the same tenant",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService loads a tenant user through tenant and active membership predicates",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService projects tenant authority from membership instead of stale user fields",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService rejects a foreign tenant before reading a user",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService fails closed before reading a tenant user without context",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService updates a tenant profile with tenant and membership predicates",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService does not mutate a known user id outside the current tenant",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService finds legacy users by phone after normalizing stored values",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService creates and links a staff account to the exact tenant provider atomically",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService rolls back provider-account creation when a concurrent link wins",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService legacy CRM provisioning cannot create staff identities or access",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService rejects CRM role provisioning outside the active tenant context",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService lists owner, active and pending CRM access without exposing synthetic phone emails",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService activates pending CRM staff access when the owner adds an email",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService links the authenticated tenant owner to an unclaimed CRM employee",
+            "status": "passed"
+          },
+          {
+            "name": "UsersService does not let a non-owner claim the CRM owner identity",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "social-auth.service.spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "SocialAuthService starts Yandex login and returns an OAuth URL with PKCE",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService rejects an unlisted OAuth redirect before persisting flow state",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService uses the server-owned neutral callback for native iOS login",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService fails closed when native social login has no neutral callback",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService returns only validated one-time provider fields to the native app",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService allows an unlisted loopback redirect only in development",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService completes Yandex login, creates a new tenant user, and links the identity",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService НЕ создаёт клиентский дубль для подавленного сверкой с CRM мастера и отдаёт понятную ошибку",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService НЕ создаёт клиентский дубль для сотрудника, у которого membership ещё не активирован и отдаёт понятную ошибку",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService пускает владельца в свежий рабочий аккаунт по совпадению телефона",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService НЕ отдаёт по телефону аккаунт, у которого провайдер уже привязан",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService пускает владельца в рабочий аккаунт по подтверждённой провайдером почте",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService не отдаёт по почте аккаунт, у которого провайдер уже привязан",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService links Yandex identity to an existing tenant user by phone",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService restores a business role when the social identity was previously linked to a client",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService links Yandex explicitly to the authenticated owner account",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService moves a social identity from a client profile to its authenticated owner",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService does not take a social identity away from another staff account",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService does not open a CRM client account without a provider-verified phone",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService rejects a replayed OAuth state before provider exchange",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService rejects an OAuth state for a tenant conflicting with the domain",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService completes Telegram login after validating the signed ID token",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService registers an isolated Telegram client when the provider omits the phone",
+            "status": "passed"
+          },
+          {
+            "name": "SocialAuthService returns a controlled unavailable error when Telegram cannot be reached",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "telegram-client-binding.architecture.spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "Telegram initial binding ownership has one server login ingress and keeps the existing single link writer",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram initial binding ownership rejects an alternate controller proof ingress",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram initial binding ownership rejects an alternate ai-tool proof ingress",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram initial binding ownership rejects an alternate helper proof ingress",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "client-link-successor.service.spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-HAPPY verifies exact binding, locks, writes successor, correlates outcome and actual actor",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-SESSION bounds the proof by the current authenticated session deadline",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-OTP rejects wrong code before link writer",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-EXPIRY rejects expired proof before link writer",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-REPLAY rejects consumed challenge before writer",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-BINDING rejects substitution of mayaUserId before writer",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-BINDING rejects substitution of mayaSubjectHash before writer",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-BINDING rejects substitution of verificationChannel before writer",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-BINDING rejects substitution of predecessorLinkId before writer",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-POLICY rejects changed policyVersion",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-POLICY rejects changed tokenHashVersion",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-POLICY rejects changed clientId",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-POLICY rejects changed issuanceEvidenceHash",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-OUTCOME refuses a lost compare-and-set outcome",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-LIMIT rejects exhausted attempts before resolving or writing",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-ISSUE creates subject-bound evidence, never returns OTP/phone, strict delivery outside transaction",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-INPUT refuses caller authority clientId",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-INPUT refuses caller authority predecessorLinkId",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-INPUT refuses caller authority verificationChannel",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-INPUT refuses caller authority mayaUserId",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 V2 coordinator guard proofs SV2-U-ROUTE requires explicit personal context and empty issuance body",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "client-link-challenge-schema.architecture.spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "A18 ClientLinkChallenge approved schema/policy boundary adds exactly the approved 14 scalar fields and no business backfill",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientLinkChallenge approved schema/policy boundary pins TTL, immutable issuance and correlated atomic outcome",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientLinkChallenge approved schema/policy boundary keeps one challenge owner and one existing link writer",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientLinkChallenge approved schema/policy boundary detects an alternate writer: tx.clientLinkChallenge.create({data: arbitrary})",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientLinkChallenge approved schema/policy boundary detects an alternate writer: db.clientLinkChallenge.updateMany({data: {clientId: other}})",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientLinkChallenge approved schema/policy boundary detects an alternate writer: INSERT INTO \"ClientLinkChallenge\" VALUES (x)",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientLinkChallenge approved schema/policy boundary detects an alternate writer: DELETE FROM \"ClientLinkChallenge\"",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientLinkChallenge approved schema/policy boundary does not broaden the A30 retention allowlist",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientLinkChallenge approved schema/policy boundary restricts the transaction-bound link entry to the challenge coordinator",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "client-channel-cabinet-projection.service.spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "B20 verified Client cabinet projection returns only the exact linked Client canonical projection without writes",
+            "status": "passed"
+          },
+          {
+            "name": "B20 verified Client cabinet projection supports a Client without Maya User through its exact CRM link",
+            "status": "passed"
+          },
+          {
+            "name": "B20 verified Client cabinet projection fails closed for missing link",
+            "status": "passed"
+          },
+          {
+            "name": "B20 verified Client cabinet projection fails closed for ambiguous link",
+            "status": "passed"
+          },
+          {
+            "name": "B20 verified Client cabinet projection returns no Client PII or private facts before canonical privacy consent",
+            "status": "passed"
+          },
+          {
+            "name": "B20 verified Client cabinet projection repeated and concurrent reads resolve the same link and never invoke a writer",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "client-reverification-candidate.service.spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-CANDIDATE selects only exact canonical CRM lineage and latest revoked tip, with zero writes",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-SESSION refuses wrong user before a provider read",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-SESSION refuses wrong tenant before a provider read",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-SESSION refuses revoked before a provider read",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-SESSION refuses expired before a provider read",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-SESSION refuses inactive membership before a provider read",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-SESSION refuses wrong member before a provider read",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-CANDIDATE refuses none candidate",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-CANDIDATE refuses multiple candidate",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-CANDIDATE refuses merged candidate",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-CANDIDATE refuses foreign candidate",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-PREDECESSOR refuses active predecessor",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-PREDECESSOR refuses other Client predecessor",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-PREDECESSOR refuses other subject predecessor",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-PREDECESSOR refuses other tenant predecessor",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-PREDECESSOR refuses old version predecessor",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-PREDECESSOR refuses ambiguous predecessor",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-HOLD refuses an unresolved identity hold",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-CHANNEL refuses missing canonical channel without User.phone fallback",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-CHANNEL refuses duplicate canonical channel without User.phone fallback",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-CHANNEL refuses foreign provider canonical channel without User.phone fallback",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-CHANNEL refuses incomplete canonical channel without User.phone fallback",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-CHANNEL refuses no phone canonical channel without User.phone fallback",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-CHANNEL refuses no source canonical channel without User.phone fallback",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-CHANNEL refuses ambiguous source canonical channel without User.phone fallback",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-DRIFT refuses predecessor changed during provider read",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-DRIFT refuses CRM source changed during provider read",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-DRIFT refuses candidate changed during provider read",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-CHANNEL binds changed channel address in a different hash",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 re-verification candidate (not authority) RV-CHANNEL binds changed CRM source even when its phone is identical",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "auth-session.service.spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "AuthSessionService issues a short access token and persists only a refresh-token hash",
+            "status": "passed"
+          },
+          {
+            "name": "AuthSessionService does not infer a tenant session from legacy User.tenantId",
+            "status": "passed"
+          },
+          {
+            "name": "AuthSessionService does not issue a session when CRM staff access was disabled",
+            "status": "passed"
+          },
+          {
+            "name": "AuthSessionService rotates a valid refresh token and returns a new credential",
+            "status": "passed"
+          },
+          {
+            "name": "AuthSessionService revokes the session response path when a token is reused",
+            "status": "passed"
+          },
+          {
+            "name": "AuthSessionService rejects a malformed token before any database lookup",
+            "status": "passed"
+          },
+          {
+            "name": "AuthSessionService rejects a revoked access session",
+            "status": "passed"
+          },
+          {
+            "name": "AuthSessionService issues a platform session without a tenant membership lookup",
+            "status": "passed"
+          },
+          {
+            "name": "AuthSessionService lists sessions and marks the access-token session as current",
+            "status": "passed"
+          },
+          {
+            "name": "AuthSessionService leaves an audit trail when a session ends",
+            "status": "passed"
+          },
+          {
+            "name": "AuthSessionService records the platform owner without inventing a tenant",
+            "status": "passed"
+          },
+          {
+            "name": "AuthSessionService revokes every session owned by the authenticated principal",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "client-channel-link-schema.architecture.spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "A18 approved single-model ClientChannelLink foundation ratchet adds exactly one relation model, without User or transient-auth ownership",
+            "status": "passed"
+          },
+          {
+            "name": "A18 approved single-model ClientChannelLink foundation ratchet retains active identity uniqueness, tenant identity FK and immutable guarded history",
+            "status": "passed"
+          },
+          {
+            "name": "A18 approved single-model ClientChannelLink foundation ratchet allows production writes only in the verifier-bound canonical link service",
+            "status": "passed"
+          },
+          {
+            "name": "A18 approved single-model ClientChannelLink foundation ratchet detects direct alternate mutation db.clientChannelLink.create({data: forged})",
+            "status": "passed"
+          },
+          {
+            "name": "A18 approved single-model ClientChannelLink foundation ratchet detects direct alternate mutation tx.clientChannelLink.update({data: {clientId: other}})",
+            "status": "passed"
+          },
+          {
+            "name": "A18 approved single-model ClientChannelLink foundation ratchet detects direct alternate mutation INSERT INTO \"ClientChannelLink\" VALUES (forged)",
+            "status": "passed"
+          },
+          {
+            "name": "A18 approved single-model ClientChannelLink foundation ratchet detects direct alternate mutation DELETE FROM \"ClientChannelLink\"",
+            "status": "passed"
+          },
+          {
+            "name": "A18 approved single-model ClientChannelLink foundation ratchet does not extend A30 deletion allowlist or overload account identity",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "personal-client-context.service.spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "SB-1 explicit personal Client authority SB1-SELECT preserves the owner actor and emits distinct personal evidence without changing roles",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-SELECTION refuses an implicit/caller-shaped choice undefined",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-SELECTION refuses an implicit/caller-shaped choice \"business_owner\"",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-SELECTION refuses an implicit/caller-shaped choice \"client\"",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-SELECTION refuses an implicit/caller-shaped choice {\"clientId\": \"client-a\"}",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-TENANT refuses a foreign account before resolving identity",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-ACTOR refuses a different authenticated actor",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-SESSION refuses stale session or membership: revoked",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-SESSION refuses stale session or membership: expired",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-SESSION refuses stale session or membership: user",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-SESSION refuses stale session or membership: membership",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-SESSION refuses stale session or membership: tenant",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-SESSION refuses stale session or membership: role",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-SESSION refuses stale session or membership: membership-user",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-LINK refuses missing or noncurrent binding: absent",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-LINK refuses missing or noncurrent binding: ambiguous",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-LINK refuses missing or noncurrent binding: revoked",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-LINK refuses missing or noncurrent binding: provider",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-LINK refuses missing or noncurrent binding: subject",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-LINK refuses missing or noncurrent binding: tenant",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-LINK refuses missing or noncurrent binding: version",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-LINK refuses missing or noncurrent binding: hash-version",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-LINK refuses missing or noncurrent binding: evidence",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-CLIENT refuses unresolved Client identity: merged",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-CLIENT refuses unresolved Client identity: foreign",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-CLIENT refuses unresolved Client identity: hold",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-RECHECK refuses changes after selection: link",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-RECHECK refuses changes after selection: client",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-RECHECK refuses changes after selection: evidence",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-RECHECK refuses changes after selection: revoked",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 explicit personal Client authority SB1-RECHECK refuses changes after selection: session",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "client-channel-link.service.spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "A18 ClientChannelLink command boundary rejects initiator authority field clientId before verification",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects initiator authority field tenantId before verification",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects initiator authority field provider before verification",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects initiator authority field providerSubjectId before verification",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects initiator authority field providerSubjectHash before verification",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects initiator authority field phone before verification",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects initiator authority field userId before verification",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects initiator authority field verifiedAt before verification",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects unverified/phone-only evidence rather than accepting an opaque token as authority",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects malformed, foreign or expired verifier output {\"tenantId\":\"tenant-b\"}",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects malformed, foreign or expired verifier output {\"provider\":\"telegram:other-bot\"}",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects malformed, foreign or expired verifier output {\"providerSubjectHash\":\"raw-subject\"}",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects malformed, foreign or expired verifier output {\"clientAuthorityProofHash\":\"\"}",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects malformed, foreign or expired verifier output {\"method\":\"proven_user_client_link\"}",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects malformed, foreign or expired verifier output {\"validUntil\":\"1970-01-01T00:00:00.000Z\"}",
+            "status": "passed"
+          },
+          {
+            "name": "A18 ClientChannelLink command boundary rejects a forged rebind predecessor before any transaction",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "client-identity.service.spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "ClientIdentityService creates an identity for a card that was never seen before",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService blocks an active unresolved provider identity before any identity write",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService allows ordinary canonical registration when no active hold exists",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService allows registration after a hold has been durably resolved",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService fails closed when the hold lookup is unavailable",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService returns machine-readable guard decisions without identity writes",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService leaves all 23 collision-free provider identities registrable",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService is idempotent: the same card returns the same identity",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService revives a card that had been marked as gone",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService keeps the identity when the phone changes",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService never attaches a new card to an existing client by phone alone",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService identifies a card that has no phone at all",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService refuses a foreign tenant before touching the database",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService fails closed without tenant context",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService ignores a card without provider or external id",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService never lets a shadow write break the caller",
+            "status": "passed"
+          },
+          {
+            "name": "ClientIdentityService produces no hash when the secret is absent",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "client-link-successor.architecture.spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "SB-1 approved JSON V2 architectural ratchets SV2-ARCH no tables/columns/backfill; original V1 lifecycle and link guards remain owners",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 approved JSON V2 architectural ratchets SV2-ARCH only canonical challenge coordinator calls successor link writer",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 approved JSON V2 architectural ratchets SV2-ARCH authenticated tenant routes, strict delivery and serializable consume remain wired",
+            "status": "passed"
+          }
+        ]
+      }
+    ]
+  },
+  "httpPostgres": {
+    "passed": 64,
+    "failed": 0,
+    "skipped": 0,
+    "suites": [
+      {
+        "file": "sb1-successor.live-spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-01 happy successor verification creates usable explicit personal context and actual actor audit",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-02 wrong OTP has no link or consumption effect",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-03 replay fails closed",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-04 expired OTP fails under database time",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-05 Client substitution cannot transfer a challenge",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-06 tenant substitution fails closed",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-07 predecessor changed after resolver read is rejected inside identity lock",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-08 active predecessor never authorizes issuance or consumption",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-09 non-latest revoked predecessor cannot be consumed",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-10 revoked episode remains byte-for-byte immutable",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-11 successful consume creates exactly one successor and one outcome",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-12 concurrent consume serializes to one success and one refusal",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-JSON all four V2 fields are mandatory, exact and immutable",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-CHANNEL canonical channel changed after issuance invalidates exact Client proof",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-SESSION current revocation is checked on consume",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-LIMIT failed OTP attempts survive rollback and cannot be reset with correct code",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-DELIVERY failed SMS grants nothing and discloses no OTP",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-V1 historical V1 remains immutable and initial-only; V1 consumption still works for a fresh subject",
+            "status": "passed"
+          },
+          {
+            "name": "SB-1 JSON V2 successor [PostgreSQL] [mock SMS.ru] SV2-HTTP registered authenticated route refuses caller authority and consumes real V2 coordinator",
+            "status": "passed"
+          }
+        ]
+      },
+      {
+        "file": "telegram-client-binding.live-spec.ts",
+        "status": "passed",
+        "tests": [
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining client role",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining tenant_owner role",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (false), including a stored matching phone",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (undefined), including a stored matching phone",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (true), including a stored matching phone",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (1), including a stored matching phone",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] links a first-time Telegram registrant to the existing CRM card, without an existing Maya account",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses forged/expired signed claims {\"aud\":\"foreign-client\"} before binding",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses forged/expired signed claims {\"iss\":\"https://forged.example\"} before binding",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses forged/expired signed claims {\"exp\":1} before binding",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses caller-selected Client, phone, tenant and channel in the login body",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rejects a token with a forged signature before any Client lookup",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] allows account login, but not Client binding, when CRM is unavailable",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] matches the complete international number despite source formatting",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] retries a serializable CRM identity registration conflict through the same owner",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one concurrent callback winner, with one link and one audit",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 1",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 2",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 3",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 4",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 5",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 6",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 7",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 8",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: absent",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: duplicate",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: same-tail-foreign-country",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: incomplete",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: provider-mismatch",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: stale",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: expired-proof",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: future-proof",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: old-proof",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: foreign-tenant",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: foreign-user",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: foreign-session",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: unclaimed-flow",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: revoked-session",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: suspended-membership",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses a source switch during CRM resolution",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rereads session revocation after CRM resolution",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] leaves revoked historical verification byte-identical and denies automatic relink",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rolls back the link when its mandatory audit cannot be written",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses a CRM card already bound to a different account",
+            "status": "passed"
+          },
+          {
+            "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] profile/personal context resolve the exact linked Client without changing owner role or consent",
+            "status": "passed"
+          }
+        ]
+      }
+    ]
+  },
+  "mutations": {
+    "qualification": "TARGETED_MUTATIONS_NOT_FULL_RELEASE_CERTIFICATION",
+    "mutations": [
+      {
+        "name": "verified-phone",
+        "exit": 1,
+        "passed": 42,
+        "failed": 3,
+        "names": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (false), including a stored matching phone",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (true), including a stored matching phone",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (1), including a stored matching phone"
+        ],
+        "killed": true
+      },
+      {
+        "name": "unique-client",
+        "exit": 1,
+        "passed": 44,
+        "failed": 1,
+        "names": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: duplicate"
+        ],
+        "killed": true
+      },
+      {
+        "name": "current-source",
+        "exit": 1,
+        "passed": 44,
+        "failed": 1,
+        "names": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses a source switch during CRM resolution"
+        ],
+        "killed": true
+      },
+      {
+        "name": "current-session",
+        "exit": 1,
+        "passed": 44,
+        "failed": 1,
+        "names": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rereads session revocation after CRM resolution"
+        ],
+        "killed": true
+      },
+      {
+        "name": "immutable-revocation",
+        "exit": 1,
+        "passed": 44,
+        "failed": 1,
+        "names": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] leaves revoked historical verification byte-identical and denies automatic relink"
+        ],
+        "killed": true
+      },
+      {
+        "name": "atomic-audit",
+        "exit": 1,
+        "passed": 42,
+        "failed": 3,
+        "names": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining client role",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining tenant_owner role",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rolls back the link when its mandatory audit cannot be written"
+        ],
+        "killed": true
+      },
+      {
+        "name": "serialization-retry",
+        "exit": 1,
+        "passed": 38,
+        "failed": 7,
+        "names": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] retries a serializable CRM identity registration conflict through the same owner",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 1",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 2",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 3",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 4",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 7",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 8"
+        ],
+        "killed": true
+      },
+      {
+        "name": "optional-profile",
+        "exit": 1,
+        "passed": 43,
+        "failed": 2,
+        "names": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining client role",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining tenant_owner role"
+        ],
+        "killed": true
+      }
+    ],
+    "baseline": {
+      "exit": 0,
+      "passed": 45,
+      "failed": 0,
+      "names": []
+    },
+    "restored": {
+      "exit": 0,
+      "passed": 45,
+      "failed": 0,
+      "names": []
+    }
+  },
+  "checks": {
+    "buildTypes": "PASS",
+    "widgetsLiveTypes": "PASS",
+    "scopedLint": "PASS",
+    "singleLinkWriterRatchet": "PASS"
+  },
+  "isolation": {
+    "clusters": [
+      {
+        "proof": "http+successor",
+        "postgresStopped": true,
+        "independentStatusExit": 3
+      },
+      {
+        "proof": "verified-phone",
+        "postgresStopped": true,
+        "independentStatusExit": 3
+      },
+      {
+        "proof": "optional-profile",
+        "postgresStopped": true,
+        "independentStatusExit": 3
+      },
+      {
+        "proof": "unique-client",
+        "postgresStopped": true,
+        "independentStatusExit": 3
+      },
+      {
+        "proof": "immutable-revocation",
+        "postgresStopped": true,
+        "independentStatusExit": 3
+      },
+      {
+        "proof": "current-source",
+        "postgresStopped": true,
+        "independentStatusExit": 3
+      },
+      {
+        "proof": "baseline",
+        "postgresStopped": true,
+        "independentStatusExit": 3
+      },
+      {
+        "proof": "restored",
+        "postgresStopped": true,
+        "independentStatusExit": 3
+      },
+      {
+        "proof": "atomic-audit",
+        "postgresStopped": true,
+        "independentStatusExit": 3
+      },
+      {
+        "proof": "current-session",
+        "postgresStopped": true,
+        "independentStatusExit": 3
+      },
+      {
+        "proof": "serialization-retry",
+        "postgresStopped": true,
+        "independentStatusExit": 3
+      }
+    ],
+    "ownerDatabaseUsed": false,
+    "productionEffects": 0,
+    "realTelegramCalls": 0,
+    "realSmsOtpCalls": 0,
+    "realYclientsCalls": 0,
+    "realModelCalls": 0
+  },
+  "notProven": [
+    "Real Telegram issuer/channel acceptance",
+    "Owner salon private Client card and complete provider visit history",
+    "Full remote-history synchronization or import",
+    "New messenger successor proof for a previously revoked link",
+    "Messenger delivery permission/consent and actual notifications",
+    "Full release certification or production deployment"
+  ],
+  "rawReceipts": [
+    {
+      "path": "/private/tmp/maya-telegram-related-unit-20261011-head.json",
+      "sha256": "9b96e63ed5cc0b68052dfceda006aef10bff7ec06fe8eb5a197462e986b797e3",
+      "bytes": 99681,
+      "archivalPolicy": "Local raw receipt; repository projection omits runtime payloads"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-http-20261011-head/telegram-initial-jest.json",
+      "sha256": "48fd1ea5ff14b43d4ec15439728cc364c29da04b724d3ec3e86c007a10bd3bea",
+      "bytes": 31906,
+      "archivalPolicy": "Local raw receipt; repository projection omits runtime payloads"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-http-20261011-head/manifest.json",
+      "sha256": "ee5fc4f884ecc63e7e922084c5035c6416fed3622d834ffa68c0cb835e336d35",
+      "bytes": 692,
+      "archivalPolicy": "Local raw receipt; repository projection omits runtime payloads"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-http-20261011-head/source-hashes.json",
+      "sha256": "4c9b684311cb2f6406c41e93b3c647d418840b6d9aa1a846dc32abbd6e6a63a4",
+      "bytes": 252616,
+      "archivalPolicy": "Local raw receipt; repository projection omits runtime payloads"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-mutations-20261011-head/summary.json",
+      "sha256": "56f47029f734d39a6aceda5b2ddb62ec5737b1ccb60568e02e70eee1921f006f",
+      "bytes": 4226,
+      "archivalPolicy": "Local raw receipt; repository projection omits runtime payloads"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-build-types-20261011-head.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "archivalPolicy": "Local raw receipt; repository projection omits runtime payloads"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-live-types-20261011-head.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "archivalPolicy": "Local raw receipt; repository projection omits runtime payloads"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-lint-20261011-head.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "archivalPolicy": "Local raw receipt; repository projection omits runtime payloads"
+    }
+  ]
+}

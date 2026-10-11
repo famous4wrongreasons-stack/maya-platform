@@ -55,8 +55,22 @@ Duplicate/currently or historically bound cards are refused rather than silently
 chosen. The source currently reads a complete registry; its cost at large salon
 sizes has not been qualified. No cached/raw phone shortcut was added.
 
-Verification receipts will be recorded in
-`docs/rebuild/evidence/maya-telegram-client-binding-20261011/`. Qualification is
+Fresh receipts on committed clean product candidate
+`8f6d9fa5750f756c7206aa714dd81f43ee1e86bd`:
+**223 unit/architecture tests, 64 HTTP/PostgreSQL tests (45 initial binding + 19
+preserved successor checks), 8/8 targeted mutations killed; clean baseline and
+restored baseline 45/45.** Build/live types and scoped lint PASS. All eleven
+final proof databases were independently confirmed stopped. Repository-safe
+[receipt summary](evidence/maya-telegram-client-binding-20261011/summary.json)
+and [source hashes](evidence/maya-telegram-client-binding-20261011/source-hashes.json)
+preserve the exact tested product bytes. Evidence-only follow-up commits do not
+claim a new product certification.
+
+Repeat from `maya-saas-backend` with an unused absolute output directory:
+`JEST_TELEGRAM_WITH_SUCCESSOR=1 node scripts/telegram-client-binding-proof.mjs /private/tmp/<new-output>`.
+Targeted mutations: `node scripts/telegram-client-binding-mutations.mjs /private/tmp/<new-mutations>`.
+Run mutations exclusively; the runner preserves backups and refuses to overwrite
+an unexpected concurrent source edit. Qualification is
 synthetic signed Telegram + synthetic CRM source, real local HTTP/PostgreSQL.
 It is not a real Telegram/CRM acceptance or a release certificate. Existing
 private-card/history readers remain owners; local mirrored history is tested,
