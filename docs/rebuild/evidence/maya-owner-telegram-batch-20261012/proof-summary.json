@@ -1,0 +1,191 @@
+{
+  "qualification": "LOCAL_BATCH_LAUNCHER_NOT_RELEASE_OR_REAL_CLIENT_ACCEPTANCE",
+  "codeCandidate": "a80b2e74aed3b5fa36c799f5eb64bbc5509393c7",
+  "profile": "owner_telegram_saved_login_batch_v2",
+  "bounds": {
+    "maximumMinutes": 30,
+    "maximumAttempts": 3,
+    "maximumRegistryRowsPerAttempt": 6400,
+    "maximumRegistryPagesPerAttempt": 32,
+    "realCredentialsPersisted": false
+  },
+  "units": {
+    "pass": 270,
+    "fail": 0
+  },
+  "types": "PASS",
+  "scopedLint": "PASS",
+  "before": {
+    "checkpoint": "450eff259d4d155dcab028d0eeee29fd3ab5dd82",
+    "pass": 51,
+    "fail": 6
+  },
+  "concurrencyBefore": {
+    "test": "four simultaneous starts can reserve only three attempts",
+    "actual": [
+      201,
+      201,
+      201,
+      201
+    ],
+    "expected": [
+      201,
+      201,
+      201,
+      403
+    ]
+  },
+  "http": {
+    "pass": 98,
+    "fail": 0,
+    "clusterStopped": true,
+    "pidFileAbsent": true,
+    "sourceUnchanged": true
+  },
+  "binary": {
+    "status": "passed",
+    "checks": [
+      "actual-child-ipc-web-ready",
+      "deadline-clipped-and-parent-credentials-discarded",
+      "health-through-actual-relay",
+      "exact-finder-through-child-relay-selects-ready-synthetic-tenant",
+      "exact-finder-keeps-canonical-client-registration-readiness",
+      "directory-enumeration-and-install-surfaces-refused",
+      "current-react-payload-served",
+      "canonical-password-session",
+      "batch-relink-refused",
+      "batch-exactly-three-saved-login-starts-fourth-refused",
+      "canonical-telegram-refusal-through-child-ipc-safe-receipt",
+      "business-model-sms-consent-routes-refused",
+      "foreign-tenant-refused",
+      "live-permit-revocation-refused",
+      "clean-child-stop-zero-provider-dispatch",
+      "second-child-refused"
+    ],
+    "realProviderCalls": 0,
+    "clusterStopped": true,
+    "pidFileAbsent": true,
+    "sourceUnchanged": true
+  },
+  "mutation": {
+    "baseline": {
+      "exit": 0,
+      "passed": 44,
+      "failed": 0,
+      "failures": [],
+      "assertion": false
+    },
+    "results": [
+      {
+        "name": "foreign-company",
+        "killed": true,
+        "failures": [
+          "provider refuses other company"
+        ]
+      },
+      {
+        "name": "unverified-owner",
+        "killed": true,
+        "failures": [
+          "exact OIDC exchange and canonical paginated registry read only"
+        ]
+      },
+      {
+        "name": "substituted-verifier",
+        "killed": true,
+        "failures": [
+          "exact OIDC exchange and canonical paginated registry read only"
+        ]
+      },
+      {
+        "name": "repeat-exchange",
+        "killed": true,
+        "failures": [
+          "background, replay, concurrent exchange and repeated page fail closed"
+        ]
+      },
+      {
+        "name": "repeat-registry-page",
+        "killed": true,
+        "failures": [
+          "background, replay, concurrent exchange and repeated page fail closed"
+        ]
+      },
+      {
+        "name": "expired-operation",
+        "killed": true,
+        "failures": [
+          "expired, stopped and changed current authority cannot dispatch"
+        ]
+      },
+      {
+        "name": "aborted-request",
+        "killed": true,
+        "failures": [
+          "aborted browser request cannot dispatch or accept an in-flight response"
+        ]
+      },
+      {
+        "name": "stale-authority-after-response",
+        "killed": true,
+        "failures": [
+          "current authority reread after provider response; oversized response refused"
+        ]
+      },
+      {
+        "name": "candidate-substitution",
+        "killed": true,
+        "failures": [
+          "execution plan refuses changed candidate"
+        ]
+      },
+      {
+        "name": "source-substitution",
+        "killed": true,
+        "failures": [
+          "execution plan refuses changed source"
+        ]
+      },
+      {
+        "name": "expired-permit",
+        "killed": true,
+        "failures": [
+          "execution plan refuses expired"
+        ]
+      },
+      {
+        "name": "batch-unlimited-attempts",
+        "killed": true,
+        "failures": [
+          "batch consumes failures, admits only three attempts and serializes concurrent attempts",
+          "batch keeps 32 pages per attempt and refuses a fourth registry scan"
+        ]
+      },
+      {
+        "name": "batch-relink",
+        "killed": true,
+        "failures": [
+          "batch consumes failures, admits only three attempts and serializes concurrent attempts"
+        ]
+      },
+      {
+        "name": "batch-overfilled-page",
+        "killed": true,
+        "failures": [
+          "batch refuses overfilled registry pages and never retries failed wire requests"
+        ]
+      }
+    ],
+    "restored": {
+      "exit": 0,
+      "passed": 44,
+      "failed": 0,
+      "failures": [],
+      "assertion": false
+    },
+    "workingSourceUnchanged": true
+  },
+  "productSourcesChanged": false,
+  "retainedOwnerDatabaseUsed": false,
+  "realPersonalClientMatch": "NOT_PROVEN"
+}

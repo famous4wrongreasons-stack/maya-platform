@@ -1,0 +1,104 @@
+[
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-regression-before-20261012-01/before-final.tap",
+    "sha256": "5904fe71f2ff9ee53560ee9853e1b6b113baf055d30dfac026974b9bb24e9836",
+    "size": 15972,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-all-units-final-20261012.tap",
+    "sha256": "6fe43c945310df9366f102d8fe32832013f021495b03a9e512267be3d2513800",
+    "size": 58187,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-types-final-20261012-02.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-lint-final-20261012-02.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-http-20261012-01/manifest.json",
+    "sha256": "93d13d8c17367dc35818963286d4cf9c1a54be2c91bdac03c017f5e1153a769d",
+    "size": 726,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-http-20261012-01/telegram-initial-jest.json",
+    "sha256": "7d2b8a3c00a6aecae96adbcc8d5be3a989c5055b0460dd106f6694061edc8463",
+    "size": 55146,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-http-20261012-02/manifest.json",
+    "sha256": "ad139a83713d7a8fa1ecf3ef02b914bd52dbc9efffa03d8cbdcc9bb275350a1a",
+    "size": 726,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-http-20261012-02/telegram-initial-jest.json",
+    "sha256": "bcd88f284b5129404b33a757852ab7814b0165816de05acc5ba2170894d02533",
+    "size": 55323,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-http-20261012-03/manifest.json",
+    "sha256": "2ae66c316675c7e0cf24437dfc691181ce321c6c1d524fd499e17bce95093697",
+    "size": 726,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-http-20261012-03/telegram-initial-jest.json",
+    "sha256": "02e7a645040de90cce28e5d2c803afdcd49ba3dd783b69950cc9c3fedea0b377",
+    "size": 55982,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-http-20261012-04/manifest.json",
+    "sha256": "feeea89d6d3a3da2fa34c1ae6c574675da05ce84011b91005d85a596714efaa5",
+    "size": 691,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-http-20261012-04/telegram-initial-jest.json",
+    "sha256": "dfb0c650da199e9a0e8f15880c2ae7f6e59b2caece3b5bff9127d6798d503966",
+    "size": 54532,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-http-final-20261012/manifest.json",
+    "sha256": "3f8202d6390d2a52fc482b28afd54fb7ff893a8c9b4aab3122a801fb419abd14",
+    "size": 692,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-http-final-20261012/telegram-initial-jest.json",
+    "sha256": "8ae771369792c2917a5f5ed547f43d5073958600fb47a75deb5aaf3ea78210fe",
+    "size": 54534,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-http-final-20261012/source-hashes.json",
+    "sha256": "9b28b1ab2e6dcec1514171225a430382ac407f3fa10bf2a21a0680e604a4c936",
+    "size": 277350,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-binary-20261012-01/summary.json",
+    "sha256": "8b4aac9ed46ca377acea5cbc17841481d81096a5968ae2ec84fbca1be9230a13",
+    "size": 5688,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-batch-mutations-20261012-01/summary.json",
+    "sha256": "430487b66bec8c49369bc795d7e0d262ca63426ee92a3208667848d399c3c56b",
+    "size": 4296,
+    "rawCopied": false
+  }
+]
