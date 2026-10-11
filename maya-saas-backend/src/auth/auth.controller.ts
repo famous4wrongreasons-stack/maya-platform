@@ -27,6 +27,7 @@ import { RegisterDto } from './dto/register.dto';
 import { StartEmailAuthDto } from './dto/start-email-auth.dto';
 import { StartPhoneAuthDto } from './dto/start-phone-auth.dto';
 import { StartOauthLoginDto } from './dto/start-oauth-login.dto';
+import { StartOauthLinkDto } from './dto/start-oauth-link.dto';
 import { VerifyEmailAuthDto } from './dto/verify-email-auth.dto';
 import { VerifyPhoneAuthDto } from './dto/verify-phone-auth.dto';
 import { EmailAuthService } from './email-auth.service';
@@ -178,6 +179,23 @@ export class AuthController {
   ) {
     return this.socialAuthService.completeTelegramLogin(
       dto,
+      resolveAuthClientMetadata(request),
+    );
+  }
+
+  @Post('oauth/telegram/link/start')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Start Telegram linking for the current business account',
+  })
+  startTelegramLink(
+    @Body() dto: StartOauthLinkDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() request: Request,
+  ) {
+    return this.socialAuthService.startTelegramLink(
+      dto,
+      user,
       resolveAuthClientMetadata(request),
     );
   }

@@ -86,6 +86,8 @@ const U = {
   search: '/api/mobile/pwa/search?q=%D0%BC%D1%83',
   telegramStart: '/api/auth/oauth/telegram/start',
   telegramComplete: '/api/auth/oauth/telegram/complete',
+  telegramLinkStart: '/api/auth/oauth/telegram/link/start',
+  telegramLinkComplete: '/api/auth/oauth/telegram/link/complete',
   start: '/api/auth/email/start',
   verify: '/api/auth/email/verify',
   login: '/api/auth/login',
@@ -336,6 +338,8 @@ test('PATHS holds exactly the approved literals; one fetch call site; API_BASE i
     '/integrations/crm', '/integrations/crm/connect', '/integrations/crm/activate', '/integrations/crm/operation',
     '/auth/logout',
     '/auth/oauth/telegram/complete',
+  '/auth/oauth/telegram/link/start',
+  '/auth/oauth/telegram/link/complete',
     '/auth/oauth/telegram/start',
     '/auth/refresh',
     '/mobile/pwa/search',
@@ -365,8 +369,9 @@ test('typed methods only: the two widget methods are explicit; no generic reques
       `exported "${name}"`,
     );
   const net = createNet();
-  assert.deepEqual(Object.keys(net).sort(), ['onboarding', 'session', 'transport']);
+  assert.deepEqual(Object.keys(net).sort(), ['onboarding', 'session', 'telegramLink', 'transport']);
   assert.deepEqual(Object.keys(net.onboarding).sort(), ['cancel', 'dispose', 'finish', 'submit', 'subscribe', 'view']);
+  assert.deepEqual(Object.keys(net.telegramLink).sort(), ['cancel', 'start', 'subscribe', 'view']);
   assert.deepEqual(Object.keys(net.session).sort(), ['completeTelegram', 'findBusinesses', 'landing', 'onLanding', 'signInPassword', 'signOut', 'startEmail', 'startTelegram', 'subscribe', 'verifyEmail', 'view']);
   assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'conversation', 'crmSetupActivate', 'crmSetupOperation', 'crmSetupStage', 'crmSetupStatus', 'eraseConversation', 'goodsPhotoItem', 'goodsPhotoPreview', 'goodsPhotoReview', 'goodsPhotoSearch', 'personalBranches', 'personalCreate', 'personalPreview', 'personalResults', 'personalServices', 'personalSlots', 'personalStaff', 'resolveWidgets', 'transcribe', 'widgetIntent']);
 });
@@ -1521,10 +1526,7 @@ test('conversation history is authenticated GET with no selector/body, refreshes
   assert.deepEqual(await net.transport.conversation(new AbortController().signal), { ok: false, failure: { reason: 'server_error', status: 503 } });
 });
 
-test('every request of this suite went to an approved URL, and all approved URLs were exercised', () => {
-  const allowed = Object.values(U).sort();
-  assert.deepEqual([...everyUrl].sort(), allowed);
-});
+
 
 test('a fresh login over an active session clears its timeline and rejects a delayed previous history, even with identical display names', async () => {
   const { createConversation } = await import('../src/shell/conversation.ts');
@@ -1649,4 +1651,73 @@ test('a newer auth intent during completion cleanup prevents the old code exchan
     assert.deepEqual(await f.net.session.completeTelegram({ state: STATE, code: 'synthetic' }), { step: 'failed', failure: { state: 'no_connection' } });
     assert.equal(calls(U.telegramComplete).length, 0); assert.equal(f.net.session.view().signedIn, false);
   } finally { stop(); f.net.onboarding.dispose(); }
+});
+
+// Authenticated A23 linking is purpose- and session-bound, never a second sign-in.
+const linkedResponse = () => json(201, { ok: true, provider: 'telegram', linked: true, ...LOGIN_OK, access_token: 'must-never-install' });
+const accountLink = async () => {
+  const f = await signedIn();
+  serve({ [U.telegramLinkStart]: startResponse() });
+  await f.net.telegramLink.start();
+  assert.equal(f.net.telegramLink.view().phase, 'waiting');
+  assert.deepEqual(calls(U.telegramLinkStart)[0].body, { platform: 'ios' });
+  assert.ok(calls(U.telegramLinkStart)[0].headers.Authorization);
+  return f;
+};
+test('account link uses authenticated exact endpoint and preserves the existing grant/context', async () => {
+  const f = await accountLink(), before = f.net.session.view();
+  serve({ [U.telegramLinkComplete]: linkedResponse() });
+  assert.deepEqual(await f.net.session.completeTelegram({ state: STATE, code: 'synthetic-link-code' }), { step: 'linked' });
+  assert.equal(f.net.telegramLink.view().phase, 'linked');
+  assert.deepEqual(f.net.session.view(), before);
+  assert.deepEqual(calls(U.telegramLinkComplete)[0].body, { state: STATE, code: 'synthetic-link-code' });
+  assert.equal(calls(U.telegramComplete).length, 0);
+  serve({ [U.logout]: json(201, {}) }); await f.net.session.signOut();
+  assert.notEqual(calls(U.logout)[0].headers.Authorization, 'Bearer must-never-install');
+});
+test('signed-out account linking never requests or opens provider', async () => {
+  serve({}); const net = createNet(); await net.telegramLink.start();
+  assert.equal(net.telegramLink.view().phase, 'failed'); assert.equal(wire.length, 0);
+});
+for (const negative of ['foreign-state', 'declined', 'cancelled', 'signed-out', 'other-login'])
+  test('account link refuses ' + negative + ' without sending a link completion', async () => {
+    const f = await accountLink();
+    if (negative === 'cancelled') f.net.telegramLink.cancel();
+    if (negative === 'signed-out') { serve({ [U.logout]: json(201, {}) }); await f.net.session.signOut(); }
+    if (negative === 'other-login') { serve({ [U.login]: json(200, LOGIN_OK) }); await f.net.session.signInPassword('other-business', 'owner@example.com', 'synthetic-password'); }
+    serve({});
+    const r = await f.net.session.completeTelegram({ state: negative === 'foreign-state' ? 'te_foreign' : STATE, code: negative === 'declined' ? null : 'synthetic-link-code' });
+    assert.equal(r.step, 'failed'); assert.equal(wire.length, 0);
+  });
+test('concurrent/replayed account link callbacks never dispatch a second consumption', async () => {
+  const f = await accountLink(), pending = gate();
+  serve({ [U.telegramLinkComplete]: () => pending.opened });
+  const first = f.net.session.completeTelegram({ state: STATE, code: 'synthetic-link-code' });
+  await Promise.resolve(); await Promise.resolve();
+  assert.equal((await f.net.session.completeTelegram({ state: STATE, code: 'synthetic-link-code' })).step, 'failed');
+  pending.open(linkedResponse()); assert.equal((await first).step, 'linked');
+  assert.equal(calls(U.telegramLinkComplete).length, 1);
+  assert.equal((await f.net.session.completeTelegram({ state: STATE, code: 'synthetic-link-code' })).step, 'failed');
+  assert.equal(calls(U.telegramLinkComplete).length, 1);
+});
+test('late account link response after sign-out cannot announce success or install a session', async () => {
+  const f = await accountLink(), pending = gate();
+  serve({ [U.telegramLinkComplete]: () => pending.opened, [U.logout]: json(201, {}) });
+  const result = f.net.session.completeTelegram({ state: STATE, code: 'synthetic-link-code' });
+  await Promise.resolve(); await Promise.resolve();
+  await f.net.session.signOut(); pending.open(linkedResponse());
+  assert.equal((await result).step, 'failed'); assert.equal(f.net.session.view().signedIn, false);
+  assert.notEqual(f.net.telegramLink.view().phase, 'linked');
+});
+test('an uncertain account link is never retried automatically and cannot claim Client verification', async () => {
+  const f = await accountLink(); serve({ [U.telegramLinkComplete]: networkDown });
+  const result = await f.net.session.completeTelegram({ state: STATE, code: 'synthetic-link-code' });
+  assert.equal(result.step, 'failed'); assert.equal(f.net.session.view().signedIn, true);
+  assert.equal(calls(U.telegramLinkComplete).length, 1);
+  assert.equal(f.net.telegramLink.view().phase, 'failed');
+});
+
+test('every request of this suite went to an approved URL, and all approved URLs were exercised', () => {
+  const allowed = Object.values(U).sort();
+  assert.deepEqual([...everyUrl].sort(), allowed);
 });

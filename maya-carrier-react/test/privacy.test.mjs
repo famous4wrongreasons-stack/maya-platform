@@ -14,7 +14,8 @@ try {
   const bundle = path.join(scratch, 'presentation.mjs');
   await esbuild.build({
     stdin: {
-      contents: `export { PrivacyPanel } from '../src/chat/PrivacyPanel.tsx';
+      contents: `export { TelegramLinkPanel } from '../src/chat/TelegramLinkPanel.tsx';
+        export { PrivacyPanel } from '../src/chat/PrivacyPanel.tsx';
         export { tokens } from '../src/identity/tokens.ts';
         export { composerReason } from '../src/runtime/copy.ts';
         export { renderToStaticMarkup } from 'react-dom/server';`,
@@ -113,3 +114,18 @@ test('only canonical completed declares deletion; every phase has an accessible 
   }
   assert.equal(m.composerReason('history_erasure'), 'Разговор заблокирован до подтверждения удаления');
 });
+
+for (const phase of ['idle', 'starting', 'waiting', 'finishing', 'linked', 'failed'])
+  test('Telegram linking panel reports ' + phase + ' without claiming Client authority', () => {
+    const calls = [];
+    const tree = m.TelegramLinkPanel({ view: { phase, failure: null }, t: m.tokens(true), start: (...args) => calls.push(['start', ...args]), cancel: (...args) => calls.push(['cancel', ...args]) });
+    const root = parse(m.renderToStaticMarkup(tree)), buttons = findAll(root, el => el.tag === 'button');
+    const busy = ['starting', 'waiting', 'finishing'].includes(phase);
+    assert.deepEqual(calls, [], 'render has no linking side effect');
+    if (busy) assert.ok('disabled' in buttons[0].attrs);
+    if (phase === 'linked') { assert.equal(buttons.length, 0); assert.match(textOf(root), /При следующем входе через Telegram Maya проверит вашу клиентскую карточку/); }
+    else assert.match(textOf(root), /Подключить Telegram к этому аккаунту/);
+    const visit = node => { if (!node || typeof node !== 'object') return; if (Array.isArray(node)) return node.forEach(visit); if (node.type === 'button' && !node.props.disabled) node.props.onClick({ foreignClientId: 'forged' }); visit(node.props?.children); };
+    visit(tree);
+    assert.deepEqual(calls, phase === 'linked' ? [] : [[busy ? 'cancel' : 'start']], 'only the explicit no-argument gesture crosses the port');
+  });

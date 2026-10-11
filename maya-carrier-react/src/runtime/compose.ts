@@ -203,6 +203,7 @@ export const voice = voiceMachine;
 cancelPrivacyVoice = () => voiceMachine.cancel();
 
 export const session = net.session;
+export const telegramLink = net.telegramLink;
 export const onboarding = net.onboarding;
 export const conversation = runtime.conversation;
 export const goodsPhoto = runtime.goodsPhoto;

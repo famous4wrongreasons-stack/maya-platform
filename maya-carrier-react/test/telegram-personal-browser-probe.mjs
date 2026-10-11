@@ -40,7 +40,7 @@ const report = { contract: 'maya.telegram-personal-browser/1', status: 'running'
   actualReact: true, actualRuntime: true, actualBackendHttp: true, realTelegram: false,
   syntheticIssuerCrmModel: true, externalRequestsDispatched: 0,
   networkBoundary: 'CDP finite relay to owned loopback backend plus deny proxy/resolver; no OS packet claim',
-  checks: [], starts: 0, completes: 0, chat: [], history: [] };
+  checks: [], starts: 0, completes: 0, accountLinks: 0, passwordLogins: 0, chat: [], history: [] };
 const callback = fs.readFileSync(path.join(root, '../maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html'));
 const errors = [];
 let browser, page, popup, providerReady = false, state, stopping;
@@ -54,6 +54,7 @@ for (const signal of ['SIGTERM', 'SIGINT', 'disconnect']) process.once(signal, a
 const check = async (expression, label, target = page) => { assert.ok(await target.waitFor(expression), label); report.checks.push(label); };
 const button = text => `Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes(${JSON.stringify(text)}))`;
 const allowed = new Map([
+  ['/api/auth/login', 'POST'], ['/api/auth/oauth/telegram/link/start', 'POST'], ['/api/auth/oauth/telegram/link/complete', 'POST'],
   ['/api/mobile/pwa/search', 'GET'], ['/api/auth/oauth/telegram/start', 'POST'],
   ['/api/auth/oauth/telegram/complete', 'POST'], ['/api/ai/conversation', 'GET'],
   ['/api/ai/chat', 'POST'], ['/api/widgets/resolve', 'POST'],
@@ -85,6 +86,19 @@ async function intercept(sessionId, event) {
     }
     if (url.pathname === '/api/auth/oauth/telegram/complete') {
       assert.deepEqual(body, { state, code: 'synthetic-code' }); report.completes++;
+    }
+    if (url.pathname === '/api/auth/login') {
+      assert.ok(input.syntheticOwner); assert.equal(report.passwordLogins, 0);
+      assert.deepEqual(body, { tenantSlug: input.tenantSlug, email: input.syntheticOwner.email, password: input.syntheticOwner.password });
+      report.passwordLogins++;
+    }
+    if (url.pathname === '/api/auth/oauth/telegram/link/start') {
+      assert.ok(input.syntheticOwner); assert.deepEqual(body, { platform: 'web', redirectUri: origin + '/oauth-callback.html' });
+    }
+    if (url.pathname === '/api/auth/oauth/telegram/link/complete') {
+      assert.ok(input.syntheticOwner); assert.equal(report.accountLinks, 0);
+      assert.deepEqual(body, { state, code: 'synthetic-code' });
+      report.accountLinks++;
     }
     if (url.pathname === '/api/ai/chat') {
       assert.deepEqual(Object.keys(body).sort(), ['surface', 'requestId', 'messages', ...(body.conversationId ? ['conversationId'] : [])].sort());
@@ -136,7 +150,30 @@ async function login() {
   await page.send('Page.bringToFront');
   await check(`!!document.querySelector('[role="log"]')`, 'actual Telegram session opens AChat');
   assert.equal(await page.eval('performance.timeOrigin'), timeOrigin); report.checks.push('initiating document retained');
-  await until(() => report.history.length === report.completes, 'canonical conversation restore');
+  await until(() => report.history.length === report.completes + report.passwordLogins, 'canonical conversation restore');
+}
+async function linkExistingOwner() {
+  await page.goto(origin + '/');
+  await check(`!!${button('Войти по паролю')}`, 'existing owner password entry');
+  assert.ok(await page.click(button('Войти по паролю')));
+  await check(`!!document.querySelector('input[aria-label="Пароль"]')`, 'existing account form');
+  for (const [label, value] of [['Короткое имя бизнеса для входа', input.tenantSlug], ['Email', input.syntheticOwner.email], ['Пароль', input.syntheticOwner.password]])
+    assert.ok(await page.fill(`document.querySelector('input[aria-label="${label}"]')`, value));
+  assert.ok(await page.click(button('Войти')));
+  await check(`!!${button('Приватность и данные')}`, 'password session retained');
+  await until(() => report.history.length === 1, 'initial owner history');
+  assert.ok(await page.click(button('Приватность и данные')));
+  await check(`!!${button('Подключить Telegram к этому аккаунту')}`, 'canonical authenticated linking control');
+  popup = null; providerReady = false;
+  assert.ok(await page.click(button('Подключить Telegram к этому аккаунту')));
+  await until(() => popup && providerReady, 'link provider window');
+  assert.equal(await popup.eval('window.opener'), null);
+  await popup.eval('location.replace("https://oauth.telegram.org/auth?synthetic_return=1")');
+  await page.send('Page.bringToFront');
+  await check(`document.querySelector('section[aria-label="Вход через Telegram"]')?.textContent.includes('Telegram подключён к вашему аккаунту')`, 'A23 confirms account link without replacing session');
+  const shot = await page.send('Page.captureScreenshot', { format: 'png' });
+  fs.writeFileSync(path.join(input.output, 'account-link.png'), Buffer.from(shot.data, 'base64'));
+  assert.equal(report.completes, 0); assert.equal(report.accountLinks, 1);
 }
 try {
   browser = await Browser.launch('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', [
@@ -155,6 +192,7 @@ try {
   page = await browser.newPage(); await page.send('Fetch.enable', { patterns: [{ urlPattern: '*', requestStage: 'Request' }] });
   await browser.send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true, filter: [{ type: 'page', exclude: false }, { exclude: true }] });
   await page.send('Emulation.setDeviceMetricsOverride', { width: 393, height: 852, deviceScaleFactor: 1, mobile: false });
+  if (input.syntheticOwner) await linkExistingOwner();
   await login();
   // The source sync is a separate canonical owner, not a side effect of login
   // or a chat reader. Exercise it explicitly after the first verified binding.

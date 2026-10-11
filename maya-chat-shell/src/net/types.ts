@@ -539,3 +539,15 @@ export interface GoodsPhotoTransport {
   goodsPhotoItem(request: GoodsPhotoRequestContext & { readonly goods_id: string }, signal: AbortSignal): Promise<Outcome<GoodsPhotoResponse, GoodsPhotoFailure>>;
   goodsPhotoReview(request: GoodsPhotoRequestContext & { readonly proposal: GoodsPhotoProposal }, signal: AbortSignal): Promise<Outcome<GoodsPhotoResponse, GoodsPhotoFailure>>;
 }
+
+/** Authenticated account linking. This view never claims a verified Client link. */
+export type TelegramLinkView = {
+  readonly phase: 'idle' | 'starting' | 'waiting' | 'finishing' | 'linked' | 'failed';
+  readonly failure: FirstRunFailure | null;
+};
+export interface TelegramLinkPort {
+  view(): TelegramLinkView;
+  subscribe(listener: (view: TelegramLinkView) => void): () => void;
+  start(): Promise<void>;
+  cancel(): void;
+}

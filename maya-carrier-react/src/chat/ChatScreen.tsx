@@ -19,7 +19,7 @@ import type {
   ConversationView,
   TimelineItemView,
 } from '../../../maya-chat-shell/src/shell/ports.ts';
-import { conversation, goodsPhoto, privacy, session, voice, widgets } from '../runtime/compose.ts';
+import { conversation, goodsPhoto, privacy, session, telegramLink, voice, widgets } from '../runtime/compose.ts';
 import { usePortView } from '../runtime/useView.ts';
 import { WidgetCard } from '../widgets/WidgetCard.tsx';
 import { FullscreenDetail } from '../widgets/FullscreenDetail.tsx';
@@ -41,6 +41,7 @@ import { Backdrop } from '../identity/Backdrop.tsx';
 import { MayaMark, MayaMarkAnimated, MayaVolumeMark } from '../identity/MayaMark.tsx';
 import { MAYA_ACCENT, MAYA_ACCENT_ON, type Tokens } from '../identity/tokens.ts';
 import { ReplyText } from '../reply-link.tsx';
+import { TelegramLinkPanel } from './TelegramLinkPanel.tsx';
 import { PrivacyPanel } from './PrivacyPanel.tsx';
 import { GoodsPhotoPanel } from './GoodsPhotoPanel.tsx';
 
@@ -369,6 +370,7 @@ export function ChatScreen({
   }, []);
   const now = useCountdownClock(view);
   const privacyView = usePortView(privacy);
+  const telegramLinkView = usePortView(telegramLink);
   const goodsPhotoView = usePortView(goodsPhoto);
   const shellView = usePortView(widgets);
   const privacyOpen = shellView.primary === 'shell.privacy';
@@ -621,6 +623,8 @@ export function ChatScreen({
           }}
         >
           {privacyOpen ? (
+            <>
+            <TelegramLinkPanel view={telegramLinkView} t={t} start={() => void telegramLink.start()} cancel={() => telegramLink.cancel()} />
             <PrivacyPanel
               view={privacyView}
               t={t}
@@ -634,6 +638,7 @@ export function ChatScreen({
                 widgets.navigate('shell.root');
               }}
             />
+            </>
           ) : (
             <>
               {view.items.length === 0 ? <ChromeLine t={t} text={COLD_START_HINT} /> : null}

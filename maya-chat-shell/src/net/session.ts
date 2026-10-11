@@ -5,8 +5,9 @@
 // The access token is never decoded (its `role` claim is never read): its expiry is
 // `receivedAt + expires_in`. The tenant is the one the server bound at sign-in.
 //
-// `createNet()` hands out three objects and keeps the rest private:
+// `createNet()` hands out four objects and keeps the rest private:
 //   session    — shaped as `shell/ports.ts` `SessionPort`: sign-in, sign-out, the signed-in view
+//   telegramLink — current authenticated business account linking; no Client authority
 //   onboarding — explicit standard signup; uncertain creation recovers through normal login
 //   transport  — shaped as `shell/ports.ts` `Transport`: `/ai/chat` and `/ai/transcribe`
 // The bearer reaches `client.ts` through an internal `Authorizer`; no token is ever exposed.
@@ -27,11 +28,13 @@ import {
   refreshSession,
   searchBusinesses,
   telegramComplete,
+  telegramLinkStart,
+  telegramLinkComplete,
   telegramStart,
 } from './client.ts';
 import type { Authorization, Authorizer, RefreshResult, Timeouts } from './client.ts';
 import { onboardingInput } from './onboarding.ts';
-import type { OnboardingPort, OnboardingView } from './types.ts';
+import type { OnboardingPort, OnboardingView, TelegramLinkPort, TelegramLinkView } from './types.ts';
 import type { BusinessChoice, BusinessMatch, FirstRunFailure, SessionGrant, SignedOutReason, SignInDisplay, SignInFailure, TelegramCallback } from './types.ts';
 
 /** A refresh starts when the access token has less than this left. */
@@ -61,6 +64,7 @@ export type TelegramLanding =
 
 /** Whether the completed login was this identity's first in that business. */
 export type TelegramLandingOutcome =
+  | { readonly step: 'linked' }
   | { readonly step: 'signed_in'; readonly display: SignInDisplay; readonly isNewUser: boolean }
   | { readonly step: 'failed'; readonly failure: FirstRunFailure };
 
@@ -204,9 +208,24 @@ export function createNet(options: NetOptions = {}) {
    * it asked. A callback arriving after a restart therefore finds nothing pending and is refused,
    * which is correct rather than unfortunate.
    */
+  let pendingLink: { state: string; epoch: number } | null = null;
+  let linkAbort: AbortController | null = null;
+  let linkView: TelegramLinkView = { phase: 'idle', failure: null };
+  const linkListeners = new Set<(view: TelegramLinkView) => void>();
+  const publishLink = (next: TelegramLinkView): void => {
+    linkView = next;
+    for (const listener of [...linkListeners]) {
+      if (linkView !== next) break;
+      try { listener(next); } catch (error) { setTimeout(() => { throw error; }, 0); }
+    }
+  };
   let pendingTelegram: string | null = null;
   let telegramHandoff: TelegramHandoff | null = null;
   const cancelTelegram = (): void => {
+    pendingLink = null;
+    linkAbort?.abort();
+    linkAbort = null;
+    if (linkView.phase !== 'idle') publishLink({ phase: 'idle', failure: null });
     pendingTelegram = null;
     const held = telegramHandoff;
     telegramHandoff = null;
@@ -283,6 +302,7 @@ export function createNet(options: NetOptions = {}) {
   };
 
   const end = (why: SignedOutReason): void => {
+    cancelTelegram();
     if (grant === null) return;
     grant = null;
     serial += 1;
@@ -428,6 +448,63 @@ export function createNet(options: NetOptions = {}) {
     dispose() { onboardingDisposed = true; cancelOnboarding(true); onboardingListeners.clear(); },
   };
 
+  const telegramLink: TelegramLinkPort = {
+    view: () => linkView,
+    subscribe(listener) { linkListeners.add(listener); return () => { linkListeners.delete(listener); }; },
+    cancel: () => cancelOnboarding(true),
+    async start() {
+      if (grant === null || onboardingDisposed) { publishLink({ phase: 'failed', failure: { state: 'account_unavailable' } }); return; }
+      cancelOnboarding(true);
+      const intent = authIntent, ownerEpoch = grant.epoch;
+      const current = (): boolean => !onboardingDisposed && authIntent === intent && grant?.epoch === ownerEpoch;
+      publishLink({ phase: 'starting', failure: null });
+      if (!current()) return;
+      if (options.prepareTelegram) {
+        try {
+          telegramHandoff = options.prepareTelegram(why => {
+            if (!current()) return;
+            cancelOnboarding(true);
+            publishLink({ phase: 'failed', failure: { state: why === 'expired' ? 'login_expired' : 'telegram_declined' } });
+          });
+        } catch { telegramHandoff = null; }
+        if (telegramHandoff === null) { publishLink({ phase: 'failed', failure: { state: 'telegram_window_blocked' } }); return; }
+      }
+      const abort = new AbortController(); linkAbort = abort;
+      const result = await telegramLinkStart(authorizer, webCallbackUrl, abort.signal, timeouts.requestMs);
+      if (!current() || abort.signal.aborted) return;
+      if (!result.ok) { cancelTelegram(); publishLink({ phase: 'failed', failure: result.failure }); return; }
+      pendingLink = { state: result.value.state, epoch: ownerEpoch };
+      try {
+        if (telegramHandoff !== null) {
+          if (!telegramHandoff.navigate(result.value.authUrl)) throw new Error('Telegram handoff unavailable');
+        } else navigate(result.value.authUrl);
+      } catch { cancelTelegram(); publishLink({ phase: 'failed', failure: { state: 'telegram_window_blocked' } }); return; }
+      if (current()) publishLink({ phase: 'waiting', failure: null });
+    },
+  };
+
+  const completeLink = async (payload: unknown): Promise<TelegramLandingOutcome> => {
+    const callback = readCallback(payload), pending = pendingLink;
+    const intent = authIntent + 1;
+    cancelOnboarding(true); // Spend the local purpose/state before dispatch; preserve the current grant.
+    const refuse = (failure: FirstRunFailure): TelegramLandingOutcome => {
+      publishLink({ phase: 'failed', failure }); return { step: 'failed', failure };
+    };
+    if (onboardingDisposed || intent !== authIntent || pending === null || grant?.epoch !== pending.epoch || callback?.state !== pending.state)
+      return refuse({ state: 'callback_unsolicited' });
+    if (callback.code === null || callback.error !== null) return refuse({ state: 'telegram_declined' });
+    const abort = new AbortController(); linkAbort = abort;
+    const current = (): boolean => !onboardingDisposed && intent === authIntent && grant?.epoch === pending.epoch && !abort.signal.aborted;
+    publishLink({ phase: 'finishing', failure: null });
+    if (!current()) return { step: 'failed', failure: { state: 'account_unavailable' } };
+    const result = await telegramLinkComplete(authorizer, pending.state, callback.code, abort.signal, timeouts.requestMs);
+    if (!current()) return { step: 'failed', failure: { state: 'account_unavailable' } };
+    linkAbort = null;
+    if (!result.ok) return refuse(result.failure);
+    publishLink({ phase: 'linked', failure: null });
+    return { step: 'linked' };
+  };
+
   const session = {
     view(): SessionSnapshot {
       return snapshot;
@@ -497,6 +574,8 @@ export function createNet(options: NetOptions = {}) {
      * validated, or this page's own URL — it is the same three strings and the same path from here.
      */
     async completeTelegram(payload: unknown): Promise<TelegramLandingOutcome> {
+      if (pendingLink !== null) return completeLink(payload);
+      if (linkView.phase === 'finishing') return { step: 'failed', failure: { state: 'callback_unsolicited' } };
       const callback = readCallback(payload);
       const expected = pendingTelegram;
       const intent = authIntent + 1;
@@ -593,5 +672,5 @@ export function createNet(options: NetOptions = {}) {
     },
   };
 
-  return { session, transport: createTransport(authorizer, timeouts), onboarding };
+  return { session, transport: createTransport(authorizer, timeouts), onboarding, telegramLink };
 }

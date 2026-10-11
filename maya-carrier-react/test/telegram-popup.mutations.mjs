@@ -9,9 +9,12 @@ import { createHash } from 'node:crypto';
 const repo=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const output=process.argv[2];assert.match(output??'',/^\/(?:private\/)?tmp\/maya-telegram-mutations-[\w-]+$/);assert.equal(fs.existsSync(output),false);fs.mkdirSync(output,{mode:0o700});
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'maya-telegram-mutant-'));
-const session='maya-chat-shell/src/net/session.ts', host='maya-carrier-react/src/runtime/telegramPopup.ts', callback='maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html';
-const sources=Object.fromEntries([session,host,callback].map(p=>[p,fs.readFileSync(path.join(repo,p),'utf8')]));
+const client='maya-chat-shell/src/net/client.ts', session='maya-chat-shell/src/net/session.ts', host='maya-carrier-react/src/runtime/telegramPopup.ts', callback='maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html';
+const sources=Object.fromEntries([session,client,host,callback].map(p=>[p,fs.readFileSync(path.join(repo,p),'utf8')]));
 const cases=[
+ ['link-state-binding',session,' || callback?.state !== pending.state','','net'],
+ ['link-session-fence',session,'const current = (): boolean => !onboardingDisposed && intent === authIntent && grant?.epoch === pending.epoch && !abort.signal.aborted;','const current = (): boolean => true;','net'],
+ ['link-completion-owner',client,"authorizedExchange(auth, 'telegramLinkComplete',", "authorizedExchange(auth, 'telegramComplete',",'net'],
  ['state-binding',session,"if (callback === null || expected === null || callback.state !== expected)","if (callback === null)",'net'],
  ['auth-cancellation',session,'    cancelTelegram();\n    onboardingGeneration += 1;','    onboardingGeneration += 1;','net'],
  ['close-before-complete',session,'    held?.close();','    // mutated close omitted','net'],

@@ -73,6 +73,8 @@ const PATHS = {
   businessSearch: '/mobile/pwa/search',
   telegramStart: '/auth/oauth/telegram/start',
   telegramComplete: '/auth/oauth/telegram/complete',
+  telegramLinkStart: '/auth/oauth/telegram/link/start',
+  telegramLinkComplete: '/auth/oauth/telegram/link/complete',
   emailStart: '/auth/email/start',
   emailVerify: '/auth/email/verify',
   login: '/auth/login',
@@ -132,6 +134,8 @@ type RequestBody =
   | WidgetIntentRequest
   | WidgetResolveRequest
   | TelegramStartRequest
+  | { readonly platform: 'web'; readonly redirectUri: string }
+  | { readonly platform: 'ios' }
   | TelegramCompleteRequest
   | Readonly<Record<string, never>>;
 
@@ -537,7 +541,7 @@ const unlessAborted = <T>(work: Promise<T>, signal: AbortSignal): Promise<T | nu
 };
 
 /** 401 → refresh once → retry once (§1.4). A second 401 ends the session; it never loops. */
-async function authorizedExchange(auth: Authorizer, endpoint: 'crmSetupStatus' | 'crmSetupStage' | 'crmSetupActivate' | 'crmSetupOperation' | 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate' | 'goodsPhotoPreview' | 'goodsPhotoSearch' | 'goodsPhotoItem' | 'goodsPhotoReview', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = '', idempotencyKey: string = '', crmLocator: CrmOperationLocator | null = null): Promise<AuthorizedExchange> {
+async function authorizedExchange(auth: Authorizer, endpoint: 'telegramLinkStart' | 'telegramLinkComplete' | 'crmSetupStatus' | 'crmSetupStage' | 'crmSetupActivate' | 'crmSetupOperation' | 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate' | 'goodsPhotoPreview' | 'goodsPhotoSearch' | 'goodsPhotoItem' | 'goodsPhotoReview', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = '', idempotencyKey: string = '', crmLocator: CrmOperationLocator | null = null): Promise<AuthorizedExchange> {
   const first = await unlessAborted(auth.authorize(), signal);
   if (first === null) return { kind: 'aborted' };
   if (first.kind !== 'bearer') return first;
@@ -552,6 +556,31 @@ async function authorizedExchange(auth: Authorizer, endpoint: 'crmSetupStatus' |
     return { kind: 'signed_out', reason: 'session_revoked' };
   }
   return retried;
+}
+
+/** Existing A23 identity owner. A completion never installs or returns a session. */
+export async function telegramLinkStart(auth: Authorizer, callback: string | null, signal: AbortSignal, timeoutMs: number): FirstRunResult<TelegramStartProjection> {
+  const body = callback === null ? { platform: 'ios' as const } : { platform: 'web' as const, redirectUri: callback };
+  const ex = await authorizedExchange(auth, 'telegramLinkStart', body, signal, timeoutMs);
+  if (ex.kind === 'signed_out') return fail({ state: 'account_unavailable' });
+  if (ex.kind === 'unavailable') return fail(firstRunFailure(ex.exchange));
+  if (ex.kind === 'response' && isSuccess(ex.status)) {
+    const value = projectTelegramStart(ex.body);
+    return value === null ? fail({ state: 'unexpected_response', status: ex.status }) : { ok: true, value };
+  }
+  return fail(firstRunFailure(ex));
+}
+
+export async function telegramLinkComplete(auth: Authorizer, state: string, code: string, signal: AbortSignal, timeoutMs: number): FirstRunResult<true> {
+  const ex = await authorizedExchange(auth, 'telegramLinkComplete', { state, code }, signal, timeoutMs);
+  if (ex.kind === 'signed_out') return fail({ state: 'account_unavailable' });
+  if (ex.kind === 'unavailable') return fail(firstRunFailure(ex.exchange));
+  if (ex.kind === 'response' && isSuccess(ex.status)) {
+    const value = ex.body as { ok?: unknown; provider?: unknown; linked?: unknown } | null;
+    return value?.ok === true && value.provider === 'telegram' && value.linked === true
+      ? { ok: true, value: true } : fail({ state: 'unexpected_response', status: ex.status });
+  }
+  return fail(firstRunFailure(ex));
 }
 
 /** A refresh that could not be completed now, as a turn failure. The turn itself was never sent. */

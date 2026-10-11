@@ -36,6 +36,7 @@ import { AuthRateLimitService } from './auth-rate-limit.service';
 import { AuthSessionService } from './auth-session.service';
 import { CompleteOauthLoginDto } from './dto/complete-oauth-login.dto';
 import { StartOauthLoginDto } from './dto/start-oauth-login.dto';
+import { StartOauthLinkDto } from './dto/start-oauth-link.dto';
 import { TenantAuthRepository } from './tenant-auth.repository';
 import { TelegramClientBindingService } from './telegram-client-binding.service';
 
@@ -350,6 +351,41 @@ export class SocialAuthService {
     metadata: Partial<AuthClientMetadata> = {},
   ) {
     return this.completeIdentityLink('yandex', dto, user, metadata);
+  }
+
+  async startTelegramLink(
+    dto: StartOauthLinkDto,
+    principal: AuthenticatedUser,
+    metadata: Partial<AuthClientMetadata> = {},
+  ) {
+    if (!principal.tenantId || !this.isBusinessRole(principal.role)) {
+      throw new ForbiddenException(
+        this.buildSocialAuthError(
+          'social_link_forbidden',
+          'Only an authenticated business account can link this sign-in method.',
+        ),
+      );
+    }
+    const tenantId = principal.tenantId;
+    return this.tenantContext.runAsAuthPrincipal(principal, async () => {
+      this.tenantContext.assertAuthPrincipal(principal.userId, tenantId);
+      const current = await this.usersService.getTenantUserOrThrow(
+        principal.userId,
+        tenantId,
+      );
+      this.assertUserCanLogin(current);
+      if (!this.isBusinessRole(current.role as UserRole))
+        throw new ForbiddenException('Business account required');
+      const tenant = await this.tenantsService.getTenantByIdOrThrow(tenantId);
+      return this.startTelegramLogin(
+        {
+          tenantSlug: tenant.slug,
+          platform: dto.platform,
+          redirectUri: dto.redirectUri,
+        },
+        metadata,
+      );
+    });
   }
 
   completeTelegramLink(

@@ -141,6 +141,7 @@ export type TelegramLanding =
   | { readonly state: 'failed'; readonly failure: FirstRunFailure };
 
 export type TelegramLandingStep =
+  | { readonly step: 'linked' }
   | { readonly step: 'signed_in'; readonly display: SignInDisplay; readonly isNewUser: boolean }
   | { readonly step: 'failed'; readonly failure: FirstRunFailure };
 

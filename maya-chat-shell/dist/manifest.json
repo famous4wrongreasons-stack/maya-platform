@@ -71,7 +71,7 @@
       },
       {
         "path": "src/net/client.ts",
-        "sha256": "4cb3675f5af01bb2135805d9e31a6925f75a05d5d422bbabb591fa18f86ff558"
+        "sha256": "77ab032fdd359fa62ae7d7b575f797489d0c17534ce34bca0cd2d4fcf39e4e61"
       },
       {
         "path": "src/net/crm-setup.ts",
@@ -99,11 +99,11 @@
       },
       {
         "path": "src/net/session.ts",
-        "sha256": "e49e66dd6c46ce146e608380d592cf1a6222964db55ab435230c13b06d2fa8f0"
+        "sha256": "361c45dceb3a08b279a0fad54c9500dd97fce793cdcc3fc8802cb54665e55ca6"
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "d83c6db75fe4db54bd748b6b3fbc5b4f1cb64df6c1599deb0589f76943101808"
+        "sha256": "9fc68a346cfa886e6f2304523c3df025827281ceacdbe7f8e6cf812d62fef6a8"
       },
       {
         "path": "src/renderer/cells.ts",
@@ -155,7 +155,7 @@
       },
       {
         "path": "src/shell/ports.ts",
-        "sha256": "62e0d83d75268b27c35f516122266aed09bf1bcf3f4e59304f7a1d6b1ea04b3a"
+        "sha256": "0a9ac034eff080c9c5b276dcfda82e33fc3dd618673c011bd8a6bd24717de987"
       },
       {
         "path": "src/shell/privacy.ts",
@@ -175,8 +175,8 @@
       }
     ]
   },
-  "bytes": 625684,
-  "digest": "fa3f09ca6268a57f3c0a14ec630b78153b92c15130768bdcf4492d664b264e31",
+  "bytes": 632637,
+  "digest": "c8d3fa199fd3183bed8fc306ed37bd426f1fbc22dc025b463ac5a750e3cc3795",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -184,8 +184,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "5e4df6ef6a66b4d60e6c0c9cb7f7c9f050eac2bd4b237b423cbd0b27c33d67e5",
-    "modulePath": "m/5e4df6ef6a66b4d6/",
+    "digest": "ae62861f0244b872db7e3760f7cc6691eda1dcad396504ec5d18ec28da46c7c6",
+    "modulePath": "m/ae62861f0244b872/",
     "files": [
       {
         "path": "entry/main.js",
@@ -244,8 +244,8 @@
       },
       {
         "path": "src/net/client.js",
-        "sha256": "7edff37c6b0e17b733d6f617eaebde5cab3f4341594f59ba57f24ce7dd7cd0e5",
-        "bytes": 38947
+        "sha256": "a50485c92acd41039a50b465825b60a7dfc193829bdc847b3364363cfc5f722b",
+        "bytes": 40480
       },
       {
         "path": "src/net/crm-setup.js",
@@ -279,8 +279,8 @@
       },
       {
         "path": "src/net/session.js",
-        "sha256": "75c32b2097e07b2d3fc9ad4090385374e06a758ebf5a18aea00dbb5a56a96362",
-        "bytes": 20365
+        "sha256": "7ad931b3a510fd08ed5a0ad134f39f580d61b85c8f465b8d7479687c5c422cbc",
+        "bytes": 25436
       },
       {
         "path": "src/net/types.js",
@@ -393,7 +393,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "348d0a10a0e4ad2a0a6814228eb0c98a1159cd94ee42444b8d5ab325630b5939",
+      "sha256": "5b75ff9b15bfd6b7cd07d3fce126fca658d311e58afff085ec2a9ef7ec948112",
       "bytes": 1344
     },
     "assets": [

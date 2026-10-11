@@ -315,7 +315,32 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
         f.user.email,
         f.user.password,
       );
-      const flow = await signedLogin(f);
+      installSignedIssuer(f);
+      const start = await request(http.app.getHttpServer())
+        .post('/api/auth/oauth/telegram/link/start')
+        .set('Authorization', `Bearer ${bearer}`)
+        .send({
+          platform: 'web',
+          redirectUri: 'https://maya.example/oauth-callback.html',
+        });
+      if (start.status !== 201) {
+        const problem = start.body as {
+          message?: string;
+          error?: { code?: string };
+        };
+        throw new Error(
+          `Authenticated link start: ${start.status} ${problem.error?.code ?? problem.message ?? 'unknown'}`,
+        );
+      }
+      expect(start.status).toBe(201);
+      expect((start.body as { tenant_slug: string }).tenant_slug).toBe(
+        f.tenant.slug,
+      );
+      const flow = {
+        state: new URL(
+          (start.body as { auth_url: string }).auth_url,
+        ).searchParams.get('state')!,
+      };
       const link = () =>
         request(http.app.getHttpServer())
           .post('/api/auth/oauth/telegram/link/complete')
@@ -367,6 +392,64 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
       expect(
         await db.prisma.membership.count({ where: { tenantId: f.tenant.id } }),
       ).toBe(1);
+    },
+  );
+
+  it.each([
+    'missing-session',
+    'client-role',
+    'tenantSlug',
+    'userId',
+    'clientId',
+    'phone',
+    'foreign-callback',
+    'revoked-session',
+  ] as const)(
+    'authenticated Telegram link start refuses %s without issuing a flow',
+    async (negative) => {
+      const f = await fixture(
+        negative === 'client-role' ? UserRole.CLIENT : UserRole.TENANT_OWNER,
+        false,
+      );
+      installSignedIssuer(f);
+      const bearer = await http.login(
+        f.tenant.slug,
+        f.user.email,
+        f.user.password,
+      );
+      if (negative === 'revoked-session')
+        await request(http.app.getHttpServer())
+          .post('/api/auth/logout')
+          .set('Authorization', `Bearer ${bearer}`)
+          .send({})
+          .expect(201);
+      const before = await db.prisma.authFlowState.count({
+        where: { tenantId: f.tenant.id },
+      });
+      const body: Record<string, unknown> = {
+        platform: 'web',
+        redirectUri:
+          negative === 'foreign-callback'
+            ? 'https://foreign.example/callback'
+            : 'https://maya.example/oauth-callback.html',
+      };
+      if (['tenantSlug', 'userId', 'clientId', 'phone'].includes(negative))
+        body[negative] = 'caller-selected';
+      const call = request(http.app.getHttpServer()).post(
+        '/api/auth/oauth/telegram/link/start',
+      );
+      if (negative !== 'missing-session')
+        call.set('Authorization', `Bearer ${bearer}`);
+      const result = await call.send(body);
+      expect(result.status).toBeGreaterThanOrEqual(400);
+      expect(result.status).toBeLessThan(500);
+      expect(
+        await db.prisma.authFlowState.count({
+          where: { tenantId: f.tenant.id },
+        }),
+      ).toBe(before);
+      expect(await f.count()).toBe(0);
+      expect(f.source).not.toHaveBeenCalled();
     },
   );
 
@@ -869,8 +952,11 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
   });
 
   describe('existing CRM reconciliation → first login → private history', () => {
-    async function historyFixture(role = UserRole.CLIENT) {
-      const f = await fixture(role);
+    async function historyFixture(
+      role = UserRole.CLIENT,
+      linkedIdentity = true,
+    ) {
+      const f = await fixture(role, linkedIdentity);
       await context.runAsSystemTenant(f.tenant.id, () =>
         http.app.get(ClientIdentityService).registerCrmClient({
           tenantId: f.tenant.id,
@@ -1134,9 +1220,9 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
 
     if (process.env.JEST_TELEGRAM_BROWSER_OUTPUT) {
       it.each([UserRole.CLIENT, UserRole.TENANT_OWNER])(
-        'current React: first signed %s Telegram login → canonical sync → three history answers → relogin without duplicate turns',
+        'current React: %s account bootstrap → signed Telegram login → canonical sync → three history answers → relogin without duplicate turns',
         async (role) => {
-          const f = await historyFixture(role);
+          const f = await historyFixture(role, role !== UserRole.TENANT_OWNER);
           await enableHistory(f);
           installSignedIssuer(f);
           const chat = await prepareChat(f);
@@ -1218,6 +1304,14 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
                     tenantSlug: f.tenant.slug,
                     tenantName,
                     questions: chat.questions,
+                    ...(role === UserRole.TENANT_OWNER
+                      ? {
+                          syntheticOwner: {
+                            email: f.user.email,
+                            password: f.user.password,
+                          },
+                        }
+                      : {}),
                   }),
                 )
                 .catch(fail);
@@ -1248,6 +1342,7 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
             browserStopped: true,
             starts: 2,
             completes: 2,
+            accountLinks: role === UserRole.TENANT_OWNER ? 1 : 0,
           });
           expect(report.chat).toHaveLength(3);
           expect(chat.wire).toHaveLength(3);

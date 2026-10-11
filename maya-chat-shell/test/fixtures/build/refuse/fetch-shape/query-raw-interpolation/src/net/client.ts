@@ -4,6 +4,8 @@ const PATHS = {
   businessSearch: '/mobile/pwa/search',
   telegramStart: '/auth/oauth/telegram/start',
   telegramComplete: '/auth/oauth/telegram/complete',
+  telegramLinkStart: '/auth/oauth/telegram/link/start',
+  telegramLinkComplete: '/auth/oauth/telegram/link/complete',
   emailStart: '/auth/email/start',
   emailVerify: '/auth/email/verify',
   login: '/auth/login',

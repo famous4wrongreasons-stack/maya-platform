@@ -224,6 +224,8 @@ export const P1_PATHS = [
   '/auth/logout',
   '/auth/oauth/telegram/start',
   '/auth/oauth/telegram/complete',
+  '/auth/oauth/telegram/link/start',
+  '/auth/oauth/telegram/link/complete',
   '/ai/chat',
   '/ai/conversation',
   '/privacy/conversations',

@@ -23,6 +23,13 @@ for (const [f, s] of Object.entries(originals))
   });
 const edits = [
   [
+    'first-linked-international-phone',
+    users,
+    'await this.assertNormalizedPhoneAvailable(tenantId, normalizedPhone);',
+    'await this.ensurePhoneIsAvailable(tenantId, normalizedPhone);',
+    'authenticated A23 link',
+  ],
+  [
     'verified-phone',
     social,
     'claims.phone_number_verified === true',
