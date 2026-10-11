@@ -16,6 +16,7 @@ import { projectRuntimeStatus, RUNTIME_STAGES, RUNTIME_CODES, projectReadTrace, 
 import { PUBLIC_DIAGNOSTIC_PARTNER, diagnosticRuntimeCommand } from './local-yclients-read-diagnostic.mjs';
 export { PUBLIC_DIAGNOSTIC_PARTNER };
 import { OWNER_CHAT_QUESTIONS } from './local-owner-chat-policy.mjs';
+import { createLocalTelegramReturn } from './local-telegram-return.mjs';
 
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repo = path.dirname(backend);
@@ -32,6 +33,9 @@ export const READ_SOURCE_FILES = Object.freeze([
   'maya-saas-backend/scripts/local-yclients-read-diagnostic.mjs',
   'maya-saas-backend/scripts/local-yclients-read-resume.mjs',
   'maya-saas-backend/scripts/local-yclients-read-resume.test.mjs',
+  'maya-saas-backend/scripts/local-telegram-return.mjs',
+  'maya-saas-backend/scripts/local-telegram-return.test.mjs',
+  'maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html',
 ]);
 export const LOCAL_READ_HEADERS = Object.freeze({
   'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
@@ -266,6 +270,27 @@ export const DIAGNOSTIC_HTML = '<!doctype html><html lang="ru"><meta charset="ut
 
 export const OWNER_CHAT_HTML = '<!doctype html><html lang="ru"><meta charset="utf-8"><title>MAYA — проверка сведений о салоне</title><main><h1>AChat: чтение сведений о вашем салоне</h1><p>Сохранённый бизнес и подключение. Только три вопроса по порядку; до 10 минут, 12 обращений к модели, не более $2. Услуги, мастера и сведения о салоне читаются из YCLIENTS. Запись, изменения, клиенты, сообщения и голос закрыты.</p><ol>' + OWNER_CHAT_QUESTIONS.map(text => '<li>'+text+'</li>').join('') + '</ol><p>Ключи в чат Maya не вводить. При отказе остановитесь, автоматического повтора нет.</p><a href="/">Открыть AChat</a></main></html>';
 
+export function createReadWebServer(plan, runtimeEnv) {
+  const origin = `http://127.0.0.1:${runtimeEnv.PORT}`;
+  const telegramReturn = createLocalTelegramReturn();
+  const dev = createDevServer({ root: path.join(repo, 'maya-carrier-react/dist/web'), api: origin + '/api', upstreamPorts: [String(runtimeEnv.PORT)], upstreamTimeoutMs: 125000 });
+  const handlers = dev.server.listeners('request'); dev.server.removeAllListeners('request');
+  dev.server.on('request', (request, response) => {
+    if (telegramReturn(request, response, runtimeEnv.CORS_ALLOWED_ORIGINS)) return;
+    protectWebResponse(response);
+    if (!localBrowserBoundary(request.headers, runtimeEnv.CORS_ALLOWED_ORIGINS, new URL(runtimeEnv.CORS_ALLOWED_ORIGINS).host)) {
+      response.writeHead(403, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+      response.end('{"error":{"code":"local_yclients_read_origin_refused"}}'); return;
+    }
+    if (request.method === 'GET' && request.url === '/__local-yclients-read') {
+      response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+      response.end(plan.ownerChat ? OWNER_CHAT_HTML : plan.diagnosticNoProvider ? DIAGNOSTIC_HTML : LANDING_HTML); return;
+    }
+    for (const handler of handlers) handler.call(dev.server, request, response);
+  });
+  return dev;
+}
+
 export async function runReadRuntime(plan, runtimeEnv, state, control, manifest, save) {
   const diagnostic = manifest.diagnostic;
   const command = plan.diagnosticNoProvider ? diagnosticRuntimeCommand(plan, runtimeEnv) : plan.runtime;
@@ -292,20 +317,7 @@ export async function runReadRuntime(plan, runtimeEnv, state, control, manifest,
     ]);
     clearTimeout(timer);
     diagnosticStage(diagnostic, 'web_starting'); save();
-    dev = createDevServer({ root: path.join(repo, 'maya-carrier-react/dist/web'), api: origin + '/api', upstreamPorts: [String(runtimeEnv.PORT)], upstreamTimeoutMs: 125000 });
-    const handlers = dev.server.listeners('request'); dev.server.removeAllListeners('request');
-    dev.server.on('request', (request, response) => {
-      protectWebResponse(response);
-      if (!localBrowserBoundary(request.headers, runtimeEnv.CORS_ALLOWED_ORIGINS, new URL(runtimeEnv.CORS_ALLOWED_ORIGINS).host)) {
-        response.writeHead(403, { 'content-type': 'application/json', 'cache-control': 'no-store' });
-        response.end('{"error":{"code":"local_yclients_read_origin_refused"}}'); return;
-      }
-      if (request.method === 'GET' && request.url === '/__local-yclients-read') {
-        response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-        response.end(plan.ownerChat ? OWNER_CHAT_HTML : plan.diagnosticNoProvider ? DIAGNOSTIC_HTML : LANDING_HTML); return;
-      }
-      for (const handler of handlers) handler.call(dev.server, request, response);
-    });
+    dev = createReadWebServer(plan, runtimeEnv);
     await dev.listen(Number(new URL(runtimeEnv.CORS_ALLOWED_ORIGINS).port));
     manifest.status = 'ready'; manifest.readyAt = new Date().toISOString();
     manifest.providerAdmission = plan.providerAdmission;

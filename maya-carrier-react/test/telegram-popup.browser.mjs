@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { Browser, Page } from '../../maya-chat-shell/test/cdp-verify.mjs';
+import { createReadWebServer } from '../../maya-saas-backend/scripts/local-yclients-read.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = process.argv[2];
 assert.match(output ?? '', /^\/(?:private\/)?tmp\/maya-telegram-browser-[\w-]+$/);
@@ -14,14 +15,13 @@ assert.equal(fs.existsSync(output), false); fs.mkdirSync(output, { mode: 0o700 }
 const verified = spawnSync(process.execPath,['build.mjs','--target=web','--verify-output'],{cwd:root,encoding:'utf8'});
 fs.writeFileSync(path.join(output,'packaging.log'),verified.stdout+verified.stderr);
 assert.equal(verified.status,0,'source-bound web payload required');
-const callbackBytes = fs.readFileSync(path.join(root, '../maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html'));
 const report = { contract: 'maya.telegram-web-return.synthetic-browser/1', candidate: execFileSync('git', ['rev-parse','HEAD'], {cwd:root,encoding:'utf8'}).trim(),
   dirtySource: Boolean(execFileSync('git',['status','--porcelain'],{cwd:root,encoding:'utf8'}).trim()),
   networkBoundary:'CDP interception plus deny proxy/resolver; no OS-wide packet claim',
-  actualReact:true,actualRuntime:true,actualCallback:true,actualBackend:false,realProvider:false,
-  checks:[],starts:0,completes:0,externalRequestsDispatched:0,interceptedProvider:0,
-  sourceHashes:Object.fromEntries(['src/runtime/compose.ts','src/runtime/telegramPopup.ts','src/signin/SignIn.tsx','../maya-chat-shell/src/net/session.ts','../maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html'].map(f=>[f,createHash('sha256').update(fs.readFileSync(path.join(root,f))).digest('hex')])) };
-let origin,state,browser,page,popup,providerReady,deadline;
+  actualReact:true,actualRuntime:true,actualCallback:true,actualLocalWebBoundary:true,actualBackend:false,realProvider:false,
+  checks:[],starts:0,completes:0,externalRequestsDispatched:0,interceptedProvider:0,callbackRequests:[],
+  sourceHashes:Object.fromEntries(['src/runtime/compose.ts','src/runtime/telegramPopup.ts','src/signin/SignIn.tsx','../maya-chat-shell/src/net/session.ts','../maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html','../maya-saas-backend/scripts/local-telegram-return.mjs','../maya-saas-backend/scripts/local-yclients-read.mjs'].map(f=>[f,createHash('sha256').update(fs.readFileSync(path.join(root,f))).digest('hex')])) };
+let origin,state,browser,page,popup,providerReady,deadline,web;
 const errors=[];
 const json=(res,value,status=200)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
 const server=http.createServer(async(req,res)=>{
@@ -38,13 +38,7 @@ const server=http.createServer(async(req,res)=>{
     }
     if(req.method==='GET'&&url.pathname==='/api/ai/conversation')return json(res,{contract:'maya.conversation-history/1',conversationId:null,truncated:false,interrupted:false,turns:[]});
     if(req.method==='POST'&&url.pathname==='/api/widgets/resolve')return json(res,{tenant_bound:true,widgets:[]});
-    if(req.method==='GET'&&url.pathname==='/oauth-callback.html'){res.writeHead(200,{'Content-Type':'text/html','Cache-Control':'no-store'});res.end(callbackBytes);return;}
-    if(req.method==='GET'){
-      const file=path.resolve(root,'dist/web','.'+(url.pathname==='/'?'/index.html':url.pathname));
-      if(file.startsWith(path.join(root,'dist/web')+path.sep)&&fs.existsSync(file)&&fs.statSync(file).isFile()){
-        const ext=path.extname(file);res.writeHead(200,{'Cache-Control':'no-store','Content-Type':ext==='.js'?'text/javascript':ext==='.css'?'text/css':ext==='.html'?'text/html':'application/octet-stream'});res.end(fs.readFileSync(file));return;
-      }
-    }res.writeHead(403);res.end();
+    res.writeHead(403);res.end();
   }catch(e){errors.push(e.message);if(!res.headersSent)res.writeHead(500);res.end();}
 });
 const button=text=>`Array.from(document.querySelectorAll('button')).find(b=>b.textContent.includes(${JSON.stringify(text)}))`;
@@ -79,7 +73,16 @@ async function start(){
 async function land(query){await popup.eval('location.replace('+JSON.stringify('https://oauth.telegram.org/auth?synthetic_callback='+encodeURIComponent(query))+')');}
 try{
   deadline=setTimeout(()=>{errors.push('deadline');void browser?.close();server.closeAllConnections();server.close();},90000);
-  await new Promise(r=>server.listen(0,'127.0.0.1',r));origin='http://127.0.0.1:'+server.address().port;
+  await new Promise(r=>server.listen(0,'127.0.0.1',r));
+  const env={PORT:String(server.address().port),CORS_ALLOWED_ORIGINS:'http://127.0.0.1:59992'};
+  web=createReadWebServer({diagnosticNoProvider:true},env);
+  web.server.prependListener('request',req=>{
+    if(req.url?.startsWith('/oauth-callback.html?'))report.callbackRequests.push({
+      method:req.method,site:req.headers['sec-fetch-site']??null,
+      mode:req.headers['sec-fetch-mode']??null,destination:req.headers['sec-fetch-dest']??null,
+    });
+  });
+  await web.listen(0);origin='http://127.0.0.1:'+web.server.address().port;env.CORS_ALLOWED_ORIGINS=origin;
   browser=await Browser.launch('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',[
     '--proxy-server=http://127.0.0.1:9','--proxy-bypass-list=127.0.0.1','--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1','--disable-quic','--disable-features=OptimizationHints,MediaRouter']);
   browser.listeners.add(msg=>{
@@ -104,6 +107,8 @@ try{
   await check("location.pathname === '/oauth-callback.html' && location.search === ''",'callback query erased in actual browser',popup);
   await page.send('Page.bringToFront');
   await check(`!!document.querySelector('[role="log"]')`,'real AChat opens after callback');
+  assert.ok(report.callbackRequests.some(r=>r.method==='GET'&&r.site==='cross-site'&&r.mode==='navigate'&&r.destination==='document'));
+  report.checks.push('actual provider cross-site document return admitted by launcher boundary');
   assert.equal(await page.eval('performance.timeOrigin'),firstMain);assert.equal(report.completes,1);report.checks.push('one completion; no parent reload');
   const shot=await page.send('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(output,'signed-in.png'),Buffer.from(shot.data,'base64'));
   await start();await land('state='+state+'&error=access_denied');await check("document.body.innerText.includes('Вход через Telegram отменён')",'decline shown');assert.equal(report.completes,1);
@@ -113,4 +118,4 @@ try{
   await check("location.pathname === '/oauth-callback.html' && location.search === ''",'standalone callback query erased');await pause(500);assert.equal(report.completes,1);report.checks.push('reload/standalone cannot create session');
   assert.deepEqual(errors,[]);report.status='PASS';
 }catch(e){report.status='FAIL';report.failure=e.message;report.screen=await page?.eval('document.body.innerText.slice(0,500)').catch(()=>null);process.exitCode=1;}
-finally{clearTimeout(deadline);if(browser)await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));report.ownedBrowserStopped=!browser||browser.child.exitCode!==null||browser.child.signalCode!==null;report.listenerStopped=!server.listening;report.errors=errors;fs.writeFileSync(path.join(output,'report.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));}
+finally{clearTimeout(deadline);if(browser)await browser.close();if(web){web.server.closeAllConnections();await web.close();}server.closeAllConnections();await new Promise(r=>server.close(r));report.ownedBrowserStopped=!browser||browser.child.exitCode!==null||browser.child.signalCode!==null;report.listenerStopped=!server.listening&&(!web||!web.server.listening);report.errors=errors;fs.writeFileSync(path.join(output,'report.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report));}
