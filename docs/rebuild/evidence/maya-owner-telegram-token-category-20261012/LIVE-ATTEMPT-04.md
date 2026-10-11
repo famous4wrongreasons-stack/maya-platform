@@ -42,3 +42,22 @@ Telegram credential/Basic exchange contract: https://core.telegram.org/bots/tele
 Safe machine projection: [attempt-04.json](attempt-04.json). Original private
 receipt hashes are appended to [receipt-manifest.json](receipt-manifest.json).
 Earlier unknown-error findings are preserved as history, not rewritten.
+
+## Owner confirmation and offline credential-path check
+
+The owner subsequently confirmed the current Login Widget Client ID is the
+configured public ID. No new live session was authorized by that confirmation.
+An offline probe on 437ea29757beb81d6417fd9d05d3113d30cf83a5 fed three artificial
+secrets through the existing hidden-input function using synthetic TTY events,
+Nest ConfigService, the compiled canonical exchange method and the local guarded
+transport. ASCII, punctuation and chunked inputs preserved exact bytes; Basic
+authentication and form parameters matched; echo was absent; a synthetic refusal
+remained a refusal. The native-fetch boundary was replaced with an in-process
+synthetic responder. No network request or retained-database start occurred.
+
+This is a focused compiled-method/input proof, not a complete child-process
+environment proof, real credential validation or successful Telegram login.
+No input corruption was reproduced. The actual entered Client Secret was not
+read or validated by the agent. Product and harness code were not changed.
+The next useful manual step is to copy the current Client Secret from the same
+Login Widget section, without sharing it in chat or rotating it blindly.

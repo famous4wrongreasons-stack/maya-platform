@@ -82,5 +82,13 @@
     "size": 156,
     "committed": false,
     "reason": "Closed safe projection only; private source/session manifest remains local."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-secret-path-20261012-01/summary.json",
+    "sha256": "db3af9ca0d9dcc16c79f2229a5e6654c69292642712287eca9f2732667c081b1",
+    "size": 1019,
+    "committed": true,
+    "repositoryCopy": "secret-path-synthetic-proof.json",
+    "reason": "Closed synthetic-only probe outcomes; no credential values."
   }
 ]
