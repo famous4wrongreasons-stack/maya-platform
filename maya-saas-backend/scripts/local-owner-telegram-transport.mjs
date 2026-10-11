@@ -4,7 +4,22 @@ import { TELEGRAM_LIMITS, telegramProviderRoute } from './local-owner-telegram-p
 
 // Reuses the real adapter and cryptographic verifier. Only tests inject wire
 // replies. Only closed route/stage/status codes enter diagnostics; no body,
-// header, provider error text or token payload is retained or interpreted here.
+// header, provider error text or token payload is retained. Successful token
+// responses also expose one closed category; it never affects their bytes.
+const oauthCategories = new Map(['invalid_client', 'invalid_grant', 'invalid_request',
+  'unauthorized_client', 'unsupported_grant_type', 'invalid_scope', 'access_denied',
+  'server_error', 'temporarily_unavailable'].map(code => [code, 'oauth_' + code]));
+function tokenOutcome(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return 'unexpected_shape';
+  const token = Object.getOwnPropertyDescriptor(value, 'id_token')?.value;
+  const error = Object.getOwnPropertyDescriptor(value, 'error')?.value;
+  if (error !== undefined && error !== null && error !== '') {
+    if (token) return 'contradictory_token_error';
+    return oauthCategories.get(error) ?? 'oauth_other_error';
+  }
+  if (typeof token === 'string' && token.length) return 'id_token_present';
+  return token ? 'unexpected_shape' : 'missing_id_token';
+}
 export function createOwnerTelegramTransport({ nativeFetch, clientId, companyId, assertCurrent, verifyCurrent, clock = Date.now, trace }) {
   const context = new AsyncLocalStorage(), counters = { calls: 0, refused: 0, routes: {} };
   let busy = false, closed = false; const active = new Set();
@@ -30,9 +45,10 @@ export function createOwnerTelegramTransport({ nativeFetch, clientId, companyId,
     async fetch(raw, init) {
       const op = context.getStore();
       let diagnosticRoute = null;
-      const emit = (stage, status, code) => {
+      const emit = (stage, status, code, telegramTokenOutcome) => {
         if (!diagnosticRoute) return;
-        try { trace?.({ surface: 'provider', route: diagnosticRoute, method: diagnosticRoute === 'telegram_token' ? 'POST' : 'GET', stage, status, code }); }
+        try { trace?.({ surface: 'provider', route: diagnosticRoute, method: diagnosticRoute === 'telegram_token' ? 'POST' : 'GET', stage, status, code,
+          ...(telegramTokenOutcome === undefined ? {} : { telegramTokenOutcome }) }); }
         catch { /* Observation cannot change a response, guard or retry policy. */ }
       };
       try {
@@ -65,7 +81,12 @@ export function createOwnerTelegramTransport({ nativeFetch, clientId, companyId,
           }
           await verifyCurrent(); check(op);
           const body = Buffer.concat(chunks);
-          try { JSON.parse(body.toString('utf8')); const accepted = new Response(body, { status: response.status, headers: { 'content-type': 'application/json' } }); emit('completed', response.status, 'provider_response_read'); return accepted; }
+          try {
+            const parsed = JSON.parse(body.toString('utf8'));
+            const accepted = new Response(body, { status: response.status, headers: { 'content-type': 'application/json' } });
+            emit('completed', response.status, 'provider_response_read', route === 'telegram_token' ? tokenOutcome(parsed) : undefined);
+            return accepted;
+          }
           finally { body.fill(0); }
         } finally { await reader.cancel().catch(() => {}); for (const c of chunks) c.fill(0); }
       } catch { emit('refused', null, 'provider_transport_unavailable'); counters.refused++; if (op) op.poisoned = true; refusal(); }

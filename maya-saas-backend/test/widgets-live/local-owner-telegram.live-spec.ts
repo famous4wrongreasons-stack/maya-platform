@@ -52,7 +52,13 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
   let expired = false,
     subject = 'synthetic-owner-telegram',
     dispatches = 0;
-  let tokenReply: 'signed' | 'http401' | 'missing' | 'malformed';
+  let tokenReply:
+    | 'signed'
+    | 'http401'
+    | 'missing'
+    | 'malformed'
+    | 'invalid_client'
+    | 'invalid_grant';
   let trace: Array<{
     route: string;
     stage: string;
@@ -134,6 +140,11 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
             { status: 401 },
           );
         if (tokenReply === 'missing') return Response.json({});
+        if (tokenReply === 'invalid_client' || tokenReply === 'invalid_grant')
+          return Response.json({
+            error: tokenReply,
+            error_description: 'synthetic-private-provider-description',
+          });
         if (tokenReply === 'malformed')
           return Response.json({
             id_token: 'synthetic-private-malformed-token',
@@ -273,12 +284,14 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
     return token;
   }
   it.each([
-    ['http401', 401, 'social_exchange_failed'],
-    ['missing', 200, 'social_exchange_failed'],
-    ['malformed', 200, 'social_token_invalid'],
+    ['http401', 401, 'social_exchange_failed', undefined],
+    ['missing', 200, 'social_exchange_failed', 'missing_id_token'],
+    ['malformed', 200, 'social_token_invalid', 'id_token_present'],
+    ['invalid_client', 200, 'social_exchange_failed', 'oauth_invalid_client'],
+    ['invalid_grant', 200, 'social_exchange_failed', 'oauth_invalid_grant'],
   ] as const)(
     'safe status distinguishes %s while canonical completion refuses and consumes once',
-    async (reply, status, code) => {
+    async (reply, status, code, outcome) => {
       tokenReply = reply;
       const token = await ownerToken(),
         state = await start(true, token);
@@ -306,6 +319,7 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
           status,
           code:
             status === 401 ? 'provider_http_error' : 'provider_response_read',
+          ...(outcome ? { telegramTokenOutcome: outcome } : {}),
         },
       ]);
       expect(JSON.stringify(trace)).not.toContain('synthetic-private');

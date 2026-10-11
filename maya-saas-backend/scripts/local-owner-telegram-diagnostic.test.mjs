@@ -104,3 +104,66 @@ test('Telegram trace survives strict launcher IPC; raw additions are refused; 64
     assert.equal(d.readTrace.length, 0); assert.equal(JSON.stringify(d).includes('SYNTHETIC_PRIVATE'), false);
   }
 });
+
+test('token response category distinguishes closed OAuth errors without retaining response values', async () => {
+  const cases = [
+    [{ error: 'invalid_client' }, 'oauth_invalid_client'],
+    [{ error: 'invalid_grant' }, 'oauth_invalid_grant'],
+    [{ error: 'invalid_request' }, 'oauth_invalid_request'],
+    [{ error: 'unauthorized_client' }, 'oauth_unauthorized_client'],
+    [{ error: 'unsupported_grant_type' }, 'oauth_unsupported_grant_type'],
+    [{ error: 'invalid_scope' }, 'oauth_invalid_scope'],
+    [{ error: 'access_denied' }, 'oauth_access_denied'],
+    [{ error: 'server_error' }, 'oauth_server_error'],
+    [{ error: 'temporarily_unavailable' }, 'oauth_temporarily_unavailable'],
+    [{ error: 'SYNTHETIC_PRIVATE' }, 'oauth_other_error'],
+    [{ error: { message: 'SYNTHETIC_PRIVATE' } }, 'oauth_other_error'],
+    [{ error: ['invalid_client'] }, 'oauth_other_error'],
+    [{ error: ' invalid_client ' }, 'oauth_other_error'],
+    [{ id_token: 'SYNTHETIC_PRIVATE_TOKEN' }, 'id_token_present'],
+    [{ id_token: 'SYNTHETIC_PRIVATE_TOKEN', error: 'invalid_client' }, 'contradictory_token_error'],
+    [{ id_token: '' }, 'missing_id_token'],
+    [{ id_token: null }, 'missing_id_token'],
+    [{ id_token: false }, 'missing_id_token'],
+    [{ id_token: {} }, 'unexpected_shape'],
+    [{ access_token: 'SYNTHETIC_PRIVATE_ACCESS' }, 'missing_id_token'],
+    [{ data: { id_token: 'SYNTHETIC_PRIVATE_TOKEN' } }, 'missing_id_token'],
+    [{}, 'missing_id_token'], [null, 'unexpected_shape'], [[], 'unexpected_shape'],
+  ];
+  for (const [value, expected] of cases) {
+    const body = JSON.stringify(value && !Array.isArray(value) ? { ...value, error_description: 'SYNTHETIC_PRIVATE_DESCRIPTION', phone: 'SYNTHETIC_PRIVATE_PHONE' } : value);
+    const events = [], t = transport(async () => new Response(body), createReadTrace(e => events.push(e)));
+    await t.run(operation(), async () => assert.equal(await (await t.fetch(tokenUrl, token())).text(), body));
+    assert.equal(events.length, 2);
+    assert.equal(events[1].telegramTokenOutcome, expected);
+    assert.equal(events[1].stage, 'completed'); assert.equal(events[1].code, 'provider_response_read');
+    assert.equal(JSON.stringify(events).includes('SYNTHETIC_PRIVATE'), false);
+    assert.deepEqual(t.counters, { calls: 1, refused: 0, routes: { telegram_token: 1 } });
+  }
+});
+test('token response category is restricted to a completed successful token response through strict IPC', async () => {
+  const events = [], t = transport(async () => new Response('{"error":"invalid_client"}'), createReadTrace(e => events.push(e)));
+  await t.run(operation(), async () => { await t.fetch(tokenUrl, token()); });
+  const event = events[1];
+  assert.equal(event.telegramTokenOutcome, 'oauth_invalid_client');
+  const d = createDiagnostic(false), expected = { origin: 'http://127.0.0.1:56151', providerAdmission: 'explicit_setup_reads_only' };
+  const observer = runtimeObserver(d, expected, () => {}); events.forEach(e => observer.accept(e));
+  assert.equal(d.readTrace[1].telegramTokenOutcome, 'oauth_invalid_client');
+  for (const changed of [
+    { telegramTokenOutcome: 'SYNTHETIC_PRIVATE' }, { telegramTokenOutcome: { secret: 'SYNTHETIC_PRIVATE' } },
+    { telegramTokenOutcome: null }, { route: 'telegram_jwks' }, { surface: 'http' },
+    { method: 'GET' }, { stage: 'entered' }, { stage: 'refused' }, { code: 'provider_http_error' },
+    { status: null }, { status: 401 }, { raw: 'SYNTHETIC_PRIVATE' },
+  ]) assert.equal(projectReadTrace({ ...event, ...changed }), null);
+});
+test('token response category never inspects non-OK bodies or adds a category to JWKS', async () => {
+  const events = [], t = transport(async (url) => url === tokenUrl
+    ? { status: 401, ok: false, redirected: false, url, body: { cancel: async () => {}, getReader() { assert.fail('Non-OK body must remain unread'); } } }
+    : new Response('{"error":"invalid_client"}'), createReadTrace(e => events.push(e)));
+  await t.run(operation(), async () => {
+    assert.equal(await (await t.fetch(tokenUrl, token())).text(), '{}');
+    assert.equal(await (await t.fetch(jwksUrl, { method: 'GET' })).text(), '{"error":"invalid_client"}');
+  });
+  assert.equal(events.length, 4);
+  for (const e of events) assert.equal(Object.hasOwn(e, 'telegramTokenOutcome'), false);
+});
