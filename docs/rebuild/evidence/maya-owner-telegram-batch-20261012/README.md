@@ -174,3 +174,83 @@ This proposal needs an explicit owner/security decision because it permits
 finishing an already verified operation after the external token expires. The
 current live-session approval does not silently grant that contract change.
 Until decided, no further real attempt, expiry relaxation or production action.
+
+## Subsequent owner decision and local implementation
+
+The owner subsequently answered **«Да, реализовать и проверить локально»** to
+the explicit two-minute operation proposal above. This supersedes its pending
+approval status. It authorizes implementation and synthetic proof only, not a
+new real-provider session or production action.
+
+`TelegramClientBindingService` remains the only login-to-Client coordinator.
+After verifying an unexpired incoming token and rereading current login
+authority, it freezes one in-memory admission bound to that exact frozen login
+proof. The deadline is the minimum of 120 seconds from acceptance, the original
+flow/session expiry and the signed issue-time freshness limit. It is minted
+before registry lookup and outside the transaction retry loop. A later login
+extension does not renew this deadline. The admission is never read from an HTTP
+request or saved profile and is not returned to the browser.
+
+Final identity-locked consumption still rereads session revocation/expiry,
+membership, Telegram identity/verified phone, consumed flow and current CRM
+source. Full fresh registry uniqueness, exact Client registration/mapping,
+immutable revoked history and canonical ClientChannelLink writer are unchanged.
+The canonical writer's proof deadline is clipped to the admission deadline.
+The channel-control evidence hash commits to the admission, and the same atomic
+audit records its `a18.telegram-oidc-phone.operation.v1` contract, acceptance
+time, hard deadline, original token expiry and opaque proof hash. No token or
+raw phone is added to that audit. Existing historical link evidence is untouched.
+
+No model, SQL column, migration, endpoint, role, carrier behavior or new authority
+writer was added. The old token-expiry rule still applies at **initial admission**;
+only completion of the already admitted operation uses the approved bounded
+deadline. Expired incoming tokens, replay, substitutions and current revocation
+remain refusals. The local launcher's independent source pins, overall session
+expiry, three-attempt cap, provider limits and cancellation are unchanged.
+
+Counterfactual proof temporarily restored the old product file while running the
+new slow-lookup test: it failed with the original explicit freshness refusal.
+The proposed file was restored byte-for-byte afterward. The earlier 100-test
+receipt above intentionally preserves the old refusal expectation; it is not
+relabelled as a successful binding.
+
+The first enlarged test run exposed two **test harness** issues: an empty test
+filter was encoded differently in the manifest, and the new simulated clock
+assigned a method to Prisma's transaction proxy, leaking a closed transaction
+into subsequent tests. The runner now normalizes an empty filter to an
+unfiltered run; the clock helper wraps each transaction without modifying the
+Prisma proxy. The failed receipts remain local. The isolated clock regression
+then passed 12 selected cases. Product checks were not relaxed to repair these
+test issues. Final receipts and limitations are recorded separately in
+`operation-proof-summary.json` and `operation-proof-manifest.json`.
+
+### Final local verification
+
+Executable checkpoint: `eb336c97a8725291319a5164bed0ee039cf3fe3a`.
+
+| Surface | Fresh result |
+| --- | --- |
+| Auth, binding ownership, canonical link writer, personal context unit suites | 75 PASS / 0 FAIL |
+| Complete selected HTTP/PostgreSQL corpus, including successor suite | 130 PASS / 0 FAIL |
+| Targeted security mutations | 15/15 killed by the intended assertions |
+| Unfiltered HTTP/PostgreSQL rerun after restoring every mutation | 130 PASS / 0 FAIL |
+| Compiled child/IPC/relay and bounded batch refusal proof | 16 PASS, zero provider dispatch |
+| TypeScript and scoped lint | PASS |
+| Disposable database and child cleanup; source stability | PASS |
+
+The mutation programme covers incoming expiry, hard operation expiry, the
+120-second ceiling, session/flow/issue-time bounds, current session/source,
+verified phone, unique Client, immutable revocation, audit atomicity and existing
+registration/profile behavior. HTTP negatives also cover caller-authored
+admission, substitution, session/membership/identity/flow changes during lookup
+and replay. Existing concurrent-writer and historical-revocation cases remain
+in the unfiltered corpus. Only the mutation runs use disclosed targeted test
+filters; both baseline and restored receipts are unfiltered.
+
+The compiled-child proof validates the actual local launch/relay and its
+refusals, not real Telegram or a real Client match. The short-token success is
+proved with a synthetic signed issuer and real HTTP/PostgreSQL owners. A new
+real owner acceptance has **not** been run. The previous real batch is stopped;
+its consumed authorization cannot authorize the changed source. No new provider
+calls, production writes, OTP/SMS, booking or iPhone actions followed the owner's
+local-only implementation decision. This is not release certification.

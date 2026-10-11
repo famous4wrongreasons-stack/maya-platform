@@ -1,0 +1,93 @@
+[
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-operation-mutations-20261012-02/summary.json",
+    "sha256": "697d98bf68e057aa5d5541491112142a64c9932607a26a93bfa1f7649a230ba7",
+    "bytes": 5419,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Raw synthetic/private-runtime artifacts retained locally; selected non-identifying receipt facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-operation-mutations-20261012-02/baseline/manifest.json",
+    "sha256": "93b4198a28fc4de90aaaeccd539fae2745b1d7e2f9abe8cffbc8b770dde7165c",
+    "bytes": 719,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Raw synthetic/private-runtime artifacts retained locally; selected non-identifying receipt facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-operation-mutations-20261012-02/baseline/telegram-initial-jest.json",
+    "sha256": "540592a646926733f1de0634ecf2bdf8427a495c65f73c74773f815c1da65ebc",
+    "bytes": 70227,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Raw synthetic/private-runtime artifacts retained locally; selected non-identifying receipt facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-operation-mutations-20261012-02/restored/manifest.json",
+    "sha256": "d3fa2f76946ce06324812480107b16d56e24449525861906859728c4d92c739d",
+    "bytes": 719,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Raw synthetic/private-runtime artifacts retained locally; selected non-identifying receipt facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-operation-mutations-20261012-02/restored/telegram-initial-jest.json",
+    "sha256": "7a091c7897d4bd73b777e1ebbdc31dcaee81b191349a9b108fe374d077158aab",
+    "bytes": 70227,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Raw synthetic/private-runtime artifacts retained locally; selected non-identifying receipt facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-operation-mutations-20261012-02/restored/source-hashes.json",
+    "sha256": "f836c76d374bcf1537c9f3903d5ca899358493dac1b0f17306b1f9fe6b2274cf",
+    "bytes": 277350,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Raw synthetic/private-runtime artifacts retained locally; selected non-identifying receipt facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-operation-binary-20261012-01/summary.json",
+    "sha256": "f30ea46adc1faec384fec9a8ed6083429e2fa167ff043aa06163ea84ec5c0ff9",
+    "bytes": 5688,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Raw synthetic/private-runtime artifacts retained locally; selected non-identifying receipt facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-operation-unit-final-20261012.json",
+    "sha256": "67d8078c6e955fca13b4776ddd377be247b6170683b5e138734bb457827778c4",
+    "bytes": 34361,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Raw synthetic/private-runtime artifacts retained locally; selected non-identifying receipt facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-operation-types-final-20261012.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Raw synthetic/private-runtime artifacts retained locally; selected non-identifying receipt facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-operation-lint-final-20261012.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Raw synthetic/private-runtime artifacts retained locally; selected non-identifying receipt facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-operation-counterfactual-20261012-01/summary.json",
+    "sha256": "0cb6cda1c7a177fd071d213a8b21065c42f1bdf10261a7ebe49d97aa3999b951",
+    "bytes": 1097,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Raw synthetic/private-runtime artifacts retained locally; selected non-identifying receipt facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-operation-clock-proof-20261012-01/manifest.json",
+    "sha256": "2642bc5869dce54f3678094e5a7210be9386d40a7b359480f5a59faa0cb68c94",
+    "bytes": 798,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Raw synthetic/private-runtime artifacts retained locally; selected non-identifying receipt facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-operation-mutations-20261012-01/baseline/telegram-initial-jest.json",
+    "sha256": "2f2ee563a77123a25ace1fed9bd95da75cb09c81557506fc776c265818832c1c",
+    "bytes": 158920,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Raw synthetic/private-runtime artifacts retained locally; selected non-identifying receipt facts archived"
+  }
+]

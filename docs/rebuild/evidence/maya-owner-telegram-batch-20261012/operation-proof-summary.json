@@ -1,0 +1,192 @@
+{
+  "qualification": "LOCAL_IMPLEMENTATION_SYNTHETIC_PROOFS_NOT_RELEASE_OR_REAL_CLIENT_ACCEPTANCE",
+  "ownerDecision": {
+    "source": "direct owner reply to call_d42e3226c5324a0aa413808c6fe0e85a",
+    "answer": "Да, реализовать и проверить локально",
+    "realProviderRetryAuthorized": false
+  },
+  "codeCheckpoint": "eb336c97a8725291319a5164bed0ee039cf3fe3a",
+  "implementationCommit": "7d576adb0c6d0d9335ea09f3bd7608ac1911dc0c",
+  "operationContract": "a18.telegram-oidc-phone.operation.v1",
+  "maxOperationMs": 120000,
+  "newPersistentModels": 0,
+  "newSqlColumns": 0,
+  "newPublicEndpoints": 0,
+  "productOwner": "TelegramClientBindingService",
+  "counterfactual": {
+    "oldProductSourceSha256": "f845dd70db0455b7ecf5e7103fc4f7f1eb893bd81b1fa3d81347b22a9d29a6ad",
+    "newProductSourceSha256": "afa412e7ccc27cb70a484a1de18563989413f0a11f0def6776b8cde365d3c51d",
+    "oldImplementationFailed": true,
+    "failure": "fresh_telegram_verification_required",
+    "proposedSourceRestored": true
+  },
+  "unit": {
+    "passed": 75,
+    "failed": 0,
+    "suites": 4
+  },
+  "httpPg": {
+    "baseline": {
+      "exit": 0,
+      "passed": 130,
+      "failed": 0,
+      "names": []
+    },
+    "restored": {
+      "exit": 0,
+      "passed": 130,
+      "failed": 0,
+      "names": []
+    },
+    "includesSuccessor": true,
+    "unfilteredBaseline": true,
+    "unfilteredRestored": true
+  },
+  "mutations": {
+    "killed": 15,
+    "total": 15,
+    "results": [
+      {
+        "name": "first-linked-international-phone",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing active business owner with no phone/Telegram: authenticated A23 link, then fresh login creates personal Client without account duplication",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing trial business owner with no phone/Telegram: authenticated A23 link, then fresh login creates personal Client without account duplication"
+        ]
+      },
+      {
+        "name": "verified-phone",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (false), including a stored matching phone",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (true), including a stored matching phone",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (1), including a stored matching phone"
+        ]
+      },
+      {
+        "name": "unique-client",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: duplicate"
+        ]
+      },
+      {
+        "name": "current-source",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses a source switch during CRM resolution"
+        ]
+      },
+      {
+        "name": "current-session",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rereads session revocation after CRM resolution"
+        ]
+      },
+      {
+        "name": "immutable-revocation",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] leaves revoked historical verification byte-identical and denies automatic relink"
+        ]
+      },
+      {
+        "name": "atomic-audit",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rolls back the link when its mandatory audit cannot be written"
+        ]
+      },
+      {
+        "name": "serialization-retry",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] retries a serializable CRM identity registration conflict through the same owner"
+        ]
+      },
+      {
+        "name": "optional-profile",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining client role",
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining tenant_owner role"
+        ]
+      },
+      {
+        "name": "incoming-expiry",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: expired-proof"
+        ]
+      },
+      {
+        "name": "operation-expiry",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not extend the original admitted deadline when the flow is prolonged during lookup"
+        ]
+      },
+      {
+        "name": "operation-bound",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses an admitted operation after its fixed 120-second deadline even if the Telegram token is still valid"
+        ]
+      },
+      {
+        "name": "session-deadline",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] clips the admitted deadline to the original session limit"
+        ]
+      },
+      {
+        "name": "flow-deadline",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] clips the admitted deadline to the original flow limit"
+        ]
+      },
+      {
+        "name": "freshness-deadline",
+        "killed": true,
+        "failedTests": [
+          "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] clips the admitted deadline to the original signed-issue-freshness limit"
+        ]
+      }
+    ]
+  },
+  "binary": {
+    "status": "passed",
+    "checks": [
+      "actual-child-ipc-web-ready",
+      "deadline-clipped-and-parent-credentials-discarded",
+      "health-through-actual-relay",
+      "exact-finder-through-child-relay-selects-ready-synthetic-tenant",
+      "exact-finder-keeps-canonical-client-registration-readiness",
+      "directory-enumeration-and-install-surfaces-refused",
+      "current-react-payload-served",
+      "canonical-password-session",
+      "batch-relink-refused",
+      "batch-exactly-three-saved-login-starts-fourth-refused",
+      "canonical-telegram-refusal-through-child-ipc-safe-receipt",
+      "business-model-sms-consent-routes-refused",
+      "foreign-tenant-refused",
+      "live-permit-revocation-refused",
+      "clean-child-stop-zero-provider-dispatch",
+      "second-child-refused"
+    ],
+    "realProviderCalls": 0,
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "pidFileAbsent": true,
+    "sourceUnchanged": true
+  },
+  "types": "PASS",
+  "scopedLint": "PASS",
+  "realPersonalClientBindingProven": false,
+  "realProviderCallsAfterDecision": 0,
+  "productionChanges": 0,
+  "sourceBytesPreservedSinceImplementation": true
+}
