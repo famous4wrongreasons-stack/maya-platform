@@ -16,7 +16,7 @@ const { proofCommands, proofEnvironment, runCommand } = await import(
 );
 const output = process.argv[2];
 const withBrowser = process.argv[3] === '--browser';
-const testNamePattern = process.env.JEST_TELEGRAM_TEST_PATTERN;
+const testNamePattern = process.env.JEST_TELEGRAM_TEST_PATTERN || undefined;
 assert.ok(!testNamePattern || (testNamePattern.length <= 500 && !/[\r\n]/.test(testNamePattern)));
 assert.ok(process.argv.length === (withBrowser ? 4 : 3), 'unknown proof arguments');
 assert.ok(output && path.isAbsolute(output) && !fs.existsSync(output));
