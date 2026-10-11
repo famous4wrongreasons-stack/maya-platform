@@ -104,13 +104,13 @@ export function publicConsultationReply(
   if (stale || data.stale === true)
     return {
       reply:
-        'Публичный каталог помечен как устаревший. Актуальные сведения о салоне и мастерах сейчас не подтверждены.',
+        'Сведения о салоне и мастерах устарели. Актуальные данные сейчас недоступны — не хочу вводить вас в заблуждение.',
       status: 'blocked',
     };
   const salon = record(data.salon);
   const name = text(salon.name);
   const lines: string[] = [];
-  if (name) lines.push(`Название в профиле: ${name}.`);
+  if (name && mode === 'salon') lines.push(`Вот что есть о салоне «${name}».`);
   if (mode === 'salon') {
     for (const [key, label] of [
       ['city', 'Город'],
@@ -119,7 +119,7 @@ export function publicConsultationReply(
       ['tagline', 'Описание'],
     ]) {
       const field = text(salon[key]);
-      if (field) lines.push(`${label} в профиле: ${field}.`);
+      if (field) lines.push(`${label}: ${field}.`);
     }
     const about = Array.isArray(salon.about)
       ? salon.about
@@ -128,26 +128,24 @@ export function publicConsultationReply(
           .filter(Boolean)
       : [];
     if (about.length)
-      lines.push(`Из сохранённого описания салона:\n${about.join('\n')}`);
+      lines.push(`В описании салона говорится:\n${about.join('\n')}`);
     // No derived age, guessed opening date or relative "six years" claim.
     const founded = text(salon.founded_hint);
     if (founded && /^\d{4}$/.test(founded))
-      lines.push(`Год основания в профиле: ${founded}.`);
+      lines.push(`В профиле указан год основания — ${founded}.`);
     if (!lines.length)
       return {
         reply:
-          'Публичные сведения о салоне в полученном профиле не заполнены. Адрес, контакты и историю по названию определить нельзя.',
+          'В описании салона пока нет подробностей. Адрес, контакты и историю уточнить по этим данным не получилось.',
         status: 'blocked',
       };
-    lines.push(
-      'Это сохранённые сведения профиля. Отсутствующие подробности по ним не установлены.',
-    );
+    lines.push('Это сведения из сохранённого описания салона.');
     return { reply: lines.join('\n\n'), status: 'verified' };
   }
   if (!Array.isArray(data.staff))
     return {
       reply:
-        'Не удалось получить публичный список мастеров. Это не означает, что в салоне нет сотрудников.',
+        'Сейчас не получилось загрузить список мастеров. Попробуйте чуть позже.',
       status: 'blocked',
     };
   const rows = data.staff.slice(0, 20).flatMap((value) => {
@@ -162,20 +160,18 @@ export function publicConsultationReply(
   if (!rows.length && data.staff.length)
     return {
       reply:
-        'Полученный каталог не содержит пригодных для показа имён мастеров. Состав команды сейчас не подтверждён.',
+        'Список пришёл без имён мастеров, которые я могла бы показать. Состав команды пока уточнить не получилось.',
       status: 'blocked',
     };
   lines.push(
     rows.length
-      ? `Мастера в полученном публичном каталоге:\n${rows.join('\n')}`
-      : 'В полученном публичном каталоге нет записей о мастерах.',
+      ? `Вот мастера из каталога салона:\n${rows.join('\n')}`
+      : 'В каталоге салона пока нет мастеров.',
   );
   if (rows.length < data.staff.length)
-    lines.push(
-      'Показана часть полученного каталога; некоторые записи не показаны.',
-    );
+    lines.push('Показываю только часть списка мастеров.');
   lines.push(
-    'Принадлежность к конкретному филиалу, возможность выполнить выбранную услугу и свободное время этим списком не подтверждаются.',
+    'Для записи ещё нужно проверить филиал, выбранную услугу и свободное время.',
   );
   return { reply: lines.join('\n\n'), status: 'verified' };
 }

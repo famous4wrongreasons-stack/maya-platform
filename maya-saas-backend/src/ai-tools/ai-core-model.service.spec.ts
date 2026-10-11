@@ -1354,6 +1354,60 @@ describe('AiCoreModelService', () => {
     expect(String(body.instructions)).toContain('FINAL RESPONSE MODE:');
   });
 
+  it.each(
+    (['deepseek', 'openai'] as const).flatMap((provider) =>
+      (['director', 'admin'] as const).flatMap((persona) =>
+        (['web', 'native'] as const).map((surface) => ({
+          provider,
+          persona,
+          surface,
+        })),
+      ),
+    ),
+  )(
+    'carries the shared conversational tone and action safeguards to $provider/$persona/$surface [synthetic transport]',
+    async ({ provider, persona, surface }) => {
+      const fetchMock = jest
+        .spyOn(global, 'fetch')
+        .mockResolvedValue(
+          provider === 'deepseek'
+            ? deepSeekResponse('Привет! Чем помочь?')
+            : openAiResponse('Привет! Чем помочь?'),
+        );
+      const service = createService({
+        AI_CORE_PROVIDER: provider,
+        DEEPSEEK_API_KEY: 'synthetic-only-key',
+        OPENAI_API_KEY: 'synthetic-only-key',
+      });
+      await service.decide({
+        ...input,
+        persona,
+        surface,
+        messages: [{ role: 'user', content: 'Привет' }],
+        tools: [],
+        requiredToolNames: [],
+        allowToolCall: false,
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const body = requestPayload(fetchMock, 0);
+      const instructions =
+        provider === 'deepseek'
+          ? (body.messages as { content: string }[])[0].content
+          : String(body.instructions);
+      expect(instructions).toContain('your default mood is good');
+      expect(instructions).toContain('stay warm and calm');
+      expect(instructions).toContain('preserving its meaning');
+      expect(instructions).toContain(
+        'Never claim that an action or calculation succeeded before its tool result is present.',
+      );
+      expect(instructions).toContain('do not bypass or simulate approval');
+      expect(instructions).not.toMatch(
+        /РОБО-ТОЧНОСТЬ|тон тут не важен|мастер творит чудеса/,
+      );
+      // The stub proves prompt delivery across the existing paths, not model style quality.
+    },
+  );
+
   it('never sends a brain context or profile prompt to the provider', async () => {
     const fetchMock = jest
       .spyOn(global, 'fetch')

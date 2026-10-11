@@ -1,0 +1,83 @@
+{
+  "contract": "maya.conversation-tone-change/1",
+  "recordedAt": "2026-10-11T08:10:11.620Z",
+  "sourceParent": "6d46f7b229da1bbf7d46f20e8aa80f25ba7e3aad",
+  "ownerDecision": "Maya should usually sound like a person in a good mood: natural, warm and attentive, with calm empathy for serious situations.",
+  "scope": [
+    "Shared model instructions for both personas, both provider paths and web/native surfaces.",
+    "Existing public salon/staff and business-hours reply wording.",
+    "Remove unsupported praise, mandatory joking and the instruction that booking tone does not matter.",
+    "Preserve exact source facts, uncertainty, current authority checks and action confirmation."
+  ],
+  "qualification": "LOCAL_SOURCE_AND_SYNTHETIC_CHECKS_ONLY",
+  "verification": {
+    "unit": {
+      "passed": 459,
+      "failed": 0,
+      "suites": 4
+    },
+    "http": {
+      "passed": 3,
+      "failed": 0,
+      "model": "scripted",
+      "provider": "synthetic",
+      "database": "fresh_isolated",
+      "clusterStopped": true
+    },
+    "typecheck": "PASS",
+    "scopedLint": "PASS",
+    "liveModelToneQuality": "NOT_REVERIFIED",
+    "fullReleaseCertification": "NOT_ISSUED"
+  },
+  "limits": [
+    "Prompt delivery and safety invariants are tested; synthetic responses do not prove real-model style quality.",
+    "Unchanged specialist reply templates were not globally rewritten.",
+    "No separate public-company restart or complete widgets-live programme was run; affected legacy wording expectations were updated."
+  ],
+  "effects": {
+    "realModelCalls": 0,
+    "realProviderCalls": 0,
+    "ownerDatabaseAccess": 0,
+    "productionChanges": 0,
+    "presentationDesignChanges": 0
+  },
+  "sourceHashes": {
+    "maya-saas-backend/src/ai-tools/ai-core-model.service.spec.ts": "51809d466f5bc64b912e67e529e2ac1da223deb4d5e6374cb43d9361f2c93f6e",
+    "maya-saas-backend/src/ai-tools/ai-core-model.service.ts": "d2ee60223dceb24c0ed3fcca1d979b04d5779a41867768a65e8803e568614333",
+    "maya-saas-backend/src/ai-tools/ai-core.service.spec.ts": "d9f7e0dbb8ad603c47275c5e06652c32322926e7083f19bea12302e4ff062852",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "8130cf98bea2f938e1101381a58a94402c4ece5cc0e9478e8e4802e351099bec",
+    "maya-saas-backend/src/ai-tools/public-consultation-presentation.spec.ts": "f5b00a9b23661ee4e2b405a61b186db275b70a5c13464fd587ea92ff95820d57",
+    "maya-saas-backend/src/ai-tools/public-consultation-presentation.ts": "e4eba0fc4cc311bd883f443861b26cbefb87cc6d4161de4bd8b5fe5215f49c2f",
+    "maya-saas-backend/test/widgets-live/c9-chat-reads.live-spec.ts": "76be9c73cd60afbce1bb849e5a29bcf8ca50fbe3bdd3661bc015af9f1a3927d6"
+  },
+  "receipts": [
+    {
+      "path": "/private/tmp/maya-tone-unit-20261011-final.json",
+      "sha256": "8a60e55de108056ec84ff7381712d9eaa671627dafaa1f8b2e8ca21ff71fba5b"
+    },
+    {
+      "path": "/private/tmp/maya-tone-unit-20261011-final.log",
+      "sha256": "d76e28552dabafae75eeccd4509e9d7406ed4d62aeec8d22789ad6e524ff9591"
+    },
+    {
+      "path": "/private/tmp/maya-tone-types-20261011-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/maya-tone-lint-20261011-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/maya-tone-http-20261011-01/manifest.json",
+      "sha256": "67ee7e7f450d4b38442d9f9a964abc6de74f15c50857bdcdbf7eb4cd0e60ce9d"
+    },
+    {
+      "path": "/private/tmp/maya-tone-http-20261011-01/matrix-jest.json",
+      "sha256": "4c96f5cba579cb4fbe9b8a6beec7df6eae7a03c376db7fd5be13cbdabc882cd1"
+    }
+  ],
+  "earlierAttempt": {
+    "path": "/private/tmp/maya-tone-unit-20261011-01.log",
+    "reason": "One stale copy assertion; updated wording expectation without weakening behavioral assertions."
+  }
+}

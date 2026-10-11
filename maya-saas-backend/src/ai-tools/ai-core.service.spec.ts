@@ -3649,7 +3649,7 @@ describe('AiCoreService', () => {
       expect.anything(),
     );
     expect(mocks.model.decide).toHaveBeenCalledTimes(1);
-    expect(result.reply).toContain('Из сохранённого описания салона');
+    expect(result.reply).toContain('В описании салона говорится');
     expect(result.reply).not.toContain('более 6 лет');
     expect(result.brain).toMatchObject({ persona: 'admin' });
     expect(result.widget).toBeUndefined();
@@ -5417,7 +5417,7 @@ describe('AiCoreService', () => {
       expect(result.reply).toContain(profile.address);
       expect(result.reply).toContain(profile.schedule);
       expect(result.reply).toContain('Europe/Moscow');
-      expect(result.reply).toContain('Источник: CRM салона');
+      expect(result.reply).toContain('Данные взяла из CRM салона');
       expect(result.reply).not.toMatch(/MODEL|открыты сейчас|свободное место/);
       expect(result).toMatchObject({
         source: 'safe_fallback',
@@ -5450,7 +5450,9 @@ describe('AiCoreService', () => {
         ],
       });
       expect(result.reply).toContain(profile.address);
-      expect(result.reply).toContain('График работы не указан');
+      expect(result.reply).toContain(
+        'Часы работы в данных салона пока не указаны',
+      );
       expect(result.reply).not.toMatch(/10:00|20:00|MODEL|открыты сейчас/);
       expect(result.grounding.status).toBe('blocked');
       expect(mocks.model.decide).toHaveBeenCalledTimes(1);
@@ -5471,7 +5473,9 @@ describe('AiCoreService', () => {
           messages: [{ role: 'user', content: 'Во сколько вы открываетесь?' }],
         });
         expect(result.grounding.status).toBe('blocked');
-        expect(result.reply).toContain('Не удалось подтвердить');
+        expect(result.reply).toContain(
+          'не получилось проверить адрес и часы работы',
+        );
         expect(result.reply).not.toMatch(/10:00|20:00|MODEL/);
         expect(mocks.model.decide).toHaveBeenCalledTimes(1);
       },
@@ -5482,7 +5486,7 @@ describe('AiCoreService', () => {
         ...dto,
         messages: [{ role: 'user', content: 'Как к вам добраться?' }],
       });
-      expect(result.reply).toContain('Адрес не указан в CRM');
+      expect(result.reply).toContain('Адрес в данных салона пока не указан');
       expect(result.reply).toContain(profile.schedule);
       expect(result.reply).not.toContain('Synthetic salon');
       expect(result.grounding.status).toBe('blocked');
@@ -5516,7 +5520,9 @@ describe('AiCoreService', () => {
         ],
       });
       expect(second.reply).toContain('Новая улица, 8');
-      expect(second.reply).toContain('График работы не указан');
+      expect(second.reply).toContain(
+        'Часы работы в данных салона пока не указаны',
+      );
       expect(second.reply).not.toContain(profile.schedule);
       expect(second.reply).not.toContain(profile.address);
       expect(mocks.model.decide).toHaveBeenCalledTimes(2);

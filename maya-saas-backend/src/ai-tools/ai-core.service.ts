@@ -6042,7 +6042,7 @@ export class AiCoreService {
     const data = this.record(result);
     const unavailable = {
       reply:
-        'Не удалось подтвердить адрес и часы работы по CRM. Попробуйте повторить запрос позже.',
+        'Сейчас не получилось проверить адрес и часы работы салона. Попробуйте чуть позже.',
       status: 'blocked' as const,
     };
     const field = (value: unknown, limit: number): value is string | null =>
@@ -6071,15 +6071,15 @@ export class AiCoreService {
     }
     const lines = [
       data.address
-        ? `Адрес по CRM: ${data.address.trim()}.`
-        : 'Адрес не указан в CRM.',
+        ? `Салон находится по адресу: ${data.address.trim()}.`
+        : 'Адрес в данных салона пока не указан.',
       data.schedule
-        ? `График работы по CRM: ${data.schedule.trim()}.`
-        : 'График работы не указан в CRM.',
+        ? `Часы работы: ${data.schedule.trim()}.`
+        : 'Часы работы в данных салона пока не указаны.',
       ...(data.schedule && data.timezone
-        ? [`Часовой пояс: ${data.timezone}.`]
+        ? [`Время указано для часового пояса ${data.timezone}.`]
         : []),
-      'Источник: CRM салона.',
+      'Данные взяла из CRM салона.',
     ];
     return {
       reply: lines.join('\n'),

@@ -231,7 +231,9 @@ describe('C9 conversation reads [HTTP] [PostgreSQL] [scripted model]', () => {
     expect(model).toHaveBeenCalledTimes(2);
     const salon = await owner.chat(randomUUID(), 'Расскажи о салоне');
     expect(salon.status).toBe(201);
-    expect(salon.body.reply).toContain('Название в профиле: Мужская Эстетика');
+    expect(salon.body.reply).toContain(
+      'Вот что есть о салоне «Мужская Эстетика»',
+    );
     expect(salon.body.reply).not.toMatch(
       /Ставропол|Лермонтов|2020|шест|премиальн|стабильн/,
     );
@@ -253,9 +255,7 @@ describe('C9 conversation reads [HTTP] [PostgreSQL] [scripted model]', () => {
     });
     const changed = await owner.chat(randomUUID(), 'Какие у вас мастера?');
     expect(changed.status).toBe(201);
-    expect(changed.body.reply).toContain(
-      'В полученном публичном каталоге нет записей',
-    );
+    expect(changed.body.reply).toContain('В каталоге салона пока нет мастеров');
     expect(changed.body.reply).not.toContain('Тестовый мастер');
     for (const [, principal] of source.mock.calls)
       expect([owner.tenant.id, other.tenant.id]).toContain(principal.tenantId);

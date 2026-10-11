@@ -21,7 +21,7 @@ describe('public consultation from synthetic existing catalog fields', () => {
   it('keeps unknown salon history and address unknown even for a familiar brand', () => {
     const out = publicConsultationReply(source, 'salon');
     expect(out.status).toBe('verified');
-    expect(out.reply).toContain('Название в профиле: Мужская Эстетика');
+    expect(out.reply).toContain('Вот что есть о салоне «Мужская Эстетика»');
     expect(out.reply).not.toMatch(
       /Ставропол|Лермонтов|2020|шест|премиальн|стабильн/,
     );
@@ -41,11 +41,9 @@ describe('public consultation from synthetic existing catalog fields', () => {
       },
       'salon',
     );
-    expect(out.reply).toContain('Город в профиле: Тестовый город');
-    expect(out.reply).toContain(
-      'Из сохранённого описания салона:\nТекст профиля',
-    );
-    expect(out.reply).toContain('Год основания в профиле: 2018');
+    expect(out.reply).toContain('Город: Тестовый город');
+    expect(out.reply).toContain('В описании салона говорится:\nТекст профиля');
+    expect(out.reply).toContain('В профиле указан год основания — 2018');
     expect(out.reply).not.toMatch(/лет|rating|https/);
   });
   it('keeps staff usable with missing profile and never turns staff labels into booking facts', () => {
@@ -53,7 +51,7 @@ describe('public consultation from synthetic existing catalog fields', () => {
     expect(out.status).toBe('verified');
     expect(out.reply).toContain('Тестовый мастер — Барбер');
     expect(out.reply).toContain(
-      'свободное время этим списком не подтверждаются',
+      'ещё нужно проверить филиал, выбранную услугу и свободное время',
     );
     expect(out.reply).not.toMatch(/private-ref|private@example|рейтинг|лучший/);
   });
@@ -66,7 +64,7 @@ describe('public consultation from synthetic existing catalog fields', () => {
   it('distinguishes a known empty catalog from missing data', () => {
     const out = publicConsultationReply({ staff: [] }, 'staff');
     expect(out.status).toBe('verified');
-    expect(out.reply).toContain('В полученном публичном каталоге нет записей');
+    expect(out.reply).toContain('В каталоге салона пока нет мастеров');
   });
   it.each([
     null,
@@ -95,7 +93,7 @@ describe('public consultation from synthetic existing catalog fields', () => {
     const out = publicConsultationReply({ staff }, 'staff');
     expect(out.reply).toContain('Мастер 19');
     expect(out.reply).not.toContain('Мастер 20');
-    expect(out.reply).toContain('Показана часть полученного каталога');
+    expect(out.reply).toContain('Показываю только часть списка мастеров');
     expect(
       publicConsultationReply(
         { staff: [{ name: 'a'.repeat(241) }, source.staff[0]] },
