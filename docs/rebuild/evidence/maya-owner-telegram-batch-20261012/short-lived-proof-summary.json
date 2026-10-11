@@ -1,0 +1,27 @@
+{
+  "qualification": "SYNTHETIC_HTTP_PG_REPRODUCTION_NOT_PRODUCT_FIX",
+  "candidate": "b8b60d94a7ff56cc3c224499bad0dc24fd342b4b",
+  "workingPatch": false,
+  "passed": 100,
+  "failed": 0,
+  "total": 100,
+  "surfaces": 2,
+  "shortLivedProofCases": [
+    {
+      "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] links with a 30-second signed Telegram proof when the exact CRM lookup finishes before expiry",
+      "status": "passed",
+      "durationMs": 87
+    },
+    {
+      "name": "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] keeps login but refuses a 30-second signed Telegram proof that expires during the exact CRM lookup",
+      "status": "passed",
+      "durationMs": 29761
+    }
+  ],
+  "types": "PASS",
+  "scopedLint": "PASS",
+  "clusterStopped": true,
+  "pidFileAbsent": true,
+  "sourceUnchanged": true,
+  "productBehaviorChanged": false
+}

@@ -1,0 +1,51 @@
+[
+  {
+    "originalLocalPath": "/private/tmp/maya-owner-telegram-batch-20261012-01/session/resume.json",
+    "sha256": "f442368c5acd0c37734abdb73067849195319864ea5398c8c43106b5220d1454",
+    "bytes": 549635,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Keep raw private runtime/proof artifacts local; selected non-identifying facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-owner-telegram-batch-20261012-01/attempt-01-observation.json",
+    "sha256": "0c87a5e8c42214fd71160bc4a4c24c26b5a46093b8564bff739ad8a1790bffd0",
+    "bytes": 724,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Keep raw private runtime/proof artifacts local; selected non-identifying facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-short-proof-http-20261012-01/manifest.json",
+    "sha256": "f12ada61804c4b7ebea6caaa1222c5653894d1163118c9d0b3fb30124aee574b",
+    "bytes": 692,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Keep raw private runtime/proof artifacts local; selected non-identifying facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-short-proof-http-20261012-01/telegram-initial-jest.json",
+    "sha256": "a03f857a07b48e99ae58c4002e11a72367bc6b8f5b607a215746b8db983f5631",
+    "bytes": 55648,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Keep raw private runtime/proof artifacts local; selected non-identifying facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-short-proof-http-20261012-01/source-hashes.json",
+    "sha256": "cbc005a8bf17f7e8a74bc16e6dcfbfafb55d06ab1ab1c1c88d001d570d260883",
+    "bytes": 277350,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Keep raw private runtime/proof artifacts local; selected non-identifying facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-short-proof-types-20261012.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Keep raw private runtime/proof artifacts local; selected non-identifying facts archived"
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-short-proof-lint-final-20261012.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "published": "SAFE_PROJECTION_ONLY",
+    "reason": "Keep raw private runtime/proof artifacts local; selected non-identifying facts archived"
+  }
+]

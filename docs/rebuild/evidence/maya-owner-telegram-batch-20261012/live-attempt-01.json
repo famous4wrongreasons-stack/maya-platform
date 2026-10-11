@@ -1,0 +1,111 @@
+{
+  "qualification": "LOCAL_REAL_LOGIN_NOT_PERSONAL_CLIENT_BINDING_OR_RELEASE_CERTIFICATION",
+  "candidate": "ab23aef26a4ed22af1db467ef720ce59f52ded8b",
+  "profile": "owner_telegram_saved_login_batch_v2",
+  "attemptsUsed": 1,
+  "attemptsMaximum": 3,
+  "status": "STOPPED_AFTER_DETERMINATE_EXPIRY_REFUSAL",
+  "readyAt": "2026-10-11T23:16:04.446Z",
+  "authorizedUntil": "2026-10-11T23:44:42.226Z",
+  "httpStatus": 201,
+  "bindingOutcome": "fresh_telegram_verification_required",
+  "httpCompletionElapsedMs": 70614,
+  "tokenLifetimeSeconds": 30,
+  "secondsExpiredAtResponse": 38.861,
+  "proofIssuedDuringCurrentSession": true,
+  "counts": {
+    "telegramIdentityCount": 1,
+    "exactUserChannelLinks": 0,
+    "exactUserActiveChannelLinks": 0,
+    "exactUserInitialBindingAuditCount": 0,
+    "newConsumedTelegramFlows": 1
+  },
+  "providerReadSummary": {
+    "calls": 31,
+    "refused": 0,
+    "routes": {
+      "telegram_token": 1,
+      "telegram_jwks": 1,
+      "client_registry": 29
+    }
+  },
+  "trace": [
+    {
+      "observedAt": "2026-10-11T23:19:11.246Z",
+      "elapsedMs": 187933,
+      "surface": "http",
+      "route": "telegram_login_complete",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "observedAt": "2026-10-11T23:19:12.646Z",
+      "elapsedMs": 189333,
+      "surface": "provider",
+      "route": "telegram_token",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "observedAt": "2026-10-11T23:19:14.408Z",
+      "elapsedMs": 191095,
+      "surface": "provider",
+      "route": "telegram_token",
+      "method": "POST",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read",
+      "telegramTokenOutcome": "id_token_present"
+    },
+    {
+      "observedAt": "2026-10-11T23:19:15.022Z",
+      "elapsedMs": 191709,
+      "surface": "provider",
+      "route": "telegram_jwks",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "observedAt": "2026-10-11T23:19:16.230Z",
+      "elapsedMs": 192917,
+      "surface": "provider",
+      "route": "telegram_jwks",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read"
+    },
+    {
+      "observedAt": "2026-10-11T23:20:21.861Z",
+      "elapsedMs": 258547,
+      "surface": "http",
+      "route": "telegram_login_complete",
+      "method": "POST",
+      "stage": "completed",
+      "status": 201,
+      "code": null,
+      "telegramBindingOutcome": "fresh_telegram_verification_required"
+    }
+  ],
+  "shutdown": {
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "sourceUnchanged": true,
+    "samePrivateState": true,
+    "privateStateRetained": true,
+    "cleanupFailures": []
+  },
+  "exclusions": {
+    "rawClaims": "NOT_ARCHIVED",
+    "credentials": "NOT_ARCHIVED",
+    "rawCustomerData": "NOT_ARCHIVED",
+    "productionEffects": 0,
+    "providerBusinessWrites": 0
+  }
+}

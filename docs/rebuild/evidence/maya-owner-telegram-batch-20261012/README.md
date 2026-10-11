@@ -79,3 +79,98 @@ not yet proven. Only the owner-initiated, hidden-input launcher can begin the
 approved real batch. No live provider call or retained-database start is made by
 the offline proof programme. The earlier refusal of automated Terminal control
 is preserved; the agent does not read the clipboard or type credentials.
+
+## Live batch result: first attempt, 2026-10-12 02:19 MSK
+
+This section supersedes the unexecuted live boundary above, not its historical
+proofs. The owner manually launched the approved batch at candidate
+`ab23aef26a4ed22af1db467ef720ce59f52ded8b`. One fresh Telegram confirmation
+completed; the second and third permitted attempts were not used.
+
+Telegram token exchange and JWKS verification succeeded. The current Chrome
+carrier returned to AChat. The canonical login endpoint returned HTTP 201 with
+`client_binding = unlinked / fresh_telegram_verification_required` after
+70,614 ms. Authentication succeeded; personal Client binding did not.
+
+The exact owner's saved signed-claim timing was examined with a read-only,
+loopback-only, tenant/user-scoped query. Only lifetime/relative timing was
+retained in repository evidence, not claims, phone, identifiers or credentials.
+The proof was issued during this session, had a **30-second lifetime in this
+attempt**, and was already expired by 38.861 seconds at the binding response.
+This is an observed claim lifetime, not a claim about every Telegram token.
+
+The final provider summary records 31 calls: one token exchange, one JWKS read,
+29 registry page reads, zero refused provider calls. Page count does not state
+the number of customers returned. A read-only aggregate observation after the
+response found one saved Telegram identity, one newly consumed login flow,
+zero exact-user `maya_user` links and zero initial-binding audit records.
+
+`TelegramClientBindingService.bind` first validates the unexpired login proof,
+then reads the complete registry, resolves exactly one current CRM identity,
+and checks the proof again inside the final identity-locked transaction.
+`assertLogin` and the canonical writer's `validUntil` both retain the original
+token expiry. The live result therefore fits expiry during the lookup, not
+an incorrect Client Secret or failed Telegram authorization. The receipt does
+not separately measure network versus source-guard/DB cost; that split is not
+claimed here. It also does not prove that every previous failed attempt had
+this cause.
+
+The owned launcher was stopped after this determinate refusal. Runtime and
+PostgreSQL stopped cleanly, private state was preserved, pinned source stayed
+unchanged for the entire live run. Local login/identity processing may write
+local session/CRM registration state; `samePrivateState` concerns the pinned
+private-state artifacts and is not a claim that the database had no writes.
+There was no production, booking, message, SMS, model or history-import action.
+Raw receipts remain local; see `live-attempt-01.json` and the hash manifest.
+
+## Offline reproduction, not a fix
+
+Test-only commit `b8b60d94a7ff56cc3c224499bad0dc24fd342b4b` adds a synthetic
+30-second signed token to the real HTTP/AppModule/PostgreSQL suite:
+
+- Fast exact CRM lookup: HTTP 201, one canonical personal Client link.
+- Synthetic lookup completing after expiry: HTTP 201 login, the same explicit
+  freshness refusal, zero link/audit writes, consumed-flow replay refused.
+
+The slow case uses real wall-clock expiry and PostgreSQL time. Signature,
+expiry, tenant and identity checks are not mocked away. Fresh results on that
+committed source: **100 PASS / 0 FAIL**, including both new cases; TypeScript
+and scoped lint passed. The disposable database stopped and source hashes
+remained unchanged. See `short-lived-proof-summary.json` and
+`short-lived-proof-manifest.json`. Earlier fixtures used a 600-second token
+lifetime; their green results did not cover this real short-lived proof.
+
+No product/runtime/authority behavior was changed. Successful real personal
+Client binding remains **NOT PROVEN**. No release certification is inferred.
+
+## Narrow contract proposal — NOT APPROVED / NOT IMPLEMENTED
+
+Do not delete expiry checks or accept an already-expired incoming token.
+Proposed resolution for a legitimate CRM lookup exceeding the provider token's
+lifetime:
+
+1. The existing verifier must accept a valid, unexpired signed Telegram token
+   for the exact audience/issuer, fresh consumed flow, user and tenant.
+2. Before CRM work, the same server-owned coordinator creates an immutable,
+   in-process, one-operation admission proof. It binds token hash, verified
+   phone/Telegram subject, user, tenant, flow and current session. No caller may
+   supply or receive this proof and it cannot survive a process restart.
+3. Its hard deadline is the minimum of acceptance time + 120 seconds, signed
+   issue time + the existing 10-minute freshness limit, flow expiry and session
+   expiry. This explicitly separates provider-token verification time from
+   the bounded lifetime of the already accepted operation; it is a change to
+   the present authority contract, not merely an HTTP timeout increase.
+4. Final consumption still rereads current session/membership/identity/source,
+   verifies the complete fresh exact-Client match and applies the existing
+   identity locks, single writer, immutable revocation and atomic audit.
+   Revocation, source changes, ambiguity, substitution, expiry or replay refuse
+   the binding. Owner role grants no Client authority.
+5. The audit retains versioned acceptance/deadline provenance and original
+   token expiry without storing the token or raw phone. Use existing evidence
+   owners; no new persistence is authorized by this proposal. If sufficient
+   evidence cannot be represented safely, stop before adding durable schema.
+
+This proposal needs an explicit owner/security decision because it permits
+finishing an already verified operation after the external token expires. The
+current live-session approval does not silently grant that contract change.
+Until decided, no further real attempt, expiry relaxation or production action.
