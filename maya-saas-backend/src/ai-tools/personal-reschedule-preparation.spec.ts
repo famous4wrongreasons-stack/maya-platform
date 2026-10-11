@@ -53,10 +53,12 @@ describe('own-list reschedule preparation presentation', () => {
       ),
     ).toThrow('conversation_tool_plan_mismatch');
     const reply = rescheduleOwnReadClarification(validated);
-    expect(reply).toContain('Пожелание для переноса: пятница.');
-    expect(reply).toContain('Возможность переноса ещё не проверена.');
-    expect(reply).toContain('уточните запись, новое время.');
-    expect(reply).toContain('Подтверждённого результата выполнения пока нет.');
+    expect(reply).toContain('Поняла: пятница.');
+    expect(reply).toContain(
+      'Доступность ещё нужно проверить; перенос пока не выполнен.',
+    );
+    expect(reply).toContain('Какую запись хотите перенести?');
+    expect(reply).toContain('перенос пока не выполнен.');
     expect(validated.tasks.map((task) => task.intent)).toEqual([
       'booking.list_own',
       'booking.reschedule_own',
@@ -72,7 +74,7 @@ describe('own-list reschedule preparation presentation', () => {
     const before = JSON.stringify(validated);
     const reply = rescheduleOwnReadClarification(validated);
     expect(reply).toContain('пятница, 20:00');
-    expect(reply).toContain('уточните запись.');
+    expect(reply).toContain('Какую запись хотите перенести?');
     expect(reply).not.toMatch(/PRIVATE|уже перенесена|слот подтверждён/);
     expect(JSON.stringify(validated)).toBe(before);
   });
@@ -144,8 +146,8 @@ describe('own-list reschedule preparation presentation', () => {
     validated.context.unresolved_references = ['appointment'];
     const before = JSON.stringify(validated);
     const reply = rescheduleOwnReadClarification(validated);
-    expect(reply).not.toMatch(/PRIVATE|25:00|Пожелание/);
-    expect(reply).toContain('уточните новую дату, новое время, запись.');
+    expect(reply).not.toMatch(/PRIVATE|25:00|Поняла:/);
+    expect(reply).toContain('Какую запись хотите перенести?');
     expect(JSON.stringify(validated)).toBe(before);
   });
 

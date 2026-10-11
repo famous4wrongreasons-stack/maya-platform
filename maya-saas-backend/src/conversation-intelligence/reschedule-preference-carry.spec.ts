@@ -70,8 +70,8 @@ describe('unselected personal reschedule preference continuation', () => {
         ? rescheduleOwnReadClarification(second)
         : mutationClarification(second);
       expect(reply).toContain('2026-10-16, 20:00');
-      expect(reply).toContain('уточните запись');
-      expect(reply).toContain('Возможность переноса ещё не проверена');
+      expect(reply).toContain('Какую запись хотите перенести?');
+      expect(reply).toContain('Доступность ещё нужно проверить');
       expect(() =>
         service.assertToolCallMatchesPlan(
           {

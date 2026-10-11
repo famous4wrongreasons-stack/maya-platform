@@ -81,10 +81,12 @@ describe('bounded reschedule preference clarification', () => {
     current.tasks[0].clarification_question = 'Уже перенесено, слот свободен.';
     const before = JSON.stringify(current);
     const reply = mutationClarification(current);
-    expect(reply).toContain('Пожелание для переноса: пятница, 20:00.');
-    expect(reply).toContain('Возможность переноса ещё не проверена.');
-    expect(reply).toContain('уточните запись.');
-    expect(reply).toContain('Подтверждённого результата выполнения пока нет.');
+    expect(reply).toContain('Поняла: пятница, 20:00.');
+    expect(reply).toContain(
+      'Доступность ещё нужно проверить; перенос пока не выполнен.',
+    );
+    expect(reply).toContain('Какую запись хотите перенести?');
+    expect(reply).toContain('перенос пока не выполнен.');
     expect(reply).not.toMatch(/Уже перенесено|слот свободен|сохранила/);
     expect(JSON.stringify(current)).toBe(before);
   });
@@ -97,13 +99,28 @@ describe('bounded reschedule preference clarification', () => {
     expect(JSON.stringify(current)).toBe(before);
   });
 
-  it('asks for absent new time/date while repeating only a finite known preference', () => {
+  it('asks one question at a time, retaining known preferences without a bureaucratic checklist', () => {
     const withoutTime = mutationClarification(plan({ new_date: 'tomorrow' }));
-    expect(withoutTime).toContain('Пожелание для переноса: завтра.');
-    expect(withoutTime).toContain('уточните запись, новое время.');
+    expect(withoutTime).toContain('Поняла: завтра.');
+    expect(withoutTime).toContain('Какую запись хотите перенести?');
     const withoutDate = mutationClarification(plan({ new_time: '20:00' }));
-    expect(withoutDate).toContain('Пожелание для переноса: 20:00.');
-    expect(withoutDate).toContain('уточните запись, новую дату.');
+    expect(withoutDate).toContain('Поняла: 20:00.');
+    expect(withoutDate).toContain('Какую запись хотите перенести?');
+    for (const reply of [withoutTime, withoutDate]) {
+      expect(reply?.match(/\?/g)).toHaveLength(1);
+      expect(reply).not.toMatch(
+        /Для подготовки действия|Подтверждённого результата выполнения/,
+      );
+      expect(reply).toContain('перенос пока не выполнен');
+    }
+    expect(
+      mutationClarification(plan({ appointment: 'PRIVATE_APPOINTMENT' })),
+    ).toContain('На какой день хотите перенести запись?');
+    expect(
+      mutationClarification(
+        plan({ appointment: 'PRIVATE_APPOINTMENT', new_date: 'friday' }),
+      ),
+    ).toContain('Во сколько вам удобно?');
   });
 
   it('accepts exact valid ISO days without resolving weekdays or relative dates to an instant', () => {
@@ -115,7 +132,7 @@ describe('bounded reschedule preference clarification', () => {
       const reply = mutationClarification(
         plan({ new_date: value, new_time: '20:00' }),
       );
-      expect(reply).toContain(`Пожелание для переноса: ${label}, 20:00.`);
+      expect(reply).toContain(`Поняла: ${label}, 20:00.`);
       expect(reply).not.toMatch(/(?:Z|[+-]0[0-9]:00)\b/);
     }
   });
@@ -131,16 +148,16 @@ describe('bounded reschedule preference clarification', () => {
         plan({ new_date: value, new_time: '20:00' }),
       );
       expect(reply).not.toContain(value);
-      expect(reply).toContain('Пожелание для переноса: 20:00.');
-      expect(reply).toContain('новую дату');
+      expect(reply).toContain('Поняла: 20:00.');
+      expect(reply).toContain('Какую запись хотите перенести?');
     }
     for (const value of ['24:00', '20:60', '20:00 PRIVATE_VALUE', 'вечером']) {
       const reply = mutationClarification(
         plan({ new_date: 'friday', new_time: value }),
       );
       expect(reply).not.toContain(value);
-      expect(reply).toContain('Пожелание для переноса: пятница.');
-      expect(reply).toContain('новое время');
+      expect(reply).toContain('Поняла: пятница.');
+      expect(reply).toContain('Какую запись хотите перенести?');
     }
     const privatePlan = plan({
       appointment: 'PRIVATE_APPOINTMENT',
@@ -148,7 +165,7 @@ describe('bounded reschedule preference clarification', () => {
       new_date: 'PRIVATE_DAY_VALUE',
     });
     expect(mutationClarification(privatePlan)).not.toMatch(/PRIVATE_/);
-    expect(mutationClarification(privatePlan)).not.toContain('Пожелание');
+    expect(mutationClarification(privatePlan)).not.toContain('Поняла:');
   });
 
   it('keeps denied and unavailable actions on their existing refusal path', () => {
@@ -167,7 +184,7 @@ describe('bounded reschedule preference clarification', () => {
   it('does not specialize other intents or multiple tasks', () => {
     for (const intent of ['booking.create_own', 'booking.cancel_own']) {
       const current = plan({}, intent);
-      expect(mutationClarification(current)).not.toContain('Пожелание');
+      expect(mutationClarification(current)).not.toContain('Поняла:');
     }
     const multiple = plan();
     multiple.tasks.push({ ...multiple.tasks[0], id: 'independent-other-task' });
@@ -180,9 +197,9 @@ describe('bounded reschedule preference clarification', () => {
     const current = plan();
     current.context.unresolved_references = ['new_date', 'new_time'];
     const reply = mutationClarification(current);
-    expect(reply).not.toContain('Пожелание');
+    expect(reply).not.toContain('Поняла:');
     expect(reply).not.toContain('20:00');
-    expect(reply).toContain('уточните запись, новую дату, новое время.');
+    expect(reply).toContain('Какую запись хотите перенести?');
   });
 });
 

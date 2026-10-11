@@ -36,7 +36,6 @@ export function mutationClarification(
   const definition = MAYA_CONVERSATION_INTENTS.get(task.intent)!;
   const missing = definition.requiredSlots.filter((k) => !(k in task.entities));
   const unresolved = plan!.context.unresolved_references;
-  let preference = '';
   if (
     plan?.tasks.length === 1 &&
     task.intent === 'booking.reschedule_own' &&
@@ -54,8 +53,17 @@ export function mutationClarification(
     if (!day) missing.push('new_date');
     if (!time) missing.push('new_time');
     const requested = [day, time].filter((value) => value !== null);
-    if (requested.length)
-      preference = `Пожелание для переноса: ${requested.join(', ')}. Возможность переноса ещё не проверена. `;
+    const needed = new Set([...missing, ...unresolved]);
+    const question = needed.has('appointment')
+      ? 'Какую запись хотите перенести?'
+      : needed.has('new_date')
+        ? 'На какой день хотите перенести запись?'
+        : needed.has('new_time')
+          ? 'Во сколько вам удобно?'
+          : needed.has('new_employee')
+            ? 'К какому мастеру хотите перенести запись?'
+            : 'Что хотите уточнить в переносе?';
+    return `${requested.length ? `Поняла: ${requested.join(', ')}. ` : ''}${question} Доступность ещё нужно проверить; перенос пока не выполнен.`;
   }
   const labels = [
     ...new Set(
@@ -65,7 +73,7 @@ export function mutationClarification(
   const clarification = labels.length
     ? `Для подготовки действия уточните ${labels.join(', ')}. Подтверждённого результата выполнения пока нет.`
     : 'Параметры действия требуют уточнения. Какой вариант вы выбираете? Подтверждённого результата выполнения пока нет.';
-  return preference + clarification;
+  return clarification;
 }
 
 /** Accept only the existing runtime's authoritative AE projection, never model text. */

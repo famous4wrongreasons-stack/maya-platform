@@ -4060,13 +4060,13 @@ describe('AiCoreService', () => {
         expect(answer.action).toBeNull();
         if (stale) {
           expect(answer.grounding.status).toBe('blocked');
-          expect(answer.reply).not.toContain('Пожелание для переноса');
+          expect(answer.reply).not.toContain('Поняла');
           expect(answer.reply).not.toContain('Тестовый филиал');
         } else {
           expect(answer.grounding.status).toBe('verified');
-          expect(answer.reply).toContain('Пожелание для переноса: пятница.');
+          expect(answer.reply).toContain('Поняла: пятница.');
           expect(answer.reply).toContain(
-            'Возможность переноса ещё не проверена.',
+            'Доступность ещё нужно проверить; перенос пока не выполнен.',
           );
           expect(answer.reply).toContain('Тестовый филиал');
         }

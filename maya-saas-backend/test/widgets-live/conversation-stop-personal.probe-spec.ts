@@ -369,13 +369,15 @@ describe('STOP, personal read and current staff binding [HTTP] [PG] [SCRIPTED]',
       replies.push(body.reply);
       expect(body.action).toBeNull();
       expect(body.resolution).toBeUndefined();
-      expect(body.reply).toContain('Возможность переноса ещё не проверена');
+      expect(body.reply).toContain('Доступность ещё нужно проверить');
     }
     expect(replies[1]).toContain('пятница, 20:00');
     expect(replies[2]).toContain('пятница, 19:00');
     expect(replies[3]).toContain('суббота, 19:00');
     expect(
-      replies.slice(1).every((reply) => reply.includes('уточните запись')),
+      replies
+        .slice(1)
+        .every((reply) => reply.includes('Какую запись хотите перенести?')),
     ).toBe(true);
     expect(decide).toHaveBeenCalledTimes(4);
     expect(
