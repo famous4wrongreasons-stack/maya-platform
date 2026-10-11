@@ -41,7 +41,9 @@ import {
 import { type Fixtures } from './support/fixtures';
 import {
   OAUTH_START_IP_PREFLIGHT_POLICY,
+  OAUTH_COMPLETE_IP_PREFLIGHT_POLICY,
   resetLoopbackOauthPreflight,
+  resetLoopbackOauthCompletionPreflight,
 } from './support/login-rate-limit';
 
 type LoginBody = {
@@ -80,6 +82,7 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
     // Independent cases share one loopback IP. Keep the actual 30/10m policy
     // within each case; only the dedicated proof DB preflight bucket is reset.
     await resetLoopbackOauthPreflight(db.prisma);
+    await resetLoopbackOauthCompletionPreflight(db.prisma);
   });
   afterEach(async () => {
     jest.restoreAllMocks();
@@ -524,6 +527,34 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
     ).toEqual(buckets.filter((b) => b.id !== preflight[0].id));
     expect(await resetLoopbackOauthPreflight(db.prisma)).toBe(0);
     expect((await start()).status).toBe(201);
+  });
+
+  it('completion fixture isolation preserves 60-attempt IP refusal and every other bucket', async () => {
+    await signedLogin(await fixture());
+    const complete = (index: number) =>
+      request(http.app.getHttpServer())
+        .post('/api/auth/oauth/telegram/complete')
+        .send({
+          state: 'te_synthetic_absent_' + index,
+          code: 'synthetic-code',
+        });
+    for (let i = 0; i < 60; i++) expect((await complete(i)).status).toBe(400);
+    expect((await complete(60)).status).toBe(429);
+    const buckets = await db.prisma.authRateLimitBucket.findMany({
+      orderBy: { id: 'asc' },
+    });
+    const preflight = buckets.filter(
+      (b) =>
+        b.policyKey === OAUTH_COMPLETE_IP_PREFLIGHT_POLICY &&
+        b.tenantId === null,
+    );
+    expect(preflight).toHaveLength(1);
+    expect(await resetLoopbackOauthCompletionPreflight(db.prisma)).toBe(1);
+    expect(
+      await db.prisma.authRateLimitBucket.findMany({ orderBy: { id: 'asc' } }),
+    ).toEqual(buckets.filter((b) => b.id !== preflight[0].id));
+    expect(await resetLoopbackOauthCompletionPreflight(db.prisma)).toBe(0);
+    expect((await complete(61)).status).toBe(400);
   });
 
   it.each([UserRole.CLIENT, UserRole.TENANT_OWNER])(
