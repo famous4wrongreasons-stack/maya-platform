@@ -52,10 +52,19 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
   let expired = false,
     subject = 'synthetic-owner-telegram',
     dispatches = 0;
+  let tokenReply: 'signed' | 'http401' | 'missing' | 'malformed';
+  let trace: Array<{
+    route: string;
+    stage: string;
+    status: number | null;
+    code: string | null;
+  }>;
   beforeEach(async () => {
     expired = false;
     subject = 'synthetic-owner-telegram';
     dispatches = 0;
+    tokenReply = 'signed';
+    trace = [];
     db = await bootFixtureContext();
     fx = new Fixtures(db, null);
     tenant = await fx.tenant('bounded Telegram owner', CalendarSource.EXTERNAL);
@@ -119,6 +128,16 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
       if (String(raw) === 'https://oauth.telegram.org/.well-known/jwks.json')
         return Response.json({ keys: [{ ...jwk, kid: 'synthetic-key' }] });
       if (String(raw) === 'https://oauth.telegram.org/token') {
+        if (tokenReply === 'http401')
+          return Response.json(
+            { error: 'synthetic-private-provider-error' },
+            { status: 401 },
+          );
+        if (tokenReply === 'missing') return Response.json({});
+        if (tokenReply === 'malformed')
+          return Response.json({
+            id_token: 'synthetic-private-malformed-token',
+          });
         const now = Math.floor(Date.now() / 1000);
         const body =
           Buffer.from(
@@ -185,6 +204,9 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
           },
         },
         nativeFetch: (raw) => Promise.resolve(wireReply(raw)),
+        trace: (event) => {
+          trace.push(event);
+        },
       });
       jest
         .spyOn(globalThis, 'fetch')
@@ -250,6 +272,61 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
     expect(r.status).toBe(201);
     return token;
   }
+  it.each([
+    ['http401', 401, 'social_exchange_failed'],
+    ['missing', 200, 'social_exchange_failed'],
+    ['malformed', 200, 'social_token_invalid'],
+  ] as const)(
+    'safe status distinguishes %s while canonical completion refuses and consumes once',
+    async (reply, status, code) => {
+      tokenReply = reply;
+      const token = await ownerToken(),
+        state = await start(true, token);
+      const r = await post(
+        'auth/oauth/telegram/link/complete',
+        { state, code: 'synthetic-code' },
+        token,
+      );
+      expect(r.status).toBe(400);
+      expect((r.body as { error: { code: string } }).error.code).toBe(code);
+      expect(trace).toEqual([
+        {
+          surface: 'provider',
+          route: 'telegram_token',
+          method: 'POST',
+          stage: 'entered',
+          status: null,
+          code: null,
+        },
+        {
+          surface: 'provider',
+          route: 'telegram_token',
+          method: 'POST',
+          stage: status === 401 ? 'refused' : 'completed',
+          status,
+          code:
+            status === 401 ? 'provider_http_error' : 'provider_response_read',
+        },
+      ]);
+      expect(JSON.stringify(trace)).not.toContain('synthetic-private');
+      expect(runtime.counters.routes).toEqual({ telegram_token: 1 });
+      expect(
+        await db.prisma.authIdentity.count({ where: { tenantId: tenant.id } }),
+      ).toBe(0);
+      expect(
+        await db.prisma.clientChannelLink.count({
+          where: { tenantId: tenant.id },
+        }),
+      ).toBe(0);
+      const replay = await post(
+        'auth/oauth/telegram/link/complete',
+        { state, code: 'synthetic-code' },
+        token,
+      );
+      expect(replay.status).toBe(403);
+      expect(dispatches).toBe(1);
+    },
+  );
   it('real A23 link then fresh signed login creates one verified personal Client, no import or role change', async () => {
     await linked();
     expect(

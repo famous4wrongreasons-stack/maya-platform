@@ -88,7 +88,7 @@ export async function start() {
       globalThis.fetch = ownerChat.fetch;
     }
     if (telegramLaunch) {
-      ownerTelegram = await installOwnerTelegram({ app, prisma, require, backend, launch: telegramLaunch, nativeFetch });
+      ownerTelegram = await installOwnerTelegram({ app, prisma, require, backend, launch: telegramLaunch, nativeFetch, trace });
       globalThis.fetch = ownerTelegram.fetch;
       guard = { counters: ownerTelegram.counters, run: ownerTelegram.runRequest };
     }

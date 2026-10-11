@@ -3,8 +3,9 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { TELEGRAM_LIMITS, telegramProviderRoute } from './local-owner-telegram-policy.mjs';
 
 // Reuses the real adapter and cryptographic verifier. Only tests inject wire
-// replies. No response/body/header/provider error is copied into diagnostics.
-export function createOwnerTelegramTransport({ nativeFetch, clientId, companyId, assertCurrent, verifyCurrent, clock = Date.now }) {
+// replies. Only closed route/stage/status codes enter diagnostics; no body,
+// header, provider error text or token payload is retained or interpreted here.
+export function createOwnerTelegramTransport({ nativeFetch, clientId, companyId, assertCurrent, verifyCurrent, clock = Date.now, trace }) {
   const context = new AsyncLocalStorage(), counters = { calls: 0, refused: 0, routes: {} };
   let busy = false, closed = false; const active = new Set();
   const refusal = () => { throw new Error('local_telegram_transport_refused'); };
@@ -28,6 +29,12 @@ export function createOwnerTelegramTransport({ nativeFetch, clientId, companyId,
     stop() { closed = true; for (const op of active) { op.active = false; op.controller.abort(); } },
     async fetch(raw, init) {
       const op = context.getStore();
+      let diagnosticRoute = null;
+      const emit = (stage, status, code) => {
+        if (!diagnosticRoute) return;
+        try { trace?.({ surface: 'provider', route: diagnosticRoute, method: diagnosticRoute === 'telegram_token' ? 'POST' : 'GET', stage, status, code }); }
+        catch { /* Observation cannot change a response, guard or retry policy. */ }
+      };
       try {
         check(op); await verifyCurrent(); check(op);
         const route = telegramProviderRoute(raw, init, op, clientId, companyId);
@@ -38,12 +45,14 @@ export function createOwnerTelegramTransport({ nativeFetch, clientId, companyId,
           if (page !== op.registryPage + 1) refusal(); op.registryPage = page;
         }
         counters.calls++; counters.routes[route] = (counters.routes[route] ?? 0) + 1;
+        if (route === 'telegram_token' || route === 'telegram_jwks') diagnosticRoute = route;
+        emit('entered', null, null);
         const signal = AbortSignal.any([op.controller.signal, ...(op.signal ? [op.signal] : []),
           AbortSignal.timeout(Math.max(1, Math.min(TELEGRAM_LIMITS.fetchMs, op.deadline - clock()))), ...(init?.signal ? [init.signal] : [])]);
         const response = await nativeFetch(raw, { ...init, redirect: 'error', signal });
         check(op);
         if (response.redirected || (response.url && response.url !== String(raw))) { await response.body?.cancel(); refusal(); }
-        if (!response.ok) { await response.body?.cancel(); return new Response('{}', { status: response.status >= 400 && response.status <= 599 ? response.status : 502 }); }
+        if (!response.ok) { await response.body?.cancel(); emit('refused', response.status, 'provider_http_error'); return new Response('{}', { status: response.status >= 400 && response.status <= 599 ? response.status : 502 }); }
         const reader = response.body?.getReader(); if (!reader) refusal();
         const chunks = []; let bytes = 0;
         try {
@@ -56,10 +65,10 @@ export function createOwnerTelegramTransport({ nativeFetch, clientId, companyId,
           }
           await verifyCurrent(); check(op);
           const body = Buffer.concat(chunks);
-          try { JSON.parse(body.toString('utf8')); return new Response(body, { status: response.status, headers: { 'content-type': 'application/json' } }); }
+          try { JSON.parse(body.toString('utf8')); const accepted = new Response(body, { status: response.status, headers: { 'content-type': 'application/json' } }); emit('completed', response.status, 'provider_response_read'); return accepted; }
           finally { body.fill(0); }
         } finally { await reader.cancel().catch(() => {}); for (const c of chunks) c.fill(0); }
-      } catch { counters.refused++; if (op) op.poisoned = true; refusal(); }
+      } catch { emit('refused', null, 'provider_transport_unavailable'); counters.refused++; if (op) op.poisoned = true; refusal(); }
     },
   };
 }

@@ -22,4 +22,12 @@ export function installOwnerTelegram(options: {
     assertCurrent: () => void;
   };
   nativeFetch: (raw: string | URL, init?: RequestInit) => Promise<Response>;
+  trace?: (event: {
+    surface: 'provider';
+    route: 'telegram_token' | 'telegram_jwks';
+    method: 'GET' | 'POST';
+    stage: 'entered' | 'completed' | 'refused';
+    status: number | null;
+    code: string | null;
+  }) => void;
 }): Promise<OwnerTelegramRuntime>;

@@ -41,6 +41,7 @@ export const READ_SOURCE_FILES = Object.freeze([
   'maya-saas-backend/scripts/local-owner-telegram-runtime.mjs',
   'maya-saas-backend/scripts/local-owner-telegram-launch.mjs',
   'maya-saas-backend/scripts/local-owner-telegram.test.mjs',
+  'maya-saas-backend/scripts/local-owner-telegram-diagnostic.test.mjs',
   'maya-saas-backend/scripts/local-owner-telegram-policy.d.mts',
   'maya-saas-backend/scripts/local-owner-telegram-runtime.d.mts',
   'maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html',

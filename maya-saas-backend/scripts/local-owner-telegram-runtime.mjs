@@ -8,7 +8,7 @@ import { TELEGRAM_LIMITS } from './local-owner-telegram-policy.mjs';
 
 // Restrictions around existing owners, installed only by the separately
 // admitted local mode. No fake sessions, identity writer or fixture injection.
-export async function installOwnerTelegram({ app, prisma, require, backend, launch, nativeFetch }) {
+export async function installOwnerTelegram({ app, prisma, require, backend, launch, nativeFetch, trace }) {
   const scope = launch.plan.scope, origin = launch.plan.origin;
   const load = p => require(path.join(backend, 'dist/src', p));
   const { ConfigService } = require('@nestjs/config');
@@ -31,7 +31,7 @@ export async function installOwnerTelegram({ app, prisma, require, backend, laun
   const actor = async user => { await current(); try { assertOwnerChatActor(user, scope); } catch { return refuse(); } };
   await current();
   const transport = createOwnerTelegramTransport({ nativeFetch, clientId: launch.plan.clientId,
-    companyId: scope.companyId, assertCurrent: launch.assertCurrent, verifyCurrent: current });
+    companyId: scope.companyId, assertCurrent: launch.assertCurrent, verifyCurrent: current, trace });
   const patch = (object, name, wrapper) => {
     assert.equal(typeof object[name], 'function', 'local_telegram_canonical_owner_missing');
     const original = object[name]; object[name] = wrapper(original.bind(object)); undo.push(() => { object[name] = original; });

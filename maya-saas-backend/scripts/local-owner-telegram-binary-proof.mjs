@@ -77,6 +77,12 @@ try {
   const session = await login.json(); assert.equal(session.user.id, owner.id); report.checks.push('canonical-password-session');
   const link = await request('/api/auth/oauth/telegram/link/start', { platform: 'web', redirectUri: origin + '/oauth-callback.html' }, session.access_token);
   assert.equal(link.status, 201); const startedLink = await link.json(); assert.match(startedLink.state, /^te_/); report.checks.push('canonical-telegram-link-start-no-provider-dispatch');
+  const refusedLink = await request('/api/auth/oauth/telegram/link/complete', { state: 'te_synthetic_unknown_state', code: 'synthetic-code' }, session.access_token);
+  assert.equal(refusedLink.status, 403);
+  const traceUntil = Date.now() + 5000;
+  while (!report.diagnostic.readTrace.some(e => e.route === 'telegram_link_complete' && e.stage === 'refused')) { assert.ok(Date.now() < traceUntil, 'closed_trace_receipt_deadline'); await delay(20); }
+  assert.ok(report.diagnostic.readTrace.some(e => e.route === 'telegram_link_complete' && e.status === 403 && e.code === 'local_owner_telegram_scope_refused'));
+  report.checks.push('canonical-telegram-refusal-through-child-ipc-safe-receipt');
   for (const route of ['/api/ai/chat', '/api/widgets/intent', '/api/integrations/crm/activate', '/api/client-channel/consent', '/api/auth/phone/start']) assert.equal((await request(route, {}, session.access_token)).status, 403);
   report.checks.push('business-model-sms-consent-routes-refused');
   assert.equal((await request('/api/auth/login', { tenantSlug: 'foreign', email, password: ownerPassword })).status, 403); report.checks.push('foreign-tenant-refused');

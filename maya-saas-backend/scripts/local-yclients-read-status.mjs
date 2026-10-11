@@ -23,9 +23,10 @@ export function runtimeStatus(stage, outcome = 'entered', code = null, error) {
 
 // First 64 closed events only. Relative timing is diagnostic, never request identity.
 export const READ_TRACE_LIMIT = 64;
-const TRACE_ROUTES = Object.freeze(['auth', 'connect', 'activate', 'operation', 'companies', 'company', 'book_services', 'services', 'categories', 'team', 'unlisted']);
+const TRACE_ROUTES = Object.freeze(['auth', 'connect', 'activate', 'operation', 'companies', 'company', 'book_services', 'services', 'categories', 'team', 'unlisted', 'telegram_link_complete', 'telegram_login_complete', 'telegram_token', 'telegram_jwks']);
 const CONNECTION_FAILURE_CODES = Object.freeze(['crm_credentials_rejected', 'crm_company_not_found', 'crm_provider_unreachable', 'crm_platform_configuration_error', 'crm_connection_failed']);
-const TRACE_CODES = Object.freeze([...CONNECTION_FAILURE_CODES, 'provider_response_read', 'provider_http_error', 'provider_rejected', 'provider_scope_refused', 'provider_transport_unavailable', 'response_closed', 'local_onboarding_origin_refused', 'local_yclients_diagnostic_route_disabled', 'local_yclients_read_route_disabled']);
+const TELEGRAM_FAILURE_CODES = Object.freeze(['social_exchange_failed', 'social_token_invalid', 'social_state_invalid', 'social_callback_invalid', 'social_identity_conflict', 'social_link_forbidden', 'social_link_tenant_mismatch', 'social_phone_required', 'social_provider_unavailable', 'social_business_access_suspended', 'social_business_link_required', 'local_owner_telegram_scope_refused']);
+const TRACE_CODES = Object.freeze([...CONNECTION_FAILURE_CODES, ...TELEGRAM_FAILURE_CODES, 'provider_response_read', 'provider_http_error', 'provider_rejected', 'provider_scope_refused', 'provider_transport_unavailable', 'response_closed', 'local_onboarding_origin_refused', 'local_yclients_diagnostic_route_disabled', 'local_yclients_read_route_disabled']);
 export const TEAM_ISSUES = Object.freeze(['payload_shape', 'success_unconfirmed', 'data_shape', 'member_limit', 'pagination_present', 'meta_shape', 'unknown_meta_fields', 'total_count_type', 'total_count_mismatch', 'count_mismatch', 'page_not_first', 'row_shape', 'invalid_staff_id', 'duplicate_staff_id', 'foreign_company']);
 export const TEAM_COUNT_ENCODINGS = Object.freeze(['number', 'decimal_string', 'missing', 'null', 'invalid_number', 'invalid_string', 'other']);
 function projectTeamCollectionCheck(value) {
@@ -81,7 +82,7 @@ export function createReadTrace(send, clock = Date.now) {
   };
 }
 export function traceHttpRequest(request, response, emit, refusal = null) {
-  const routes = { '/api/integrations/crm/connect': 'connect', '/api/integrations/crm/activate': 'activate', '/api/integrations/crm/operation': 'operation' };
+  const routes = { '/api/integrations/crm/connect': 'connect', '/api/integrations/crm/activate': 'activate', '/api/integrations/crm/operation': 'operation', '/api/auth/oauth/telegram/link/complete': 'telegram_link_complete', '/api/auth/oauth/telegram/complete': 'telegram_login_complete' };
   const route = routes[typeof request.originalUrl === 'string' ? request.originalUrl.split('?')[0] : ''];
   if (!route || !['GET', 'POST'].includes(request.method)) return;
   const base = { surface: 'http', route, method: request.method };
@@ -90,7 +91,9 @@ export function traceHttpRequest(request, response, emit, refusal = null) {
   // Retain only a canonical public failure code. Never stringify/copy the body,
   // invoke its getters, or change the application's response or error behavior.
   let connectionFailure = null;
-  if (['connect', 'activate'].includes(route) && typeof response.json === 'function') {
+  const failureCodes = ['connect', 'activate'].includes(route) ? CONNECTION_FAILURE_CODES
+    : ['telegram_link_complete', 'telegram_login_complete'].includes(route) ? TELEGRAM_FAILURE_CODES : [];
+  if (failureCodes.length && typeof response.json === 'function') {
     const originalJson = response.json;
     response.json = function (...args) {
       try {
@@ -99,7 +102,7 @@ export function traceHttpRequest(request, response, emit, refusal = null) {
           ? Object.getOwnPropertyDescriptor(body, 'error')?.value : null;
         const candidate = error && typeof error === 'object' && !Array.isArray(error)
           ? Object.getOwnPropertyDescriptor(error, 'code')?.value : null;
-        connectionFailure = CONNECTION_FAILURE_CODES.includes(candidate) ? candidate : null;
+        connectionFailure = failureCodes.includes(candidate) ? candidate : null;
       } catch { connectionFailure = null; }
       return Reflect.apply(originalJson, this, args);
     };
