@@ -1,5 +1,13 @@
 # Telegram → личная история → AChat: подготовка приёмки
 
+**Актуализация 11 октября — web lifecycle исправлен на `6ca9a5ed`.**
+Свежие runtime 723 PASS / 7 SKIP, carrier 157 PASS, 10/10 targeted mutations,
+29 browser checkpoints и 18 packaging checks PASS. Это isolated Chrome с
+настоящими React/runtime/callback и синтетическими backend/provider responses.
+Реальный Telegram и личная история пока не проверены. Ниже сохранены исходные
+HTTP-checkpoint и preflight; новое доказательство не превращает их в живую приёмку.
+[Точный checkpoint, receipts и ограничения](evidence/maya-telegram-web-return-20261011/README.md).
+
 Дата: 2026-10-11. Ветка: `codex/maya-local-crm-setup-20261010`.
 Test checkpoint: `a53c6546c8b4fa35fdc1fa0d141cc74838d605c6`.
 Product source остаётся byte-identical к `f13c0077`; новый commit содержит только
@@ -121,7 +129,7 @@ Raw provider payload/контакты не должны попадать в ча
 | Условие | Текущий статус / действие |
 | --- | --- |
 | Существующее Telegram Login приложение | `@mayaos_login_bot` найден в canonical deployment docs; `mayaos.ru` и web/native callback известны. Текущая provider configuration и наличие допустимых local credentials не проверены; секреты не запрашиваются в чате |
-| Точный callback текущего React AChat | Source-execution probe воспроизводит потерю pending state при замене документа и `callback_unsolicited`. Сначала квалифицировать web roundtrip с сохранением защит. Разрешение loopback в Maya не доказывает его допустимость у Telegram; production configuration не менять |
+| Точный callback текущего React AChat | Исправлен на `6ca9a5ed`: исходный документ сохраняется, exact popup возвращается через callback, query/fragment удаляются, state/single-use guards сохранены. 29 synthetic browser checkpoints PASS. Current real provider/domain/COOP, Safari/PWA/iOS не квалифицированы; React и callback должны выпускаться согласованно. Production configuration не менялась |
 | Та же сохранённая локальная owner-БД | В этом проходе не запускалась и не читалась. Использовать прежний same-DB owner, сохранить исходный state/keys и проверить mapping перед dispatch |
 | Current owner identity/link | Фактическое состояние этой БД UNKNOWN. Если current tip отозван, initial-only login его не восстанавливает; новый successor verifier не предполагается |
 | Частный provider scope | Подготовить дополнительный ограниченный режим существующего local launcher: exact tenant/company, exact read templates, лимиты/истечение, отказ от writes/outbound; существующие публичные допуски не расширять молча |
@@ -138,13 +146,17 @@ Raw provider payload/контакты не должны попадать в ча
 
 ## Дизайн
 
-Актуальные Figma/экраны можно передать сейчас для сверки. Канонический carrier —
-`maya-carrier-react`, runtime — `maya-chat-shell`. Этот проход не меняет дизайн
-и не интегрирует неизвестную параллельную ветку. Подключение выбранного дизайна
-должно сохранить session/conversation/widget/voice contracts и текущие proofs.
+Получен `Maya_full_design_package` от 11 октября: 113/113 manifest hashes совпали.
+Канонический carrier — `maya-carrier-react`, runtime — `maya-chat-shell`.
+Сверка пакета не меняет дизайн приложения и не интегрирует неизвестную ветку.
+Подключение макетов должно сохранить session/conversation/widget/voice contracts.
+Пакет описывает владельца; демонстрационные данные не являются источником прав
+или реальных задач/библиотеки. [Карта сопоставления](MAYA-DESIGN-PACKAGE-INTAKE-20261011.md).
 
 LIVE PERSONAL ACCEPTANCE: NOT RUN.
-READY FOR LIVE LAUNCH: NO — web callback lifecycle имеет воспроизведённый
-блокер; текущая Telegram configuration и отдельный private-read режим ещё не
-квалифицированы; действующего разрешения на private CRM/model нет.
-PRODUCT CHANGES IN THIS UNIT: 0.
+READY FOR LIVE LAUNCH: NO — локальный lifecycle blocker исправлен и synthetic
+roundtrip проходит; текущая Telegram configuration и отдельный private-read режим
+ещё не квалифицированы; действующего разрешения на private CRM/model нет.
+PRODUCT CHANGES: 0 в исходном HTTP-test checkpoint `a53c6546`; web handoff/runtime
+и callback artifact изменены в последующем `6ca9a5ed`. Backend auth/Client authority
+и owner DB этим последующим проходом не изменялись.

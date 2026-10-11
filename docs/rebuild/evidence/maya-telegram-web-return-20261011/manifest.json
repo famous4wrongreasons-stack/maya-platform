@@ -1,0 +1,150 @@
+{
+  "candidate": "6ca9a5ede154647e960ab2a704e15653f1205fe6",
+  "note": "Raw local synthetic logs/screens retained in place; final results above supersede exploratory harness runs. Source changes are not implied by docs-only commits. No real credentials or owner data used.",
+  "receipts": [
+    {
+      "path": "/private/tmp/maya-telegram-final-6ca9a5ed-20261011/browser.log",
+      "bytes": 1910,
+      "sha256": "07e0fbd6883ff6da55701b54782b11c57b021d46f86482b4bb5fc1a0d85607e2",
+      "use": "fresh committed-checkpoint verification"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-final-6ca9a5ed-20261011/candidate.txt",
+      "bytes": 41,
+      "sha256": "dc1c4f8bee72f48e8be36df28bc7652ed20e726d68e3ba606688f8adb95ef8b0",
+      "use": "fresh committed-checkpoint verification"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-final-6ca9a5ed-20261011/carrier.log",
+      "bytes": 13338,
+      "sha256": "290df8109f8062476c5957bc253e76d001fe58824c45097dc0f4c40228c04eb7",
+      "use": "fresh committed-checkpoint verification"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-final-6ca9a5ed-20261011/git-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "use": "fresh committed-checkpoint verification"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-final-6ca9a5ed-20261011/mutations.log",
+      "bytes": 1161,
+      "sha256": "5bc813ccd2cb3fc655e5528a839eedfc8265e52b6686253aa0a7e5756ac5f600",
+      "use": "fresh committed-checkpoint verification"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-final-6ca9a5ed-20261011/packaging-tests.log",
+      "bytes": 1468,
+      "sha256": "63771de768d8a61ae7b718a402221f82ba68e886f3848e15383859cee5f2e353",
+      "use": "fresh committed-checkpoint verification"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-final-6ca9a5ed-20261011/packaging.log",
+      "bytes": 732,
+      "sha256": "6ab6852d86bc47e0950c5122afb1539537c1a1e1a2e378f5359be618fc96518f",
+      "use": "fresh committed-checkpoint verification"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-final-6ca9a5ed-20261011/runtime.log",
+      "bytes": 79027,
+      "sha256": "e21b4b6f322bff763b0ed3f71adfdd496495532800df79d33d942b67389f9810",
+      "use": "fresh committed-checkpoint verification"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-browser-6ca9a5ed-final/report.json",
+      "bytes": 2168,
+      "sha256": "4574028c2daa08c8c0571cf3a629d5f01fcee71c157b35c8c95519bf90f5bbd2",
+      "use": "fresh committed-checkpoint verification"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-mutations-6ca9a5ed-final/report.json",
+      "bytes": 1641,
+      "sha256": "fed64b3dc1aef30e66935181c177fb670de4a7e15730162e5c7c786e9eded8b8",
+      "use": "fresh committed-checkpoint verification"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-browser-6ca9a5ed-final/signed-in.png",
+      "bytes": 25188,
+      "sha256": "09eb14bab39b3415e0bb94ee4cf8941ee7090691ceac68a744299ee496c0ffec",
+      "use": "fresh committed-checkpoint verification"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-runtime-full-20261011.log",
+      "bytes": 80618,
+      "sha256": "f87a4e97b784266ddc720de95cebfd68107a6e36c7f65cbf7dfc9a6f05b9495f",
+      "use": "historical diagnostic or intermediate harness"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-fixture-repair-20261011.log",
+      "bytes": 225,
+      "sha256": "24846ac929366782f49b9f37d754bd90f19fb25f02bda904b72df925feaaeda2",
+      "use": "historical diagnostic or intermediate harness"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-preexisting-fixture-hashes-20261011.json",
+      "bytes": 747,
+      "sha256": "3fc6d7f682b0f9eb65a0a74c33429e15e34063fecc527ecaa3fcc001d80a7dff",
+      "use": "historical diagnostic or intermediate harness"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-browser-20261011-01/report.json",
+      "bytes": 1105,
+      "sha256": "dd6ec087499711a9fe2edd2e4a23c10fc050588de12dbdcc190af86c57fb8b92",
+      "use": "historical diagnostic or intermediate harness"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-browser-20261011-02/report.json",
+      "bytes": 1103,
+      "sha256": "8e951b57007f12d50cd3fda64dedfd43040d61d2e991e30141fb4ceaf9cef9e0",
+      "use": "historical diagnostic or intermediate harness"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-browser-20261011-03/report.json",
+      "bytes": 1340,
+      "sha256": "f47a5056f6bef5364ce5a0c94cb32e1d97c84df34112a02ae122e13e727bbf03",
+      "use": "historical diagnostic or intermediate harness"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-browser-20261011-04/report.json",
+      "bytes": 1503,
+      "sha256": "ef763672d2658609d5b95d412dfa34b36a4b644d0128575ab231ad07df87dc66",
+      "use": "historical diagnostic or intermediate harness"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-browser-20261011-05/report.json",
+      "bytes": 2087,
+      "sha256": "68783a1c29ee5882bc4d4a0dabbd8a3b76a8bf22e7d56de8abcee640ee6aa1a0",
+      "use": "historical diagnostic or intermediate harness"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-browser-20261011-06/report.json",
+      "bytes": 2233,
+      "sha256": "4f43caf4420a5d51f2799ecb68dbf11fcd6d6aea1e85162ff98adbaa831bba0b",
+      "use": "historical diagnostic or intermediate harness"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-browser-20261011-07/report.json",
+      "bytes": 3649,
+      "sha256": "1487d8742d943ac3c39a0c72b83c14ccb96c8957a97754371964f3687a80f7d3",
+      "use": "historical diagnostic or intermediate harness"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-browser-20261011-08/report.json",
+      "bytes": 6218,
+      "sha256": "d9ff591ba4b32f73b35e5e8f5cfe20eeb78d5c4d4fbf0bdf05cf53c6568e30ce",
+      "use": "historical diagnostic or intermediate harness"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-browser-20261011-09/report.json",
+      "bytes": 3677,
+      "sha256": "408382ff48d25ad01e900730f6dad056162dff7311115f0eb8786c9dfc881275",
+      "use": "historical diagnostic or intermediate harness"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-browser-20261011-10/report.json",
+      "bytes": 2018,
+      "sha256": "fca175d13c5ad0f80f9137bf39d468e11e4076b1b9f0aabc35aba570330b5d3f",
+      "use": "historical diagnostic or intermediate harness"
+    }
+  ]
+}

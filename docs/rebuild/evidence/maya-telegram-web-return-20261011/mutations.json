@@ -1,0 +1,75 @@
+{
+  "contract": "maya.telegram-web-return.mutations/1",
+  "sourceHashes": {
+    "maya-chat-shell/src/net/session.ts": "e49e66dd6c46ce146e608380d592cf1a6222964db55ab435230c13b06d2fa8f0",
+    "maya-carrier-react/src/runtime/telegramPopup.ts": "94aab76acfab1cc9142b418ef1252f46d553894379b74a2eac2bcbf6ecdb675a",
+    "maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html": "b10e89898aa74a39756d4f49e1537c8ee6c0066bc7a2666982b4052b0f99444f"
+  },
+  "baseline": {
+    "net": 0,
+    "popup": 0
+  },
+  "results": [
+    {
+      "name": "state-binding",
+      "killed": true,
+      "status": 1,
+      "signal": null
+    },
+    {
+      "name": "auth-cancellation",
+      "killed": true,
+      "status": 1,
+      "signal": null
+    },
+    {
+      "name": "close-before-complete",
+      "killed": true,
+      "status": 1,
+      "signal": null
+    },
+    {
+      "name": "exact-origin",
+      "killed": true,
+      "status": 1,
+      "signal": null
+    },
+    {
+      "name": "exact-path",
+      "killed": true,
+      "status": 1,
+      "signal": null
+    },
+    {
+      "name": "erase-query-before-read",
+      "killed": true,
+      "status": 1,
+      "signal": null
+    },
+    {
+      "name": "disown-opener",
+      "killed": true,
+      "status": 1,
+      "signal": null
+    },
+    {
+      "name": "erase-before-delivery",
+      "killed": true,
+      "status": 1,
+      "signal": null
+    },
+    {
+      "name": "duplicate-state",
+      "killed": true,
+      "status": 1,
+      "signal": null
+    },
+    {
+      "name": "malformed-query-erasure",
+      "killed": true,
+      "status": 1,
+      "signal": null
+    }
+  ],
+  "status": "PASS"
+}

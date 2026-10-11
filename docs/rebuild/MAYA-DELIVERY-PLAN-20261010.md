@@ -1,5 +1,17 @@
 # План завершения MAYA — 10 октября 2026
 
+**11 октября, web return исправлен и проверен на `6ca9a5ed`:** Telegram открывается
+в отдельном окне, исходный AChat сохраняет ожидаемый вход в памяти; callback
+проверяется и очищается до штатного `/complete`. Runtime 723 PASS / 7 SKIP,
+carrier 157 PASS, 10/10 targeted mutations, 29 synthetic browser checkpoints,
+18 packaging checks и PWA/Capacitor equivalence PASS. Реальный provider/Safari/iOS
+и private-history launch ещё не квалифицированы. Старые записи ниже — история,
+а не открытый повтор уже исправленного дефекта.
+[Evidence](evidence/maya-telegram-web-return-20261011/README.md).
+Получен новый дизайн владельца, целостность 113 файлов подтверждена;
+[сверка с текущими владельцами данных и маршрутами](MAYA-DESIGN-PACKAGE-INTAKE-20261011.md)
+не означает внедрение или смену source authority.
+
 **11 октября, Telegram web preflight на `0c4ae3b8`:** имя платформенного бота
 уже установлено из canonical docs — `@mayaos_login_bot`; повторный запрос
 владельцу не нужен. Node/VM execution текущего compose + callback воспроизводит

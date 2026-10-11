@@ -1,0 +1,580 @@
+{
+  "contract": "maya.design-package-intake/1",
+  "date": "2026-10-11",
+  "sourceDirectory": "/Users/stanislavmosin/Downloads/Maya_full_design_package",
+  "sourceManifestSha256": "fcb463bd245b1a1223bfdf1ae59fedecf3db4e6d98771d6bd29b6e4ebe09be09",
+  "comparedProductCheckpoint": "6ca9a5ede154647e960ab2a704e15653f1205fe6",
+  "verifiedFiles": 113,
+  "verifiedBytes": 10407909,
+  "integrity": "PASS",
+  "prototypeExecutedByThisIntake": false,
+  "productDesignChanged": false,
+  "packageInstructions": "Reference material, not independent task authorization or repository governance",
+  "files": [
+    {
+      "path": "00_START_HERE.txt",
+      "bytes": 5040,
+      "sha256": "081b7cce139454d5b0f7169cb7fc0c73fe8dfcabac14453e3af585f8b2ce2a5e"
+    },
+    {
+      "path": "01_IMPLEMENTATION.txt",
+      "bytes": 20419,
+      "sha256": "8190b1f109140eaa34eda9765ba9a77602085b066481a5401f18c3b95e6d4e07"
+    },
+    {
+      "path": "02_CODEX_PROMPT.txt",
+      "bytes": 3177,
+      "sha256": "359b27e699d7985bdd1f2d22ab043ca0a7ae99dd6485ff59291f45c8f6546140"
+    },
+    {
+      "path": "PACKAGE_PREVIEW.png",
+      "bytes": 118990,
+      "sha256": "6040faa37ba2aa23ef41b2f99c242c3175535133864ce24396811fe601e42d3b"
+    },
+    {
+      "path": "VERIFICATION.txt",
+      "bytes": 3780,
+      "sha256": "6db804e5220a31ca04a5a6fc7f4c0ac7783f47c21bd19d0015a1f88a9c96cbe2"
+    },
+    {
+      "path": "assets/maya-logo.png",
+      "bytes": 284452,
+      "sha256": "53d4b9fb9aa48915d89d88b5fc945568afa1aa7f532475c34333b8096bc41600"
+    },
+    {
+      "path": "assets/maya-robot-static.png",
+      "bytes": 979557,
+      "sha256": "5d025a174df2958ce6c3b0dfdd065078a1b4e9ef41d7f2a29d013f34ba3f1761"
+    },
+    {
+      "path": "assets/motion/generation-prompt.json",
+      "bytes": 2172,
+      "sha256": "02a70e53f5d441efc54f8e3fd438e50914635de707d4c4850e1260606f090b62"
+    },
+    {
+      "path": "assets/motion/maya-rig.png",
+      "bytes": 812947,
+      "sha256": "26f12592f2fb6a6f38b13ffeda50ac818995995dad56cf013b9ae093b48d7e60"
+    },
+    {
+      "path": "assets/motion/maya-robot.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "assets/motion/maya-robot.js",
+      "bytes": 7072,
+      "sha256": "78e8f5c75c4301e2409d321fc0c54f54de60ed10ecdd0ce0dba471a7d679b986"
+    },
+    {
+      "path": "design/MOTION.txt",
+      "bytes": 9860,
+      "sha256": "a13e8b86e82eba1cb069ab7013d0586f24d8d289de448228995af88de8e8ab6f"
+    },
+    {
+      "path": "design/SCREEN_MAP.json",
+      "bytes": 4544,
+      "sha256": "2f675b4372543674bb7f92f558caf5158c9ce8af2293aef140f11e37fac4bd61"
+    },
+    {
+      "path": "design/design-system.json",
+      "bytes": 2380,
+      "sha256": "ff2dfafcde22dee9df73eb2f4ac02844d814a660137a65060462604fbdc5c00e"
+    },
+    {
+      "path": "design/visual-guide/Maya_design_v4.docx",
+      "bytes": 1252895,
+      "sha256": "ecfaab4e1c1c563fb736344efa3c1631bd9289ddb78f7dae7555fc05b2ad4e36"
+    },
+    {
+      "path": "index.html",
+      "bytes": 9220,
+      "sha256": "c028fa4dea5e05661b315058b347092fccf8e483e5ab432533f894f78c05e36e"
+    },
+    {
+      "path": "prototype/.gitignore",
+      "bytes": 53,
+      "sha256": "463b5f9362420aaa6bbf70c200b7cef361af47f34e60e6767851406f3091a39a"
+    },
+    {
+      "path": "prototype/.npmrc",
+      "bytes": 23,
+      "sha256": "f7dbda001b627b3a792fb6929303b517f047f03916f2c55227e81216d38a2008"
+    },
+    {
+      "path": "prototype/.openai/hosting.json",
+      "bytes": 31,
+      "sha256": "d532abb65cf9ae20634b464d954cb4a08a0de9f3cd3cdf7f9c3ec8948826d947"
+    },
+    {
+      "path": "prototype/AGENTS.md",
+      "bytes": 11910,
+      "sha256": "14c32424cb46f52f9e47de3869410bda349f87c6bb991703be243622c3e20787"
+    },
+    {
+      "path": "prototype/design-system.json",
+      "bytes": 2380,
+      "sha256": "ff2dfafcde22dee9df73eb2f4ac02844d814a660137a65060462604fbdc5c00e"
+    },
+    {
+      "path": "prototype/dist/.openai/hosting.json",
+      "bytes": 31,
+      "sha256": "d532abb65cf9ae20634b464d954cb4a08a0de9f3cd3cdf7f9c3ec8948826d947"
+    },
+    {
+      "path": "prototype/dist/client/assets/android/Keyboard.png",
+      "bytes": 42695,
+      "sha256": "6085e50be17ca2705b4351283187be2c5b01b58262c70b90d74b3376efb4adfe"
+    },
+    {
+      "path": "prototype/dist/client/assets/android/Pixel10.png",
+      "bytes": 214337,
+      "sha256": "a87c1250ba20756f5d020b5351a7ae71d663dcfc64aca3a1cd56452e8a05233e"
+    },
+    {
+      "path": "prototype/dist/client/assets/android/navigation-bar.svg",
+      "bytes": 542,
+      "sha256": "077a782a3b6c2915fc518dfb4bba825c8c5861b2572f9522a7024902b9cb2850"
+    },
+    {
+      "path": "prototype/dist/client/assets/index-Bu7yZRu0.js",
+      "bytes": 575373,
+      "sha256": "5f520d6da3fe96b349be048f52202eb00340836c8fae625d0ff1afa343378c21"
+    },
+    {
+      "path": "prototype/dist/client/assets/index-D1YzUNiD.css",
+      "bytes": 32358,
+      "sha256": "19a5af829ec8e195c8349a07de501f34fa1de88627edd1c937bec663fa6fc9f9"
+    },
+    {
+      "path": "prototype/dist/client/assets/iphone/Bezel.png",
+      "bytes": 353980,
+      "sha256": "ee2514d74d2f75f3541405fa2f20811f159879a66586778cfd8c9c84c44959df"
+    },
+    {
+      "path": "prototype/dist/client/assets/iphone/Keyboard.png",
+      "bytes": 53341,
+      "sha256": "292e2d83d69adaeb663d6a840ce8db8d0a5257710b472c20713e03f56b08ea88"
+    },
+    {
+      "path": "prototype/dist/client/assets/maya/logo.png",
+      "bytes": 284452,
+      "sha256": "53d4b9fb9aa48915d89d88b5fc945568afa1aa7f532475c34333b8096bc41600"
+    },
+    {
+      "path": "prototype/dist/client/assets/maya/motion/generation-prompt.json",
+      "bytes": 2172,
+      "sha256": "02a70e53f5d441efc54f8e3fd438e50914635de707d4c4850e1260606f090b62"
+    },
+    {
+      "path": "prototype/dist/client/assets/maya/motion/maya-rig.png",
+      "bytes": 812947,
+      "sha256": "26f12592f2fb6a6f38b13ffeda50ac818995995dad56cf013b9ae093b48d7e60"
+    },
+    {
+      "path": "prototype/dist/client/assets/maya/motion/maya-robot.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "prototype/dist/client/assets/maya/motion/maya-robot.js",
+      "bytes": 7072,
+      "sha256": "78e8f5c75c4301e2409d321fc0c54f54de60ed10ecdd0ce0dba471a7d679b986"
+    },
+    {
+      "path": "prototype/dist/client/assets/maya/robot.png",
+      "bytes": 979557,
+      "sha256": "5d025a174df2958ce6c3b0dfdd065078a1b4e9ef41d7f2a29d013f34ba3f1761"
+    },
+    {
+      "path": "prototype/dist/client/assets/roboto-latin-500-normal-7RbcRiD8.woff2",
+      "bytes": 22200,
+      "sha256": "5bcc3aa180e7f26f643cd5b2621cd7c2de193d0661d913a94afd3d4881a7a34b"
+    },
+    {
+      "path": "prototype/dist/client/assets/roboto-latin-500-normal-DQZyH_nt.woff",
+      "bytes": 21920,
+      "sha256": "b9c3346f0ae869eee449c94a182d90b100f253d916827785577887d03eff51db"
+    },
+    {
+      "path": "prototype/dist/client/assets/status/ios-status-icons.svg",
+      "bytes": 2765,
+      "sha256": "40e218b274d0973d519b50f42884e6e05ef0f2b6a0e46e102fda54218784466d"
+    },
+    {
+      "path": "prototype/dist/client/assets/status/status-icons.svg",
+      "bytes": 824,
+      "sha256": "1a8bd4207cf34532ae514bdcdca693acc9a2b8ebc9d3182dc163c3e9ddcc4823"
+    },
+    {
+      "path": "prototype/dist/client/index.html",
+      "bytes": 483,
+      "sha256": "d3243ea69cf21245a0764f962632de5d3d34ce965435687faf80cb010bccc4a7"
+    },
+    {
+      "path": "prototype/dist/client/maya-motion.html",
+      "bytes": 13503,
+      "sha256": "e9d55dbe5d7b9b2010319e3d951e4663e3432a20730a2ff27bd5cb122b31cf3b"
+    },
+    {
+      "path": "prototype/dist/server/index.js",
+      "bytes": 483,
+      "sha256": "2dd0615a445143933d88d4271f54f5d63ee951421fcd08c5a7617bb09c564389"
+    },
+    {
+      "path": "prototype/index.html",
+      "bytes": 385,
+      "sha256": "6359184611b1f28e6431e69caec5f50e04e93052b8b1af8418cad6d60adfef9d"
+    },
+    {
+      "path": "prototype/mobile-runtime.lock.json",
+      "bytes": 2800,
+      "sha256": "54ad5b0bd5ceebbe73261b5e343859cbddaf621e6320c6eaaecec87c4a39ce5d"
+    },
+    {
+      "path": "prototype/package-lock.json",
+      "bytes": 77420,
+      "sha256": "c70f5fc941948754f0c3e2c1d0f5f468faa2fe3ab4bc81689219c2a011c24272"
+    },
+    {
+      "path": "prototype/package.json",
+      "bytes": 1062,
+      "sha256": "3f96151bf0c0f673593e19ccd9732e84e71ffb921003b2d43e8a88e1d62003bf"
+    },
+    {
+      "path": "prototype/playwright.config.ts",
+      "bytes": 539,
+      "sha256": "a75849b516724e663b31107209177f5372afd8aa76e6e6375dc24e839d4af3b5"
+    },
+    {
+      "path": "prototype/public/assets/android/Keyboard.png",
+      "bytes": 42695,
+      "sha256": "6085e50be17ca2705b4351283187be2c5b01b58262c70b90d74b3376efb4adfe"
+    },
+    {
+      "path": "prototype/public/assets/android/Pixel10.png",
+      "bytes": 214337,
+      "sha256": "a87c1250ba20756f5d020b5351a7ae71d663dcfc64aca3a1cd56452e8a05233e"
+    },
+    {
+      "path": "prototype/public/assets/android/navigation-bar.svg",
+      "bytes": 542,
+      "sha256": "077a782a3b6c2915fc518dfb4bba825c8c5861b2572f9522a7024902b9cb2850"
+    },
+    {
+      "path": "prototype/public/assets/iphone/Bezel.png",
+      "bytes": 353980,
+      "sha256": "ee2514d74d2f75f3541405fa2f20811f159879a66586778cfd8c9c84c44959df"
+    },
+    {
+      "path": "prototype/public/assets/iphone/Keyboard.png",
+      "bytes": 53341,
+      "sha256": "292e2d83d69adaeb663d6a840ce8db8d0a5257710b472c20713e03f56b08ea88"
+    },
+    {
+      "path": "prototype/public/assets/maya/logo.png",
+      "bytes": 284452,
+      "sha256": "53d4b9fb9aa48915d89d88b5fc945568afa1aa7f532475c34333b8096bc41600"
+    },
+    {
+      "path": "prototype/public/assets/maya/motion/generation-prompt.json",
+      "bytes": 2172,
+      "sha256": "02a70e53f5d441efc54f8e3fd438e50914635de707d4c4850e1260606f090b62"
+    },
+    {
+      "path": "prototype/public/assets/maya/motion/maya-rig.png",
+      "bytes": 812947,
+      "sha256": "26f12592f2fb6a6f38b13ffeda50ac818995995dad56cf013b9ae093b48d7e60"
+    },
+    {
+      "path": "prototype/public/assets/maya/motion/maya-robot.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "prototype/public/assets/maya/motion/maya-robot.js",
+      "bytes": 7072,
+      "sha256": "78e8f5c75c4301e2409d321fc0c54f54de60ed10ecdd0ce0dba471a7d679b986"
+    },
+    {
+      "path": "prototype/public/assets/maya/robot.png",
+      "bytes": 979557,
+      "sha256": "5d025a174df2958ce6c3b0dfdd065078a1b4e9ef41d7f2a29d013f34ba3f1761"
+    },
+    {
+      "path": "prototype/public/assets/status/ios-status-icons.svg",
+      "bytes": 2765,
+      "sha256": "40e218b274d0973d519b50f42884e6e05ef0f2b6a0e46e102fda54218784466d"
+    },
+    {
+      "path": "prototype/public/assets/status/status-icons.svg",
+      "bytes": 824,
+      "sha256": "1a8bd4207cf34532ae514bdcdca693acc9a2b8ebc9d3182dc163c3e9ddcc4823"
+    },
+    {
+      "path": "prototype/public/maya-motion.html",
+      "bytes": 13503,
+      "sha256": "e9d55dbe5d7b9b2010319e3d951e4663e3432a20730a2ff27bd5cb122b31cf3b"
+    },
+    {
+      "path": "prototype/scripts/check-mobile-runtime.mjs",
+      "bytes": 1212,
+      "sha256": "ee85738cc2ef889c0b457d8ccac61e017b8c5d16f393e766ec9fb7d11c9aff7f"
+    },
+    {
+      "path": "prototype/scripts/prepare-sites-build.mjs",
+      "bytes": 910,
+      "sha256": "b6a6adaa4fab3234676116dd1c9cb6611275ab9d92dd26f5bf402393e3744bf6"
+    },
+    {
+      "path": "prototype/scripts/update-mobile-runtime-lock.mjs",
+      "bytes": 1732,
+      "sha256": "b4e1aa41133f19ba8bb32685b3ec05798b1ceabaf72c328419d545aa60fe1f0b"
+    },
+    {
+      "path": "prototype/src/App.tsx",
+      "bytes": 191,
+      "sha256": "7054b4e14304ab33153d3a2e860aa43d2a4f69e8a69630b4a37a2cbcd4ad2f16"
+    },
+    {
+      "path": "prototype/src/MayaRobot.tsx",
+      "bytes": 1398,
+      "sha256": "33196f3a896b042fce51382c2c48f3922e33165f06a7a34c24f6687595d93a5f"
+    },
+    {
+      "path": "prototype/src/Prototype.tsx",
+      "bytes": 34745,
+      "sha256": "4b9123c60121b6db549de158d5c9853f79b8c3cfbc1a6858173b5c2779d5650a"
+    },
+    {
+      "path": "prototype/src/main.tsx",
+      "bytes": 307,
+      "sha256": "01b7049715148ab645637905ccbbc91fc3f87659198a309541c2d1f03bb537d0"
+    },
+    {
+      "path": "prototype/src/mobile/BottomSheet.tsx",
+      "bytes": 4316,
+      "sha256": "f9c376dc78b8b5feb1c8752aa23414993ab66013d11e81b2ebb8342c570032ac"
+    },
+    {
+      "path": "prototype/src/mobile/COMPONENTS.md",
+      "bytes": 1982,
+      "sha256": "678379569b09d9ab789d96e8030a0eebb6606b880d8ad5b74de513f8a7b2787b"
+    },
+    {
+      "path": "prototype/src/mobile/Carousel.tsx",
+      "bytes": 10162,
+      "sha256": "242f4a7488e18c35e9b43651c9d5877288655a6f9f1734e03e56108f17526bf7"
+    },
+    {
+      "path": "prototype/src/mobile/Device.tsx",
+      "bytes": 3537,
+      "sha256": "867de9c65220f2ac7202f895d2b10a64c747f211a4b22cd8f81a1a1d66e52fc2"
+    },
+    {
+      "path": "prototype/src/mobile/FlowStack.tsx",
+      "bytes": 7244,
+      "sha256": "1e85744c5f1c1138dd5e8b7b27fbb6c05139d5aac93d94c45084a018eddd4ebc"
+    },
+    {
+      "path": "prototype/src/mobile/Keyboard.tsx",
+      "bytes": 6831,
+      "sha256": "862587264375499846385ce817ea1b813db8f118140cdb6da163f989a6946cac"
+    },
+    {
+      "path": "prototype/src/mobile/MobileCursor.tsx",
+      "bytes": 2171,
+      "sha256": "be2353205e05d823bc23ecae88179d712781ee9ede8fa317057c194c7c23ee7d"
+    },
+    {
+      "path": "prototype/src/mobile/MobileRuntime.tsx",
+      "bytes": 1338,
+      "sha256": "1ffe80a9582460005d66f10fc73deaff08b81431785a506887cc0d8320be747f"
+    },
+    {
+      "path": "prototype/src/mobile/MobileScroll.tsx",
+      "bytes": 14325,
+      "sha256": "ea3e3691f587ea13753162b9e64c1981263e5b9beddebea21a6a1551dce76430"
+    },
+    {
+      "path": "prototype/src/mobile/PhoneFrame.tsx",
+      "bytes": 4448,
+      "sha256": "73015590b468acbb4b58e3f6fe5eef99c5f68f67722caffd8f00d271ba00a91d"
+    },
+    {
+      "path": "prototype/src/mobile/assets.ts",
+      "bytes": 232,
+      "sha256": "d40cb8e5390fd2b54618266e7694e40349006dfe480f65d60559316ca8c9c234"
+    },
+    {
+      "path": "prototype/src/mobile/components.tsx",
+      "bytes": 2691,
+      "sha256": "20b02f6c6de4cfd08aa6a49bf9bc261c0ea000864b37e1001afdcd892afe4bc8"
+    },
+    {
+      "path": "prototype/src/mobile/geometry.ts",
+      "bytes": 1244,
+      "sha256": "f1382e5d6cc9adfd7ac142304f2f9a5a2330db1d74b3f0848adbaf311676bf16"
+    },
+    {
+      "path": "prototype/src/mobile/index.ts",
+      "bytes": 802,
+      "sha256": "ee69d9341571db5dee84dd2d7452a62eef09085a84a85f198a3edc48047e0412"
+    },
+    {
+      "path": "prototype/src/prototype.css",
+      "bytes": 22217,
+      "sha256": "0c9c92962dfa7e93bd23dcc6d04dc26287501b35e38f868ecc7b4326ed7211c9"
+    },
+    {
+      "path": "prototype/src/styles.css",
+      "bytes": 14264,
+      "sha256": "844c67b27cf5e38ba395153145d058c929c6479199d245cd046f3646badd719d"
+    },
+    {
+      "path": "prototype/src/vite-env.d.ts",
+      "bytes": 38,
+      "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5"
+    },
+    {
+      "path": "prototype/tests/mobile-runtime.spec.ts",
+      "bytes": 11097,
+      "sha256": "8585d11c768d853f26eef5d5dcc38edd32312646f8a83aecb23291da9235a975"
+    },
+    {
+      "path": "prototype/tests/runtime-fixture.css",
+      "bytes": 1249,
+      "sha256": "2445079492e348809e9ab48a016e1ab40e99026d6853c0fe036e34cfd062cbff"
+    },
+    {
+      "path": "prototype/tests/runtime-fixture.html",
+      "bytes": 334,
+      "sha256": "5d76636ac5d6a7ba916ada52e8b5cd9d9311887cbb2e17c73c10560091a26bb5"
+    },
+    {
+      "path": "prototype/tests/runtime-fixture.tsx",
+      "bytes": 4156,
+      "sha256": "5151193645265a13e8e1aea05264d089512312ac85f67b0fc35d7f956b0d26ed"
+    },
+    {
+      "path": "prototype/tests/sites-worker.test.mjs",
+      "bytes": 2219,
+      "sha256": "96af7b48906c6460c793356d7b6952f7d5026dbf5a502bec0d9297ff04201c26"
+    },
+    {
+      "path": "prototype/tsconfig.json",
+      "bytes": 527,
+      "sha256": "83efc1798334967d5a907f26b8cba31fa213f16b5ac0ed5c02fd38e7cf0ceb66"
+    },
+    {
+      "path": "prototype/vite.config.ts",
+      "bytes": 255,
+      "sha256": "da36eba05b845c3b0d69d823a515f6f7d9612992126ed2fe32c2809815ec73ba"
+    },
+    {
+      "path": "prototype/worker/index.js",
+      "bytes": 483,
+      "sha256": "2dd0615a445143933d88d4271f54f5d63ee951421fcd08c5a7617bb09c564389"
+    },
+    {
+      "path": "screens/01-chat.png",
+      "bytes": 22352,
+      "sha256": "7bb552c1f1a0c679981a179c529d2dd6b814acf4cbf807d320580fe59ee94ac7"
+    },
+    {
+      "path": "screens/02-feed.png",
+      "bytes": 23823,
+      "sha256": "8f0b1bbdb70eb18c41afaddbe5c98977360ea1edf2ca7f7e864673645deb0d1e"
+    },
+    {
+      "path": "screens/03-ideas.png",
+      "bytes": 22620,
+      "sha256": "51285d6c669b47bf851516d557968420517fc831281b04bc33b232798378d8e0"
+    },
+    {
+      "path": "screens/04-tasks.png",
+      "bytes": 20503,
+      "sha256": "27afc1b43a7b82f5eb70935eca609ae22af6436cae858c87e6d144f9e4b8ebe1"
+    },
+    {
+      "path": "screens/05-library.png",
+      "bytes": 19787,
+      "sha256": "437ee30acc4792eb39ddbd90d68466db48d9bd195d55bd341bb0ec63895239ca"
+    },
+    {
+      "path": "screens/06-media-empty.png",
+      "bytes": 15986,
+      "sha256": "990ef5835e7520c75c99f4e56c0155e6bce12b8b10087074580a01cc5a21d7df"
+    },
+    {
+      "path": "screens/07-library-menu.png",
+      "bytes": 15461,
+      "sha256": "0ab1895676ab473118f842478d33c5cf87b4ef7621e3de58190ab5effc133d55"
+    },
+    {
+      "path": "screens/08-library-grid.png",
+      "bytes": 17840,
+      "sha256": "e2f475729948c48694748b6c5442bae77bf74b492bd9be7f085af552520d27fc"
+    },
+    {
+      "path": "screens/09-document.png",
+      "bytes": 18446,
+      "sha256": "b4de7a2cb43f0cd9d4f69694c355dfd96dcdf7420135200181d250aa8b54e1e6"
+    },
+    {
+      "path": "screens/10-drawer.png",
+      "bytes": 15855,
+      "sha256": "393e6119d425f60bca695b7b414bc2daab5111011bfa3d2b049c6ede2921bff9"
+    },
+    {
+      "path": "screens/11-settings.png",
+      "bytes": 19024,
+      "sha256": "ad626acbe3debde499b65949a346acec91dec57a38da127736d7e859de2c9f4d"
+    },
+    {
+      "path": "screens/12-action-plan.png",
+      "bytes": 24174,
+      "sha256": "7f58cfe75eaac49d5412a4951f8a30be48dd5ba57fe63f7dda07688efb2807e4"
+    },
+    {
+      "path": "screens/13-schedule.png",
+      "bytes": 18546,
+      "sha256": "d226d73e8216fbcf23fd1134d35f207ba92da3558f3e61f820741e98e7aeaa4f"
+    },
+    {
+      "path": "screens/14-new-task.png",
+      "bytes": 18883,
+      "sha256": "09a871693fd0bd5f28eed485d592bb30e68dc267651625b2c4e87e4d5f6a29d4"
+    },
+    {
+      "path": "screens/15-about-maya.png",
+      "bytes": 20339,
+      "sha256": "80c29459f8583c6a2be92af9831db20afe614c6ae8650b519066bb37427d9068"
+    },
+    {
+      "path": "screens/16-motion-overview.png",
+      "bytes": 71037,
+      "sha256": "9716dc2f4c30df3e043bb38c85062cf04880c214ae08470ce1bf2fcc3837c3ab"
+    },
+    {
+      "path": "screens/17-feed-filters.png",
+      "bytes": 17595,
+      "sha256": "8148b476d1a81dd06f18ddc3453b45e4b3db409da9031a142ddf778af54eae04"
+    },
+    {
+      "path": "screens/18-voice.png",
+      "bytes": 21335,
+      "sha256": "82258bc1a0c7fbff53315da393f30a834ee813c7dc414bcf3830735171cd822a"
+    },
+    {
+      "path": "screens/19-attachments.png",
+      "bytes": 21404,
+      "sha256": "e899eecfc6445b2bcd25dfce93c67db46e29596f0ea80dcb2da6bbdd726c2543"
+    },
+    {
+      "path": "screens/20-android.png",
+      "bytes": 21879,
+      "sha256": "f262f588162e0a22588e78d1bc33b9929ac9b755d3a6aa37cff4d507c86fc8b3"
+    }
+  ]
+}
