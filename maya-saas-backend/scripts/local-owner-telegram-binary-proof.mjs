@@ -73,10 +73,18 @@ try {
   const request = (route, body, token) => fetch(origin + route, { method: body === undefined ? 'GET' : 'POST', headers: { origin, ...(body === undefined ? {} : { 'content-type': 'application/json' }), ...(token ? { authorization: 'Bearer ' + token } : {}) }, ...(body === undefined ? {} : { body: JSON.stringify(body) }), signal: AbortSignal.timeout(10000), redirect: 'error' });
   assert.equal((await request('/api/health')).status, 200); report.checks.push('health-through-actual-relay');
   const finder = await request('/api/mobile/pwa/search?q=' + encodeURIComponent(tenant.slug));
+  const finderBody = await finder.json();
+  report.finder = { status: finder.status, itemCount: Array.isArray(finderBody.items) ? finderBody.items.length : null };
+  save();
   assert.equal(finder.status, 200);
-  // This fixture has no customer-app grant: finder availability never supplies readiness.
-  assert.deepEqual((await finder.json()).items, []);
-  report.checks.push('exact-finder-through-child-relay-keeps-canonical-readiness');
+  assert.deepEqual(finderBody.items.map(item => item.tenant_slug), [tenant.slug]);
+  report.checks.push('exact-finder-through-child-relay-selects-ready-synthetic-tenant');
+  // Set an explicit canonical readiness condition in this synthetic fixture.
+  // Absence of grants alone is not a finder blocker under the existing contract.
+  await prisma.tenant.update({ where: { id: tenant.id }, data: { allowSelfRegistration: false } });
+  const hidden = await request('/api/mobile/pwa/search?q=' + encodeURIComponent(tenant.slug));
+  assert.equal(hidden.status, 200); assert.deepEqual((await hidden.json()).items, []);
+  report.checks.push('exact-finder-keeps-canonical-client-registration-readiness');
   for (const route of ['/api/mobile/pwa/search?q=other', '/api/mobile/pwa/search?q=' + tenant.slug + '&city=other', '/api/mobile/pwa/' + tenant.slug + '/install', '/api/mobile/pwa/' + tenant.slug + '/manifest.webmanifest'])
     assert.equal((await request(route)).status, 403);
   report.checks.push('directory-enumeration-and-install-surfaces-refused');
