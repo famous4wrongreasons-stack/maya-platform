@@ -1,0 +1,20 @@
+[
+  {
+    "localPath": "/private/tmp/maya-owner-telegram-20261012-07/session/resume.json",
+    "sha256": "83b7dd19a0bc20514f5cd43e7c00f3678bab2379345aadfbccf8a0a9dd5e012b",
+    "size": 549470,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-owner-telegram-20261012-07/before-login-counts.json",
+    "sha256": "f3ded941c591ebc8bdf254ff06682dca5cb2d8a2d13e6335a68530b60fcc91df",
+    "size": 188,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-owner-telegram-20261012-07/after-login-counts.json",
+    "sha256": "9ac27bb33916eb74cec6a742d1727e57c343ec800ee679d40f0d350e18b087a7",
+    "size": 287,
+    "rawCopied": false
+  }
+]

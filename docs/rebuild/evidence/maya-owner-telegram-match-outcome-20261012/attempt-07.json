@@ -1,0 +1,101 @@
+{
+  "qualification": "LOCAL_OWNER_ATTEMPT_NOT_RELEASE_CERTIFICATION",
+  "candidate": "218a1b066826b663b8fe72c7853e056e86a4b887",
+  "readyAt": "2026-10-11T22:49:02.655Z",
+  "expiresAt": "2026-10-11T22:59:02.655Z",
+  "status": "cancelled",
+  "trace": [
+    {
+      "observedAt": "2026-10-11T22:50:42.349Z",
+      "surface": "http",
+      "route": "telegram_login_complete",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "observedAt": "2026-10-11T22:50:44.056Z",
+      "surface": "provider",
+      "route": "telegram_token",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "observedAt": "2026-10-11T22:50:46.067Z",
+      "surface": "provider",
+      "route": "telegram_token",
+      "method": "POST",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read",
+      "telegramTokenOutcome": "id_token_present"
+    },
+    {
+      "observedAt": "2026-10-11T22:50:46.810Z",
+      "surface": "provider",
+      "route": "telegram_jwks",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "observedAt": "2026-10-11T22:50:48.141Z",
+      "surface": "provider",
+      "route": "telegram_jwks",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read"
+    },
+    {
+      "observedAt": "2026-10-11T22:52:05.513Z",
+      "surface": "http",
+      "route": "telegram_login_complete",
+      "method": "POST",
+      "stage": "completed",
+      "status": 201,
+      "code": null
+    }
+  ],
+  "providerSummary": {
+    "calls": 31,
+    "refused": 0,
+    "routes": {
+      "telegram_token": 1,
+      "telegram_jwks": 1,
+      "client_registry": 29
+    }
+  },
+  "beforeLogin": {
+    "observedAt": "2026-10-11T22:49:40.286Z",
+    "telegramIdentityCount": 1,
+    "ownerLinkedClientCount": 0,
+    "tenantChannelLinks": 0,
+    "tenantActiveChannelLinks": 0,
+    "readOnly": true
+  },
+  "afterCompletedLogin": {
+    "observedAt": "2026-10-11T22:52:24.027Z",
+    "httpCompleted": true,
+    "telegramIdentityCount": 1,
+    "exactUserChannelLinks": 0,
+    "exactUserActiveChannelLinks": 0,
+    "exactUserInitialBindingAuditCount": 0,
+    "newConsumedTelegramFlows": 1,
+    "linkProperties": [],
+    "readOnly": true
+  },
+  "ui": "no_connection",
+  "retry": false,
+  "exactBindingReason": "NOT_CAPTURED",
+  "cleanup": {
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "sourceUnchanged": true,
+    "samePrivateState": true
+  }
+}

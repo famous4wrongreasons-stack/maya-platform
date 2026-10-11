@@ -1,0 +1,92 @@
+[
+  {
+    "localPath": "/private/tmp/maya-source-shared-regression-20261012-01/before.tap",
+    "sha256": "3f973100d9689ed9fe0abc7ff524dc155cb458c834a7cf3b042ca8126e7801e4",
+    "size": 2667,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-source-shared-regression-20261012-01/before-initial-test-matchers.tap",
+    "sha256": "122505cdd31b23ddbc914939fc94bde00f569cc749f2af832d4df7e9020cbf70",
+    "size": 7136,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-binding-diagnostic-20261012-01/before.tap",
+    "sha256": "c517ab42dc28b79e48327e800d92e0cba8a56dbd224df66c9c6c73a40f936480",
+    "size": 6491,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-binding-diagnostic-20261012-01/after-final.tap",
+    "sha256": "c136c00f2ee93282febd533aa1ea5f601219293ed3ebe52182f41dd96ab32e15",
+    "size": 56613,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-binding-diagnostic-20261012-01/types-final.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-binding-diagnostic-20261012-01/lint.log",
+    "sha256": "5e2fa2b3240785c218b224866a26ba7107ee564d25630792600a81ab88b8dc25",
+    "size": 20563,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-binding-diagnostic-20261012-01/lint-final.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-match-diagnostic-http-20261012-01/manifest.json",
+    "sha256": "4fa6339fc1baaeafbdd0371e209ea81712b5e90a0ddca1be9b5470f40c3dfe25",
+    "size": 726,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-match-diagnostic-http-20261012-01/telegram-initial-jest.json",
+    "sha256": "06a95453148b945d1c3cd2985536bab2e02bd3082f65e9b2fda7d0d93c2a0f4b",
+    "size": 45032,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-match-diagnostic-http-20261012-02/manifest.json",
+    "sha256": "a2118b54572b04d3204bce2b346a5b54d1f12f8b4f08d7b081ce30c219af95bf",
+    "size": 691,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-match-diagnostic-http-20261012-02/telegram-initial-jest.json",
+    "sha256": "8bfa19c03a53d98fd2a5ece97b9000927fe6bee9e3c410cf201e15bfae42aca2",
+    "size": 51167,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-match-diagnostic-http-20261012-02/source-hashes.json",
+    "sha256": "78732271e9ce5a48d58cc6322c69440f11358ddb914a3879145fb6c2cd249803",
+    "size": 277350,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-shared-scan-timing-20261012-01/summary.json",
+    "sha256": "2c2cfd28f6028899e4d434f6182be091ec33be22a4a1d88b735f6905557d80e8",
+    "size": 1406,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-match-diagnostic-binary-20261012-01/summary.json",
+    "sha256": "db3034c13eb84a92bd6db7c875beef6a446eef7ee038cc7ed8f25cdb44873287",
+    "size": 5532,
+    "rawCopied": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-match-diagnostic-guards-20261012-01/summary.json",
+    "sha256": "a2a34b1cd985f1b13aee34dfe3b99538b8ccce4d20fd21c1f4976e6c7622b34d",
+    "size": 3391,
+    "rawCopied": false
+  }
+]

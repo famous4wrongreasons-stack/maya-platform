@@ -1,0 +1,204 @@
+{
+  "qualification": "LOCAL_HARNESS_PROOFS_NOT_RELEASE_OR_REAL_CLIENT_ACCEPTANCE",
+  "codeCandidate": "7a0e963e270f4c3998ab57a08caad9aaace84a19",
+  "sourceScanRegressionBefore": {
+    "pass": 8,
+    "fail": 1
+  },
+  "diagnosticRegressionBefore": {
+    "pass": 11,
+    "fail": 3
+  },
+  "localUnits": {
+    "tests": 263,
+    "pass": 263,
+    "fail": 0
+  },
+  "http": {
+    "baseHead": "0acd5e1f142e3f11bf1d604df5bf1c962b792e8c",
+    "workingPatch": true,
+    "exactTestedFilesMatchCodeCandidate": true,
+    "status": "passed",
+    "pass": 92,
+    "fail": 0,
+    "clusterStopped": true,
+    "sourceUnchanged": true
+  },
+  "types": "PASS",
+  "scopedLint": "PASS",
+  "timing": {
+    "qualification": "OFFLINE_TRANSPORT_SOURCE_GUARD_COST_NOT_REAL_PROVIDER_OR_BINDING_PROOF",
+    "head": "7a0e963e270f4c3998ab57a08caad9aaace84a19",
+    "referenceCommit": "2fb2569147cf1910be0b4c01b7ad2735054abe6a",
+    "sourceFiles": 2163,
+    "projectionDigest": "1a4b6adde97c854f97035518f1ea1ec5c9642f0e47c0ba1264f4434611d00931",
+    "projectionEqual": true,
+    "operationBudgetMs": 120000,
+    "browserBudgetMs": 80000,
+    "providerCalls": 0,
+    "retainedDatabaseAccess": false,
+    "runs": [
+      {
+        "name": "shared-scan",
+        "elapsedMs": 38117,
+        "guardMs": 38095,
+        "sourceChecks": 341,
+        "authorityRereads": 68,
+        "completedPages": 32,
+        "completed": true,
+        "withinBrowserBudget": true,
+        "syntheticTransport": {
+          "calls": 34,
+          "refused": 0,
+          "routes": {
+            "telegram_token": 1,
+            "telegram_jwks": 1,
+            "client_registry": 32
+          }
+        }
+      },
+      {
+        "name": "previous-algorithm",
+        "elapsedMs": 114536,
+        "guardMs": 114520,
+        "sourceChecks": 341,
+        "authorityRereads": 68,
+        "completedPages": 32,
+        "completed": true,
+        "withinBrowserBudget": false,
+        "syntheticTransport": {
+          "calls": 34,
+          "refused": 0,
+          "routes": {
+            "telegram_token": 1,
+            "telegram_jwks": 1,
+            "client_registry": 32
+          }
+        }
+      }
+    ],
+    "sourceUnchanged": true
+  },
+  "binary": {
+    "status": "passed",
+    "checks": [
+      "actual-child-ipc-web-ready",
+      "health-through-actual-relay",
+      "exact-finder-through-child-relay-selects-ready-synthetic-tenant",
+      "exact-finder-keeps-canonical-client-registration-readiness",
+      "directory-enumeration-and-install-surfaces-refused",
+      "current-react-payload-served",
+      "canonical-password-session",
+      "canonical-telegram-link-start-no-provider-dispatch",
+      "canonical-telegram-refusal-through-child-ipc-safe-receipt",
+      "business-model-sms-consent-routes-refused",
+      "foreign-tenant-refused",
+      "live-permit-revocation-refused",
+      "clean-child-stop-zero-provider-dispatch",
+      "second-child-refused"
+    ],
+    "realProviderCalls": 0,
+    "clusterStopped": true,
+    "pidFileAbsent": true,
+    "sourceUnchanged": true
+  },
+  "mutation": {
+    "baseline": {
+      "exit": 0,
+      "passed": 38,
+      "failed": 0,
+      "failures": [],
+      "assertion": false
+    },
+    "results": [
+      {
+        "name": "foreign-company",
+        "killed": true,
+        "failures": [
+          "provider refuses other company"
+        ]
+      },
+      {
+        "name": "unverified-owner",
+        "killed": true,
+        "failures": [
+          "exact OIDC exchange and canonical paginated registry read only"
+        ]
+      },
+      {
+        "name": "substituted-verifier",
+        "killed": true,
+        "failures": [
+          "exact OIDC exchange and canonical paginated registry read only"
+        ]
+      },
+      {
+        "name": "repeat-exchange",
+        "killed": true,
+        "failures": [
+          "background, replay, concurrent exchange and repeated page fail closed"
+        ]
+      },
+      {
+        "name": "repeat-registry-page",
+        "killed": true,
+        "failures": [
+          "background, replay, concurrent exchange and repeated page fail closed"
+        ]
+      },
+      {
+        "name": "expired-operation",
+        "killed": true,
+        "failures": [
+          "expired, stopped and changed current authority cannot dispatch"
+        ]
+      },
+      {
+        "name": "aborted-request",
+        "killed": true,
+        "failures": [
+          "aborted browser request cannot dispatch or accept an in-flight response"
+        ]
+      },
+      {
+        "name": "stale-authority-after-response",
+        "killed": true,
+        "failures": [
+          "current authority reread after provider response; oversized response refused"
+        ]
+      },
+      {
+        "name": "candidate-substitution",
+        "killed": true,
+        "failures": [
+          "execution plan refuses changed candidate"
+        ]
+      },
+      {
+        "name": "source-substitution",
+        "killed": true,
+        "failures": [
+          "execution plan refuses changed source"
+        ]
+      },
+      {
+        "name": "expired-permit",
+        "killed": true,
+        "failures": [
+          "execution plan refuses expired"
+        ]
+      }
+    ],
+    "restored": {
+      "exit": 0,
+      "passed": 38,
+      "failed": 0,
+      "failures": [],
+      "assertion": false
+    },
+    "workingSourceUnchanged": true
+  },
+  "productSourcesChanged": false,
+  "retainedOwnerDatabaseUsedByProofs": false,
+  "liveFreshLoginAndExactPersonalClient": "NOT_PROVEN"
+}
