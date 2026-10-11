@@ -341,6 +341,62 @@ describe('Bounded planner stage wire context (no language acceptance)', () => {
     // No recursive rewriting of items/anyOf/$defs or nested property schemas.
     expect(wire.tool_input_schemas[6]).toEqual(sourceSchemas[6]);
   });
+  it('interns complete slot/tool values by equality without sharing changed aliases or permissions', () => {
+    const base = ci.plannerContract(UserRole.CLIENT, ['appointments.own.list']);
+    const one = {
+      ...base.intents[0],
+      required_slots: ['service'],
+      optional_slots: ['date'],
+      ready_tools: ['appointments.own.list'],
+      slot_aliases: { service: ['услуга', 'service'] },
+      readiness_note: 'Exact current source only',
+    };
+    const contract = {
+      ...base,
+      intents: [
+        one,
+        structuredClone(one),
+        {
+          ...one,
+          allowed_for_role: false,
+          ready_tools: [],
+          required_slots: ['service', 'date'],
+          slot_aliases: { service: ['услуга', 'service', 'иная'] },
+          readiness_note: null,
+        },
+      ],
+    };
+    const before = structuredClone(contract);
+    const wire = JSON.parse(
+      JSON.stringify(plannerWireContext([], contract)),
+    ) as PlannerWire;
+    const { intents } = wire.conversation_contract;
+    expect(contract).toEqual(before);
+    expect(Object.keys(intents.dictionaries)).not.toContain('allowed_for_role');
+    for (const [rowIndex, row] of intents.rows.entries()) {
+      for (const [columnIndex, column] of intents.columns.entries()) {
+        const dictionary =
+          intents.dictionaries[column as keyof typeof intents.dictionaries];
+        if (dictionary) {
+          const ref = row[columnIndex] as number;
+          expect(Number.isInteger(ref)).toBe(true);
+          expect(ref).toBeGreaterThanOrEqual(0);
+          expect(ref).toBeLessThan(dictionary.length);
+          expect(dictionary[ref]).toEqual(before.intents[rowIndex][column]);
+        } else
+          expect(row[columnIndex]).toEqual(before.intents[rowIndex][column]);
+      }
+    }
+    expect(intents.dictionaries.slot_aliases).toHaveLength(2);
+    expect(intents.dictionaries.ready_tools).toEqual([
+      ['appointments.own.list'],
+      [],
+    ]);
+    expect(intents.dictionaries.readiness_note).toEqual([
+      'Exact current source only',
+      null,
+    ]);
+  });
   it.each(groups)(
     '%s preserves every tool field and all canonical intent fields exactly',
     (_group, role, features) => {
@@ -371,12 +427,18 @@ describe('Bounded planner stage wire context (no language acceptance)', () => {
       }).toEqual(contract);
       expect(intents.columns).toHaveLength(13);
       expect(intents.rows).toHaveLength(MAYA_CONVERSATION_TAXONOMY.length);
-      expect(intents.rows).toHaveLength(91);
+      // 5f24fcbc adds booking.prepare_personal; retain every current row.
+      expect(intents.rows).toHaveLength(92);
       expect(Object.keys(intents.dictionaries)).toEqual([
         'domain',
         'action',
         'data_class',
         'readiness',
+        'required_slots',
+        'optional_slots',
+        'slot_aliases',
+        'ready_tools',
+        'readiness_note',
       ]);
       expect(contract.intents.some((x) => !x.allowed_for_role)).toBe(true);
       expect(contract.intents.some((x) => x.readiness === 'partial')).toBe(
@@ -388,25 +450,25 @@ describe('Bounded planner stage wire context (no language acceptance)', () => {
     [
       'director',
       'web',
-      '248b1e737e051c1dcc95cc25d0dfe81578c948d928a007144319358084dc0574',
+      'c86b3ed1eb541d034d56e27d93c3146fcff9f2ed6ab98a19b5215758000f810a',
     ],
     [
       'director',
       'native',
-      '434ab43bc35ec723300625b5a0199111be79fbb94fd0682cc63b925d0288d9bc',
+      '7edafe77ae27dc776407915454fde7aa32d32ca2f088778eb7d6c24d50cade70',
     ],
     [
       'admin',
       'web',
-      '75c94642fe2c83512205669a23e27c390a216b6bbd456e7e6e9b0f2e5bc9f0d6',
+      '0a806e682967a67bf2d014d136d54963f4888a348983ac05e1ebb8a254a2742e',
     ],
     [
       'admin',
       'native',
-      '8485f31e91b36b285aba30b08ba3136d17693fdfbfd47e2593fb1d2cff174d8d',
+      '19fb920a364b36ec6cf1d142990971161f26f7cc269aacbd13df1fdfc283b66f',
     ],
   ] as const)(
-    'retains the pre-partition final system bytes for %s/%s',
+    'retains owner-approved conversational tone d2b0cd72 final system bytes for %s/%s',
     (persona, surface, sha256) => {
       const service = new AiCoreModelService({
         get: () => undefined,

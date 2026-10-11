@@ -4,9 +4,19 @@ import type {
 } from '../conversation-intelligence/conversation-intelligence.types';
 import type { AiCoreToolDescriptor } from './ai-core.types';
 
-// Request-local indexes for these four repeated labels only. The actual values
-// remain in the same message; no intent, permission or readiness row is removed.
-const LABEL_COLUMNS = ['domain', 'action', 'data_class', 'readiness'] as const;
+// Request-local indexes for repeated labels and complete slot declarations.
+// Values stay in the same request; no intent, permission or schema is dropped.
+const DICTIONARY_COLUMNS = [
+  'domain',
+  'action',
+  'data_class',
+  'readiness',
+  'required_slots',
+  'optional_slots',
+  'slot_aliases',
+  'ready_tools',
+  'readiness_note',
+] as const;
 
 function record(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -78,12 +88,25 @@ export function plannerWireContext(
   const columns = Object.keys(contract.intents[0] ?? {}) as Array<
     keyof ConversationPlannerIntent
   >;
+  // Compare whole JSON values, never object identity or a partial slot name.
+  // A different alias/constraint must occupy a different entry.
+  const dictionaryIndexes = new Map<string, Map<string, number>>();
   const dictionaries = Object.fromEntries(
-    LABEL_COLUMNS.map((key) => [
-      key,
-      [...new Set(contract.intents.map((intent) => intent[key]))],
-    ]),
-  ) as Record<(typeof LABEL_COLUMNS)[number], string[]>;
+    DICTIONARY_COLUMNS.map((key) => {
+      const values: unknown[] = [];
+      const indexes = new Map<string, number>();
+      for (const intent of contract.intents) {
+        const value = intent[key];
+        const encoded = JSON.stringify(value);
+        if (!indexes.has(encoded)) {
+          indexes.set(encoded, values.length);
+          values.push(value);
+        }
+      }
+      dictionaryIndexes.set(key, indexes);
+      return [key, values];
+    }),
+  ) as Record<(typeof DICTIONARY_COLUMNS)[number], unknown[]>;
   const rows = contract.intents.map((intent) => {
     // Fail loudly on a heterogeneous future contract rather than drop a field.
     if (
@@ -93,9 +116,7 @@ export function plannerWireContext(
       throw new Error('planner_intent_shape_mismatch');
     return columns.map((key) =>
       Object.prototype.hasOwnProperty.call(dictionaries, key)
-        ? dictionaries[key as keyof typeof dictionaries].indexOf(
-            intent[key] as string,
-          )
+        ? dictionaryIndexes.get(key)!.get(JSON.stringify(intent[key]))!
         : intent[key],
     );
   });
@@ -128,4 +149,4 @@ export function plannerWireContext(
 }
 
 export const PLANNER_WIRE_INSTRUCTIONS =
-  'WIRE REPRESENTATION: available_tools and conversation_contract.intents use {columns,rows}: each row contains field values in column order. For intent columns named in dictionaries, expand each zero-based cell index using that column dictionary. Read rows as complete objects, including denied and planned intents. available_tools may also contain ordinary descriptor objects. input_schema_ref indexes tool_input_schemas (zero-based). Before reading schema i, merge each property name in tool_input_schema_property_refs[i] into its properties using the indexed complete tool_input_property_schemas value. All other schema fields remain unchanged. All descriptions, readiness, permissions, slots and policies remain authoritative.';
+  'WIRE REPRESENTATION: available_tools and conversation_contract.intents use {columns,rows}: each row contains field values in column order. For intent columns named in dictionaries, expand each zero-based cell index using that column dictionary, preserving the complete value (string, null, complete tool/slot array or alias object). Read rows as complete objects, including denied and planned intents. available_tools may also contain ordinary descriptor objects. input_schema_ref indexes tool_input_schemas (zero-based). Before reading schema i, merge each property name in tool_input_schema_property_refs[i] into its properties using the indexed complete tool_input_property_schemas value. All other schema fields remain unchanged. All descriptions, readiness, permissions, slots and policies remain authoritative.';
