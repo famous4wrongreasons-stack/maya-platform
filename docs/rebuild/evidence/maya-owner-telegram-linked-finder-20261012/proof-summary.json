@@ -1,0 +1,78 @@
+{
+  "qualification": "LOCAL_FINDER_HARNESS_PROOF_NOT_RELEASE_CERTIFICATION",
+  "committedCodeHead": "67eb820558f601eb6ca597dc4ef5e3ab340fa7c6",
+  "http": {
+    "before": {
+      "passed": 88,
+      "failed": 2
+    },
+    "after": {
+      "passed": 90,
+      "failed": 0
+    },
+    "sameTests": true,
+    "onlyInstallerChangedBetweenRuns": true,
+    "liveSpecAndInstallerMatchCommittedBytes": true,
+    "executedWorkingPatch": true
+  },
+  "units": {
+    "name": "units",
+    "exit": 0,
+    "signal": null,
+    "passed": 250,
+    "failed": 0
+  },
+  "types": {
+    "name": "types-correct-path",
+    "exit": 0,
+    "signal": null
+  },
+  "lint": {
+    "name": "lint",
+    "exit": 0,
+    "signal": null
+  },
+  "invalidPriorTypeInvocation": "Wrong config path, preserved in private checks summary; corrected path passed.",
+  "guards": {
+    "baseline": 38,
+    "killed": 11,
+    "total": 11,
+    "restored": 38,
+    "workingSourceUnchanged": true
+  },
+  "binary": {
+    "head": "67eb820558f601eb6ca597dc4ef5e3ab340fa7c6",
+    "status": "passed",
+    "checks": [
+      "actual-child-ipc-web-ready",
+      "health-through-actual-relay",
+      "exact-finder-through-child-relay-selects-ready-synthetic-tenant",
+      "exact-finder-keeps-canonical-client-registration-readiness",
+      "directory-enumeration-and-install-surfaces-refused",
+      "current-react-payload-served",
+      "canonical-password-session",
+      "canonical-telegram-link-start-no-provider-dispatch",
+      "canonical-telegram-refusal-through-child-ipc-safe-receipt",
+      "business-model-sms-consent-routes-refused",
+      "foreign-tenant-refused",
+      "live-permit-revocation-refused",
+      "clean-child-stop-zero-provider-dispatch",
+      "second-child-refused"
+    ],
+    "finder": {
+      "status": 200,
+      "itemCount": 1
+    },
+    "providerReadSummary": {
+      "calls": 0,
+      "refused": 0,
+      "routes": {}
+    },
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "sourceUnchanged": true
+  },
+  "liveFreshLogin": "NOT_PROVEN",
+  "livePersonalClientMatch": "NOT_PROVEN",
+  "productionChanged": false
+}

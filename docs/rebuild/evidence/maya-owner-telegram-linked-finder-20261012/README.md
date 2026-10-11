@@ -67,3 +67,36 @@ entry should not be necessary for that fresh-login path.
 No production/deployment/migration/grant, SMS, booking, model, outbound message,
 iPhone operation or push occurred. Synthetic proof databases are separate from
 the retained owner database.
+
+## Binary proof correction (preserved failure)
+
+The first expanded binary run stopped after the health check. A diagnostic
+rerun retained only the finder status and item count: HTTP 200, one item.
+Its assertion incorrectly expected an empty list merely because the synthetic
+tenant had no explicit customer-app grant. The existing public finder has a
+legacy no-feature-key fallback and this fixture was otherwise client-ready.
+No product rule was changed to satisfy that assumption.
+
+The corrected binary proof first requires the exact synthetic tenant match,
+then explicitly disables allowSelfRegistration in that disposable fixture and
+requires an empty finder result. This is the canonical readiness condition
+already covered by the HTTP proof. The initial and diagnostic failed receipts
+remain local, with hashes recorded in the final proof manifest. The correction
+is test-only commit 67eb820558f601eb6ca597dc4ef5e3ab340fa7c6; the local installer
+fix is commit 036d8598f4e15047c4503a8928a267cd9150350c.
+
+## Final checks
+
+- Local unit tests: 250 PASS / 0 FAIL.
+- Expanded HTTP/isolated-PG suite: 90 PASS / 0 FAIL; the runtime and live-spec
+  bytes exactly match the committed source.
+- Scoped TypeScript and changed-test lint: PASS. One earlier type invocation
+  named a nonexistent config path; the corrected invocation passed.
+- Existing restriction mutations: 38 green baseline, 11/11 killed, 38 restored.
+- Actual compiled child/IPC/web-relay proof on
+  67eb820558f601eb6ca597dc4ef5e3ab340fa7c6: 14 checks PASS, zero provider
+  dispatches, clean child/database shutdown and unchanged source.
+- The retained real owner database stayed stopped throughout these proofs.
+
+See proof-summary.json and receipt-manifest.json for provenance, including the
+two deliberately preserved binary failures and their corrected final run.

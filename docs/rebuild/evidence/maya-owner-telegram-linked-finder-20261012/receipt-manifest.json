@@ -1,0 +1,81 @@
+{
+  "receipts": [
+    {
+      "name": "httpBefore/manifest.json",
+      "sha256": "825fe7312fe6f43aeb89d1a6ac32ba37af68f6e40a893d30219b27df7eedd8ab",
+      "size": 726,
+      "originalLocalPath": "/private/tmp/maya-telegram-finder-before-20261012-01/manifest.json",
+      "repositoryCopy": "safe summary only; raw synthetic receipt retained locally"
+    },
+    {
+      "name": "httpBefore/telegram-initial-jest.json",
+      "sha256": "dbe75c63968f22ecf0ea0b6cffe171a9b776ad9bf630eee68fff4ddd1f5454d0",
+      "size": 52566,
+      "originalLocalPath": "/private/tmp/maya-telegram-finder-before-20261012-01/telegram-initial-jest.json",
+      "repositoryCopy": "safe summary only; raw synthetic receipt retained locally"
+    },
+    {
+      "name": "httpBefore/source-hashes.json",
+      "sha256": "6084781a34afdc5cf62f7cc1ab6237bd782032e9b6ea274411783192341f7e03",
+      "size": 277127,
+      "originalLocalPath": "/private/tmp/maya-telegram-finder-before-20261012-01/source-hashes.json",
+      "repositoryCopy": "safe summary only; raw synthetic receipt retained locally"
+    },
+    {
+      "name": "httpAfter/manifest.json",
+      "sha256": "427d06229c5c7938f18d39c88e7a8d463a9cd6f14665fe09edf09148c82dac23",
+      "size": 691,
+      "originalLocalPath": "/private/tmp/maya-telegram-finder-after-20261012-01/manifest.json",
+      "repositoryCopy": "safe summary only; raw synthetic receipt retained locally"
+    },
+    {
+      "name": "httpAfter/telegram-initial-jest.json",
+      "sha256": "76c6efd82ad2963489057ae182a2bdac5df5dfb28123697d2fe8c5a9492cf437",
+      "size": 50114,
+      "originalLocalPath": "/private/tmp/maya-telegram-finder-after-20261012-01/telegram-initial-jest.json",
+      "repositoryCopy": "safe summary only; raw synthetic receipt retained locally"
+    },
+    {
+      "name": "httpAfter/source-hashes.json",
+      "sha256": "a85db54fe50ce549a66f623325ea71400f6cdcbc0bfc1ec929b71ce532548f5d",
+      "size": 277127,
+      "originalLocalPath": "/private/tmp/maya-telegram-finder-after-20261012-01/source-hashes.json",
+      "repositoryCopy": "safe summary only; raw synthetic receipt retained locally"
+    },
+    {
+      "name": "checks/summary.json",
+      "sha256": "c074b63e94898c84d922cd4ef5099ecc9165e582b0e0662f011566709f780e92",
+      "size": 438,
+      "originalLocalPath": "/private/tmp/maya-telegram-finder-checks-20261012-01/summary.json",
+      "repositoryCopy": "safe summary only; raw synthetic receipt retained locally"
+    },
+    {
+      "name": "binaryInitial/summary.json",
+      "sha256": "ce5bd1169d786c2f8c1fa2c50b73f9b3563f33eebbb8e0dd328ec20755165167",
+      "size": 3401,
+      "originalLocalPath": "/private/tmp/maya-telegram-finder-binary-20261012-01/summary.json",
+      "repositoryCopy": "safe summary only; raw synthetic receipt retained locally"
+    },
+    {
+      "name": "binaryDiagnostic/summary.json",
+      "sha256": "0ff0ff50be63baaebc6715a3e3f236056de5e1b67fb1b8b841a7bb4c2240533b",
+      "size": 3458,
+      "originalLocalPath": "/private/tmp/maya-telegram-finder-binary-diagnosis-20261012-01/summary.json",
+      "repositoryCopy": "safe summary only; raw synthetic receipt retained locally"
+    },
+    {
+      "name": "binaryFinal/summary.json",
+      "sha256": "12560d544bc37a1eba143b26cc8f25c290cfc27ddc03a4aadb3cf4d1263f3c79",
+      "size": 5536,
+      "originalLocalPath": "/private/tmp/maya-telegram-finder-binary-20261012-02/summary.json",
+      "repositoryCopy": "safe summary only; raw synthetic receipt retained locally"
+    },
+    {
+      "name": "mutations/summary.json",
+      "sha256": "70357bad1656da11b7d6e7440e439e8edf1f6508d443a33bffb5fef0a332d666",
+      "size": 3391,
+      "originalLocalPath": "/private/tmp/maya-telegram-finder-guards-20261012-01/summary.json",
+      "repositoryCopy": "safe summary only; raw synthetic receipt retained locally"
+    }
+  ]
+}
