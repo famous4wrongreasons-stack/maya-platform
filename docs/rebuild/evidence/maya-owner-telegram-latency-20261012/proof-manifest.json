@@ -1,0 +1,32 @@
+[
+  {
+    "localPath": "/private/tmp/maya-telegram-binding-performance-20261012-01/before.tap",
+    "sha256": "831fe28de1fde8f66a07bd51469a3df0c68798b6784b66f2e368f8dde35a44db",
+    "size": 2523,
+    "rawCommitted": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-binding-performance-20261012-01/after.tap",
+    "sha256": "9c8a1ff09b6da534347474e2fa950e740a9fedf5269f8efd92ff10bcfc9d791e",
+    "size": 55492,
+    "rawCommitted": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-binding-transport-20261012-01/summary.json",
+    "sha256": "edf369a960694d30066cf6052ec5419963cfc3ea763fb80abce645592bf301e9",
+    "size": 1402,
+    "rawCommitted": true
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-binding-binary-20261012-01/summary.json",
+    "sha256": "56fdf01475f629b7a427c2b97d4af127bd495cdb587e240bc3049433e231a992",
+    "size": 5532,
+    "rawCommitted": false
+  },
+  {
+    "localPath": "/private/tmp/maya-telegram-binding-guards-20261012-01/summary.json",
+    "sha256": "12813b504114586b2ddc0392bbfad5487615759eb5eb72f9f76fd414f1077b87",
+    "size": 3391,
+    "rawCommitted": false
+  }
+]

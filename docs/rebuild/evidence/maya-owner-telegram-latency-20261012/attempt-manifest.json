@@ -1,0 +1,42 @@
+[
+  {
+    "name": "resume.json",
+    "localPath": "/private/tmp/maya-owner-telegram-20261012-06/session/resume.json",
+    "sha256": "92b62b4b74e8aeb639856d8c8b36ed3d5dffaadfa9440c97b67f0f0e8e8eb58c",
+    "size": 549470,
+    "rawCopied": false,
+    "reason": "Safe projections only; original stays local."
+  },
+  {
+    "name": "pending-counts.json",
+    "localPath": "/private/tmp/maya-owner-telegram-20261012-06/pending-counts.json",
+    "sha256": "d0df229a1a3356a023d81d4e3fc0bd6ea4a3ce3362d2ef772f216ac9b84244d9",
+    "size": 318,
+    "rawCopied": false,
+    "reason": "Safe projections only; original stays local."
+  },
+  {
+    "name": "ui-outcome.json",
+    "localPath": "/private/tmp/maya-owner-telegram-20261012-06/ui-outcome.json",
+    "sha256": "5d24381220c904a3eeb3b76ba88c83e37e1239c0f1192089044f2b0054c3a957",
+    "size": 958,
+    "rawCopied": false,
+    "reason": "Safe projections only; original stays local."
+  },
+  {
+    "name": "offline-source-pin-timing.json",
+    "localPath": "/private/tmp/maya-owner-telegram-20261012-06/offline-source-pin-timing.json",
+    "sha256": "76a39e4c3b15dca53941af717bbf1ddad7931324460a0c44ecbb77592dfd3b50",
+    "size": 248,
+    "rawCopied": false,
+    "reason": "Safe projections only; original stays local."
+  },
+  {
+    "name": "offline-batched-pin-timing.json",
+    "localPath": "/private/tmp/maya-owner-telegram-20261012-06/offline-batched-pin-timing.json",
+    "sha256": "26bddfae59f5dd81d296be20115220881f63f1e93eefb0ecd0096a309e93148e",
+    "size": 289,
+    "rawCopied": false,
+    "reason": "Safe projections only; original stays local."
+  }
+]

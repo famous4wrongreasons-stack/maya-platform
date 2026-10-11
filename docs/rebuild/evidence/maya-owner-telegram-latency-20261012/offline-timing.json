@@ -1,0 +1,53 @@
+{
+  "qualification": "OFFLINE_TRANSPORT_SOURCE_GUARD_COST_NOT_REAL_PROVIDER_OR_BINDING_PROOF",
+  "head": "bd627f46007ce40084102643a9e5a4a0945ea5d4",
+  "referenceCommit": "2fb2569147cf1910be0b4c01b7ad2735054abe6a",
+  "sourceFiles": 2163,
+  "projectionDigest": "0afdf9973ecb1f400ae7ea5a3d801f13610102181625c03e423040051703e2dc",
+  "projectionEqual": true,
+  "operationBudgetMs": 120000,
+  "browserBudgetMs": 80000,
+  "providerCalls": 0,
+  "retainedDatabaseAccess": false,
+  "runs": [
+    {
+      "name": "batched",
+      "elapsedMs": 44218,
+      "guardMs": 44198,
+      "sourceChecks": 341,
+      "authorityRereads": 68,
+      "completedPages": 32,
+      "completed": true,
+      "withinBrowserBudget": true,
+      "syntheticTransport": {
+        "calls": 34,
+        "refused": 0,
+        "routes": {
+          "telegram_token": 1,
+          "telegram_jwks": 1,
+          "client_registry": 32
+        }
+      }
+    },
+    {
+      "name": "previous-algorithm",
+      "elapsedMs": 112697,
+      "guardMs": 112680,
+      "sourceChecks": 341,
+      "authorityRereads": 68,
+      "completedPages": 32,
+      "completed": true,
+      "withinBrowserBudget": false,
+      "syntheticTransport": {
+        "calls": 34,
+        "refused": 0,
+        "routes": {
+          "telegram_token": 1,
+          "telegram_jwks": 1,
+          "client_registry": 32
+        }
+      }
+    }
+  ],
+  "sourceUnchanged": true
+}

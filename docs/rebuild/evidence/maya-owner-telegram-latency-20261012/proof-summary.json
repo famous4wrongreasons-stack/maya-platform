@@ -1,0 +1,88 @@
+{
+  "qualification": "LOCAL_HARNESS_PROOFS_NOT_RELEASE_OR_REAL_CLIENT_ACCEPTANCE",
+  "codeCandidate": "bd627f46007ce40084102643a9e5a4a0945ea5d4",
+  "regressionBefore": {
+    "tests": 8,
+    "pass": 7,
+    "fail": 1
+  },
+  "allLocalUnitsAfter": {
+    "tests": 258,
+    "pass": 258,
+    "fail": 0
+  },
+  "bindingProjectionExactlyEqual": true,
+  "guardCost": [
+    {
+      "name": "batched",
+      "elapsedMs": 44218,
+      "guardMs": 44198,
+      "sourceChecks": 341,
+      "authorityRereads": 68,
+      "completedPages": 32,
+      "completed": true,
+      "withinBrowserBudget": true,
+      "syntheticTransport": {
+        "calls": 34,
+        "refused": 0,
+        "routes": {
+          "telegram_token": 1,
+          "telegram_jwks": 1,
+          "client_registry": 32
+        }
+      }
+    },
+    {
+      "name": "previous-algorithm",
+      "elapsedMs": 112697,
+      "guardMs": 112680,
+      "sourceChecks": 341,
+      "authorityRereads": 68,
+      "completedPages": 32,
+      "completed": true,
+      "withinBrowserBudget": false,
+      "syntheticTransport": {
+        "calls": 34,
+        "refused": 0,
+        "routes": {
+          "telegram_token": 1,
+          "telegram_jwks": 1,
+          "client_registry": 32
+        }
+      }
+    }
+  ],
+  "browserBudgetMs": 80000,
+  "mutation": {
+    "baseline": 38,
+    "killed": 11,
+    "restored": 38,
+    "workingSourceUnchanged": true
+  },
+  "binary": {
+    "status": "passed",
+    "checks": [
+      "actual-child-ipc-web-ready",
+      "health-through-actual-relay",
+      "exact-finder-through-child-relay-selects-ready-synthetic-tenant",
+      "exact-finder-keeps-canonical-client-registration-readiness",
+      "directory-enumeration-and-install-surfaces-refused",
+      "current-react-payload-served",
+      "canonical-password-session",
+      "canonical-telegram-link-start-no-provider-dispatch",
+      "canonical-telegram-refusal-through-child-ipc-safe-receipt",
+      "business-model-sms-consent-routes-refused",
+      "foreign-tenant-refused",
+      "live-permit-revocation-refused",
+      "clean-child-stop-zero-provider-dispatch",
+      "second-child-refused"
+    ],
+    "realProviderCalls": 0,
+    "clusterStopped": true,
+    "pidFileAbsent": true,
+    "sourceUnchanged": true
+  },
+  "productSourcesChanged": false,
+  "retainedOwnerDatabaseUsedByProofs": false,
+  "liveFreshLoginAndExactPersonalClient": "NOT_PROVEN"
+}

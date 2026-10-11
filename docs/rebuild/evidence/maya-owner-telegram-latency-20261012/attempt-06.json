@@ -1,0 +1,102 @@
+{
+  "qualification": "LOCAL_REAL_ATTEMPT_NOT_RELEASE_CERTIFICATION",
+  "candidate": "2fb2569147cf1910be0b4c01b7ad2735054abe6a",
+  "status": "cancelled",
+  "readyAt": "2026-10-11T22:33:45.183Z",
+  "expiresAt": "2026-10-11T22:43:45.183Z",
+  "providerSummary": {
+    "calls": 24,
+    "refused": 1,
+    "routes": {
+      "telegram_token": 1,
+      "telegram_jwks": 1,
+      "client_registry": 22
+    }
+  },
+  "traceClock": "launcher_received_utc_not_provider_time",
+  "trace": [
+    {
+      "observedAt": "2026-10-11T22:35:25.296Z",
+      "surface": "http",
+      "route": "telegram_login_complete",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "observedAt": "2026-10-11T22:35:28.924Z",
+      "surface": "provider",
+      "route": "telegram_token",
+      "method": "POST",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "observedAt": "2026-10-11T22:35:32.139Z",
+      "surface": "provider",
+      "route": "telegram_token",
+      "method": "POST",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read",
+      "telegramTokenOutcome": "id_token_present"
+    },
+    {
+      "observedAt": "2026-10-11T22:35:33.579Z",
+      "surface": "provider",
+      "route": "telegram_jwks",
+      "method": "GET",
+      "stage": "entered",
+      "status": null,
+      "code": null
+    },
+    {
+      "observedAt": "2026-10-11T22:35:36.145Z",
+      "surface": "provider",
+      "route": "telegram_jwks",
+      "method": "GET",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read"
+    },
+    {
+      "observedAt": "2026-10-11T22:37:27.642Z",
+      "surface": "http",
+      "route": "telegram_login_complete",
+      "method": "POST",
+      "stage": "completed",
+      "status": 201,
+      "code": null
+    }
+  ],
+  "ui": "no_connection",
+  "automaticRetry": false,
+  "pendingDatabaseCounts": {
+    "observedAt": "2026-10-11T22:37:00.895Z",
+    "telegramIdentityCount": 1,
+    "newTelegramFlows": 1,
+    "consumedTelegramFlows": 1,
+    "newTenantClientChannelLinks": 0,
+    "databaseActivity": [
+      {
+        "state": "idle",
+        "wait_event_type": "Client",
+        "wait_event": "ClientRead",
+        "count": 5
+      }
+    ]
+  },
+  "finalPersonalClientBinding": "NOT_VERIFIED_AFTER_LATE_RESPONSE",
+  "cleanup": {
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "sourceUnchanged": true,
+    "samePrivateState": true
+  },
+  "claimAbsent": true,
+  "databasePidAbsent": true,
+  "realBusinessWrites": 0,
+  "rawProviderBodiesRetainedInArchive": false
+}
