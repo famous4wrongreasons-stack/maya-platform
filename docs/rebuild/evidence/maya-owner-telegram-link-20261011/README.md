@@ -102,3 +102,9 @@ The 37 backend failures recorded here are resolved by the subsequent
 on `6f48df0542468d0557e386d65f91cb9bb7b6a97f`: 9,601 passes / zero failures.
 The original receipts and this checkpoint's counts remain unchanged. Live owner
 Telegram/history acceptance is still not run.
+
+The subsequent [local launcher return proof](../maya-local-telegram-return-20261011/README.md)
+fixes an additional callback serving/boundary gap and runs the browser proof
+through the real local web handler. Its consolidated live prerequisites are in
+[LIVE-PREPARATION.md](../maya-local-telegram-return-20261011/LIVE-PREPARATION.md).
+Real provider registration and the finite private-data launch remain unqualified.

@@ -1,0 +1,25 @@
+{
+  "checkedAt": "2026-10-11T15:01:39.738Z",
+  "qualification": "PUBLIC_STATIC_GET_ONLY_NOT_BACKEND_HEALTH_OR_LIVE_LOGIN",
+  "rows": [
+    {
+      "route": "/oauth-callback.html",
+      "expectedSha256": "b10e89898aa74a39756d4f49e1537c8ee6c0066bc7a2666982b4052b0f99444f",
+      "httpStatus": 200,
+      "sameUrl": true,
+      "contentType": "text/html",
+      "sha256": "91c4f58facd2c93dbf29cbb891abe6e1c1b92f61a87da075655bd3c282e6f0b2",
+      "byteMatch": false
+    },
+    {
+      "route": "/maya-chat-shell/",
+      "expectedSha256": "3d4a0839aa36e623c9700344397b186fab8209cc7dcd404c0ee7608ad8fee465",
+      "httpStatus": 404,
+      "sameUrl": true,
+      "contentType": "text/html; charset=iso-8859-1",
+      "sha256": "00381924b7ef42464e459ef81c7e78a51cbd37a2b34cd0ce04d2084a7c9e699e",
+      "byteMatch": false
+    }
+  ],
+  "productionChanges": 0
+}

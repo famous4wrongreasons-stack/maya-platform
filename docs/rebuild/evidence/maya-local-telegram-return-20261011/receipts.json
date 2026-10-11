@@ -1,0 +1,47 @@
+[
+  {
+    "path": "/private/tmp/maya-local-telegram-return-before-20261011.log",
+    "size": 1900,
+    "sha256": "1a1b674c8025cc11f28cbca44f0d5a85b8761959bade8953419954f99a17290f"
+  },
+  {
+    "path": "/private/tmp/maya-local-telegram-return-suite-573b4567.log",
+    "size": 8996,
+    "sha256": "f33c556133cfc7563fad917a436560df5bf94c945d5fe5a3e403b813807015bb"
+  },
+  {
+    "path": "/private/tmp/maya-local-telegram-return-carrier-573b4567.log",
+    "size": 13864,
+    "sha256": "54668a987716668f72a14b0d32fde236a38e6d2a75a1b25ed13f838a99148c24"
+  },
+  {
+    "path": "/private/tmp/maya-local-telegram-return-release-tests-573b4567.log",
+    "size": 1471,
+    "sha256": "6a46c21c172790936b50470610e6d736ac40a4ed16c0da6ea3f6fa88187d0b33"
+  },
+  {
+    "path": "/private/tmp/maya-local-telegram-return-parity-573b4567.log",
+    "size": 732,
+    "sha256": "d58ab173d85c7dc5ea5cf4a81b91375870cb42b50b8709b475850a9abd5f7093"
+  },
+  {
+    "path": "/private/tmp/maya-local-telegram-return-mutations-573b4567.log",
+    "size": 51,
+    "sha256": "3aec430cb284cf6bb1f81296c97ee9d2cffe2bb3010b684a6e8a9860b072acfc"
+  },
+  {
+    "path": "/private/tmp/maya-telegram-browser-local-return-573b4567.log",
+    "size": 2596,
+    "sha256": "efb42214f377c2f6968f8310a28672129a5b2867e0603944c532796cd7a421f6"
+  },
+  {
+    "path": "/private/tmp/maya-telegram-browser-local-return-573b4567/report.json",
+    "size": 3050,
+    "sha256": "a19b709d964b73fa5c38475268ac4871b497de2b09f6646750825faa271cf9a6"
+  },
+  {
+    "path": "/private/tmp/maya-local-telegram-return-mutations-573b4567/summary.json",
+    "size": 3291,
+    "sha256": "ae748f6484cc8c5a42f44903c00db45633d09c9e59066e574627a0b2bc51f3c1"
+  }
+]

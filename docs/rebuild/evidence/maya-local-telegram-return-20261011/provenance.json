@@ -1,0 +1,25 @@
+{
+  "head": "573b4567b663e216f819233649e858735951dd82",
+  "parent": "b3f1660e9119e348222d3feb3c6623d5ff906064",
+  "changedSourceSha256": {
+    "maya-saas-backend/scripts/local-telegram-return.mjs": "3df7ab95b8d6c14f14367ac078566e5d1c024f1dbb0fd656eb59f0013c3fde08",
+    "maya-saas-backend/scripts/local-telegram-return.test.mjs": "2eb5b9927a65592a8d2feb5f83ba5a38330565af74387de43921a61c57ecae22",
+    "maya-saas-backend/scripts/local-telegram-return-mutations.mjs": "87806b547b5de5e100b481ad62c8b2aeccc2b423532c0c6913f59466cf407303",
+    "maya-saas-backend/scripts/local-yclients-read.mjs": "e1982a893907964740afe0ede714703b720b1eff92ec1f672fa6221091c1c7ea",
+    "maya-saas-backend/scripts/local-yclients-read.test.mjs": "8ff78c573011ad2a3740cf6e33d3702cbd5f3726fff81354f1d00fa208fa4a95",
+    "maya-carrier-react/test/telegram-popup.browser.mjs": "f5ec44d8fe8b567cfe656d594c6e13345528ef0a4d5f4344a463556f8cc51947"
+  },
+  "unchangedProductScopes": [
+    "maya-saas-backend/src",
+    "maya-saas-backend/prisma",
+    "maya-chat-shell/src",
+    "maya-carrier-react/src",
+    "maya-carrier-react/build.mjs",
+    "maya-carrier-react/index.html",
+    "maya-carrier-react/tools",
+    "maya-ios-carrier",
+    "maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html"
+  ],
+  "unchangedProductTreeSha256": "719679085082f5ce05e54cc46ba062687ee0914a2388adbe23c97023794f6db8",
+  "unchangedProductBlobCount": 1941
+}

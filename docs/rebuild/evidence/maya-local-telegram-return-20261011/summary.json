@@ -1,0 +1,62 @@
+{
+  "qualification": "LOCAL_LAUNCHER_AND_SYNTHETIC_BROWSER_NOT_RELEASE_CERTIFICATION",
+  "testedHead": "573b4567b663e216f819233649e858735951dd82",
+  "before": {
+    "crossSiteCallbackHttpStatus": 403,
+    "directCallbackHttpStatus": 404,
+    "reproduction": "Current regression tests after mechanical extraction of original b3f1660e web handler; no behavior change before failing proof."
+  },
+  "localLauncher": {
+    "passed": 93,
+    "failed": 0
+  },
+  "browser": {
+    "checkpoints": 30,
+    "passed": true,
+    "actualReact": true,
+    "actualRuntime": true,
+    "actualLocalWebBoundary": true,
+    "actualBackend": false,
+    "realTelegram": false,
+    "ownedBrowserStopped": true,
+    "listenersStopped": true
+  },
+  "carrier": {
+    "passed": 163,
+    "failed": 0
+  },
+  "packaging": {
+    "passed": 18,
+    "failed": 0
+  },
+  "parity": {
+    "status": "PASS",
+    "files": 8,
+    "nativeVerified": false
+  },
+  "targetedMutations": {
+    "baseline": 25,
+    "killed": 8,
+    "total": 8,
+    "restored": 25
+  },
+  "sourceBinding": {
+    "paths": 2154,
+    "duplicates": 0,
+    "callbackAndHandlerBound": true
+  },
+  "effects": {
+    "productionChanges": 0,
+    "ownerDatabaseStarts": 0,
+    "ownerDatabaseWrites": 0,
+    "realTelegramLogins": 0,
+    "realModelCalls": 0,
+    "realYclientsCalls": 0,
+    "realOtpSms": 0,
+    "iphoneInstalls": 0,
+    "pushes": 0,
+    "publicStaticGets": 2
+  },
+  "readyForLivePrivateReadLaunch": false,
+  "releaseCertified": false
+}

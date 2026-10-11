@@ -1,0 +1,87 @@
+{
+  "contract": "maya.telegram-web-return.synthetic-browser/1",
+  "candidate": "573b4567b663e216f819233649e858735951dd82",
+  "dirtySource": false,
+  "networkBoundary": "CDP interception plus deny proxy/resolver; no OS-wide packet claim",
+  "actualReact": true,
+  "actualRuntime": true,
+  "actualCallback": true,
+  "actualLocalWebBoundary": true,
+  "actualBackend": false,
+  "realProvider": false,
+  "checks": [
+    "finder rendered",
+    "synthetic salon selectable",
+    "actual cross-origin provider window",
+    "handoff releases busy UI",
+    "web ignores injected native event and message",
+    "callback query erased in actual browser",
+    "real AChat opens after callback",
+    "actual provider cross-site document return admitted by launcher boundary",
+    "one completion; no parent reload",
+    "finder rendered",
+    "synthetic salon selectable",
+    "actual cross-origin provider window",
+    "handoff releases busy UI",
+    "decline shown",
+    "finder rendered",
+    "synthetic salon selectable",
+    "actual cross-origin provider window",
+    "handoff releases busy UI",
+    "substituted state refused",
+    "finder rendered",
+    "synthetic salon selectable",
+    "actual cross-origin provider window",
+    "handoff releases busy UI",
+    "manual close releases attempt",
+    "finder rendered",
+    "synthetic salon selectable",
+    "actual cross-origin provider window",
+    "handoff releases busy UI",
+    "standalone callback query erased",
+    "reload/standalone cannot create session"
+  ],
+  "starts": 5,
+  "completes": 1,
+  "externalRequestsDispatched": 0,
+  "interceptedProvider": 8,
+  "callbackRequests": [
+    {
+      "method": "GET",
+      "site": "cross-site",
+      "mode": "navigate",
+      "destination": "document"
+    },
+    {
+      "method": "GET",
+      "site": "cross-site",
+      "mode": "navigate",
+      "destination": "document"
+    },
+    {
+      "method": "GET",
+      "site": "cross-site",
+      "mode": "navigate",
+      "destination": "document"
+    },
+    {
+      "method": "GET",
+      "site": "none",
+      "mode": "navigate",
+      "destination": "document"
+    }
+  ],
+  "sourceHashes": {
+    "src/runtime/compose.ts": "e55cd74c15d9ee33114df9b8fd418e1f1e42f8db40dc4cd58eecdb6eea521ff6",
+    "src/runtime/telegramPopup.ts": "94aab76acfab1cc9142b418ef1252f46d553894379b74a2eac2bcbf6ecdb675a",
+    "src/signin/SignIn.tsx": "cbe909e7b164c9d0f326b848cb20daa161f8519e0be85242d66f5006e64ebe69",
+    "../maya-chat-shell/src/net/session.ts": "361c45dceb3a08b279a0fad54c9500dd97fce793cdcc3fc8802cb54665e55ca6",
+    "../maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html": "b10e89898aa74a39756d4f49e1537c8ee6c0066bc7a2666982b4052b0f99444f",
+    "../maya-saas-backend/scripts/local-telegram-return.mjs": "3df7ab95b8d6c14f14367ac078566e5d1c024f1dbb0fd656eb59f0013c3fde08",
+    "../maya-saas-backend/scripts/local-yclients-read.mjs": "e1982a893907964740afe0ede714703b720b1eff92ec1f672fa6221091c1c7ea"
+  },
+  "status": "PASS",
+  "ownedBrowserStopped": true,
+  "listenerStopped": true,
+  "errors": []
+}
