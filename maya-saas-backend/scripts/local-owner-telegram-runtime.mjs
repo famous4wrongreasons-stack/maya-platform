@@ -96,6 +96,13 @@ export async function installOwnerTelegram({ app, prisma, require, backend, laun
       if (!publicRoutes.includes(req.originalUrl) && req.originalUrl !== '/api/mobile/pwa/search?q=' + encodeURIComponent(scope.tenantSlug)) await actor(req.user);
       return next.handle();
     } });
+    // The canonical finder shares this switch with tenant PWA installation.
+    // Only the exact saved-slug search is admitted by the local ingress above;
+    // install/manifest/QR and other searches remain refused. Readiness is still
+    // decided by the unchanged canonical finder, never by this local setting.
+    const priorPwaInstall = config.get('PWA_TENANT_INSTALL_ENABLED');
+    undo.push(() => config.set('PWA_TENANT_INSTALL_ENABLED', priorPwaInstall));
+    config.set('PWA_TENANT_INSTALL_ENABLED', 'true');
     config.set('TELEGRAM_LOGIN_ENABLED', 'true');
     config.set('TELEGRAM_CLIENT_ID', launch.plan.clientId);
     config.set('TELEGRAM_JWKS_URL', 'https://oauth.telegram.org/.well-known/jwks.json');

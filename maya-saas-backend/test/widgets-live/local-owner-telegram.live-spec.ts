@@ -196,6 +196,9 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
       throw new Error('Unlisted external wire request');
     };
     http = await bootHttp(undefined, async (app) => {
+      // Match the retained stage-0 environment; a generic test default would
+      // hide the real finder refusal observed after a successful owner link.
+      app.get(ConfigService).set('PWA_TENANT_INSTALL_ENABLED', 'false');
       app
         .get(ConfigService)
         .set('TELEGRAM_CLIENT_SECRET', 'synthetic-client-secret-not-real');
@@ -348,6 +351,16 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
         where: { tenantId: tenant.id },
       }),
     ).toBe(0);
+    const found = await request(http.app.getHttpServer())
+      .get('/api/mobile/pwa/search')
+      .query({ q: tenant.slug });
+    expect(found.status).toBe(200);
+    expect(
+      (found.body as { items: { tenant_slug: string }[] }).items.map(
+        (item) => item.tenant_slug,
+      ),
+    ).toEqual([tenant.slug]);
+    expect(runtime.counters.routes.client_registry ?? 0).toBe(0);
     const state = await start(false);
     const r = await post('auth/oauth/telegram/complete', {
       state,
@@ -410,6 +423,49 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
           )
         ).status,
       ).toBe(403);
+  });
+  it('finder remains bounded and hides a tenant that is not client-ready', async () => {
+    for (const route of [
+      '/api/mobile/pwa/search?q=other',
+      '/api/mobile/pwa/search?q=' + tenant.slug.slice(0, 3),
+      '/api/mobile/pwa/search?q=' + tenant.slug + '&city=other',
+      '/api/mobile/pwa/' + tenant.slug + '/install',
+      '/api/mobile/pwa/' + tenant.slug + '/manifest.webmanifest',
+      '/api/mobile/pwa/' + tenant.slug + '/qr.svg',
+    ])
+      expect((await request(http.app.getHttpServer()).get(route)).status).toBe(
+        403,
+      );
+    await db.prisma.tenant.update({
+      where: { id: tenant.id },
+      data: { allowSelfRegistration: false },
+    });
+    const hidden = await request(http.app.getHttpServer())
+      .get('/api/mobile/pwa/search')
+      .query({ q: tenant.slug });
+    expect(hidden.status).toBe(200);
+    expect((hidden.body as { items: unknown[] }).items).toEqual([]);
+    expect(dispatches).toBe(0);
+    expect(
+      await db.prisma.authIdentity.count({ where: { tenantId: tenant.id } }),
+    ).toBe(0);
+    expect(
+      await db.prisma.clientChannelLink.count({
+        where: { tenantId: tenant.id },
+      }),
+    ).toBe(0);
+  });
+  it('expired scope refuses the exact finder and stop restores the prior disabled setting', async () => {
+    expired = true;
+    const refused = await request(http.app.getHttpServer())
+      .get('/api/mobile/pwa/search')
+      .query({ q: tenant.slug });
+    expect(refused.status).toBe(403);
+    expect(dispatches).toBe(0);
+    runtime.stop();
+    expect(http.app.get(ConfigService).get('PWA_TENANT_INSTALL_ENABLED')).toBe(
+      'false',
+    );
   });
   it('wrong account/password tenant and link-purpose substitution fail before a provider call', async () => {
     expect(

@@ -1,0 +1,37 @@
+{
+  "qualification": "REAL_LOCAL_A23_LINK_NOT_FRESH_LOGIN_OR_RELEASE_CERTIFICATION",
+  "candidate": "8d311022e0d1169bbbec4f92b5bec1a0da26ba73",
+  "observedAt": "2026-10-11T22:23:26.490Z",
+  "linkHttpStatus": 201,
+  "tokenOutcome": "id_token_present",
+  "jwksHttpStatus": 200,
+  "telegramIdentityCount": 1,
+  "newTelegramFlows": 1,
+  "consumedTelegramFlows": 1,
+  "newTenantClientChannelLinks": 0,
+  "newOwnerAuditRows": 0,
+  "freshLoginFinderHttpStatus": 503,
+  "freshLoginFinderError": "tenant_pwa_install_disabled",
+  "providerCalls": 2,
+  "providerRoutes": {
+    "telegram_token": 1,
+    "telegram_jwks": 1
+  },
+  "clientRegistryCalls": 0,
+  "clusterStopped": true,
+  "runtimeGroupAbsent": true,
+  "sourceUnchanged": true,
+  "samePrivateState": true,
+  "sourceReceipts": [
+    {
+      "name": "session/resume.json",
+      "sha256": "251f682e79b4d8a5bb978d94e7f3db432f5eca8fcff7a0cda5e13ce7ebab1731",
+      "repositoryCopy": "safe projection only"
+    },
+    {
+      "name": "read-only-outcome.json",
+      "sha256": "144759d1e6b96c8ea588242034d6831c632bbc63fa8a69be586973d7136b5d5b",
+      "repositoryCopy": "safe projection only"
+    }
+  ]
+}

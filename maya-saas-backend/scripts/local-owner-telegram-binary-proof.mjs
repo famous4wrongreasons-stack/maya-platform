@@ -72,6 +72,14 @@ try {
   report.checks.push('actual-child-ipc-web-ready');
   const request = (route, body, token) => fetch(origin + route, { method: body === undefined ? 'GET' : 'POST', headers: { origin, ...(body === undefined ? {} : { 'content-type': 'application/json' }), ...(token ? { authorization: 'Bearer ' + token } : {}) }, ...(body === undefined ? {} : { body: JSON.stringify(body) }), signal: AbortSignal.timeout(10000), redirect: 'error' });
   assert.equal((await request('/api/health')).status, 200); report.checks.push('health-through-actual-relay');
+  const finder = await request('/api/mobile/pwa/search?q=' + encodeURIComponent(tenant.slug));
+  assert.equal(finder.status, 200);
+  // This fixture has no customer-app grant: finder availability never supplies readiness.
+  assert.deepEqual((await finder.json()).items, []);
+  report.checks.push('exact-finder-through-child-relay-keeps-canonical-readiness');
+  for (const route of ['/api/mobile/pwa/search?q=other', '/api/mobile/pwa/search?q=' + tenant.slug + '&city=other', '/api/mobile/pwa/' + tenant.slug + '/install', '/api/mobile/pwa/' + tenant.slug + '/manifest.webmanifest'])
+    assert.equal((await request(route)).status, 403);
+  report.checks.push('directory-enumeration-and-install-surfaces-refused');
   const page = await (await fetch(origin)).text(); assert.ok(page.includes('<html') || page.includes('<!doctype')); report.checks.push('current-react-payload-served');
   const login = await request('/api/auth/login', { tenantSlug: tenant.slug, email, password: ownerPassword }); assert.equal(login.status, 201);
   const session = await login.json(); assert.equal(session.user.id, owner.id); report.checks.push('canonical-password-session');
