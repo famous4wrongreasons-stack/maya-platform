@@ -1,0 +1,267 @@
+{
+  "qualification": "LOCAL_DIAGNOSTICS_NOT_RELEASE_CERTIFICATION",
+  "head": "fc34d9c5522c85ef73753fa5e62008eaf55f7a65",
+  "attempts": [
+    {
+      "attempt": 2,
+      "candidate": "6f297f80d5906e39e3a19f261bf7a91fc4463a21",
+      "status": "cancelled",
+      "providerReadSummary": {
+        "calls": 1,
+        "refused": 0,
+        "routes": {
+          "telegram_token": 1
+        }
+      },
+      "clusterStopped": true,
+      "runtimeGroupAbsent": true,
+      "sourceUnchanged": true,
+      "samePrivateState": true,
+      "readOnlyOutcome": {
+        "readOnly": true,
+        "selectedOwnerTelegramIdentities": 0,
+        "sessionFlows": {
+          "total": 1,
+          "consumed": 1
+        },
+        "selectedOwnerAuditActions": 0
+      },
+      "trace": [
+        {
+          "sequence": 1,
+          "surface": "http",
+          "route": "telegram_link_complete",
+          "stage": "entered",
+          "status": null,
+          "code": null,
+          "observedAt": "2026-10-11T21:41:28.301Z"
+        },
+        {
+          "sequence": 2,
+          "surface": "provider",
+          "route": "telegram_token",
+          "stage": "entered",
+          "status": null,
+          "code": null,
+          "observedAt": "2026-10-11T21:41:33.716Z"
+        },
+        {
+          "sequence": 3,
+          "surface": "provider",
+          "route": "telegram_token",
+          "stage": "completed",
+          "status": 200,
+          "code": "provider_response_read",
+          "observedAt": "2026-10-11T21:41:37.134Z"
+        },
+        {
+          "sequence": 4,
+          "surface": "http",
+          "route": "telegram_link_complete",
+          "stage": "refused",
+          "status": 400,
+          "code": "social_exchange_failed",
+          "observedAt": "2026-10-11T21:41:37.135Z"
+        }
+      ],
+      "credentialInputEvidence": "OWNER_REPORTED_BOT_API_TOKEN",
+      "rootCause": "TOKEN_EXCHANGE_REFUSED_EXACT_PROVIDER_ERROR_NOT_RETAINED"
+    },
+    {
+      "attempt": 3,
+      "candidate": "6f297f80d5906e39e3a19f261bf7a91fc4463a21",
+      "status": "cancelled",
+      "providerReadSummary": {
+        "calls": 1,
+        "refused": 0,
+        "routes": {
+          "telegram_token": 1
+        }
+      },
+      "clusterStopped": true,
+      "runtimeGroupAbsent": true,
+      "sourceUnchanged": true,
+      "samePrivateState": true,
+      "readOnlyOutcome": {
+        "readOnly": true,
+        "selectedOwnerTelegramIdentities": 0,
+        "sessionFlows": {
+          "total": 1,
+          "consumed": 1
+        },
+        "selectedOwnerAuditActions": 0
+      },
+      "trace": [
+        {
+          "sequence": 1,
+          "surface": "http",
+          "route": "telegram_link_complete",
+          "stage": "entered",
+          "status": null,
+          "code": null,
+          "observedAt": "2026-10-11T21:48:08.783Z"
+        },
+        {
+          "sequence": 2,
+          "surface": "provider",
+          "route": "telegram_token",
+          "stage": "entered",
+          "status": null,
+          "code": null,
+          "observedAt": "2026-10-11T21:48:15.077Z"
+        },
+        {
+          "sequence": 3,
+          "surface": "provider",
+          "route": "telegram_token",
+          "stage": "completed",
+          "status": 200,
+          "code": "provider_response_read",
+          "observedAt": "2026-10-11T21:48:18.763Z"
+        },
+        {
+          "sequence": 4,
+          "surface": "http",
+          "route": "telegram_link_complete",
+          "stage": "refused",
+          "status": 400,
+          "code": "social_exchange_failed",
+          "observedAt": "2026-10-11T21:48:18.766Z"
+        }
+      ],
+      "credentialInputEvidence": "OWNER_DIRECTED_TO_LOGIN_WIDGET_CLIENT_SECRET_VALUE_NOT_INSPECTED",
+      "rootCause": "TOKEN_EXCHANGE_REFUSED_EXACT_PROVIDER_ERROR_NOT_RETAINED"
+    }
+  ],
+  "units": [
+    {
+      "name": "units",
+      "exit": 0,
+      "signal": null,
+      "passed": 232,
+      "failed": 0
+    },
+    {
+      "name": "types",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "lint",
+      "exit": 0,
+      "signal": null
+    }
+  ],
+  "http": {
+    "passed": 88,
+    "failed": 0,
+    "skipped": 0,
+    "clusterStopped": true,
+    "sourceUnchanged": true
+  },
+  "binary": {
+    "status": "passed",
+    "checks": [
+      "actual-child-ipc-web-ready",
+      "health-through-actual-relay",
+      "current-react-payload-served",
+      "canonical-password-session",
+      "canonical-telegram-link-start-no-provider-dispatch",
+      "canonical-telegram-refusal-through-child-ipc-safe-receipt",
+      "business-model-sms-consent-routes-refused",
+      "foreign-tenant-refused",
+      "live-permit-revocation-refused",
+      "clean-child-stop-zero-provider-dispatch",
+      "second-child-refused"
+    ],
+    "providerReadSummary": {
+      "calls": 0,
+      "refused": 0,
+      "routes": {}
+    },
+    "clusterStopped": true,
+    "sourceUnchanged": true
+  },
+  "guards": {
+    "baseline": 38,
+    "killed": 11,
+    "restored": 38,
+    "workingSourceUnchanged": true
+  },
+  "counterfactual": {
+    "head": "fc34d9c5522c85ef73753fa5e62008eaf55f7a65",
+    "base": "6f297f80d5906e39e3a19f261bf7a91fc4463a21",
+    "testSha256": "9302b10205f44064c4976cd02c37e76a7a4302c03859c1fa328aef1cba39a9bc",
+    "old": {
+      "exit": 1,
+      "passed": 9,
+      "failed": 2,
+      "failures": [
+        "token response category distinguishes closed OAuth errors without retaining response values",
+        "token response category is restricted to a completed successful token response through strict IPC"
+      ]
+    },
+    "baseline": {
+      "exit": 0,
+      "passed": 11,
+      "failed": 0,
+      "failures": []
+    },
+    "mutations": [
+      {
+        "name": "mislabel-client-error",
+        "exit": 1,
+        "passed": 9,
+        "failed": 2,
+        "failures": [
+          "token response category distinguishes closed OAuth errors without retaining response values",
+          "token response category is restricted to a completed successful token response through strict IPC"
+        ],
+        "killed": true
+      },
+      {
+        "name": "accept-arbitrary-category",
+        "exit": 1,
+        "passed": 10,
+        "failed": 1,
+        "failures": [
+          "token response category is restricted to a completed successful token response through strict IPC"
+        ],
+        "killed": true
+      },
+      {
+        "name": "attempt-raw-error-diagnostic",
+        "exit": 1,
+        "passed": 9,
+        "failed": 2,
+        "failures": [
+          "token response category distinguishes closed OAuth errors without retaining response values",
+          "token response category is restricted to a completed successful token response through strict IPC"
+        ],
+        "killed": true
+      },
+      {
+        "name": "misattribute-jwks",
+        "exit": 1,
+        "passed": 9,
+        "failed": 2,
+        "failures": [
+          "token/JWKS HTTP status and exact successful response preserved without payload/header diagnostics",
+          "token response category never inspects non-OK bodies or adds a category to JWKS"
+        ],
+        "killed": true
+      }
+    ],
+    "restored": {
+      "exit": 0,
+      "passed": 11,
+      "failed": 0,
+      "failures": []
+    },
+    "workingSourceUnchanged": true
+  },
+  "realAcceptance": "NOT_PROVEN",
+  "productionChanged": false,
+  "realYclientsCalls": 0,
+  "realModelCalls": 0
+}

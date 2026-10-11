@@ -1,0 +1,72 @@
+[
+  {
+    "originalLocalPath": "/private/tmp/maya-owner-telegram-20261012-02/session/resume.json",
+    "sha256": "175abf9dc6ed9ce63587140e4314a375737a49a06ef517f8fcb7558584910872",
+    "size": 548621,
+    "committed": false,
+    "reason": "Only closed safe projections are archived; private execution/source manifests and raw test receipts remain local."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-owner-telegram-20261012-02/read-only-outcome.json",
+    "sha256": "f5de0085dd16f2c1f30f65e76e21f1c42761b69a13706b93d66b3b9c0a7f4a04",
+    "size": 156,
+    "committed": false,
+    "reason": "Only closed safe projections are archived; private execution/source manifests and raw test receipts remain local."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-owner-telegram-20261012-03/session/resume.json",
+    "sha256": "6bec6ce4ae57c5e335d596ab3af258a70793e48e73188cebaec9a13e2298c611",
+    "size": 548617,
+    "committed": false,
+    "reason": "Only closed safe projections are archived; private execution/source manifests and raw test receipts remain local."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-owner-telegram-20261012-03/read-only-outcome.json",
+    "sha256": "f5de0085dd16f2c1f30f65e76e21f1c42761b69a13706b93d66b3b9c0a7f4a04",
+    "size": 156,
+    "committed": false,
+    "reason": "Only closed safe projections are archived; private execution/source manifests and raw test receipts remain local."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-category-checks-20261012-01/summary.json",
+    "sha256": "e933f3800c028ac604bedb0f4e5e51b3fccc0cb4517c0f67e4e289c6bb31cf80",
+    "size": 337,
+    "committed": false,
+    "reason": "Only closed safe projections are archived; private execution/source manifests and raw test receipts remain local."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-category-http-20261012-01/manifest.json",
+    "sha256": "8c309aad7e8eeb0fdbac16a272e5d3e1e0e0ef24f5fe9fa700b3b33b88b415e1",
+    "size": 692,
+    "committed": false,
+    "reason": "Only closed safe projections are archived; private execution/source manifests and raw test receipts remain local."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-category-http-20261012-01/telegram-initial-jest.json",
+    "sha256": "aa93667df13edc65a06302ac0bade79bf3fb616498ca941e8059ef5d06bb9eaf",
+    "size": 49089,
+    "committed": false,
+    "reason": "Only closed safe projections are archived; private execution/source manifests and raw test receipts remain local."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-category-binary-20261012-01/summary.json",
+    "sha256": "787b1171d7953c8c94bf670ff3f19b74429e46c53c90d151bc5e7d598d2ff13b",
+    "size": 5283,
+    "committed": false,
+    "reason": "Only closed safe projections are archived; private execution/source manifests and raw test receipts remain local."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-category-guards-20261012-01/summary.json",
+    "sha256": "6b0146beadbd49b36d74cdf95904cc6ac38b0b303e35e81081ad353202e4e4a4",
+    "size": 3391,
+    "committed": false,
+    "reason": "Only closed safe projections are archived; private execution/source manifests and raw test receipts remain local."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-telegram-category-counterfactual-20261012-01/summary.json",
+    "sha256": "b14109c15329d57e956f9e73811f21ac46744b7003452a5d8bb1c6d9274e8c3b",
+    "size": 2091,
+    "committed": false,
+    "reason": "Only closed safe projections are archived; private execution/source manifests and raw test receipts remain local."
+  }
+]
