@@ -29,23 +29,33 @@ const sourcePaths = [
   'maya-carrier-react/src', 'maya-carrier-react/tools', 'maya-carrier-react/index.html', 'maya-carrier-react/build.mjs', 'maya-carrier-react/package.json', 'maya-carrier-react/package-lock.json', 'maya-carrier-react/tsconfig.json',
   'maya-chat-shell/src', 'maya-chat-shell/dev', 'maya-chat-shell/build.mjs', 'maya-chat-shell/package.json',
 ];
-function sourceBinding() {
+function sourceBinding(extensionPaths = []) {
+  assert.ok(Array.isArray(extensionPaths) && new Set(extensionPaths).size === extensionPaths.length);
+  const paths = [...sourcePaths, ...extensionPaths];
   const git = args => execFileSync('git', args, { cwd: repo, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 }).trim();
   const head = git(['rev-parse', 'HEAD']);
   assert.match(head, /^[a-f0-9]{40}$/);
-  assert.equal(git(['status', '--porcelain', '--untracked-files=all', '--', ...sourcePaths]), '', 'Captured source must be committed and clean');
-  const files = git(['ls-tree', '-r', head, '--', ...sourcePaths]).split('\n').filter(Boolean).map(line => {
+  assert.equal(git(['status', '--porcelain', '--untracked-files=all', '--', ...paths]), '', 'Captured source must be committed and clean');
+  const isBase = name => sourcePaths.some(p => name === p || name.startsWith(p + '/'));
+  const committed = new Map();
+  const files = git(['ls-tree', '-r', head, '--', ...paths]).split('\n').filter(Boolean).map(line => {
     const match = /^(100644|100755) blob ([a-f0-9]{40})\t(.+)$/.exec(line);
-    assert.ok(match, 'Only committed ordinary source files are accepted');
+    assert.ok(match && !committed.has(match[3]) && (isBase(match[3]) || extensionPaths.includes(match[3])), 'Source must be an exact committed file');
     const filename = path.join(repo, match[3]), stat = fs.lstatSync(filename);
     assert.ok(stat.isFile() && !stat.isSymbolicLink());
     const bytes = fs.readFileSync(filename);
     const blob = createHash('sha1').update('blob ' + bytes.length + '\0').update(bytes).digest('hex');
     assert.equal(blob, match[2], 'Captured source changed');
-    return { path: match[3], gitBlob: blob, sha256: digest(bytes) };
+    const row = { path: match[3], gitBlob: blob, sha256: digest(bytes) };
+    committed.set(row.path, row);
+    return row;
   });
   for (const filename of sourcePaths.filter(name => /\.(?:mjs|ts|json|html)$/.test(name))) assert.ok(files.some(file => file.path === filename), 'Required launcher source is not committed');
-  return { head, files };
+  for (const filename of extensionPaths) assert.ok(committed.has(filename), 'Source must be an exact committed file');
+  assert.equal(git(['rev-parse', 'HEAD']), head, 'Source commit changed during binding');
+  // Read mode shares the same status/tree/hash pass, while preserving its
+  // historical base-first, declared-extension-order projection. No cache.
+  return { head, files: [...files.filter(row => isBase(row.path)), ...extensionPaths.map(name => committed.get(name))] };
 }
 export function sessionPlan({ stateDirectory, pgBin, database, pgPort, apiPort, webPort, minutes = 15 }) {
   assert.ok(path.isAbsolute(stateDirectory) && !/[\s']/.test(stateDirectory));

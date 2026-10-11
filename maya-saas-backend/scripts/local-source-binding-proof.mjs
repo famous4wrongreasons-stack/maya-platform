@@ -7,7 +7,6 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { sourceBinding } from './local-onboarding.mjs';
 import { readSourceBinding, READ_SOURCE_FILES } from './local-yclients-read.mjs';
 import { createOwnerTelegramTransport } from './local-owner-telegram-transport.mjs';
 import { TELEGRAM_LIMITS } from './local-owner-telegram-policy.mjs';
@@ -19,13 +18,19 @@ const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const git = args => execFileSync('git', args, { cwd: repo, encoding: 'utf8', maxBuffer: 4 * 1024 * 1024 }).trim();
 const referenceCommit = '2fb2569147cf1910be0b4c01b7ad2735054abe6a';
 const reference = git(['show', referenceCommit + ':maya-saas-backend/scripts/local-yclients-read.mjs']);
+const referenceBase = git(['show', referenceCommit + ':maya-saas-backend/scripts/local-onboarding.mjs']);
+const baseFrom = referenceBase.indexOf('const sourcePaths = [');
+const baseUntil = referenceBase.indexOf('\nexport function sessionPlan(', baseFrom);
+assert.ok(baseFrom >= 0 && baseUntil > baseFrom);
+const oldBaseBinding = new Function('execFileSync', 'repo', 'assert', 'fs', 'path', 'createHash', 'digest',
+  referenceBase.slice(baseFrom, baseUntil) + '\nreturn sourceBinding;')(execFileSync, repo, assert, fs, path, createHash, digest);
 const from = reference.indexOf('export function readSourceBinding() {');
 const until = reference.indexOf('\nexport function readSessionPlan(', from);
 assert.ok(from >= 0 && until > from);
 // Run the former algorithm on the same final committed files, not old bytes.
 const oldBinding = new Function('sourceBinding', 'execFileSync', 'repo', 'READ_SOURCE_FILES', 'assert', 'fs', 'path', 'createHash', 'digest',
   'return (' + reference.slice(from + 'export '.length, until).trim() + ');')(
-  sourceBinding, execFileSync, repo, READ_SOURCE_FILES, assert, fs, path, createHash, digest);
+  oldBaseBinding, execFileSync, repo, READ_SOURCE_FILES, assert, fs, path, createHash, digest);
 const source = readSourceBinding();
 assert.deepEqual(oldBinding(), source);
 const projectionDigest = digest(JSON.stringify(source));
@@ -38,7 +43,7 @@ const report = { qualification: 'OFFLINE_TRANSPORT_SOURCE_GUARD_COST_NOT_REAL_PR
   operationBudgetMs: TELEGRAM_LIMITS.operationMs, browserBudgetMs, providerCalls: 0, retainedDatabaseAccess: false, runs: [] };
 const save = () => fs.writeFileSync(path.join(output, 'summary.json'), JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
 save();
-for (const [name, read] of [['batched', readSourceBinding], ['previous-algorithm', oldBinding]]) {
+for (const [name, read] of [['shared-scan', readSourceBinding], ['previous-algorithm', oldBinding]]) {
   let checks = 0, guardMs = 0, authorityRereads = 0, completedPages = 0;
   const check = () => {
     const start = performance.now();
