@@ -1694,8 +1694,12 @@ test('concurrent/replayed account link callbacks never dispatch a second consump
   serve({ [U.telegramLinkComplete]: () => pending.opened });
   const first = f.net.session.completeTelegram({ state: STATE, code: 'synthetic-link-code' });
   await Promise.resolve(); await Promise.resolve();
-  assert.equal((await f.net.session.completeTelegram({ state: STATE, code: 'synthetic-link-code' })).step, 'failed');
-  pending.open(linkedResponse()); assert.equal((await first).step, 'linked');
+  const second = f.net.session.completeTelegram({ state: STATE, code: 'synthetic-link-code' });
+  // Release both contenders before asserting, so removing the single-use guard
+  // fails on two consumptions rather than deadlocking the mutation harness.
+  pending.open(linkedResponse());
+  const [firstResult, secondResult] = await Promise.all([first, second]);
+  assert.equal(firstResult.step, 'linked'); assert.equal(secondResult.step, 'failed');
   assert.equal(calls(U.telegramLinkComplete).length, 1);
   assert.equal((await f.net.session.completeTelegram({ state: STATE, code: 'synthetic-link-code' })).step, 'failed');
   assert.equal(calls(U.telegramLinkComplete).length, 1);
