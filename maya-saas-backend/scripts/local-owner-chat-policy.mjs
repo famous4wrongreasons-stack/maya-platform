@@ -12,27 +12,10 @@ export const OWNER_CHAT_QUESTIONS = Object.freeze([
   'Какие мастера работают в нашем салоне?',
   'Какой адрес и часы работы у нашего салона?',
 ]);
+import { assertOwnerChatScope, assertOwnerChatActor } from './local-owner-scope.mjs';
+export { assertOwnerChatScope, assertOwnerChatActor } from './local-owner-scope.mjs';
 const exact = (value, keys) => value !== null && typeof value === 'object' && !Array.isArray(value)
   && Object.keys(value).length === keys.length && keys.every(key => Object.hasOwn(value, key));
-const opaque = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value);
-const hash = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
-
-export function assertOwnerChatScope(scope) {
-  assert.ok(exact(scope, ['stateDirectory', 'initialManifestSha256', 'privateStateSha256',
-    'restartReceiptPath', 'restartReceiptSha256', 'tenantId', 'userId', 'branchId', 'tenantSlug', 'companyId']), 'owner_chat_scope_shape');
-  assert.ok(typeof scope.stateDirectory === 'string' && /^\/private\/tmp\/[a-zA-Z0-9_-]+$/.test(scope.stateDirectory), 'owner_chat_state');
-  assert.ok(typeof scope.restartReceiptPath === 'string' && /^\/private\/tmp\/[a-zA-Z0-9_-]+\/restart.json$/.test(scope.restartReceiptPath), 'owner_chat_restart');
-  for (const key of ['initialManifestSha256', 'privateStateSha256', 'restartReceiptSha256']) assert.ok(hash(scope[key]), 'owner_chat_state_pin');
-  for (const key of ['tenantId', 'userId', 'branchId']) assert.ok(opaque(scope[key]), 'owner_chat_identity');
-  assert.ok(typeof scope.tenantSlug === 'string' && /^[a-z0-9-]{1,80}$/.test(scope.tenantSlug), 'owner_chat_slug');
-  assert.ok(typeof scope.companyId === 'string' && /^[1-9][0-9]{0,14}$/.test(scope.companyId), 'owner_chat_company');
-}
-
-export function assertOwnerChatActor(user, scope) {
-  assertOwnerChatScope(scope);
-  assert.ok(user?.userId === scope.userId && user?.tenantId === scope.tenantId
-    && user.role === 'tenant_owner' && user.membershipStatus === 'active', 'owner_chat_actor_refused');
-}
 
 export function ownerChatIngress(method, rawPath, headers, body, origin, scope) {
   assertOwnerChatScope(scope);

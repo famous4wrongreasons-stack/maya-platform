@@ -14,6 +14,8 @@ import { realReadEnvironment } from './local-yclients-read-profile.mjs';
 import { createDiagnostic, diagnosticFailure, diagnosticStage, promptPartnerToken, readSessionPlan, readSourceBinding, runReadRuntime, runtimeCredential } from './local-yclients-read.mjs';
 import { readOwnerChatLaunch } from './local-owner-chat-launch.mjs';
 import { startCoreBroker } from './conversation-qualification/core-conversation-broker.mjs';
+import { readOwnerTelegramLaunch } from './local-owner-telegram-launch.mjs';
+import { OWNER_TELEGRAM_ADMISSION } from './local-owner-telegram-policy.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -215,6 +217,7 @@ export async function main(args) {
     'session-manifest-sha256': { type: 'string' }, 'private-state-sha256': { type: 'string' },
     'approved-source-commit': { type: 'string' }, minutes: { type: 'string', default: '15' },
     'owner-chat-plan': { type: 'string' }, 'owner-chat-plan-sha256': { type: 'string' },
+    'owner-telegram-plan': { type: 'string' }, 'owner-telegram-plan-sha256': { type: 'string' }, 'owner-approval-ref': { type: 'string' },
     'pg-bin': { type: 'string', default: '/opt/homebrew/opt/postgresql@16/bin' },
   } });
   if (!values.run) { process.stdout.write('Prepared only. Explicit --run with pinned completed stage-0 state, restart receipt and approved source resumes the same database and existing keys. No service or credential prompt started.\n'); return; }
@@ -223,6 +226,11 @@ export async function main(args) {
   const allowUserAuth = values['allow-user-auth'] === true;
   assert.equal(Boolean(values['owner-chat-plan']), Boolean(values['owner-chat-plan-sha256']), 'owner_chat_plan_pair');
   const chatLaunch = values['owner-chat-plan'] ? readOwnerChatLaunch(values['owner-chat-plan'], values['owner-chat-plan-sha256'], null) : null;
+  assert.equal(Boolean(values['owner-telegram-plan']), Boolean(values['owner-telegram-plan-sha256']), 'local_telegram_plan_pair');
+  assert.equal(Boolean(values['owner-telegram-plan']), Boolean(values['owner-approval-ref']), 'local_telegram_approval_pair');
+  const telegramArgs = [values['owner-telegram-plan'], values['owner-telegram-plan-sha256'], values['owner-approval-ref'], readSourceBinding];
+  const telegramLaunch = values['owner-telegram-plan'] ? readOwnerTelegramLaunch(...telegramArgs) : null;
+  assert.ok(!telegramLaunch || (!chatLaunch && !diagnosticNoProvider && !allowUserAuth && Number(values.minutes) === 10), 'local_telegram_mode_refused');
   assert.ok(!chatLaunch || (!diagnosticNoProvider && !allowUserAuth && Number(values.minutes) === 10), 'owner_chat_mode_refused');
   assert.ok(!diagnosticNoProvider || !allowUserAuth);
   if (!diagnosticNoProvider) { assert.equal(process.stdin.isTTY, true, 'owner_terminal_required'); assert.equal(process.stderr.isTTY, true, 'owner_terminal_required'); }
@@ -246,6 +254,16 @@ export async function main(args) {
   assert.ok(initial.landingUrl === env.CORS_ALLOWED_ORIGINS + '/__local-onboarding' && receipt.landingUrl === initial.landingUrl, 'saved_origin_mismatch');
   const output = externalStatePath(values.output, repo);
   const plan = resumePlan(env, state, values['pg-bin'], Number(values.minutes), output, diagnosticNoProvider, allowUserAuth);
+  if (telegramLaunch) {
+    const tp = telegramLaunch.plan, scope = tp.scope;
+    assert.ok(scope.stateDirectory === state && scope.restartReceiptPath === receiptPath
+      && scope.initialManifestSha256 === pins.initial && scope.privateStateSha256 === pins.privateState
+      && scope.restartReceiptSha256 === pins.receipt && tp.candidateCommit === source.head
+      && tp.origin === env.CORS_ALLOWED_ORIGINS, 'local_telegram_saved_state_binding');
+    plan.ownerTelegram = true; plan.executionExpiresAt = tp.expiresAt;
+    plan.providerAdmission = OWNER_TELEGRAM_ADMISSION;
+    plan.runtime.args.push('--owner-telegram-plan', ...telegramArgs.slice(0, 3));
+  }
   if (chatLaunch) {
     const scope = chatLaunch.manifest.ownerScope;
     assert.ok(scope.stateDirectory === state && scope.restartReceiptPath === receiptPath
@@ -267,6 +285,7 @@ export async function main(args) {
   const int = () => cancel('SIGINT'), term = () => cancel('SIGTERM');
   const inputsUnchanged = () => { directoriesUnchanged(); return unchanged(initialPath, 16 * 1024 * 1024, pins.initial) && unchanged(privatePath, 65536, pins.privateState) && unchanged(receiptPath, 16 * 1024 * 1024, pins.receipt) && checkPgpass(state, env) === pgpassHash; };
   try {
+    if (telegramLaunch) readOwnerTelegramLaunch(...telegramArgs, 'claim');
     fs.mkdirSync(output, { mode: 0o700 }); assertPrivateCwd(output);
     report = { contract: 'maya.local-yclients-read-resume/1', status: 'preparing', providerAdmission: 'not_started', qualifiedAcceptance: false,
       source, initialSourceHead: initial.source.head, initialManifestSha256: pins.initial, completedRestartSha256: pins.receipt,
@@ -303,6 +322,11 @@ export async function main(args) {
       control.terminate = null;
     }
     runtimeEnv = resumeEnvironment(env, partner, diagnosticNoProvider, allowUserAuth); partner = undefined;
+    if (telegramLaunch) {
+      const abort = new AbortController(); control.terminate = () => abort.abort();
+      runtimeEnv.TELEGRAM_CLIENT_SECRET = await promptPartnerToken({ credentialKind: 'telegram', timeoutMs: plan.promptDeadlineMs, signal: abort.signal });
+      control.terminate = null;
+    }
     report.diagnostic.credentialAccepted = !diagnosticNoProvider;
     assert.ok(inputsUnchanged() && jsonEqual(readSourceBinding(), source), 'resume_inputs_or_source_changed'); assert.equal(control.cancelled, null);
     if (chatLaunch) {
@@ -330,7 +354,7 @@ export async function main(args) {
       phase = 'stopping';
       try { await broker?.stop('owner_read_session_stopped'); }
       catch { failed = true; if (report) diagnosticFailure(report.diagnostic, 'cleanup_failed', { cleanup: true }); }
-      if (runtimeEnv) delete runtimeEnv.YCLIENTS_PARTNER_TOKEN;
+      if (runtimeEnv) { delete runtimeEnv.YCLIENTS_PARTNER_TOKEN; delete runtimeEnv.TELEGRAM_CLIENT_SECRET; }
       if (attempted) {
         try {
           directoriesUnchanged();

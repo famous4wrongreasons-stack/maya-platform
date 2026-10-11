@@ -7,25 +7,8 @@ import { socketRequest } from './conversation-qualification/core-conversation-so
 import { candidateReservation } from './conversation-qualification/current-candidate-budget.mjs';
 import { OWNER_CHAT_PROFILE, OWNER_CHAT_TOOLS, assertOwnerChatActor, createOwnerChatWindow } from './local-owner-chat-policy.mjs';
 
-export async function verifyOwnerChatDatabase(prisma, scope) {
-  const [tenant, user, membership, branch, integration] = await Promise.all([
-    prisma.tenant.findUnique({ where: { id: scope.tenantId }, select: { slug: true, status: true } }),
-    prisma.user.findUnique({ where: { id: scope.userId }, select: { tenantId: true, role: true, status: true } }),
-    prisma.membership.findFirst({ where: { tenantId: scope.tenantId, userId: scope.userId, role: 'tenant_owner', status: 'active' }, select: { id: true } }),
-    prisma.branch.findUnique({ where: { id: scope.branchId }, select: { tenantId: true } }),
-    prisma.crmIntegration.findUnique({ where: { tenantId: scope.tenantId }, select: { status: true, provider: true, baseUrl: true, verifiedAt: true, settingsJson: true } }),
-  ]);
-  assert.ok(tenant?.slug === scope.tenantSlug && ['active', 'trial'].includes(tenant.status)
-    && user?.tenantId === scope.tenantId && user.role === 'tenant_owner' && user.status === 'active'
-    && membership && branch?.tenantId === scope.tenantId, 'owner_chat_current_membership_refused');
-  const settings = integration?.settingsJson;
-  assert.ok(integration?.status === 'active' && integration.provider === 'yclients' && !integration.baseUrl && integration.verifiedAt
-    && String(settings?.companyId) === scope.companyId && settings?.branchBinding?.branchId === scope.branchId
-    && String(settings?.branchBinding?.companyId) === scope.companyId
-    && settings?.branchBinding?.contract === 'maya.crm-branch-binding/1'
-    && /^[a-f0-9]{64}$/.test(settings?.acceptedImportSnapshotHash ?? ''), 'owner_chat_current_crm_refused');
-  return scope.companyId;
-}
+import { verifyOwnerChatDatabase } from './local-owner-scope.mjs';
+export { verifyOwnerChatDatabase } from './local-owner-scope.mjs';
 
 export async function installOwnerChat({ app, prisma, require, backend, launch, providerFetch, diagnostic = () => {} }) {
   launch.assertCurrent();

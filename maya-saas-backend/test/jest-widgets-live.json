@@ -4,6 +4,7 @@
   "testEnvironment": "node",
   "testRegex": "widgets-live/.*\\.live-spec\\.ts$",
   "transform": {
+    "^.+/(?:local-owner-telegram-(?:policy|transport|runtime)|local-owner-scope|local-onboarding-profile)\\.mjs$": "<rootDir>/widgets-live/support/local-owner-telegram-mjs-transform.cjs",
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "globalSetup": "<rootDir>/widgets-live/support/global-setup.ts",

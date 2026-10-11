@@ -35,6 +35,14 @@ export const READ_SOURCE_FILES = Object.freeze([
   'maya-saas-backend/scripts/local-yclients-read-resume.test.mjs',
   'maya-saas-backend/scripts/local-telegram-return.mjs',
   'maya-saas-backend/scripts/local-telegram-return.test.mjs',
+  'maya-saas-backend/scripts/local-owner-scope.mjs',
+  'maya-saas-backend/scripts/local-owner-telegram-policy.mjs',
+  'maya-saas-backend/scripts/local-owner-telegram-transport.mjs',
+  'maya-saas-backend/scripts/local-owner-telegram-runtime.mjs',
+  'maya-saas-backend/scripts/local-owner-telegram-launch.mjs',
+  'maya-saas-backend/scripts/local-owner-telegram.test.mjs',
+  'maya-saas-backend/scripts/local-owner-telegram-policy.d.mts',
+  'maya-saas-backend/scripts/local-owner-telegram-runtime.d.mts',
   'maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html',
 ]);
 export const LOCAL_READ_HEADERS = Object.freeze({
@@ -43,7 +51,7 @@ export const LOCAL_READ_HEADERS = Object.freeze({
   'Cache-Control': 'no-store',
 });
 const PREPARATION_MS = 15 * 60000;
-const ROUTE_KINDS = Object.freeze(['auth', 'companies', 'company', 'book_services', 'services', 'categories', 'team']);
+const ROUTE_KINDS = Object.freeze(['auth', 'companies', 'company', 'book_services', 'services', 'categories', 'team', 'telegram_token', 'telegram_jwks', 'client_registry']);
 const LAUNCHER_STAGES = Object.freeze(['preparing', 'waiting_input', 'credential_accepted', 'backend_starting', 'web_starting', 'ready', 'stopping', 'stopped']);
 const FAILURE_CODES = Object.freeze(['preflight_refused', 'relay_start_failed', 'session_cancelled', 'preparation_stage_failed', 'preparation_timeout', 'input_timeout', 'input_cancelled', 'input_invalid', 'child_boot_failed', 'child_boot_timeout', 'child_exit_unexpected', 'runtime_status_invalid', 'runtime_summary_missing', 'cleanup_failed', 'source_changed', ...RUNTIME_CODES]);
 const safeFailure = code => Object.assign(new Error('Local setup-read operation stopped'), { diagnosticCode: code });
@@ -173,7 +181,8 @@ export function partnerTokenShape(value) {
 
 // Unit tests use finite public strings and fake TTY events. Real invocation uses
 // only the owner's foreground terminal, never a pipe, environment or token file.
-export async function promptPartnerToken({ input = process.stdin, output = process.stderr, timeoutMs = 600000, signal } = {}) {
+export async function promptPartnerToken({ input = process.stdin, output = process.stderr, timeoutMs = 600000, signal, credentialKind = 'partner' } = {}) {
+  assert.ok(['partner', 'telegram'].includes(credentialKind), 'private_input_kind');
   assert.equal(input.isTTY, true, 'An interactive terminal is required');
   assert.equal(output.isTTY, true, 'An interactive terminal is required');
   assert.equal(typeof input.setRawMode, 'function');
@@ -227,7 +236,7 @@ export async function promptPartnerToken({ input = process.stdin, output = proce
       input.setRawMode(true);
       input.on('data', onData); input.once('end', onEnd); input.once('error', onError);
       signal?.addEventListener('abort', onAbort, { once: true });
-      output.write('Partner token YCLIENTS (hidden; Enter confirms, Ctrl-C cancels): ');
+      output.write(credentialKind === 'telegram' ? 'Telegram OIDC Client Secret (hidden; Enter confirms, Ctrl-C cancels): ' : 'Partner token YCLIENTS (hidden; Enter confirms, Ctrl-C cancels): ');
       timer = setTimeout(() => finish(safeFailure('input_timeout')), timeoutMs);
       input.resume();
       if (signal?.aborted) onAbort();
@@ -284,7 +293,7 @@ export function createReadWebServer(plan, runtimeEnv) {
     }
     if (request.method === 'GET' && request.url === '/__local-yclients-read') {
       response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-      response.end(plan.ownerChat ? OWNER_CHAT_HTML : plan.diagnosticNoProvider ? DIAGNOSTIC_HTML : LANDING_HTML); return;
+      response.end(plan.ownerTelegram ? '<!doctype html><meta charset="utf-8"><title>MAYA — Telegram</title><main><h1>Вход через Telegram и личная карточка</h1><p>До 10 минут. Войдите в сохранённый бизнес по паролю, свяжите свой Telegram, затем войдите через Telegram заново. Разрешено чтение реестра клиентов выбранного салона для точного сопоставления. Это может создать личную связь только в локальной базе.</p><p>Существующая история доступна только по действующим правам и настройкам. Импорт истории, изменение согласий, модель, SMS, сообщения и запись закрыты. Секреты в AChat не вводить.</p><a href="/">Открыть Maya</a></main>' : plan.ownerChat ? OWNER_CHAT_HTML : plan.diagnosticNoProvider ? DIAGNOSTIC_HTML : LANDING_HTML); return;
     }
     for (const handler of handlers) handler.call(dev.server, request, response);
   });
@@ -297,7 +306,7 @@ export async function runReadRuntime(plan, runtimeEnv, state, control, manifest,
   let child;
   try { child = spawn(command.command, command.args, { cwd: state, env: runtimeEnv, detached: true, stdio: ['ignore', 'ignore', 'ignore', 'ipc'] }); }
   catch { diagnosticFailure(diagnostic, 'child_boot_failed'); throw safeFailure('child_boot_failed'); }
-  finally { delete runtimeEnv.YCLIENTS_PARTNER_TOKEN; }
+  finally { delete runtimeEnv.YCLIENTS_PARTNER_TOKEN; delete runtimeEnv.TELEGRAM_CLIENT_SECRET; }
   let dev, timer, stopPromise, cancelled, wasReady = false;
   const origin = `http://127.0.0.1:${runtimeEnv.PORT}`;
   const observer = runtimeObserver(diagnostic, { origin, providerAdmission: plan.providerAdmission }, save);
@@ -323,12 +332,14 @@ export async function runReadRuntime(plan, runtimeEnv, state, control, manifest,
     manifest.providerAdmission = plan.providerAdmission;
     manifest.landingUrl = runtimeEnv.CORS_ALLOWED_ORIGINS + '/__local-yclients-read';
     manifest.webUrl = runtimeEnv.CORS_ALLOWED_ORIGINS + '/'; manifest.apiOrigin = origin;
-    manifest.expiresAt = new Date(Date.now() + plan.durationMs).toISOString();
+    const duration = Math.min(plan.durationMs, plan.ownerTelegram ? Date.parse(plan.executionExpiresAt) - Date.now() : plan.durationMs);
+    assert.ok(duration > 0, 'local_execution_expired');
+    manifest.expiresAt = new Date(Date.now() + duration).toISOString();
     diagnosticStage(diagnostic, 'ready'); save(); wasReady = true;
     process.stdout.write(`${plan.diagnosticNoProvider ? 'Network-closed diagnostic' : 'Local YCLIENTS setup-read'} session ready: ${manifest.landingUrl}\n${plan.diagnosticNoProvider ? 'No owner credential was requested. Only health reads are admitted; no provider network.' : plan.ownerChat ? 'Three owner catalog questions only; bounded model broker. Business writes and notifications remain closed.' : 'Provider writes, model and outbound notifications remain closed.'}\n`);
     await Promise.race([
       observer.failure,
-      new Promise(resolve => { cancelled = resolve; timer = setTimeout(resolve, plan.durationMs); if (control.cancelled) resolve(); }),
+      new Promise(resolve => { cancelled = resolve; timer = setTimeout(resolve, duration); if (control.cancelled) resolve(); }),
       closed.then(() => { throw safeFailure('child_exit_unexpected'); }),
     ]);
   } catch (error) {

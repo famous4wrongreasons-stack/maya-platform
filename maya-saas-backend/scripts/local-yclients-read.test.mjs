@@ -40,8 +40,8 @@ test('read session reuses exact preparation and cleanup without changing stage 0
   assert.throws(() => readSessionPlan({ ...options, database: 'existing_unowned_database' }));
 });
 test('all finite read-profile sources are explicitly bound and landing uses current form', () => {
-  assert.equal(READ_SOURCE_FILES.length, 13); assert.equal(new Set(READ_SOURCE_FILES).size, 13);
-  for (const file of ['local-telegram-return.mjs', 'local-telegram-return.test.mjs', 'oauth-callback.html']) assert.ok(READ_SOURCE_FILES.some(name => path.basename(name) === file));
+  assert.equal(READ_SOURCE_FILES.length, 21); assert.equal(new Set(READ_SOURCE_FILES).size, 21);
+  for (const file of ['local-telegram-return.mjs', 'local-telegram-return.test.mjs', 'oauth-callback.html', 'local-owner-scope.mjs', 'local-owner-telegram.test.mjs', ...['policy.mjs', 'transport.mjs', 'runtime.mjs', 'launch.mjs', 'policy.d.mts', 'runtime.d.mts'].map(suffix => 'local-owner-telegram-' + suffix)]) assert.ok(READ_SOURCE_FILES.some(name => path.basename(name) === file));
   for (const name of ['local-yclients-read.mjs', 'local-yclients-read-profile.mjs', 'local-yclients-read-runtime.mjs', 'local-yclients-read-transport.mjs', 'local-yclients-read-profile.test.mjs', 'local-yclients-read.test.mjs', 'local-yclients-read-status.mjs', 'local-yclients-read-diagnostic.mjs', 'local-yclients-read-resume.mjs', 'local-yclients-read-resume.test.mjs']) assert.ok(READ_SOURCE_FILES.some(file => path.basename(file) === name));
   assert.ok(LANDING_HTML.includes('href="/?local_crm_setup=1"'));
   assert.ok(LANDING_HTML.includes('Партнёрский токен вводится скрыто'));
@@ -170,6 +170,15 @@ test('hidden prompt returns exact explicit TTY bytes without echo and restores t
   assert.equal(await pending, token);
   assert.equal(first.every(byte => byte === 0), true); assert.equal(second.every(byte => byte === 0), true);
   restored(fake); assert.deepEqual(fake.input.modes, [true, false]);
+});
+test('Telegram secret uses the same hidden TTY owner; arbitrary credential kinds are refused', async () => {
+  const fake = tty(), pending = promptPartnerToken({ ...fake, credentialKind: 'telegram' });
+  const bytes = Buffer.from(token + '\r'); fake.input.emit('data', bytes);
+  assert.equal(await pending, token); restored(fake);
+  assert.equal(bytes.every(byte => byte === 0), true);
+  assert.ok(fake.writes.join('').includes('Telegram'));
+  assert.ok(!fake.writes.join('').includes(token));
+  await assert.rejects(promptPartnerToken({ ...tty(), credentialKind: 'unknown' }));
 });
 test('hidden prompt refuses prebuffer, encoding or another reader before enabling raw input', async () => {
   for (const configure of [

@@ -44,6 +44,7 @@ const scopes = [
   'scripts/telegram-client-binding-proof.mjs',
   'scripts/telegram-client-binding-mutations.mjs',
   'scripts/local-*.mjs',
+  'scripts/local-*.d.mts',
   'scripts/conversation-qualification/current-candidate-budget.mjs',
   '../maya-chat-shell/dev',
   '../maya-chat-shell/test/cdp-verify.mjs',
@@ -160,6 +161,7 @@ commands.push({
     '--runInBand',
     '--runTestsByPath',
     'test/widgets-live/telegram-client-binding.live-spec.ts',
+    'test/widgets-live/local-owner-telegram.live-spec.ts',
     ...(process.env.JEST_TELEGRAM_WITH_SUCCESSOR === '1'
       ? ['test/widgets-live/sb1-successor.live-spec.ts']
       : []),
