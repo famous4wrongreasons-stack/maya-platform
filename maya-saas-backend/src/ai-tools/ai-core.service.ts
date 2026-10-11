@@ -4932,6 +4932,14 @@ export class AiCoreService {
       localCalendarDate(timezone, savedDate) !== localCalendarDate(timezone)
     ) {
       for (const task of plan.tasks) {
+        // Reschedule days are preferences too. A weekday/tomorrow must not
+        // silently acquire a later meaning after the retained business day.
+        if (
+          task.intent === 'booking.reschedule_own' &&
+          typeof task.entities.new_date === 'string' &&
+          !/^\d{4}-\d{2}-\d{2}$/.test(task.entities.new_date)
+        )
+          delete task.entities.new_date;
         // A relative day cannot silently move when a conversation resumes later.
         for (const key of ['date', 'date_or_period']) {
           const value = task.entities[key];

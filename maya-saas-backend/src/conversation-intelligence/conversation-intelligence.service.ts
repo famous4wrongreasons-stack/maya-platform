@@ -7,6 +7,7 @@ import {
 } from './semantic-slot-normalization';
 
 import { UserRole } from '../common/domain.enums';
+import { rescheduleDayPreference } from './reschedule-day-preference';
 import {
   MAYA_CONVERSATION_INTENTS,
   MAYA_CONVERSATION_TAXONOMY,
@@ -316,6 +317,45 @@ export class ConversationIntelligenceService {
     }
 
     const context = this.context(candidate.context, tasks);
+    // Continue only an explicitly unresolved personal move. Retain the user's
+    // date/time preference, never appointment identity, staff or READ authority.
+    // The same current owner must still choose/verify the appointment and slot.
+    const pendingMove = this.unselectedReschedule(tasks);
+    const previousMove = previousPlan
+      ? this.unselectedReschedule(previousPlan.tasks)
+      : null;
+    if (
+      pendingMove &&
+      previousMove &&
+      ['clarification', 'answer', 'correction', 'follow_up'].includes(
+        String(candidate.dialogue_act),
+      )
+    ) {
+      for (const key of ['new_date', 'new_time'] as const) {
+        const value = previousMove.entities[key];
+        if (
+          previousPlan!.context.unresolved_references.includes(key) ||
+          context.unresolved_references.includes(key) ||
+          (key === 'new_date'
+            ? rescheduleDayPreference(value) === null
+            : !isExactBookingTime(value))
+        )
+          continue;
+        if (!Object.hasOwn(pendingMove.entities, key)) {
+          pendingMove.entities[key] = value;
+          carried.add(key);
+        } else if (pendingMove.entities[key] !== value) {
+          replaced.add(key);
+        }
+      }
+      // The absent appointment keeps both clarification and confirmation
+      // mandatory. Update only the derived question after preference carry.
+      pendingMove.clarification_question = this.defaultClarification(
+        MAYA_CONVERSATION_INTENTS.get(pendingMove.intent)!.requiredSlots.filter(
+          (key) => !(key in pendingMove.entities),
+        ),
+      );
+    }
     context.carried_slots = [
       ...new Set([...context.carried_slots, ...carried]),
     ].filter((key) => !replaced.has(key));
@@ -333,6 +373,40 @@ export class ConversationIntelligenceService {
       tasks,
       context,
     };
+  }
+
+  private unselectedReschedule(
+    tasks: readonly ConversationSemanticTask[],
+  ): ConversationSemanticTask | null {
+    const move = tasks.at(-1);
+    if (
+      !move ||
+      ![1, 2].includes(tasks.length) ||
+      move.intent !== 'booking.reschedule_own' ||
+      move.permission.status !== 'allowed' ||
+      move.tool.status !== 'ready' ||
+      move.tool.name !== 'appointments.own.reschedule' ||
+      !move.requires_clarification ||
+      !move.requires_confirmation ||
+      move.confidence < MIN_EXECUTABLE_CONFIDENCE ||
+      Object.hasOwn(move.entities, 'appointment') ||
+      Object.hasOwn(move.entities, 'new_employee')
+    )
+      return null;
+    if (tasks.length === 1) return move.depends_on.length ? null : move;
+    const read = tasks[0];
+    return read.intent === 'booking.list_own' &&
+      read.permission.status === 'allowed' &&
+      read.tool.status === 'ready' &&
+      read.tool.name === 'appointments.own.list' &&
+      !read.requires_clarification &&
+      !read.requires_confirmation &&
+      read.confidence >= MIN_EXECUTABLE_CONFIDENCE &&
+      read.depends_on.length === 0 &&
+      move.depends_on.length === 1 &&
+      move.depends_on[0] === read.id
+      ? move
+      : null;
   }
 
   clarifyUnselectedIntegrationRead(

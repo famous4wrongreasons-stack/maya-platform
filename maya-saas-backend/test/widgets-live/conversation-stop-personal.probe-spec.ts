@@ -269,6 +269,176 @@ describe('STOP, personal read and current staff binding [HTTP] [PG] [SCRIPTED]',
       actionExecutions: 0,
     });
   });
+  it('keeps reschedule preferences through actual persisted follow-ups and fresh login, without selecting or moving an appointment', async () => {
+    const f = await salon(UserRole.CLIENT);
+    await fx.bookingSource(f.tenant, f.user, true);
+    const intelligence = new ConversationIntelligenceService();
+    const turns = [
+      {
+        text: 'Перенеси мою запись на пятницу',
+        entities: { new_date: 'friday' },
+        paired: true,
+        act: 'request',
+      },
+      {
+        text: 'В 20:00',
+        entities: { new_time: '20:00' },
+        paired: true,
+        act: 'answer',
+      },
+      {
+        text: 'Нет, лучше в 19:00',
+        entities: { new_time: '19:00' },
+        paired: false,
+        act: 'correction',
+      },
+      {
+        text: 'А на субботу?',
+        entities: { new_date: 'saturday' },
+        paired: false,
+        act: 'follow_up',
+      },
+    ];
+    let index = 0;
+    const decide = jest
+      .spyOn(http.app.get(AiCoreModelService), 'decide')
+      .mockImplementation((input) => {
+        const turn = turns[index++];
+        if (!turn) throw new Error('Unexpected scripted model request');
+        return Promise.resolve(
+          decision({
+            reply: '',
+            toolCall: turn.paired
+              ? { name: 'appointments.own.list', arguments: {} }
+              : null,
+            semanticPlan: intelligence.validatePlan(
+              {
+                dialogue_act: turn.act,
+                tasks: [
+                  ...(turn.paired
+                    ? [
+                        {
+                          id: 'own',
+                          intent: 'booking.list_own',
+                          entities: {},
+                          confidence: 1,
+                        },
+                      ]
+                    : []),
+                  {
+                    id: 'move',
+                    intent: 'booking.reschedule_own',
+                    entities: turn.entities,
+                    depends_on: turn.paired ? ['own'] : [],
+                    confidence: 1,
+                  },
+                ],
+              },
+              input.principalRole!,
+              input.tools.map((t) => t.name),
+              input.conversationPlan,
+            ),
+          }),
+        );
+      });
+    const before = await db.prisma.appointment.findMany({
+      where: { tenantId: f.tenant.id },
+      orderBy: { id: 'asc' },
+    });
+    let conversation: string | undefined;
+    const replies: string[] = [];
+    const token = await http.login(
+      f.tenant.slug,
+      f.user.email,
+      f.user.password,
+    );
+    for (const [i, turn] of turns.entries()) {
+      const response = await f.chat(
+        turn.text,
+        conversation,
+        i < 2 ? f.token : token,
+      );
+      expect(response.status).toBe(201);
+      const body = response.body as {
+        reply: string;
+        action: unknown;
+        user_turn: { conversationId: string };
+        resolution?: unknown;
+      };
+      conversation = body.user_turn.conversationId;
+      replies.push(body.reply);
+      expect(body.action).toBeNull();
+      expect(body.resolution).toBeUndefined();
+      expect(body.reply).toContain('Возможность переноса ещё не проверена');
+    }
+    expect(replies[1]).toContain('пятница, 20:00');
+    expect(replies[2]).toContain('пятница, 19:00');
+    expect(replies[3]).toContain('суббота, 19:00');
+    expect(
+      replies.slice(1).every((reply) => reply.includes('уточните запись')),
+    ).toBe(true);
+    expect(decide).toHaveBeenCalledTimes(4);
+    expect(
+      decide.mock.calls[2][0].conversationPlan?.tasks.at(-1)?.entities,
+    ).toEqual({ new_date: 'friday', new_time: '20:00' });
+    const stop = await f.chat('Стоп', conversation, token);
+    expect(stop.status).toBe(201);
+    decide.mockImplementation((input) => {
+      expect(input.conversationPlan).toBeNull();
+      return Promise.resolve(
+        decision({
+          semanticPlan: intelligence.validatePlan(
+            {
+              dialogue_act: 'answer',
+              tasks: [
+                {
+                  intent: 'booking.reschedule_own',
+                  entities: { new_time: '18:00' },
+                  confidence: 1,
+                },
+              ],
+            },
+            input.principalRole!,
+            input.tools.map((t) => t.name),
+            input.conversationPlan,
+          ),
+        }),
+      );
+    });
+    const afterStop = await f.chat('А в 18:00?', conversation, token);
+    expect(afterStop.status).toBe(201);
+    expect((afterStop.body as { reply: string }).reply).not.toMatch(
+      /пятница|суббота/,
+    );
+    expect(
+      await db.prisma.appointment.findMany({
+        where: { tenantId: f.tenant.id },
+        orderBy: { id: 'asc' },
+      }),
+    ).toEqual(before);
+    expect(
+      await db.prisma.actionExecution.count({
+        where: { tenantId: f.tenant.id },
+      }),
+    ).toBe(0);
+    expect(
+      await db.prisma.aiToolExecution.findMany({
+        where: { tenantId: f.tenant.id },
+        select: { toolName: true },
+      }),
+    ).toEqual([
+      { toolName: 'appointments.own.list' },
+      { toolName: 'appointments.own.list' },
+    ]);
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+    evidence.push({
+      case: 'reschedule_preference_followups',
+      replies,
+      afterStop: (afterStop.body as { reply: string }).reply,
+      appointmentsUnchanged: true,
+      actionExecutions: 0,
+    });
+  });
   it.each([UserRole.CLIENT, UserRole.TENANT_OWNER])(
     'reads only own branchless appointments for %s, with explicit display timezone and revocation',
     async (role) => {

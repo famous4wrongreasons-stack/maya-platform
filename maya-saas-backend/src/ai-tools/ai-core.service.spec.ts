@@ -112,6 +112,31 @@ describe('AiCoreService', () => {
       );
       return { ...mocks, timeline, saved };
     }
+    it.each(['friday', 'tomorrow', '2026-10-16'])(
+      'does not reinterpret a retained reschedule day on the next local day: %s',
+      async (day) => {
+        const f = fixture();
+        const saved = f.saved[0] as {
+          savedAt: string;
+          plan: { tasks: { entities: { new_date: string } }[] };
+        };
+        saved.savedAt = '2020-01-01T12:00:00Z';
+        saved.plan.tasks[0].entities.new_date = day;
+        await f.service.chat(
+          { ...user, role: UserRole.CLIENT },
+          {
+            ...dto,
+            conversationId: 'stop-conversation',
+            messages: [{ role: 'user', content: 'А на 19:00?' }],
+          },
+        );
+        expect(
+          f.model.decide.mock.calls[0][0].conversationPlan?.tasks[0].entities
+            .new_date,
+        ).toBe(day === '2026-10-16' ? day : undefined);
+        expect(f.runtime.execute).not.toHaveBeenCalled();
+      },
+    );
     it.each([UserRole.CLIENT, UserRole.TENANT_OWNER])(
       'closes the current preparation for %s before model, tool or card dispatch',
       async (role) => {
