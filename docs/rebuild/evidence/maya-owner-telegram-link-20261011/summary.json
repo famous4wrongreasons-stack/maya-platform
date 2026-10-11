@@ -1,0 +1,91 @@
+{
+  "qualification": "LOCAL_FUNCTIONAL_DEVELOPMENT_NOT_RELEASE_CERTIFICATION",
+  "originalHead": "20a543840eb75b58d649c44517f8e071b04865fc",
+  "implementationHead": "1e0e72c267f2429b79e77a63d0fdaa04a28d0868",
+  "freshProofHead": "d27699c2f96d65095f1d24c7fca79ad69e227e1b",
+  "results": {
+    "telegramHttpPgSuccessorBrowser": {
+      "passed": 97,
+      "failed": 0,
+      "browserCases": 2,
+      "syntheticIssuerCrmModel": true,
+      "sourceHashesMatched": 2109
+    },
+    "runtime": {
+      "passed": 733,
+      "failed": 0,
+      "skipped": 7
+    },
+    "reactCarrier": {
+      "passed": 163,
+      "failed": 0
+    },
+    "authPhoneUnit": {
+      "passed": 83,
+      "failed": 0,
+      "includedInFullBackend": true
+    },
+    "packaging": {
+      "status": "PASS",
+      "owner": "React AChat",
+      "webCapacitorParity": "PASS",
+      "filesPerPayload": 8,
+      "nativeVerified": false,
+      "nativeInstall": false
+    },
+    "packagingTests": {
+      "passed": 18,
+      "failed": 0
+    },
+    "scopedLint": "PASS",
+    "liveTypecheck": "PASS",
+    "webMutations": {
+      "killed": 13,
+      "total": 13,
+      "greenBaseline": true,
+      "checkpoint": "d27699c2f96d65095f1d24c7fca79ad69e227e1b"
+    },
+    "backendMutations": {
+      "killed": 9,
+      "total": 9,
+      "greenBaselinePassed": 76,
+      "restoredBaselinePassed": 76,
+      "checkpoint": "1e0e72c267f2429b79e77a63d0fdaa04a28d0868",
+      "reuseBasis": "All backend source/tests/runner bytes unchanged at freshProofHead; later commit changed one runtime test only. This is a targeted mutation programme, not full release certification."
+    },
+    "fullBackend": {
+      "passed": 9562,
+      "failed": 37,
+      "passedSuites": 704,
+      "failedSuites": 13,
+      "totalSuites": 717,
+      "status": "NOT_GREEN",
+      "exactFailuresReproducedOnOriginalHead": 37,
+      "notWaived": true
+    }
+  },
+  "liveOwnerAcceptance": "NOT_RUN",
+  "readyForLivePrivateReadLaunch": false,
+  "releaseCertified": false,
+  "effects": {
+    "realTelegram": 0,
+    "realOtpSms": 0,
+    "realModelCalls": 0,
+    "realYclientsEffects": 0,
+    "productionChanges": 0,
+    "ownerDatabaseWrites": 0,
+    "iphoneInstallations": 0,
+    "pushes": 0
+  },
+  "cleanup": {
+    "proofClusterStopped": true,
+    "proofBrowsersStopped": true,
+    "trackedProductSourcesUnchangedAfterProof": true
+  },
+  "remaining": [
+    "Close separately recorded inherited backend findings; full backend is not green.",
+    "Qualify current callback/React pair on an authorized Telegram HTTPS return.",
+    "Qualify existing launcher for narrowly bounded private reads; its current catalog-only permit is insufficient.",
+    "Fresh explicit real private-data/model allowance and user-completed Telegram sign-in; history consent remains separately owned."
+  ]
+}

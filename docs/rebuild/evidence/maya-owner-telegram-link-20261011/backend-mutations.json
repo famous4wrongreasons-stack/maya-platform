@@ -1,0 +1,117 @@
+{
+  "qualification": "TARGETED_MUTATIONS_NOT_FULL_RELEASE_CERTIFICATION",
+  "mutations": [
+    {
+      "name": "first-linked-international-phone",
+      "exit": 1,
+      "passed": 74,
+      "failed": 2,
+      "names": [
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing active business owner with no phone/Telegram: authenticated A23 link, then fresh login creates personal Client without account duplication",
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing trial business owner with no phone/Telegram: authenticated A23 link, then fresh login creates personal Client without account duplication"
+      ],
+      "killed": true
+    },
+    {
+      "name": "verified-phone",
+      "exit": 1,
+      "passed": 73,
+      "failed": 3,
+      "names": [
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (false), including a stored matching phone",
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (true), including a stored matching phone",
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (1), including a stored matching phone"
+      ],
+      "killed": true
+    },
+    {
+      "name": "unique-client",
+      "exit": 1,
+      "passed": 75,
+      "failed": 1,
+      "names": [
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: duplicate"
+      ],
+      "killed": true
+    },
+    {
+      "name": "current-source",
+      "exit": 1,
+      "passed": 75,
+      "failed": 1,
+      "names": [
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses a source switch during CRM resolution"
+      ],
+      "killed": true
+    },
+    {
+      "name": "current-session",
+      "exit": 1,
+      "passed": 75,
+      "failed": 1,
+      "names": [
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rereads session revocation after CRM resolution"
+      ],
+      "killed": true
+    },
+    {
+      "name": "immutable-revocation",
+      "exit": 1,
+      "passed": 75,
+      "failed": 1,
+      "names": [
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] leaves revoked historical verification byte-identical and denies automatic relink"
+      ],
+      "killed": true
+    },
+    {
+      "name": "atomic-audit",
+      "exit": 1,
+      "passed": 73,
+      "failed": 3,
+      "names": [
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining client role",
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining tenant_owner role",
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rolls back the link when its mandatory audit cannot be written"
+      ],
+      "killed": true
+    },
+    {
+      "name": "serialization-retry",
+      "exit": 1,
+      "passed": 71,
+      "failed": 5,
+      "names": [
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] retries a serializable CRM identity registration conflict through the same owner",
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 4",
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 5",
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 6",
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] gives one initial writer under concurrent valid login contexts, run 8"
+      ],
+      "killed": true
+    },
+    {
+      "name": "optional-profile",
+      "exit": 1,
+      "passed": 74,
+      "failed": 2,
+      "names": [
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining client role",
+        "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining tenant_owner role"
+      ],
+      "killed": true
+    }
+  ],
+  "baseline": {
+    "exit": 0,
+    "passed": 76,
+    "failed": 0,
+    "names": []
+  },
+  "restored": {
+    "exit": 0,
+    "passed": 76,
+    "failed": 0,
+    "names": []
+  }
+}

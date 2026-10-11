@@ -1,0 +1,121 @@
+{
+  "qualification": "Hashes of executed local receipts; local raw logs are not copied. No release-admission assertion.",
+  "freshProofHead": "d27699c2f96d65095f1d24c7fca79ad69e227e1b",
+  "receipts": [
+    {
+      "localPath": "/private/tmp/maya-owner-link-final-20261011/manifest.json",
+      "sha256": "09a567b027d45b813dfccb8e1f8ddbc11afd3ef808e2b91a2a6b7fcbf15d3b0f",
+      "size": 719
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-final-20261011/source-hashes.json",
+      "sha256": "b03e8b7c6cd2e1dce7316ece1235b38e2d8c601ce1bfbb61d8423cd128568121",
+      "size": 257420
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-final-20261011/telegram-initial-jest.json",
+      "sha256": "234975a6a829f52480c11f26a1a2260559942fe4b565571e3406bed0e691f7fa",
+      "size": 53045
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-final-20261011/browser-client/browser.json",
+      "sha256": "2de318e8480f773cdcb860de8c38ebd7a47554bae51e52699e1ace2166e4d46b",
+      "size": 2163
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-final-20261011/browser-tenant_owner/browser.json",
+      "sha256": "2ba9664e6857f23dfdbcd3dfda79f6c8c3514bcdc03e92cd7944dcfd0e54d9fb",
+      "size": 2435
+    },
+    {
+      "localPath": "/private/tmp/maya-telegram-mutations-owner-link-final-20261011/report.json",
+      "sha256": "ca13214068d84d079acff69db40af997c3c11e2671cdd044ca01bce61dff56ab",
+      "size": 2086
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-backend-mutations-1e0e72c2/summary.json",
+      "sha256": "d8739abee2efa1084032242ea9e0bc0b527844f6ba2c576e2204d848cee9529d",
+      "size": 4546
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-final-runtime.log",
+      "sha256": "e98de37a6fc6a988180f78fbd3215d140eb801a333e3d76517ebec185e474d84",
+      "size": 79935
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-final-carrier.log",
+      "sha256": "3dfd243e7781f1dda29af405726d003cbd8e1f93c371f269f215f76140849e22",
+      "size": 13857
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-final-packaging.log",
+      "sha256": "05bae03a0ab021c7a7059da379eeb0f869e1d39091edeaa6224f1d0741047c39",
+      "size": 2288
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-final-release-tests.log",
+      "sha256": "d23cd834da8487597c5a4defc472a9a3e2ae1d8b921b81f3d13a7a2472e4cca6",
+      "size": 1382
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-final-auth-unit.log",
+      "sha256": "d029d40f7f75e9c1bdebc77bc453e925f6199b849945e41619d619c1306e7dd5",
+      "size": 400
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-final-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-final-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-final-backend-unit.log",
+      "sha256": "46ca96b2fe4fabaaeb5c978ea86f2e623348cf32183a9ce06645b705cd758318",
+      "size": 1138215
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-baseline-20a54384/provenance.json",
+      "sha256": "5fcb3bb80c6f570629bd7dc73e182e4f27b86ab5af6b6299c4c7efcc6ee75676",
+      "size": 307
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-baseline-20a54384/complete-result.json",
+      "sha256": "25046b1acde7a088a8a116f1342e5c6fcc4ec1ecabf7424bacb67aa6669f60fe",
+      "size": 343351
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-baseline-20a54384/profile-result.json",
+      "sha256": "bfc1465293848233cc9917da383bc66088d4ea010cdb6c26fc34ae4a6f088b4e",
+      "size": 19128
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-baseline-20a54384/r01-result.json",
+      "sha256": "5846bbbe92185cf16912e5ec3aa4911707cd3df96d73e682ee58f3e935310cc2",
+      "size": 11586
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-baseline-20a54384/remaining-result.json",
+      "sha256": "1044bf9ce9b248f93f597c3f9103ae8e467872e71c345a6276fddaa2cc443a5c",
+      "size": 97893
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-baseline-20a54384/identity-guard-complete-result.json",
+      "sha256": "bdd07ce78b3b8304d09ac18e9895adba5a26765c367de8a6e261b0b84ea8b33e",
+      "size": 14419
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-baseline-20a54384/failed-case-equivalence.json",
+      "sha256": "02d44d36ae7f496555a300037620210bbc889f15dabd93418cfdf9043ed66465",
+      "size": 9075
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-link-baseline-20a54384/build-complete.log",
+      "sha256": "ddfc13f432822fb489ee830f67f34a806bca5d31bd14ae449b59c1110c23994d",
+      "size": 1010
+    }
+  ]
+}

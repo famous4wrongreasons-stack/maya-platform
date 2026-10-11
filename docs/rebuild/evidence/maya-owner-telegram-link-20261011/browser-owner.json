@@ -1,0 +1,79 @@
+{
+  "contract": "maya.telegram-personal-browser/1",
+  "status": "PASS",
+  "candidate": "d27699c2f96d65095f1d24c7fca79ad69e227e1b",
+  "actualReact": true,
+  "actualRuntime": true,
+  "actualBackendHttp": true,
+  "realTelegram": false,
+  "syntheticIssuerCrmModel": true,
+  "externalRequestsDispatched": 0,
+  "networkBoundary": "CDP finite relay to owned loopback backend plus deny proxy/resolver; no OS packet claim",
+  "checks": [
+    "existing owner password entry",
+    "existing account form",
+    "password session retained",
+    "canonical authenticated linking control",
+    "A23 confirms account link without replacing session",
+    "finder rendered",
+    "canonical business search",
+    "actual Telegram session opens AChat",
+    "initiating document retained",
+    "existing reconciliation owner synchronized after first binding",
+    "canonical private reply 1",
+    "canonical private reply 2",
+    "canonical private reply 3",
+    "finder rendered",
+    "canonical business search",
+    "actual Telegram session opens AChat",
+    "initiating document retained",
+    "relogin restores exactly three message pairs"
+  ],
+  "starts": 2,
+  "completes": 2,
+  "accountLinks": 1,
+  "passwordLogins": 1,
+  "chat": [
+    {
+      "responseSha256": "501a573f1d5ada2be1701299ecd06ad393daed57fd2c8b54804cbdf6cc6d005f",
+      "requestIdSha256": "af9ef18638955e842313f44fa85a11847841aab1dc13d086991b07e9447708e2",
+      "authorityFieldsSent": false,
+      "rendered": true
+    },
+    {
+      "responseSha256": "89f3405826c62ce8bbf04c56f17d2fc15b4ca6e95957424779b1f8c3897dff9c",
+      "requestIdSha256": "256ece126ac794a74bede79cb35007f5327ead6852e0a7a4f1efb6af952eb345",
+      "authorityFieldsSent": false,
+      "rendered": true
+    },
+    {
+      "responseSha256": "d6c36bee65ee1a9abd6d6d3e7c8c5013087c759fd3861469e76643a2b21b5ece",
+      "requestIdSha256": "0ec680c0718c12cd8246f6c58e474712ee8ec4c36f221537ec1eadfa832d5b72",
+      "authorityFieldsSent": false,
+      "rendered": true
+    }
+  ],
+  "history": [
+    {
+      "conversationIdSha256": null,
+      "roles": []
+    },
+    {
+      "conversationIdSha256": null,
+      "roles": []
+    },
+    {
+      "conversationIdSha256": "6028f77e6c6031d63a1c98168c225fb478ea656791683a4a5ee0c5fc40ce7a85",
+      "roles": [
+        "user",
+        "assistant",
+        "user",
+        "assistant",
+        "user",
+        "assistant"
+      ]
+    }
+  ],
+  "errors": [],
+  "browserStopped": true
+}

@@ -1,0 +1,70 @@
+{
+  "contract": "maya.telegram-personal-browser/1",
+  "status": "PASS",
+  "candidate": "d27699c2f96d65095f1d24c7fca79ad69e227e1b",
+  "actualReact": true,
+  "actualRuntime": true,
+  "actualBackendHttp": true,
+  "realTelegram": false,
+  "syntheticIssuerCrmModel": true,
+  "externalRequestsDispatched": 0,
+  "networkBoundary": "CDP finite relay to owned loopback backend plus deny proxy/resolver; no OS packet claim",
+  "checks": [
+    "finder rendered",
+    "canonical business search",
+    "actual Telegram session opens AChat",
+    "initiating document retained",
+    "existing reconciliation owner synchronized after first binding",
+    "canonical private reply 1",
+    "canonical private reply 2",
+    "canonical private reply 3",
+    "finder rendered",
+    "canonical business search",
+    "actual Telegram session opens AChat",
+    "initiating document retained",
+    "relogin restores exactly three message pairs"
+  ],
+  "starts": 2,
+  "completes": 2,
+  "accountLinks": 0,
+  "passwordLogins": 0,
+  "chat": [
+    {
+      "responseSha256": "6c2eceb186f19f659d296b8ad54e5dfc349f07c8abca1080ad6aa221858db8fc",
+      "requestIdSha256": "cf7e847e75a26884028485841aaa58934471503a7af215573646dfc357d9ad32",
+      "authorityFieldsSent": false,
+      "rendered": true
+    },
+    {
+      "responseSha256": "f77b2028377ccbd58683925ad43f5ab30110047a4bbf6ccecfbbac34e4ea1c94",
+      "requestIdSha256": "a33bd610f39baf499f739c367b83d790bbc2b5fc4974569ab66df9fdf2f6cd56",
+      "authorityFieldsSent": false,
+      "rendered": true
+    },
+    {
+      "responseSha256": "1ca70b043ae0b10aef795e8f6585863a1282d47e64349bb299d53f4fe866b364",
+      "requestIdSha256": "da42e5aad165e83e89ffe8f28b5b8079206c2dac23406b9600ffe1b11b4a7a72",
+      "authorityFieldsSent": false,
+      "rendered": true
+    }
+  ],
+  "history": [
+    {
+      "conversationIdSha256": null,
+      "roles": []
+    },
+    {
+      "conversationIdSha256": "84af5ff0238165f83a6ed3da7e6c53af5e8adcccf90f50cf6b2f742b265ec909",
+      "roles": [
+        "user",
+        "assistant",
+        "user",
+        "assistant",
+        "user",
+        "assistant"
+      ]
+    }
+  ],
+  "errors": [],
+  "browserStopped": true
+}

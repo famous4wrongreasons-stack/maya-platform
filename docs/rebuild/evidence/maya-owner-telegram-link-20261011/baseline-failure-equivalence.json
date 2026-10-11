@@ -1,0 +1,157 @@
+{
+  "originalHead": "20a543840eb75b58d649c44517f8e071b04865fc",
+  "newHead": "d27699c2f96d65095f1d24c7fca79ad69e227e1b",
+  "fullBackendFailures": 37,
+  "reproducedBeforeChanges": 37,
+  "exactFailureNamesMatch": true,
+  "cases": [
+    {
+      "suite": "src/crm/crm-branch-binding.spec.ts",
+      "name": "READY reschedule requires the original persisted source witness: null"
+    },
+    {
+      "suite": "src/crm/crm-branch-binding.spec.ts",
+      "name": "READY reschedule requires the original persisted source witness: old"
+    },
+    {
+      "suite": "src/crm/crm-branch-binding.spec.ts",
+      "name": "READY reschedule requires the original persisted source witness: current"
+    },
+    {
+      "suite": "src/crm/crm-branch-binding.spec.ts",
+      "name": "an original persisted witness cannot be bypassed by current branch-null"
+    },
+    {
+      "suite": "src/crm/crm-branch-binding.spec.ts",
+      "name": "an original persisted witness cannot be bypassed by current calendar"
+    },
+    {
+      "suite": "src/crm/crm-branch-binding.spec.ts",
+      "name": "an original persisted witness cannot be bypassed by current provider"
+    },
+    {
+      "suite": "src/crm/client-appointment-status.spec.ts",
+      "name": "native reschedule readback identity uses provider identity crm-501 and current status confirmed before mirror/confirmation"
+    },
+    {
+      "suite": "src/crm/client-appointment-status.spec.ts",
+      "name": "native reschedule readback identity uses provider identity crm-other and current status confirmed before mirror/confirmation"
+    },
+    {
+      "suite": "src/crm/client-appointment-status.spec.ts",
+      "name": "native reschedule readback identity uses provider identity crm-501 and current status canceled before mirror/confirmation"
+    },
+    {
+      "suite": "src/widgets/projection/projector-fences.architecture.spec.ts",
+      "name": "U12b \u2014 the projector fences (ARCH-12-1 \u2026 ARCH-12-14) ARCH-12-11 [BUILD] F3/FR-16: this change adds no capability, no capability field and no column to a non-Widget table"
+    },
+    {
+      "suite": "src/ai-tools/routing-regression.acceptance.spec.ts",
+      "name": "\u041a\u041e\u0420\u041f\u0423\u0421: \u043f\u0440\u043e\u043c\u0430\u0445 \u043f\u043e\u0434\u0441\u043a\u0430\u0437\u043a\u0438 \u0431\u043e\u043b\u044c\u0448\u0435 \u043d\u0435 \u043e\u0442\u043a\u0430\u0437 \u043d\u0438 \u043e\u0434\u043d\u043e\u0433\u043e \u0438\u043d\u0441\u0442\u0440\u0443\u043c\u0435\u043d\u0442\u0430 \u0434\u0430\u043d\u043d\u044b\u0445 \u0434\u043b\u044f \u0440\u043e\u043b\u0438 \u2014 \u043f\u0440\u0435\u0436\u043d\u0438\u0439 \u0447\u0435\u0441\u0442\u043d\u044b\u0439 \u043e\u0442\u043a\u0430\u0437"
+    },
+    {
+      "suite": "src/widgets/proactive/proactive.spec.ts",
+      "name": "K13 \u2014 no C10 autonomy PR2 \u2014 READ keys are provenance and are admissible; PROPOSE_ONLY and OWNER_HANDOFF are not"
+    },
+    {
+      "suite": "src/widgets/consent/consent.spec.ts",
+      "name": "K12 \u2014 both kinds are blocked on capability registration no consent, identity or privacy READ key is registered"
+    },
+    {
+      "suite": "src/ai-tools/planner-wire-context.spec.ts",
+      "name": "Bounded planner stage wire context (no language acceptance) fits the recorded owner compound follow-up without dropping actual history or authority fields"
+    },
+    {
+      "suite": "src/ai-tools/planner-wire-context.spec.ts",
+      "name": "Bounded planner stage wire context (no language acceptance) booking preserves every tool field and all canonical intent fields exactly"
+    },
+    {
+      "suite": "src/ai-tools/planner-wire-context.spec.ts",
+      "name": "Bounded planner stage wire context (no language acceptance) personal preserves every tool field and all canonical intent fields exactly"
+    },
+    {
+      "suite": "src/ai-tools/planner-wire-context.spec.ts",
+      "name": "Bounded planner stage wire context (no language acceptance) admin preserves every tool field and all canonical intent fields exactly"
+    },
+    {
+      "suite": "src/ai-tools/planner-wire-context.spec.ts",
+      "name": "Bounded planner stage wire context (no language acceptance) staff_config preserves every tool field and all canonical intent fields exactly"
+    },
+    {
+      "suite": "src/ai-tools/planner-wire-context.spec.ts",
+      "name": "Bounded planner stage wire context (no language acceptance) bi preserves every tool field and all canonical intent fields exactly"
+    },
+    {
+      "suite": "src/ai-tools/planner-wire-context.spec.ts",
+      "name": "Bounded planner stage wire context (no language acceptance) lifecycle preserves every tool field and all canonical intent fields exactly"
+    },
+    {
+      "suite": "src/ai-tools/planner-wire-context.spec.ts",
+      "name": "Bounded planner stage wire context (no language acceptance) occupancy preserves every tool field and all canonical intent fields exactly"
+    },
+    {
+      "suite": "src/ai-tools/planner-wire-context.spec.ts",
+      "name": "Bounded planner stage wire context (no language acceptance) goods preserves every tool field and all canonical intent fields exactly"
+    },
+    {
+      "suite": "src/ai-tools/planner-wire-context.spec.ts",
+      "name": "Bounded planner stage wire context (no language acceptance) retains the pre-partition final system bytes for director/web"
+    },
+    {
+      "suite": "src/ai-tools/planner-wire-context.spec.ts",
+      "name": "Bounded planner stage wire context (no language acceptance) retains the pre-partition final system bytes for director/native"
+    },
+    {
+      "suite": "src/ai-tools/planner-wire-context.spec.ts",
+      "name": "Bounded planner stage wire context (no language acceptance) retains the pre-partition final system bytes for admin/web"
+    },
+    {
+      "suite": "src/ai-tools/planner-wire-context.spec.ts",
+      "name": "Bounded planner stage wire context (no language acceptance) retains the pre-partition final system bytes for admin/native"
+    },
+    {
+      "suite": "src/ai-tools/planner-wire-context.spec.ts",
+      "name": "Bounded planner stage wire context (no language acceptance) openai serializes occupancy through the real provider serializer on first and later planning passes"
+    },
+    {
+      "suite": "src/action-engine/beget-relay-release.architecture.spec.ts",
+      "name": "R01 live artifact and release/recovery protection [INTEGRATION-ONLY] gates a static shell candidate as strictly as a PHP edge candidate"
+    },
+    {
+      "suite": "src/ai-tools/ai-core.development-integration.spec.ts",
+      "name": "unified development candidate: routes and authority stay isolated uses one conversation across general chat, Occupancy, pricing and schedule without leaking a previous purpose"
+    },
+    {
+      "suite": "src/ai-tools/ai-core.development-integration.spec.ts",
+      "name": "unified development candidate: routes and authority stay isolated leaves an unfinished schedule clarification for the new request: \u0423\u0441\u0442\u0430\u043d\u043e\u0432\u0438 \u0446\u0435\u043d\u0443 \u0421\u0442\u0440\u0438\u0436\u043a\u0430 1900 \u0440\u0443\u0431\u043b\u0435\u0439"
+    },
+    {
+      "suite": "src/ai-tools/ai-core.development-integration.spec.ts",
+      "name": "unified development candidate: routes and authority stay isolated leaves an unfinished schedule clarification for the new request: \u0423\u0441\u0442\u0430\u043d\u043e\u0432\u0438 \u0446\u0435\u043d\u0443 \u0421\u0442\u0440\u0438\u0436\u043a\u0430 1900 \u0440\u0443\u0431\u043b\u0435\u0439 \u043d\u0430 2035-05-10"
+    },
+    {
+      "suite": "src/entitlements/widget-release-profile.contract.spec.ts",
+      "name": "fixed no-handoff certificate threshold pins every allowed template/effect/kind/capability/target/closed-schema combination"
+    },
+    {
+      "suite": "src/widgets/rendering/denial-projection.ratchet.spec.ts",
+      "name": "P-RENDER \u2014 P10: every canonical denial code has a rendering, and none is an error REN-2 the contract counts 127 distinct codes, and the source still has exactly those"
+    },
+    {
+      "suite": "src/widgets/rendering/denial-projection.ratchet.spec.ts",
+      "name": "P-RENDER \u2014 P10: every canonical denial code has a rendering, and none is an error REN-2 C9_DENIAL_PROJECTION has a row for every code, and no row for a code that is gone"
+    },
+    {
+      "suite": "src/widgets/rendering/denial-projection.ratchet.spec.ts",
+      "name": "P-RENDER \u2014 P10: every canonical denial code has a rendering, and none is an error REN-2 the families partition the code space: every code is claimed exactly once"
+    },
+    {
+      "suite": "src/action-engine/package5-wave3-bypass-ratchet.architecture.spec.ts",
+      "name": "Package 5 Wave 3 ownership/bypass ratchet pins Action Engine ownership on every production initiator"
+    },
+    {
+      "suite": "src/crm/client-identity-registration-guard.architecture.spec.ts",
+      "name": "P4-03 unresolved client identity runtime registration guard has no second production call surface that bypasses the canonical owner"
+    }
+  ]
+}

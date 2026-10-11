@@ -1,0 +1,33 @@
+{
+  "contract": "maya.local-owner-identity-readonly-preflight/1",
+  "sourceHead": "20a543840eb75b58d649c44517f8e071b04865fc",
+  "scopeManifestSha256": "0cf0f0b6688578ad42510d34763e84ab48de90554d14407a9a7f71676a4eb6e2",
+  "status": "PASS",
+  "realProviderDispatch": 0,
+  "modelDispatch": 0,
+  "appRuntimeStarted": false,
+  "businessWrites": 0,
+  "queriesReadOnly": true,
+  "facts": {
+    "owner_active": true,
+    "owner_phone_present": false,
+    "owner_telegram_identities": 0,
+    "owner_other_social_identities": 0,
+    "owner_direct_clients": 0,
+    "owner_direct_client_crm_links": 0,
+    "all_tenant_clients": 0,
+    "all_tenant_maya_user_episodes": 0,
+    "all_tenant_revoked_maya_user_episodes": 0,
+    "all_tenant_appointments": 0,
+    "history_configuration_revisions": 0,
+    "integration_active": true,
+    "membership_count": 1
+  },
+  "clusterStopped": true,
+  "privateInputsUnchanged": true,
+  "sourceReceipt": {
+    "path": "/private/tmp/maya-owner-identity-preflight-20261011-01/report.json",
+    "sha256": "25aaa6e6f0b7cc2c781e49c6a20829de7be8271f854ae0f0cd70fdefeb223625"
+  },
+  "qualification": "READ_ONLY_RETAINED_LOCAL_OWNER_DATABASE_NOT_PRODUCTION"
+}
