@@ -202,6 +202,7 @@ export type FirstRunFailure =
   | { readonly state: 'term_too_short' }
   | { readonly state: 'rate_limited'; readonly retryAfterSec: number }
   | { readonly state: 'telegram_unavailable' }
+  | { readonly state: 'telegram_window_blocked' }
   | { readonly state: 'business_unavailable' }
   // A callback that names no login this app started, or that names one already spent. Refused
   // before any request: this is the client's half of the state check, and the whole of the defence

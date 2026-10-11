@@ -14,7 +14,7 @@
 // Everything decided here is decided by the runtime:
 //   * the finder refuses a term under two characters BEFORE any request — this screen passes the
 //     text through and renders what comes back, it does not pre-validate;
-//   * `startTelegram` navigates away on success, so no caller may assume it still runs;
+//   * web Telegram keeps this page alive while its separate window completes;
 //   * a provider callback becomes a session only inside `completeTelegram`, which refuses anything
 //     that does not name the login this app started.
 
@@ -91,13 +91,12 @@ export function SignIn({
     setFailure(null);
     void session
       .startTelegram(slug)
-      // On `handed_off` the page is already navigating away; nothing may assume it still runs.
+      // Web stays here while its owned window is open; native may hand off externally.
       .then((step) => {
         if (step.step === 'failed') {
           setFailure(step.failure);
-          setBusy(false);
         }
-      });
+      }).finally(() => setBusy(false));
   }, []);
 
   const [email, setEmail] = useState('');

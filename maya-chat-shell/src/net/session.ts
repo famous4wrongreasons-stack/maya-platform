@@ -132,6 +132,12 @@ export type SignInOutcome =
   | { readonly step: 'signed_in'; readonly display: SignInDisplay }
   | { readonly step: 'failed'; readonly failure: SignInFailure };
 
+/** An ephemeral carrier window, reserved during the initiating user gesture. */
+export interface TelegramHandoff {
+  readonly navigate: (url: string) => boolean;
+  readonly close: () => void;
+}
+
 export interface NetOptions {
   /** Epoch milliseconds. */
   readonly now?: () => number;
@@ -144,6 +150,8 @@ export interface NetOptions {
   readonly webCallbackUrl?: string | null;
   /** Hand this browser to an external URL. `entry/` supplies it; nothing in `net/` touches `location`. */
   readonly navigate?: (url: string) => void;
+  /** Web keeps the initiating page alive. Native continues to use its existing external browser. */
+  readonly prepareTelegram?: (cancelled: (reason: 'closed' | 'expired') => void) => TelegramHandoff | null;
 }
 
 interface Grant {
@@ -197,6 +205,13 @@ export function createNet(options: NetOptions = {}) {
    * which is correct rather than unfortunate.
    */
   let pendingTelegram: string | null = null;
+  let telegramHandoff: TelegramHandoff | null = null;
+  const cancelTelegram = (): void => {
+    pendingTelegram = null;
+    const held = telegramHandoff;
+    telegramHandoff = null;
+    held?.close();
+  };
   let landing: TelegramLanding = { state: 'none' };
   const landingListeners = new Set<(view: TelegramLanding) => void>();
   let snapshot: SessionSnapshot = { signedIn: false, reason: null };
@@ -354,6 +369,7 @@ export function createNet(options: NetOptions = {}) {
   const cancelOnboarding = (clearCompleted = false): void => {
     if (!clearCompleted && onboardingView.phase === 'completed') return;
     authIntent += 1;
+    cancelTelegram();
     onboardingGeneration += 1;
     onboardingAbort?.abort();
     onboardingAbort = null;
@@ -368,6 +384,7 @@ export function createNet(options: NetOptions = {}) {
       if (onboardingDisposed || grant !== null || onboardingView.busy || signupUncertain || onboardingView.phase === 'completed' || !confirmed) return;
       const parsed = onboardingInput(input);
       if (!parsed.ok) { publishOnboarding({ ...idleOnboarding(), phase: 'failed', failure: parsed.failure }); return; }
+      cancelTelegram();
       const intent = ++authIntent;
       const generation = ++onboardingGeneration;
       const abort = new AbortController();
@@ -430,23 +447,37 @@ export function createNet(options: NetOptions = {}) {
       return r.ok ? { step: 'matches', businesses: r.value.items } : { step: 'failed', failure: r.failure };
     },
 
-    /**
-     * Start Telegram for the chosen business and hand the browser over. `navigate` is the last thing
-     * that runs here: on success this page is leaving, so no session is installed on this side.
-     */
+    /** Reserve a web window synchronously; only the current attempt may navigate or complete. */
     async startTelegram(tenantSlug: string): Promise<TelegramOutcome> {
       cancelOnboarding(true);
       const intent = authIntent;
       const business = tenantSlug.trim();
+      if (onboardingDisposed) return { step: 'failed', failure: { state: 'no_connection' } };
       if (business === '') return { step: 'failed', failure: { state: 'business_unavailable' } };
+      setLanding({ state: 'none' });
+      if (intent !== authIntent || onboardingDisposed) return { step: 'failed', failure: { state: 'no_connection' } };
+      if (options.prepareTelegram) {
+        try {
+          telegramHandoff = options.prepareTelegram((why) => {
+            if (intent !== authIntent) return;
+            cancelOnboarding(true);
+            setLanding({ state: 'failed', failure: { state: why === 'expired' ? 'login_expired' : 'telegram_declined' } });
+          });
+        } catch { telegramHandoff = null; }
+        if (telegramHandoff === null) return { step: 'failed', failure: { state: 'telegram_window_blocked' } };
+      }
       const r = await telegramStart(business, webCallbackUrl, timeouts.requestMs);
       if (intent !== authIntent || onboardingDisposed) return { step: 'failed', failure: { state: 'no_connection' } };
-      if (!r.ok) return { step: 'failed', failure: r.failure };
-      // Recorded BEFORE the browser goes anywhere: on iOS the provider's page opens outside this
-      // web view and the callback can arrive the moment it closes.
+      if (!r.ok) { cancelTelegram(); return { step: 'failed', failure: r.failure }; }
       pendingTelegram = r.value.state;
-      setLanding({ state: 'none' });
-      navigate(r.value.authUrl);
+      try {
+        if (telegramHandoff !== null) {
+          if (!telegramHandoff.navigate(r.value.authUrl)) throw new Error('Telegram handoff unavailable');
+        } else navigate(r.value.authUrl);
+      } catch {
+        cancelTelegram();
+        return { step: 'failed', failure: { state: 'telegram_window_blocked' } };
+      }
       return { step: 'handed_off' };
     },
 
@@ -466,10 +497,11 @@ export function createNet(options: NetOptions = {}) {
      * validated, or this page's own URL — it is the same three strings and the same path from here.
      */
     async completeTelegram(payload: unknown): Promise<TelegramLandingOutcome> {
-      cancelOnboarding(true);
-      const intent = authIntent;
       const callback = readCallback(payload);
       const expected = pendingTelegram;
+      const intent = authIntent + 1;
+      cancelOnboarding(true);
+      if (intent !== authIntent || onboardingDisposed) return { step: 'failed', failure: { state: 'no_connection' } };
       // Spent on sight, before anything can fail: whatever happens next, a second delivery of the
       // same callback finds nothing pending. The server refuses a replay too (`claimFlowState` is a
       // conditional update); this refuses it without spending a request.

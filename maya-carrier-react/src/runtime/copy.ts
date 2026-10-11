@@ -207,6 +207,8 @@ export const firstRunSentence = (failure: FirstRunFailure): string => {
       return rateLimitSentence(failure.retryAfterSec);
     case 'telegram_unavailable':
       return 'Вход через Telegram сейчас недоступен';
+    case 'telegram_window_blocked':
+      return 'Не удалось открыть окно Telegram — разрешите всплывающие окна для MAYA и попробуйте снова';
     case 'business_unavailable':
       return 'Этот бизнес сейчас не принимает вход';
     case 'callback_unsolicited':

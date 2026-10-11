@@ -1548,3 +1548,105 @@ test('a fresh login over an active session clears its timeline and rejects a del
   assert.equal(conversation.view().inFlight, false);
   conversation.dispose();
 });
+
+// Actual memory-only owner, synthetic carrier window; no browser or external provider.
+const windowNet = (options = {}) => {
+  const windows = [];
+  const net = createNet({ webCallbackUrl: 'https://mayaos.ru/oauth-callback.html', ...options,
+    prepareTelegram: cancelled => {
+      const held = { closed: false, navigations: [], cancel: cancelled,
+        navigate(url) { if (this.closed) return false; this.navigations.push(url); return true; },
+        close() { this.closed = true; } };
+      windows.push(held); return held;
+    } });
+  return { net, windows };
+};
+const startResponse = () => json(200, { ok: true, provider: 'telegram', auth_url: AUTH_URL, state: STATE });
+
+test('web window is reserved before asynchronous start; same memory owner consumes once and closes first', async () => {
+  const g = gate();
+  serve({ [U.telegramStart]: async () => { await g.opened; return startResponse(); },
+    [U.telegramComplete]: () => { assert.equal(f.windows[0].closed, true); return json(201, completeBody()); } });
+  const f = windowNet(); const task = f.net.session.startTelegram('salon');
+  assert.equal(f.windows.length, 1, 'reservation happens within the user gesture');
+  assert.equal(f.windows[0].navigations.length, 0);
+  g.open(); assert.equal((await task).step, 'handed_off');
+  assert.deepEqual(f.windows[0].navigations, [AUTH_URL]);
+  assert.equal((await f.net.session.completeTelegram({ state: STATE, code: 'synthetic' })).step, 'signed_in');
+  assert.equal((await f.net.session.completeTelegram({ state: STATE, code: 'synthetic' })).failure.state, 'callback_unsolicited');
+  assert.equal(calls(U.telegramComplete).length, 1);
+});
+
+test('blocked or throwing window preparation sends no start and never navigates the parent', async () => {
+  for (const prepareTelegram of [() => null, () => { throw new Error('blocked'); }]) {
+    serve({}); let navigated = false;
+    const net = createNet({ webCallbackUrl: 'https://mayaos.ru/oauth-callback.html', prepareTelegram, navigate: () => { navigated = true; } });
+    assert.equal((await net.session.startTelegram('salon')).failure.state, 'telegram_window_blocked');
+    assert.equal(wire.length, 0); assert.equal(navigated, false);
+  }
+});
+
+for (const mode of ['closed', 'expired']) test(`web window ${mode} cancels current state before completion`, async () => {
+  serve({ [U.telegramStart]: startResponse() }); const f = windowNet();
+  await f.net.session.startTelegram('salon'); f.windows[0].cancel(mode);
+  assert.equal(f.net.session.landing().failure.state, mode === 'closed' ? 'telegram_declined' : 'login_expired');
+  assert.equal((await f.net.session.completeTelegram({ state: STATE, code: 'synthetic' })).failure.state, 'callback_unsolicited');
+  assert.equal(calls(U.telegramComplete).length, 0); assert.equal(f.windows[0].closed, true);
+});
+
+for (const stop of ['signout', 'password', 'email', 'dispose']) test(`web ${stop} invalidates pending callback and closes its window`, async () => {
+  serve({ [U.telegramStart]: startResponse() }); const f = windowNet();
+  await f.net.session.startTelegram('salon');
+  if (stop === 'signout') await f.net.session.signOut();
+  if (stop === 'password') await f.net.session.signInPassword('', '', '');
+  if (stop === 'email') await f.net.session.startEmail('invalid');
+  if (stop === 'dispose') f.net.onboarding.dispose();
+  assert.equal(f.windows[0].closed, true);
+  assert.equal((await f.net.session.completeTelegram({ state: STATE, code: 'synthetic' })).failure.state, stop === 'dispose' ? 'no_connection' : 'callback_unsolicited');
+  assert.equal(calls(U.telegramComplete).length, 0);
+});
+
+test('late start cannot navigate after cancellation or close a newer window', async () => {
+  const g = gate(); serve({ [U.telegramStart]: [async () => { await g.opened; return startResponse(); }, startResponse()] });
+  const f = windowNet(); const first = f.net.session.startTelegram('first');
+  try {
+    await f.net.session.startTelegram('second');
+    assert.equal(f.windows[0].closed, true); assert.equal(f.windows[1].closed, false);
+    f.windows[0].cancel('closed');
+    assert.equal(f.windows[1].closed, false, 'late old-window event cannot cancel new attempt');
+    g.open(); assert.equal((await first).step, 'failed');
+    assert.deepEqual(f.windows[0].navigations, []); assert.deepEqual(f.windows[1].navigations, [AUTH_URL]);
+  } finally { g.open(); f.net.onboarding.dispose(); await first; }
+});
+
+test('failed start/redirect closes the reserved window without a pending login', async () => {
+  for (const mode of ['http', 'redirect']) {
+    serve({ [U.telegramStart]: mode === 'http' ? json(503, { error: { code: 'social_provider_unavailable' } }) : startResponse() });
+    const f = windowNet(); const attempt = f.net.session.startTelegram('salon');
+    if (mode === 'redirect') f.windows[0].navigate = () => false;
+    assert.equal((await attempt).step, 'failed'); assert.equal(f.windows[0].closed, true);
+    assert.equal((await f.net.session.completeTelegram({ state: STATE, code: 'synthetic' })).failure.state, 'callback_unsolicited');
+    assert.equal(calls(U.telegramComplete).length, 0);
+  }
+});
+
+
+test('cancellation during landing publication cannot reserve or dispatch a web attempt', async () => {
+  serve({}); const f = windowNet();
+  const stop = f.net.session.onLanding(() => { f.net.onboarding.dispose(); });
+  try {
+    assert.equal((await f.net.session.startTelegram('salon')).step, 'failed');
+    assert.equal(f.windows.length, 0); assert.equal(wire.length, 0);
+  } finally { stop(); }
+});
+
+
+test('a newer auth intent during completion cleanup prevents the old code exchange', async () => {
+  serve({ [U.telegramStart]: startResponse() }); const f = windowNet();
+  await f.net.session.startTelegram('salon'); let armed = true;
+  const stop = f.net.onboarding.subscribe(() => { if (armed) { armed = false; void f.net.session.startEmail('invalid'); } });
+  try {
+    assert.deepEqual(await f.net.session.completeTelegram({ state: STATE, code: 'synthetic' }), { step: 'failed', failure: { state: 'no_connection' } });
+    assert.equal(calls(U.telegramComplete).length, 0); assert.equal(f.net.session.view().signedIn, false);
+  } finally { stop(); f.net.onboarding.dispose(); }
+});

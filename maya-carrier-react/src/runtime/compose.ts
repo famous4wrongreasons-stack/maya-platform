@@ -21,6 +21,7 @@ import { createLocalCrmSetup } from '../../../maya-chat-shell/src/shell/local-cr
 import { createCrmPendingLocation } from './crmPending.ts';
 import { createPersonalBooking } from '../../../maya-chat-shell/src/shell/personal-booking.ts';
 import { createNet } from '../../../maya-chat-shell/src/net/session.ts';
+import { createTelegramPopup } from './telegramPopup.ts';
 import { createShellRuntime, type ShellRuntimeDeps } from '../../../maya-chat-shell/src/shell/shell.ts';
 import { createLiveSubmission } from '../../../maya-chat-shell/src/shell/intents.ts';
 import { createVoiceControl } from '../../../maya-chat-shell/src/shell/voice-state.ts';
@@ -128,18 +129,21 @@ const newAbort = (): AbortController => new AbortController();
 
 // ── FACTORY 1 — the session and the one transport (entry/main.ts:157-161) ──────────────────────
 const origin = window.location.origin;
+const webOAuth = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+const land = (payload: unknown): void => void net.session.completeTelegram(payload);
 const net = createNet({
-  webCallbackUrl: origin.startsWith('http') ? `${origin}/${WEB_CALLBACK_FILE}` : null,
+  webCallbackUrl: webOAuth ? `${origin}/${WEB_CALLBACK_FILE}` : null,
   navigate: (target) => window.location.assign(target),
+  ...(webOAuth ? { prepareTelegram: createTelegramPopup(window, land) } : {}),
 });
 export const localCrmSetupEnabled = (window.location.protocol === 'http:' || window.location.protocol === 'https:') &&
   ['127.0.0.1', 'localhost'].includes(window.location.hostname) && new URLSearchParams(window.location.search).get('local_crm_setup') === '1';
 
-// ── the OAuth landing, between the factories (entry/main.ts:174-184) ───────────────────────────
-const land = (payload: unknown): void => void net.session.completeTelegram(payload);
+// ── Native landing and refusal of unsolicited legacy fragment landings ───────────────────────
 // NB: written without a generic type argument on purpose. The carrier's closed-tag scanner reads
 // raw text, and a lowercase type argument such as `CustomEvent<unknown>` matches its tag pattern.
 window.addEventListener(OAUTH_EVENT, (event) => {
+  if (webOAuth) return; // Web callbacks arrive only through the owned same-origin window.
   const carried: unknown = (event as CustomEvent).detail;
   land(carried);
 });
