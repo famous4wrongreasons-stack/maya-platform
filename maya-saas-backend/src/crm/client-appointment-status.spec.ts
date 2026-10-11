@@ -406,13 +406,13 @@ describe('native reschedule readback identity', () => {
       });
       const owner = f.service as unknown as {
         providerOfTenant(tenantId: string): Promise<string>;
-        assertRescheduleBranchWitness(...args: unknown[]): Promise<void>;
+        assertAppointmentBranchWitness(...args: unknown[]): Promise<void>;
         loadAppointmentDetail(...args: unknown[]): Promise<unknown>;
         persistRescheduledAppointmentMirror(...args: unknown[]): Promise<void>;
       };
       jest.spyOn(owner, 'providerOfTenant').mockResolvedValue('yclients');
       jest
-        .spyOn(owner, 'assertRescheduleBranchWitness')
+        .spyOn(owner, 'assertAppointmentBranchWitness')
         .mockResolvedValue(undefined);
       jest.spyOn(owner, 'loadAppointmentDetail').mockResolvedValue({
         id,

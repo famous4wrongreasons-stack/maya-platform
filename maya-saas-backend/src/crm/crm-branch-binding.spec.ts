@@ -554,14 +554,14 @@ it.each([null, 'old', 'current'])(
     });
     // Invoke the existing owner's finite dispatch guard with the persisted AE row.
     const guard = f.service as unknown as {
-      assertRescheduleBranchWitness(
+      assertAppointmentBranchWitness(
         t: string,
         i: unknown,
         e: string,
       ): Promise<void>;
     };
     const result = f.run(() =>
-      guard.assertRescheduleBranchWitness(
+      guard.assertAppointmentBranchWitness(
         'tenant-a',
         { clientPrincipal: { appointmentId: 'appointment-a' } },
         'execution-a',
@@ -593,7 +593,7 @@ it.each(['branch-null', 'calendar', 'provider'])(
       });
     if (change === 'provider') f.integration.provider = 'mock';
     const guard = f.service as unknown as {
-      assertRescheduleBranchWitness(
+      assertAppointmentBranchWitness(
         t: string,
         i: unknown,
         e: string,
@@ -601,7 +601,7 @@ it.each(['branch-null', 'calendar', 'provider'])(
     };
     await expect(
       f.run(() =>
-        guard.assertRescheduleBranchWitness(
+        guard.assertAppointmentBranchWitness(
           'tenant-a',
           { clientPrincipal: { appointmentId: 'appointment-a' } },
           'execution-a',
