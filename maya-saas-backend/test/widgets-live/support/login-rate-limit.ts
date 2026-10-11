@@ -17,6 +17,8 @@ import { assertProofDatabase } from './proof-db-guard';
 
 export const PASSWORD_LOGIN_IP_PREFLIGHT_POLICY =
   'auth.password_login.preflight.ip.15m';
+export const OAUTH_START_IP_PREFLIGHT_POLICY =
+  'auth.oauth_start.preflight.ip.10m';
 /** `normalizeIp` strips `::ffff:`, so an IPv4 loopback client is `127.0.0.1`; `::1` is the IPv6 loopback. */
 export const LOOPBACK_SUBJECTS: readonly string[] = Object.freeze([
   '127.0.0.1',
@@ -75,6 +77,33 @@ export async function resetLoopbackLoginPreflight(
       policyKey: PASSWORD_LOGIN_IP_PREFLIGHT_POLICY,
       tenantId: null,
       subjectHash: { in: loopbackLoginPreflightHashes(env) },
+    },
+  });
+  return count;
+}
+
+/** OAuth fixture isolation only. Do not reset within an attempt/concurrency test. */
+export async function resetLoopbackOauthPreflight(
+  db: BucketDelegate,
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<number> {
+  assertProofDatabase(env);
+  const secret = env.AUTH_RATE_LIMIT_SECRET?.trim();
+  if (!secret)
+    throw new Error('widgets-live OAuth hygiene: rate secret missing');
+  const { count } = await db.authRateLimitBucket.deleteMany({
+    where: {
+      policyKey: OAUTH_START_IP_PREFLIGHT_POLICY,
+      tenantId: null,
+      subjectHash: {
+        in: LOOPBACK_SUBJECTS.map((subject) =>
+          globalRateLimitSubjectHash(
+            secret,
+            OAUTH_START_IP_PREFLIGHT_POLICY,
+            subject,
+          ),
+        ),
+      },
     },
   });
   return count;

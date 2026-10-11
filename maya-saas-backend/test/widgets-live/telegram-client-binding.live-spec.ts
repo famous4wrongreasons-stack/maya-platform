@@ -9,6 +9,9 @@ import {
   randomUUID,
 } from 'node:crypto';
 import request from 'supertest';
+import { spawn } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
 import {
   TelegramClientBindingService,
@@ -36,6 +39,10 @@ import {
   type HttpHarness,
 } from './support/http-bootstrap';
 import { type Fixtures } from './support/fixtures';
+import {
+  OAUTH_START_IP_PREFLIGHT_POLICY,
+  resetLoopbackOauthPreflight,
+} from './support/login-rate-limit';
 
 type LoginBody = {
   client_binding: { status: string };
@@ -68,6 +75,11 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
     crm = http.app.get(CrmService);
     context = http.app.get(TenantContextService);
     binding = http.app.get(TelegramClientBindingService);
+  });
+  beforeEach(async () => {
+    // Independent cases share one loopback IP. Keep the actual 30/10m policy
+    // within each case; only the dedicated proof DB preflight bucket is reset.
+    await resetLoopbackOauthPreflight(db.prisma);
   });
   afterEach(async () => {
     jest.restoreAllMocks();
@@ -190,7 +202,7 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
     };
   }
 
-  async function signedLogin(
+  function installSignedIssuer(
     f: Awaited<ReturnType<typeof fixture>>,
     claims: Record<string, unknown> = {},
     forgedSignature = false,
@@ -258,6 +270,14 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
         });
       return Promise.reject(new Error('Unexpected external request'));
     });
+  }
+
+  async function signedLogin(
+    f: Awaited<ReturnType<typeof fixture>>,
+    claims: Record<string, unknown> = {},
+    forgedSignature = false,
+  ) {
+    installSignedIssuer(f, claims, forgedSignature);
     const start = await request(http.app.getHttpServer())
       .post('/api/auth/oauth/telegram/start')
       .send({
@@ -274,6 +294,34 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
         .send({ state, code: 'synthetic-code', ...extra });
     return { complete, state };
   }
+
+  it('OAuth fixture hygiene preserves the real 30-attempt refusal and all non-preflight buckets', async () => {
+    const f = await fixture();
+    await signedLogin(f);
+    const start = () =>
+      request(http.app.getHttpServer())
+        .post('/api/auth/oauth/telegram/start')
+        .send({
+          tenantSlug: f.tenant.slug,
+          redirectUri: 'https://maya.example/oauth-callback.html',
+        });
+    for (let i = 1; i < 30; i++) expect((await start()).status).toBe(201);
+    expect((await start()).status).toBe(429);
+    const buckets = await db.prisma.authRateLimitBucket.findMany({
+      orderBy: { id: 'asc' },
+    });
+    const preflight = buckets.filter(
+      (b) =>
+        b.policyKey === OAUTH_START_IP_PREFLIGHT_POLICY && b.tenantId === null,
+    );
+    expect(preflight).toHaveLength(1);
+    expect(await resetLoopbackOauthPreflight(db.prisma)).toBe(1);
+    expect(
+      await db.prisma.authRateLimitBucket.findMany({ orderBy: { id: 'asc' } }),
+    ).toEqual(buckets.filter((b) => b.id !== preflight[0].id));
+    expect(await resetLoopbackOauthPreflight(db.prisma)).toBe(0);
+    expect((await start()).status).toBe(201);
+  });
 
   it.each([UserRole.CLIENT, UserRole.TENANT_OWNER])(
     'signed login automatically links exact Client while retaining %s role',
@@ -832,8 +880,7 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
 
     // Only the remote planner response is scripted. The real serializer, parser,
     // HTTP guards, AiCore, C9, tool owner, private reader and reply composer run.
-    async function chatFixture(f: Awaited<ReturnType<typeof historyFixture>>) {
-      const login = await f.login();
+    async function prepareChat(f: Awaited<ReturnType<typeof historyFixture>>) {
       for (const feature of [
         'ai.consultant',
         'ai.owner',
@@ -852,8 +899,18 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
       ];
       const periods = ['past', 'last_visit', 'upcoming'];
       const wire: string[] = [];
+      const issuerFetch = (
+        globalThis.fetch as jest.MockedFunction<typeof fetch>
+      ).getMockImplementation();
       (globalThis.fetch as jest.Mock).mockImplementation(
         (url: unknown, init?: RequestInit) => {
+          if (
+            url === 'https://oauth.telegram.org/token' ||
+            url === 'https://oauth.telegram.org/.well-known/jwks.json'
+          ) {
+            if (!issuerFetch) throw new Error('Synthetic issuer required');
+            return issuerFetch(url, init);
+          }
           if (
             url !== 'https://api.openai.com/v1/responses' ||
             init?.method !== 'POST' ||
@@ -914,6 +971,12 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
           );
         },
       );
+      return { wire, questions };
+    }
+
+    async function chatFixture(f: Awaited<ReturnType<typeof historyFixture>>) {
+      const login = await f.login();
+      const { wire, questions } = await prepareChat(f);
       const ask = async (
         index: number,
         previous: Array<{ role: string; content: string }> = [],
@@ -949,9 +1012,192 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
       return { ...login, ask, wire, questions, conversation };
     }
 
-    it.each([UserRole.CLIENT, UserRole.TENANT_OWNER])(
-      'signed %s login → canonical sync → three HTTP AChat replies, with no private model continuation',
-      async (role) => {
+    if (process.env.JEST_TELEGRAM_BROWSER_OUTPUT) {
+      it.each([UserRole.CLIENT, UserRole.TENANT_OWNER])(
+        'current React: first signed %s Telegram login → canonical sync → three history answers → relogin without duplicate turns',
+        async (role) => {
+          const f = await historyFixture(role);
+          await enableHistory(f);
+          installSignedIssuer(f);
+          const chat = await prepareChat(f);
+          let before: Awaited<ReturnType<typeof f.state>> = [];
+          expect(await f.count()).toBe(0);
+          const output = path.join(
+            process.env.JEST_TELEGRAM_BROWSER_OUTPUT!,
+            'browser-' + role,
+          );
+          const { name: tenantName } = await db.prisma.tenant.findUniqueOrThrow(
+            {
+              where: { id: f.tenant.id },
+              select: { name: true },
+            },
+          );
+          await new Promise<void>((resolve, reject) => {
+            const child = spawn(
+              process.execPath,
+              [
+                path.resolve(
+                  '../maya-carrier-react/test/telegram-personal-browser-probe.mjs',
+                ),
+              ],
+              {
+                stdio: ['ignore', 'ignore', 'pipe', 'ipc'],
+              },
+            );
+            let failure: Error | undefined;
+            let stage = 'child-start';
+            let synchronized = false;
+            const fail = (error: unknown) => {
+              failure ??=
+                error instanceof Error
+                  ? error
+                  : new Error('browser child failed');
+              child.kill('SIGTERM');
+            };
+            const timer = setTimeout(
+              () => fail(new Error('bounded personal browser timeout')),
+              90000,
+            );
+            child.stderr?.resume(); // No credential-bearing protocol bodies to diagnostics.
+            child.on('error', fail);
+            child.on('message', (message: { type: string; stage?: string }) => {
+              if (message.type === 'synchronize-canonical-source') {
+                if (synchronized)
+                  return fail(new Error('source sync replay refused'));
+                synchronized = true;
+                void (async () => {
+                  expect(await f.count()).toBe(1);
+                  expect(await f.state()).toEqual([]);
+                  await f.sync();
+                  before = await f.state();
+                  expect(before).toHaveLength(3);
+                  child.send({ type: 'source-ready' });
+                })().catch(fail);
+                return;
+              }
+              if (
+                message.type === 'stage' &&
+                [
+                  'validate-backend',
+                  'validate-output',
+                  'verify-build',
+                ].includes(message.stage ?? '')
+              ) {
+                stage = message.stage!;
+                return;
+              }
+              if (message.type !== 'ready')
+                return fail(new Error('unexpected child message'));
+              void http
+                .listenLoopback()
+                .then((backendOrigin) =>
+                  child.send({
+                    type: 'start',
+                    backendOrigin,
+                    output,
+                    tenantSlug: f.tenant.slug,
+                    tenantName,
+                    questions: chat.questions,
+                  }),
+                )
+                .catch(fail);
+            });
+            child.on('close', (code, signal) => {
+              clearTimeout(timer);
+              if (failure || code !== 0 || signal)
+                reject(
+                  failure ??
+                    new Error(
+                      `personal browser failed at ${stage}; exit ${code}; signal ${signal}; inspect safe browser.json`,
+                    ),
+                );
+              else resolve();
+            });
+          });
+          const report = JSON.parse(
+            readFileSync(path.join(output, 'browser.json'), 'utf8'),
+          ) as {
+            status: string;
+            browserStopped: boolean;
+            chat: unknown[];
+            starts: number;
+            completes: number;
+          };
+          expect(report).toMatchObject({
+            status: 'PASS',
+            browserStopped: true,
+            starts: 2,
+            completes: 2,
+          });
+          expect(report.chat).toHaveLength(3);
+          expect(chat.wire).toHaveLength(3);
+          for (const serialized of chat.wire) {
+            for (const secret of [
+              phone,
+              f.user.id,
+              f.user.email,
+              f.tenant.id,
+              f.registry.clients[0].external_id,
+              'Synthetic Client',
+              'Synthetic provider private note',
+              'визит состоялся',
+              ...before.map((row) => row.id),
+            ])
+              expect(serialized).not.toContain(secret);
+          }
+          const turns = await db.prisma.widgetTimelineTurn.findMany({
+            where: { tenantId: f.tenant.id },
+            orderBy: { turnIndex: 'asc' },
+          });
+          expect(turns.map((turn) => turn.role)).toEqual([
+            'user',
+            'assistant',
+            'user',
+            'assistant',
+            'user',
+            'assistant',
+          ]);
+          expect(new Set(turns.map((turn) => turn.conversationId)).size).toBe(
+            1,
+          );
+          expect(await f.state()).toEqual(before);
+          expect(f.journal).toHaveBeenCalledTimes(1);
+          expect(await f.count()).toBe(1);
+          expect(
+            (
+              await db.prisma.membership.findUniqueOrThrow({
+                where: {
+                  userId_tenantId: { userId: f.user.id, tenantId: f.tenant.id },
+                },
+              })
+            ).role,
+          ).toBe(role);
+          expect(
+            await db.prisma.actionExecution.count({
+              where: {
+                tenantId: f.tenant.id,
+                actionClass: {
+                  in: [
+                    'create_appointment',
+                    'reschedule_appointment',
+                    'cancel_appointment',
+                  ],
+                },
+              },
+            }),
+          ).toBe(0);
+        },
+      );
+    }
+
+    it.each([
+      [UserRole.CLIENT, 'explicit-client'],
+      [UserRole.TENANT_OWNER, 'explicit-client'],
+      [UserRole.CLIENT, 'canonical-web'],
+      [UserRole.TENANT_OWNER, 'canonical-web'],
+    ] as const)(
+      'signed %s login → %s request → canonical sync → three HTTP AChat replies, with no private model continuation',
+      async (role, requestShape) => {
         const f = await historyFixture(role),
           chat = await chatFixture(f);
         await chat.consent(true);
@@ -961,7 +1207,15 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
         const previous: Array<{ role: string; content: string }> = [];
         let conversationId: string | undefined;
         for (const index of [0, 1, 2]) {
-          const result = await chat.ask(index, previous, { conversationId });
+          // The current React/headless carrier never sends audience, role,
+          // tenant or Client id. Retain the historical explicit-client cases,
+          // but also prove the actual web request shape for both real roles.
+          const result = await chat.ask(index, previous, {
+            conversationId,
+            ...(requestShape === 'canonical-web'
+              ? { audience: undefined }
+              : {}),
+          });
           expect(result.status).toBe(201);
           expect(result.body.grounding.status).toBe('verified');
           expect(result.body.action).toBeNull();

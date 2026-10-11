@@ -15,6 +15,8 @@ const { proofCommands, proofEnvironment, runCommand } = await import(
   pathToFileURL(path.join(backend, 'scripts/c9-occupancy-proof.mjs'))
 );
 const output = process.argv[2];
+const withBrowser = process.argv[3] === '--browser';
+assert.ok(process.argv.length === (withBrowser ? 4 : 3), 'unknown proof arguments');
 assert.ok(output && path.isAbsolute(output) && !fs.existsSync(output));
 for (const f of ['.env', '.env.local'])
   assert.equal(fs.existsSync(path.join(backend, f)), false);
@@ -33,6 +35,7 @@ const env = proofEnvironment(
   process.env,
   `postgresql://c9_proof@127.0.0.1:${port}/${database}`,
 );
+if (withBrowser) env.JEST_TELEGRAM_BROWSER_OUTPUT = output;
 const scopes = [
   'src',
   'test/widgets-live',
@@ -42,6 +45,10 @@ const scopes = [
   'scripts/telegram-client-binding-mutations.mjs',
   'prisma',
   '../maya-chat-shell/src',
+  '../maya-carrier-react/src',
+  '../maya-carrier-react/build.mjs',
+  '../maya-carrier-react/test/telegram-personal-browser-probe.mjs',
+  'deploy/platform/beget-edge/oauth-callback.html',
   'package.json',
   'package-lock.json',
 ];
@@ -134,6 +141,11 @@ const commands = proofCommands({
   output,
   ownerChat: true,
 }).slice(0, 4);
+if (withBrowser) commands.push({
+  name: 'current-react-build', command: process.execPath,
+  args: ['build.mjs', '--target=web'],
+  cwd: path.resolve(backend, '../maya-carrier-react'),
+});
 commands.push({
   name: 'telegram-initial',
   command: process.execPath,
