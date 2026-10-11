@@ -152,15 +152,21 @@ export function readSourceBinding() {
   const base = sourceBinding();
   const git = args => execFileSync('git', args, { cwd: repo, encoding: 'utf8', maxBuffer: 2 * 1024 * 1024 }).trim();
   assert.equal(git(['status', '--porcelain', '--untracked-files=all', '--', ...READ_SOURCE_FILES]), '', 'Setup-read source must be committed and clean');
-  const files = READ_SOURCE_FILES.map(filename => {
-    const line = git(['ls-tree', base.head, '--', filename]);
+  // One metadata lookup per binding, never a cache. Every file is still reread
+  // and hashed on every guard; preserve the declared projection order below.
+  const committed = new Map();
+  for (const line of git(['ls-tree', base.head, '--', ...READ_SOURCE_FILES]).split('\n').filter(Boolean)) {
     const match = /^(100644|100755) blob ([a-f0-9]{40})\t(.+)$/.exec(line);
-    assert.ok(match && match[3] === filename, 'Setup-read source must be an exact committed file');
+    assert.ok(match && READ_SOURCE_FILES.includes(match[3]) && !committed.has(match[3]), 'Setup-read source must be an exact committed file');
+    committed.set(match[3], match[2]);
+  }
+  assert.equal(committed.size, READ_SOURCE_FILES.length, 'Setup-read source must be an exact committed file');
+  const files = READ_SOURCE_FILES.map(filename => {
     const file = path.join(repo, filename), stat = fs.lstatSync(file);
     assert.ok(stat.isFile() && !stat.isSymbolicLink());
     const bytes = fs.readFileSync(file);
     const gitBlob = createHash('sha1').update('blob ' + bytes.length + '\0').update(bytes).digest('hex');
-    assert.equal(gitBlob, match[2], 'Setup-read source changed');
+    assert.equal(gitBlob, committed.get(filename), 'Setup-read source changed');
     return { path: filename, gitBlob, sha256: digest(bytes) };
   });
   assert.equal(git(['rev-parse', 'HEAD']), base.head, 'Source commit changed during binding');
