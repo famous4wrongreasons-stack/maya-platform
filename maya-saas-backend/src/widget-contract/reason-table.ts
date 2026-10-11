@@ -243,9 +243,9 @@ export const UNMAPPED_DENIAL_PROJECTION: DenialProjection = Object.freeze({
 });
 
 /**
- * The projection families. P10 requires a row for each of the **127 distinct** `c9Deny('…')` codes
- * under `src/orchestration/`; it does not require 127 distinct projections, and inventing 127 would
- * be inventing meaning the contract does not carry. So the codes are grouped by what the denial
+ * The projection families. P10 requires a row for each current distinct `c9Deny('…')` code
+ * under `src/orchestration/`. The historical 127 plus lifecycle_request share
+ * projections; extra rows must not invent meaning the contract does not carry. So the codes are grouped by what the denial
  * says about the CELL, and the rule for each group is written down where a reviewer can disagree
  * with it. `denial-projection.ratchet.spec.ts` holds the totality; the grouping is the judgement.
  *
@@ -259,6 +259,15 @@ const PROJECTION_FAMILIES: readonly {
   readonly why: string;
   readonly codes: readonly string[];
 }[] = [
+  {
+    // 602c9e25 introduced this bounded request denial. Make the existing neutral
+    // fallback explicit; no new explanation, authority or lifecycle action.
+    cell_state: 'UNAVAILABLE',
+    reason_code: 'PROVIDER_SILENT',
+    limitation_severity: 'limitation',
+    why: 'The existing bounded Lifecycle request refusal keeps exactly its previous neutral fallback projection; it cannot claim a measured answer or authorize an action.',
+    codes: ['lifecycle_request'],
+  },
   {
     // P10, owner decision 2026-10-05: explicit rows preserving the existing neutral outcome.
     cell_state: 'UNAVAILABLE',

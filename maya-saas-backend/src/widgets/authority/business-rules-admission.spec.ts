@@ -119,7 +119,8 @@ describe('F36b/P10 — owner decision 2026-10-05; no expanded authority or publi
 
   it('preserves all 118 previously registered projections exactly', () => {
     const previous = Object.keys(C9_DENIAL_PROJECTION)
-      .filter((key) => !reasons.includes(key))
+      // Later Lifecycle refusal preserves its old fallback; not part of this historical pin.
+      .filter((key) => !reasons.includes(key) && key !== 'lifecycle_request')
       .sort();
     expect(previous).toHaveLength(118);
     expect(

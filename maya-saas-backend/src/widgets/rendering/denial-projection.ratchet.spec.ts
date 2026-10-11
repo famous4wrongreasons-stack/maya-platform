@@ -68,9 +68,16 @@ describe('P-RENDER — P10: every canonical denial code has a rendering, and non
     expect(opaque).toEqual([]);
   });
 
-  it('REN-2 the contract counts 127 distinct codes, and the source still has exactly those', () => {
-    // C11:2509 pins the number. A change in either direction is a contract event, not a merge.
-    expect(denyLiterals()).toHaveLength(127);
+  it('REN-2 preserves the 127-code checkpoint plus the bounded Lifecycle request refusal', () => {
+    const codes = denyLiterals();
+    expect(codes.filter((code) => code !== 'lifecycle_request')).toHaveLength(
+      127,
+    );
+    expect(codes).toHaveLength(128);
+    expect(hasDenialProjection('lifecycle_request')).toBe(true);
+    expect(projectC9Denial('lifecycle_request')).toEqual(
+      UNMAPPED_DENIAL_PROJECTION,
+    );
   });
 
   it('REN-2 C9_DENIAL_PROJECTION has a row for every code, and no row for a code that is gone', () => {
