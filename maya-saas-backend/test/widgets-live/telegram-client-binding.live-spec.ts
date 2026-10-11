@@ -42,6 +42,15 @@ type LoginBody = {
   user: { role: string };
   access_token: string;
 };
+type ChatProofBody = {
+  reply: string;
+  action: unknown;
+  grounding: { status: string };
+};
+type ConversationProofBody = {
+  conversationId: string | null;
+  turns: Array<{ role: string; text: string }>;
+};
 const phone = '+12025550123';
 const digest = (s: string) => createHash('sha256').update(s).digest('hex');
 describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () => {
@@ -770,6 +779,7 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
         });
         return {
           actor,
+          accessToken: body.access_token,
           read: () =>
             request(http.app.getHttpServer())
               .get('/api/client-channel/appointments')
@@ -792,6 +802,356 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
       };
       return { ...f, entries, journal, sync, state, login };
     }
+
+    async function enableHistory(
+      f: Awaited<ReturnType<typeof historyFixture>>,
+    ) {
+      const owner = await fx.user(f.tenant, UserRole.TENANT_OWNER);
+      const actor = await fx.actor(f.tenant, owner);
+      return context.runAsAuthPrincipal(actor, async () => {
+        const current = await http.app
+          .get(GovernedSettingsReadService)
+          .read(f.tenant.id, owner.id, 'client_capabilities');
+        return http.app
+          .get(Package5Wave1CanonicalCutoverService)
+          .updateGoverned(
+            f.tenant.id,
+            owner.id,
+            'tenant_business_configuration',
+            {
+              confirmed: true,
+              namespace: 'client_capabilities',
+              expectedRevision: current.revision,
+              previousRevisionId: current.previousRevisionId,
+              content: { client_self_visit_history: true },
+            },
+            randomUUID(),
+          );
+      });
+    }
+
+    // Only the remote planner response is scripted. The real serializer, parser,
+    // HTTP guards, AiCore, C9, tool owner, private reader and reply composer run.
+    async function chatFixture(f: Awaited<ReturnType<typeof historyFixture>>) {
+      const login = await f.login();
+      for (const feature of [
+        'ai.consultant',
+        'ai.owner',
+        'booking',
+        'booking.customer_app',
+        'crm.integration',
+      ] as const)
+        await fx.grantFeature(f.tenant, feature);
+      const config = http.app.get(ConfigService);
+      config.set('AI_CORE_PROVIDER', 'openai');
+      config.set('OPENAI_API_KEY', 'synthetic-no-provider-credential');
+      const questions = [
+        'Покажи историю моих визитов',
+        'Когда я был у вас последний раз?',
+        'Какие у меня ближайшие записи?',
+      ];
+      const periods = ['past', 'last_visit', 'upcoming'];
+      const wire: string[] = [];
+      (globalThis.fetch as jest.Mock).mockImplementation(
+        (url: unknown, init?: RequestInit) => {
+          if (
+            url !== 'https://api.openai.com/v1/responses' ||
+            init?.method !== 'POST' ||
+            typeof init.body !== 'string'
+          )
+            throw new Error('Unexpected external request');
+          wire.push(init.body);
+          const serialized = JSON.parse(init.body) as { input: string };
+          const input = JSON.parse(serialized.input) as {
+            phase: string;
+            conversation: Array<{ role: string; content: string }>;
+            tool_results: unknown[];
+          };
+          expect(input.phase).toBe('tool_planning');
+          expect(input.tool_results).toEqual([]);
+          expect(input.conversation.every((m) => m.role === 'user')).toBe(true);
+          const question = input.conversation.at(-1)?.content;
+          const index = questions.indexOf(question ?? '');
+          expect(index).toBeGreaterThanOrEqual(0);
+          const plan = {
+            semantic_plan: {
+              parent_request: question,
+              language: 'ru',
+              dialogue_act: 'question',
+              tasks: [
+                {
+                  id: 'own',
+                  intent: 'booking.list_own',
+                  entities_json: JSON.stringify({ period: periods[index] }),
+                  depends_on: [],
+                  confidence: 1,
+                  requires_clarification: false,
+                  clarification_question: null,
+                },
+              ],
+              context: {
+                carried_slots: [],
+                replaced_slots: [],
+                unresolved_references: [],
+              },
+            },
+            tool_call: { name: 'appointments.own.list', arguments_json: '{}' },
+          };
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                output: [
+                  {
+                    content: [
+                      { type: 'output_text', text: JSON.stringify(plan) },
+                    ],
+                  },
+                ],
+                usage: {},
+              }),
+              { status: 200 },
+            ),
+          );
+        },
+      );
+      const ask = async (
+        index: number,
+        previous: Array<{ role: string; content: string }> = [],
+        extra = {},
+      ) => {
+        const response = await request(http.app.getHttpServer())
+          .post('/api/ai/chat')
+          .set('Authorization', `Bearer ${login.accessToken}`)
+          .send({
+            surface: 'web',
+            audience: 'client',
+            requestId: randomUUID(),
+            messages: [
+              ...previous,
+              { role: 'user', content: questions[index] },
+            ],
+            ...extra,
+          });
+        return {
+          status: response.status,
+          body: response.body as ChatProofBody,
+        };
+      };
+      const conversation = async () => {
+        const response = await request(http.app.getHttpServer())
+          .get('/api/ai/conversation')
+          .set('Authorization', `Bearer ${login.accessToken}`);
+        return {
+          status: response.status,
+          body: response.body as ConversationProofBody,
+        };
+      };
+      return { ...login, ask, wire, questions, conversation };
+    }
+
+    it.each([UserRole.CLIENT, UserRole.TENANT_OWNER])(
+      'signed %s login → canonical sync → three HTTP AChat replies, with no private model continuation',
+      async (role) => {
+        const f = await historyFixture(role),
+          chat = await chatFixture(f);
+        await chat.consent(true);
+        await f.sync();
+        await enableHistory(f);
+        const before = await f.state();
+        const previous: Array<{ role: string; content: string }> = [];
+        let conversationId: string | undefined;
+        for (const index of [0, 1, 2]) {
+          const result = await chat.ask(index, previous, { conversationId });
+          expect(result.status).toBe(201);
+          expect(result.body.grounding.status).toBe('verified');
+          expect(result.body.action).toBeNull();
+          expect(result.body.reply).toContain(
+            index < 2 ? 'визит состоялся' : 'Предстоящих: 1',
+          );
+          expect(result.body.reply).not.toMatch(
+            /foreign-same-time|Synthetic provider private note|Synthetic source-only name/,
+          );
+          previous.push(
+            { role: 'user', content: chat.questions[index] },
+            { role: 'assistant', content: result.body.reply },
+          );
+          const restored = await chat.conversation();
+          expect(restored.status).toBe(200);
+          expect(restored.body.conversationId).toEqual(expect.any(String));
+          conversationId ??= restored.body.conversationId!;
+          expect(restored.body.conversationId).toBe(conversationId);
+          expect(
+            restored.body.turns.map((turn: { role: string; text: string }) => ({
+              role: turn.role,
+              content: turn.text,
+            })),
+          ).toEqual(previous);
+        }
+        expect(chat.wire).toHaveLength(3);
+        for (const serialized of chat.wire) {
+          for (const secret of [
+            phone,
+            f.user.id,
+            f.user.email,
+            f.tenant.id,
+            f.registry.clients[0].external_id,
+            'Synthetic Client',
+            'Synthetic provider private note',
+            'визит состоялся',
+            ...before.map((row) => row.id),
+          ])
+            expect(serialized).not.toContain(secret);
+        }
+        expect(await f.state()).toEqual(before);
+        expect(f.journal).toHaveBeenCalledTimes(1);
+        expect(await f.count()).toBe(1);
+        expect(chat.actor.role).toBe(role);
+        expect(
+          await db.prisma.actionExecution.count({
+            where: {
+              tenantId: f.tenant.id,
+              actionClass: {
+                in: [
+                  'create_appointment',
+                  'reschedule_appointment',
+                  'cancel_appointment',
+                ],
+              },
+            },
+          }),
+        ).toBe(0);
+      },
+    );
+
+    it('HTTP AChat explains disabled history; does not turn it into an empty or complete history', async () => {
+      const f = await historyFixture(),
+        chat = await chatFixture(f);
+      await f.sync();
+      const result = await chat.ask(0);
+      expect(result.status).toBe(201);
+      expect(result.body.grounding.status).toBe('blocked');
+      expect(result.body.reply).toContain('Салон пока не открыл');
+      expect(result.body.reply).not.toContain('визит состоялся');
+      expect(chat.wire).toHaveLength(1);
+      expect(f.journal).toHaveBeenCalledTimes(1);
+    });
+
+    it('HTTP AChat rereads revoked Client authority despite a successful previous turn', async () => {
+      const f = await historyFixture(),
+        chat = await chatFixture(f);
+      await f.sync();
+      await enableHistory(f);
+      const first = await chat.ask(0);
+      expect(first.body.grounding.status).toBe('verified');
+      const link = await db.prisma.clientChannelLink.findFirstOrThrow({
+        where: { tenantId: f.tenant.id },
+      });
+      const writer = new ClientChannelLinkService(db.prisma, db.tenantContext, {
+        verifyLink: () => Promise.reject(new Error('not used')),
+        verifyRevocation: () =>
+          Promise.resolve({
+            tenantId: f.tenant.id,
+            provider: 'maya_user',
+            providerSubjectHash: link.providerSubjectHash,
+            linkId: link.id,
+            revocationIdentityHash: digest(randomUUID()),
+            actorProofHash: digest('synthetic-http-revocation'),
+            reason: 'test',
+            validUntil: new Date(Date.now() + 60_000),
+          }),
+      });
+      await db.tenantContext.runAsSystemTenant(f.tenant.id, () =>
+        writer.revoke({ proof: 'synthetic-revocation' }),
+      );
+      const revoked = await db.prisma.clientChannelLink.findUniqueOrThrow({
+        where: { id: link.id },
+      });
+      const second = await chat.ask(1, [
+        { role: 'user', content: chat.questions[0] },
+        { role: 'assistant', content: first.body.reply },
+      ]);
+      expect(second.status).toBe(201);
+      expect(second.body.grounding.status).toBe('blocked');
+      expect(second.body.reply).not.toContain('визит состоялся');
+      expect(chat.wire.join('')).not.toContain('визит состоялся');
+      expect(
+        await db.prisma.clientChannelLink.findUniqueOrThrow({
+          where: { id: link.id },
+        }),
+      ).toEqual(revoked);
+      expect(await f.count()).toBe(1);
+      expect(f.journal).toHaveBeenCalledTimes(1);
+    });
+
+    it('revoked session cannot send another history turn or restore the private conversation', async () => {
+      const f = await historyFixture(),
+        chat = await chatFixture(f);
+      await f.sync();
+      await enableHistory(f);
+      expect((await chat.ask(0)).body.grounding.status).toBe('verified');
+      await db.prisma.authSession.update({
+        where: { id: chat.actor.sessionId },
+        data: { revokedAt: new Date() },
+      });
+      expect((await chat.ask(1)).status).toBe(401);
+      expect((await chat.conversation()).status).toBe(401);
+      expect(chat.wire).toHaveLength(1);
+      expect(f.journal).toHaveBeenCalledTimes(1);
+    });
+
+    it.each(['same-tenant', 'foreign-tenant'])(
+      'HTTP AChat refuses caller-selected Client and %s foreign conversation before private history disclosure',
+      async (scope) => {
+        const f = await historyFixture(),
+          chat = await chatFixture(f);
+        await f.sync();
+        await enableHistory(f);
+        const first = await chat.ask(0);
+        expect(first.body.grounding.status).toBe('verified');
+        const current = await chat.conversation();
+        expect(current.body.conversationId).toEqual(expect.any(String));
+        expect(
+          (await chat.ask(0, [], { clientId: 'caller-client' })).status,
+        ).toBe(400);
+        const otherTenant =
+          scope === 'same-tenant'
+            ? f.tenant
+            : await fx.tenant('Foreign private chat');
+        if (scope === 'foreign-tenant') cancelled.push(otherTenant.id);
+        for (const feature of [
+          'ai.consultant',
+          'booking',
+          'booking.customer_app',
+          'crm.integration',
+        ] as const)
+          await fx.grantFeature(otherTenant, feature);
+        const other = await fx.user(otherTenant, UserRole.CLIENT);
+        const token = await http.login(
+          otherTenant.slug,
+          other.email,
+          other.password,
+        );
+        const foreign = await request(http.app.getHttpServer())
+          .post('/api/ai/chat')
+          .set('Authorization', `Bearer ${token}`)
+          .send({
+            surface: 'web',
+            audience: 'client',
+            requestId: randomUUID(),
+            conversationId: current.body.conversationId,
+            messages: [{ role: 'user', content: chat.questions[0] }],
+          });
+        // Existing timeline owner reports a foreign persisted reference as a
+        // scope conflict (409), before planner/tool dispatch.
+        expect(foreign.status).toBe(409);
+        expect((foreign.body as { message: string }).message).toBe(
+          'conversation_scope_conflict',
+        );
+        expect(JSON.stringify(foreign.body)).not.toContain('визит состоялся');
+        expect(chat.wire).toHaveLength(1);
+        expect(f.journal).toHaveBeenCalledTimes(1);
+      },
+    );
 
     it.each([UserRole.CLIENT, UserRole.TENANT_OWNER])(
       'source-to-card history uses exact Client after signed %s login, with explicit consent and no GET writes',
