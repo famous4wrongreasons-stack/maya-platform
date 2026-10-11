@@ -621,6 +621,53 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
     },
   );
 
+  it('links with a 30-second signed Telegram proof when the exact CRM lookup finishes before expiry', async () => {
+    const f = await fixture(UserRole.TENANT_OWNER);
+    const issuedAt = Math.floor(Date.now() / 1000);
+    const login = await signedLogin(f, { iat: issuedAt, exp: issuedAt + 30 });
+    const result = await login.complete();
+    expect(result.status).toBe(201);
+    expect((result.body as LoginBody).client_binding).toEqual({
+      status: 'linked',
+    });
+    expect(f.source).toHaveBeenCalledTimes(1);
+    expect(await f.count()).toBe(1);
+  });
+
+  it('keeps login but refuses a 30-second signed Telegram proof that expires during the exact CRM lookup', async () => {
+    const f = await fixture(UserRole.TENANT_OWNER);
+    const issuedAt = Math.floor(Date.now() / 1000);
+    const expiresAt = (issuedAt + 30) * 1000;
+    const login = await signedLogin(f, { iat: issuedAt, exp: issuedAt + 30 });
+    f.source.mockImplementation(async () => {
+      // Real wall clock and PostgreSQL clock, no verifier/expiry bypass. Only
+      // synthetic CRM latency is injected; there are no real provider calls.
+      expect(Date.now()).toBeLessThan(expiresAt);
+      await new Promise((resolve) =>
+        setTimeout(resolve, Math.max(0, expiresAt - Date.now()) + 250),
+      );
+      return { ...f.registry, generated_at: new Date().toISOString() };
+    });
+    const result = await login.complete();
+    expect(result.status).toBe(201);
+    expect((result.body as LoginBody).client_binding).toEqual({
+      status: 'unlinked',
+      reason: 'fresh_telegram_verification_required',
+    });
+    expect(f.source).toHaveBeenCalledTimes(1);
+    expect(await f.count()).toBe(0);
+    expect(
+      await db.prisma.auditLog.count({
+        where: {
+          tenantId: f.tenant.id,
+          action: 'client.telegram_initial_link',
+        },
+      }),
+    ).toBe(0);
+    expect((await login.complete()).status).toBe(400);
+    expect(await f.count()).toBe(0);
+  }, 65_000);
+
   it.each([false, undefined, 'true', 1])(
     'does not use an unverified phone claim (%s), including a stored matching phone',
     async (verified) => {
