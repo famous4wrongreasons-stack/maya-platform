@@ -1,0 +1,35 @@
+{
+  "checkedAt": "2026-10-11T12:14:20.834Z",
+  "authenticated": false,
+  "writes": 0,
+  "requests": [
+    {
+      "url": "https://mayaos.ru/oauth-callback.html",
+      "status": 200,
+      "contentType": "text/html",
+      "coop": null,
+      "coep": null,
+      "csp": null,
+      "location": null,
+      "bytes": 3590,
+      "sha256": "91c4f58facd2c93dbf29cbb891abe6e1c1b92f61a87da075655bd3c282e6f0b2",
+      "matchesCurrentCallback": false
+    },
+    {
+      "url": "https://mayaos.ru/maya-chat-shell/",
+      "status": 404,
+      "contentType": "text/html; charset=iso-8859-1",
+      "coop": null,
+      "coep": null,
+      "csp": null,
+      "location": null,
+      "bytes": 269,
+      "sha256": "00381924b7ef42464e459ef81c7e78a51cbd37a2b34cd0ce04d2084a7c9e699e"
+    }
+  ],
+  "callbackComparison": {
+    "matchingHistoricalCommit": "1ba86ac44a87ebafcaf765a34f278b03408b4a7b",
+    "currentLocalCallbackSha256": "b10e89898aa74a39756d4f49e1537c8ee6c0066bc7a2666982b4052b0f99444f",
+    "matchingHashDoesNotProveEntireDeployedCandidate": true
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "testedHead": "48cfa9eae631bc060681d0bcf5164f91c78154a4",
+  "receipts": [
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/current-react-build.log",
+      "bytes": 185,
+      "sha256": "edb2c07aacc70265dea873e4b9a96b901a55056fdab0bb25fde70438d767b04b"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/initdb.log",
+      "bytes": 954,
+      "sha256": "0e6c438c36ddcbd17c674c29e7bbd0a231bcd091a1f8c8b0bac96cf846b56355"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/manifest.json",
+      "bytes": 719,
+      "sha256": "b3003b28e5eb1c95c587be33eafc940b57741e34d6e7be9e57ba618da5fa002d"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/migrations.log",
+      "bytes": 14720,
+      "sha256": "6767b31285667320751d959a5a6ec6f2cff6934bf93a7a1b25b490f486c7b9d6"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/postgres.log",
+      "bytes": 50156,
+      "sha256": "23f52925fc173f3cb62a1a9c7076bc9a017f32562f69d59fd5ac16dde5ec1064"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/source-hashes.json",
+      "bytes": 257184,
+      "sha256": "0f7033cb165f7807d747c5481f346bbdc337267d0787ad71ed20841f25034faf"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/telegram-initial-jest.json",
+      "bytes": 45902,
+      "sha256": "cab2fb295a32cc0026e78443eb09e703bd8e42332695c249c60a2993c4cea231"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/telegram-initial.log",
+      "bytes": 2666,
+      "sha256": "00b6ad3314f3b3ddba13409af9faecfdf5f9a1b0a71401a9d04a07920f8ca590"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/browser-client/browser.json",
+      "bytes": 2119,
+      "sha256": "c3ad9347b538c77b4fd0fc2a4848153533127b41016346cc582f20a619e9cba3"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/browser-client/history.png",
+      "bytes": 97308,
+      "sha256": "dbb1197bc5f6a705145cec4eae307276a78f4543f57866ed191f3ab11bf2e254"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/browser-client/packaging.log",
+      "bytes": 188,
+      "sha256": "ef77d93e1222ea91c3135ad8a7d1010e21b6fb51b6fce8c99e7dc37e0d12f752"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/browser-tenant_owner/browser.json",
+      "bytes": 2119,
+      "sha256": "366dd2e629c141655ece0993498bd667f6fb3fd4d45dd4f6fb864f7ee3dd51ac"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/browser-tenant_owner/history.png",
+      "bytes": 97308,
+      "sha256": "dbb1197bc5f6a705145cec4eae307276a78f4543f57866ed191f3ab11bf2e254"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-final-48cfa9ea-20261011/browser-tenant_owner/packaging.log",
+      "bytes": 188,
+      "sha256": "ef77d93e1222ea91c3135ad8a7d1010e21b6fb51b6fce8c99e7dc37e0d12f752"
+    },
+    {
+      "path": "/private/tmp/maya-telegram-public-preflight-20261011.json",
+      "bytes": 780,
+      "sha256": "e2a7150266fd0e0009c495452e478162c3850769c79f45743d62e13f28d8525c"
+    },
+    {
+      "path": "/private/tmp/maya-personal-final-48cfa9ea-lint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/maya-personal-final-48cfa9ea-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/private/tmp/maya-personal-web-shape-20261011-01/manifest.json",
+      "bytes": 726,
+      "sha256": "4353d8b1c0db25b8fcd41f49be23feb73824749a4539f86daf6298bd44e91fc8"
+    },
+    {
+      "path": "/private/tmp/maya-personal-web-shape-20261011-01/telegram-initial-jest.json",
+      "bytes": 38414,
+      "sha256": "24760596a23316e7d4257e1eb652840ca67738c15b57af7679a48162141fe9df"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-01/manifest.json",
+      "bytes": 753,
+      "sha256": "0dabe434b9070e36f650edcc4cd73be7502d7f62785e313a61b633769f1c4267"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-01/telegram-initial-jest.json",
+      "bytes": 39394,
+      "sha256": "b74a9f97673f1661c8354fce1f77a4cd3cbeb791163667263634a1a5b85c9dea"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-02/manifest.json",
+      "bytes": 753,
+      "sha256": "81c9aa278597ba957a8a572d5d53eef2413f292a8598d9fe2b43237aafd5a756"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-02/telegram-initial-jest.json",
+      "bytes": 39630,
+      "sha256": "2884a9be7c1b02a512388e3c03f685af0f3906777f2475b74da61d6f352789ae"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-03/manifest.json",
+      "bytes": 753,
+      "sha256": "7faf51c583852227d6a135c3e6c7d808beb5f2500451fbe4228ccc5a96322df6"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-03/telegram-initial-jest.json",
+      "bytes": 39632,
+      "sha256": "c17225308cfdf96e0c8ffa577b91886c360599b909e959e5d866fe4d48245df6"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-04/manifest.json",
+      "bytes": 753,
+      "sha256": "177b37693257a76f2066aa60f152cc1c8e953fd646e0a7b047c7bca421c5725e"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-04/telegram-initial-jest.json",
+      "bytes": 39377,
+      "sha256": "f9c66e7a561ca6b182680c524b129626bcb2c212865e268fb80ba54ee14030be"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-05/manifest.json",
+      "bytes": 753,
+      "sha256": "bda7f3e2c23a493fc2581632c5854b50fbe88102ce874d0809ce65b24164f449"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-05/telegram-initial-jest.json",
+      "bytes": 39378,
+      "sha256": "51719276d8fb88ce82183633f247d0adce8de88e30cfc7d440e0bbef1d1ed08d"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-06/manifest.json",
+      "bytes": 753,
+      "sha256": "6617c6553a8065c583b747be39c3c309fdc1db461c012e030a96db1fd7e5aabc"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-06/telegram-initial-jest.json",
+      "bytes": 39445,
+      "sha256": "8e685475898874cb7045e4e54493ec40b767eb29fdf20f9fbf1e4bee9f4a052e"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-07/manifest.json",
+      "bytes": 718,
+      "sha256": "e4b5d26846ce9d3ce23f41738cbcb4e8c7f24db135c60b1e88ecb29d61f0cdc3"
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-07/telegram-initial-jest.json",
+      "bytes": 36799,
+      "sha256": "eced62a0bde81dc44b80629c4ddfd0756c2f41c6e2d34c905150dd0bdc3feb43"
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "qualification": "SYNTHETIC_REACT_HTTP_PG_NOT_REAL_ACCEPTANCE_NOT_RELEASE_CERTIFICATION",
+  "testedHead": "48cfa9eae631bc060681d0bcf5164f91c78154a4",
+  "workingPatch": false,
+  "productSourceUnchangedFrom": "5cbc29080ee202f52f60eec1537368335258d773",
+  "checks": {
+    "httpPg": {
+      "passed": 84,
+      "failed": 0,
+      "suites": 2,
+      "includesInitialBindingAndBrowser": 65,
+      "includesSyntheticSuccessor": 19
+    },
+    "browser": {
+      "roles": [
+        "client",
+        "tenant_owner"
+      ],
+      "checkpointsPerRole": 13,
+      "firstLoginCreatesOneLink": true,
+      "explicitCanonicalReconciliationBeforeQuestions": true,
+      "questionsPerRole": 3,
+      "restoredUserAssistantPairsPerRole": 3,
+      "authorityFieldsSent": false,
+      "privateHistorySentToModel": false,
+      "businessExecutions": 0,
+      "bothBrowsersStopped": true
+    },
+    "liveTypes": "PASS",
+    "scopedLint": "PASS",
+    "currentWebBuildAndPerBrowserByteVerification": "PASS"
+  },
+  "proofCleanup": {
+    "clusterStopped": true,
+    "pidFileAbsent": true,
+    "sourceUnchanged": true
+  },
+  "preliminary": [
+    {
+      "path": "/private/tmp/maya-personal-web-shape-20261011-01",
+      "status": "failed",
+      "passed": 60,
+      "failed": 2,
+      "clusterStopped": true,
+      "sourceUnchanged": true,
+      "reason": "Shared loopback OAuth preflight exhausted after new cases; new canonical-web requests passed."
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-01",
+      "status": "failed",
+      "passed": 63,
+      "failed": 2,
+      "clusterStopped": true,
+      "sourceUnchanged": true,
+      "reason": "Harness build/verify cwd mismatch."
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-02",
+      "status": "failed",
+      "passed": 63,
+      "failed": 2,
+      "clusterStopped": true,
+      "sourceUnchanged": true,
+      "reason": "Stage diagnostics confirmed build/verify cwd mismatch."
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-03",
+      "status": "failed",
+      "passed": 63,
+      "failed": 2,
+      "clusterStopped": true,
+      "sourceUnchanged": true,
+      "reason": "Fixture projection did not select tenant name."
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-04",
+      "status": "failed",
+      "passed": 63,
+      "failed": 2,
+      "clusterStopped": true,
+      "sourceUnchanged": true,
+      "reason": "Harness used text selector for an aria-labelled send button."
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-05",
+      "status": "failed",
+      "passed": 63,
+      "failed": 2,
+      "clusterStopped": true,
+      "sourceUnchanged": true,
+      "reason": "Fixture synchronized before Client existed; required explicit post-binding canonical sync; synthetic favicon needed declared response."
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-06",
+      "status": "failed",
+      "passed": 63,
+      "failed": 2,
+      "clusterStopped": true,
+      "sourceUnchanged": true,
+      "reason": "Browser path passed, but graceful IPC disconnect incorrectly called abort/exit 2."
+    },
+    {
+      "path": "/private/tmp/maya-personal-browser-20261011-07",
+      "status": "passed",
+      "passed": 65,
+      "failed": 0,
+      "clusterStopped": true,
+      "sourceUnchanged": true,
+      "reason": "Working-tree rehearsal passed before committed final proof."
+    }
+  ],
+  "notClaimed": [
+    "real Telegram acceptance",
+    "current BotFather registration",
+    "real CRM history acceptance",
+    "live model quality",
+    "Safari/PWA/iPhone acceptance",
+    "new release certification",
+    "deployment"
+  ],
+  "externalEffects": {
+    "productionChanges": 0,
+    "realOwnerDatabaseAccess": 0,
+    "realClientBindings": 0,
+    "realCrmReads": 0,
+    "realCrmWrites": 0,
+    "realModelCalls": 0,
+    "smsOtp": 0,
+    "publicUnauthenticatedPreflightGets": 2
+  },
+  "remaining": [
+    "qualify exact current React+callback HTTPS target and Telegram Allowed URLs",
+    "qualify bounded private-read local runner without widening old catalog authorization",
+    "inspect same retained owner DB identity tip through existing owner before any dispatch",
+    "obtain fresh exact private CRM/model authorization; old allowance expired"
+  ]
+}

@@ -1,5 +1,13 @@
 # Telegram → личная история → AChat: подготовка приёмки
 
+**Дополнение 11 октября — единый React/HTTP/PG сценарий на `48cfa9ea`.**
+Текущий carrier проходит первый signed synthetic Telegram login, отдельную
+каноническую CRM-сверку, три личных ответа и восстановление разговора после
+повторного входа для CLIENT и TENANT_OWNER. Фактический web request не содержит
+`audience` или Client id. [Новые receipts, ограничения и публичный preflight](evidence/maya-personal-browser-20261011/README.md).
+Публичный callback пока byte-identical историческому `1ba86ac4`, а не локальному
+исправлению; живая приёмка не выполнена. Ниже сохранён прежний checkpoint.
+
 **Актуализация 11 октября — web lifecycle исправлен на `6ca9a5ed`.**
 Свежие runtime 723 PASS / 7 SKIP, carrier 157 PASS, 10/10 targeted mutations,
 29 browser checkpoints и 18 packaging checks PASS. Это isolated Chrome с

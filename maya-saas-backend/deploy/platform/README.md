@@ -40,25 +40,32 @@ does not need to create its own Telegram bot or Yandex application.
 - Provider credentials live only in `/etc/maya-saas/live-widgets.env` on the
   platform server and must never be committed to Git.
 
-Telegram login is configured **entirely by the bot's domain**, and by nothing else.
+### Telegram configuration: current instructions and historical evidence
 
-`@mayaos_login_bot` → Bot Settings → Domain → `mayaos.ru`. That is the whole provider-side surface.
-This platform uses Telegram's **OIDC** (`oauth.telegram.org/auth` + `/token`, `id_token` verified
-against JWKS), not the Login Widget, and Telegram validates `redirect_uri` against the bot's domain
-rather than against a registered path list.
+Checked 2026-10-11: [Telegram's current official login documentation](https://core.telegram.org/bots/telegram-login#registering-your-allowed-urls)
+directs operators to BotFather → bot → Login Widget → Allowed URLs, including exact
+OIDC redirect URIs. It also locates the client credentials there. The current
+registration of `@mayaos_login_bot` has **not** been inspected. Do not infer it from
+the historical domain test below, expose a secret in a receipt, or change the
+production bot to a local address as part of a source-code test.
 
-Proven by construction on 2026-09-29: two callbacks on `mayaos.ru` that had never been registered
+This platform uses Authorization Code + PKCE and server-side JWKS verification.
+The callbacks below remain the intended web/native addresses. Before real login,
+the actual allowed URL, application origin, callback bytes and deployed app must
+be qualified together. A successful synthetic loopback test does not register
+that URL with Telegram.
+
+Historical report from 2026-09-29 (not repeated on 2026-10-11): two callbacks on `mayaos.ru` that had never been registered
 anywhere were both accepted and served the consent page, while the identical request against another
 domain — and against the retired acceptance host — returned `redirect_uri required`.
 
-So the two callbacks need no registration; they only have to stay on `mayaos.ru`:
+The original report interpreted this as domain-only admission. Retain that
+observation as provenance, not as a current claim that registration is unnecessary:
 
 - web: `https://mayaos.ru/oauth-callback.html`
 - native: `https://mayaos.ru/api/auth/oauth/native/callback`
 
-An earlier revision of this file listed "redirect URI" and "trusted origin" as provider fields to
-change. @BotFather exposes no such fields — that text described the Login Widget, which this
-platform does not use. `api.mayaos.ru` is deliberately not a redirect target: it is the backend host
+`api.mayaos.ru` is deliberately not a redirect target: it is the backend host
 the `mayaos.ru/api` relay forwards to.
 
 The existing `malesthetic.pro` OAuth configuration and salon Telegram bot are
