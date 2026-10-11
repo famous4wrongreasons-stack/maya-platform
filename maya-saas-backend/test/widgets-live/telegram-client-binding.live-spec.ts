@@ -310,14 +310,23 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
       .mockImplementation((fn: unknown, options: unknown) =>
         transaction(async (tx) => {
           const original = tx.$queryRaw.bind(tx);
-          tx.$queryRaw = ((query: Prisma.Sql, ...values: unknown[]) => {
+          const queryRaw = (query: Prisma.Sql, ...values: unknown[]) => {
             if (offset() && query.sql?.includes('clock_timestamp()'))
               return Promise.resolve([
                 { now: new Date(Date.now() + offset()) },
               ]);
             return original(query, ...values);
-          }) as typeof tx.$queryRaw;
-          return (fn as (tx: unknown) => Promise<unknown>)(tx);
+          };
+          // Do not assign to Prisma's transaction proxy: that can leak a
+          // closure over a committed transaction into the parent client.
+          const scopedClock = new Proxy(tx, {
+            get(target, key) {
+              return key === '$queryRaw'
+                ? queryRaw
+                : (Reflect.get(target, key, target) as unknown);
+            },
+          });
+          return (fn as (tx: unknown) => Promise<unknown>)(scopedClock);
         }, options as never),
       );
   }
