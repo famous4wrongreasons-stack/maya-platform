@@ -1,0 +1,32 @@
+{
+  "contract": "maya.telegram-web-navigation-preflight/1",
+  "candidate": "0c4ae3b8143ee0e2b99c98d0462286f504b954a3",
+  "executedAt": "2026-10-11T11:07:20.929Z",
+  "node": "v24.15.0",
+  "method": "Node runtime and VM execution of actual composition factory and callback script; page replacement simulated by a new composition instance; not browser acceptance",
+  "sourceHashes": {
+    "maya-carrier-react/src/runtime/compose.ts": "394721aa55a360f94bcab79127786bd0a2941bd55b4f7baadce20f6882ad91a9",
+    "maya-chat-shell/src/net/session.ts": "97346d84a1617231f645fece136ee1e786562643b5d0b9f1e5994386465b7dd4",
+    "maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html": "91c4f58facd2c93dbf29cbb891abe6e1c1b92f61a87da075655bd3c282e6f0b2"
+  },
+  "result": "DEFECT_REPRODUCED",
+  "observations": {
+    "sourceNavigation": "window.location.assign",
+    "callbackNavigation": "location.replace to app root with fragment",
+    "newDocument": {
+      "step": "failed",
+      "failure": {
+        "state": "callback_unsolicited"
+      }
+    },
+    "initiatingDocument": "signed_in",
+    "replay": "callback_unsolicited",
+    "foreignState": "callback_unsolicited",
+    "completeRequests": 1,
+    "persistentStoreTouches": 0
+  },
+  "externalRequests": 0,
+  "databaseWrites": 0,
+  "productChanges": 0,
+  "limitation": "Does not qualify Telegram current provider configuration, loopback callback acceptance, iOS behavior or real browser acceptance."
+}

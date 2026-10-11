@@ -1,0 +1,19 @@
+{
+  "purpose": "Diagnostic counterexample, not Telegram acceptance or a release receipt",
+  "candidate": "0c4ae3b8143ee0e2b99c98d0462286f504b954a3",
+  "runtimeNetTests": {
+    "pass": 58,
+    "fail": 0,
+    "exitCode": 0
+  },
+  "probeExitCode": 0,
+  "probeExitMeaning": "Existing defect reproduced; does NOT mean web login passes",
+  "externalCalls": 0,
+  "ownerDatabaseAccess": false,
+  "productSourceChanges": 0,
+  "files": {
+    "net-tests.txt": "59661bfd7b1555cd6104931d061d489408d2d02a5517b9e27659ae8b945716e5",
+    "probe.mjs": "e747596838047712fd187d145b8dc90acd772461726bde994b7a9866f723e49b",
+    "result.json": "3780cce3e88d04dfecf056a53d272a5b7075f358c88d8a6376d8b41112ede4ae"
+  }
+}

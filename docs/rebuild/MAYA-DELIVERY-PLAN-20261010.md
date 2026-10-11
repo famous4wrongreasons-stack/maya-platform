@@ -1,5 +1,15 @@
 # План завершения MAYA — 10 октября 2026
 
+**11 октября, Telegram web preflight на `0c4ae3b8`:** имя платформенного бота
+уже установлено из canonical docs — `@mayaos_login_bot`; повторный запрос
+владельцу не нужен. Node/VM execution текущего compose + callback воспроизводит
+потерю memory-only pending state при смене страницы (`callback_unsolicited`);
+тот же callback в исходном instance проходит. Это локальный diagnostic,
+не browser acceptance; отдельные 58 runtime net tests зелёные. Product code,
+настройки бота и production не менялись. До живого входа требуется исправить и
+проверить web roundtrip без ослабления state/privacy checks.
+[Preflight, source hashes и границы](MAYA-PERSONAL-CHAT-ACCEPTANCE-20261011.md#уточнение-telegram-preflight-после-0c4ae3b8).
+
 **11 октября, единый HTTP-сценарий Telegram → история → AChat — `a53c6546`:**
 79/79 проверок на отдельной PostgreSQL (60 initial/card/history/chat + 19
 successor), включая три последовательные реплики CLIENT и владельца в личном

@@ -57,6 +57,44 @@ Client отклоняется DTO. У чужих участников есть �
 правила lint не ослаблялись. Финальный прогон закрепляется отдельно на committed
 checkpoint выше и включает прежние successor tests.
 
+## Уточнение Telegram preflight после `0c4ae3b8`
+
+Публичное имя уже есть в canonical source: **`@mayaos_login_bot` (`MAYA OS`)**,
+`maya-saas-backend/deploy/platform/README.md`, раздел Shared platform login.
+Повторно спрашивать его у владельца не требуется. `@malesthetic_bot` относится
+к салону/историческому приложению и не заменяет платформенный login.
+Документированные callbacks: `https://mayaos.ru/oauth-callback.html` для web и
+`https://mayaos.ru/api/auth/oauth/native/callback` для native. Документ описывает
+проверку provider-domain на 2026-09-29; это historical evidence, а не свежая
+проверка текущей регистрации, доступности или секретов. Секретные файлы не читались.
+
+На точном `0c4ae3b8143ee0e2b99c98d0462286f504b954a3` воспроизведена
+несовместимость web-навигации с memory-only pending state:
+
+1. Настоящий factory-фрагмент React compose вызывает `window.location.assign`
+   после сохранения `pendingTelegram` в runtime closure.
+2. Настоящий callback-script вызывает `location.replace('/#oauth=telegram…')`.
+3. При моделировании нового документа создаётся новый `createNet`; тот же
+   callback отклоняется как `callback_unsolicited`, до backend `/complete`.
+4. Контроль: тот же callback принимается исходным live instance; replay и чужой
+   state по-прежнему отклоняются. Persistent stores не использованы.
+
+Это **Node/VM source-execution probe с явно моделируемой заменой документа**,
+не реальный browser/provider roundtrip. [Результат и hashes](evidence/maya-telegram-navigation-20261011/result.json),
+[воспроизводимый probe](evidence/maya-telegram-navigation-20261011/probe.mjs),
+[manifest](evidence/maya-telegram-navigation-20261011/manifest.json).
+Запуск из корня repository: `node docs/rebuild/evidence/maya-telegram-navigation-20261011/probe.mjs .`.
+Exit 0 этого diagnostic означает воспроизведение дефекта, **не успешный вход**.
+Существующий runtime `test/net.test.mjs` отдельно: **58 PASS / 0 FAIL**; его
+same-instance callbacks не квалифицируют замену страницы при web OAuth.
+
+Защита от unsolicited callback правильна и не ослаблялась. Перед живым web-входом
+требуется исправить/квалифицировать доставку callback в начавший login контекст,
+сохранив current state, single-use, origin/source validation и отсутствие
+постоянного хранения credentials. Конкретная реализация в этом preflight не
+выбиралась. iOS поведение этим probe не проверено. Local product/runtime/carrier,
+бот, provider configuration, production и owner-БД не изменялись.
+
 ## Почему прежний реальный сеанс нельзя просто повторить
 
 `local-owner-chat-policy.mjs` разрешает только три публичных вопроса о салоне.
@@ -82,8 +120,8 @@ Raw provider payload/контакты не должны попадать в ча
 
 | Условие | Текущий статус / действие |
 | --- | --- |
-| Существующее Telegram Login приложение | Требуется публичное имя бота; client ID/secret и зарегистрированный callback не проверены. Секреты не запрашиваются в чате |
-| Точный callback текущего React AChat | Maya development разрешает loopback, но это не доказательство допуска того же адреса со стороны Telegram. Проверить регистрацию без смены production configuration |
+| Существующее Telegram Login приложение | `@mayaos_login_bot` найден в canonical deployment docs; `mayaos.ru` и web/native callback известны. Текущая provider configuration и наличие допустимых local credentials не проверены; секреты не запрашиваются в чате |
+| Точный callback текущего React AChat | Source-execution probe воспроизводит потерю pending state при замене документа и `callback_unsolicited`. Сначала квалифицировать web roundtrip с сохранением защит. Разрешение loopback в Maya не доказывает его допустимость у Telegram; production configuration не менять |
 | Та же сохранённая локальная owner-БД | В этом проходе не запускалась и не читалась. Использовать прежний same-DB owner, сохранить исходный state/keys и проверить mapping перед dispatch |
 | Current owner identity/link | Фактическое состояние этой БД UNKNOWN. Если current tip отозван, initial-only login его не восстанавливает; новый successor verifier не предполагается |
 | Частный provider scope | Подготовить дополнительный ограниченный режим существующего local launcher: exact tenant/company, exact read templates, лимиты/истечение, отказ от writes/outbound; существующие публичные допуски не расширять молча |
@@ -106,6 +144,7 @@ Raw provider payload/контакты не должны попадать в ча
 должно сохранить session/conversation/widget/voice contracts и текущие proofs.
 
 LIVE PERSONAL ACCEPTANCE: NOT RUN.
-READY FOR LIVE LAUNCH: NO — Telegram configuration и отдельный private-read
-режим ещё не квалифицированы; действующего разрешения на private CRM/model нет.
+READY FOR LIVE LAUNCH: NO — web callback lifecycle имеет воспроизведённый
+блокер; текущая Telegram configuration и отдельный private-read режим ещё не
+квалифицированы; действующего разрешения на private CRM/model нет.
 PRODUCT CHANGES IN THIS UNIT: 0.
