@@ -84,3 +84,10 @@ for synthetic testing. Historical evidence is preserved in its original files.
 
 Protocol reference checked read-only: https://core.telegram.org/bots/telegram-login
 (BotFather Login Widget credentials and manual OIDC exchange).
+
+## Later real attempt
+
+[Attempt 04](LIVE-ATTEMPT-04.md) on the documentation-follow-up checkpoint
+reached the provider and retained the exact category invalid_client. It narrows
+the refusal to application-client authentication; the exact credential cause
+and successful real binding remain unproven. Earlier results above are unchanged.

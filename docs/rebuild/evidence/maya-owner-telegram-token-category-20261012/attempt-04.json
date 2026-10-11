@@ -1,0 +1,72 @@
+{
+  "qualification": "BOUNDED_REAL_LOCAL_ATTEMPT_NOT_RELEASE_CERTIFICATION",
+  "candidate": "3847f5150bba54ca73e2a092c3e5571e43149e0c",
+  "attempt": 4,
+  "status": "cancelled",
+  "providerReadSummary": {
+    "calls": 1,
+    "refused": 0,
+    "routes": {
+      "telegram_token": 1
+    }
+  },
+  "readOnlyOutcome": {
+    "readOnly": true,
+    "selectedOwnerTelegramIdentities": 0,
+    "sessionFlows": {
+      "total": 1,
+      "consumed": 1
+    },
+    "selectedOwnerAuditActions": 0
+  },
+  "trace": [
+    {
+      "sequence": 1,
+      "surface": "http",
+      "route": "telegram_link_complete",
+      "stage": "entered",
+      "status": null,
+      "code": null,
+      "observedAt": "2026-10-11T22:11:37.961Z"
+    },
+    {
+      "sequence": 2,
+      "surface": "provider",
+      "route": "telegram_token",
+      "stage": "entered",
+      "status": null,
+      "code": null,
+      "observedAt": "2026-10-11T22:11:43.423Z"
+    },
+    {
+      "sequence": 3,
+      "surface": "provider",
+      "route": "telegram_token",
+      "stage": "completed",
+      "status": 200,
+      "code": "provider_response_read",
+      "telegramTokenOutcome": "oauth_invalid_client",
+      "observedAt": "2026-10-11T22:11:46.698Z"
+    },
+    {
+      "sequence": 4,
+      "surface": "http",
+      "route": "telegram_link_complete",
+      "stage": "refused",
+      "status": 400,
+      "code": "social_exchange_failed",
+      "observedAt": "2026-10-11T22:11:46.699Z"
+    }
+  ],
+  "providerOutcome": "invalid_client",
+  "classification": "APPLICATION_CLIENT_AUTHENTICATION_REFUSED",
+  "exactCredentialCause": "NOT_PROVEN",
+  "identityLinkSaved": false,
+  "personalClientBindingReached": false,
+  "clusterStopped": true,
+  "runtimeGroupAbsent": true,
+  "sourceUnchanged": true,
+  "samePrivateState": true,
+  "productionChanged": false,
+  "realYclientsCalls": 0
+}

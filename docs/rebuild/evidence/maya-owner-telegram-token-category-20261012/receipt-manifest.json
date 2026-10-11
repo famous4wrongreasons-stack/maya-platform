@@ -68,5 +68,19 @@
     "size": 2091,
     "committed": false,
     "reason": "Only closed safe projections are archived; private execution/source manifests and raw test receipts remain local."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-owner-telegram-20261012-04/session/resume.json",
+    "sha256": "092734f02e4af9a4d1d3ae549cf04e6caa6c307884ca79154031d8f8b5a72acb",
+    "size": 548677,
+    "committed": false,
+    "reason": "Closed safe projection only; private source/session manifest remains local."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-owner-telegram-20261012-04/read-only-outcome.json",
+    "sha256": "f5de0085dd16f2c1f30f65e76e21f1c42761b69a13706b93d66b3b9c0a7f4a04",
+    "size": 156,
+    "committed": false,
+    "reason": "Closed safe projection only; private source/session manifest remains local."
   }
 ]
