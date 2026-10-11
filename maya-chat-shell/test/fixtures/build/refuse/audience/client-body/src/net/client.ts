@@ -1,6 +1,12 @@
 import { API_BASE } from './endpoint.ts';
 
 const PATHS = {
+  trialActivation: '/onboarding/trial-activations',
+  trialSignup: '/onboarding/trial',
+  crmStatus: '/integrations/crm',
+  crmConnect: '/integrations/crm/connect',
+  crmActivate: '/integrations/crm/activate',
+  crmOperation: '/integrations/crm/operation',
   businessSearch: '/mobile/pwa/search',
   telegramStart: '/auth/oauth/telegram/start',
   telegramComplete: '/auth/oauth/telegram/complete',
