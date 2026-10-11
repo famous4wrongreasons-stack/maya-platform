@@ -133,3 +133,70 @@ test('private pinned plan has one runner and one child; substitutions/replay ref
     fs.writeFileSync(file,bytes+' '); assert.throws(()=>run.assertCurrent());
   } finally { fs.rmSync(dir,{recursive:true}); }
 });
+
+const batchContract = 'owner_telegram_saved_login_batch_v2';
+test('batch permit preserves exact pins, one child and a hard 30-minute window', () => {
+  const p = { ...makePlan(), contract: batchContract };
+  assert.doesNotThrow(() => assertOwnerTelegramPlan(p, source, p.ownerApprovalRef));
+  for (const change of [
+    q => { q.contract = 'unapproved'; }, q => { q.contract = undefined; },
+    q => { q.maxAttempts = 99; }, q => { q.scope.tenantId = ''; },
+    q => { q.expiresAt = new Date(Date.parse(q.notBefore) + 1800001).toISOString(); },
+  ]) { const q = structuredClone(p); change(q); assert.throws(() => assertOwnerTelegramPlan(q, source, q.ownerApprovalRef)); }
+  const dir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'maya-telegram-batch-unit-'))); fs.chmodSync(dir, 0o700);
+  const file = path.join(dir, 'plan.json'), bytes = JSON.stringify(p), pin = hash(bytes);
+  fs.writeFileSync(file, bytes, { mode: 0o600 });
+  try {
+    const args = [file, pin, p.ownerApprovalRef, () => source];
+    const run = readOwnerTelegramLaunch(...args, 'claim'); run.assertCurrent();
+    readOwnerTelegramLaunch(...args, 'child').assertCurrent();
+    assert.throws(() => readOwnerTelegramLaunch(...args, 'claim'));
+    assert.throws(() => readOwnerTelegramLaunch(...args, 'child'));
+    fs.unlinkSync(file + '.consumed'); assert.throws(() => run.assertCurrent());
+  } finally { fs.rmSync(dir, { recursive: true }); }
+});
+test('batch ingress forbids re-linking, foreign tenant and business writes', () => {
+  const body = { tenantSlug: scope.tenantSlug, platform: 'web', redirectUri: origin + '/oauth-callback.html' };
+  const admit = (route, value) => ownerTelegramIngress('POST', route, {}, value, origin, scope, batchContract);
+  assert.equal(admit('/api/auth/oauth/telegram/start', body), null);
+  assert.notEqual(admit('/api/auth/oauth/telegram/link/start', { platform: 'web', redirectUri: origin + '/oauth-callback.html' }), null);
+  assert.notEqual(admit('/api/auth/oauth/telegram/link/complete', { state: 'te_synthetic_state', code: 'synthetic-code' }), null);
+  assert.notEqual(admit('/api/auth/oauth/telegram/start', { ...body, tenantSlug: 'other' }), null);
+  for (const route of ['/api/auth/oauth/telegram/link/start', '/api/auth/oauth/telegram/link/complete', '/api/widgets/intent', '/api/auth/phone/start', '/api/integrations/crm/activate']) assert.notEqual(admit(route, {}), null);
+});
+test('batch consumes failures, admits only three attempts and serializes concurrent attempts', async () => {
+  const t = transport({ contract: batchContract }); let release;
+  const pending = t.run(operation(), () => new Promise(resolve => { release = resolve; }));
+  await assert.rejects(t.run(operation(), async () => {}), /busy/); release(); await pending;
+  await assert.rejects(t.run(operation(), async () => { throw Error('synthetic failure'); }));
+  await t.run(operation(), async () => {});
+  await assert.rejects(t.run(operation(), async () => {}), /attempt_limit/);
+  const link = transport({ contract: batchContract });
+  await assert.rejects(link.run({ ...operation(), purpose: 'link' }, async () => {}), /attempt_limit/);
+});
+test('batch keeps 32 pages per attempt and refuses a fourth registry scan', async () => {
+  let calls = 0;
+  const t = transport({ contract: batchContract, nativeFetch: async () => { calls++; return new Response('{"success":true,"data":[]}'); } });
+  for (let attempt = 0; attempt < 3; attempt++) await t.run(operation(), async () => {
+    for (let page = 1; page <= 32; page++) await (await t.fetch(registryUrl, registry(page))).text();
+    await assert.rejects(t.fetch(registryUrl, registry(33)));
+  });
+  await assert.rejects(t.run(operation(), async () => t.fetch(registryUrl, registry())), /attempt_limit/);
+  assert.equal(calls, 96);
+});
+test('batch refuses overfilled registry pages and never retries failed wire requests', async () => {
+  let calls = 0;
+  const t = transport({ contract: batchContract, nativeFetch: async () => { calls++; return Response.json({ success: true, data: Array(201).fill({ id: 'synthetic' }) }); } });
+  await t.run(operation(), async () => assert.rejects(t.fetch(registryUrl, registry())));
+  assert.equal(calls, 1);
+  const failed = transport({ contract: batchContract, nativeFetch: async () => { calls++; throw Error('synthetic transport failure'); } });
+  await failed.run(operation(), async () => assert.rejects(failed.fetch(tokenUrl, token())));
+  assert.equal(calls, 2);
+});
+test('batch refuses expired authorization and cannot use earlier attempt response', async () => {
+  let current = true, calls = 0;
+  const t = transport({ contract: batchContract, assertCurrent: () => assert.ok(current), nativeFetch: async () => { calls++; current = false; return new Response('{}'); } });
+  await t.run(operation(), async () => assert.rejects(t.fetch(tokenUrl, token())));
+  await assert.rejects(t.run(operation(), async () => {}));
+  assert.equal(calls, 1);
+});

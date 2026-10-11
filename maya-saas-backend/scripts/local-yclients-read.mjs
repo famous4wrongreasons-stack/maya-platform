@@ -17,6 +17,7 @@ import { PUBLIC_DIAGNOSTIC_PARTNER, diagnosticRuntimeCommand } from './local-ycl
 export { PUBLIC_DIAGNOSTIC_PARTNER };
 import { OWNER_CHAT_QUESTIONS } from './local-owner-chat-policy.mjs';
 import { createLocalTelegramReturn } from './local-telegram-return.mjs';
+import { OWNER_TELEGRAM_BATCH_PROFILE } from './local-owner-telegram-policy.mjs';
 
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repo = path.dirname(backend);
@@ -279,7 +280,10 @@ export function createReadWebServer(plan, runtimeEnv) {
     }
     if (request.method === 'GET' && request.url === '/__local-yclients-read') {
       response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-      response.end(plan.ownerTelegram ? '<!doctype html><meta charset="utf-8"><title>MAYA — Telegram</title><main><h1>Вход через Telegram и личная карточка</h1><p>До 10 минут. Войдите в сохранённый бизнес по паролю, свяжите свой Telegram, затем войдите через Telegram заново. Разрешено чтение реестра клиентов выбранного салона для точного сопоставления. Это может создать личную связь только в локальной базе.</p><p>Существующая история доступна только по действующим правам и настройкам. Импорт истории, изменение согласий, модель, SMS, сообщения и запись закрыты. Секреты в AChat не вводить.</p><a href="/">Открыть Maya</a></main>' : plan.ownerChat ? OWNER_CHAT_HTML : plan.diagnosticNoProvider ? DIAGNOSTIC_HTML : LANDING_HTML); return;
+      response.end(plan.ownerTelegram ? '<!doctype html><meta charset="utf-8"><title>MAYA — Telegram</title><main><h1>Вход через Telegram и личная карточка</h1><p>'
+        + (plan.ownerTelegramContract === OWNER_TELEGRAM_BATCH_PROFILE ? 'Одно окно до 30 минут, максимум три попытки входа через уже привязанный Telegram. Повторная привязка закрыта. '
+          : 'До 10 минут. Войдите в сохранённый бизнес по паролю, свяжите свой Telegram, затем войдите через Telegram заново. ')
+        + 'Разрешено чтение реестра клиентов выбранного салона для точного сопоставления. Это может создать личную связь только в локальной базе.</p><p>Существующая история доступна только по действующим правам и настройкам. Импорт истории, изменение согласий, модель, SMS, сообщения и запись закрыты. Секреты в AChat не вводить.</p><a href="/">Открыть Maya</a></main>' : plan.ownerChat ? OWNER_CHAT_HTML : plan.diagnosticNoProvider ? DIAGNOSTIC_HTML : LANDING_HTML); return;
     }
     for (const handler of handlers) handler.call(dev.server, request, response);
   });

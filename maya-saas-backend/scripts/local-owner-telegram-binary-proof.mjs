@@ -15,12 +15,14 @@ import { stage } from './local-onboarding.mjs';
 import { createDiagnostic, readSessionPlan, readSourceBinding, runReadRuntime } from './local-yclients-read.mjs';
 import { diagnosticSandboxPolicy } from './local-yclients-read-diagnostic.mjs';
 import { readOwnerTelegramLaunch } from './local-owner-telegram-launch.mjs';
-import { OWNER_TELEGRAM_PROFILE, OWNER_TELEGRAM_ADMISSION } from './local-owner-telegram-policy.mjs';
+import { OWNER_TELEGRAM_PROFILE, OWNER_TELEGRAM_BATCH_PROFILE, OWNER_TELEGRAM_ADMISSION } from './local-owner-telegram-policy.mjs';
+import { resumePlan } from './local-yclients-read-resume.mjs';
 
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(import.meta.url), output = process.argv[2];
 assert.equal(process.platform, 'darwin');
-assert.ok(process.argv.length === 3 && output && path.isAbsolute(output) && !fs.existsSync(output));
+const batch = process.argv[3] === '--batch';
+assert.ok((process.argv.length === 3 || (process.argv.length === 4 && batch)) && output && path.isAbsolute(output) && !fs.existsSync(output));
 const source = readSourceBinding(), hash = b => createHash('sha256').update(b).digest('hex');
 fs.mkdirSync(output, { mode: 0o700 });
 const state = fs.mkdtempSync('/private/tmp/maya-telegram-binary-'); fs.chmodSync(state, 0o700);
@@ -56,11 +58,17 @@ try {
   const encryption = new EncryptionService({ get: key => keys[key] });
   await prisma.crmIntegration.create({ data: { tenantId: tenant.id, provider: 'yclients', status: 'active', verifiedAt: new Date(), encryptedApiToken: encryption.encrypt('SYNTHETIC_USER_TOKEN_NOT_REAL'), settingsJson: { companyId: 12345, branchBinding: { contract: 'maya.crm-branch-binding/1', companyId: 12345, branchId: branch.id }, acceptedImportSnapshotHash: 'a'.repeat(64) } } });
   const scope = { stateDirectory: state, initialManifestSha256: '1'.repeat(64), privateStateSha256: '2'.repeat(64), restartReceiptPath: state + '/restart.json', restartReceiptSha256: '3'.repeat(64), tenantId: tenant.id, userId: owner.id, branchId: branch.id, tenantSlug: tenant.slug, companyId: '12345' };
-  const permit = { contract: OWNER_TELEGRAM_PROFILE, candidateCommit: source.head, sourceSha256: hash(JSON.stringify(source)), scope, origin, clientId: '123456789', notBefore: new Date().toISOString(), expiresAt: new Date(Date.now() + 180000).toISOString(), ownerApprovalRef: 'synthetic-binary-proof-not-owner-authorization' };
+  const permit = { contract: batch ? OWNER_TELEGRAM_BATCH_PROFILE : OWNER_TELEGRAM_PROFILE, candidateCommit: source.head, sourceSha256: hash(JSON.stringify(source)), scope, origin, clientId: '123456789', notBefore: new Date().toISOString(), expiresAt: new Date(Date.now() + (batch ? 1800000 : 180000)).toISOString(), ownerApprovalRef: 'synthetic-binary-proof-not-owner-authorization' };
+  if (batch) {
+    await prisma.authIdentity.create({ data: { tenantId: tenant.id, userId: owner.id, provider: 'telegram', providerUserId: 'synthetic-saved-owner' } });
+    plan.durationMs = resumePlan(env, state, pgBin, 30, output, false, false, permit.contract).durationMs;
+    assert.equal(plan.durationMs, 1800000);
+  }
   const permitPath = path.join(state, 'plan.json'), bytes = JSON.stringify(permit), pin = hash(bytes);
   fs.writeFileSync(permitPath, bytes, { mode: 0o600, flag: 'wx' });
   readOwnerTelegramLaunch(permitPath, pin, permit.ownerApprovalRef, readSourceBinding, 'claim');
-  plan.ownerTelegram = true; plan.executionExpiresAt = permit.expiresAt; plan.providerAdmission = OWNER_TELEGRAM_ADMISSION;
+  plan.ownerTelegram = true; plan.ownerTelegramContract = permit.contract; plan.executionExpiresAt = permit.expiresAt; plan.providerAdmission = OWNER_TELEGRAM_ADMISSION;
+  report.ownerTelegramContract = permit.contract;
   const childArgs = [...plan.runtime.args, '--owner-telegram-plan', permitPath, pin, permit.ownerApprovalRef];
   plan.runtime = { ...plan.runtime, command: '/usr/bin/sandbox-exec', args: ['-p', diagnosticSandboxPolicy(pgPort, apiPort), process.execPath, ...childArgs] };
   const runtimeEnv = realReadEnvironment(process.env, options, 'SYNTHETIC_PARTNER_NOT_REAL');
@@ -70,6 +78,10 @@ try {
   const until = Date.now() + 60000;
   while (report.status !== 'ready') { if (failure) throw failure; assert.ok(Date.now() < until, 'binary_readiness_deadline'); await delay(50); }
   report.checks.push('actual-child-ipc-web-ready');
+  assert.ok(Date.parse(report.expiresAt) <= Date.parse(permit.expiresAt));
+  assert.equal(Object.hasOwn(runtimeEnv, 'YCLIENTS_PARTNER_TOKEN'), false);
+  assert.equal(Object.hasOwn(runtimeEnv, 'TELEGRAM_CLIENT_SECRET'), false);
+  report.checks.push('deadline-clipped-and-parent-credentials-discarded');
   const request = (route, body, token) => fetch(origin + route, { method: body === undefined ? 'GET' : 'POST', headers: { origin, ...(body === undefined ? {} : { 'content-type': 'application/json' }), ...(token ? { authorization: 'Bearer ' + token } : {}) }, ...(body === undefined ? {} : { body: JSON.stringify(body) }), signal: AbortSignal.timeout(10000), redirect: 'error' });
   assert.equal((await request('/api/health')).status, 200); report.checks.push('health-through-actual-relay');
   const finder = await request('/api/mobile/pwa/search?q=' + encodeURIComponent(tenant.slug));
@@ -92,12 +104,23 @@ try {
   const login = await request('/api/auth/login', { tenantSlug: tenant.slug, email, password: ownerPassword }); assert.equal(login.status, 201);
   const session = await login.json(); assert.equal(session.user.id, owner.id); report.checks.push('canonical-password-session');
   const link = await request('/api/auth/oauth/telegram/link/start', { platform: 'web', redirectUri: origin + '/oauth-callback.html' }, session.access_token);
-  assert.equal(link.status, 201); const startedLink = await link.json(); assert.match(startedLink.state, /^te_/); report.checks.push('canonical-telegram-link-start-no-provider-dispatch');
-  const refusedLink = await request('/api/auth/oauth/telegram/link/complete', { state: 'te_synthetic_unknown_state', code: 'synthetic-code' }, session.access_token);
+  if (batch) {
+    assert.equal(link.status, 403); report.checks.push('batch-relink-refused');
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const startedLogin = await request('/api/auth/oauth/telegram/start', { tenantSlug: tenant.slug, platform: 'web', redirectUri: origin + '/oauth-callback.html' });
+      assert.equal(startedLogin.status, 201);
+    }
+    assert.equal((await request('/api/auth/oauth/telegram/start', { tenantSlug: tenant.slug, platform: 'web', redirectUri: origin + '/oauth-callback.html' })).status, 403);
+    report.checks.push('batch-exactly-three-saved-login-starts-fourth-refused');
+  } else {
+    assert.equal(link.status, 201); const startedLink = await link.json(); assert.match(startedLink.state, /^te_/); report.checks.push('canonical-telegram-link-start-no-provider-dispatch');
+  }
+  const completedRoute = batch ? 'telegram_login_complete' : 'telegram_link_complete';
+  const refusedLink = await request(batch ? '/api/auth/oauth/telegram/complete' : '/api/auth/oauth/telegram/link/complete', { state: 'te_synthetic_unknown_state', code: 'synthetic-code' }, session.access_token);
   assert.equal(refusedLink.status, 403);
   const traceUntil = Date.now() + 5000;
-  while (!report.diagnostic.readTrace.some(e => e.route === 'telegram_link_complete' && e.stage === 'refused')) { assert.ok(Date.now() < traceUntil, 'closed_trace_receipt_deadline'); await delay(20); }
-  assert.ok(report.diagnostic.readTrace.some(e => e.route === 'telegram_link_complete' && e.status === 403 && e.code === 'local_owner_telegram_scope_refused'));
+  while (!report.diagnostic.readTrace.some(e => e.route === completedRoute && e.stage === 'refused')) { assert.ok(Date.now() < traceUntil, 'closed_trace_receipt_deadline'); await delay(20); }
+  assert.ok(report.diagnostic.readTrace.some(e => e.route === completedRoute && e.status === 403 && e.code === 'local_owner_telegram_scope_refused'));
   report.checks.push('canonical-telegram-refusal-through-child-ipc-safe-receipt');
   for (const route of ['/api/ai/chat', '/api/widgets/intent', '/api/integrations/crm/activate', '/api/client-channel/consent', '/api/auth/phone/start']) assert.equal((await request(route, {}, session.access_token)).status, 403);
   report.checks.push('business-model-sms-consent-routes-refused');

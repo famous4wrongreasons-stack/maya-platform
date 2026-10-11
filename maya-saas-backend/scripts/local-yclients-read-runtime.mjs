@@ -102,7 +102,7 @@ export async function start() {
       const boundary = localBrowserBoundary(request.headers, origin, `127.0.0.1:${process.env.PORT}`);
       const diagnosticRoute = request.method === 'GET' && ['/api/health', '/api/health/ready'].includes(request.originalUrl);
       const reason = !boundary ? 'local_onboarding_origin_refused' : telegramLaunch
-        ? ownerTelegramIngress(request.method, request.originalUrl, request.headers, request.body, origin, telegramLaunch.plan.scope) : chatLaunch
+        ? ownerTelegramIngress(request.method, request.originalUrl, request.headers, request.body, origin, telegramLaunch.plan.scope, telegramLaunch.plan.contract) : chatLaunch
         ? ownerChatIngress(request.method, request.originalUrl, request.headers, request.body, origin, chatLaunch.manifest.ownerScope)
         : diagnostic ? (diagnosticRoute ? null : 'local_yclients_diagnostic_route_disabled') : realReadIngress(request.method, request.originalUrl, request.headers, request.body, origin, allowUserAuth);
       traceHttpRequest(request, response, trace, reason);

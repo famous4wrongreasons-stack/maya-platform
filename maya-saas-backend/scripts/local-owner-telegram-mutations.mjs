@@ -41,6 +41,9 @@ const mutations = [
   ['candidate-substitution', 'launch', 'plan.candidateCommit === source.head', 'true', 'changed candidate'],
   ['source-substitution', 'launch', 'plan.sourceSha256 === digest(JSON.stringify(source))', 'true', 'changed source'],
   ['expired-permit', 'launch', 'now < end', 'true', 'execution plan refuses expired'],
+  ['batch-unlimited-attempts', 'transport', 'attempts < limits.attempts', 'true', 'batch consumes failures'],
+  ['batch-relink', 'transport', "operation.purpose === 'login' && attempts", 'true && attempts', 'batch consumes failures'],
+  ['batch-overfilled-page', 'transport', 'parsed.data.length > 200', 'false', 'batch refuses overfilled'],
 ];
 try {
   report.baseline = run('baseline'); save(); assert.equal(report.baseline.exit, 0);

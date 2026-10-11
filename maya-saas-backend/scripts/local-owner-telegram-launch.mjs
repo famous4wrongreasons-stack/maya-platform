@@ -7,13 +7,14 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { assertPrivateCwd } from './local-onboarding-profile.mjs';
 import { assertOwnerChatScope } from './local-owner-scope.mjs';
-import { OWNER_TELEGRAM_PROFILE, assertTelegramOrigin, exactObject } from './local-owner-telegram-policy.mjs';
+import { ownerTelegramLimits, assertTelegramOrigin, exactObject } from './local-owner-telegram-policy.mjs';
 
 const digest = b => createHash('sha256').update(b).digest('hex');
 const sha = v => typeof v === 'string' && /^[a-f0-9]{64}$/.test(v);
 export function assertOwnerTelegramPlan(plan, source, approvalRef, now = Date.now()) {
   assert.ok(exactObject(plan, ['contract', 'candidateCommit', 'sourceSha256', 'scope', 'origin', 'clientId', 'notBefore', 'expiresAt', 'ownerApprovalRef']), 'local_telegram_plan_shape');
-  assert.ok(plan.contract === OWNER_TELEGRAM_PROFILE && /^[a-f0-9]{40}$/.test(plan.candidateCommit)
+  ownerTelegramLimits(plan.contract);
+  assert.ok(typeof plan.contract === 'string' && /^[a-f0-9]{40}$/.test(plan.candidateCommit)
     && plan.candidateCommit === source.head && sha(plan.sourceSha256)
     && plan.sourceSha256 === digest(JSON.stringify(source)), 'local_telegram_source_pin');
   assertOwnerChatScope(plan.scope); assertTelegramOrigin(plan.origin);
@@ -43,7 +44,7 @@ export function readOwnerTelegramLaunch(filename, hash, approvalRef, readSource,
   const plan = readPlan(filename, hash), source = readSource();
   assertOwnerTelegramPlan(plan, source, approvalRef);
   const used = filename + '.consumed';
-  const expected = JSON.stringify({ contract: OWNER_TELEGRAM_PROFILE, planSha256: hash, ownerApprovalRef: approvalRef });
+  const expected = JSON.stringify({ contract: plan.contract, planSha256: hash, ownerApprovalRef: approvalRef });
   const assertClaim = () => {
     const fd = fs.openSync(used, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW | fs.constants.O_NONBLOCK);
     try {

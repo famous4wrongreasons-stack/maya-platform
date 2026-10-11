@@ -17,4 +17,7 @@ export function ownerTelegramIngress(
   body: unknown,
   origin: string,
   scope: OwnerTelegramScope,
+  contract?: string,
 ): string | null;
+export const OWNER_TELEGRAM_PROFILE: string;
+export const OWNER_TELEGRAM_BATCH_PROFILE: string;

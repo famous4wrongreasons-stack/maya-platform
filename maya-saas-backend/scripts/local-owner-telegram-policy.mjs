@@ -4,9 +4,15 @@ import { assertOwnerChatScope } from './local-owner-scope.mjs';
 import { ingressDecision } from './local-onboarding-profile.mjs';
 
 export const OWNER_TELEGRAM_PROFILE = 'owner_telegram_personal_read_v1';
+export const OWNER_TELEGRAM_BATCH_PROFILE = 'owner_telegram_saved_login_batch_v2';
 export const OWNER_TELEGRAM_ADMISSION = 'explicit_owner_telegram_and_initial_client_read';
 export const TELEGRAM_LIMITS = Object.freeze({ sessionMs: 600000, operationMs: 120000,
   fetchMs: 20000, responseBytes: 2 * 1024 * 1024, calls: 128, registryPages: 32, starts: 4 });
+const BATCH_LIMITS = Object.freeze({ ...TELEGRAM_LIMITS, sessionMs: 1800000, starts: 3, attempts: 3 });
+export function ownerTelegramLimits(contract = OWNER_TELEGRAM_PROFILE) {
+  assert.ok([OWNER_TELEGRAM_PROFILE, OWNER_TELEGRAM_BATCH_PROFILE].includes(contract), 'local_telegram_contract');
+  return contract === OWNER_TELEGRAM_BATCH_PROFILE ? BATCH_LIMITS : TELEGRAM_LIMITS;
+}
 export const exactObject = (v, keys) => v !== null && typeof v === 'object' && !Array.isArray(v)
   && Object.keys(v).length === keys.length && keys.every(k => Object.hasOwn(v, k));
 const text = (v, n) => typeof v === 'string' && v.length > 0 && v.length <= n && !/[\r\n\0]/.test(v);
@@ -15,8 +21,10 @@ export function assertTelegramOrigin(value) {
   assert.ok(u.origin === value && u.protocol === 'http:' && u.hostname === '127.0.0.1'
     && Number(u.port) > 1024 && Number(u.port) <= 65535 && !u.username && !u.password, 'local_telegram_origin');
 }
-export function ownerTelegramIngress(method, route, headers, body, origin, scope) {
+export function ownerTelegramIngress(method, route, headers, body, origin, scope, contract = OWNER_TELEGRAM_PROFILE) {
   assertOwnerChatScope(scope); assertTelegramOrigin(origin);
+  ownerTelegramLimits(contract);
+  if (contract === OWNER_TELEGRAM_BATCH_PROFILE && route.startsWith('/api/auth/oauth/telegram/link/')) return 'local_telegram_route_refused';
   if (headers.origin && headers.origin !== origin) return 'local_telegram_origin_refused';
   if (method === 'GET') {
     if (['/api/health', '/api/health/ready', '/api/branches', '/api/integrations/crm',

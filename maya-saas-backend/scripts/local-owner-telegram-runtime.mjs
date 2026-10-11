@@ -4,12 +4,13 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { assertOwnerChatActor } from './local-owner-scope.mjs';
 import { verifyOwnerChatDatabase } from './local-owner-scope.mjs';
 import { createOwnerTelegramTransport } from './local-owner-telegram-transport.mjs';
-import { TELEGRAM_LIMITS } from './local-owner-telegram-policy.mjs';
+import { ownerTelegramLimits } from './local-owner-telegram-policy.mjs';
 
 // Restrictions around existing owners, installed only by the separately
 // admitted local mode. No fake sessions, identity writer or fixture injection.
 export async function installOwnerTelegram({ app, prisma, require, backend, launch, nativeFetch, trace }) {
   const scope = launch.plan.scope, origin = launch.plan.origin;
+  const limits = ownerTelegramLimits(launch.plan.contract);
   const load = p => require(path.join(backend, 'dist/src', p));
   const { ConfigService } = require('@nestjs/config');
   const { ForbiddenException } = require('@nestjs/common');
@@ -31,7 +32,7 @@ export async function installOwnerTelegram({ app, prisma, require, backend, laun
   const actor = async user => { await current(); try { assertOwnerChatActor(user, scope); } catch { return refuse(); } };
   await current();
   const transport = createOwnerTelegramTransport({ nativeFetch, clientId: launch.plan.clientId,
-    companyId: scope.companyId, assertCurrent: launch.assertCurrent, verifyCurrent: current, trace });
+    companyId: scope.companyId, assertCurrent: launch.assertCurrent, verifyCurrent: current, trace, contract: launch.plan.contract });
   const patch = (object, name, wrapper) => {
     assert.equal(typeof object[name], 'function', 'local_telegram_canonical_owner_missing');
     const original = object[name]; object[name] = wrapper(original.bind(object)); undo.push(() => { object[name] = original; });
@@ -49,23 +50,27 @@ export async function installOwnerTelegram({ app, prisma, require, backend, laun
       await current(); if (!forOwner(user)) return refuse(); return original(user, ...rest);
     });
     patch(social, 'startTelegramLink', original => async (dto, user, ...rest) => {
+      if (limits.attempts !== undefined) return refuse();
       await actor(user); return startContext.run('link', () => original(dto, user, ...rest));
     });
     patch(social, 'startTelegramLogin', original => async (dto, ...rest) => {
       await current();
       if (dto.tenantSlug !== scope.tenantSlug || dto.platform !== 'web' || dto.redirectUri !== origin + '/oauth-callback.html'
-        || starts >= TELEGRAM_LIMITS.starts) return refuse();
+        || starts >= limits.starts) return refuse();
       const purpose = startContext.getStore() === 'link' ? 'link' : 'login';
       // Starting a fresh sign-in is allowed only after the canonical A23 link
       // exists for this selected account. Stored phone alone never qualifies.
       if (purpose === 'login' && !await prisma.authIdentity.findFirst({ where: { provider: 'telegram', userId: scope.userId }, select: { id: true } })) return refuse();
+      // Reserve synchronously after the awaited identity read as well: parallel
+      // starts may all have passed the earlier check before any was counted.
+      if (starts >= limits.starts) return refuse();
       starts++;
       const result = await original(dto, ...rest); await current();
       states.set(result.state, purpose); return result;
     });
     for (const [method, purpose] of [['completeTelegramLink', 'link'], ['completeTelegramLogin', 'login']])
       patch(social, method, original => async (dto, ...rest) => {
-        await current(); if (purpose === 'link') await actor(rest[0]);
+        await current(); if (purpose === 'link') { if (limits.attempts !== undefined) return refuse(); await actor(rest[0]); }
         if (states.get(dto.state) !== purpose) return refuse();
         states.delete(dto.state); // No replay, concurrent winner or purpose substitution.
         const flow = await social.getValidAuthFlowState(dto.state, 'telegram');

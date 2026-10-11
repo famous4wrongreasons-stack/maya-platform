@@ -16,13 +16,20 @@ import { CalendarSource, UserRole } from '../../src/common/domain.enums';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import { bootHttp, type HttpHarness } from './support/http-bootstrap';
 import { Fixtures } from './support/fixtures';
-import { resetLoopbackOauthPreflight } from './support/login-rate-limit';
+import {
+  resetLoopbackOauthPreflight,
+  resetLoopbackOauthCompletionPreflight,
+} from './support/login-rate-limit';
 
 const nativeRequire = createRequire(__filename);
 const { installOwnerTelegram } = nativeRequire(
   path.resolve('scripts/local-owner-telegram-runtime.mjs'),
 ) as typeof import('../../scripts/local-owner-telegram-runtime.mjs');
-const { ownerTelegramIngress } = nativeRequire(
+const {
+  ownerTelegramIngress,
+  OWNER_TELEGRAM_PROFILE,
+  OWNER_TELEGRAM_BATCH_PROFILE,
+} = nativeRequire(
   path.resolve('scripts/local-owner-telegram-policy.mjs'),
 ) as typeof import('../../scripts/local-owner-telegram-policy.mjs');
 type LocalReadEvent = {
@@ -66,6 +73,7 @@ const pair = generateKeyPairSync('rsa', { modulusLength: 2048 });
 const jwk = pair.publicKey.export({ format: 'jwk' });
 
 describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () => {
+  let launchContract = OWNER_TELEGRAM_PROFILE;
   let db: FixtureContext, http: HttpHarness, fx: Fixtures;
   let runtime: Awaited<ReturnType<typeof installOwnerTelegram>>;
   let tenant: Awaited<ReturnType<Fixtures['tenant']>>;
@@ -142,6 +150,7 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
     ] as const)
       await fx.grantFeature(tenant, feature);
     await resetLoopbackOauthPreflight(db.prisma);
+    await resetLoopbackOauthCompletionPreflight(db.prisma);
     const scope = {
       stateDirectory: '/private/tmp/synthetic-telegram-state',
       initialManifestSha256: '1'.repeat(64),
@@ -235,6 +244,15 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
         });
       throw new Error('Unlisted external wire request');
     };
+    if (launchContract === OWNER_TELEGRAM_BATCH_PROFILE)
+      await db.prisma.authIdentity.create({
+        data: {
+          tenantId: tenant.id,
+          userId: owner.id,
+          provider: 'telegram',
+          providerUserId: subject,
+        },
+      });
     http = await bootHttp(undefined, async (app) => {
       // Match the retained stage-0 environment; a generic test default would
       // hide the real finder refusal observed after a successful owner link.
@@ -251,7 +269,7 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
         require: currentClassLoader,
         backend: process.cwd(),
         launch: {
-          plan: { scope, origin, clientId },
+          plan: { scope, origin, clientId, contract: launchContract },
           assertCurrent() {
             if (expired)
               throw new ForbiddenException('Synthetic execution window closed');
@@ -274,6 +292,7 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
           req.body,
           origin,
           scope,
+          launchContract,
         );
         traceHttpRequest(req, res, emitHttp, reason);
         if (reason) {
@@ -328,6 +347,147 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
     expect(r.status).toBe(201);
     return token;
   }
+  describe('approved saved-login batch', () => {
+    beforeAll(() => {
+      launchContract = OWNER_TELEGRAM_BATCH_PROFILE;
+    });
+    afterAll(() => {
+      launchContract = OWNER_TELEGRAM_PROFILE;
+    });
+    it('two failures then a fresh login bind once with the same in-memory provider setup; fourth start refused', async () => {
+      tokenReply = 'http401';
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const state = await start(false);
+        const failed = await post('auth/oauth/telegram/complete', {
+          state,
+          code: 'synthetic-code',
+        });
+        expect(failed.status).toBe(400);
+      }
+      tokenReply = 'signed';
+      const state = await start(false);
+      const result = await post('auth/oauth/telegram/complete', {
+        state,
+        code: 'synthetic-code',
+      });
+      expect(result.status).toBe(201);
+      expect(
+        (result.body as { client_binding: { status: string } }).client_binding
+          .status,
+      ).toBe('linked');
+      expect(runtime.counters.routes.telegram_token).toBe(3);
+      expect(runtime.counters.routes.client_registry).toBe(1);
+      expect(
+        await db.prisma.clientChannelLink.count({
+          where: { tenantId: tenant.id },
+        }),
+      ).toBe(1);
+      expect(
+        await db.prisma.authIdentity.count({ where: { tenantId: tenant.id } }),
+      ).toBe(1);
+      const fourth = await post('auth/oauth/telegram/start', {
+        tenantSlug: tenant.slug,
+        platform: 'web',
+        redirectUri: origin + '/oauth-callback.html',
+      });
+      expect(fourth.status).toBe(403);
+    });
+    it('concurrent and replayed completion never reuse an exchange or create a second binding', async () => {
+      const state = await start(false),
+        body = { state, code: 'synthetic-code' };
+      const results = await Promise.all([
+        post('auth/oauth/telegram/complete', body),
+        post('auth/oauth/telegram/complete', body),
+      ]);
+      expect(results.map((r) => r.status).sort()).toEqual([201, 403]);
+      expect((await post('auth/oauth/telegram/complete', body)).status).toBe(
+        403,
+      );
+      expect(runtime.counters.routes.telegram_token).toBe(1);
+      expect(
+        await db.prisma.clientChannelLink.count({
+          where: { tenantId: tenant.id },
+        }),
+      ).toBe(1);
+    });
+    it('re-linking, foreign tenant and expired permit remain refused', async () => {
+      const token = await ownerToken();
+      const relink = await post(
+        'auth/oauth/telegram/link/start',
+        { platform: 'web', redirectUri: origin + '/oauth-callback.html' },
+        token,
+      );
+      expect(relink.status).toBe(403);
+      expect(
+        (
+          await post('auth/oauth/telegram/start', {
+            tenantSlug: 'foreign',
+            platform: 'web',
+            redirectUri: origin + '/oauth-callback.html',
+          })
+        ).status,
+      ).toBe(403);
+      expired = true;
+      expect(
+        (
+          await post('auth/oauth/telegram/start', {
+            tenantSlug: tenant.slug,
+            platform: 'web',
+            redirectUri: origin + '/oauth-callback.html',
+          })
+        ).status,
+      ).toBe(403);
+      expect(dispatches).toBe(0);
+    });
+    it('saved identity is mandatory and no account is silently re-linked', async () => {
+      await db.prisma.authIdentity.deleteMany({
+        where: { tenantId: tenant.id },
+      });
+      expect(
+        (
+          await post('auth/oauth/telegram/start', {
+            tenantSlug: tenant.slug,
+            platform: 'web',
+            redirectUri: origin + '/oauth-callback.html',
+          })
+        ).status,
+      ).toBe(403);
+      expect(dispatches).toBe(0);
+    });
+    it('four simultaneous starts can reserve only three attempts', async () => {
+      const identities = http.app.get(PrismaService).authIdentity;
+      const original = identities.findFirst.bind(identities);
+      let entered = 0,
+        release!: () => void;
+      const barrier = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      // This barrier only models the awaited lookup, not Prisma's fluent relations.
+      const lookup: {
+        findFirst: (
+          args?: Parameters<typeof original>[0],
+        ) => PromiseLike<Awaited<ReturnType<typeof original>>>;
+      } = identities;
+      jest.spyOn(lookup, 'findFirst').mockImplementation(async (args) => {
+        entered++;
+        if (entered === 4) release();
+        await barrier;
+        return original(args);
+      });
+      const body = {
+        tenantSlug: tenant.slug,
+        platform: 'web',
+        redirectUri: origin + '/oauth-callback.html',
+      };
+      const results = await Promise.all(
+        Array.from({ length: 4 }, () =>
+          post('auth/oauth/telegram/start', body),
+        ),
+      );
+      expect(results.map((r) => r.status).sort()).toEqual([201, 201, 201, 403]);
+      expect(dispatches).toBe(0);
+    });
+  });
   it.each([
     ['http401', 401, 'social_exchange_failed', undefined],
     ['missing', 200, 'social_exchange_failed', 'missing_id_token'],

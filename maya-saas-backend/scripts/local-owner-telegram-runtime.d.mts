@@ -18,7 +18,7 @@ export function installOwnerTelegram(options: {
   require: (id: string) => unknown;
   backend: string;
   launch: {
-    plan: { scope: OwnerTelegramScope; origin: string; clientId: string };
+    plan: { scope: OwnerTelegramScope; origin: string; clientId: string; contract?: string };
     assertCurrent: () => void;
   };
   nativeFetch: (raw: string | URL, init?: RequestInit) => Promise<Response>;

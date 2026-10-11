@@ -15,7 +15,7 @@ import { createDiagnostic, diagnosticFailure, diagnosticStage, promptPartnerToke
 import { readOwnerChatLaunch } from './local-owner-chat-launch.mjs';
 import { startCoreBroker } from './conversation-qualification/core-conversation-broker.mjs';
 import { readOwnerTelegramLaunch } from './local-owner-telegram-launch.mjs';
-import { OWNER_TELEGRAM_ADMISSION } from './local-owner-telegram-policy.mjs';
+import { OWNER_TELEGRAM_ADMISSION, OWNER_TELEGRAM_BATCH_PROFILE, ownerTelegramLimits } from './local-owner-telegram-policy.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -107,13 +107,21 @@ function verifyHistoricalGitSource(initial, candidate, approvedCommit) {
   assert.ok(jsonEqual(historicalSchema, initial.files.map(row => row.path).filter(schemaPath).sort()), 'historical_schema_capture_incomplete');
 }
 
-export function resumePlan(env, state, pgBin, minutes, output, diagnosticNoProvider = false, allowUserAuth = false) {
-  assert.ok(Number.isSafeInteger(minutes) && minutes >= 1 && minutes <= 15, 'session_window_refused');
+export function resumePlan(env, state, pgBin, minutes, output, diagnosticNoProvider = false, allowUserAuth = false, telegramContract = null) {
+  const batch = telegramContract === OWNER_TELEGRAM_BATCH_PROFILE;
+  if (telegramContract !== null) {
+    const limits = ownerTelegramLimits(telegramContract);
+    assert.ok(!diagnosticNoProvider && !allowUserAuth && minutes * 60000 === limits.sessionMs, 'local_telegram_mode_refused');
+  }
+  assert.ok(Number.isSafeInteger(minutes) && minutes >= 1 && (batch ? minutes === 30 : minutes <= 15), 'session_window_refused');
   assertProfileEnvironment(env);
   assert.ok(env.MAYA_LOCAL_ONBOARDING_STATE === state, 'saved_state_mismatch');
   assert.ok(typeof output === 'string' && path.isAbsolute(output) && output !== state && !output.startsWith(state + path.sep), 'separate_output_required');
   const db = new URL(env.DATABASE_URL), web = new URL(env.CORS_ALLOWED_ORIGINS);
-  const plan = readSessionPlan({ stateDirectory: state, pgBin, database: db.pathname.slice(1), pgPort: Number(db.port), apiPort: Number(env.PORT), webPort: Number(web.port), minutes, diagnosticNoProvider });
+  const plan = readSessionPlan({ stateDirectory: state, pgBin, database: db.pathname.slice(1), pgPort: Number(db.port), apiPort: Number(env.PORT), webPort: Number(web.port), minutes: batch ? 10 : minutes, diagnosticNoProvider });
+  // Only this separately pinned saved-login contract admits a 30-minute runtime.
+  // Generic setup, chat, diagnostics and the historical Telegram mode keep their bounds.
+  if (batch) plan.durationMs = ownerTelegramLimits(telegramContract).sessionMs;
   // Compiling the explicitly approved candidate does not migrate the retained DB.
   const setup = plan.setup.filter(spec => ['backend-build', 'react-build', 'pg-start'].includes(spec.name)).map(spec => {
     if (spec.name !== 'pg-start') return spec;
@@ -230,7 +238,8 @@ export async function main(args) {
   assert.equal(Boolean(values['owner-telegram-plan']), Boolean(values['owner-approval-ref']), 'local_telegram_approval_pair');
   const telegramArgs = [values['owner-telegram-plan'], values['owner-telegram-plan-sha256'], values['owner-approval-ref'], readSourceBinding];
   const telegramLaunch = values['owner-telegram-plan'] ? readOwnerTelegramLaunch(...telegramArgs) : null;
-  assert.ok(!telegramLaunch || (!chatLaunch && !diagnosticNoProvider && !allowUserAuth && Number(values.minutes) === 10), 'local_telegram_mode_refused');
+  assert.ok(!telegramLaunch || (!chatLaunch && !diagnosticNoProvider && !allowUserAuth
+    && Number(values.minutes) * 60000 === ownerTelegramLimits(telegramLaunch.plan.contract).sessionMs), 'local_telegram_mode_refused');
   assert.ok(!chatLaunch || (!diagnosticNoProvider && !allowUserAuth && Number(values.minutes) === 10), 'owner_chat_mode_refused');
   assert.ok(!diagnosticNoProvider || !allowUserAuth);
   if (!diagnosticNoProvider) { assert.equal(process.stdin.isTTY, true, 'owner_terminal_required'); assert.equal(process.stderr.isTTY, true, 'owner_terminal_required'); }
@@ -253,14 +262,14 @@ export async function main(args) {
   const env = privateState.environment; assertProfileEnvironment(env);
   assert.ok(initial.landingUrl === env.CORS_ALLOWED_ORIGINS + '/__local-onboarding' && receipt.landingUrl === initial.landingUrl, 'saved_origin_mismatch');
   const output = externalStatePath(values.output, repo);
-  const plan = resumePlan(env, state, values['pg-bin'], Number(values.minutes), output, diagnosticNoProvider, allowUserAuth);
+  const plan = resumePlan(env, state, values['pg-bin'], Number(values.minutes), output, diagnosticNoProvider, allowUserAuth, telegramLaunch?.plan.contract ?? null);
   if (telegramLaunch) {
     const tp = telegramLaunch.plan, scope = tp.scope;
     assert.ok(scope.stateDirectory === state && scope.restartReceiptPath === receiptPath
       && scope.initialManifestSha256 === pins.initial && scope.privateStateSha256 === pins.privateState
       && scope.restartReceiptSha256 === pins.receipt && tp.candidateCommit === source.head
       && tp.origin === env.CORS_ALLOWED_ORIGINS, 'local_telegram_saved_state_binding');
-    plan.ownerTelegram = true; plan.executionExpiresAt = tp.expiresAt;
+    plan.ownerTelegram = true; plan.ownerTelegramContract = tp.contract; plan.executionExpiresAt = tp.expiresAt;
     plan.providerAdmission = OWNER_TELEGRAM_ADMISSION;
     plan.runtime.args.push('--owner-telegram-plan', ...telegramArgs.slice(0, 3));
   }
@@ -279,7 +288,7 @@ export async function main(args) {
   assertClusterStopped(state); const pgpassHash = checkPgpass(state, env);
   for (const name of ['pg_ctl', 'pg_controldata', 'psql']) fs.accessSync(path.join(values['pg-bin'], name), fs.constants.X_OK);
   const claim = claimResume(state, { contract: 'maya.local-yclients-read-resume-claim/1', pid: process.pid, initialManifestSha256: pins.initial, restartReceiptSha256: pins.receipt, approvedSource: source.head });
-  let report, save, broker, attempted = false, timer, failed = false, phase = 'preflight', runtimeEnv, systemIdentity;
+  let report, save, broker, attempted = false, timer, executionTimer, failed = false, phase = 'preflight', runtimeEnv, systemIdentity;
   const control = { cancelled: null, terminate: null };
   const cancel = signal => { control.cancelled ??= signal; control.terminate?.(); };
   const int = () => cancel('SIGINT'), term = () => cancel('SIGTERM');
@@ -291,9 +300,11 @@ export async function main(args) {
       source, initialSourceHead: initial.source.head, initialManifestSha256: pins.initial, completedRestartSha256: pins.receipt,
       stateDirectory: state, ownedCluster: plan.cluster, samePrivateState: true, completed: [], resources: initial.resources,
       privateStateRetained: true, partnerTokenPersistence: false, executesNoInitdbMigrationSeedOrSignup: true,
+      ...(telegramLaunch ? { ownerTelegramContract: telegramLaunch.plan.contract, maxLoginAttempts: ownerTelegramLimits(telegramLaunch.plan.contract).attempts ?? null } : {}),
       diagnostic: createDiagnostic(diagnosticNoProvider) };
     save = () => fs.writeFileSync(path.join(output, 'resume.json'), JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
     save(); process.on('SIGINT', int); process.on('SIGTERM', term);
+    if (telegramLaunch) executionTimer = setTimeout(() => cancel('EXECUTION_DEADLINE'), Math.max(1, Date.parse(telegramLaunch.plan.expiresAt) - Date.now()));
     assert.ok(inputsUnchanged(), 'resume_inputs_changed'); assertClusterStopped(state);
     systemIdentity = stoppedSystemIdentity(values['pg-bin'], state);
     timer = setTimeout(() => cancel('PREPARATION_DEADLINE'), plan.preparationDeadlineMs);
@@ -317,7 +328,9 @@ export async function main(args) {
     if (!diagnosticNoProvider) {
       const abort = new AbortController(); control.terminate = () => abort.abort();
       report.status = 'waiting_input'; diagnosticStage(report.diagnostic, 'waiting_input'); save();
-      process.stdout.write('Same-database preparation ready. Owner input is required in this terminal; the 1–15 minute web session starts only after backend and web readiness.\n');
+      process.stdout.write(telegramLaunch?.plan.contract === OWNER_TELEGRAM_BATCH_PROFILE
+        ? 'Same-database preparation ready. Enter each key once in this terminal. Saved Telegram login only: at most 3 attempts, within the approved 30-minute window.\n'
+        : 'Same-database preparation ready. Owner input is required in this terminal; the 1–15 minute web session starts only after backend and web readiness.\n');
       partner = await promptPartnerToken({ timeoutMs: plan.promptDeadlineMs, signal: abort.signal });
       control.terminate = null;
     }
@@ -350,7 +363,7 @@ export async function main(args) {
     // The claim is released even if a diagnostic projection or evidence write
     // fails. Never signal a replacement directory/system during cleanup.
     try {
-      clearTimeout(timer); control.terminate = null;
+      clearTimeout(timer); clearTimeout(executionTimer); control.terminate = null;
       phase = 'stopping';
       try { await broker?.stop('owner_read_session_stopped'); }
       catch { failed = true; if (report) diagnosticFailure(report.diagnostic, 'cleanup_failed', { cleanup: true }); }

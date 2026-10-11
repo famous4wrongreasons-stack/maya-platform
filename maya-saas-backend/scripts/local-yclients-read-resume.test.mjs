@@ -200,3 +200,16 @@ test('same-database resume explicitly opts into user auth without changing saved
   assert.throws(()=>resumeEnvironment(saved,partner,true,true));
   assert.throws(()=>resumePlan(saved,state,'/owned/bin',15,output,true,true));
 });
+
+test('30-minute resume is exclusive to pinned saved-login batch; generic and V1 bounds unchanged', () => {
+  const env = savedEnvironment(), v2 = 'owner_telegram_saved_login_batch_v2';
+  const p = resumePlan(env, state, '/owned/bin', 30, output, false, false, v2);
+  assert.equal(p.durationMs, 1800000);
+  assert.deepEqual(p.setup.map(s => s.name), ['backend-build', 'react-build', 'pg-start']);
+  for (const [minutes, diagnostic, auth, contract] of [
+    [30, false, false, null], [30, false, false, 'owner_telegram_personal_read_v1'],
+    [30, true, false, v2], [30, false, true, v2], [31, false, false, v2],
+    [15, false, false, v2], [30, false, false, 'unknown'],
+  ]) assert.throws(() => resumePlan(env, state, '/owned/bin', minutes, output, diagnostic, auth, contract));
+  assert.equal(resumePlan(env, state, '/owned/bin', 10, output, false, false, 'owner_telegram_personal_read_v1').durationMs, 600000);
+});

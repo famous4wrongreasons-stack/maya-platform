@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { TELEGRAM_LIMITS, telegramProviderRoute } from './local-owner-telegram-policy.mjs';
+import { TELEGRAM_LIMITS, OWNER_TELEGRAM_PROFILE, ownerTelegramLimits, telegramProviderRoute } from './local-owner-telegram-policy.mjs';
 
 // Reuses the real adapter and cryptographic verifier. Only tests inject wire
 // replies. Only closed route/stage/status codes enter diagnostics; no body,
@@ -20,9 +20,10 @@ function tokenOutcome(value) {
   if (typeof token === 'string' && token.length) return 'id_token_present';
   return token ? 'unexpected_shape' : 'missing_id_token';
 }
-export function createOwnerTelegramTransport({ nativeFetch, clientId, companyId, assertCurrent, verifyCurrent, clock = Date.now, trace }) {
+export function createOwnerTelegramTransport({ nativeFetch, clientId, companyId, assertCurrent, verifyCurrent, clock = Date.now, trace, contract = OWNER_TELEGRAM_PROFILE }) {
+  const limits = ownerTelegramLimits(contract);
   const context = new AsyncLocalStorage(), counters = { calls: 0, refused: 0, routes: {} };
-  let busy = false, closed = false; const active = new Set();
+  let busy = false, closed = false, attempts = 0; const active = new Set();
   const refusal = () => { throw new Error('local_telegram_transport_refused'); };
   const check = op => {
     assertCurrent();
@@ -33,6 +34,10 @@ export function createOwnerTelegramTransport({ nativeFetch, clientId, companyId,
     operation: () => context.getStore(),
     async run(operation, fn) {
       assertCurrent(); assert.ok(!busy && !closed, 'local_telegram_operation_busy');
+      if (limits.attempts !== undefined) {
+        assert.ok(operation.purpose === 'login' && attempts < limits.attempts, 'local_telegram_attempt_limit');
+        attempts++; // Failed and aborted attempts count; never replay a consumed code.
+      }
       busy = true;
       const op = { ...operation, active: true, poisoned: false, deadline: clock() + TELEGRAM_LIMITS.operationMs,
         controller: new AbortController(), registryPage: 0, tokenSent: false };
@@ -83,6 +88,8 @@ export function createOwnerTelegramTransport({ nativeFetch, clientId, companyId,
           const body = Buffer.concat(chunks);
           try {
             const parsed = JSON.parse(body.toString('utf8'));
+            if (limits.attempts !== undefined && route === 'client_registry' && Array.isArray(parsed?.data)
+              && parsed.data.length > 200) refusal();
             const accepted = new Response(body, { status: response.status, headers: { 'content-type': 'application/json' } });
             emit('completed', response.status, 'provider_response_read', route === 'telegram_token' ? tokenOutcome(parsed) : undefined);
             return accepted;
