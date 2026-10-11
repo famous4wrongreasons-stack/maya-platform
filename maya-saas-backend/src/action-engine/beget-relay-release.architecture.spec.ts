@@ -300,10 +300,10 @@ describe('R01 live artifact and release/recovery protection', () => {
   it('[INTEGRATION-ONLY] gates a static shell candidate as strictly as a PHP edge candidate', () => {
     const shell = resolve(root, '../maya-chat-shell/dist/web');
     const result = edge.verifyShellCandidate(shell);
-    // Preserve e437e114's 38-file baseline plus the four implemented runtime
-    // modules for personal booking, booking reasons and explicit privacy.
+    // Preserve the original 38-file baseline + 4 personal/privacy modules,
+    // and the five later canonical setup/photo/endpoint modules below.
     // No arbitrary extra artifact files become admitted by this exact census.
-    expect(result).toMatchObject({ files: 42, php: 0, icons: 3 });
+    expect(result).toMatchObject({ files: 47, php: 0, icons: 3 });
     const generations = readdirSync(join(shell, 'm'));
     expect(generations).toHaveLength(1);
     expect(generations[0]).toMatch(/^[a-f0-9]{16}$/);
@@ -312,6 +312,11 @@ describe('R01 live artifact and release/recovery protection', () => {
       'net/personal.js',
       'shell/personal-booking.js',
       'shell/privacy.js',
+      'net/crm-setup.js',
+      'net/endpoint.js',
+      'net/goods-photo.js',
+      'shell/local-crm-setup.js',
+      'shell/goods-photo.js',
     ])
       expect(
         readFileSync(join(shell, 'm', generations[0], 'src', module), 'utf8'),

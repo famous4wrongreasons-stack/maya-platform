@@ -1290,8 +1290,9 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
     // The registry's reviewed hash. A Gate 12 change never moves it; a unit that legitimately
     // changes the C9 canon moves this line in its own commit, with the reason in the message.
     expect(C9_REGISTRY_HASH).toBe(
-      // Existing goods READ/PROPOSE additions are pinned; GR-PC1 changes no C9 object.
-      '72b623c0c8fe6072097a52969becd55b1e0e9c21e0aae3d5960cbec8c2c82816',
+      // Existing READ additions: goods search (245d3888), rename preview (995a87e3).
+      // No profile admission or new capability is added by this evidence repair.
+      '80c4712157aac6ad89e8fcd68587e2f4ecb016b74315266571c4a114027e715a',
     );
     const contract = parse(
       'action-engine/action-engine.contract.ts',

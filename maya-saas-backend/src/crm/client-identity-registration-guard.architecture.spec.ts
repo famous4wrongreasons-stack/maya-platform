@@ -309,7 +309,21 @@ describe('P4-03 unresolved client identity runtime registration guard', () => {
       .map(({ path }) => path)
       .sort();
 
-    // B27 removes the last read-triggered identity registration caller.
-    expect(callSurfaces).toEqual([]);
+    // B27 still excludes read-triggered registration. Owner decision 2026-10-11
+    // (8f6d9fa5) adds only the verified initial Telegram login coordinator.
+    // It delegates to CANONICAL_OWNER; it is not another registration writer.
+    expect(callSurfaces).toEqual([
+      'src/auth/telegram-client-binding.service.ts',
+    ]);
+    const coordinator = files.find(
+      ({ path }) => path === 'src/auth/telegram-client-binding.service.ts',
+    )!.code;
+    expect(isRegistrationMutation(coordinator)).toBe(false);
+    expect(
+      coordinator.match(/\.(?:tryRegisterCrmClient|registerCrmClient)\s*\(/g),
+    ).toHaveLength(1);
+    expect(coordinator).toContain(
+      'await this.identities.registerCrmClient(input)',
+    );
   });
 });

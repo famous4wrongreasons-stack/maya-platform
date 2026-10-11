@@ -337,8 +337,20 @@ describe('K12 — CONSENT.1 … CONSENT.6', () => {
 
 describe('K12 — both kinds are blocked on capability registration', () => {
   it('no consent, identity or privacy READ key is registered', () => {
-    // P-09 and K23: YC-SP1 plus the three integrated goods tools; no consent/identity READ key.
-    expect(MAYA_AI_TOOL_CATALOG).toHaveLength(52);
+    // Preserve the 52-tool checkpoint, then name the one later READ delta (995a87e3).
+    expect(
+      MAYA_AI_TOOL_CATALOG.filter(
+        (t) => t.name !== 'catalog.service.rename.preview',
+      ),
+    ).toHaveLength(52);
+    expect(
+      MAYA_AI_TOOL_CATALOG.filter(
+        (t) => t.name === 'catalog.service.rename.preview',
+      ),
+    ).toEqual([
+      expect.objectContaining({ riskTier: 'read', approvalPolicy: 'none' }),
+    ]);
+    expect(MAYA_AI_TOOL_CATALOG).toHaveLength(53);
     expect(
       MAYA_AI_TOOL_CATALOG.filter((t: { name: string }) =>
         /consent|identity|privacy/.test(t.name),

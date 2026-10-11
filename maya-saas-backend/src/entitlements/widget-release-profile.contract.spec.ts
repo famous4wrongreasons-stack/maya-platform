@@ -109,8 +109,28 @@ describe('fixed no-handoff certificate threshold', () => {
         }),
     );
     expect(PROFILE_REGISTRY.tuples).toEqual(tuples);
+    // These later READ additions have no approved widget successor admission.
+    // Preserve the fixed release profile; development registry growth is not a grant.
+    const developmentOnly = [
+      'catalog.service.rename.preview',
+      'inventory.goods.search',
+    ];
+    expect(
+      C9_CAPABILITIES.filter((row) =>
+        developmentOnly.includes(row.capabilityKey),
+      )
+        .map((row) => [row.capabilityKey, row.mode])
+        .sort(),
+    ).toEqual([
+      ['catalog.service.rename.preview', 'READ'],
+      ['inventory.goods.search', 'READ'],
+    ]);
+    for (const key of developmentOnly)
+      expect(PROFILE_REGISTRY.successorCapabilities).not.toContain(key);
     expect(PROFILE_REGISTRY.successorCapabilities).toEqual(
-      C9_CAPABILITIES.map((row) => row.capabilityKey).sort(),
+      C9_CAPABILITIES.map((row) => row.capabilityKey)
+        .filter((key) => !developmentOnly.includes(key))
+        .sort(),
     );
   });
   it('refuses the preserved previous pin and excludes the complete settings editor card', () => {

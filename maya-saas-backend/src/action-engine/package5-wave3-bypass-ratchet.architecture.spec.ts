@@ -80,8 +80,14 @@ describe('Package 5 Wave 3 ownership/bypass ratchet', () => {
   it('pins Action Engine ownership on every production initiator', () => {
     expect(cutover).toContain('this.planner.build(');
     expect(cutover).toContain("'execute'");
-    expect(controller).toContain('this.canonicalWave3.installCrmCredentials');
-    expect(controller).toContain('this.canonicalWave3.activateCrmIntegration');
+    // Qualified A17 entries still build and execute through the same AE owner.
+    expect(controller).toContain(
+      'this.canonicalWave3.installQualifiedCrmCredentials',
+    );
+    expect(controller).toContain(
+      'this.canonicalWave3.activateQualifiedCrmIntegration',
+    );
+    expect(cutover).toContain('await this.executor.execute(prepared)');
     expect(controller).toContain(
       'this.canonicalWave3.disconnectCrmIntegration',
     );

@@ -433,8 +433,23 @@ describe('K13 — no C10 autonomy', () => {
       'inventory.goods.read',
       'inventory.goods.receipt.prepare',
     ];
+    const laterReadKeys = [
+      'inventory.goods.search',
+      'catalog.service.rename.preview',
+    ];
+    expect(
+      rows
+        .filter((c) => laterReadKeys.includes(c.capabilityKey))
+        .map((c) => [c.capabilityKey, c.mode])
+        .sort(),
+    ).toEqual([
+      ['catalog.service.rename.preview', 'READ'],
+      ['inventory.goods.search', 'READ'],
+    ]);
     const beforeGoods = rows.filter(
-      (c) => !goodsKeys.includes(c.capabilityKey),
+      (c) =>
+        !goodsKeys.includes(c.capabilityKey) &&
+        !laterReadKeys.includes(c.capabilityKey),
     );
     expect(beforeGoods).toHaveLength(58);
     expect(beforeGoods.filter((c) => c.mode === 'READ')).toHaveLength(42);
@@ -450,8 +465,8 @@ describe('K13 — no C10 autonomy', () => {
       ['inventory.goods.read', 'READ'],
       ['inventory.goods.receipt.prepare', 'PROPOSE_ONLY'],
     ]);
-    expect(rows).toHaveLength(60);
-    expect(reads).toHaveLength(43);
+    expect(rows).toHaveLength(62);
+    expect(reads).toHaveLength(45);
     expect(rows.filter((c) => c.mode === 'PROPOSE_ONLY')).toHaveLength(15);
     expect(rows.filter((c) => c.mode === 'OWNER_HANDOFF')).toHaveLength(2);
     expect(openers).toHaveLength(17);
