@@ -1,0 +1,120 @@
+{
+  "qualification": "SYNTHETIC_LOCAL_HTTP_NOT_RELEASE_CERTIFICATION",
+  "head": "0157b600fcfdf4edd9e38d4c5e4fe5b40aa794e7",
+  "sourceSha256": "3df7ab95b8d6c14f14367ac078566e5d1c024f1dbb0fd656eb59f0013c3fde08",
+  "baseline": {
+    "exit": 0,
+    "passed": 25,
+    "failed": 0,
+    "failures": [],
+    "assertionFailure": false
+  },
+  "mutations": [
+    {
+      "name": "cross-site-return-blocked",
+      "exit": 1,
+      "passed": 23,
+      "failed": 2,
+      "failures": [
+        "provider document return serves the exact canonical callback",
+        "replayed/concurrent callbacks are static and cannot reflect state or issue a session"
+      ],
+      "assertionFailure": true,
+      "killed": true
+    },
+    {
+      "name": "callback-script-csp-blocked",
+      "exit": 1,
+      "passed": 24,
+      "failed": 1,
+      "failures": [
+        "callback header CSP admits only canonical script/style hashes; no connect or unsafe-inline"
+      ],
+      "assertionFailure": true,
+      "killed": true
+    },
+    {
+      "name": "foreign-host-admitted",
+      "exit": 1,
+      "passed": 24,
+      "failed": 1,
+      "failures": [
+        "foreign host cannot use the callback exception"
+      ],
+      "assertionFailure": true,
+      "killed": true
+    },
+    {
+      "name": "credential-bearing-return-admitted",
+      "exit": 1,
+      "passed": 21,
+      "failed": 4,
+      "failures": [
+        "session bearer cannot use the callback exception",
+        "cookie cannot use the callback exception",
+        "session token cannot use the callback exception",
+        "Telegram init data cannot use the callback exception"
+      ],
+      "assertionFailure": true,
+      "killed": true
+    },
+    {
+      "name": "subframe-admitted",
+      "exit": 1,
+      "passed": 24,
+      "failed": 1,
+      "failures": [
+        "cross-origin subframe cannot use the callback exception"
+      ],
+      "assertionFailure": true,
+      "killed": true
+    },
+    {
+      "name": "non-get-admitted",
+      "exit": 1,
+      "passed": 23,
+      "failed": 2,
+      "failures": [
+        "POST cannot use the callback exception",
+        "HEAD cannot use the callback exception"
+      ],
+      "assertionFailure": true,
+      "killed": true
+    },
+    {
+      "name": "callback-path-broadened",
+      "exit": 1,
+      "passed": 21,
+      "failed": 4,
+      "failures": [
+        "cross-site app cannot use the callback exception",
+        "cross-site API cannot use the callback exception",
+        "cross-site encoded callback cannot use the callback exception",
+        "cross-site callback suffix cannot use the callback exception"
+      ],
+      "assertionFailure": true,
+      "killed": true
+    },
+    {
+      "name": "callback-bytes-substituted",
+      "exit": 1,
+      "passed": 22,
+      "failed": 3,
+      "failures": [
+        "provider document return serves the exact canonical callback",
+        "direct/standalone callback still serves the erasing page without a session",
+        "replayed/concurrent callbacks are static and cannot reflect state or issue a session"
+      ],
+      "assertionFailure": true,
+      "killed": true
+    }
+  ],
+  "restored": {
+    "exit": 0,
+    "passed": 25,
+    "failed": 0,
+    "failures": [],
+    "assertionFailure": false
+  },
+  "workingSourceUnchanged": true
+}

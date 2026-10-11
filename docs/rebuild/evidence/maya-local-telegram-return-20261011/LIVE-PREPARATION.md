@@ -5,11 +5,17 @@ execution authority and introduces no alternative identity or release engine.
 
 ## One list of owner input/actions
 
-1. Inspect **@mayaos_login_bot → Login Widget → Allowed URLs** in BotFather.
-   Provide only the registered origins/redirect URLs, never tokens or Client
-   Secret. Current registration is not in repository evidence. It must not be
-   inferred from a historical login. No BotFather setting is changed by this unit.
-2. After those URLs are known, select and authorize the test entry/return pair.
+1. **Observed:** the BotFather mini app shows web Redirect URI
+   `https://mayaos.ru/oauth-callback.html` and Trusted Origin `https://mayaos.ru/`.
+   See [BOTFATHER-REGISTRATION.md](BOTFATHER-REGISTRATION.md) for visual-evidence
+   provenance and limitations. No credentials were needed for this observation.
+2. **Local registration attempt authorized and completed:** exact Redirect URI
+   `http://127.0.0.1:56151/oauth-callback.html` added and seen after refresh.
+   BotFather stripped the port from the proposed Trusted Origin; the resulting
+   non-matching entry was removed. Production entries are unchanged. See the
+   registration report for the server-side OIDC distinction; actual provider
+   login acceptance is **not yet proved**. No repeat owner approval is needed
+   for the already completed exact registration attempt.
    The web runtime requires the app and `/oauth-callback.html` on the **same
    origin**. The current remote callback is older; its bytes cannot be paired
    with this React build. Local HTTP success does not prove that Telegram accepts
@@ -31,7 +37,13 @@ execution authority and introduces no alternative identity or release engine.
 
 Telegram's [official registration instructions](https://core.telegram.org/bots/telegram-login#registering-your-allowed-urls)
 require pre-registered origins and specific OIDC redirects. The public read-only
-probe does not verify that registration. Credentials are not needed to read it.
+probe does not verify registration; the owner screenshots above provide the
+current visual evidence. Credentials are not needed to inspect these settings.
+
+The combined actual-web-relay + AppModule/isolated PostgreSQL proof is now
+[recorded here](../maya-telegram-combined-http-20261011/README.md): 97 tests pass
+on committed `0157b600`. Telegram issuer, CRM and model are synthetic. This closes
+the separate web/backend proof gap, not the live launch admission work below.
 
 ## Exact remaining engineering work (agent-owned)
 

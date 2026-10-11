@@ -1,0 +1,104 @@
+{
+  "contract": "maya.telegram-personal-browser/1",
+  "status": "PASS",
+  "candidate": "0157b600fcfdf4edd9e38d4c5e4fe5b40aa794e7",
+  "actualReact": true,
+  "actualRuntime": true,
+  "actualBackendHttp": true,
+  "actualLocalWebBoundary": true,
+  "realTelegram": false,
+  "actualLauncherRuntimeAdmission": false,
+  "callbackRequests": [
+    {
+      "method": "GET",
+      "site": "cross-site",
+      "mode": "navigate",
+      "destination": "document"
+    },
+    {
+      "method": "GET",
+      "site": "cross-site",
+      "mode": "navigate",
+      "destination": "document"
+    },
+    {
+      "method": "GET",
+      "site": "cross-site",
+      "mode": "navigate",
+      "destination": "document"
+    }
+  ],
+  "apiResponses": 18,
+  "syntheticIssuerCrmModel": true,
+  "externalRequestsDispatched": 0,
+  "networkBoundary": "browser HTTP to actual loopback launcher/relay plus CDP synthetic provider and deny proxy/resolver; no OS packet claim",
+  "checks": [
+    "existing owner password entry",
+    "existing account form",
+    "password session retained",
+    "canonical authenticated linking control",
+    "A23 confirms account link without replacing session",
+    "finder rendered",
+    "canonical business search",
+    "actual Telegram session opens AChat",
+    "initiating document retained",
+    "existing reconciliation owner synchronized after first binding",
+    "canonical private reply 1",
+    "canonical private reply 2",
+    "canonical private reply 3",
+    "finder rendered",
+    "canonical business search",
+    "actual Telegram session opens AChat",
+    "initiating document retained",
+    "relogin restores exactly three message pairs",
+    "actual cross-site returns through owner launcher and canonical HTTP relay"
+  ],
+  "starts": 2,
+  "completes": 2,
+  "accountLinks": 1,
+  "passwordLogins": 1,
+  "chat": [
+    {
+      "responseSha256": "712f41f0b019566be11ad17ecd38f1e9cb913b2659925b99484753744ef82f13",
+      "requestIdSha256": "0fbce44bf847a2634e5f3c471049f27e46330f02ba66ea7df4ba4ef34824f791",
+      "authorityFieldsSent": false,
+      "rendered": true
+    },
+    {
+      "responseSha256": "10520dba974193902b65cab2f19ad5cdcf00324404ce6add0b363d151a244455",
+      "requestIdSha256": "fa696576f22b3f233a3a1f749869a22ac00685f5a185f0cad627589dd050c6e3",
+      "authorityFieldsSent": false,
+      "rendered": true
+    },
+    {
+      "responseSha256": "5bc35047277a7e58327bb295950e50d76295eefd1ca99738491384b7749d2a85",
+      "requestIdSha256": "469072eafa9fb730d8b20ed56bb2a5207ad41a92c1a28367ae12da11ca8b292f",
+      "authorityFieldsSent": false,
+      "rendered": true
+    }
+  ],
+  "history": [
+    {
+      "conversationIdSha256": null,
+      "roles": []
+    },
+    {
+      "conversationIdSha256": null,
+      "roles": []
+    },
+    {
+      "conversationIdSha256": "5c4fcdddb71f38f1ba737d7b9c2e73ba835cf5225cc499a8f583d4c1e0f782b4",
+      "roles": [
+        "user",
+        "assistant",
+        "user",
+        "assistant",
+        "user",
+        "assistant"
+      ]
+    }
+  ],
+  "errors": [],
+  "webListenerStopped": true,
+  "browserStopped": true
+}

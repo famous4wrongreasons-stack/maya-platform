@@ -1,0 +1,25 @@
+{
+  "qualification": "SYNTHETIC_SCRIPTED_HTTP_PG_NOT_RELEASE_CERTIFICATION",
+  "head": "0157b600fcfdf4edd9e38d4c5e4fe5b40aa794e7",
+  "workingPatch": false,
+  "status": "passed",
+  "realModelAcceptance": false,
+  "realProviderAcceptance": false,
+  "runnerSha256": "a53b5bd316f14f72befcaf16d5a9c4dbac11b0ac552eb8bd87ae27e1feef7e7b",
+  "clusterStopped": true,
+  "pidFileAbsent": true,
+  "sourceUnchanged": true,
+  "jest": {
+    "numPassedTests": 97,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTestSuites": 2,
+    "numPassedTestSuites": 2
+  },
+  "suiteBreakdown": {
+    "initial": 78,
+    "successor": 19
+  },
+  "actualLauncherRuntimeAdmission": false,
+  "releaseCertification": false
+}

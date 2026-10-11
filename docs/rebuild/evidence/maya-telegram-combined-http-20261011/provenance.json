@@ -1,0 +1,61 @@
+{
+  "head": "0157b600fcfdf4edd9e38d4c5e4fe5b40aa794e7",
+  "parent": "f256ea716d1bb03714933ee611607e9be4c5a0b8",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "changedFiles": [
+    "maya-carrier-react/test/telegram-personal-browser-probe.mjs",
+    "maya-saas-backend/scripts/telegram-client-binding-proof.mjs",
+    "maya-saas-backend/test/widgets-live/telegram-client-binding.live-spec.ts"
+  ],
+  "unchangedProductScopes": [
+    {
+      "scope": "backendProduct",
+      "paths": [
+        "maya-saas-backend/src"
+      ],
+      "sameTreeEntries": true,
+      "gitTreeEntriesSha256": "b32b354bb7aabb85a6b0e897f843af19171c0814d70f9663d5919d3434719b35"
+    },
+    {
+      "scope": "schema",
+      "paths": [
+        "maya-saas-backend/prisma",
+        "maya-saas-backend/prisma.config.ts"
+      ],
+      "sameTreeEntries": true,
+      "gitTreeEntriesSha256": "3a18ad7589386dd2a4988fbec5512a6bccba758cea5535449d31652bd00cd847"
+    },
+    {
+      "scope": "headlessRuntime",
+      "paths": [
+        "maya-chat-shell/src"
+      ],
+      "sameTreeEntries": true,
+      "gitTreeEntriesSha256": "54a6c5b5b610423962971b7eda6286f319ae592840bb1004a3a5406e240566e2"
+    },
+    {
+      "scope": "reactPresentation",
+      "paths": [
+        "maya-carrier-react/src"
+      ],
+      "sameTreeEntries": true,
+      "gitTreeEntriesSha256": "00c3f6249887c004d9625b03604476cdeac4e3baa8c89102fead4b33bca00fe3"
+    },
+    {
+      "scope": "ios",
+      "paths": [
+        "maya-ios-carrier"
+      ],
+      "sameTreeEntries": true,
+      "gitTreeEntriesSha256": "4a53fc76f762d63893cf6b11e02bf88a4521aff834ce366c2baeb76b8536269b"
+    },
+    {
+      "scope": "canonicalCallback",
+      "paths": [
+        "maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html"
+      ],
+      "sameTreeEntries": true,
+      "gitTreeEntriesSha256": "6221da3aa6f0dc5ba3a5009022d5bbf4e53e09e31719f2212d7dfaa761c66dcf"
+    }
+  ]
+}

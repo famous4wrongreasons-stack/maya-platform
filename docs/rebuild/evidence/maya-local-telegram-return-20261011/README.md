@@ -7,6 +7,12 @@ Branch: `codex/maya-local-crm-setup-20261010`.
 This is local launch preparation after C9. It is neither a new release
 certificate nor live owner Telegram/Client/history acceptance.
 
+Subsequent evidence: [combined real local web relay + backend/PG](../maya-telegram-combined-http-20261011/README.md)
+on `0157b600` removes the separate web/backend harness boundary described below.
+[BotFather registration](BOTFATHER-REGISTRATION.md) records the later approved
+local redirect addition and exact Trusted Origin limitation. Historical results
+in this report remain attributed to their original checkpoint.
+
 ## Finding and repair
 
 The earlier synthetic browser proof served the callback directly, bypassing the

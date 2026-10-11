@@ -1,0 +1,66 @@
+{
+  "head": "0157b600fcfdf4edd9e38d4c5e4fe5b40aa794e7",
+  "rawReceiptsNotPublished": true,
+  "artifacts": [
+    {
+      "originalLocalPath": "/private/tmp/maya-telegram-combined-final-0157b600/manifest.json",
+      "sha256": "939b9403400b834e635b397fbe0f6cc65f1d08a2fcb0fecd60c7b9027eb32862",
+      "bytes": 719
+    },
+    {
+      "originalLocalPath": "/private/tmp/maya-telegram-combined-final-0157b600/source-hashes.json",
+      "sha256": "0c978b175a7d354e874a45767b8e036fbc3a6008754a76e855017be19d2cce5b",
+      "bytes": 275606
+    },
+    {
+      "originalLocalPath": "/private/tmp/maya-telegram-combined-final-0157b600/telegram-initial-jest.json",
+      "sha256": "6219f662c4fe2ea9d141a6b7ba8160f81312c46701d2382cc9cf209439726201",
+      "bytes": 53044
+    },
+    {
+      "originalLocalPath": "/private/tmp/maya-telegram-combined-final-0157b600/browser-client/browser.json",
+      "sha256": "75bdddb959ce963dc95a0f2a0689375234662ad0bf689a20f786cf802e23c6c2",
+      "bytes": 2676
+    },
+    {
+      "originalLocalPath": "/private/tmp/maya-telegram-combined-final-0157b600/browser-tenant_owner/browser.json",
+      "sha256": "bb8dda2d9120b5431b670351ba7b62bc7f0c7de35b58107307e04424be4e3113",
+      "bytes": 3070
+    },
+    {
+      "originalLocalPath": "/private/tmp/maya-telegram-combined-mutations-0157b600/summary.json",
+      "sha256": "0175ef7f3677d32f1c509f524cb16a2e0d3cbd1f4853d79b5ebc74ed3081598a",
+      "bytes": 3291
+    },
+    {
+      "originalLocalPath": "/private/tmp/maya-telegram-types-comparison-0157b600.json",
+      "sha256": "ceceb4dc45a7819b24a76938dac19efc9f7a9a25ff2e83656bc54876669d5410",
+      "bytes": 609
+    },
+    {
+      "originalLocalPath": "/private/tmp/maya-telegram-combined-final-0157b600.log",
+      "sha256": "18a9576087f1243cfcd4675cd21ec479cf23b1288d687458e591270ae0a205e0",
+      "bytes": 138
+    },
+    {
+      "originalLocalPath": "/private/tmp/maya-telegram-combined-local-0157b600.log",
+      "sha256": "d083735318e1f6a364a4523cc135fbf15743e1817cdc9d9a93815458318b23d2",
+      "bytes": 9014
+    },
+    {
+      "originalLocalPath": "/private/tmp/maya-telegram-combined-scoped-types-0157b600.log",
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "bytes": 128
+    },
+    {
+      "originalLocalPath": "/private/tmp/maya-telegram-combined-lint-0157b600.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "originalLocalPath": "/private/tmp/maya-telegram-types-comparison-0157b600.cjs",
+      "sha256": "d7cbd57c8b594250235d205155277862bc94d1458d299e1d809178bfe0ffa7ee",
+      "bytes": 2067
+    }
+  ]
+}

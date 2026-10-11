@@ -1,0 +1,11 @@
+{
+  "qualification": "UNSCOPED_DIAGNOSTIC_COMPARISON_NOT_CANONICAL_TYPECHECK",
+  "baselineCommit": "f256ea716d1bb03714933ee611607e9be4c5a0b8",
+  "currentCommit": "0157b600fcfdf4edd9e38d4c5e4fe5b40aa794e7",
+  "method": "compiler host substitutes the only changed TypeScript source with its exact baseline blob; installed/generated dependencies held constant",
+  "baselineCount": 369,
+  "currentCount": 369,
+  "baselineDigest": "1b38340311e53dde0a226efb25a76d1c16324f0ab5c5ac54c17cd6b9dc328bdc",
+  "currentDigest": "1b38340311e53dde0a226efb25a76d1c16324f0ab5c5ac54c17cd6b9dc328bdc",
+  "sameDiagnostics": true
+}
