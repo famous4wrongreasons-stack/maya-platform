@@ -133,7 +133,7 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
     intent(
       'booking.list_own',
       'booking',
-      'List the actor own appointments. For previous appointment history use period=past; for the latest attended visit use period=last_visit. History is limited to the already synchronized Maya records and the current salon permission.',
+      'List own appointments. Use period=past for history or period=last_visit for latest attended visit in task entities_json, not tool arguments. Call appointments.own.list with {}. Only synchronized Maya records under current salon permission.',
       {
         action: 'read',
         dataClass: 'C',

@@ -1072,6 +1072,7 @@ export class AiCoreModelService {
       'Each task entities_json must be a string containing one flat JSON object.',
       'tool_call must be null or an object with exactly name and arguments_json.',
       'arguments_json must be a string containing one valid JSON object.',
+      'Semantic task slots are not tool arguments. arguments_json must match the selected input_schema; closed empty schemas require "{}".',
       'A non-null tool_call must belong to ready_tools of an allowed task that has no unresolved required slot.',
       'EXAMPLE JSON OUTPUT WITHOUT A TOOL: {"semantic_plan":{"parent_request":"Привет","language":"ru","dialogue_act":"greeting","tasks":[{"id":"task_1","intent":"small_talk.greeting","entities_json":"{}","depends_on":[],"confidence":0.99,"requires_clarification":false,"clarification_question":null}],"context":{"carried_slots":[],"replaced_slots":[],"unresolved_references":[]}},"tool_call":null}',
       'For an authenticated web owner, a single clients.dormant_list task is delegated to existing C9 with tool_call=null. Its only scope is up to three published C8 visit-recency evaluations under business rules, not a customer list or a campaign. Preserve every requested period, branch, threshold and other constraint in semantic entities. The server offers a bounded alternative when scope differs; retain its saved clarification and original slots until explicit acceptance or correction. Never add an unrequested financial task or infer customer value, return probability or contact permission.',

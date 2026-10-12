@@ -292,7 +292,8 @@ export const MAYA_AI_TOOL_CATALOG = [
   },
   {
     name: 'appointments.own.list',
-    description: 'Read the authenticated customer appointment history.',
+    description:
+      'Read authenticated customer history; arguments_json="{}". Keep period/status in booking.list_own entities_json, not tool arguments.',
     inputSchema: EMPTY_OBJECT_SCHEMA,
     allowedRoles: ALL_INTERACTIVE_TENANT_ROLES,
     allowedSurfaces: ALL_SURFACES,

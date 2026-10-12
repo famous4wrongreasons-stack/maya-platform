@@ -1,0 +1,51 @@
+{
+  "semantic_plan": {
+    "parent_request": "Когда я был у вас последний раз?",
+    "language": "ru",
+    "dialogue_act": "question",
+    "tasks": [
+      {
+        "id": "task_1",
+        "domain": "booking",
+        "intent": "booking.list_own",
+        "sub_intent": "booking.list_own",
+        "action": "read",
+        "data_class": "C",
+        "risk": "low",
+        "capability": {
+          "readiness": "ready",
+          "note": null
+        },
+        "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+        "entities": {
+          "period": "last_visit"
+        },
+        "depends_on": [],
+        "permission": {
+          "required": "appointments.own.read",
+          "status": "allowed"
+        },
+        "tool": {
+          "name": "appointments.own.list",
+          "alternatives": [
+            "appointments.own.list"
+          ],
+          "status": "ready"
+        },
+        "confidence": 0.97,
+        "requires_clarification": false,
+        "clarification_question": null,
+        "requires_confirmation": false
+      }
+    ],
+    "context": {
+      "carried_slots": [],
+      "replaced_slots": [],
+      "unresolved_references": []
+    }
+  },
+  "tool_call": {
+    "name": "appointments.own.list",
+    "arguments_json": "{\"period\":\"last_visit\"}"
+  }
+}
