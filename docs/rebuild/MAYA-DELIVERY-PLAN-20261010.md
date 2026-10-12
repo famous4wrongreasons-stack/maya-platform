@@ -1,5 +1,22 @@
 # План завершения MAYA — 10 октября 2026
 
+**12 октября, текущий вопрос отделён от сохранённого плана — `880b4653`,
+сквозной proof `e267e9ef`: OFFLINE PASS; LIVE REQUALIFICATION OPEN.**
+Planner явно получает последнюю безопасную реплику отдельно от прошлой задачи;
+уточняет её смысл и период даже при том же инструменте. 189 scoped tests,
+7 privacy checks, 4/4 counterfactuals и 17 actual React/HTTP/PG checkpoints PASS.
+Лимиты, Client authority и требование подтверждённого посещения сохранены.
+Новые ответы модели в этих тестах искусственные: успешный живой «последний визит»
+ещё не доказан. Реальных запросов и расходов в этом проходе нет.
+[Изменение, неудачные попытки, receipts и границы](evidence/maya-history-current-request-20261012/README.md).
+
+**Ближайший остаток:** один живой повтор диалога после исправления; затем цельный
+путь запись → результат → перенос → отмена. Telegram/личная Client-связь уже
+подтверждены локально на `b4e3f3fb`, чтение собственной истории — на `f653516d`.
+Повторные setup, привязка и импорт не являются следующим шагом.
+C10, полный продукт и текущая release certification не завершены. Исторические
+записи ниже сохраняют состояние на дату своего checkpoint.
+
 **12 октября, живая история с сохранёнными ключами — `f653516d`: PARTIAL.**
 Оба ключа получены штатным компонентом автоматически. После входа два вопроса
 прошли через реальный React/HTTP/backend/DeepSeek в одном разговоре. История:
@@ -217,10 +234,10 @@ Telegram/CRM-приёмка, полная загрузка удалённой и
 
 | № / группа | Реализовано | Соединено в текущем приложении | Проверено и предел | Реальная приёмка | Точный остаток |
 | --- | --- | --- | --- | --- | --- |
-| 1. Естественный диалог и продолжение задач | Semantic selection, уточнения, исправления, возврат к теме, общие вопросы, bounded history | Текущий React → chat → сохранённый контекст и разрешённые source READ | Локальные scripted сценарии; отдельные 5 actual model responses имеют ungraded semantics | NOT_ISSUED | Репрезентативный multi-turn цикл по ролям; исправление воспроизводимых смысловых ошибок и непонятных состояний. Не заменять понимание перечнем точных фраз |
+| 1. Естественный диалог и продолжение задач | Semantic selection, уточнения, исправления, возврат к теме, bounded history; явная текущая реплика | Текущий React → chat → сохранённый контекст и разрешённые source READ | Публичные ответы и личная история подтверждены живыми checkpoint; последний визит на f653516d FAIL. Исправленная передача контекста: 189 scoped/17 HTTP-PG PASS, модель scripted | NOT_ISSUED | Живая повторная проверка история → последний визит и репрезентативный multi-turn цикл по ролям. Не заменять понимание перечнем точных фраз |
 | 2. Один C9 и согласованный результат агентов | Runs/revisions/evidence, reviews/continuations, explicit Occupancy/Lifecycle/BI и Admin capabilities | READ bridge и конечный compound дают один ответ; не все capability READ вызывают отдельный agent reasoning | Локальные HTTP/React/restart; конечная композиция, не любые процессы | NOT_ISSUED | Замкнуть конкретные многодоменные задачи через существующий C9; проверить реальное планирование и единый ответ. Не строить agent v2/second orchestrator |
 | 3. YCLIENTS, филиал и API-управление | Одна company↔branch, native readers, отдельные mutations, A17 atomic import и same-ID recovery | Текущая opt-in setup form, выбранные chat verticals | Synthetic native + HTTP/React/restart; real save/activate/import и DB persistence подтверждены 11.10 на bfc83242 | NOT_ISSUED | Real setup закрыт в bounded local profile; обычный app login/read после restart и chat/source acceptance остаются. Operation inventory → adapter/owner/chat/outcome. Создание/редактирование услуг, связей услуга–мастер и карточек сотрудников покрыты не полностью. Один салон не делает их готовыми |
-| 4. Client identity, личные данные и запись | Verified A18 context, own/Admin create/move/cancel через AE, source fences и UNKNOWN | Текущий React и existing Admin owners | Internal/synthetic native booking, reload/restart и cancellation company fence | NOT_ISSUED | Real verified Client lifecycle и outcome; initial-only Client proof пока отсутствует. Старые импортированные записи могут не иметь необходимого canonical origin для переноса |
+| 4. Client identity, личные данные и запись | Verified A18 context, own/Admin create/move/cancel через AE, source fences и UNKNOWN | Текущий React и existing Admin owners | Реальный локальный Telegram login/initial Client binding b4e3f3fb; своя история f653516d. Booking/recovery/revocation остаются synthetic HTTP/PG | NOT_ISSUED | Полный реальный booking/move/cancel outcome и последующий Client lifecycle. Старые импортированные записи могут не иметь canonical origin для переноса. Initial binding уже подтверждён, повторять его не требуется |
 | 5. Maya Admin: консультация и знания салона | Public salon/catalog/staff facts, A22 staff-only guidance | Собственный чат MAYA; полного roundtrip нового внешнего inbound нет | Локальные роли, источники и privacy refusals | NOT_ISSUED | Customer-visible knowledge contract и его связь с existing owner; полезная реальная консультация. Внутренние правила нельзя объявить публичной политикой |
 | 6. Owner analytics, C7/C8 | Published C7, bounded finance/expenses/reviews, qualified C8 и объяснение | Выбранные owner вопросы, периоды и compound | Локальные source/revision/restart proofs, не полнота финансов салона | NOT_ISSUED | Проверить реальные периоды, полноту выручки/расходов/прибыли и source mapping, корректность объяснений. Недоступные cash/profit и причинность не выдумывать; disabled численные модели не включать без квалификации |
 | 7. Occupancy после отмен | Existing C5 Opportunity + current availability → C9 → сохранённая версия предложения | Явный запрос в текущем чате, limited варианты и evidence | Synthetic native HTTP/React/restart; occupied/expired/stale/incomplete/revoked/foreign outcomes | NOT_ISSUED | Наблюдаемая реальная отмена и текущее окно, полезный ответ модели. Фоновая инициатива относится к №11; никаких списков клиентов/скидок/вероятностей по умолчанию |
@@ -300,7 +317,7 @@ Telegram/CRM-приёмка, полная загрузка удалённой и
 1. Normal onboarding, парольное восстановление и same-DB restart фактически проверены с текущим React и обычным AppModule на двух синтетических бизнесах. [Actual evidence](evidence/maya-normal-onboarding-actual-20261010/summary.json); прежний memory-lint blocker закрыт scoped PASS.
 2. Отдельный real-YC-read профиль прошёл actual synthetic startup с текущими AppModule/PG/React; диагностические stages/codes сохраняют отказ без секретов. [Scope, приватный ввод и retention](MAYA-LOCAL-YCLIENTS-ONE-TIME-HANDOFF-20261010.md) остаются ограниченными. Перед новым реальным prompt согласовать готовность владельца, не повторяя уже данное разрешение на тот же setup. Старые failures сохранены. Real provider/company/branch setup квалифицирован на bfc83242 в ограниченном local setup scope; весь чат/booking этим не квалифицирован. Следующий запуск — status-first, без повторного install/activate.
 3. В существующем API inventory выделить операции первого полного выпуска, явно отметить deferred/excluded и для included привязать current code/owner/недостающее. Это рабочий список реализации, не новый аудит.
-4. Подготовить существующий verified Client и точные READ/create/move/cancel сценарии; затем при отдельном допуске выполнить первый real источник/model цикл.
+4. Существующий verified Client уже получен через Telegram (`b4e3f3fb`), свой history READ подтверждён (`f653516d`). Локальная передача текущего вопроса исправлена (`880b4653`), 17 React/HTTP/PG checks прошли (`e267e9ef`). Следующий реальный цикл — повторная проверка history → last_visit без setup/import, затем отдельно разрешённый create/move/cancel. Scripted model не заменяет живую смысловую приёмку.
 5. Продолжать конечные функции №2–11; после инвентаря и первого real цикла заменить NOT_ESTIMABLE оценками конкретных исправлений. Показывать владельцу полезные результаты по мере готовности, не ждать финальной сертификации всей платформы.
 
 ## Масштабирование после первого пилота
@@ -319,5 +336,5 @@ Telegram/CRM-приёмка, полная загрузка удалённой и
 - **Неоднозначность каналов явная:** отсрочка нового Telegram/WhatsApp/MAX inbound не отменяет согласованную campaign функцию. Точный существующий outbound маршрут, получатели и consent надо выбрать; без этого delivery не объявляется готовой.
 - **Website/real booking другой задачи не затрагиваются.** Существующие ограничения source/identity/retention/authority сохраняются. Любая новая схема, retention или autonomy decision останавливает только зависимое изменение до точного решения.
 
-Ни полная функциональность первого салона, ни масштабная MAYA ещё не приняты. Этот документ сохраняет выбранную цель, завершённые локальные результаты и следующий исполнимый порядок работ; он не выдаёт C10 completion из contracts или synthetic proof. Реальное локальное подключение салона уже подтверждено на `bfc83242`, три публичных ответа AChat — на `6d46f7b2`; повторять install/activate ради этой проверки не требуется. Текущий ближайший шаг — подготовить и квалифицировать Telegram/private-history режим на той же сохранённой базе, затем провести один отдельно разрешённый реальный сценарий. Существующий public-only режим и старое истёкшее model окно не дают допуска к частным данным. Автопилот C10, полный продукт и новая release certification остаются незавершёнными.
+Ни полная функциональность первого салона, ни масштабная MAYA ещё не приняты. Этот документ сохраняет выбранную цель, завершённые локальные результаты и следующий исполнимый порядок работ; он не выдаёт C10 completion из contracts или synthetic proof. Реальное локальное подключение салона уже подтверждено на `bfc83242`, три публичных ответа AChat — на `6d46f7b2`; повторять install/activate ради этой проверки не требуется. Telegram/private-history режим уже квалифицирован и применён локально: реальная Client-связь и чтение своей истории подтверждены. Текущий ближайший шаг — живой повтор исправленного перехода история → последний визит, затем непрерывный booking/move/cancel сценарий. Новая локальная правка и сохранённые ключи не продлевают истёкшие допуски внешних проверок. Автопилот C10, полный продукт и новая release certification остаются незавершёнными.
 

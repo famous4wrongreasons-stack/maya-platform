@@ -1,0 +1,70 @@
+{
+  "success": true,
+  "numPassedTests": 189,
+  "numFailedTests": 0,
+  "numTotalTests": 189,
+  "numPassedTestSuites": 9,
+  "numFailedTestSuites": 0,
+  "startTime": 1791830954684,
+  "qualification": "SCOPED_OFFLINE_NOT_FULL_CERTIFICATION_OR_REAL_MODEL_ACCEPTANCE",
+  "productCommit": "880b4653",
+  "testedProductBytesUnchangedAt": "e267e9ef622aefda9eed6e35fced3e339efabd86",
+  "suites": [
+    {
+      "file": "maya-saas-backend/src/ai-tools/planner-wire-context.spec.ts",
+      "status": "passed",
+      "passed": 31
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/personal-history-planner-contract.spec.ts",
+      "status": "passed",
+      "passed": 11
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-core.personal-appointments-source-trace.spec.ts",
+      "status": "passed",
+      "passed": 16
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/ai-core-model.service.spec.ts",
+      "status": "passed",
+      "passed": 58
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/personal-history-source.spec.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/personal-history-followup.spec.ts",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/owner-review-plan.spec.ts",
+      "status": "passed",
+      "passed": 9
+    },
+    {
+      "file": "maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.spec.ts",
+      "status": "passed",
+      "passed": 27
+    },
+    {
+      "file": "maya-saas-backend/src/ai-tools/personal-history-presentation.spec.ts",
+      "status": "passed",
+      "passed": 29
+    }
+  ],
+  "sourceHashes": {
+    "maya-saas-backend/src/ai-tools/planner-wire-context.spec.ts": "d7da6169390501173632c5c9cbe467867c40883d0c7430c4d706fd928f8d6d4b",
+    "maya-saas-backend/src/ai-tools/personal-history-planner-contract.spec.ts": "c6344c6555eb684f090fb13931fa48419c3c7db7eb6f00ffbbf57e3f8d4dc702",
+    "maya-saas-backend/src/ai-tools/ai-core.personal-appointments-source-trace.spec.ts": "8b3bbaca90f8b2003d47a332091c1b17ff95f9eb42fc13ee760199091159c9fd",
+    "maya-saas-backend/src/ai-tools/ai-core-model.service.spec.ts": "51809d466f5bc64b912e67e529e2ac1da223deb4d5e6374cb43d9361f2c93f6e",
+    "maya-saas-backend/src/ai-tools/personal-history-source.spec.ts": "413e2ae6ad60d50b477e603dc29ccd6fb45fc6c6f496b779a4ac28719f5fc727",
+    "maya-saas-backend/src/ai-tools/personal-history-followup.spec.ts": "5b7e9b17ea89ddc895fb0a5da4cab61725fee6db2d0e1a199d0fe430fb121998",
+    "maya-saas-backend/src/ai-tools/owner-review-plan.spec.ts": "16596d63c1c9a343fb1ede9ee40e9b75c8934256f978a1d66564725073bb5c32",
+    "maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.spec.ts": "5061e3d765bf6d5bcb51301f96350dfac713435b306f01083f1780bd8d36841f",
+    "maya-saas-backend/src/ai-tools/personal-history-presentation.spec.ts": "3d3b39b0e5b35ff186320f7748b700fb12ab7439646b10963ebaadb5d6588aa4"
+  }
+}

@@ -1,0 +1,80 @@
+[
+  {
+    "path": "/private/tmp/maya-history-current-request-unit-20261012.json",
+    "sha256": "bf47ae6000e73911e344c70cc107e497b1eccbd2e308e0fd6f37764efd6445db",
+    "bytes": 56334,
+    "retention": "local original; inspected aggregate only committed"
+  },
+  {
+    "path": "/private/tmp/maya-history-current-request-unit-20261012-02.json",
+    "sha256": "db8ff7d6df866021785cdcca30e64bfea190846c791ec88898c22bb219813d98",
+    "bytes": 95792,
+    "retention": "local original; inspected aggregate only committed"
+  },
+  {
+    "path": "/private/tmp/maya-history-current-request-unit-20261012-03.json",
+    "sha256": "86cfea9f98bcd76e7c010a15b4b7ea0ae6347817d7453209eab4b5ba4a2b0883",
+    "bytes": 94632,
+    "retention": "local original; inspected aggregate only committed"
+  },
+  {
+    "path": "/private/tmp/maya-history-current-request-policy-20261012.log",
+    "sha256": "982dec3d24dc6916f293f7304b8f2d2a9cc594b0a8d201cd1e91dc02388d2b47",
+    "bytes": 1016,
+    "retention": "local original; inspected aggregate only committed"
+  },
+  {
+    "path": "/private/tmp/maya-history-current-request-types-20261012.log",
+    "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+    "bytes": 103,
+    "retention": "local original; inspected aggregate only committed"
+  },
+  {
+    "path": "/private/tmp/maya-history-current-request-lint-20261012.log",
+    "sha256": "b3c9e04b0131b88f97f80e1c0f5accadc203c67b484d9c74f7f87795aa24a89d",
+    "bytes": 4632,
+    "retention": "local original; inspected aggregate only committed"
+  },
+  {
+    "path": "/private/tmp/maya-history-current-request-lint-20261012-02.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0,
+    "retention": "local original; inspected aggregate only committed"
+  },
+  {
+    "path": "/private/tmp/maya-history-current-request-build-20261012.log",
+    "sha256": "b74e5c60033b62edf5aa47fcace858704866272bf6c05a53d7b76d4f3abdaf15",
+    "bytes": 158,
+    "retention": "local original; inspected aggregate only committed"
+  },
+  {
+    "path": "/private/tmp/maya-history-current-request-mutations-20261012-01.log",
+    "sha256": "472c1f9d28491abacb7a0699b123a501fafe65569f739cf6f6737aacb840b5eb",
+    "bytes": 851,
+    "retention": "local original; inspected aggregate only committed"
+  },
+  {
+    "path": "/private/tmp/maya-history-current-request-mutations-20261012-01/guard-baseline.log",
+    "sha256": "6ceb3dd8baf97338967ccc2eaf55ff6be595ffd0e268e9b77c041e6266f138e9",
+    "bytes": 1800,
+    "retention": "local original; inspected aggregate only committed"
+  },
+  {
+    "path": "/private/tmp/maya-history-current-request-mutations-20261012-02/summary.json",
+    "sha256": "23bea4b0fa1990ac30780b5deb2bbc8b596ff5c12ff5b1de1d1a536877e41872",
+    "bytes": 3549,
+    "retention": "local original; inspected aggregate only committed"
+  },
+  {
+    "path": "/private/tmp/maya-history-current-request-http-20261012-01/summary.json",
+    "sha256": "78080f490c5d182520f2877c87423b9dfee4174fa7615a0473d30fded29c91d0",
+    "bytes": 2822,
+    "retention": "local original; inspected aggregate only committed"
+  },
+  {
+    "path": "/private/tmp/maya-history-current-request-http-20261012-02/summary.json",
+    "sha256": "a64e4fdff75553395d14b2cd648a4a08dcea6597df06731a8a7afd3f86c22157",
+    "bytes": 2678,
+    "retention": "local original; inspected aggregate only committed"
+  }
+]

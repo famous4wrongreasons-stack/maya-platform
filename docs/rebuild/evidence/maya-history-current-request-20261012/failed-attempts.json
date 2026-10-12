@@ -1,0 +1,30 @@
+[
+  {
+    "attempt": "unit-01",
+    "passed": 102,
+    "failed": 2,
+    "reason": "instruction wire exceeded existing 98304-byte limit; compacted guidance, did not raise limit"
+  },
+  {
+    "attempt": "unit-02",
+    "passed": 188,
+    "failed": 1,
+    "reason": "one OpenAI fixture was 98313 bytes; compacted instruction, kept limit"
+  },
+  {
+    "attempt": "mutations-01",
+    "reason": "isolated archive omitted maya-chat-shell/dev relay import; guard baseline could not load; no mutations qualified",
+    "fixedBy": "61989aef"
+  },
+  {
+    "attempt": "react-http-pg-01",
+    "passedCheckpoints": 6,
+    "reason": "new harness incorrectly expected persisted parent_request prose; AiCore canonically saves empty parent_request and only task/slots",
+    "fixedBy": "e267e9ef",
+    "cleanup": {
+      "clusterStopped": true,
+      "pidFileAbsent": true,
+      "sourceUnchanged": true
+    }
+  }
+]

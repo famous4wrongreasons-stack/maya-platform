@@ -1,0 +1,93 @@
+{
+  "qualification": "OFFLINE_WIRE_COUNTERFACTUALS_NOT_MODEL_LANGUAGE_ACCEPTANCE",
+  "head": "61989aef274a3d49d3470e25e78b389a6c29dccf",
+  "prior": "3671a0db85047c2b888862894ff45d802872041d",
+  "specSha256": "5b7e9b17ea89ddc895fb0a5da4cab61725fee6db2d0e1a199d0fe430fb121998",
+  "baseline": {
+    "wire": {
+      "exit": 0,
+      "total": 4,
+      "failed": 0,
+      "passed": 4,
+      "logSha256": "4b5bcd4b663a952a23d46c8ae139ba07086fd21d39ef1515de629acc21fc2a5b",
+      "failures": []
+    },
+    "guard": {
+      "exit": 0,
+      "total": 7,
+      "failed": 0,
+      "passed": 7,
+      "logSha256": "73dcedf75e0a474a9fe58318bbe70f38b26734b2c44d711982dccce502b5812b"
+    }
+  },
+  "mutations": [
+    {
+      "name": "exact-prior-planner",
+      "exit": 1,
+      "total": 4,
+      "failed": 3,
+      "passed": 1,
+      "logSha256": "c0f981197f01d65864b7fd55dde70a09ab8cefcb7b71cf462f92d538967c7620",
+      "failures": [
+        "current user request versus retained personal history plan deepseek wire explicitly binds each current utterance while retaining history and scope",
+        "current user request versus retained personal history plan openai wire explicitly binds each current utterance while retaining history and scope",
+        "current user request versus retained personal history plan selects only the latest user message, not assistant prose or a retained parent"
+      ],
+      "killed": true
+    },
+    {
+      "name": "first-user-instead-of-current",
+      "exit": 1,
+      "total": 4,
+      "failed": 3,
+      "passed": 1,
+      "logSha256": "570b823d98e204db7c43a5d0ec85b0b9609066cdbb3bd368d3b381c569a7b150",
+      "failures": [
+        "current user request versus retained personal history plan deepseek wire explicitly binds each current utterance while retaining history and scope",
+        "current user request versus retained personal history plan openai wire explicitly binds each current utterance while retaining history and scope",
+        "current user request versus retained personal history plan selects only the latest user message, not assistant prose or a retained parent"
+      ],
+      "killed": true
+    },
+    {
+      "name": "retained-parent-instead-of-current",
+      "exit": 1,
+      "total": 4,
+      "failed": 3,
+      "passed": 1,
+      "logSha256": "ada309e7e003bc33cca4d6d8cb1e9076d91dc4b08856d3595f74b794e783563d",
+      "failures": [
+        "current user request versus retained personal history plan deepseek wire explicitly binds each current utterance while retaining history and scope",
+        "current user request versus retained personal history plan openai wire explicitly binds each current utterance while retaining history and scope",
+        "current user request versus retained personal history plan selects only the latest user message, not assistant prose or a retained parent"
+      ],
+      "killed": true
+    },
+    {
+      "name": "unchecked-private-or-stale-current-request",
+      "exit": 1,
+      "total": 7,
+      "failed": 1,
+      "passed": 6,
+      "logSha256": "a36858609f69797a0b07c70b546d430be4f906166034a0a1436aeb161ae3e7f2",
+      "killed": true
+    }
+  ],
+  "restored": {
+    "wire": {
+      "exit": 0,
+      "total": 4,
+      "failed": 0,
+      "passed": 4,
+      "logSha256": "4244eb56ff05a41e11333521abd0e5701d03ffe00d7d0ffe94d07bbdedb6f29a",
+      "failures": []
+    },
+    "guard": {
+      "exit": 0,
+      "total": 7,
+      "failed": 0,
+      "passed": 7,
+      "logSha256": "8cacb396357435475659380416fcb09656a2694a4df25946a454386bb9636aea"
+    }
+  }
+}
