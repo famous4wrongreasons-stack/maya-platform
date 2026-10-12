@@ -3334,10 +3334,14 @@ export class CrmService {
     // A completed result needs no provider, current catalogue, or new quote.
     if (source.execution.state === 'SUCCEEDED') {
       await authorize();
-      return this.getAppointmentActionExecutionResult(
+      const result = await this.getAppointmentActionExecutionResult(
         input.tenantId,
         bound.executionId,
       );
+      // The result read awaits storage; current Client/widget access may have
+      // been revoked meanwhile. Preserve history, but refuse its disclosure.
+      await authorize();
+      return result;
     }
     if (
       stableActionJson(
@@ -3423,11 +3427,14 @@ export class CrmService {
         );
     };
     await authorize();
-    if (execution.state === 'SUCCEEDED')
-      return this.getAppointmentActionExecutionResult(
+    if (execution.state === 'SUCCEEDED') {
+      const result = await this.getAppointmentActionExecutionResult(
         input.tenantId,
         execution.id,
       );
+      await authorize();
+      return result;
+    }
     const invocation: AppointmentActionInvocation = {
       sourceType: 'authenticated_request',
       sourceRef: `client-channel-link:${input.linkId}`,

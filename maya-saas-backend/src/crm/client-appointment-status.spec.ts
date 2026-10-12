@@ -207,6 +207,59 @@ function fixture() {
 afterEach(() => jest.restoreAllMocks());
 
 describe('explicit original Client appointment status', () => {
+  it.each(['create', 'reschedule'] as const)(
+    'refuses completed %s if access is revoked while its durable result is read',
+    async (operation) => {
+      const f = fixture();
+      f.source.execution.state = 'SUCCEEDED';
+      if (operation === 'reschedule') {
+        f.runtime.readClientAppointmentStatusSource.mockResolvedValue({
+          execution: {
+            id: 'execution-a',
+            capability: 'crm.appointment.reschedule.v1',
+            state: 'SUCCEEDED',
+          },
+          principal: {
+            linkId: 'link-a',
+            target: {
+              kind: 'appointment',
+              appointmentId: 'appointment-a',
+              externalId: '501',
+            },
+          },
+          input: { externalId: '501', start: f.source.input.start },
+        });
+      }
+      // The durable result is legitimate. Losing current Client/widget access
+      // during the awaited DB read must prevent disclosure, not rewrite it.
+      f.runtime.getExecutionResult.mockImplementation(async () => {
+        await Promise.resolve();
+        f.revoke();
+        return { executionId: 'execution-a', state: 'SUCCEEDED' };
+      });
+      const read = () =>
+        operation === 'create'
+          ? f.read()
+          : f.run(() =>
+              f.service.readClientRescheduleStatus({
+                tenantId: 'tenant-a',
+                linkId: 'link-a',
+                appointmentId: 'appointment-a',
+                externalId: '501',
+                key: 'original-stored-confirmation-key',
+                timezone: 'Europe/Moscow',
+                authorize: f.createInput.authorize,
+              }),
+            );
+      await expect(read()).rejects.toThrow(ForbiddenException);
+      expect(f.runtime.getExecutionResult).toHaveBeenCalledTimes(1);
+      expect(f.source.execution.state).toBe('SUCCEEDED');
+      expect(f.adapterRead).not.toHaveBeenCalled();
+      expect(f.runtime.resolveClientAppointmentStatus).not.toHaveBeenCalled();
+      f.noMutation();
+    },
+  );
+
   it('reads completed create by its original tenant/Client/alias without source or provider calls', async () => {
     const f = fixture();
     f.source.execution.state = 'SUCCEEDED';
