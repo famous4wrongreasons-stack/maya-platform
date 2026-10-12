@@ -125,7 +125,7 @@ try {
   report.checks.push('real-adapter-to-canonical-reconciliation-two-distinct-clients','one-import-concurrent-and-later-replay-refused');
   // Real acceptance reached this read after the five-minute canonical adapter
   // cache expired. Reproduce that boundary without sleeping or changing clocks.
-  const cachedAdapter=crm.adapterCache.get(tenant.id);assert.ok(cachedAdapter);cachedAdapter.expiresAt=Date.now()-1;
+  const cachedAdapter=app.get(CrmService).adapterCache.get(tenant.id);assert.ok(cachedAdapter);cachedAdapter.expiresAt=Date.now()-1;
   const personalRead=await http('/api/client-channel/appointments',undefined,token);assert.equal(personalRead.status,200);assert.equal(personalRead.body.length,1);
   assert.ok(!JSON.stringify(personalRead.body).includes('Synthetic foreign'));assert.ok(!JSON.stringify(personalRead.body).includes('SYNTHETIC PRIVATE NOTE'));
   report.checks.push('canonical-personal-reader-excludes-foreign-records-and-notes');
