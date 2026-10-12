@@ -13,7 +13,8 @@ const git = (...args) => execFileSync('git', args, { cwd: repo, encoding: 'utf8'
 assert.equal(git('status', '--porcelain', '--untracked-files=all', '--', 'maya-chat-shell'), '');
 const head = git('rev-parse', 'HEAD');
 fs.mkdirSync(output, { mode: 0o700 });
-execFileSync('tar', ['-x', '-C', output], { input: execFileSync('git', ['archive', head, 'maya-chat-shell'], { cwd: repo, maxBuffer: 128 * 1024 * 1024 }) });
+execFileSync('tar', ['-x', '-C', output], { input: execFileSync('git', ['archive', head, 'maya-chat-shell', 'maya-saas-backend/package.json'], { cwd: repo, maxBuffer: 128 * 1024 * 1024 }) });
+fs.symlinkSync(path.join(repo, 'maya-saas-backend/node_modules'), path.join(output, 'maya-saas-backend/node_modules'), 'dir');
 const cwd = path.join(output, 'maya-chat-shell');
 const file = path.join(cwd, 'src/shell/intents.ts'), original = fs.readFileSync(file, 'utf8');
 const sha = text => createHash('sha256').update(text).digest('hex');
@@ -30,8 +31,10 @@ function run(name) {
   const total = Number(/^# tests (\d+)$/m.exec(log)?.[1]);
   assert.equal(total, 30, 'All applicable tests ran; syntax/import/runner failure is not a kill');
   for (const [file, hash] of Object.entries(hashes)) assert.equal(sha(fs.readFileSync(path.join(cwd, file))), hash);
+  const failures = [...log.matchAll(/^not ok \d+ - (.+)$/gm)].map(m => m[1]);
+  assert.ok(failures.every(name => name.startsWith('restored receipt')), 'Import/runner failure is not a kill');
   return { exit: result.status, total, passed: Number(/^# pass (\d+)$/m.exec(log)?.[1]), failed: Number(/^# fail (\d+)$/m.exec(log)?.[1]),
-    failures: [...log.matchAll(/^not ok \d+ - (.+)$/gm)].map(m => m[1]), logSha256: sha(log) };
+    failures, logSha256: sha(log) };
 }
 const mutations = [
   ['missing-restored-read', "deps.timeline.setReceiptRefresh(anchor, 'available');", '// no restored read chrome', /actual conversation restore/],
