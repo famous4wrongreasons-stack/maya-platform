@@ -270,7 +270,7 @@ async function main() {
       assert.equal(slotsRequest.status, 200);
       assert.equal(new URL(slotsRequest.url).searchParams.get('branchId'), branch.id);
       const slot = JSON.parse(await page.responseBody(slotsRequest.requestId))[0]; assert.ok(slot);
-      assert.equal(slot.branchId, branch.id);
+      assert.equal(slot.branch_id, branch.id);
       const label = new Intl.DateTimeFormat('ru', { timeZone: branch.timezone, dateStyle: 'short', timeStyle: 'short' }).format(new Date(slot.start)) + ` (${branch.timezone})`;
       await clickNamed(page, label);
       if (scenario.key === 'incomplete') {
