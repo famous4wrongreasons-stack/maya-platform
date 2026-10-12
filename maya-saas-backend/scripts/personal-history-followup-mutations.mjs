@@ -15,7 +15,7 @@ const head=git('rev-parse','HEAD'), prior='3671a0db85047c2b888862894ff45d8028720
 fs.mkdirSync(out,{mode:0o700});
 execFileSync('tar',['-x','-C',out],{input:execFileSync('git',['archive',head,
   'maya-saas-backend/src','maya-saas-backend/scripts','maya-saas-backend/package.json',
-  'maya-saas-backend/tsconfig.json'],{cwd:repo,maxBuffer:128*1024*1024})});
+  'maya-saas-backend/tsconfig.json','maya-chat-shell/dev'],{cwd:repo,maxBuffer:128*1024*1024})});
 const cwd=path.join(out,'maya-saas-backend');
 for(const name of ['node_modules','dist'])fs.symlinkSync(path.join(backend,name),path.join(cwd,name),'dir');
 const files={model:'src/ai-tools/ai-core-model.service.ts',
