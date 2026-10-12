@@ -47,20 +47,22 @@ describe('H-2 ordinary full-trial own-history authority', () => {
   afterEach(() => jest.useRealTimers());
 
   it('allows only history for a full unexpired trial and binds the exact lookup', async () => {
-    const db = tx(member());
+    const findUnique = jest.fn().mockResolvedValue(member());
+    const db = {
+      membership: { findUnique },
+    } as unknown as Prisma.TransactionClient;
     await expect(
       read.actor(db, 'tenant-a', 'user-a', 'client_capabilities'),
     ).resolves.toMatchObject({ id: 'membership-a' });
-    expect(db.membership.findUnique).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { userId_tenantId: { tenantId: 'tenant-a', userId: 'user-a' } },
-        include: expect.objectContaining({
-          tenant: {
-            select: { status: true, trialFullAccess: true, trialEndsAt: true },
-          },
-        }),
-      }),
-    );
+    expect(findUnique).toHaveBeenCalledWith({
+      where: { userId_tenantId: { tenantId: 'tenant-a', userId: 'user-a' } },
+      include: {
+        user: { select: { status: true } },
+        tenant: {
+          select: { status: true, trialFullAccess: true, trialEndsAt: true },
+        },
+      },
+    });
   });
   it.each(
     TENANT_CONFIGURATION_NAMESPACES.filter((n) => n !== 'client_capabilities'),
@@ -138,14 +140,16 @@ describe('H-2 ordinary full-trial own-history authority', () => {
     async (state) => {
       const currentMember = member();
       const dbTx = {
-        membership: { findUnique: jest.fn(async () => currentMember) },
+        membership: { findUnique: jest.fn().mockResolvedValue(currentMember) },
         $executeRaw: jest.fn(),
         $queryRaw: jest.fn(),
         actionExecution: {
-          findUniqueOrThrow: jest.fn(async () => ({
-            ...execution,
-            state: 'SUCCEEDED',
-          })),
+          findUniqueOrThrow: jest.fn(() =>
+            Promise.resolve({
+              ...execution,
+              state: 'SUCCEEDED',
+            }),
+          ),
         },
       };
       const execution = {
@@ -178,12 +182,16 @@ describe('H-2 ordinary full-trial own-history authority', () => {
         },
       };
       const database = {
-        actionExecution: { findUniqueOrThrow: jest.fn(async () => execution) },
-        $transaction: jest.fn(async (work: (tx: unknown) => unknown) =>
-          work(dbTx),
+        actionExecution: {
+          findUniqueOrThrow: jest.fn().mockResolvedValue(execution),
+        },
+        $transaction: jest.fn((work: (tx: unknown) => unknown) =>
+          Promise.resolve(work(dbTx)),
         ),
       };
-      const kernel = { readTrustedNormalizedInput: jest.fn(async () => input) };
+      const kernel = {
+        readTrustedNormalizedInput: jest.fn().mockResolvedValue(input),
+      };
       const executor = new Package5Wave1ExecutableService(
         database as unknown as PrismaClient,
         {} as CanonicalActionIngressService,

@@ -31,7 +31,7 @@ function run(name) {
   return { exit: result.status, passed: d.numPassedTests, failed: d.numFailedTests, failures: d.testResults.flatMap(r => r.assertionResults.filter(t => t.status === 'failed').map(t => t.title)), assertion: d.testResults.some(r => r.assertionResults.some(t => t.status === 'failed' && t.failureMessages.some(m => m.includes('expect(')))) };
 }
 const mutations = [
-  ['trial-namespace', 'read', "namespace === 'client_capabilities'", 'true', 'does not widen'],
+  ['trial-namespace', 'read', "namespace === 'client_capabilities' &&", 'true &&', 'does not widen'],
   ['full-trial-flag', 'read', 'member.tenant.trialFullAccess === true', 'true', 'setup-only'],
   ['trial-status', 'read', "member?.tenant.status === 'trial'", 'true', 'suspended'],
   ['trial-expiry', 'read', 'member.tenant.trialEndsAt.getTime() > Date.now()', 'true', 'exact expiry'],
