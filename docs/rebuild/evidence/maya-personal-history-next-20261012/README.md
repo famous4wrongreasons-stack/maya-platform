@@ -127,3 +127,18 @@ stopped. No product/schema/carrier source changed.
 **H-1: OPTION A SELECTED; LOCAL PREPARATION PASS.**
 **READY TO REQUEST ONE REAL LOCAL EXECUTION ALLOWANCE: YES.**
 **REAL HISTORY IMPORT: NOT AUTHORIZED / NOT EXECUTED.**
+
+## Subsequent authorized local execution — 2026-10-12
+
+The owner later approved and ran the bounded H-1 journal session. It completed
+one import of 162 appointments; a read-only aggregate found four belonging to
+the current verified personal Client. Own privacy consent was saved with
+marketing false. The actual personal-history GET returned 500 and governed
+configuration returned 403 for the `trial` salon; live AChat acceptance was not
+performed. The local runtime and retained database were stopped cleanly.
+
+[The live result and synthetic correction](../maya-owner-history-14d-20261012/LIVE-RESULT.md)
+preserve the exact executed candidate, receipt hashes, proven catalogue-refresh
+defect and correction, and the separate H-2 trial-configuration decision. This
+supersedes the earlier no-execution status only; it is not release certification
+or authority to repeat the consumed import.

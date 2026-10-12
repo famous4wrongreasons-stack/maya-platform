@@ -1,0 +1,34 @@
+{
+  "qualification": "HASH_PROVENANCE_NO_RAW_STATE",
+  "receipts": [
+    {
+      "name": "session/resume.json",
+      "originalLocalPath": "/private/tmp/maya-owner-history-20261012-01/session/resume.json",
+      "sha256": "7ec5ead5659797f0f23e09279b3e141e71a223bfc9cc1a95fa5aef3e557dcbef",
+      "bytes": 549283,
+      "repositoryForm": "allowlisted safe projection in live-summary.json; original retained locally"
+    },
+    {
+      "name": "history-observation.json",
+      "originalLocalPath": "/private/tmp/maya-owner-history-20261012-01/history-observation.json",
+      "sha256": "80e1a4ec744833bc68c464655661554223fbc71a0c6c2b417fbc8c2e3cb38c48",
+      "bytes": 611,
+      "repositoryForm": "allowlisted safe projection in live-summary.json; original retained locally"
+    },
+    {
+      "name": "api-observation.json",
+      "originalLocalPath": "/private/tmp/maya-owner-history-20261012-01/api-observation.json",
+      "sha256": "122dedf429851c2ce8544051e987c220d74fbef4d74e89ece0138260080e27ca",
+      "bytes": 630,
+      "repositoryForm": "allowlisted safe projection in live-summary.json; original retained locally"
+    }
+  ],
+  "excluded": [
+    "private plan and scope identities",
+    "keys, credentials, cookies and sessions",
+    "raw provider records and contacts/notes",
+    "retained database and dumps",
+    "personal appointment identity list/hash"
+  ],
+  "databaseRestartedForArchive": false
+}

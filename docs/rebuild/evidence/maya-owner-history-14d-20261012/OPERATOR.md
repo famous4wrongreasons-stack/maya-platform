@@ -2,6 +2,11 @@
 
 This procedure is prepared, not executed. No live plan or current execution authorization exists at this checkpoint.
 
+**Subsequent execution notice:** this historical procedure was later executed
+under a separate one-use owner allowance. Its permit is now consumed and the
+runtime/database are stopped. See [LIVE-RESULT.md](LIVE-RESULT.md); do not repeat
+the import to inspect the journal already retained locally.
+
 1. **Owner — approve once.** Authorize one local session of at most 30 minutes on the retained owner database: one existing reconciliation for October 5–18, 2026 inclusive in Europe/Moscow, at most 5,000 salon appointment rows, including other clients' provider-supplied contacts and notes. Include enabling personal history through the existing governed setting and recording the owner's own privacy consent, with marketing false, then reading only the verified personal Client's projection. No model, booking changes, messages/SMS, production or history outside that interval. Prior selection of scope is not this real-data allowance.
 2. **Agent — prepare the exact execution.** Verify the clean source checkpoint and retained manifest, private artifact hashes, original restart receipt and stopped database. Issue a new private one-use plan with exact source/owner scope, dates, origin and an absolute expiry no later than 30 minutes from its start. Pin the new approval reference. Do not reuse the consumed Telegram plan. Keep private material outside Git and chat. Produce the specific owner command only after approval.
 3. **Owner — one hidden credential entry.** Run the prepared command in Terminal and enter the YCLIENTS partner token only at its hidden prompt. The saved encrypted YCLIENTS user token is reused. No Telegram Client Secret or model key is required. Automatic Terminal control for secret entry was previously rejected by the safety review; this procedure preserves that boundary. Do not paste any token into chat.

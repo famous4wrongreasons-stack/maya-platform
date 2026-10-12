@@ -1,0 +1,350 @@
+{
+  "qualification": "SYNTHETIC_LOCAL_CORRECTION_NOT_LIVE_ACCEPTANCE_NOT_RELEASE_CERTIFICATION",
+  "executedHead": "7c26f2958af0e0dbb10292fd6f8b2eccec559e2b",
+  "units": {
+    "passed": 148,
+    "failed": 0,
+    "skipped": 0,
+    "historyGuardTests": 37
+  },
+  "mutations": {
+    "head": "7c26f2958af0e0dbb10292fd6f8b2eccec559e2b",
+    "baseline": {
+      "exit": 0,
+      "passed": 37,
+      "failed": 0,
+      "failures": [],
+      "assertion": false
+    },
+    "mutations": [
+      {
+        "name": "foreign-company",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "finite provider refuses foreign company"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "window-widening",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "finite provider refuses wide dates"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "model-write",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "finite provider refuses write"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "one-invocation",
+        "exit": 1,
+        "passed": 35,
+        "failed": 2,
+        "failures": [
+          "one invocation including failed/concurrent retry; background cannot dispatch",
+          "later personal read may refresh public labels after journal adapter cache expires"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "replayed-page",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "catalogue replay is refused independently of journal page ordering"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "session-call-budget",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "label refresh operations share the same finite total request budget"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "unordered-page",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "ordered pages and replay; foreign request poisons remaining run"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "expired-operation",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "expired, revoked and changed authority refuses even an in-flight response"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "stale-response-authority",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "expired, revoked and changed authority refuses even an in-flight response"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "overfilled-record-page",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "exact page cap 25 and row cap 200 including overfilled provider responses"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "per-page-byte-cap",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "catalogue size and page byte cap are enforced"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "aggregate-byte-cap",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "aggregate byte cap across individually valid pages"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "response-source-pin",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "changed source cannot expose a response while the execution permit stays current"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "candidate-pin",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "history plan refuses candidate"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "source-pin",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "history plan refuses source"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "expired-permit",
+        "exit": 1,
+        "passed": 36,
+        "failed": 1,
+        "failures": [
+          "history plan refuses expired"
+        ],
+        "assertion": true,
+        "killed": true
+      }
+    ],
+    "restored": {
+      "exit": 0,
+      "passed": 37,
+      "failed": 0,
+      "failures": [],
+      "assertion": false
+    },
+    "workingSourceUnchanged": true
+  },
+  "compiledHttpPgBinary": [
+    {
+      "head": "7c26f2958af0e0dbb10292fd6f8b2eccec559e2b",
+      "status": "passed",
+      "checks": [
+        "canonical-password-login-and-GET-do-not-import",
+        "real-adapter-to-canonical-reconciliation-two-distinct-clients",
+        "one-import-concurrent-and-later-replay-refused",
+        "canonical-personal-reader-excludes-foreign-records-and-notes",
+        "expired-adapter-cache-refreshes-labels-without-reimport",
+        "governed-history-setting-canonical-CAS-and-explicit-private-consent",
+        "business-model-SMS-binding-and-foreign-owner-refused",
+        "out-of-window-source-row-refused-before-any-appointment-write",
+        "overfilled-page-fails-without-false-completion-or-extra-rows",
+        "stop-between-rows-cannot-restore-unrestricted-writer",
+        "expiry-after-final-row-cannot-mark-reconciliation-complete",
+        "nonprogressing-source-remains-truncated-no-absence-deletion",
+        "execution-revocation-during-wire-refuses-result",
+        "company-change-in-flight-refused",
+        "actual-child-IPC-import-command-relay-and-network-denial-safe-receipt",
+        "clean-binary-stop-parent-key-discarded"
+      ],
+      "realProviderCalls": 0,
+      "clusterStopped": true,
+      "pidFileAbsent": true,
+      "runtimeGroupAbsent": true,
+      "sourceUnchanged": true
+    },
+    {
+      "head": "7c26f2958af0e0dbb10292fd6f8b2eccec559e2b",
+      "status": "passed",
+      "checks": [
+        "canonical-password-login-and-GET-do-not-import",
+        "real-adapter-to-canonical-reconciliation-two-distinct-clients",
+        "one-import-concurrent-and-later-replay-refused",
+        "canonical-personal-reader-excludes-foreign-records-and-notes",
+        "expired-adapter-cache-refreshes-labels-without-reimport",
+        "governed-history-setting-canonical-CAS-and-explicit-private-consent",
+        "business-model-SMS-binding-and-foreign-owner-refused",
+        "out-of-window-source-row-refused-before-any-appointment-write",
+        "overfilled-page-fails-without-false-completion-or-extra-rows",
+        "stop-between-rows-cannot-restore-unrestricted-writer",
+        "expiry-after-final-row-cannot-mark-reconciliation-complete",
+        "nonprogressing-source-remains-truncated-no-absence-deletion",
+        "execution-revocation-during-wire-refuses-result",
+        "company-change-in-flight-refused",
+        "actual-child-IPC-import-command-relay-and-network-denial-safe-receipt",
+        "clean-binary-stop-parent-key-discarded"
+      ],
+      "realProviderCalls": 0,
+      "clusterStopped": true,
+      "pidFileAbsent": true,
+      "runtimeGroupAbsent": true,
+      "sourceUnchanged": true
+    }
+  ],
+  "before": {
+    "validHttpHead": "d022414d792ab52e8749d931e5424202926ef395",
+    "failure": "Expected values to be strictly equal:\n\n500 !== 200\n",
+    "invalidExploratoryFailure": "crm is not defined"
+  },
+  "intermediateAfterFailure": {
+    "head": "45e2c6e7eabeddda52c1499d3294847f50b6dfdc",
+    "passedChecks": 5,
+    "failure": "socket hang up",
+    "socketRootCause": "NOT_PROVEN; diagnostics/deadlines added; two later same-HEAD runs passed"
+  },
+  "receipts": [
+    {
+      "name": "beforeUnit",
+      "originalLocalPath": "/private/tmp/maya-history-cache-before-20261012.log",
+      "sha256": "a3450ebd9fbedc968838ddaf34fea6a66f2ca423acac3e383ef4833706b9a775",
+      "bytes": 4836,
+      "archivalForm": "safe result projection; original local receipt retained"
+    },
+    {
+      "name": "invalidBeforeHttp",
+      "originalLocalPath": "/private/tmp/maya-history-cache-http-before-20261012/summary.json",
+      "sha256": "234c64d45ecfb6027526474eaae17c70db75b251717e8c5789c5c8f2035b4b59",
+      "bytes": 1447,
+      "archivalForm": "safe result projection; original local receipt retained"
+    },
+    {
+      "name": "beforeHttp",
+      "originalLocalPath": "/private/tmp/maya-history-cache-http-before-20261012-02/summary.json",
+      "sha256": "fcef6a295861acf164352026c020ed92be501ea1607510c7139e9875c4d92ab4",
+      "bytes": 1535,
+      "archivalForm": "safe result projection; original local receipt retained"
+    },
+    {
+      "name": "firstAfterHttpFailure",
+      "originalLocalPath": "/private/tmp/maya-history-cache-http-final-20261012/summary.json",
+      "sha256": "12fd2cd0dca8f54792095a048425c05a29d497f6ed4cac57006e51cb9e597998",
+      "bytes": 1546,
+      "archivalForm": "safe result projection; original local receipt retained"
+    },
+    {
+      "name": "finalHttpFirst",
+      "originalLocalPath": "/private/tmp/maya-history-cache-http-diagnostic-20261012/summary.json",
+      "sha256": "1eeb47f11f04da2be618cf959870babe5d20aba58eebb04556998286d2aafa28",
+      "bytes": 11384,
+      "archivalForm": "safe result projection; original local receipt retained"
+    },
+    {
+      "name": "finalHttpRepeat",
+      "originalLocalPath": "/private/tmp/maya-history-cache-http-final-20261012-02/summary.json",
+      "sha256": "f26a1d9c21fa4ccc911d7d3a37d1669668f728699e067885905f98f8bb39e439",
+      "bytes": 11384,
+      "archivalForm": "safe result projection; original local receipt retained"
+    },
+    {
+      "name": "finalUnit",
+      "originalLocalPath": "/private/tmp/maya-history-cache-unit-final-7c26f295.log",
+      "sha256": "f96218cc9d5dbcf15c69b9df5c7c467cd31c7eef279e44c8f1a96c40f3510487",
+      "bytes": 12135,
+      "archivalForm": "safe result projection; original local receipt retained"
+    },
+    {
+      "name": "finalMutations",
+      "originalLocalPath": "/private/tmp/maya-history-cache-mutations-final-20261012/summary.json",
+      "sha256": "56b85874b8327e009292587b6eba18ee3bbe06699432d94afe9cc37559286be3",
+      "bytes": 4564,
+      "archivalForm": "safe result projection; original local receipt retained"
+    }
+  ],
+  "changedSourceHashes": [
+    {
+      "path": "maya-saas-backend/scripts/local-owner-history-transport.mjs",
+      "sha256": "9e8e302b471dfaab787fbb2cd6f669d1418a0110cbc0eef6f820458947f80a82"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-owner-history-proof.mjs",
+      "sha256": "6931b93d07af1ca56536b81d17681baec6d8b28d8ab00d923e4f67832f32a654"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-owner-history.test.mjs",
+      "sha256": "6942df48d915ba26a7316328ceb6b7f7fed40cddf7eeb7e02dceb5aacf0e98ec"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-owner-history-mutations.mjs",
+      "sha256": "e5422990110350e0349672c2719c2bf029de84d6efc61da8b88f60d2969dce5f"
+    }
+  ]
+}

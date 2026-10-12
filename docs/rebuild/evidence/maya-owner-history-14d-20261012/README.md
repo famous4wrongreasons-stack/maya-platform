@@ -4,13 +4,18 @@ Date: 2026-10-12, Europe/Moscow. Branch: `codex/maya-local-crm-setup-20261010`.
 Executed source checkpoint: `f3a1992a7819788d7dfad66f7ea1b194f34670ff`.
 This is local operator qualification, **not release certification or live history acceptance**.
 
+Historical preparation checkpoint. The subsequent separately authorized real
+import, partial acceptance and local correction are recorded in
+[LIVE-RESULT.md](LIVE-RESULT.md). Statements below about no live execution apply
+to this preparation checkpoint, not to that later run.
+
 ## Decision and scope
 
 The owner selected Option A in the [H-1 decision](../maya-personal-history-next-20261012/README.md): prepare the existing salon journal for seven days before the selected day and seven days beginning on it. The question explicitly excluded real reading at this preparation stage. No live history execution permit has been issued and no real journal has been read.
 
 Proposed day: **2026-10-12**. Proposed inclusive interval: **2026-10-05 through 2026-10-18**, in `Europe/Moscow`; the exclusive end is local midnight on October 19. The launcher must reread the actual selected branch and tenant reconciliation timezones before execution. A mismatch refuses the run; this report is not a fresh production timezone observation.
 
-The approved preparation may synchronize all clients' appointments in that interval. It is not an exact-Client source filter. Provider identifiers, appointment times, staff/services, statuses, amounts, contacts and notes may be received locally. The canonical personal reader subsequently selects only the current verified Client and excludes foreign records and private notes/contacts from its returned projection. Raw rows must not enter evidence, logs, Git or a model.
+The approved preparation may synchronize all clients' appointments in that interval. It is not an exact-Client source filter. Provider identifiers, appointment times, staff/services, statuses, amounts, contacts and notes may be received locally. The canonical personal reader subsequently selects only the current verified Client. **Evidence correction (2026-10-12):** the earlier blanket claim of private-note/contact exclusion from this HTTP projection was too broad; see the projection clarification in [LIVE-RESULT.md](LIVE-RESULT.md). Raw rows must not enter evidence, logs, Git or a model.
 
 ## Implementation and provenance
 

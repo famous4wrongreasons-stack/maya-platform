@@ -1,0 +1,99 @@
+{
+  "qualification": "REAL_LOCAL_IMPORT_NOT_PERSONAL_HISTORY_ACCEPTANCE_NOT_RELEASE_CERTIFICATION",
+  "executedCandidate": "f7429380a9d92b2f710f2ca90f9da2a6d00d0282",
+  "approvalReference": "owner-history-20261012-call_311c41f8c1b64038a32b8be914969ada",
+  "interval": {
+    "startDate": "2026-10-05",
+    "endDateInclusive": "2026-10-18",
+    "timezone": "Europe/Moscow"
+  },
+  "session": {
+    "status": "cancelled",
+    "readyAt": "2026-10-12T09:00:14.985Z",
+    "expiresAt": "2026-10-12T09:29:31.876Z",
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "samePrivateState": true,
+    "sourceUnchanged": true,
+    "executesNoInitdbMigrationSeedOrSignup": true
+  },
+  "stopInterpretation": "deliberate local SIGINT after incomplete acceptance; successful completed import remains retained; permit consumed",
+  "history": {
+    "status": "ran",
+    "completeness": "complete",
+    "windows": 1,
+    "fetched": 162,
+    "complete_windows": 1,
+    "truncated_windows": 0,
+    "created": 162,
+    "updated": 0,
+    "unchanged": 0,
+    "events_emitted": 0,
+    "duplicate_events": 0,
+    "skipped": 0
+  },
+  "providerReadSummary": {
+    "calls": 4,
+    "refused": 6,
+    "routes": {
+      "history_records": 1,
+      "team": 1,
+      "book_services": 1,
+      "categories": 1
+    }
+  },
+  "cleanupFailures": [],
+  "aggregate": {
+    "observedAt": "2026-10-12T09:04:54.789Z",
+    "databaseIdentity": "PASS",
+    "activeVerifiedPersonalLinks": 1,
+    "totalTenantAppointments": 162,
+    "personalAppointments": 4,
+    "otherOrUnresolvedAppointments": 158,
+    "outOfWindowAppointments": 0,
+    "runs": [
+      {
+        "finished": true,
+        "completeness": "complete",
+        "fetched": 162,
+        "created": 162,
+        "updated": 0,
+        "eventsEmitted": 0,
+        "failed": false
+      }
+    ]
+  },
+  "api": {
+    "observedAt": "2026-10-12T09:07:43.211Z",
+    "settings": {
+      "status": 403,
+      "reason": "Exact active staff membership required",
+      "writeAttempted": false
+    },
+    "consent": {
+      "status": 201,
+      "verifiedByStatusRead": true,
+      "privacy": true,
+      "marketing": false
+    },
+    "personalReader": {
+      "status": 500,
+      "passed": false
+    },
+    "negativeChecks": {
+      "unauthenticatedStatus": 401,
+      "callerClientSelectorStatus": 403
+    },
+    "rawDataEmitted": false,
+    "modelRequests": 0
+  },
+  "scopeLimits": {
+    "rawRowsIncluded": false,
+    "chatAcceptance": false,
+    "providerWrites": 0,
+    "productionChanges": 0,
+    "smsOrMessages": 0,
+    "retainedDatabaseMigrations": 0,
+    "reimportAuthorized": false
+  }
+}
