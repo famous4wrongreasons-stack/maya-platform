@@ -3,6 +3,8 @@
 Latest result: [live local setting and four personal visits passed; retained-context
 qualification defect fixed](LIVE-RESULT.md). The earlier sections below describe
 their original checkpoints. Live external-model AChat answers remain unverified.
+The [next bounded live review](NEXT-LIVE-REVIEW.md) includes the additional passed
+interrupted-turn continuation proof and exact data, budget and credential scope.
 
 Date: 2026-10-12. Tested source: `63d61fadaeac2d56d107ffd86b8a940c848c1d36`.
 Branch: `codex/maya-local-crm-setup-20261010`.
