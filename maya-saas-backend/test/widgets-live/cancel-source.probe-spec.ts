@@ -841,6 +841,7 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
       // actual explicit HTTP status path; do not restore automatic polling.
       for (const attempts of [2, 3]) {
         const response = await http.resolveWidgets(s.token, {
+          thread_page: { limit: 20 },
           booking_receipt: { widget_id: s.confirmation!.widget_id },
         });
         expect(response.status).toBe(200);
@@ -885,6 +886,7 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
       expect(
         (
           await http.resolveWidgets(s.token, {
+            thread_page: { limit: 20 },
             booking_receipt: { widget_id: s.confirmation!.widget_id },
           })
         ).status,
