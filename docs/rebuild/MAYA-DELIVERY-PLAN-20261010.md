@@ -1,5 +1,23 @@
 # План завершения MAYA — 10 октября 2026
 
+**12 октября, локальное хранение ключей — `90891802`:** исправлена штатная
+вставка ⌘V в защищённом окне; 24/24 native tests PASS. Владелец сам сохранил
+партнёрский токен YCLIENTS и DeepSeek. Подтверждены UI success, наличие двух
+точных записей и ACL компонента; значения агент не читал, внешних запросов нет.
+Хранение не продлевает допуски живых проверок.
+[Evidence](evidence/maya-local-keychain-integration-20261012/paste-enrollment/summary.json).
+
+**12 октября, фактический restart-барьер отмены — `ee002988`:** текущий React →
+HTTP → PostgreSQL подтвердил исходную отмену с потерянным ответом; test provider
+сохранил ровно одну отмену, Maya сохранила UNKNOWN. После нового backend process
+и реального restart PG исходные action/evidence сохранились, повторных DELETE нет.
+Но восстановленный AChat показывает только текст результата без «Проверить
+результат»: `restoreBookingOutcomes` не создаёт доступного status-read control.
+Это реальный разрыв сквозного восстановления, не зелёный FBE2E. Последующие
+pending/confirmed/revoked UI-шаги не достигнуты; runtime/product здесь не меняли.
+Оба принадлежащих тесту процесса/Chrome и отдельная PG остановлены.
+[Checkpoint и точный отказ](evidence/maya-client-cancel-status-20261012/react-restart-checkpoint.json).
+
 **12 октября, проверка исходного результата отмены — `0149f668`:**
 исправлен backend разрыв explicit receipt read для собственной отмены. Проверка
 переиспользует исходный Action Engine result/reconciliation без нового dispatch,

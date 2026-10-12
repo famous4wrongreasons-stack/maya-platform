@@ -1,0 +1,114 @@
+{
+  "contract": "maya.cancel-status-react-checkpoint/1",
+  "candidate": "ee002988cd6093c148c0a59cfc350c21617652bf",
+  "result": "BLOCKED_ON_RESTORED_RECEIPT_STATUS_CONTROL",
+  "scope": "SYNTHETIC_NATIVE_PROVIDER_ACTUAL_HTTP_PG_BROWSER_RESTART_NOT_RELEASE",
+  "prepare": "PASS",
+  "prepareBrowserCheckpoints": [
+    "recover-schedule",
+    "recover-preview",
+    "recover-unknown",
+    "revoked-schedule",
+    "revoked-preview",
+    "revoked-unknown"
+  ],
+  "postgresRestart": true,
+  "newBackendProcess": true,
+  "persistedOriginalActionAndEvidenceUnchanged": true,
+  "restoredReceiptText": "UNKNOWN",
+  "originalProviderDeleteCountPerScenario": 1,
+  "providerDeletesAfterRestart": 0,
+  "falseCancelSuccessObserved": false,
+  "blocker": {
+    "assertion": "The expression evaluated to a falsy value:\n\n  assert.ok(snapshot.controls.some(c => c.name === 'Проверить результат'))\n",
+    "owner": "runtime/restored-receipt presentation binding",
+    "source": "maya-chat-shell/src/shell/intents.ts:restoreBookingOutcomes publishes terminal text only; refreshBookingReceipt requires a live bookingReceipt Entry.",
+    "required": "An explicit current-authority status-read action for a restored stored receipt without re-ingesting spent COMMIT controls or granting retry authority.",
+    "implemented": false
+  },
+  "unreached": [
+    "explicit pending read through restored UI",
+    "confirmed status read through restored UI",
+    "completed provider-free reread through restored UI",
+    "revoked binding refusal through restored UI"
+  ],
+  "realProviderCalls": 0,
+  "realModelCalls": 0,
+  "clusterStopped": true,
+  "sourcesUnchanged": true,
+  "browserCleanup": {
+    "chromeExited": true,
+    "serverClosed": true
+  },
+  "historicalAttempts": [
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r1",
+      "result": "runner rejected noncanonical proof database prefix before start"
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r2",
+      "result": "setup HTTP400: stale test omitted required expectedVersion; exact DTO reproduction retained"
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r3",
+      "result": "failed"
+    }
+  ],
+  "rawReceipts": [
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r3/manifest.json",
+      "sha256": "8c7cd5c4cf2f9cba83902d5481333f96f219ea14ab27b519514ea5c521382f6d"
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r3/source-hashes.json",
+      "sha256": "2c19f3a3a7a58171ea80d27ec43290bec8f518c733f78f820cfb94edbf2a8257"
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r3/prepare-jest.json",
+      "sha256": "2e2284b7a55945d35d36d039ca01759d748db53d2495fde03ec2c9db7c09923b"
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r3/prepare-observations.json",
+      "sha256": "2752eaf0d9a62a8f6bd958706dffda5b739fd1638588f13000e5adc69f2cb8b4"
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r3/resume-jest.json",
+      "sha256": "ef312f70bcac7385735face4bb3d40db2d8821d9a000cdcb2e87f30f417e1e40"
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r3/resume-observations.json",
+      "sha256": "1dc3938415b7c6a18dc5d0a54ba77327def7c78694648228e31158c159b75a04"
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r3/resume/current-react/browser.json",
+      "sha256": "cedd226fc6c1275990eae951e7ae0f4518861f982dfb45bc2ffe24e62bd14919"
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r3/resume/current-react/recover-restored.png",
+      "sha256": "3df50a214347795540dd238ff14afa14f12704dfd79a858d50a0208bbd5dde62"
+    }
+  ],
+  "restoredObservation": [
+    {
+      "name": "recover-restored",
+      "state": {
+        "action": {
+          "id": "0905dd4d-dac1-4fd0-b961-7273c422f19a",
+          "state": "UNKNOWN",
+          "attempts": 1,
+          "evidence": [
+            "client-authority:v1:71b6fbe4-5736-4188-a12a-0ce3a69f7cea",
+            "client-target:appointment:v1:cmv5ayn38000z9uc9yki10m0c",
+            "crm-branch-source/1:9a8a88098fde484ad70a9f36e5bd6282c42934282defca7cb1dcce741cf9ac4b"
+          ]
+        },
+        "mirror": "confirmed",
+        "provider": {
+          "canceled": true,
+          "deletes": 1
+        }
+      },
+      "nativeDetailReads": 0
+    }
+  ]
+}

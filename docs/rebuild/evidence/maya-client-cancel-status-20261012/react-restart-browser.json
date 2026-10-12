@@ -1,0 +1,78 @@
+{
+  "contract": "maya.cancel-status-browser/1",
+  "status": "failed",
+  "realReactAndAuth": true,
+  "scriptedModel": true,
+  "syntheticNativeProvider": true,
+  "realModelCalls": 0,
+  "realProviderCalls": 0,
+  "steps": [
+    {
+      "name": "recover-restored",
+      "reply": null,
+      "envelopeKind": null,
+      "receiptOutcome": null,
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПроверить запись\nВы:\nПодтвердить запись\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n14.10.2026, 10:00 (Europe/Moscow) — Synthetic branch A — Synthetic haircut\nИсточник: ваши записи в MAYA.\nВы:\nПроверить отмену\nВы:\nПодтвердить отмену\nНе все ответы сохранены. Если вы просили выполнить действие, уточните его результат.\nСохранённые результаты недавних действий с записями:\nMAYA:\nРезультат пока не подтверждён. Не отправляйте повторно.\nMAYA:\nЗапись подтверждена.\nТовар по фото накладной\n\nСообщение для MAYA\n↑",
+        "controls": [
+          {
+            "name": "Приватность и данные",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    }
+  ],
+  "blocked": [],
+  "chromePid": 19948,
+  "lastLoginAt": 1791812669737,
+  "canonicalLogins": 1,
+  "login": "ACTUAL_CANONICAL_DEBUG_EMAIL_SYNTHETIC_CLIENT",
+  "error": "The expression evaluated to a falsy value:\n\n  assert.ok(snapshot.controls.some(c => c.name === 'Проверить результат'))\n",
+  "failureSnapshot": {
+    "text": "MAYA\nMaya\nАДМИНИСТРАТОР · ОНЛАЙН\nПриватность и данные\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nПроверить запись\nВы:\nПодтвердить запись\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n14.10.2026, 10:00 (Europe/Moscow) — Synthetic branch A — Synthetic haircut\nИсточник: ваши записи в MAYA.\nВы:\nПроверить отмену\nВы:\nПодтвердить отмену\nНе все ответы сохранены. Если вы просили выполнить действие, уточните его результат.\nСохранённые результаты недавних действий с записями:\nMAYA:\nРезультат пока не подтверждён. Не отправляйте повторно.\nMAYA:\nЗапись подтверждена.\nТовар по фото накладной\n\nСообщение для MAYA\n↑",
+    "controls": [
+      {
+        "name": "Приватность и данные",
+        "ref": null,
+        "disabled": false
+      },
+      {
+        "name": "Товар по фото накладной",
+        "ref": null,
+        "disabled": false
+      },
+      {
+        "name": "Сказать голосом",
+        "ref": null,
+        "disabled": false
+      },
+      {
+        "name": "Отправить",
+        "ref": null,
+        "disabled": false
+      }
+    ]
+  },
+  "cleanup": {
+    "chromeExited": true,
+    "serverClosed": true
+  }
+}
