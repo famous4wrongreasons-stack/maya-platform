@@ -232,7 +232,8 @@ try {
   const { CrmService:Crm }=load('crm/crm.service.js');app.get(Crm).adapterCache.get(tenant.id).expiresAt=Date.now()-1;
   assert.equal((await h('/api/client-channel/appointments',undefined,token)).body.length,1);
   check('catalogue-cache-expiry-label-refresh-no-journal');
-  await prisma.clientChannelLink.update({where:{id:linked.link.id},data:{revokedAt:new Date()}});
+  const revoker=new ClientChannelLinkService(databaseService,context,{verifyLink:async()=>{throw Error('not used');},verifyRevocation:async()=>({tenantId:tenant.id,provider:'maya_user',providerSubjectHash:proof.providerSubjectHash,linkId:linked.link.id,revocationIdentityHash:hash('synthetic-review-revoke'),actorProofHash:hash('synthetic-review-actor'),reason:'synthetic-review-only',validUntil:new Date(Date.now()+60000)})});
+  await context.runAsSystemTenant(tenant.id,()=>revoker.revoke({proof:'synthetic-revocation-not-real'}));
   assert.notEqual((await h('/api/client-channel/appointments',undefined,token)).status,200);
   check('revoked-current-client-link-refuses-history');
   assert.deepEqual(await prisma.appointment.findMany({orderBy:{id:'asc'}}),beforeRows);
