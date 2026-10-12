@@ -1,0 +1,152 @@
+{
+  "qualification": "SYNTHETIC_NATIVE_HELPER_ACTUAL_APP_MODULE_HTTP_PG",
+  "candidate": "570d806f812b601534bbbcf0f018ef18719a8177",
+  "realKeychainAccesses": 0,
+  "realProviderCalls": 0,
+  "personalDatabaseAccesses": 0,
+  "checks": [
+    "actual native helper → admission → fd4 → AppModule initialization → HTTP health",
+    "ordinary canonical login on synthetic tenant passes",
+    "business-effect route remains refused",
+    "provider/model calls zero; runtime reaped with clean receipt"
+  ],
+  "completed": [
+    "backend-build",
+    "react-build",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations"
+  ],
+  "diagnostic": {
+    "contract": "maya.local-yclients-read-diagnostic/1",
+    "mode": "owner_input",
+    "stage": "stopping",
+    "outcome": "entered",
+    "credentialAccepted": false,
+    "preparationStep": null,
+    "firstFailure": null,
+    "cleanupFailures": [],
+    "runtimeStatuses": [
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "environment_validating",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "network_guard_installing",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "app_importing",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "app_creating",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "http_configuring",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "backend_listening",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "runtime_ready",
+        "outcome": "completed",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "runtime_stopping",
+        "outcome": "entered",
+        "code": null,
+        "cause": null
+      },
+      {
+        "type": "runtime-status",
+        "contract": "maya.local-yclients-read-status/1",
+        "stage": "runtime_stopping",
+        "outcome": "completed",
+        "code": null,
+        "cause": null
+      }
+    ],
+    "readTrace": [
+      {
+        "type": "read-trace",
+        "contract": "maya.local-yclients-read-trace/1",
+        "sequence": 1,
+        "elapsedMs": 1267,
+        "surface": "http",
+        "route": "activate",
+        "method": "POST",
+        "stage": "entered",
+        "status": null,
+        "code": null,
+        "observedAt": "2026-10-12T12:10:41.966Z"
+      },
+      {
+        "type": "read-trace",
+        "contract": "maya.local-yclients-read-trace/1",
+        "sequence": 2,
+        "elapsedMs": 1267,
+        "surface": "http",
+        "route": "activate",
+        "method": "POST",
+        "stage": "refused",
+        "status": 403,
+        "code": null,
+        "observedAt": "2026-10-12T12:10:41.966Z"
+      }
+    ],
+    "readTraceLimitReached": false,
+    "readTraceClock": "launcher_received_utc_not_provider_time"
+  },
+  "status": "ready",
+  "readyAt": "2026-10-12T12:10:41.868Z",
+  "providerAdmission": "explicit_owner_catalog_and_bounded_model",
+  "landingUrl": "http://127.0.0.1:61204/__local-yclients-read",
+  "webUrl": "http://127.0.0.1:61204/",
+  "apiOrigin": "http://127.0.0.1:61203",
+  "expiresAt": "2026-10-12T12:11:41.868Z",
+  "runtimeGroupAbsent": true,
+  "providerReadSummary": {
+    "calls": 0,
+    "refused": 0,
+    "routes": {}
+  },
+  "providerReadSummaryStatus": "reported_at_clean_stop",
+  "clusterStopped": true,
+  "sourceUnchanged": true,
+  "result": "PASS"
+}

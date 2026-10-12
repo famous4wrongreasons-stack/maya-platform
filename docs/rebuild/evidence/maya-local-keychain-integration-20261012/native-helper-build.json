@@ -1,0 +1,16 @@
+{
+  "qualification": "BUILT_NOT_ENROLLED_NOT_AUTHORIZED",
+  "syntheticStorage": false,
+  "source": {
+    "kind": "macos-keychain",
+    "reference": "/private/tmp/maya-keychain-native-owner-20261012-01/MayaLocalCredentials.app/Contents/MacOS/MayaLocalCredentials",
+    "owner": 501,
+    "reader": 501,
+    "sha256": "7bbe67dc6aed3cad83973eb00bb7e9849c7c93c8df8a21a27c94d121d0385a46",
+    "cdhash": "d41947ed7ac912609334207875996ffa9d9e0680",
+    "storageApprovalRef": "PREPARED_NOT_AUTHORIZED"
+  },
+  "sourceSha256": "ea557d2dc18b713bc02742d5824b2eda159ddf51d1f7f79b248fc62ff4a90e3b",
+  "signing": "AD_HOC_EXACT_CDHASH_NO_PRIVATE_KEY",
+  "keychainAccessPerformed": false
+}

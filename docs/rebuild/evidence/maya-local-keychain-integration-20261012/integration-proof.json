@@ -1,0 +1,25 @@
+{
+  "qualification": "SYNTHETIC_NATIVE_ADMISSION_BROKER_LAUNCHER_COMPILED_FACTORY",
+  "keychainAccesses": 0,
+  "providerNetworkCalls": 0,
+  "personalDatabaseAccesses": 0,
+  "checks": [
+    "first: native load → claimed broker → model stub → fd4 → compiled CRM adapter → stop, no repeated enrollment",
+    "restart: native load → claimed broker → model stub → fd4 → compiled CRM adapter → stop, no repeated enrollment",
+    "revocation closes existing admission before next model dispatch",
+    "expired refuses before loading either credential",
+    "not-yet-valid refuses before loading either credential",
+    "wrong-candidate refuses before loading either credential",
+    "revoked-before-load refuses before loading either credential",
+    "concurrent launch: exactly one permit claim and broker",
+    "reports/ledger/manifests contain no synthetic credential values"
+  ],
+  "helper": {
+    "synthetic": true,
+    "sha256": "ad0ffe339610bf3fc6240b42b92f1d3d7931969573a912ff498a680814105150",
+    "cdhash": "6bff70409c97659037fbfaef983267b97243a42a"
+  },
+  "candidate": "570d806f812b601534bbbcf0f018ef18719a8177",
+  "fakeModelCalls": 2,
+  "result": "PASS"
+}

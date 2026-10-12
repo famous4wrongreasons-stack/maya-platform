@@ -1,0 +1,55 @@
+[
+  {
+    "artifact": "native-helper-build.json",
+    "source": "/private/tmp/maya-keychain-native-owner-20261012-01/helper.json",
+    "sha256": "5d2399837e76a6a7adac7e95f533139c1d92af1ffd674ca00fd10279da918a52",
+    "size": 672,
+    "qualification": "SAFE_SYNTHETIC_OR_PUBLIC_BUILD_METADATA"
+  },
+  {
+    "artifact": "integration-proof.json",
+    "source": "/private/tmp/maya-keychain-integration-20261012-final/summary.json",
+    "sha256": "90c30570d9a98de2cf6f26bb57432a192c309ebac2088cd6ee866d6702b248b0",
+    "size": 1181,
+    "qualification": "SAFE_SYNTHETIC_OR_PUBLIC_BUILD_METADATA"
+  },
+  {
+    "artifact": "appmodule-proof.json",
+    "source": "/private/tmp/maya-keychain-app-20261012-final/summary.json",
+    "sha256": "5d40c8cd97410b876ed7d4f4f1aff66b708494a85b4f40bd1975b02e6822ad19",
+    "size": 4315,
+    "qualification": "SAFE_SYNTHETIC_OR_PUBLIC_BUILD_METADATA"
+  },
+  {
+    "artifact": "maya-keychain-final-unit-20261012.log",
+    "source": "/private/tmp/maya-keychain-final-unit-20261012.log",
+    "sha256": "a1e472bb42ec717253c3063547cdb041c600edf8ea1c3554b05cbe354039f8de",
+    "size": 45311,
+    "committed": false,
+    "reason": "reproducible console receipt; public summary retained"
+  },
+  {
+    "artifact": "maya-keychain-final-crm-20261012.log",
+    "source": "/private/tmp/maya-keychain-final-crm-20261012.log",
+    "sha256": "3c4415e1e8ab46fd58627eeafa9dd422494446a5e23788d4bf1319af6a8b0d8a",
+    "size": 124,
+    "committed": false,
+    "reason": "reproducible console receipt; public summary retained"
+  },
+  {
+    "artifact": "maya-keychain-final-types-20261012.log",
+    "source": "/private/tmp/maya-keychain-final-types-20261012.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "committed": false,
+    "reason": "reproducible console receipt; public summary retained"
+  },
+  {
+    "artifact": "maya-keychain-final-lint-20261012.log",
+    "source": "/private/tmp/maya-keychain-final-lint-20261012.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "committed": false,
+    "reason": "reproducible console receipt; public summary retained"
+  }
+]
