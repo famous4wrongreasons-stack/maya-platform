@@ -2136,7 +2136,9 @@ for (const [label, change] of [
 ]) test(`restored receipt: ${label} page cannot create a read control`, async () => {
   const page = restoredPage(terminalCard()); change(page);
   const s = await restoredSetup(async () => { throw Error('Unexpected read'); }, page);
-  assert.equal(s.anchor, undefined);
+  // Exercise both owners: conversation filters unbound pages; widgets also refuses direct restore.
+  s.runtime.widgets.restoreBookingOutcomes(page);
+  assert.equal(s.items().some(i => i.receiptRefresh !== undefined), false);
   assert.equal(s.runtime.widgets.heldTokens(), 0);
   s.runtime.dispose();
 });
