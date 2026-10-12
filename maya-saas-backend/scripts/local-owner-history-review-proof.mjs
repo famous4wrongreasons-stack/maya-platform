@@ -9,6 +9,8 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import httpModule from 'node:http';
+import { Browser } from '../../maya-chat-shell/test/cdp-verify.mjs';
+import { createReadWebServer } from './local-yclients-read.mjs';
 import { installOwnerChat } from './local-owner-chat-runtime.mjs';
 import { OWNER_HISTORY_REVIEW_PROFILE, HISTORY_REVIEW_QUESTIONS, historyReviewIngress, assertHistoryPlanningRequest } from './local-owner-history-review-policy.mjs';
 import { CORE_OWNER_HISTORY_LIMITS } from './conversation-qualification/current-candidate-budget.mjs';
@@ -43,7 +45,8 @@ const save = () => fs.writeFileSync(path.join(output, 'summary.json'), JSON.stri
 const control = { cancelled: null, terminate: null };
 const cancel = () => { control.cancelled = 'SIGTERM'; control.terminate?.(); };
 process.on('SIGINT', cancel); process.on('SIGTERM', cancel);
-let started = false, prisma, app, runtime, chatRuntime, broker;
+const nativeHttpRequest=httpModule.request;
+let started = false, prisma, app, runtime, chatRuntime, broker, browser, web;
 const originalFetch = globalThis.fetch;
 try {
   save();
@@ -141,8 +144,13 @@ try {
       res.setHeader('content-type','application/json');res.end(JSON.stringify({choices:[{finish_reason:'stop',message:{content:JSON.stringify(answer)}}],usage:{prompt_tokens:10,completion_tokens:10,total_tokens:20}}));
     } catch(error) { report.wireFailure=String(error.message).slice(0,300);res.writeHead(500);res.end('{}'); }
   });
+  broker.on('clientError',(error,socket)=>{report.brokerClientError=error.code;socket.destroy();});
+  broker.on('connection',()=>{report.brokerConnections=(report.brokerConnections??0)+1;});
+  broker.on('error',error=>{report.brokerError=error.code;});
   await new Promise(r=>broker.listen(socket,r));fs.chmodSync(socket,0o600);
   const target={host:'localhost',workDirectory:backend,brokerUid:process.getuid(),runnerUid:process.getuid(),brokerSocket:{path:socket,gid:process.getgid()}};
+  const nativeRequest=httpModule.request;
+  httpModule.request=function(...args){const req=nativeRequest.apply(this,args);req.on('error',error=>{report.syntheticTransportError=error.code;});return req;};
   const reviewLaunch={manifest:{profile:OWNER_HISTORY_REVIEW_PROFILE,ownerScope:scope,manifestSha256:'e'.repeat(64),limits:CORE_OWNER_HISTORY_LIMITS,admissionContext:{target}},admission:{expiresAt:Date.now()+1800000},assertCurrent(){assert.ok(alive);}};
   runtime=await installOwnerHistory({app,prisma:databaseService,require,backend,launch:{plan:{scope},assertCurrent:reviewLaunch.assertCurrent},nativeFetch:wire,readExistingOnly:true});
   chatRuntime=await installOwnerChat({app,prisma:databaseService,require,backend,launch:reviewLaunch,providerFetch:runtime.fetch});
@@ -153,7 +161,26 @@ try {
   const request=require('supertest');
   const h=(route,body,token)=>{const r=body===undefined?request(app.getHttpServer()).get(route):request(app.getHttpServer()).post(route).send(body);r.set('Origin',origin).timeout({response:60000,deadline:75000});if(token)r.set('Authorization','Bearer '+token);return r;};
   const check=name=>{report.checks.push(name);save();};
-  const login=await h('/api/auth/login',{tenantSlug:tenant.slug,email,password:ownerPassword});assert.equal(login.status,201);const token=login.body.access_token;
+  let token, lastChat;
+  web=createReadWebServer({ownerHistoryReview:true},{PORT:String(apiPort),CORS_ALLOWED_ORIGINS:origin});
+  web.server.prependListener('request',(req,res)=>{
+    if(!['/api/auth/login','/api/ai/chat'].includes(req.url))return;
+    const chunks=[],write=res.write,end=res.end;
+    const capture=c=>{if(c!==null&&c!==undefined)chunks.push(Buffer.isBuffer(c)?Buffer.from(c):Buffer.from(String(c)));};
+    res.write=function(c,...args){capture(c);return write.call(this,c,...args);};
+    res.end=function(c,...args){capture(c);return end.call(this,c,...args);};
+    res.once('finish',()=>{try{const value=JSON.parse(Buffer.concat(chunks).toString());if(req.url==='/api/auth/login'&&res.statusCode===201)token=value.access_token;if(req.url==='/api/ai/chat')lastChat={status:res.statusCode,body:value};}finally{chunks.forEach(c=>c.fill(0));}});
+  });
+  await web.listen(webPort);
+  browser=await Browser.launch('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',['--proxy-server=http://127.0.0.1:9','--proxy-bypass-list=127.0.0.1','--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1','--disable-quic']);
+  const page=await browser.newPage();
+  await page.goto(origin+'/');
+  const button=text=>`Array.from(document.querySelectorAll('button')).find(b=>b.textContent.includes(${JSON.stringify(text)}))`;
+  assert.ok(await page.waitFor('!!'+button('Войти по паролю')));assert.ok(await page.click(button('Войти по паролю')));
+  assert.ok(await page.waitFor(`!!document.querySelector('input[aria-label="Пароль"]')`));
+  for(const [label,value] of [['Короткое имя бизнеса для входа',tenant.slug],['Email',email],['Пароль',ownerPassword]])assert.ok(await page.fill(`document.querySelector('input[aria-label="${label}"]')`,value));
+  assert.ok(await page.click(button('Войти')));
+  assert.ok(await page.waitFor(`!!document.querySelector('[role="log"]')`));assert.equal(typeof token,'string');
   check('one-real-canonical-password-login-with-retained-verified-personal-context');
   const settings=await h('/api/governed-settings/tenant/client_capabilities',undefined,token);assert.equal(settings.status,200);
   const command={confirmed:true,namespace:'client_capabilities',expectedRevision:settings.body.revision,previousRevisionId:settings.body.previousRevisionId,content:{client_self_visit_history:true}};
@@ -165,19 +192,24 @@ try {
   const read=await h('/api/client-channel/appointments',undefined,token);assert.equal(read.status,200);assert.equal(read.body.length,1);
   assert.ok(!JSON.stringify(read.body).includes('Synthetic foreign'));assert.ok(!JSON.stringify(read.body).includes('SYNTHETIC PRIVATE NOTE'));
   check('personal-reader-one-own-visit-foreign-and-note-excluded');
-  const chatMessages=[];let conversationId;
   for(const [index,question] of HISTORY_REVIEW_QUESTIONS.entries()) {
-    chatMessages.push({role:'user',content:question});
-    const response=await h('/api/ai/chat',{surface:'web',requestId:'synthetic-review-turn-'+index,messages:chatMessages,...(conversationId?{conversationId}:{})},token);
+    lastChat=null;
+    assert.ok(await page.fill('Q.composer()',question));assert.ok(await page.click('Q.send()'));
+    for(let i=0;!lastChat&&i<600;i++)await new Promise(r=>setTimeout(r,100));
+    assert.ok(lastChat,'synthetic browser HTTP result');const response=lastChat;
     assert.equal(response.status,201,'synthetic AChat '+JSON.stringify(response.body));
     const reply=response.body.reply;
-    assert.equal(typeof reply,'string');
-    assert.match(reply,/Synthetic service/,'synthetic reply '+reply);
+    assert.equal(typeof reply,'string');assert.match(reply,/Synthetic service/,'synthetic reply '+reply);
     assert.match(reply,index===0?/сохранённой истории/:/Последний подтверждённый визит/);
     assert.ok(!reply.includes('Synthetic foreign')&&!reply.includes('SYNTHETIC PRIVATE NOTE'));
-    chatMessages.push({role:'assistant',content:reply});conversationId=response.body.conversationId;
-    check(index===0?'actual-AiCore-C9-own-history-tool-and-server-composed-answer':'second-question-with-private-assistant-history-only-user-text-reaches-model');
+    const expected=reply.replace(/\s+/g,' ').trim();
+    assert.ok(await page.waitFor(`Array.from(document.querySelectorAll('[data-chat-message="maya"]')).at(-1)?.textContent.replace(/^MAYA: /,'').replace(/\\s+/g,' ').trim() === ${JSON.stringify(expected)}`));
+    check(index===0?'actual-React-AiCore-C9-own-history-tool-and-server-composed-answer':'second-React-question-with-private-assistant-history-only-user-text-reaches-model');
   }
+  await page.goto(origin+'/');
+  assert.ok(await page.waitFor(`document.querySelectorAll('[data-chat-message="maya"]').length === 2 && document.querySelectorAll('[data-chat-message="user"]').length === 2`));
+  const shot=await page.send('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(output,'synthetic-history.png'),Buffer.from(shot.data,'base64'),{mode:0o600});
+  check('browser-reload-retains-session-and-restores-exactly-two-pairs');
   assert.equal(modelCalls,2);check('exactly-two-synthetic-planner-calls-no-private-result-generation-call');
   const restored=await h('/api/ai/conversation',undefined,token);assert.equal(restored.status,200);
   assert.equal(restored.body.turns.filter(t=>t.role==='user').length,2);
@@ -207,9 +239,12 @@ try {
 } catch(error) {
   report.status='failed';report.syntheticFailure={name:error?.name,message:String(error?.message).slice(0,1000),stack:String(error?.stack).slice(0,1800)};process.exitCode=1;save();
 } finally {
+  await browser?.close();
+  if(web){web.server.closeAllConnections();await web.close();}
   chatRuntime?.stop();runtime?.stop();
   if(app){await app.get(require(path.join(backend,'dist/src/prisma/prisma.service.js')).PrismaService).$disconnect().catch(()=>{});await app.close().catch(()=>{});}
   if(broker)await new Promise(r=>broker.close(r));
+  httpModule.request=nativeHttpRequest;
   await prisma?.$disconnect();globalThis.fetch=originalFetch;
   if(started){try{await stage(plan.stop,env,state,{cancelled:null,terminate:null});report.clusterStopped=true;}catch{report.clusterStopped=false;report.status='failed-cleanup';process.exitCode=1;}}
   report.pidFileAbsent=!fs.existsSync(path.join(state,'pg/postmaster.pid'));
