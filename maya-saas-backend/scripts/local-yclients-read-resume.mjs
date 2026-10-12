@@ -17,6 +17,9 @@ import { startCoreBroker } from './conversation-qualification/core-conversation-
 import { readOwnerTelegramLaunch } from './local-owner-telegram-launch.mjs';
 import { OWNER_TELEGRAM_ADMISSION, OWNER_TELEGRAM_BATCH_PROFILE, ownerTelegramLimits } from './local-owner-telegram-policy.mjs';
 
+import { readOwnerHistoryLaunch } from './local-owner-history-launch.mjs';
+import { OWNER_HISTORY_PROFILE, OWNER_HISTORY_ADMISSION } from './local-owner-history-policy.mjs';
+
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const hash = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
@@ -108,9 +111,9 @@ function verifyHistoricalGitSource(initial, candidate, approvedCommit) {
 }
 
 export function resumePlan(env, state, pgBin, minutes, output, diagnosticNoProvider = false, allowUserAuth = false, telegramContract = null) {
-  const batch = telegramContract === OWNER_TELEGRAM_BATCH_PROFILE;
+  const batch = telegramContract === OWNER_TELEGRAM_BATCH_PROFILE || telegramContract === OWNER_HISTORY_PROFILE;
   if (telegramContract !== null) {
-    const limits = ownerTelegramLimits(telegramContract);
+    const limits = telegramContract === OWNER_HISTORY_PROFILE ? { sessionMs: 1800000 } : ownerTelegramLimits(telegramContract);
     assert.ok(!diagnosticNoProvider && !allowUserAuth && minutes * 60000 === limits.sessionMs, 'local_telegram_mode_refused');
   }
   assert.ok(Number.isSafeInteger(minutes) && minutes >= 1 && (batch ? minutes === 30 : minutes <= 15), 'session_window_refused');
@@ -121,7 +124,7 @@ export function resumePlan(env, state, pgBin, minutes, output, diagnosticNoProvi
   const plan = readSessionPlan({ stateDirectory: state, pgBin, database: db.pathname.slice(1), pgPort: Number(db.port), apiPort: Number(env.PORT), webPort: Number(web.port), minutes: batch ? 10 : minutes, diagnosticNoProvider });
   // Only this separately pinned saved-login contract admits a 30-minute runtime.
   // Generic setup, chat, diagnostics and the historical Telegram mode keep their bounds.
-  if (batch) plan.durationMs = ownerTelegramLimits(telegramContract).sessionMs;
+  if (batch) plan.durationMs = 1800000;
   // Compiling the explicitly approved candidate does not migrate the retained DB.
   const setup = plan.setup.filter(spec => ['backend-build', 'react-build', 'pg-start'].includes(spec.name)).map(spec => {
     if (spec.name !== 'pg-start') return spec;
@@ -224,6 +227,7 @@ export async function main(args) {
     'restart-receipt': { type: 'string' }, 'restart-receipt-sha256': { type: 'string' },
     'session-manifest-sha256': { type: 'string' }, 'private-state-sha256': { type: 'string' },
     'approved-source-commit': { type: 'string' }, minutes: { type: 'string', default: '15' },
+    'owner-history-plan': { type: 'string' }, 'owner-history-plan-sha256': { type: 'string' },
     'owner-chat-plan': { type: 'string' }, 'owner-chat-plan-sha256': { type: 'string' },
     'owner-telegram-plan': { type: 'string' }, 'owner-telegram-plan-sha256': { type: 'string' }, 'owner-approval-ref': { type: 'string' },
     'pg-bin': { type: 'string', default: '/opt/homebrew/opt/postgresql@16/bin' },
@@ -235,7 +239,11 @@ export async function main(args) {
   assert.equal(Boolean(values['owner-chat-plan']), Boolean(values['owner-chat-plan-sha256']), 'owner_chat_plan_pair');
   const chatLaunch = values['owner-chat-plan'] ? readOwnerChatLaunch(values['owner-chat-plan'], values['owner-chat-plan-sha256'], null) : null;
   assert.equal(Boolean(values['owner-telegram-plan']), Boolean(values['owner-telegram-plan-sha256']), 'local_telegram_plan_pair');
-  assert.equal(Boolean(values['owner-telegram-plan']), Boolean(values['owner-approval-ref']), 'local_telegram_approval_pair');
+  assert.equal(Boolean(values['owner-telegram-plan'] || values['owner-history-plan']), Boolean(values['owner-approval-ref']), 'local_approval_pair');
+  assert.equal(Boolean(values['owner-history-plan']), Boolean(values['owner-history-plan-sha256']), 'history_plan_pair');
+  const historyArgs = [values['owner-history-plan'], values['owner-history-plan-sha256'], values['owner-approval-ref'], readSourceBinding];
+  const historyLaunch = values['owner-history-plan'] ? readOwnerHistoryLaunch(...historyArgs) : null;
+  assert.ok(!historyLaunch || (!values['owner-telegram-plan'] && !chatLaunch && !diagnosticNoProvider && !allowUserAuth && Number(values.minutes) === 30), 'history_mode_refused');
   const telegramArgs = [values['owner-telegram-plan'], values['owner-telegram-plan-sha256'], values['owner-approval-ref'], readSourceBinding];
   const telegramLaunch = values['owner-telegram-plan'] ? readOwnerTelegramLaunch(...telegramArgs) : null;
   assert.ok(!telegramLaunch || (!chatLaunch && !diagnosticNoProvider && !allowUserAuth
@@ -262,7 +270,7 @@ export async function main(args) {
   const env = privateState.environment; assertProfileEnvironment(env);
   assert.ok(initial.landingUrl === env.CORS_ALLOWED_ORIGINS + '/__local-onboarding' && receipt.landingUrl === initial.landingUrl, 'saved_origin_mismatch');
   const output = externalStatePath(values.output, repo);
-  const plan = resumePlan(env, state, values['pg-bin'], Number(values.minutes), output, diagnosticNoProvider, allowUserAuth, telegramLaunch?.plan.contract ?? null);
+  const plan = resumePlan(env, state, values['pg-bin'], Number(values.minutes), output, diagnosticNoProvider, allowUserAuth, telegramLaunch?.plan.contract ?? historyLaunch?.plan.contract ?? null);
   if (telegramLaunch) {
     const tp = telegramLaunch.plan, scope = tp.scope;
     assert.ok(scope.stateDirectory === state && scope.restartReceiptPath === receiptPath
@@ -272,6 +280,16 @@ export async function main(args) {
     plan.ownerTelegram = true; plan.ownerTelegramContract = tp.contract; plan.executionExpiresAt = tp.expiresAt;
     plan.providerAdmission = OWNER_TELEGRAM_ADMISSION;
     plan.runtime.args.push('--owner-telegram-plan', ...telegramArgs.slice(0, 3));
+  }
+  if (historyLaunch) {
+    const hp = historyLaunch.plan, scope = hp.scope;
+    assert.ok(scope.stateDirectory === state && scope.restartReceiptPath === receiptPath
+      && scope.initialManifestSha256 === pins.initial && scope.privateStateSha256 === pins.privateState
+      && scope.restartReceiptSha256 === pins.receipt && hp.candidateCommit === source.head
+      && hp.origin === env.CORS_ALLOWED_ORIGINS, 'history_saved_state_binding');
+    plan.ownerHistory = true; plan.executionExpiresAt = hp.expiresAt;
+    plan.providerAdmission = OWNER_HISTORY_ADMISSION;
+    plan.runtime.args.push('--owner-history-plan', ...historyArgs.slice(0, 3));
   }
   if (chatLaunch) {
     const scope = chatLaunch.manifest.ownerScope;
@@ -295,6 +313,7 @@ export async function main(args) {
   const inputsUnchanged = () => { directoriesUnchanged(); return unchanged(initialPath, 16 * 1024 * 1024, pins.initial) && unchanged(privatePath, 65536, pins.privateState) && unchanged(receiptPath, 16 * 1024 * 1024, pins.receipt) && checkPgpass(state, env) === pgpassHash; };
   try {
     if (telegramLaunch) readOwnerTelegramLaunch(...telegramArgs, 'claim');
+    if (historyLaunch) readOwnerHistoryLaunch(...historyArgs, 'claim');
     fs.mkdirSync(output, { mode: 0o700 }); assertPrivateCwd(output);
     report = { contract: 'maya.local-yclients-read-resume/1', status: 'preparing', providerAdmission: 'not_started', qualifiedAcceptance: false,
       source, initialSourceHead: initial.source.head, initialManifestSha256: pins.initial, completedRestartSha256: pins.receipt,
@@ -304,7 +323,7 @@ export async function main(args) {
       diagnostic: createDiagnostic(diagnosticNoProvider) };
     save = () => fs.writeFileSync(path.join(output, 'resume.json'), JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
     save(); process.on('SIGINT', int); process.on('SIGTERM', term);
-    if (telegramLaunch) executionTimer = setTimeout(() => cancel('EXECUTION_DEADLINE'), Math.max(1, Date.parse(telegramLaunch.plan.expiresAt) - Date.now()));
+    if (telegramLaunch || historyLaunch) executionTimer = setTimeout(() => cancel('EXECUTION_DEADLINE'), Math.max(1, Date.parse((telegramLaunch || historyLaunch).plan.expiresAt) - Date.now()));
     assert.ok(inputsUnchanged(), 'resume_inputs_changed'); assertClusterStopped(state);
     systemIdentity = stoppedSystemIdentity(values['pg-bin'], state);
     timer = setTimeout(() => cancel('PREPARATION_DEADLINE'), plan.preparationDeadlineMs);

@@ -40,9 +40,12 @@ function readPlan(filename, hash) {
   } finally { fs.closeSync(fd); }
 }
 export function readOwnerTelegramLaunch(filename, hash, approvalRef, readSource, role = 'inspect') {
+  return readPinnedLocalLaunch(filename, hash, approvalRef, readSource, role, assertOwnerTelegramPlan);
+}
+export function readPinnedLocalLaunch(filename, hash, approvalRef, readSource, role, validate) {
   assert.ok(['inspect', 'claim', 'child'].includes(role), 'local_telegram_plan_role');
   const plan = readPlan(filename, hash), source = readSource();
-  assertOwnerTelegramPlan(plan, source, approvalRef);
+  validate(plan, source, approvalRef);
   const used = filename + '.consumed';
   const expected = JSON.stringify({ contract: plan.contract, planSha256: hash, ownerApprovalRef: approvalRef });
   const assertClaim = () => {
@@ -66,6 +69,6 @@ export function readOwnerTelegramLaunch(filename, hash, approvalRef, readSource,
   return { plan, assertCurrent() {
     assert.ok(role !== 'inspect', 'local_telegram_claim_required'); assertClaim();
     assert.ok(digest(JSON.stringify(readPlan(filename, hash))) === digest(JSON.stringify(plan)), 'local_telegram_plan_changed');
-    assertOwnerTelegramPlan(plan, readSource(), approvalRef);
+    validate(plan, readSource(), approvalRef);
   } };
 }

@@ -20,6 +20,8 @@ import { createLocalTelegramReturn } from './local-telegram-return.mjs';
 import { OWNER_TELEGRAM_BATCH_PROFILE } from './local-owner-telegram-policy.mjs';
 
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+import { historyResultProjection } from './local-owner-history-policy.mjs';
+
 const repo = path.dirname(backend);
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -37,6 +39,13 @@ export const READ_SOURCE_FILES = Object.freeze([
   'maya-saas-backend/scripts/local-telegram-return.mjs',
   'maya-saas-backend/scripts/local-telegram-return.test.mjs',
   'maya-saas-backend/scripts/local-owner-scope.mjs',
+  'maya-saas-backend/scripts/local-owner-history-policy.mjs',
+  'maya-saas-backend/scripts/local-owner-history-transport.mjs',
+  'maya-saas-backend/scripts/local-owner-history-runtime.mjs',
+  'maya-saas-backend/scripts/local-owner-history-launch.mjs',
+  'maya-saas-backend/scripts/local-owner-history-proof.mjs',
+  'maya-saas-backend/scripts/local-owner-history-mutations.mjs',
+  'maya-saas-backend/scripts/local-owner-history.test.mjs',
   'maya-saas-backend/scripts/local-owner-telegram-policy.mjs',
   'maya-saas-backend/scripts/local-owner-telegram-transport.mjs',
   'maya-saas-backend/scripts/local-owner-telegram-runtime.mjs',
@@ -53,7 +62,7 @@ export const LOCAL_READ_HEADERS = Object.freeze({
   'Cache-Control': 'no-store',
 });
 const PREPARATION_MS = 15 * 60000;
-const ROUTE_KINDS = Object.freeze(['auth', 'companies', 'company', 'book_services', 'services', 'categories', 'team', 'telegram_token', 'telegram_jwks', 'client_registry']);
+const ROUTE_KINDS = Object.freeze(['history_records', 'auth', 'companies', 'company', 'book_services', 'services', 'categories', 'team', 'telegram_token', 'telegram_jwks', 'client_registry']);
 const LAUNCHER_STAGES = Object.freeze(['preparing', 'waiting_input', 'credential_accepted', 'backend_starting', 'web_starting', 'ready', 'stopping', 'stopped']);
 const FAILURE_CODES = Object.freeze(['preflight_refused', 'relay_start_failed', 'session_cancelled', 'preparation_stage_failed', 'preparation_timeout', 'input_timeout', 'input_cancelled', 'input_invalid', 'child_boot_failed', 'child_boot_timeout', 'child_exit_unexpected', 'runtime_status_invalid', 'runtime_summary_missing', 'cleanup_failed', 'source_changed', ...RUNTIME_CODES]);
 const safeFailure = code => Object.assign(new Error('Local setup-read operation stopped'), { diagnosticCode: code });
@@ -87,7 +96,7 @@ export function runtimeCredential(diagnosticNoProvider, ownerInput) {
 // Status events precede ready. Only the exact ready envelope resolves ready;
 // malformed IPC rejects the finite session without retaining any raw payload.
 export function runtimeObserver(diagnostic, expected, save) {
-  let resolveReady, rejectProtocol, readyCount = 0, summaryCount = 0, summary = null;
+  let resolveReady, rejectProtocol, readyCount = 0, summaryCount = 0, summary = null, historyCount = 0;
   const ready = new Promise(resolve => { resolveReady = resolve; });
   const failure = new Promise((_, reject) => { rejectProtocol = reject; });
   void failure.catch(() => {});
@@ -112,6 +121,13 @@ export function runtimeObserver(diagnostic, expected, save) {
             rejectProtocol(safeFailure(projected.code));
           }
           save(); return;
+        }
+        if (message?.type === 'history-result') {
+          const result = message.result;
+          const projected = historyResultProjection(result);
+          if (!expected.ownerHistory || Object.keys(message).length !== 2 || ++historyCount !== 1
+            || JSON.stringify(result) !== JSON.stringify(projected)) { refuse('runtime_status_invalid'); save(); return; }
+          diagnostic.history = projected; save(); return;
         }
         if (message?.type === 'read-summary') {
           summaryCount += 1; summary = readSummaryProjection(message);
@@ -280,7 +296,7 @@ export function createReadWebServer(plan, runtimeEnv) {
     }
     if (request.method === 'GET' && request.url === '/__local-yclients-read') {
       response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-      response.end(plan.ownerTelegram ? '<!doctype html><meta charset="utf-8"><title>MAYA — Telegram</title><main><h1>Вход через Telegram и личная карточка</h1><p>'
+      response.end(plan.ownerHistory ? '<!doctype html><meta charset="utf-8"><title>MAYA — история</title><main><h1>Журнал салона за 14 дней</h1><p>Один явно разрешённый проход синхронизации в локальную базу. Личная история — только по действующей проверенной связи, настройке и согласию. Модель, записи в YCLIENTS и исходящие сообщения закрыты.</p><a href="/">Открыть Maya</a></main>' : plan.ownerTelegram ? '<!doctype html><meta charset="utf-8"><title>MAYA — Telegram</title><main><h1>Вход через Telegram и личная карточка</h1><p>'
         + (plan.ownerTelegramContract === OWNER_TELEGRAM_BATCH_PROFILE ? 'Одно окно до 30 минут, максимум три попытки входа через уже привязанный Telegram. Повторная привязка закрыта. '
           : 'До 10 минут. Войдите в сохранённый бизнес по паролю, свяжите свой Telegram, затем войдите через Telegram заново. ')
         + 'Разрешено чтение реестра клиентов выбранного салона для точного сопоставления. Это может создать личную связь только в локальной базе.</p><p>Существующая история доступна только по действующим правам и настройкам. Импорт истории, изменение согласий, модель, SMS, сообщения и запись закрыты. Секреты в AChat не вводить.</p><a href="/">Открыть Maya</a></main>' : plan.ownerChat ? OWNER_CHAT_HTML : plan.diagnosticNoProvider ? DIAGNOSTIC_HTML : LANDING_HTML); return;
@@ -299,7 +315,7 @@ export async function runReadRuntime(plan, runtimeEnv, state, control, manifest,
   finally { delete runtimeEnv.YCLIENTS_PARTNER_TOKEN; delete runtimeEnv.TELEGRAM_CLIENT_SECRET; }
   let dev, timer, stopPromise, cancelled, wasReady = false;
   const origin = `http://127.0.0.1:${runtimeEnv.PORT}`;
-  const observer = runtimeObserver(diagnostic, { origin, providerAdmission: plan.providerAdmission }, save);
+  const observer = runtimeObserver(diagnostic, { origin, providerAdmission: plan.providerAdmission, ownerHistory: plan.ownerHistory === true }, save);
   child.on('message', observer.accept);
   const closed = new Promise((resolve, reject) => { child.once('error', () => reject(safeFailure('child_boot_failed'))); child.once('close', (code, signal) => resolve({ code, signal })); });
   void closed.catch(() => {});
@@ -322,10 +338,11 @@ export async function runReadRuntime(plan, runtimeEnv, state, control, manifest,
     manifest.providerAdmission = plan.providerAdmission;
     manifest.landingUrl = runtimeEnv.CORS_ALLOWED_ORIGINS + '/__local-yclients-read';
     manifest.webUrl = runtimeEnv.CORS_ALLOWED_ORIGINS + '/'; manifest.apiOrigin = origin;
-    const duration = Math.min(plan.durationMs, plan.ownerTelegram ? Date.parse(plan.executionExpiresAt) - Date.now() : plan.durationMs);
+    const duration = Math.min(plan.durationMs, (plan.ownerTelegram || plan.ownerHistory) ? Date.parse(plan.executionExpiresAt) - Date.now() : plan.durationMs);
     assert.ok(duration > 0, 'local_execution_expired');
     manifest.expiresAt = new Date(Date.now() + duration).toISOString();
     diagnosticStage(diagnostic, 'ready'); save(); wasReady = true;
+    if (plan.ownerHistory) child.send({ type: 'owner-history-run' });
     process.stdout.write(`${plan.diagnosticNoProvider ? 'Network-closed diagnostic' : 'Local YCLIENTS setup-read'} session ready: ${manifest.landingUrl}\n${plan.diagnosticNoProvider ? 'No owner credential was requested. Only health reads are admitted; no provider network.' : plan.ownerChat ? 'Three owner catalog questions only; bounded model broker. Business writes and notifications remain closed.' : 'Provider writes, model and outbound notifications remain closed.'}\n`);
     await Promise.race([
       observer.failure,
