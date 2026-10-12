@@ -351,3 +351,21 @@ test('truncated response never becomes a completed WHATWG Response', async (t) =
     /core_socket_transport_failed/,
   );
 });
+
+// macOS/Node 24: one large AF_UNIX write can fail with EPIPE below our admitted
+// 96 KiB ceiling. Exercise the real stream, not a mocked http.request.
+test('local socket preserves 80 and 96 KiB bodies byte-for-byte and still refuses overflow', async t => {
+  const root=fs.mkdtempSync('/private/tmp/maya-socket-large-');fs.chmodSync(root,0o700);
+  const dir=path.join(root,'channel');fs.mkdirSync(dir,{mode:0o700});fs.chownSync(dir,process.getuid(),process.getgid());
+  const target={brokerUid:process.getuid(),runnerUid:process.getuid(),brokerSocket:{path:path.join(dir,'b.sock'),gid:process.getgid()}};
+  const received=[];const server=http.createServer(async(req,res)=>{const chunks=[];for await(const c of req)chunks.push(c);received.push(Buffer.concat(chunks));res.end('ok');});
+  await new Promise(r=>server.listen(target.brokerSocket.path,r));fs.chmodSync(target.brokerSocket.path,0o600);
+  t.after(async()=>{server.closeAllConnections();await new Promise(r=>server.close(r));fs.rmSync(root,{recursive:true,force:true});});
+  for(const n of [500,20000,60000,80000,80*1024,96*1024]){
+    const body='synthetic-'.repeat(Math.ceil(n/10)).slice(0,n);
+    const response=await socketRequest(target,'/chat/completions',{method:'POST',body},{localStdin:true});
+    assert.equal(await response.text(),'ok');assert.deepEqual(received.at(-1),Buffer.from(body));
+  }
+  await assert.rejects(socketRequest(target,'/chat/completions',{method:'POST',body:'x'.repeat(96*1024+1)},{localStdin:true}),/core_socket_request_limit/);
+  assert.equal(received.length,6);
+});

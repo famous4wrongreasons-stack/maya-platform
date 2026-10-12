@@ -310,7 +310,25 @@ export async function socketRequest(
         socket.destroy();
         fail(error('core_socket_response_refused'));
       });
-      req.end(method === 'POST' ? body : undefined);
+      if (method !== 'POST') req.end();
+      else {
+        // Keep each AF_UNIX write bounded on macOS. Node may otherwise coalesce
+        // headers and an admitted 96 KiB body into one failing EPIPE write.
+        // Preserve exact bytes/content-length, deadline and abort; never retry.
+        req.flushHeaders();
+        let offset = 0;
+        const writeNext = () => {
+          if (done) return;
+          if (offset === body.length) { req.end(); return; }
+          const chunk = body.subarray(offset, offset + 16384);
+          offset += chunk.length;
+          req.write(chunk, failure => {
+            if (failure) fail(error('core_socket_transport_failed'));
+            else writeNext();
+          });
+        };
+        writeNext();
+      }
     } catch {
       fail(error('core_socket_transport_failed'));
     }
