@@ -1,0 +1,111 @@
+{
+  "contract": "maya.personal-history.current-source-proof/1",
+  "date": "2026-10-12",
+  "timezone": "Europe/Moscow",
+  "head": "0ae634f1c745ebac8d376ada4ef50d65efe52f0b",
+  "workingPatch": false,
+  "scope": "Existing signed Telegram → canonical Client → explicit fixture reconciliation → personal history/last visit/upcoming → actual React AChat → relogin, on a disposable test DB",
+  "tests": {
+    "total": 132,
+    "passed": 132,
+    "failed": 0,
+    "skipped": 0,
+    "suites": [
+      {
+        "name": "telegram-client-binding.live-spec.ts",
+        "status": "passed",
+        "passed": 92
+      },
+      {
+        "name": "local-owner-telegram.live-spec.ts",
+        "status": "passed",
+        "passed": 21
+      },
+      {
+        "name": "sb1-successor.live-spec.ts",
+        "status": "passed",
+        "passed": 19
+      }
+    ]
+  },
+  "browser": [
+    {
+      "role": "client",
+      "status": "PASS",
+      "checkpoints": 14,
+      "checks": [
+        "finder rendered",
+        "canonical business search",
+        "actual Telegram session opens AChat",
+        "initiating document retained",
+        "existing reconciliation owner synchronized after first binding",
+        "canonical private reply 1",
+        "canonical private reply 2",
+        "canonical private reply 3",
+        "finder rendered",
+        "canonical business search",
+        "actual Telegram session opens AChat",
+        "initiating document retained",
+        "relogin restores exactly three message pairs",
+        "actual cross-site returns through owner launcher and canonical HTTP relay"
+      ],
+      "actualReact": true,
+      "actualRuntime": true,
+      "actualBackendHttp": true,
+      "actualLocalWebBoundary": true,
+      "actualLauncherRuntimeAdmission": false,
+      "realTelegram": false,
+      "syntheticIssuerCrmModel": true,
+      "externalRequestsDispatched": 0,
+      "networkBoundary": "browser HTTP to actual loopback launcher/relay plus CDP synthetic provider and deny proxy/resolver; no OS packet claim",
+      "browserStopped": true,
+      "webListenerStopped": true
+    },
+    {
+      "role": "tenant_owner",
+      "status": "PASS",
+      "checkpoints": 19,
+      "checks": [
+        "existing owner password entry",
+        "existing account form",
+        "password session retained",
+        "canonical authenticated linking control",
+        "A23 confirms account link without replacing session",
+        "finder rendered",
+        "canonical business search",
+        "actual Telegram session opens AChat",
+        "initiating document retained",
+        "existing reconciliation owner synchronized after first binding",
+        "canonical private reply 1",
+        "canonical private reply 2",
+        "canonical private reply 3",
+        "finder rendered",
+        "canonical business search",
+        "actual Telegram session opens AChat",
+        "initiating document retained",
+        "relogin restores exactly three message pairs",
+        "actual cross-site returns through owner launcher and canonical HTTP relay"
+      ],
+      "actualReact": true,
+      "actualRuntime": true,
+      "actualBackendHttp": true,
+      "actualLocalWebBoundary": true,
+      "actualLauncherRuntimeAdmission": false,
+      "realTelegram": false,
+      "syntheticIssuerCrmModel": true,
+      "externalRequestsDispatched": 0,
+      "networkBoundary": "browser HTTP to actual loopback launcher/relay plus CDP synthetic provider and deny proxy/resolver; no OS packet claim",
+      "browserStopped": true,
+      "webListenerStopped": true
+    }
+  ],
+  "sourceUnchanged": true,
+  "clusterStopped": true,
+  "pidFileAbsent": true,
+  "realOwnerDatabaseStarted": false,
+  "realProviderCalls": 0,
+  "liveModelCalls": 0,
+  "realHistoryImport": false,
+  "releaseCertification": false,
+  "qualificationGap": "The synthetic fixture explicitly invokes the existing reconciliation owner. This does not qualify a retained-owner operator launch or grant access to the real salon journal."
+}

@@ -1,0 +1,77 @@
+{
+  "head": "0ae634f1c745ebac8d376ada4ef50d65efe52f0b",
+  "artifacts": [
+    {
+      "name": "manifest.json",
+      "originalLocalPath": "/private/tmp/maya-personal-history-current-20261012-01/manifest.json",
+      "sha256": "bc916e82d60be6f42926d6807262bf2e79549b4bda8b630b9e3b16fe91f3d945",
+      "size": 746,
+      "committed": false,
+      "reason": "Full synthetic local test receipt; compact aggregate archived instead"
+    },
+    {
+      "name": "source-hashes.json",
+      "originalLocalPath": "/private/tmp/maya-personal-history-current-20261012-01/source-hashes.json",
+      "sha256": "f836c76d374bcf1537c9f3903d5ca899358493dac1b0f17306b1f9fe6b2274cf",
+      "size": 277350,
+      "committed": false,
+      "reason": "Full synthetic local test receipt; compact aggregate archived instead"
+    },
+    {
+      "name": "telegram-initial-jest.json",
+      "originalLocalPath": "/private/tmp/maya-personal-history-current-20261012-01/telegram-initial-jest.json",
+      "sha256": "73eb3759da48eb8cec21ac550650a3e516f9525c1788f0472e4628eca5e6c9b7",
+      "size": 71811,
+      "committed": false,
+      "reason": "Full synthetic local test receipt; compact aggregate archived instead"
+    },
+    {
+      "name": "telegram-initial.log",
+      "originalLocalPath": "/private/tmp/maya-personal-history-current-20261012-01/telegram-initial.log",
+      "sha256": "1ea75aced42ff8283106335d90d5c3319e108e42bc3fc93ce3019be0385a6592",
+      "size": 4343,
+      "committed": false,
+      "reason": "Full synthetic local test receipt; compact aggregate archived instead"
+    },
+    {
+      "name": "current-react-build.log",
+      "originalLocalPath": "/private/tmp/maya-personal-history-current-20261012-01/current-react-build.log",
+      "sha256": "3b96d454ab974512513c0090e0fbe164f198c60f79dfbf64cb70d5f9c3685329",
+      "size": 185,
+      "committed": false,
+      "reason": "Full synthetic local test receipt; compact aggregate archived instead"
+    },
+    {
+      "name": "browser-client/browser.json",
+      "originalLocalPath": "/private/tmp/maya-personal-history-current-20261012-01/browser-client/browser.json",
+      "sha256": "2f1348a88862f9a2efef7c84666385e9991d44ac9c51905aa2c09e54e4b6daf1",
+      "size": 2676,
+      "committed": false,
+      "reason": "Full synthetic local test receipt; compact aggregate archived instead"
+    },
+    {
+      "name": "browser-client/packaging.log",
+      "originalLocalPath": "/private/tmp/maya-personal-history-current-20261012-01/browser-client/packaging.log",
+      "sha256": "56415e454644a5595fbe4ec7d9b4adf9856f169a2e0fdd43bd63f37ee0edbd93",
+      "size": 188,
+      "committed": false,
+      "reason": "Full synthetic local test receipt; compact aggregate archived instead"
+    },
+    {
+      "name": "browser-tenant_owner/browser.json",
+      "originalLocalPath": "/private/tmp/maya-personal-history-current-20261012-01/browser-tenant_owner/browser.json",
+      "sha256": "0a41e91fec6f5891b91c43390b9f8028a71efe4891e4ee04ab2a0e96ae281130",
+      "size": 3070,
+      "committed": false,
+      "reason": "Full synthetic local test receipt; compact aggregate archived instead"
+    },
+    {
+      "name": "browser-tenant_owner/packaging.log",
+      "originalLocalPath": "/private/tmp/maya-personal-history-current-20261012-01/browser-tenant_owner/packaging.log",
+      "sha256": "56415e454644a5595fbe4ec7d9b4adf9856f169a2e0fdd43bd63f37ee0edbd93",
+      "size": 188,
+      "committed": false,
+      "reason": "Full synthetic local test receipt; compact aggregate archived instead"
+    }
+  ]
+}
