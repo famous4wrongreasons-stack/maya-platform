@@ -56,6 +56,15 @@ async function main() {
   }
   async function record(name, body = null, extra = {}) {
     assert.ok(await page.waitFor('!document.querySelector(".maya-typewriter-caret")'));
+    // DOM settlement is not compositor settlement in a headless/background tab.
+    // Bring the page forward and observe two real frames before retaining its screenshot.
+    await page.send('Page.bringToFront');
+    await page.eval('new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))');
+    if (/^recover-(confirmed|repeat)$/.test(name)) {
+      const painted = await page.eval(`Q.all('[data-chat-message="maya"]').filter(el=>el.innerText.includes('Запись отменена.')).map(el=>({ visible: Q.visible(el), rect: (()=>{const r=el.getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height};})(), viewport:innerHeight }))`);
+      assert.equal(painted.length, 1, 'Exactly one canonical cancelled result on screen');
+      assert.ok(painted[0].visible && painted[0].rect.height > 0 && painted[0].rect.top >= 0 && painted[0].rect.bottom <= painted[0].viewport);
+    }
     const snapshot = await view();
     const row = { name, reply: body?.reply ?? null, envelopeKind: body?.resolution?.receipt?.envelope?.kind ?? body?.next_envelope?.kind ?? null, receiptOutcome: body?.receipt_outcome ?? null, code: body?.code ?? null, snapshot };
     report.steps.push(row); save();
