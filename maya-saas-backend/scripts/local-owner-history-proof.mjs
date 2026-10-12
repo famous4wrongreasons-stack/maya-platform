@@ -112,8 +112,11 @@ try {
   configureHttpApp(app);
   app.use((req,res,next)=>{const reason=ownerHistoryIngress(req.method,req.originalUrl,req.headers,req.body,origin,scope);if(reason)res.status(403).json({error:{code:reason}});else next();});
   await app.init();
+  report.httpLifecycle=[];
+  const server=app.getHttpServer();
+  for(const event of ['listening','connection','request','close']) server.on(event,()=>{report.httpLifecycle.push({event,phase:report.phase??'initial',at:new Date().toISOString()});save();});
   const request=require('supertest');
-  const http=(route,body,token)=>{const r=body===undefined?request(app.getHttpServer()).get(route):request(app.getHttpServer()).post(route).send(body);r.set('Origin',origin);if(token)r.set('Authorization','Bearer '+token);return r;};
+  const http=(route,body,token)=>{report.phase='http-'+route;save();const r=body===undefined?request(app.getHttpServer()).get(route):request(app.getHttpServer()).post(route).send(body);r.set('Origin',origin).timeout({response:20000,deadline:30000});if(token)r.set('Authorization','Bearer '+token);return r;};
   const login=await http('/api/auth/login',{tenantSlug:tenant.slug,email,password:ownerPassword});assert.equal(login.status,201);const token=login.body.access_token;
   const empty=await http('/api/client-channel/appointments',undefined,token);assert.equal(empty.status,200);assert.deepEqual(empty.body,[]);
   assert.equal(wireCalls,0);assert.equal(await prisma.reconciliationRun.count({where:{tenantId:tenant.id}}),0);
@@ -196,7 +199,7 @@ try {
   report.checks.push('clean-binary-stop-parent-key-discarded');report.status='passed';
 } catch(error) {
   // Fixtures have no owner data. Record closed name/message for synthetic diagnosis only.
-  report.status='failed';report.syntheticFailure={name:error?.name,message:String(error?.message).slice(0,500),stack:String(error?.stack).slice(0,1800)};process.exitCode=1;
+  report.status='failed';report.syntheticFailure={name:error?.name,message:String(error?.message).slice(0,500),stack:String(error?.stack).slice(0,1800)};process.exitCode=1;save();
 } finally {
   runtime?.stop();await app?.close().catch(()=>{});globalThis.fetch=originalFetch;
   control.terminate?.();await running?.catch(()=>{});await prisma?.$disconnect();
