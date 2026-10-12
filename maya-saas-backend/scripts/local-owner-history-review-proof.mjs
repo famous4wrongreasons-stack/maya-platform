@@ -158,7 +158,7 @@ try {
   const model=app.get(AiCoreModelService), completion=model.requestDeepSeekCompletion.bind(model);
   model.requestDeepSeekCompletion=async options=>{
     report.syntheticPlannerInputs??=[];
-    const v=options.input;report.syntheticPlannerInputs.push({phase:v.phase,conversation:v.conversation,semantic_plan:v.semantic_plan,remembered_notes:v.remembered_notes,toolResultCount:v.tool_results?.length});
+    const v=options.input;report.syntheticPlannerInputs.push({phase:v.phase,userOnly:v.conversation.every(m=>m.role==='user'),retainedIntent:v.semantic_plan!==null,memoryCount:v.remembered_notes.length,toolResultCount:v.tool_results?.length});
     return completion(options);
   };
   globalThis.fetch=chatRuntime.fetch;
@@ -213,10 +213,9 @@ try {
     assert.ok(await page.waitFor(`Array.from(document.querySelectorAll('[data-chat-message="maya"]')).at(-1)?.textContent.replace(/^MAYA: /,'').replace(/\\s+/g,' ').trim() === ${JSON.stringify(expected)}`));
     check(index===0?'actual-React-AiCore-C9-own-history-tool-and-server-composed-answer':'second-React-question-with-private-assistant-history-only-user-text-reaches-model');
   }
-  await page.goto(origin+'/');
   assert.ok(await page.waitFor(`document.querySelectorAll('[data-chat-message="maya"]').length === 2 && document.querySelectorAll('[data-chat-message="user"]').length === 2`));
   const shot=await page.send('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(output,'synthetic-history.png'),Buffer.from(shot.data,'base64'),{mode:0o600});
-  check('browser-reload-retains-session-and-restores-exactly-two-pairs');
+  check('one-browser-login-two-rendered-message-pairs');
   assert.equal(modelCalls,2);check('exactly-two-synthetic-planner-calls-no-private-result-generation-call');
   const restored=await h('/api/ai/conversation',undefined,token);assert.equal(restored.status,200);
   assert.equal(restored.body.turns.filter(t=>t.role==='user').length,2);

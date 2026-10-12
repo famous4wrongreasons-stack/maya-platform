@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { PRIVATE_KEYS, profileEnvironment } from './local-onboarding-profile.mjs';
-import { HISTORY_REVIEW_QUESTIONS as questions, OWNER_HISTORY_REVIEW_PROFILE, historyReviewIngress, createHistoryReviewWindow, assertHistoryPlanningRequest } from './local-owner-history-review-policy.mjs';
+import { HISTORY_REVIEW_QUESTIONS as questions, OWNER_HISTORY_REVIEW_PROFILE, historyReviewIngress, createHistoryReviewWindow, assertHistoryPlanningRequest, safeRetainedHistoryPlan } from './local-owner-history-review-policy.mjs';
 import { createOwnerHistoryTransport } from './local-owner-history-transport.mjs';
 import { resumePlan } from './local-yclients-read-resume.mjs';
 const scope = { stateDirectory:'/private/tmp/synthetic-history-review', initialManifestSha256:'a'.repeat(64), privateStateSha256:'b'.repeat(64),
@@ -56,4 +56,59 @@ test('thirty-minute retained review prepares builds and starts the existing data
   assert.equal(plan.durationMs,1800000);
   assert.deepEqual(plan.setup.map(x=>x.name),['backend-build','react-build','pg-start']);
   assert.throws(()=>resumePlan(env,scope.stateDirectory,'/opt/homebrew/opt/postgresql@16/bin',30,'/private/tmp/synthetic-output'));
+});
+
+const safePlan = {
+  "version": "maya-ci/1",
+  "parent_request": "",
+  "language": "ru",
+  "dialogue_act": "question",
+  "tasks": [
+    {
+      "id": "own",
+      "domain": "booking",
+      "intent": "booking.list_own",
+      "sub_intent": "booking.list_own",
+      "action": "read",
+      "data_class": "C",
+      "risk": "low",
+      "capability": {
+        "readiness": "ready",
+        "note": null
+      },
+      "response_rule": "Answer the requested intent directly, then offer at most one useful next step.",
+      "entities": {
+        "period": "past"
+      },
+      "depends_on": [],
+      "permission": {
+        "required": "appointments.own.read",
+        "status": "allowed"
+      },
+      "tool": {
+        "name": "appointments.own.list",
+        "alternatives": [
+          "appointments.own.list"
+        ],
+        "status": "ready"
+      },
+      "confidence": 1,
+      "requires_clarification": false,
+      "clarification_question": null,
+      "requires_confirmation": false
+    }
+  ],
+  "context": {
+    "carried_slots": [],
+    "replaced_slots": [],
+    "unresolved_references": []
+  }
+};
+test('canonical retained history intent is safe but appointment data, identity, prose and authority substitutions are refused', () => {
+  assert.equal(safeRetainedHistoryPlan(safePlan),true);
+  const input={phase:'tool_planning',conversation:[{role:'user',content:questions[1]}],tool_results:[],remembered_notes:[],semantic_plan:safePlan};
+  const wire={body:JSON.stringify({messages:[{role:'system',content:'synthetic'},{role:'user',content:JSON.stringify(input)}]})};assertHistoryPlanningRequest(wire);
+  for(const change of [p=>{p.tasks[0].entities.clientId='foreign'},p=>{p.tasks[0].entities.period='upcoming'},p=>{p.tasks[0].tool.name='appointments.create'},p=>{p.tasks[0].clarification_question='private'},p=>{p.context.carried_slots.push({phone:'private'})},p=>{p.parent_request='private phone'},p=>{p.visit={private:'data'}}]){
+    const bad=structuredClone(safePlan);change(bad);assert.equal(safeRetainedHistoryPlan(bad),false);
+  }
 });

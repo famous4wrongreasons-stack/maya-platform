@@ -44,6 +44,7 @@ export const READ_SOURCE_FILES = Object.freeze([
   'maya-saas-backend/scripts/local-owner-history-review-policy.mjs',
   'maya-saas-backend/scripts/local-owner-history-review.test.mjs',
   'maya-saas-backend/scripts/local-owner-history-review-proof.mjs',
+  'maya-saas-backend/scripts/local-owner-history-review-mutations.mjs',
   'maya-saas-backend/scripts/local-owner-history-transport.mjs',
   'maya-saas-backend/scripts/local-owner-history-runtime.mjs',
   'maya-saas-backend/scripts/local-owner-history-launch.mjs',

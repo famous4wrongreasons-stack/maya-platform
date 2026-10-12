@@ -1,3 +1,4 @@
+import { OWNER_HISTORY_REVIEW_PROFILE, HISTORY_REVIEW_QUESTIONS, HISTORY_REVIEW_TOOLS } from './local-owner-history-review-policy.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { EventEmitter } from 'node:events';
@@ -148,4 +149,27 @@ test('model adapter uses the existing private broker socket with exact turn bind
   assert.equal(requests[0].headers['x-candidate-manifest'],'e'.repeat(64));
   assert.equal(requests[0].headers['x-candidate-case'],'owner-salon-services');
   assert.equal(requests[0].headers['x-candidate-turn'],'1');installed.stop();
+});
+
+test('history review boundary retains original allowed read owner and blocks all Action Engine entry, including internal calls', async () => {
+  const body=i=>({surface:'web',requestId:'history-review-'+(i??0),messages:[{role:'user',content:HISTORY_REVIEW_QUESTIONS[i??0]}]});
+  const f=database(); let readCalls=0,actionCalls=0;
+  const tokens={}; const fakeRequire = file => {
+    if(file==='@nestjs/common') return {ForbiddenException:class extends Error{}};
+    const names={'@nestjs/config':'ConfigService','ai-core.service.js':'AiCoreService','ai-tool-runtime.service.js':'AiToolRuntimeService','action-engine.runtime.js':'ActionEngineRuntimeService'};
+    const name=names[file] ?? names[file.split('/').at(-1)]; assert.ok(name); tokens[name] ??= {name};return {[name]:tokens[name]};
+  };
+  const tools={listTools:async()=>({tools:[...HISTORY_REVIEW_TOOLS,'appointments.create'].map(name=>({name}))}),execute:async()=>{readCalls++;return 'canonical-read';},replayCompletedRead:async()=>{readCalls++;return 'canonical-replay';}};
+  const core={chat:async u=>tools.execute(u,'appointments.own.list',{})};
+  const engine={execute:async()=>{actionCalls++;},executeWithReceipt:async()=>{actionCalls++;}};
+  const services={AiCoreService:core,AiToolRuntimeService:tools,ActionEngineRuntimeService:engine,ConfigService:{set(){}}};
+  const app={get:token=>services[token.name],useGlobalInterceptors(i){this.interceptor=i;}};
+  const launch={manifest:{profile:OWNER_HISTORY_REVIEW_PROFILE,ownerScope:scope,limits:{model:'deepseek-v4-pro',outputPerAttempt:2048}},admission:{expiresAt:Date.now()+600000},assertCurrent(){}};
+  const installed=await installOwnerChat({app,prisma:f.prisma,require:fakeRequire,backend:process.cwd(),launch,providerFetch:async()=>{throw Error('no network')}});
+  assert.deepEqual((await tools.listTools(user,'web')).tools.map(t=>t.name),HISTORY_REVIEW_TOOLS);
+  await assert.rejects(tools.execute(user,'appointments.own.list',{})); // no live chat context
+  assert.equal(await core.chat(user,body()),'canonical-read');assert.equal(readCalls,1);
+  await assert.rejects(core.chat({...user,tenantId:'foreign'},body(1)));
+  assert.throws(()=>engine.execute()); assert.throws(()=>engine.executeWithReceipt());assert.equal(actionCalls,0);
+  installed.stop();await assert.rejects(core.chat(user,body(1)));
 });
