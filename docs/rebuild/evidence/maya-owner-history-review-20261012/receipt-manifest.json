@@ -1,0 +1,44 @@
+[
+  {
+    "artifact": "summary.json",
+    "localPath": "/private/tmp/maya-history-review-proof-08/summary.json",
+    "sha256": "71145888990b428ee0f74bcaca5811b132b9f0361c801e5041466a80c1e05698",
+    "size": 2181,
+    "classification": "SYNTHETIC_ONLY_NO_OWNER_DATA"
+  },
+  {
+    "artifact": "synthetic-history.png",
+    "localPath": "/private/tmp/maya-history-review-proof-08/synthetic-history.png",
+    "sha256": "309b9e561dc324164f6c385c9b704ada332762d325c976e6b0b186e6b117558e",
+    "size": 76257,
+    "classification": "SYNTHETIC_ONLY_NO_OWNER_DATA"
+  },
+  {
+    "artifact": "maya-history-review-all-units-final.log",
+    "localPath": "/private/tmp/maya-history-review-all-units-final.log",
+    "sha256": "126ed26bd66b43eb4c3a620890434c02d200acd5ffc655133252c9fcf7c8757b",
+    "size": 59218,
+    "classification": "SYNTHETIC_ONLY_NO_OWNER_DATA"
+  },
+  {
+    "artifact": "summary.json",
+    "localPath": "/private/tmp/maya-history-review-mutations-final/summary.json",
+    "sha256": "5891eea7b48ea4b4ef3b4292965743c3670b28086365db6773ec5ff84552e158",
+    "size": 2948,
+    "classification": "SYNTHETIC_ONLY_NO_OWNER_DATA"
+  },
+  {
+    "artifact": "maya-history-review-socket-before-02.log",
+    "localPath": "/private/tmp/maya-history-review-socket-before-02.log",
+    "sha256": "bbb1af6bf210cc076def32f5853bf7a8bed39dc4a92bbf3475add151c1241245",
+    "size": 1495,
+    "classification": "SYNTHETIC_ONLY_NO_OWNER_DATA"
+  },
+  {
+    "artifact": "maya-history-review-socket-after.log",
+    "localPath": "/private/tmp/maya-history-review-socket-after.log",
+    "sha256": "40badadc8a4197678cbf4a329b3b2a601b5989c63abb5d18b05fc0c0a719f2e0",
+    "size": 5796,
+    "classification": "SYNTHETIC_ONLY_NO_OWNER_DATA"
+  }
+]
