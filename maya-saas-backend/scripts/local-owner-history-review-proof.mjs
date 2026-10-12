@@ -139,7 +139,10 @@ try {
       const question=input.current_user_request;
       assert.equal(question,input.conversation.at(-1).content);
       if(modelCalls===1) {
-        assert.equal(input.semantic_plan.parent_request,HISTORY_REVIEW_QUESTIONS[0]);
+        // The canonical persisted context erases historical prose, retaining
+        // only the previous task/slots. The new utterance remains explicit.
+        assert.equal(input.semantic_plan.parent_request,'');
+        assert.equal(input.conversation.at(-2).content,HISTORY_REVIEW_QUESTIONS[0]);
         assert.equal(input.semantic_plan.tasks[0].entities.period,'past');
         report.currentRequestDistinctFromPriorPlan=true;
       }
