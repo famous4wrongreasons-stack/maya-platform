@@ -1,0 +1,85 @@
+{
+  "candidate": "f91b95a9830d1f28b7eb42fcc09c26a9b72e567d",
+  "receipts": [
+    {
+      "localPath": "/private/tmp/maya-last-visit-final-head-20261012.json",
+      "sha256": "b3f7f31399d114adb0f29ce2e1013cbdc6c2403a9236b3d5b958f947c243f067",
+      "bytes": 287342
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-final-head-20261012.log",
+      "sha256": "abd3e1caa0c237fd43bd67f808578acc3a4a0862ad1c6c8393e34e386505a6a1",
+      "bytes": 3978
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-final-lint-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-final-types-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-scripts-types-20261012.log",
+      "sha256": "eb83f5e7719dd703d43d4b37f1b030506ae6d70b2e25e279daadf05bef62dce2",
+      "bytes": 884
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-counterfactual-20261012-01/summary.json",
+      "sha256": "8ef9f218270f3cae17d6e0fe39a2a87e65f6ec0c84139490e5018319c1bcbb19",
+      "bytes": 3531
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-counterfactual-20261012-01/baseline.json",
+      "sha256": "4287a4a16a9950b9bf01cb22ec026114ef46115784b6120c97656d3778963b73",
+      "bytes": 6698
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-counterfactual-20261012-01/baseline.log",
+      "sha256": "fcda3f9e8f10134cbf275311d1b055a6992dac13e10224dba9fd1010200f1a6f",
+      "bytes": 1471
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-counterfactual-20261012-01/exact-prior-product.json",
+      "sha256": "982f6c55bb8aa7813b9ad23961e37db200db05fce2c16815ac909f7e8910c4dd",
+      "bytes": 169487
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-counterfactual-20261012-01/exact-prior-product.log",
+      "sha256": "79a188ee175b4abdd4eef0fcf1ef9dbab22f2ddf5064486ec85ad5ea24d728d3",
+      "bytes": 56659
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-counterfactual-20261012-01/silently-accept-unsupported-arguments.json",
+      "sha256": "e04a376a4b2914bce624ab1c373f61882da88f1b309fd9ac2bedf0b26fe8b02b",
+      "bytes": 27368
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-counterfactual-20261012-01/silently-accept-unsupported-arguments.log",
+      "sha256": "84de866a3851ca817c3ad5a6f8481fc9f33b90d81e0b62c0a6a0d9d4341294b6",
+      "bytes": 5650
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-counterfactual-20261012-01/weaken-empty-input-schema.json",
+      "sha256": "df022d7cfb80f94adcd8883ce542a2f13376f50dca8221b8dc35d5237eff35e1",
+      "bytes": 10247
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-counterfactual-20261012-01/weaken-empty-input-schema.log",
+      "sha256": "932ce8fb19d199097eff1f218c8b38f4255a4c193412b585c909a0b7ac8b4458",
+      "bytes": 3324
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-counterfactual-20261012-01/restored.json",
+      "sha256": "9412d1bc4bc086e94f5b39c8be77043e3d52233a71d65dc0767a57537a56ae97",
+      "bytes": 6697
+    },
+    {
+      "localPath": "/private/tmp/maya-last-visit-counterfactual-20261012-01/restored.log",
+      "sha256": "0270ca4a13aaf6f930a0013b42c784523f2463eae5d1bbfe3f1f35f50d9f2f7f",
+      "bytes": 1492
+    }
+  ]
+}
