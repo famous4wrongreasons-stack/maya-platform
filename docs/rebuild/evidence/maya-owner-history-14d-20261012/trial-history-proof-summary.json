@@ -1,0 +1,361 @@
+{
+  "qualification": "SYNTHETIC_H2_LOCAL_IMPLEMENTATION_NOT_LIVE_ACCEPTANCE_NOT_RELEASE_CERTIFICATION",
+  "decision": "H-2 Option A owner approved 2026-10-12",
+  "productAndHttpExecutedHead": "a8d554b4a844f17c914d3f066f6342aec9ceb1bd",
+  "finalTestExecutedHead": "8d5720dbdd0cafb29c935c01bb6d4d437e2fb4d9",
+  "subsequentDocsNotIndependentlyTested": true,
+  "fullBackend": {
+    "head": "a8d554b4a844f17c914d3f066f6342aec9ceb1bd",
+    "passed": 9611,
+    "failed": 0,
+    "filteredOrPending": 18,
+    "passedSuites": 717,
+    "success": true
+  },
+  "multilineNameCompletion": {
+    "head": "8d5720dbdd0cafb29c935c01bb6d4d437e2fb4d9",
+    "passed": 17,
+    "failed": 0,
+    "filteredOrPending": 188,
+    "passedSuites": 6,
+    "success": true,
+    "exactSkippedCaseMultisetMatched": true
+  },
+  "combinedBackend": {
+    "passed": 9628,
+    "failed": 0,
+    "remainingIntegrationOnly": 1
+  },
+  "focusedWave1": {
+    "head": "8d5720dbdd0cafb29c935c01bb6d4d437e2fb4d9",
+    "passed": 98,
+    "failed": 0,
+    "filteredOrPending": 0,
+    "passedSuites": 7,
+    "success": true
+  },
+  "mutations": {
+    "qualification": "SYNTHETIC_H2_AUTHORITY_MUTATIONS_NOT_RELEASE_CERTIFICATION",
+    "head": "8d5720dbdd0cafb29c935c01bb6d4d437e2fb4d9",
+    "hashes": {
+      "read": "bda5ab24eeb3aaaa4841499655ff0891669ced52c5d607a0824d50f62df6c8fd",
+      "executor": "0e2308483431666667c912dd73d02c5a530f6aaf056b6d206ef561623507c0af"
+    },
+    "baseline": {
+      "exit": 0,
+      "passed": 28,
+      "failed": 0,
+      "failures": [],
+      "assertion": false
+    },
+    "mutations": [
+      {
+        "name": "trial-namespace",
+        "exit": 1,
+        "passed": 23,
+        "failed": 5,
+        "failures": [
+          "does not widen trial namespace business_rules",
+          "does not widen trial namespace staff_ai_provider",
+          "does not widen trial namespace c8_valuation",
+          "does not widen trial namespace c9_orchestration",
+          "does not widen personal preference authority"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "full-trial-flag",
+        "exit": 1,
+        "passed": 26,
+        "failed": 2,
+        "failures": [
+          "refuses setup-only lifecycle",
+          "refuses missing full flag lifecycle"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "trial-status",
+        "exit": 1,
+        "passed": 26,
+        "failed": 2,
+        "failures": [
+          "refuses suspended lifecycle",
+          "refuses disabled lifecycle"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "trial-expiry",
+        "exit": 1,
+        "passed": 22,
+        "failed": 6,
+        "failures": [
+          "refuses invalid expiry lifecycle",
+          "refuses exact expiry lifecycle",
+          "refuses expired lifecycle",
+          "rereads lifecycle after admission instead of caching trial authority",
+          "rechecks current authority before returning a SUCCEEDED receipt, including the locked winner",
+          "rechecks current authority before returning a READY receipt, including the locked winner"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "current-membership",
+        "exit": 1,
+        "passed": 27,
+        "failed": 1,
+        "failures": [
+          "preserves missing/inactive membership, user and role refusal 1"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "current-user",
+        "exit": 1,
+        "passed": 27,
+        "failed": 1,
+        "failures": [
+          "preserves missing/inactive membership, user and role refusal 2"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "terminal-receipt-authority",
+        "exit": 1,
+        "passed": 27,
+        "failed": 1,
+        "failures": [
+          "rechecks current authority before returning a SUCCEEDED receipt, including the locked winner"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "locked-receipt-authority",
+        "exit": 1,
+        "passed": 27,
+        "failed": 1,
+        "failures": [
+          "rechecks current authority before returning a READY receipt, including the locked winner"
+        ],
+        "assertion": true,
+        "killed": true
+      }
+    ],
+    "restored": {
+      "exit": 0,
+      "passed": 28,
+      "failed": 0,
+      "failures": [],
+      "assertion": false
+    },
+    "workingSourceUnchanged": true
+  },
+  "httpPgProofs": [
+    {
+      "receipt": "maya-h2-http-pg-20261012-03",
+      "qualification": "SYNTHETIC_H2_HTTP_PG_NOT_LIVE_ACCEPTANCE",
+      "head": "a8d554b4a844f17c914d3f066f6342aec9ceb1bd",
+      "status": "passed",
+      "checks": [
+        "full-trial-confirmed-http-A22-revision-audit-and-concurrent-idempotent-receipt",
+        "stale-CAS-changed-replay-unconfirmed-and-extra-authority-fields-refused",
+        "other-trial-tenant-namespaces-and-personal-preferences-remain-refused",
+        "existing-staff-read-role-preserved-non-owner-write-refused",
+        "caller-header-cannot-switch-tenant-foreign-context-and-unauthenticated-refused",
+        "expiry-missing-expiry-setup-suspension-cancellation-refuse-read-and-receipt",
+        "revoked-membership-and-suspended-user-refuse-historical-receipt",
+        "admission-to-execution-authority-allow",
+        "admission-to-execution-authority-expired",
+        "admission-to-execution-authority-setup-only",
+        "admission-to-execution-authority-role-changed",
+        "admission-to-execution-authority-membership-replaced",
+        "admission-to-execution-authority-user-suspended",
+        "concurrent-distinct-CAS-winner-exactly-one",
+        "active-tenant-history-and-personal-preference-replay-regression",
+        "no-widget-grant-booking-Client-link-or-external-dispatch"
+      ],
+      "clusterStopped": true,
+      "sourceUnchanged": true,
+      "pidFileAbsent": true,
+      "realProviderCalls": 0
+    },
+    {
+      "receipt": "maya-h2-history-regression-20261012-01",
+      "qualification": "SYNTHETIC_HISTORY_HTTP_PG_BINARY_NOT_LIVE_ACCEPTANCE",
+      "head": "a8d554b4a844f17c914d3f066f6342aec9ceb1bd",
+      "status": "passed",
+      "checks": [
+        "canonical-password-login-and-GET-do-not-import",
+        "real-adapter-to-canonical-reconciliation-two-distinct-clients",
+        "one-import-concurrent-and-later-replay-refused",
+        "canonical-personal-reader-excludes-foreign-records-and-notes",
+        "expired-adapter-cache-refreshes-labels-without-reimport",
+        "governed-history-setting-canonical-CAS-and-explicit-private-consent",
+        "business-model-SMS-binding-and-foreign-owner-refused",
+        "out-of-window-source-row-refused-before-any-appointment-write",
+        "overfilled-page-fails-without-false-completion-or-extra-rows",
+        "stop-between-rows-cannot-restore-unrestricted-writer",
+        "expiry-after-final-row-cannot-mark-reconciliation-complete",
+        "nonprogressing-source-remains-truncated-no-absence-deletion",
+        "execution-revocation-during-wire-refuses-result",
+        "company-change-in-flight-refused",
+        "actual-child-IPC-import-command-relay-and-network-denial-safe-receipt",
+        "clean-binary-stop-parent-key-discarded"
+      ],
+      "clusterStopped": true,
+      "sourceUnchanged": true,
+      "pidFileAbsent": true,
+      "realProviderCalls": 0
+    }
+  ],
+  "typecheck": "PASS",
+  "scopedLint": "PASS",
+  "productAndProofHashes": [
+    {
+      "file": "maya-saas-backend/src/package5-wave1/governed-settings.read.ts",
+      "sha256": "bda5ab24eeb3aaaa4841499655ff0891669ced52c5d607a0824d50f62df6c8fd",
+      "equalBetweenExecutedHeads": true
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave1/package5-wave1-canonical-cutover.service.ts",
+      "sha256": "adbc3b7963708511f9d0930a9cdbde01d980507969e9f85c9121014b94e49471",
+      "equalBetweenExecutedHeads": true
+    },
+    {
+      "file": "maya-saas-backend/src/package5-wave1/package5-wave1.service.ts",
+      "sha256": "0e2308483431666667c912dd73d02c5a530f6aaf056b6d206ef561623507c0af",
+      "equalBetweenExecutedHeads": true
+    },
+    {
+      "file": "maya-saas-backend/scripts/local-owner-history-trial-proof.mjs",
+      "sha256": "dd22a0743391a48334a0f42acfa3b9dcdd7e6eac151435922bbc3e1a6299a951",
+      "equalBetweenExecutedHeads": true
+    },
+    {
+      "file": "maya-saas-backend/scripts/local-owner-history-proof.mjs",
+      "sha256": "6931b93d07af1ca56536b81d17681baec6d8b28d8ab00d923e4f67832f32a654",
+      "equalBetweenExecutedHeads": true
+    }
+  ],
+  "receiptManifest": [
+    {
+      "localPath": "/private/tmp/maya-h2-backend-20261012-01.json",
+      "sha256": "5cb83c9ea834175b6a32b471833a4672400c8e40bfd2d663360513e196743a97",
+      "bytes": 4891763,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    },
+    {
+      "localPath": "/private/tmp/maya-h2-backend-20261012-01.log",
+      "sha256": "e9deb992db4a73e3050220c48bb296fd43f8f62511cd9de3fc9f66e2ac8bb772",
+      "bytes": 971835,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    },
+    {
+      "localPath": "/private/tmp/maya-h2-backend-multiline-20261012.json",
+      "sha256": "b7e7b58a3d2489fc64cfed26e8b1675c0262d20381a4b797deda7e396f9effb7",
+      "bytes": 176123,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    },
+    {
+      "localPath": "/private/tmp/maya-h2-backend-multiline-20261012.log",
+      "sha256": "6311f65177220874c21419ea3bcb96ca8dc7cd23ee29ef16c50471e792b6de39",
+      "bytes": 1204,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    },
+    {
+      "localPath": "/private/tmp/maya-h2-focused-final-20261012.json",
+      "sha256": "a4fb779dcad328c22519c91e5dd1dd35610f8eef0c82a88a3a325d10730357c1",
+      "bytes": 46296,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    },
+    {
+      "localPath": "/private/tmp/maya-h2-focused-final-20261012.log",
+      "sha256": "56bc82ed4077f51af5cbf346f84099495ec08925640c2f07e04b8cd810f73b77",
+      "bytes": 404,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    },
+    {
+      "localPath": "/private/tmp/maya-h2-typecheck-final-20261012.log",
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "bytes": 103,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    },
+    {
+      "localPath": "/private/tmp/maya-h2-product-lint-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    },
+    {
+      "localPath": "/private/tmp/maya-h2-lint-final-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    },
+    {
+      "localPath": "/private/tmp/maya-h2-http-pg-20261012-01/summary.json",
+      "sha256": "3570994328c83edcde296990c344aae0e65203c3a5e649b74078362d59ae5fea",
+      "bytes": 1660,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    },
+    {
+      "localPath": "/private/tmp/maya-h2-http-pg-20261012-02/summary.json",
+      "sha256": "ae64db4dd3aa1f5a2e9897b939b1b3e8ecaf0956e747d607ea00c4183941049c",
+      "bytes": 3088,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    },
+    {
+      "localPath": "/private/tmp/maya-h2-http-pg-20261012-03/summary.json",
+      "sha256": "cc380250ac34e7f1661b05b02032501bf807d2f030c5da513462ef7c14a77d45",
+      "bytes": 1947,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    },
+    {
+      "localPath": "/private/tmp/maya-h2-history-regression-20261012-01/summary.json",
+      "sha256": "d00f70d192560884565cb85e3b000a4d6faa6a12db9b4a82b374ffe5c258cecf",
+      "bytes": 11384,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    },
+    {
+      "localPath": "/private/tmp/maya-h2-mutations-20261012-01/summary.json",
+      "sha256": "d7f95764eef69c029a674c3183d9aea80168f3598cd1136ecbaa1aa31a058af3",
+      "bytes": 601,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    },
+    {
+      "localPath": "/private/tmp/maya-h2-mutations-20261012-02/summary.json",
+      "sha256": "fe7fe0988de3ff0af0293451a6712bec7f08d2edec29938abcd161d8ba053ad3",
+      "bytes": 3235,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; safe projection archived here, no real owner material copied."
+    }
+  ],
+  "realOwnerDatabaseStarted": false,
+  "realSettingChanged": false,
+  "realProviderCallsThisUnit": 0,
+  "productionChanged": false,
+  "schemaChanged": false,
+  "releaseCertificationClaimed": false
+}

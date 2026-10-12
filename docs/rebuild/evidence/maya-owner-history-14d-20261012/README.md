@@ -9,6 +9,10 @@ import, partial acceptance and local correction are recorded in
 [LIVE-RESULT.md](LIVE-RESULT.md). Statements below about no live execution apply
 to this preparation checkpoint, not to that later run.
 
+Latest local implementation: [H-2 ordinary full-trial history setting](TRIAL-HISTORY-IMPLEMENTATION.md).
+The owner approved Option A; synthetic qualification is complete. This does not
+mean the retained real setting has been enabled or live history acceptance passed.
+
 ## Decision and scope
 
 The owner selected Option A in the [H-1 decision](../maya-personal-history-next-20261012/README.md): prepare the existing salon journal for seven days before the selected day and seven days beginning on it. The question explicitly excluded real reading at this preparation stage. No live history execution permit has been issued and no real journal has been read.

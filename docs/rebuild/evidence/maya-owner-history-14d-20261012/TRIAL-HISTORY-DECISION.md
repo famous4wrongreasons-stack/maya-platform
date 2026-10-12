@@ -1,7 +1,14 @@
 # H-2 — Personal-history configuration during an ordinary full trial
 
-Status: OWNER DECISION REQUIRED; no product authority change implemented.
-Date: 2026-10-12. This is independent of the local catalogue-refresh defect.
+Status: OWNER APPROVED OPTION A on 2026-10-12, for local implementation and
+synthetic qualification only. The owner selected “A — разрешить настройку
+истории для полноценного trial”. No real execution allowance is implied.
+This is independent of the local catalogue-refresh defect.
+
+The established-facts section below records the pre-decision behavior on the
+named historical candidate. It is not the current implementation status.
+See [TRIAL-HISTORY-IMPLEMENTATION.md](TRIAL-HISTORY-IMPLEMENTATION.md) for the
+implementation and exact executed evidence.
 
 ## Established facts
 

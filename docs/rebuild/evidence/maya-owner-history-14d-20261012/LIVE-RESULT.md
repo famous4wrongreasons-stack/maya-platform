@@ -6,6 +6,11 @@ Branch: `codex/maya-local-crm-setup-20261010`.
 This updates, rather than replaces, the preceding preparation checkpoint.
 It is not release certification or successful live AChat/history acceptance.
 
+Subsequent local-only update: the owner approved H-2 Option A and its synthetic
+implementation passed. See [TRIAL-HISTORY-IMPLEMENTATION.md](TRIAL-HISTORY-IMPLEMENTATION.md).
+The live outcomes and the historical remaining-boundary assessment below are
+preserved; the implementation does not retrospectively change those outcomes.
+
 ## Authorized real local execution
 
 The owner separately approved one session of at most 30 minutes, one salon
