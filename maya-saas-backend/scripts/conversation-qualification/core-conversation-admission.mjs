@@ -1,4 +1,5 @@
 import { isRetainedOwnerProfile } from './current-candidate-budget.mjs';
+import { validateKeychainSource } from '../local-keychain-source.mjs';
 /** Validates externally supplied, nonsecret admission records. This module never
  * issues owner authority, opens credentials, starts transport or creates a permit.
  * A valid declaration still requires separate owner/tool execution authorization.
@@ -184,6 +185,7 @@ function validateManifest(value, localStdin) {
     record(value.admissionContext, ['target', 'credentialSource']);
     validateTarget(value.admissionContext.target, localStdin);
     validateCredential(value.admissionContext.credentialSource, localStdin);
+    if(value.admissionContext.credentialSource.kind==='macos-keychain')requireThat(owner);
     requireThat(
       value.admissionContext.credentialSource.reader ===
         value.admissionContext.target.brokerUid,
@@ -274,6 +276,9 @@ function validateTarget(target, localStdin = false) {
   // dedicated direct parent, actual socket type, ownership and access modes.
 }
 function validateCredential(source, localStdin = false) {
+  if(localStdin && source?.kind==='macos-keychain'){
+    try{validateKeychainSource(source);}catch{deny();}return;
+  }
   record(source, ['kind', 'reference', 'owner', 'reader']);
   if (localStdin) {
     requireThat(

@@ -30,6 +30,7 @@ function fixture(
   t,
   mode = 'ADMITTED_MODEL_HTTP',
   profileId = CORE_DIAGNOSTIC_PROFILE,
+  credentialOverride,
 ) {
   const profile = coreConversationProfile(profileId);
   const dataset = JSON.parse(
@@ -61,7 +62,7 @@ function fixture(
       gid: process.getgid(),
     },
   };
-  const credentialSource = {
+  const credentialSource = credentialOverride ?? {
     kind: localStdin ? 'terminal-stdin' : 'file',
     reference: localStdin
       ? 'owner-terminal-stdin-once'
@@ -152,6 +153,27 @@ function fixture(
     write,
   };
 }
+
+const syntheticKeychain=()=>({kind:'macos-keychain',reference:'/private/tmp/SYNTHETIC/MayaLocalCredentials.app/Contents/MacOS/MayaLocalCredentials',
+  owner:process.getuid(),reader:process.getuid(),sha256:'d'.repeat(64),cdhash:'e'.repeat(40),storageApprovalRef:'SYNTHETIC_MEMORY_ONLY'});
+test('Keychain source remains bound to one-use current local owner admission',t=>{
+  const f=fixture(t,'ADMITTED_LOCAL_MODEL_HTTP',CORE_OWNER_HISTORY_PROFILE,syntheticKeychain());
+  const current=claimCorePermit(f.options);current(f.binding);
+  denied(()=>claimCorePermit(f.options)); // also the concurrent/replayed claim
+  denied(()=>assertCoreAdmission({...f.options,credentialSource:{...f.options.credentialSource,sha256:'f'.repeat(64)}}));
+  denied(()=>current({...f.binding,candidateCommit:'b'.repeat(40)}));
+  t.mock.method(Date,'now',()=>at+60001);denied(()=>current(f.binding));
+});
+test('Keychain revocation is checked after a successful claim',t=>{
+  const f=fixture(t,'ADMITTED_LOCAL_MODEL_HTTP',CORE_OWNER_READ_PROFILE,syntheticKeychain());
+  const current=claimCorePermit(f.options);current(f.binding);
+  f.write(f.options.path,{...f.permit,revoked:true});denied(()=>current(f.binding));
+});
+test('Keychain cannot expand into remote or unapproved local profiles',t=>{
+  for(const [mode,profile] of [['ADMITTED_MODEL_HTTP',CORE_OWNER_READ_PROFILE],['ADMITTED_LOCAL_MODEL_HTTP',CORE_DIAGNOSTIC_PROFILE],['ADMITTED_LOCAL_MODEL_HTTP',CORE_UI_PROFILE]]){
+    denied(()=>fixture(t,mode,profile,syntheticKeychain()));
+  }
+});
 
 test('dry manifest has no admission authority and needs no permit', (t) => {
   const f = fixture(t, 'DRY_HTTP');

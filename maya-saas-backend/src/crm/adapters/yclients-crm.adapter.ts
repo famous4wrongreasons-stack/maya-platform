@@ -355,14 +355,21 @@ export class YclientsCRMAdapter implements CRMAdapter {
     YclientsServiceCategoryApiItem[]
   > | null = null;
 
-  constructor(private readonly config: CrmAdapterConfig) {
+  constructor(
+    private readonly config: CrmAdapterConfig,
+    partnerToken?: string,
+  ) {
     this.baseUrl = (
       config.baseUrl ||
       process.env.YCLIENTS_BASE_URL ||
       'https://api.yclients.com/api/v1'
     ).replace(/\/+$/, '');
 
-    this.partnerToken = process.env.YCLIENTS_PARTNER_TOKEN || '';
+    // Optional server-bootstrap credential; never taken from tenant config/settings.
+    this.partnerToken =
+      partnerToken === undefined
+        ? process.env.YCLIENTS_PARTNER_TOKEN || ''
+        : partnerToken;
     this.settings = (config.settings as YclientsSettings | undefined) ?? {};
 
     if (!this.partnerToken) {

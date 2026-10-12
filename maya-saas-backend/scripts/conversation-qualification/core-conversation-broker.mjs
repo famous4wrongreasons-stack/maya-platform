@@ -1,6 +1,7 @@
 // Separate explicit profile. Ordinary widgets and the old dry entry cannot load
 // credentials. A live invocation requires a fresh pinned external permit first.
 import assert from 'node:assert/strict';
+import { readKeychainCredential } from '../local-keychain-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
@@ -65,7 +66,7 @@ export function createCoreUsageFence({ profile, onUnknown }) {
 }
 // Import-safe for the finite local A+B launcher. Shared input never enters CLI,
 // runner, environment, files or IPC; all ordinary permit checks remain mandatory.
-export async function startCoreBroker(values, batch = null) {
+export async function startCoreBroker(values, batch = null, credentialSignal = null) {
   if (batch) {
     assert.equal(values.mode, 'admitted-local', 'core_batch_local_only');
     assert.equal(
@@ -107,6 +108,8 @@ export async function startCoreBroker(values, batch = null) {
   const pinned = readCoreManifest(values.manifest, values['manifest-sha256'], {
     localStdin,
   });
+  const keychainSource=localStdin&&pinned.admissionContext.credentialSource.kind==='macos-keychain';
+  assert.ok(!keychainSource||batch===null,'core_keychain_batch_refused');
   const profile = coreConversationProfile(pinned.profile);
   assert.ok(
     profile.id !== CORE_OFFLINE_PROFILE ||
@@ -393,6 +396,8 @@ export async function startCoreBroker(values, batch = null) {
   if (localStdin) {
     const controller = new AbortController();
     const cancel = () => controller.abort();
+    credentialSignal?.addEventListener('abort',cancel,{once:true});
+    if(credentialSignal?.aborted)controller.abort();
     const signals = ['SIGINT', 'SIGTERM', 'SIGHUP'];
     for (const signal of signals) process.on(signal, cancel);
     const revocation = setInterval(() => {
@@ -411,6 +416,8 @@ export async function startCoreBroker(values, batch = null) {
           signal: controller.signal,
           timeoutMs: Math.min(30000, remaining),
         });
+      else if(keychainSource)
+        localCredential=await readKeychainCredential(pinned.admissionContext.credentialSource,'deepseek',{assertCurrent:()=>admission(binding),signal:controller.signal,timeoutMs:Math.min(10000,remaining)});
       else
         localCredential = await readLocalTerminalCredential({
           signal: controller.signal,
@@ -429,6 +436,7 @@ export async function startCoreBroker(values, batch = null) {
       throw new Error('core_local_credential_input_refused');
     } finally {
       clearInterval(revocation);
+      credentialSignal?.removeEventListener('abort',cancel);
       for (const signal of signals) process.off(signal, cancel);
     }
   }

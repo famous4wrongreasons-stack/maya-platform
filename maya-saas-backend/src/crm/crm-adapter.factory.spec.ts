@@ -56,6 +56,50 @@ describe('CrmAdapterFactory', () => {
       'https://altegio.example/api/v1/companies?my=1',
     );
   });
+
+  it('uses a server bootstrap reader without environment writes or tenant-config authority', async () => {
+    delete process.env.YCLIENTS_PARTNER_TOKEN;
+    const factory = new CrmAdapterFactory();
+    const token = 'SYNTHETIC_PIPE_PARTNER_ONLY';
+    factory.installPartnerTokenReader(() => token);
+    factory.onModuleInit();
+    const adapter = factory.create(CrmProvider.YCLIENTS, {
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'synthetic-user-token',
+      settings: { partnerToken: 'caller-substitution-refused' },
+    });
+    await adapter.discoverCompanies?.();
+    const init = (global.fetch as jest.MockedFunction<typeof fetch>).mock
+      .calls[0][1];
+    expect(init).toBeDefined();
+    expect(new Headers(init?.headers).get('Authorization')).toContain(token);
+    expect(new Headers(init?.headers).get('Authorization')).not.toContain(
+      'caller-substitution',
+    );
+    expect(process.env.YCLIENTS_PARTNER_TOKEN).toBeUndefined();
+    expect(() => factory.installPartnerTokenReader(() => token)).toThrow();
+  });
+
+  it('revoked or empty bootstrap credentials never fall back to an ambient token', () => {
+    const factory = new CrmAdapterFactory();
+    let current = true;
+    factory.installPartnerTokenReader(() =>
+      current ? 'SYNTHETIC_PIPE_PARTNER_ONLY' : '',
+    );
+    const config = {
+      provider: CrmProvider.YCLIENTS,
+      apiToken: 'synthetic-user-token',
+      settings: {},
+    };
+    expect(() => factory.create(CrmProvider.YCLIENTS, config)).not.toThrow();
+    current = false;
+    expect(() => factory.create(CrmProvider.YCLIENTS, config)).toThrow(
+      'CRM credential unavailable',
+    );
+    expect(() => factory.create(CrmProvider.ALTEGIO, config)).toThrow(
+      'CRM credential unavailable',
+    );
+  });
 });
 
 function restoreEnv(name: string, value: string | undefined): void {

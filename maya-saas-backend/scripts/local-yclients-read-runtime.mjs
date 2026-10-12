@@ -1,4 +1,6 @@
 import { OWNER_HISTORY_REVIEW_PROFILE, OWNER_HISTORY_REVIEW_ADMISSION, historyReviewIngress } from './local-owner-history-review-policy.mjs';
+import {readPartnerPipe} from './local-credential-pipe.mjs';
+import {installLocalPartnerCredential} from './local-owner-keychain.mjs';
 // Ordinary AppModule and existing A17 owners. Diagnostics contain only closed
 // stage/code enums, never provider input, error text or credential metadata.
 import assert from 'node:assert/strict';
@@ -26,7 +28,7 @@ import { installOwnerHistory } from './local-owner-history-runtime.mjs';
 const require = createRequire(import.meta.url);
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export async function start() {
-  let app, prisma, guard, ownerChat, ownerTelegram, ownerHistory, closing, stage = 'environment_validating', code = 'environment_refused';
+  let app, prisma, guard, ownerChat, ownerTelegram, ownerHistory, closing, pipedPartner, clearPartner, stage = 'environment_validating', code = 'environment_refused';
   const send = message => { if (process.connected) process.send(message); };
   const trace = createReadTrace(send);
   const enter = (nextStage, nextCode) => { stage = nextStage; code = nextCode; send(runtimeStatus(stage)); };
@@ -35,11 +37,13 @@ export async function start() {
     ownerChat?.stop();
     ownerTelegram?.stop();
     ownerHistory?.stop();
+    clearPartner?.();
     try { await app?.close(); await prisma?.$disconnect(); }
     catch (error) { send(runtimeStatus('runtime_stopping', 'failed', 'runtime_cleanup_failed', error)); throw new Error('Runtime cleanup failed'); }
     finally {
       delete process.env.YCLIENTS_PARTNER_TOKEN;
       delete process.env.TELEGRAM_CLIENT_SECRET;
+      pipedPartner=undefined;
       if (guard) send({ type: 'read-summary', contract: 'maya.local-yclients-read/1', calls: guard.counters.calls, refused: guard.counters.refused, routes: guard.counters.routes });
     }
     send(runtimeStatus('runtime_stopping', 'completed'));
@@ -58,6 +62,8 @@ export async function start() {
     const telegramLaunch = ownerTelegramRequested ? readOwnerTelegramLaunch(args[1], args[2], args[3], readSourceBinding, 'child') : null;
     const historyLaunch = ownerHistoryRequested ? readOwnerHistoryLaunch(args[1], args[2], args[3], readSourceBinding, 'child') : null;
     const checkedEnv = { ...process.env };
+    const keychain=chatLaunch?.manifest.admissionContext.credentialSource.kind==='macos-keychain';
+    if(keychain){assert.equal(Object.hasOwn(process.env,'YCLIENTS_PARTNER_TOKEN'),false);chatLaunch.assertCurrent();pipedPartner=await readPartnerPipe();chatLaunch.assertCurrent();checkedEnv.YCLIENTS_PARTNER_TOKEN=pipedPartner;}
     if (telegramLaunch) {
       assert.ok(typeof checkedEnv.TELEGRAM_CLIENT_SECRET === 'string' && /^[\x21-\x7e]{16,4096}$/.test(checkedEnv.TELEGRAM_CLIENT_SECRET), 'local_telegram_secret_required');
       delete checkedEnv.TELEGRAM_CLIENT_SECRET;
@@ -66,7 +72,8 @@ export async function start() {
     const allowUserAuth = process.env.MAYA_LOCAL_YCLIENTS_USER_AUTH === 'owner_login_v1';
     assert.ok(!diagnostic || !allowUserAuth);
     assert.ok(!(telegramLaunch || historyLaunch) || !allowUserAuth);
-    assert.equal(process.env.YCLIENTS_PARTNER_TOKEN === PUBLIC_DIAGNOSTIC_PARTNER, diagnostic);
+    assert.equal(checkedEnv.YCLIENTS_PARTNER_TOKEN === PUBLIC_DIAGNOSTIC_PARTNER, diagnostic);
+    if(keychain)delete checkedEnv.YCLIENTS_PARTNER_TOKEN;
     code = 'private_state_refused';
     assertPrivateCwd(process.cwd());
     assert.equal(process.cwd(), process.env.MAYA_LOCAL_ONBOARDING_STATE);
@@ -92,6 +99,11 @@ export async function start() {
     const { PrismaService } = require(path.join(backend, 'dist/src/prisma/prisma.service.js'));
     enter('app_creating', 'app_create_failed');
     app = await NestFactory.create(AppModule, { bodyParser: false, logger: false, abortOnError: false });
+    if(keychain){
+      const {CrmAdapterFactory}=require(path.join(backend,'dist/src/crm/crm-adapter.factory.js'));
+      clearPartner=installLocalPartnerCredential(app.get(CrmAdapterFactory),pipedPartner,chatLaunch.assertCurrent);
+      pipedPartner=undefined;
+    }
     prisma = app.get(PrismaService);
     const historyReview = chatLaunch?.manifest.profile === OWNER_HISTORY_REVIEW_PROFILE;
     if (historyReview) {

@@ -11,6 +11,28 @@ import { CRMAdapter, CrmAdapterConfig } from './crm-adapter.interface';
 @Injectable()
 export class CrmAdapterFactory implements OnModuleInit {
   private readonly logger = new Logger(CrmAdapterFactory.name);
+  private partnerTokenReader?: () => string;
+
+  // Local server bootstrap only; there is no DTO, route, or persisted setting.
+  // Installing a reader disables environment fallback, including after revocation.
+  installPartnerTokenReader(reader: () => string): void {
+    if (this.partnerTokenReader || typeof reader !== 'function') {
+      throw new Error('CRM credential reader installation refused');
+    }
+    this.partnerTokenReader = reader;
+  }
+
+  private partnerToken(): string | undefined {
+    if (!this.partnerTokenReader) return undefined;
+    const token = this.partnerTokenReader();
+    if (
+      typeof token !== 'string' ||
+      !/^[\x21-\x2b\x2d-\x7e]{16,4096}$/.test(token)
+    ) {
+      throw new Error('CRM credential unavailable');
+    }
+    return token;
+  }
 
   /**
    * 🔴 Партнёрский токен проверяем при СТАРТЕ, а не в момент подключения.
@@ -22,7 +44,11 @@ export class CrmAdapterFactory implements OnModuleInit {
    * отказываемся стартовать.
    */
   onModuleInit(): void {
-    if (String(process.env.YCLIENTS_PARTNER_TOKEN || '').trim()) {
+    if (
+      String(
+        this.partnerToken() ?? process.env.YCLIENTS_PARTNER_TOKEN ?? '',
+      ).trim()
+    ) {
       return;
     }
 
@@ -35,21 +61,27 @@ export class CrmAdapterFactory implements OnModuleInit {
   create(provider: CrmProvider, config: CrmAdapterConfig): CRMAdapter {
     switch (provider) {
       case CrmProvider.YCLIENTS:
-        return new YclientsCRMAdapter({
-          ...config,
-          baseUrl:
-            config.baseUrl ||
-            process.env.YCLIENTS_BASE_URL ||
-            'https://api.yclients.com/api/v1',
-        });
+        return new YclientsCRMAdapter(
+          {
+            ...config,
+            baseUrl:
+              config.baseUrl ||
+              process.env.YCLIENTS_BASE_URL ||
+              'https://api.yclients.com/api/v1',
+          },
+          this.partnerToken(),
+        );
       case CrmProvider.ALTEGIO:
-        return new YclientsCRMAdapter({
-          ...config,
-          baseUrl:
-            config.baseUrl ||
-            process.env.ALTEGIO_BASE_URL ||
-            'https://api.alteg.io/api/v1',
-        });
+        return new YclientsCRMAdapter(
+          {
+            ...config,
+            baseUrl:
+              config.baseUrl ||
+              process.env.ALTEGIO_BASE_URL ||
+              'https://api.alteg.io/api/v1',
+          },
+          this.partnerToken(),
+        );
       case CrmProvider.MOCK:
         return new MockCRMAdapter(config);
       case CrmProvider.DIKIDI:

@@ -27,6 +27,14 @@ const repo = path.dirname(backend);
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 export const READ_SOURCE_FILES = Object.freeze([
+  'maya-saas-backend/scripts/local-keychain-source.mjs',
+  'maya-saas-backend/scripts/local-owner-keychain.mjs',
+  'maya-saas-backend/scripts/local-credential-pipe.mjs',
+  'maya-saas-backend/scripts/build-local-keychain-helper.mjs',
+  'maya-saas-backend/scripts/local-credentials/MayaLocalCredentials.swift',
+  'maya-saas-backend/scripts/local-keychain.test.mjs',
+  'maya-saas-backend/scripts/local-keychain-integration-proof.mjs',
+  'maya-saas-backend/scripts/local-keychain-runtime-fixture.mjs',
   'maya-saas-backend/scripts/local-yclients-read.mjs',
   'maya-saas-backend/scripts/local-yclients-read-profile.mjs',
   'maya-saas-backend/scripts/local-yclients-read-runtime.mjs',
@@ -311,11 +319,12 @@ export function createReadWebServer(plan, runtimeEnv) {
   return dev;
 }
 
-export async function runReadRuntime(plan, runtimeEnv, state, control, manifest, save) {
+export async function runReadRuntime(plan, runtimeEnv, state, control, manifest, save, partnerPipe = null) {
   const diagnostic = manifest.diagnostic;
   const command = plan.diagnosticNoProvider ? diagnosticRuntimeCommand(plan, runtimeEnv) : plan.runtime;
   let child;
-  try { child = spawn(command.command, command.args, { cwd: state, env: runtimeEnv, detached: true, stdio: ['ignore', 'ignore', 'ignore', 'ipc'] }); }
+  if(partnerPipe!==null)assert.equal(Object.hasOwn(runtimeEnv,'YCLIENTS_PARTNER_TOKEN'),false,'partner_environment_refused');
+  try { child = spawn(command.command, command.args, { cwd: state, env: runtimeEnv, detached: true, stdio: ['ignore', 'ignore', 'ignore', 'ipc', ...(partnerPipe!==null?['pipe']:[])] }); }
   catch { diagnosticFailure(diagnostic, 'child_boot_failed'); throw safeFailure('child_boot_failed'); }
   finally { delete runtimeEnv.YCLIENTS_PARTNER_TOKEN; delete runtimeEnv.TELEGRAM_CLIENT_SECRET; }
   let dev, timer, stopPromise, cancelled, wasReady = false;
@@ -330,6 +339,7 @@ export async function runReadRuntime(plan, runtimeEnv, state, control, manifest,
   const terminate = () => { void stopChild().catch(() => {}); cancelled?.(); };
   control.terminate = terminate;
   try {
+    if(partnerPipe!==null){const {writePartnerPipe}=await import('./local-credential-pipe.mjs');await writePartnerPipe(child.stdio[4],partnerPipe);partnerPipe=null;}
     await Promise.race([
       observer.ready, observer.failure,
       new Promise((_, reject) => { timer = setTimeout(() => reject(safeFailure('child_boot_timeout')), 60000); }),
@@ -359,6 +369,7 @@ export async function runReadRuntime(plan, runtimeEnv, state, control, manifest,
     diagnosticFailure(diagnostic, stoppedByOwner && !diagnostic.firstFailure ? 'session_cancelled' : FAILURE_CODES.includes(error?.diagnosticCode) ? error.diagnosticCode : diagnostic.stage === 'web_starting' ? 'relay_start_failed' : (wasReady ? 'child_exit_unexpected' : 'child_boot_failed'));
     save(); throw safeFailure(diagnostic.firstFailure.code);
   } finally {
+    partnerPipe=null;
     clearTimeout(timer); diagnosticStage(diagnostic, 'stopping');
     let cleanupFailed = false;
     try { await dev?.close(); }

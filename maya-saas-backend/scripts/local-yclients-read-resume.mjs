@@ -15,6 +15,7 @@ import { realReadEnvironment } from './local-yclients-read-profile.mjs';
 import { createDiagnostic, diagnosticFailure, diagnosticStage, promptPartnerToken, readSessionPlan, readSourceBinding, runReadRuntime, runtimeCredential } from './local-yclients-read.mjs';
 import { readOwnerChatLaunch } from './local-owner-chat-launch.mjs';
 import { startCoreBroker } from './conversation-qualification/core-conversation-broker.mjs';
+import { startOwnerKeychainSession } from './local-owner-keychain.mjs';
 import { readOwnerTelegramLaunch } from './local-owner-telegram-launch.mjs';
 import { OWNER_TELEGRAM_ADMISSION, OWNER_TELEGRAM_BATCH_PROFILE, ownerTelegramLimits } from './local-owner-telegram-policy.mjs';
 
@@ -239,6 +240,7 @@ export async function main(args) {
   const allowUserAuth = values['allow-user-auth'] === true;
   assert.equal(Boolean(values['owner-chat-plan']), Boolean(values['owner-chat-plan-sha256']), 'owner_chat_plan_pair');
   const chatLaunch = values['owner-chat-plan'] ? readOwnerChatLaunch(values['owner-chat-plan'], values['owner-chat-plan-sha256'], null) : null;
+  const keychain = chatLaunch?.manifest.admissionContext.credentialSource.kind === 'macos-keychain';
   assert.equal(Boolean(values['owner-telegram-plan']), Boolean(values['owner-telegram-plan-sha256']), 'local_telegram_plan_pair');
   assert.equal(Boolean(values['owner-telegram-plan'] || values['owner-history-plan']), Boolean(values['owner-approval-ref']), 'local_approval_pair');
   assert.equal(Boolean(values['owner-history-plan']), Boolean(values['owner-history-plan-sha256']), 'history_plan_pair');
@@ -251,7 +253,7 @@ export async function main(args) {
     && Number(values.minutes) * 60000 === ownerTelegramLimits(telegramLaunch.plan.contract).sessionMs), 'local_telegram_mode_refused');
   assert.ok(!chatLaunch || (!diagnosticNoProvider && !allowUserAuth && Number(values.minutes) * 60000 === chatLaunch.manifest.limits.durationMs), 'owner_chat_mode_refused');
   assert.ok(!diagnosticNoProvider || !allowUserAuth);
-  if (!diagnosticNoProvider) { assert.equal(process.stdin.isTTY, true, 'owner_terminal_required'); assert.equal(process.stderr.isTTY, true, 'owner_terminal_required'); }
+  if (!diagnosticNoProvider && !keychain) { assert.equal(process.stdin.isTTY, true, 'owner_terminal_required'); assert.equal(process.stderr.isTTY, true, 'owner_terminal_required'); }
   assert.ok(typeof values.state === 'string' && path.isAbsolute(values.state), 'state_required');
   const state = fs.realpathSync(values.state); assert.equal(state, values.state); assertPrivateCwd(state);
   const relative = path.relative(fs.realpathSync(repo), state);
@@ -308,7 +310,7 @@ export async function main(args) {
   assertClusterStopped(state); const pgpassHash = checkPgpass(state, env);
   for (const name of ['pg_ctl', 'pg_controldata', 'psql']) fs.accessSync(path.join(values['pg-bin'], name), fs.constants.X_OK);
   const claim = claimResume(state, { contract: 'maya.local-yclients-read-resume-claim/1', pid: process.pid, initialManifestSha256: pins.initial, restartReceiptSha256: pins.receipt, approvedSource: source.head });
-  let report, save, broker, attempted = false, timer, executionTimer, failed = false, phase = 'preflight', runtimeEnv, systemIdentity;
+  let report, save, broker, partnerPipe = null, attempted = false, timer, executionTimer, failed = false, phase = 'preflight', runtimeEnv, systemIdentity;
   const control = { cancelled: null, terminate: null };
   const cancel = signal => { control.cancelled ??= signal; control.terminate?.(); };
   const int = () => cancel('SIGINT'), term = () => cancel('SIGTERM');
@@ -347,7 +349,13 @@ export async function main(args) {
     assert.equal(control.cancelled, null); clearTimeout(timer); report.diagnostic.preparationStep = null;
     phase = 'input';
     let partner;
-    if (!diagnosticNoProvider) {
+    if (keychain) {
+      const abort = new AbortController(); control.terminate = () => abort.abort();
+      report.status = 'loading_credentials'; save();
+      const session = await startOwnerKeychainSession(values['owner-chat-plan'], values['owner-chat-plan-sha256'], abort.signal);
+      broker = session.broker; partner = session.partner; session.partner = undefined;
+      control.terminate = null;
+    } else if (!diagnosticNoProvider) {
       const abort = new AbortController(); control.terminate = () => abort.abort();
       report.status = 'waiting_input'; diagnosticStage(report.diagnostic, 'waiting_input'); save();
       process.stdout.write(plan.ownerHistoryReview ? 'Подготовка завершена. Нужны ДВА разных ключа: сначала партнёрский токен YCLIENTS, затем ключ DeepSeek API. После каждого нажмите Enter. На второй ввод — до 3 минут в пределах общего разрешённого срока. Сохранённую историю повторно не загружаем.\n' : historyLaunch ? 'Same-database preparation ready. One explicit fourteen-day journal synchronization, within the approved 30-minute window. Enter the partner token once.\n' : telegramLaunch?.plan.contract === OWNER_TELEGRAM_BATCH_PROFILE
@@ -356,7 +364,9 @@ export async function main(args) {
       partner = await promptPartnerToken({ timeoutMs: plan.promptDeadlineMs, signal: abort.signal });
       control.terminate = null;
     }
-    runtimeEnv = resumeEnvironment(env, partner, diagnosticNoProvider, allowUserAuth); partner = undefined;
+    runtimeEnv = resumeEnvironment(env, partner, diagnosticNoProvider, allowUserAuth);
+    if (keychain) { partnerPipe = partner; delete runtimeEnv.YCLIENTS_PARTNER_TOKEN; }
+    partner = undefined;
     if (telegramLaunch) {
       const abort = new AbortController(); control.terminate = () => abort.abort();
       runtimeEnv.TELEGRAM_CLIENT_SECRET = await promptPartnerToken({ credentialKind: 'telegram', timeoutMs: plan.promptDeadlineMs, signal: abort.signal });
@@ -365,16 +375,20 @@ export async function main(args) {
     report.diagnostic.credentialAccepted = !diagnosticNoProvider;
     assert.ok(inputsUnchanged() && jsonEqual(readSourceBinding(), source), 'resume_inputs_or_source_changed'); assert.equal(control.cancelled, null);
     if (chatLaunch) {
-      if (plan.ownerHistoryReview) process.stdout.write('Шаг 1/2 завершён. Теперь вставьте ДРУГОЙ ключ — DeepSeek API — в следующий скрытый запрос и нажмите Enter.\n');
-      broker = await startCoreBroker({ mode: 'admitted-local', ...chatLaunch.common, output: path.join(chatLaunch.root, 'broker') });
-      await broker.ready;
-      if (plan.ownerHistoryReview) process.stdout.write('Шаг 2/2 завершён. Оба ключа приняты локально. Запускаю Maya; дождитесь сообщения session ready.\n');
+      if (!keychain) {
+        if (plan.ownerHistoryReview) process.stdout.write('Шаг 1/2 завершён. Теперь вставьте ДРУГОЙ ключ — DeepSeek API — в следующий скрытый запрос и нажмите Enter.\n');
+        broker = await startCoreBroker({ mode: 'admitted-local', ...chatLaunch.common, output: path.join(chatLaunch.root, 'broker') });
+        await broker.ready;
+        if (plan.ownerHistoryReview) process.stdout.write('Шаг 2/2 завершён. Оба ключа приняты локально. Запускаю Maya; дождитесь сообщения session ready.\n');
+      }
       if (plan.ownerHistoryReview) plan.executionExpiresAt = broker.snapshot().expiresAt;
-      void broker.closed.then(() => { if (phase === 'runtime') cancel('MODEL_WINDOW_STOP'); }, () => cancel('MODEL_WINDOW_STOP'));
+      void broker.closed.then(() => { if (phase !== 'stopping') cancel('MODEL_WINDOW_STOP'); }, () => cancel('MODEL_WINDOW_STOP'));
       assert.equal(control.cancelled, null);
     }
     phase = 'runtime'; report.status = 'backend_starting'; diagnosticStage(report.diagnostic, 'backend_starting'); save();
-    await runReadRuntime(plan, runtimeEnv, state, control, report, save);
+    const running = runReadRuntime(plan, runtimeEnv, state, control, report, save, partnerPipe);
+    partnerPipe = null;
+    await running;
     phase = 'stopping';
     report.status = control.cancelled ? 'cancelled' : 'stopped';
   } catch (error) {
@@ -390,6 +404,7 @@ export async function main(args) {
     try {
       clearTimeout(timer); clearTimeout(executionTimer); control.terminate = null;
       phase = 'stopping';
+      partnerPipe = null;
       try { await broker?.stop('owner_read_session_stopped'); }
       catch { failed = true; if (report) diagnosticFailure(report.diagnostic, 'cleanup_failed', { cleanup: true }); }
       if (runtimeEnv) { delete runtimeEnv.YCLIENTS_PARTNER_TOKEN; delete runtimeEnv.TELEGRAM_CLIENT_SECRET; }

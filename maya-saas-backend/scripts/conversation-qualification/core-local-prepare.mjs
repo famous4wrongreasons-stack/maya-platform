@@ -1,4 +1,5 @@
 import { isRetainedOwnerProfile } from './current-candidate-budget.mjs';
+import {validateKeychainSource,assertKeychainHelper} from '../local-keychain-source.mjs';
 // Preparation only: read-only Git subprocesses; no permit, credential access,
 // services, database or network.
 import assert from 'node:assert/strict';
@@ -22,7 +23,7 @@ import {
   CORE_OFFLINE_PROFILE,
 } from './current-candidate-budget.mjs';
 
-export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE, ownerScope) {
+export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE, ownerScope, keychainSource) {
   const profile = coreConversationProfile(profileId);
   assert.notEqual(
     profile.id,
@@ -53,6 +54,7 @@ export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE, ow
   );
   const uid = process.getuid(),
     gid = process.getgid();
+  if(keychainSource){validateKeychainSource(keychainSource);assert.equal(keychainSource.owner,uid);assert.ok(isRetainedOwnerProfile(profile.id),'keychain_retained_only');assertKeychainHelper(keychainSource);}
   const context = {
     target: {
       host: 'localhost',
@@ -61,7 +63,7 @@ export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE, ow
       runnerUid: uid,
       brokerSocket: { path: socketPath, gid },
     },
-    credentialSource: {
+    credentialSource: keychainSource ?? {
       kind: 'terminal-stdin',
       reference: 'owner-terminal-stdin-once',
       owner: uid,
@@ -188,6 +190,14 @@ export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE, ow
     plan.effectBoundary = profile.id === 'core-owner-personal-history-20261012/1'
       ? 'EXACT_OWNER_EXISTING_PERSONAL_HISTORY_SETTING_AND_READ_ONLY_PLANNER_NO_PRIVATE_DATA_NO_IMPORT'
       : 'EXACT_OWNER_PUBLIC_CATALOG_READS_ONLY_NO_BUSINESS_MUTATIONS';
+  }
+  if(keychainSource){
+    delete plan.terminalInput;
+    plan.credentialInput={method:'exact-native-helper-private-pipes',inputsPerRun:0,
+      storedItems:2,storageApprovalRef:keychainSource.storageApprovalRef,
+      enrollmentPerformed:false,permitRequired:true,
+      storage:'owner-login-keychain; runtime memory only',
+      recipient:'DeepSeek: bounded broker; YCLIENTS partner: retained runtime factory'};
   }
   fs.writeFileSync(
     path.join(output, 'local-plan.json'),

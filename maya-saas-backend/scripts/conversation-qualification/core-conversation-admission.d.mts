@@ -21,6 +21,9 @@ export type CoreCredentialReference = Readonly<{
   reference: string;
   owner: number;
   reader: number;
+}> | Readonly<{
+  kind: 'macos-keychain'; reference: string; owner: number; reader: number;
+  sha256: string; cdhash: string; storageApprovalRef: string;
 }>;
 export type CoreManifest = CoreAdmissionBinding &
   Readonly<{

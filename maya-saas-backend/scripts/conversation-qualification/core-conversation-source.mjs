@@ -26,6 +26,8 @@ const scopes = [
   'maya-saas-backend/prisma',
   'maya-saas-backend/scripts/conversation-qualification',
   'maya-saas-backend/scripts/local-*.mjs',
+  'maya-saas-backend/scripts/local-credentials',
+  'maya-saas-backend/scripts/build-local-keychain-helper.mjs',
   'maya-saas-backend/scripts/c9-occupancy-proof.mjs',
   'maya-saas-backend/datasets/conversation-intelligence',
   'maya-saas-backend/test/widgets-live',
