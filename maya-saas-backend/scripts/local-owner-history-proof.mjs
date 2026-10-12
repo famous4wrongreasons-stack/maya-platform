@@ -139,11 +139,11 @@ try {
   report.checks.push('business-model-SMS-binding-and-foreign-owner-refused');save();
   // Fresh synthetic permits only. No live owner permits or state are reused.
   const install=async mode=>{
-    runtime.stop();wireMode=mode;alive=true;
+    report.phase='install-'+mode;save();runtime.stop();wireMode=mode;alive=true;
     // New AppModule per case avoids retaining an interceptor from a stopped qualification.
-    await app.close();globalThis.fetch=async()=>{throw Error('startup provider forbidden');};
+    await app.get(PrismaService).$disconnect();await app.close();globalThis.fetch=async()=>{throw Error('startup provider forbidden');};
     app=await NestFactory.create(AppModule,{bodyParser:false,logger:false,abortOnError:false});
-    runtime=await installOwnerHistory({app,prisma:app.get(PrismaService),require,backend,launch:{plan:permit,assertPermitCurrent(){assert.ok(alive);launch.assertPermitCurrent();},assertCurrent(){assert.ok(alive);launch.assertCurrent();}},nativeFetch:wire});globalThis.fetch=runtime.fetch;
+    report.phase='install-runtime-'+mode;save();runtime=await installOwnerHistory({app,prisma:app.get(PrismaService),require,backend,launch:{plan:permit,assertPermitCurrent(){assert.ok(alive);launch.assertPermitCurrent();},assertCurrent(){assert.ok(alive);launch.assertCurrent();}},nativeFetch:wire});globalThis.fetch=runtime.fetch;
     return runtime;
   };
   await install('outside-window');assert.equal((await runtime.importOnce()).status,'failed');
@@ -192,7 +192,7 @@ try {
   report.checks.push('clean-binary-stop-parent-key-discarded');report.status='passed';
 } catch(error) {
   // Fixtures have no owner data. Record closed name/message for synthetic diagnosis only.
-  report.status='failed';report.syntheticFailure={name:error?.name,message:String(error?.message).slice(0,500)};process.exitCode=1;
+  report.status='failed';report.syntheticFailure={name:error?.name,message:String(error?.message).slice(0,500),stack:String(error?.stack).slice(0,1800)};process.exitCode=1;
 } finally {
   runtime?.stop();await app?.close().catch(()=>{});globalThis.fetch=originalFetch;
   control.terminate?.();await running?.catch(()=>{});await prisma?.$disconnect();
