@@ -175,7 +175,7 @@ try {
   const { ConversationIntelligenceService }=load('conversation-intelligence/conversation-intelligence.service.js');
   const timeline=app.get(AI_TYPED_WIDGET_TRIGGER), intelligence=app.get(ConversationIntelligenceService);
   const actor={tenantId:tenant.id,userId:owner.id,role:'tenant_owner',membershipId:member.id,membershipStatus:'active',branchId:null,email,sessionId:'synthetic-fixture'};
-  let priorConversation;
+  let priorConversation, interruptedTurn;
   await context.runAsAuthPrincipal(actor,async()=>{
     for(const [index,question] of OWNER_CHAT_QUESTIONS.entries()){
       const userTurn=await timeline.persistTypedTurn({actor,surface:'web',utterance:question,requestId:randomUUID(),...(priorConversation?{conversationId:priorConversation}:{})});
@@ -183,9 +183,13 @@ try {
       const priorPlan=intelligence.validatePlan({parent_request:'',language:'ru',dialogue_act:'question',tasks:[{id:'t1',intent:'company.business_hours',entities:{},depends_on:[],confidence:1}],context:{}},actor.role,OWNER_CHAT_TOOLS);
       await timeline.persistAssistantReply({actor,userTurn,reply:`Synthetic public catalogue answer ${index+1}`,completionHash:hash('synthetic-prior-'+index),semanticContext:{version:'maya.chat-semantic-context/1',savedAt:new Date().toISOString(),timezone:'Europe/Moscow',plan:priorPlan}});
     }
+    // Match a failed planner turn: its canonical user row exists, no reply.
+    // Restoring it must not silently retry the question or mint a completion.
+    interruptedTurn=await timeline.persistTypedTurn({actor,surface:'web',utterance:HISTORY_REVIEW_QUESTIONS[0],requestId:randomUUID(),conversationId:priorConversation});
+    assert.ok(interruptedTurn);
   });
   const priorRows=await prisma.widgetTimelineTurn.findMany({where:{tenantId:tenant.id,conversationId:priorConversation},orderBy:{turnIndex:'asc'}});
-  assert.equal(priorRows.length,6);check('prior-public-conversation-persisted-through-canonical-typed-and-reply-owners');
+  assert.equal(priorRows.length,7);check('prior-public-conversation-and-interrupted-user-turn-persisted-through-canonical-owners');
   let token, lastChat;
   web=createReadWebServer({ownerHistoryReview:true},{PORT:String(apiPort),CORS_ALLOWED_ORIGINS:origin});
   web.server.prependListener('request',(req,res)=>{
@@ -207,8 +211,12 @@ try {
   assert.ok(await page.click(button('Войти')));
   assert.ok(await page.waitFor(`!!document.querySelector('[role="log"]')`));assert.equal(typeof token,'string');
   check('one-real-canonical-password-login-with-retained-verified-personal-context');
-  assert.ok(await page.waitFor(`document.querySelectorAll('[data-chat-message="maya"]').length === 3 && document.querySelectorAll('[data-chat-message="user"]').length === 3`));
-  check('actual-React-restores-three-prior-public-question-answer-pairs');
+  assert.ok(await page.waitFor(`document.querySelectorAll('[data-chat-message="maya"]').length === 3 && document.querySelectorAll('[data-chat-message="user"]').length === 4`));
+  const beforeChat=await h('/api/ai/conversation',undefined,token);assert.equal(beforeChat.status,200);
+  assert.equal(beforeChat.body.interrupted,true);
+  assert.equal(beforeChat.body.turns.find(t=>t.id===interruptedTurn.turnId)?.completed,false);
+  assert.equal(modelCalls,0);assert.equal(lastChat,undefined);
+  check('actual-React-restores-prior-pairs-and-interrupted-turn-without-auto-resubmit');
   const settings=await h('/api/governed-settings/tenant/client_capabilities',undefined,token);assert.equal(settings.status,200);
   const command={confirmed:true,namespace:'client_capabilities',expectedRevision:settings.body.revision,previousRevisionId:settings.body.previousRevisionId,content:{client_self_visit_history:true}};
   const settingKey=randomUUID();const changed=await h('/api/governed-settings/tenant',command,token).set('Idempotency-Key',settingKey);assert.equal(changed.status,201,'full trial setting '+JSON.stringify(changed.body));
@@ -233,18 +241,19 @@ try {
     assert.ok(await page.waitFor(`Array.from(document.querySelectorAll('[data-chat-message="maya"]')).at(-1)?.textContent.replace(/^MAYA: /,'').replace(/\\s+/g,' ').trim() === ${JSON.stringify(expected)}`));
     check(index===0?'actual-React-AiCore-C9-own-history-tool-and-server-composed-answer':'second-React-question-with-private-assistant-history-only-user-text-reaches-model');
   }
-  assert.ok(await page.waitFor(`document.querySelectorAll('[data-chat-message="maya"]').length === 5 && document.querySelectorAll('[data-chat-message="user"]').length === 5`));
+  assert.ok(await page.waitFor(`document.querySelectorAll('[data-chat-message="maya"]').length === 5 && document.querySelectorAll('[data-chat-message="user"]').length === 6`));
   const shot=await page.send('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(output,'synthetic-history.png'),Buffer.from(shot.data,'base64'),{mode:0o600});
-  check('one-browser-login-three-prior-plus-two-new-rendered-message-pairs');
+  check('one-browser-login-prior-pairs-interrupted-turn-and-two-new-rendered-pairs');
   assert.equal(modelCalls,2);check('exactly-two-synthetic-planner-calls-no-private-result-generation-call');
   assert.deepEqual(report.syntheticPlannerInputs.map(v=>v.retainedIntent),['company.business_hours','booking.list_own']);
   check('canonical-public-prior-context-then-private-history-intent-cross-actual-planner-wire');
   const restored=await h('/api/ai/conversation',undefined,token);assert.equal(restored.status,200);
   assert.equal(restored.body.conversationId,priorConversation);
-  assert.equal(restored.body.turns.filter(t=>t.role==='user').length,5);
+  assert.equal(restored.body.turns.filter(t=>t.role==='user').length,6);
   assert.equal(restored.body.turns.filter(t=>t.role==='assistant').length,5);
+  assert.equal(restored.body.turns.find(t=>t.id===interruptedTurn.turnId)?.completed,false);
   assert.deepEqual(await prisma.widgetTimelineTurn.findMany({where:{id:{in:priorRows.map(r=>r.id)}},orderBy:{turnIndex:'asc'}}),priorRows);
-  check('same-canonical-conversation-two-new-pairs-prior-six-rows-unchanged');
+  check('same-canonical-conversation-two-new-pairs-prior-seven-rows-unchanged-no-false-completion');
   for(const route of ['/api/integrations/crm/activate','/api/widgets/act','/api/client-channel/challenges','/api/auth/phone/start','/api/ai/tools/execute'])assert.equal((await h(route,{},token)).status,403);
   assert.equal((await h('/api/ai/chat',{surface:'web',requestId:'synthetic-review-forbidden',messages:[{role:'user',content:'Запиши меня'}]},token)).status,403);
   check('HTTP-import-booking-binding-SMS-direct-tool-and-new-question-refused');
