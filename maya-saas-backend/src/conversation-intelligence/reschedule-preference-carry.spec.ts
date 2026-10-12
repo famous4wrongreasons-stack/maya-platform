@@ -10,7 +10,16 @@ function candidate(
   entities: Record<string, string>,
   paired: boolean,
   act = 'clarification',
-) {
+): {
+  dialogue_act: string;
+  tasks: {
+    id: string;
+    intent: string;
+    entities: Record<string, string>;
+    depends_on?: string[];
+    confidence: number;
+  }[];
+} {
   return {
     dialogue_act: act,
     tasks: [
