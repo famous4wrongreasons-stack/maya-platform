@@ -8,7 +8,7 @@ import {
   CORE_DIAGNOSTIC_PROFILE,
   CORE_FOLLOWUP_PROFILE,
   CORE_UNION_PROFILE,
-  CORE_OWNER_READ_PROFILE,
+  CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE,
 } from './current-candidate-budget.mjs';
 
 const endpoint = 'https://api.deepseek.com/chat/completions';
@@ -30,7 +30,7 @@ const profiles = [
   CORE_DIAGNOSTIC_PROFILE,
   CORE_FOLLOWUP_PROFILE,
   CORE_UNION_PROFILE,
-  CORE_OWNER_READ_PROFILE,
+  CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE,
 ];
 
 function fixture(profile, onUnknown = () => {}) {

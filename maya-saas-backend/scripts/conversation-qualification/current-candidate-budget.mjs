@@ -5,6 +5,8 @@ import fs, { openSync, fsyncSync, closeSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { dirname } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
+export const CORE_OWNER_HISTORY_PROFILE = 'core-owner-personal-history-20261012/1';
+export const isRetainedOwnerProfile = profile => [CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE].includes(profile);
 export const CORE_OWNER_READ_PROFILE = 'core-owner-salon-read-20261011/1';
 
 export const CANDIDATE_LIMITS = Object.freeze({
@@ -48,6 +50,8 @@ export const CORE_OWNER_READ_LIMITS = Object.freeze({
 });
 export const CORE_OWNER_READ_LIMITS_SHA256 = createHash('sha256')
   .update(JSON.stringify(CORE_OWNER_READ_LIMITS)).digest('hex');
+export const CORE_OWNER_HISTORY_LIMITS = Object.freeze({ ...CORE_DIAGNOSTIC_LIMITS, dialogs: 2, turns: 2, durationMs: 1800000 });
+export const CORE_OWNER_HISTORY_LIMITS_SHA256 = createHash('sha256').update(JSON.stringify(CORE_OWNER_HISTORY_LIMITS)).digest('hex');
 export const CORE_FOLLOWUP_PROFILE = 'core-followup-20261009/1';
 export const CORE_FOLLOWUP_LIMITS = Object.freeze({
   ...CORE_DIAGNOSTIC_LIMITS,
@@ -98,6 +102,7 @@ export const CORE_OFFLINE_LIMITS_SHA256 = createHash('sha256')
   .update(JSON.stringify(CORE_OFFLINE_LIMITS))
   .digest('hex');
 function profileLimits(profile) {
+  if (profile === CORE_OWNER_HISTORY_PROFILE) return CORE_OWNER_HISTORY_LIMITS;
   if (profile === CORE_OWNER_READ_PROFILE) return CORE_OWNER_READ_LIMITS;
   if (profile === undefined) return CANDIDATE_LIMITS;
   if ([CORE_DIAGNOSTIC_PROFILE, CORE_UI_PROFILE].includes(profile))
@@ -237,6 +242,7 @@ export class CandidateBudgetGate {
           CORE_FOLLOWUP_PROFILE,
           CORE_UNION_PROFILE,
           CORE_OWNER_READ_PROFILE,
+          CORE_OWNER_HISTORY_PROFILE,
         ].includes(profile) ||
         typeof assertAdmission !== 'function' ||
         now !== undefined ||

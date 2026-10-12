@@ -1,3 +1,4 @@
+import { OWNER_HISTORY_REVIEW_PROFILE, OWNER_HISTORY_REVIEW_ADMISSION } from './local-owner-history-review-policy.mjs';
 // Explicit transition of one stopped, owned stage-0 database into the existing
 // setup-read profile. No initdb, migration, seed, signup or credential rotation.
 import assert from 'node:assert/strict';
@@ -111,9 +112,9 @@ function verifyHistoricalGitSource(initial, candidate, approvedCommit) {
 }
 
 export function resumePlan(env, state, pgBin, minutes, output, diagnosticNoProvider = false, allowUserAuth = false, telegramContract = null) {
-  const batch = telegramContract === OWNER_TELEGRAM_BATCH_PROFILE || telegramContract === OWNER_HISTORY_PROFILE;
+  const batch = telegramContract === OWNER_TELEGRAM_BATCH_PROFILE || telegramContract === OWNER_HISTORY_PROFILE || telegramContract === OWNER_HISTORY_REVIEW_PROFILE;
   if (telegramContract !== null) {
-    const limits = telegramContract === OWNER_HISTORY_PROFILE ? { sessionMs: 1800000 } : ownerTelegramLimits(telegramContract);
+    const limits = [OWNER_HISTORY_PROFILE, OWNER_HISTORY_REVIEW_PROFILE].includes(telegramContract) ? { sessionMs: 1800000 } : ownerTelegramLimits(telegramContract);
     assert.ok(!diagnosticNoProvider && !allowUserAuth && minutes * 60000 === limits.sessionMs, 'local_telegram_mode_refused');
   }
   assert.ok(Number.isSafeInteger(minutes) && minutes >= 1 && (batch ? minutes === 30 : minutes <= 15), 'session_window_refused');
@@ -248,7 +249,7 @@ export async function main(args) {
   const telegramLaunch = values['owner-telegram-plan'] ? readOwnerTelegramLaunch(...telegramArgs) : null;
   assert.ok(!telegramLaunch || (!chatLaunch && !diagnosticNoProvider && !allowUserAuth
     && Number(values.minutes) * 60000 === ownerTelegramLimits(telegramLaunch.plan.contract).sessionMs), 'local_telegram_mode_refused');
-  assert.ok(!chatLaunch || (!diagnosticNoProvider && !allowUserAuth && Number(values.minutes) === 10), 'owner_chat_mode_refused');
+  assert.ok(!chatLaunch || (!diagnosticNoProvider && !allowUserAuth && Number(values.minutes) * 60000 === chatLaunch.manifest.limits.durationMs), 'owner_chat_mode_refused');
   assert.ok(!diagnosticNoProvider || !allowUserAuth);
   if (!diagnosticNoProvider) { assert.equal(process.stdin.isTTY, true, 'owner_terminal_required'); assert.equal(process.stderr.isTTY, true, 'owner_terminal_required'); }
   assert.ok(typeof values.state === 'string' && path.isAbsolute(values.state), 'state_required');
@@ -270,7 +271,7 @@ export async function main(args) {
   const env = privateState.environment; assertProfileEnvironment(env);
   assert.ok(initial.landingUrl === env.CORS_ALLOWED_ORIGINS + '/__local-onboarding' && receipt.landingUrl === initial.landingUrl, 'saved_origin_mismatch');
   const output = externalStatePath(values.output, repo);
-  const plan = resumePlan(env, state, values['pg-bin'], Number(values.minutes), output, diagnosticNoProvider, allowUserAuth, telegramLaunch?.plan.contract ?? historyLaunch?.plan.contract ?? null);
+  const plan = resumePlan(env, state, values['pg-bin'], Number(values.minutes), output, diagnosticNoProvider, allowUserAuth, telegramLaunch?.plan.contract ?? historyLaunch?.plan.contract ?? (chatLaunch?.manifest.profile === OWNER_HISTORY_REVIEW_PROFILE ? OWNER_HISTORY_REVIEW_PROFILE : null));
   if (telegramLaunch) {
     const tp = telegramLaunch.plan, scope = tp.scope;
     assert.ok(scope.stateDirectory === state && scope.restartReceiptPath === receiptPath
@@ -298,7 +299,8 @@ export async function main(args) {
       && scope.restartReceiptSha256 === pins.receipt && chatLaunch.manifest.candidateCommit === source.head
       && output === path.join(chatLaunch.root, 'session'), 'owner_chat_saved_state_binding');
     plan.ownerChat = true;
-    plan.providerAdmission = 'explicit_owner_catalog_and_bounded_model';
+    plan.ownerHistoryReview = chatLaunch.manifest.profile === OWNER_HISTORY_REVIEW_PROFILE;
+    plan.providerAdmission = plan.ownerHistoryReview ? OWNER_HISTORY_REVIEW_ADMISSION : 'explicit_owner_catalog_and_bounded_model';
     plan.runtime.args.push('--owner-chat-plan', values['owner-chat-plan'], values['owner-chat-plan-sha256']);
   }
   const stateIdentity = ownedDirectoryIdentity(state), clusterIdentity = ownedDirectoryIdentity(plan.cluster);
@@ -348,7 +350,7 @@ export async function main(args) {
     if (!diagnosticNoProvider) {
       const abort = new AbortController(); control.terminate = () => abort.abort();
       report.status = 'waiting_input'; diagnosticStage(report.diagnostic, 'waiting_input'); save();
-      process.stdout.write(historyLaunch ? 'Same-database preparation ready. One explicit fourteen-day journal synchronization, within the approved 30-minute window. Enter the partner token once.\n' : telegramLaunch?.plan.contract === OWNER_TELEGRAM_BATCH_PROFILE
+      process.stdout.write(plan.ownerHistoryReview ? 'Same-database preparation ready. Existing personal history only; no reimport. Enter partner token and model key once for the approved 30-minute window.\n' : historyLaunch ? 'Same-database preparation ready. One explicit fourteen-day journal synchronization, within the approved 30-minute window. Enter the partner token once.\n' : telegramLaunch?.plan.contract === OWNER_TELEGRAM_BATCH_PROFILE
         ? 'Same-database preparation ready. Enter each key once in this terminal. Saved Telegram login only: at most 3 attempts, within the approved 30-minute window.\n'
         : 'Same-database preparation ready. Owner input is required in this terminal; the 1–15 minute web session starts only after backend and web readiness.\n');
       partner = await promptPartnerToken({ timeoutMs: plan.promptDeadlineMs, signal: abort.signal });

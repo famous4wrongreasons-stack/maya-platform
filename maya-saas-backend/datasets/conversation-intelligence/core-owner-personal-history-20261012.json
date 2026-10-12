@@ -1,0 +1,29 @@
+{
+  "contract": "maya.core-owner-personal-history/1",
+  "status": "FROZEN_QUESTIONS_NOT_EXECUTION_AUTHORITY",
+  "qualification": "LOCAL_RETAINED_HISTORY_REVIEW_NOT_BOOKING_ACCEPTANCE",
+  "dialogs": 2,
+  "userTurns": 2,
+  "cases": [
+    {
+      "id": "owner-personal-history",
+      "role": "owner",
+      "runtimeRole": "tenant_owner",
+      "audience": "owner",
+      "userTurns": [
+        "Покажи историю моих визитов"
+      ],
+      "proof": "VERIFIED_PERSONAL_CONTEXT_CANONICAL_SAVED_HISTORY_NO_PRIVATE_MODEL_INPUT"
+    },
+    {
+      "id": "owner-personal-last-visit",
+      "role": "owner",
+      "runtimeRole": "tenant_owner",
+      "audience": "owner",
+      "userTurns": [
+        "Когда я был у вас последний раз?"
+      ],
+      "proof": "VERIFIED_PERSONAL_CONTEXT_CANONICAL_SAVED_HISTORY_NO_PRIVATE_MODEL_INPUT"
+    }
+  ]
+}

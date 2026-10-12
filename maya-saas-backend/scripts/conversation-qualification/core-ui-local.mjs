@@ -13,7 +13,7 @@ import {
   coreBackend,
   coreHash,
 } from './core-conversation-source.mjs';
-import { CORE_UI_PROFILE, CORE_OWNER_READ_PROFILE } from './current-candidate-budget.mjs';
+import { CORE_UI_PROFILE, CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE, isRetainedOwnerProfile } from './current-candidate-budget.mjs';
 import { trackOwnedChild } from './owned-child-cleanup.mjs';
 
 export function readUiLaunchFile(file) {
@@ -89,13 +89,14 @@ export async function finishUiLaunch({
 }
 
 export function readUiLaunch(planPath, planSha256, expectedProfile = CORE_UI_PROFILE) {
-  assert.ok([CORE_UI_PROFILE, CORE_OWNER_READ_PROFILE].includes(expectedProfile), 'core_local_launch_profile');
+  assert.ok([CORE_UI_PROFILE, CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE, 'retained-owner'].includes(expectedProfile), 'core_local_launch_profile');
   assert.match(planSha256 ?? '', /^[a-f0-9]{64}$/, 'core_ui_plan_pin');
   const read = readUiLaunchFile;
   assert.equal(fs.realpathSync(planPath), planPath, 'core_ui_canonical_plan');
   const bytes = read(planPath);
   assert.equal(coreHash(bytes), planSha256, 'core_ui_plan_changed');
   const plan = JSON.parse(bytes);
+  if (expectedProfile === 'retained-owner') { assert.ok(isRetainedOwnerProfile(plan.profile), 'core_ui_profile'); expectedProfile = plan.profile; }
   assert.equal(plan.profile, expectedProfile, 'core_ui_profile');
   assert.equal(plan.mode, 'ADMITTED_LOCAL_MODEL_HTTP');
   assert.equal(plan.workDirectory, coreBackend);

@@ -49,9 +49,9 @@ export function historyProviderRoute(raw, init, plan, purpose) {
   if (!(typeof raw === 'string' || raw instanceof URL) || (init?.method ?? 'GET') !== 'GET' || init?.body != null) return null;
   let u; try { u = new URL(String(raw)); } catch { return null; }
   if (u.origin !== 'https://api.yclients.com' || u.username || u.password || u.hash || /[%\\]/.test(String(raw)) || !['journal','labels'].includes(purpose)) return null;
-  const company = plan.scope.companyId, dates = historyDates(plan.day);
+  const company = plan.scope.companyId;
   if (u.pathname === `/api/v1/records/${company}` && purpose === 'journal') {
-    const q = u.searchParams;
+    const dates = historyDates(plan.day), q = u.searchParams;
     if ([...q.keys()].sort().join(',') !== 'count,end_date,page,start_date,with_deleted'
       || q.get('start_date') !== dates.startDate || q.get('end_date') !== dates.endDate || q.get('count') !== '200'
       || q.get('with_deleted') !== '1' || !/^(?:[1-9]|1\d|2[0-5])$/.test(q.get('page'))) return null;

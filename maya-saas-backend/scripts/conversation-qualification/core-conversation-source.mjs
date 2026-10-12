@@ -1,3 +1,4 @@
+import { isRetainedOwnerProfile } from './current-candidate-budget.mjs';
 // Existing candidate/corpus ownership, narrowed to fixed frozen core profiles.
 // A manifest binds source bytes; it never authorizes a model request.
 import assert from 'node:assert/strict';
@@ -9,7 +10,6 @@ import { fileURLToPath } from 'node:url';
 import {
   CORE_DIAGNOSTIC_PROFILE,
   CORE_OFFLINE_PROFILE,
-  CORE_OWNER_READ_PROFILE,
 } from './current-candidate-budget.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
 import { assertOwnerChatScope } from '../local-owner-chat-policy.mjs';
@@ -74,7 +74,7 @@ export function assertCoreInventory(
   assert.deepEqual(actual, [...files].sort(), 'core_source_inventory_changed');
 }
 export function assertCoreSources(manifest) {
-  if (manifest.profile === CORE_OWNER_READ_PROFILE) assertOwnerChatScope(manifest.ownerScope);
+  if (isRetainedOwnerProfile(manifest.profile)) assertOwnerChatScope(manifest.ownerScope);
   else assert.equal(Object.hasOwn(manifest, 'ownerScope'), false, 'core_owner_scope_profile');
   assert.equal(typeof manifest.profile, 'string', 'core_profile_required');
   const profile = coreConversationProfile(manifest.profile);
@@ -188,7 +188,7 @@ export function captureCoreManifest(
     fs.readFileSync(path.join(coreRepo, profile.datasetPath), 'utf8'),
   );
   const manifest = {
-    ...(profile.id === CORE_OWNER_READ_PROFILE ? { ownerScope } : {}),
+    ...(isRetainedOwnerProfile(profile.id) ? { ownerScope } : {}),
     contract: 'maya.core-conversation-run/1',
     mode,
     profile: profile.id,

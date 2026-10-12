@@ -1,3 +1,4 @@
+import { OWNER_HISTORY_REVIEW_PROFILE, OWNER_HISTORY_REVIEW_ADMISSION, historyReviewIngress } from './local-owner-history-review-policy.mjs';
 // Ordinary AppModule and existing A17 owners. Diagnostics contain only closed
 // stage/code enums, never provider input, error text or credential metadata.
 import assert from 'node:assert/strict';
@@ -92,6 +93,13 @@ export async function start() {
     enter('app_creating', 'app_create_failed');
     app = await NestFactory.create(AppModule, { bodyParser: false, logger: false, abortOnError: false });
     prisma = app.get(PrismaService);
+    const historyReview = chatLaunch?.manifest.profile === OWNER_HISTORY_REVIEW_PROFILE;
+    if (historyReview) {
+      ownerHistory = await installOwnerHistory({ app, prisma, require, backend,
+        launch: { plan: { scope: chatLaunch.manifest.ownerScope }, assertCurrent: chatLaunch.assertCurrent },
+        nativeFetch, readExistingOnly: true });
+      guard = { counters: ownerHistory.counters, run: ownerHistory.runRequest, fetch: ownerHistory.fetch };
+    }
     if (chatLaunch) {
       ownerChat = await installOwnerChat({ app, prisma, require, backend, launch: chatLaunch, providerFetch: guard.fetch });
       globalThis.fetch = ownerChat.fetch;
@@ -117,7 +125,7 @@ export async function start() {
       const reason = !boundary ? 'local_onboarding_origin_refused' : historyLaunch
         ? ownerHistoryIngress(request.method, request.originalUrl, request.headers, request.body, origin, historyLaunch.plan.scope) : telegramLaunch
         ? ownerTelegramIngress(request.method, request.originalUrl, request.headers, request.body, origin, telegramLaunch.plan.scope, telegramLaunch.plan.contract) : chatLaunch
-        ? ownerChatIngress(request.method, request.originalUrl, request.headers, request.body, origin, chatLaunch.manifest.ownerScope)
+        ? (historyReview ? historyReviewIngress : ownerChatIngress)(request.method, request.originalUrl, request.headers, request.body, origin, chatLaunch.manifest.ownerScope)
         : diagnostic ? (diagnosticRoute ? null : 'local_yclients_diagnostic_route_disabled') : realReadIngress(request.method, request.originalUrl, request.headers, request.body, origin, allowUserAuth);
       traceHttpRequest(request, response, trace, reason);
       if (reason) { response.status(403).json({ error: { code: reason }, message: 'Этот локальный профиль допускает только явно разрешённые действия.' }); return; }
@@ -130,7 +138,7 @@ export async function start() {
     code = 'startup_provider_attempt';
     assert.equal(guard.counters.calls, 0, 'Startup provider dispatch forbidden');
     assert.equal(guard.counters.refused, 0, 'Startup provider attempt forbidden');
-    if (ownerHistory) {
+    if (historyLaunch) {
       let requested = false;
       process.on('message', message => {
         if (requested || closing || !message || Object.keys(message).length !== 1 || message.type !== 'owner-history-run') return;
@@ -139,7 +147,7 @@ export async function start() {
       });
     }
     send(runtimeStatus('runtime_ready', 'completed'));
-    send({ type: 'ready', contract: 'maya.local-yclients-read/1', origin: `http://127.0.0.1:${process.env.PORT}`, providerAdmission: historyLaunch ? OWNER_HISTORY_ADMISSION : telegramLaunch ? OWNER_TELEGRAM_ADMISSION : chatLaunch ? 'explicit_owner_catalog_and_bounded_model' : diagnostic ? 'diagnostic_network_closed' : allowUserAuth ? 'explicit_setup_auth_and_reads_only' : 'explicit_setup_reads_only' });
+    send({ type: 'ready', contract: 'maya.local-yclients-read/1', origin: `http://127.0.0.1:${process.env.PORT}`, providerAdmission: historyLaunch ? OWNER_HISTORY_ADMISSION : telegramLaunch ? OWNER_TELEGRAM_ADMISSION : chatLaunch ? (historyReview ? OWNER_HISTORY_REVIEW_ADMISSION : 'explicit_owner_catalog_and_bounded_model') : diagnostic ? 'diagnostic_network_closed' : allowUserAuth ? 'explicit_setup_auth_and_reads_only' : 'explicit_setup_reads_only' });
   } catch (error) {
     send(runtimeStatus(stage, 'failed', code, error));
     await stop().catch(() => {});

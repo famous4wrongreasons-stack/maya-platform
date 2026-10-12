@@ -1,3 +1,4 @@
+import { isRetainedOwnerProfile } from './current-candidate-budget.mjs';
 // Preparation only: read-only Git subprocesses; no permit, credential access,
 // services, database or network.
 import assert from 'node:assert/strict';
@@ -18,7 +19,6 @@ import {
   CORE_UI_PROFILE,
   CORE_UNION_PROFILE,
   CORE_OFFLINE_PROFILE,
-  CORE_OWNER_READ_PROFILE,
 } from './current-candidate-budget.mjs';
 
 export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE, ownerScope) {
@@ -178,13 +178,15 @@ export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE, ow
       ],
       effects: 'SYNTHETIC_SOURCES_READ_AND_PROPOSAL_ONLY_NO_BUSINESS_DISPATCH',
     };
-  if (profile.id === CORE_OWNER_READ_PROFILE) {
+  if (isRetainedOwnerProfile(profile.id)) {
     // Owner-salon reads reuse the retained-state launcher, never the fixture runner.
     plan.runnerArgv = null;
     plan.ownerScope = manifest.ownerScope;
     plan.terminalInput.inputsPerRun = 2;
     plan.terminalInput.recipient = 'partner token: retained-state runtime; model key: existing local broker only';
-    plan.effectBoundary = 'EXACT_OWNER_PUBLIC_CATALOG_READS_ONLY_NO_BUSINESS_MUTATIONS';
+    plan.effectBoundary = profile.id === 'core-owner-personal-history-20261012/1'
+      ? 'EXACT_OWNER_EXISTING_PERSONAL_HISTORY_SETTING_AND_READ_ONLY_PLANNER_NO_PRIVATE_DATA_NO_IMPORT'
+      : 'EXACT_OWNER_PUBLIC_CATALOG_READS_ONLY_NO_BUSINESS_MUTATIONS';
   }
   fs.writeFileSync(
     path.join(output, 'local-plan.json'),
@@ -215,7 +217,7 @@ export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE, ow
       { flag: 'wx', mode: 0o700 },
     );
   }
-  if (profile.id === CORE_OWNER_READ_PROFILE) {
+  if (isRetainedOwnerProfile(profile.id)) {
     const quote = value => "'" + value.replaceAll("'", "'\\''") + "'";
     const planPath = path.join(output, 'local-plan.json');
     const scope = manifest.ownerScope;
@@ -223,7 +225,7 @@ export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE, ow
       '--state', scope.stateDirectory, '--output', path.join(output, 'session'),
       '--restart-receipt', scope.restartReceiptPath, '--restart-receipt-sha256', scope.restartReceiptSha256,
       '--session-manifest-sha256', scope.initialManifestSha256, '--private-state-sha256', scope.privateStateSha256,
-      '--approved-source-commit', manifest.candidateCommit, '--minutes', '10',
+      '--approved-source-commit', manifest.candidateCommit, '--minutes', String(profile.limits.durationMs / 60000),
       '--owner-chat-plan', planPath, '--owner-chat-plan-sha256', coreHash(fs.readFileSync(planPath))];
     fs.writeFileSync(path.join(output, 'launch.command'), '#!/bin/sh\nset -eu\ncd '+quote(coreBackend)
       +'\nexec env -i PATH=/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin HOME=/Users/stanislavmosin TMPDIR=/tmp TZ=UTC '

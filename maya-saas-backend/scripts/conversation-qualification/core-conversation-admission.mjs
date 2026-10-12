@@ -1,3 +1,4 @@
+import { isRetainedOwnerProfile } from './current-candidate-budget.mjs';
 /** Validates externally supplied, nonsecret admission records. This module never
  * issues owner authority, opens credentials, starts transport or creates a permit.
  * A valid declaration still requires separate owner/tool execution authorization.
@@ -5,7 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { CORE_OFFLINE_PROFILE, CORE_OWNER_READ_PROFILE } from './current-candidate-budget.mjs';
+import { CORE_OFFLINE_PROFILE } from './current-candidate-budget.mjs';
 import { assertOwnerChatScope } from '../local-owner-chat-policy.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
 const manifests = new WeakMap();
@@ -137,7 +138,7 @@ function readPinned(file, expectedSha, maxBytes, pin) {
   }
 }
 function validateManifest(value, localStdin) {
-  const owner = value?.profile === CORE_OWNER_READ_PROFILE;
+  const owner = isRetainedOwnerProfile(value?.profile);
   if (owner) {
     requireThat(localStdin || value.mode === 'DRY_HTTP');
     try { assertOwnerChatScope(value.ownerScope); } catch { deny(); }
@@ -435,7 +436,7 @@ function checkPermit(config, previous, time) {
     typeof process.getuid === 'function' &&
       process.getuid() === config.target[config.role + 'Uid'],
   );
-  const expectedCwd = config.manifest.profile === CORE_OWNER_READ_PROFILE && config.role === 'runner'
+  const expectedCwd = isRetainedOwnerProfile(config.manifest.profile) && config.role === 'runner'
     ? config.manifest.ownerScope.stateDirectory : config.target.workDirectory;
   requireThat(fs.realpathSync(process.cwd()) === expectedCwd);
   const start = instant(permit.startsAt),

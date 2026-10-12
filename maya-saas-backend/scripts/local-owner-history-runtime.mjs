@@ -6,7 +6,7 @@ import { createHash } from 'node:crypto';
 import { assertOwnerChatActor, verifyOwnerChatDatabase } from './local-owner-scope.mjs';
 import { createOwnerHistoryTransport } from './local-owner-history-transport.mjs';
 import { historyDates, historyResultProjection } from './local-owner-history-policy.mjs';
-export async function installOwnerHistory({ app, prisma, require, backend, launch, nativeFetch }) {
+export async function installOwnerHistory({ app, prisma, require, backend, launch, nativeFetch, readExistingOnly = false }) {
   const plan = launch.plan, scope = plan.scope, undo = [];
   const load = p => require(path.join(backend, 'dist/src', p));
   const { ForbiddenException } = require('@nestjs/common');
@@ -38,8 +38,8 @@ export async function installOwnerHistory({ app, prisma, require, backend, launc
       // The current journal uses tenant timezone. Never reinterpret its dates
       // in a divergent branch timezone or silently modify either source.
       assert.ok(tenant?.calendarSource === 'external'
-        && resolveSalonTimezone({ branchTimezone: branch?.timezone, tenantTimezone: tenant?.defaultTimezone }) === plan.timezone
-        && resolveSalonTimezone({ tenantTimezone: tenant?.defaultTimezone }) === plan.timezone, 'history_canonical_timezone_changed');
+        && (readExistingOnly || (resolveSalonTimezone({ branchTimezone: branch?.timezone, tenantTimezone: tenant?.defaultTimezone }) === plan.timezone
+        && resolveSalonTimezone({ tenantTimezone: tenant?.defaultTimezone }) === plan.timezone)), 'history_canonical_timezone_changed');
       const pin = createHash('sha256').update(JSON.stringify({ tenant, branch, integration })).digest('hex');
       if (sourcePin === undefined) sourcePin = pin;
       assert.ok(sourcePin === pin, 'history_source_changed');
@@ -47,16 +47,17 @@ export async function installOwnerHistory({ app, prisma, require, backend, launc
     } catch { return refuse(); }
   };
   launch.assertCurrent(); await current();
-  const transport = createOwnerHistoryTransport({ plan, nativeFetch, assertCurrent: permitCurrent, assertSource: launch.assertCurrent, verifyCurrent: current });
+  const transport = createOwnerHistoryTransport({ plan, nativeFetch, assertCurrent: permitCurrent, assertSource: launch.assertCurrent, verifyCurrent: current, allowJournal: !readExistingOnly });
   const patch = (object, method, wrapper) => {
     assert.equal(typeof object[method], 'function', 'history_canonical_owner_required');
     const original = object[method]; object[method] = wrapper(original.bind(object)); undo.push(() => { object[method] = original; });
   };
-  const dates = historyDates(plan.day);
-  const from = canonicalAppointmentInstant(dates.startDate + 'T00:00:00', plan.timezone);
-  const to = canonicalAppointmentInstant(dates.exclusiveDate + 'T00:00:00', plan.timezone);
+  const dates = readExistingOnly ? null : historyDates(plan.day);
+  const from = dates && canonicalAppointmentInstant(dates.startDate + 'T00:00:00', plan.timezone);
+  const to = dates && canonicalAppointmentInstant(dates.exclusiveDate + 'T00:00:00', plan.timezone);
   let importing = false;
   try {
+    if (readExistingOnly) patch(reconciliation, 'run', () => refuse);
     patch(auth, 'login', original => async (dto, ...rest) => {
       await current();
       const user = await prisma.user.findUnique({ where: { id: scope.userId }, select: { email: true } });
@@ -116,6 +117,7 @@ export async function installOwnerHistory({ app, prisma, require, backend, launc
       runRequest(_request, _response, next) { next(); },
       async importOnce() {
         try {
+          if (readExistingOnly) return refuse();
           await current();
           return await transport.run('journal', async () => {
             importing = true;

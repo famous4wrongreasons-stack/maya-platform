@@ -1,3 +1,4 @@
+import { HISTORY_REVIEW_QUESTIONS } from './local-owner-history-review-policy.mjs';
 // Separate, explicitly invoked local setup-read session. Existing stage 0 stays
 // closed to providers. No token is accepted through argv, files or inherited env.
 import assert from 'node:assert/strict';
@@ -40,6 +41,9 @@ export const READ_SOURCE_FILES = Object.freeze([
   'maya-saas-backend/scripts/local-telegram-return.test.mjs',
   'maya-saas-backend/scripts/local-owner-scope.mjs',
   'maya-saas-backend/scripts/local-owner-history-policy.mjs',
+  'maya-saas-backend/scripts/local-owner-history-review-policy.mjs',
+  'maya-saas-backend/scripts/local-owner-history-review.test.mjs',
+  'maya-saas-backend/scripts/local-owner-history-review-proof.mjs',
   'maya-saas-backend/scripts/local-owner-history-transport.mjs',
   'maya-saas-backend/scripts/local-owner-history-runtime.mjs',
   'maya-saas-backend/scripts/local-owner-history-launch.mjs',
@@ -296,7 +300,7 @@ export function createReadWebServer(plan, runtimeEnv) {
     }
     if (request.method === 'GET' && request.url === '/__local-yclients-read') {
       response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-      response.end(plan.ownerHistory ? '<!doctype html><meta charset="utf-8"><title>MAYA — история</title><main><h1>Журнал салона за 14 дней</h1><p>Один явно разрешённый проход синхронизации в локальную базу. Личная история — только по действующей проверенной связи, настройке и согласию. Модель, записи в YCLIENTS и исходящие сообщения закрыты.</p><a href="/">Открыть Maya</a></main>' : plan.ownerTelegram ? '<!doctype html><meta charset="utf-8"><title>MAYA — Telegram</title><main><h1>Вход через Telegram и личная карточка</h1><p>'
+      response.end(plan.ownerHistoryReview ? '<!doctype html><meta charset="utf-8"><title>MAYA — личная история</title><main><h1>Проверка сохранённой личной истории в AChat</h1><p>До 30 минут, два вопроса, максимум 12 обращений к модели и $2. История визитов остаётся на Mac. YCLIENTS: только названия услуг и мастеров. Повторная загрузка журнала, бронирования и сообщения закрыты.</p><ol>' + HISTORY_REVIEW_QUESTIONS.map(q => '<li>'+q+'</li>').join('') + '</ol><a href="/">Открыть AChat</a></main>' : plan.ownerHistory ? '<!doctype html><meta charset="utf-8"><title>MAYA — история</title><main><h1>Журнал салона за 14 дней</h1><p>Один явно разрешённый проход синхронизации в локальную базу. Личная история — только по действующей проверенной связи, настройке и согласию. Модель, записи в YCLIENTS и исходящие сообщения закрыты.</p><a href="/">Открыть Maya</a></main>' : plan.ownerTelegram ? '<!doctype html><meta charset="utf-8"><title>MAYA — Telegram</title><main><h1>Вход через Telegram и личная карточка</h1><p>'
         + (plan.ownerTelegramContract === OWNER_TELEGRAM_BATCH_PROFILE ? 'Одно окно до 30 минут, максимум три попытки входа через уже привязанный Telegram. Повторная привязка закрыта. '
           : 'До 10 минут. Войдите в сохранённый бизнес по паролю, свяжите свой Telegram, затем войдите через Telegram заново. ')
         + 'Разрешено чтение реестра клиентов выбранного салона для точного сопоставления. Это может создать личную связь только в локальной базе.</p><p>Существующая история доступна только по действующим правам и настройкам. Импорт истории, изменение согласий, модель, SMS, сообщения и запись закрыты. Секреты в AChat не вводить.</p><a href="/">Открыть Maya</a></main>' : plan.ownerChat ? OWNER_CHAT_HTML : plan.diagnosticNoProvider ? DIAGNOSTIC_HTML : LANDING_HTML); return;
@@ -343,7 +347,7 @@ export async function runReadRuntime(plan, runtimeEnv, state, control, manifest,
     manifest.expiresAt = new Date(Date.now() + duration).toISOString();
     diagnosticStage(diagnostic, 'ready'); save(); wasReady = true;
     if (plan.ownerHistory) child.send({ type: 'owner-history-run' });
-    process.stdout.write(`${plan.diagnosticNoProvider ? 'Network-closed diagnostic' : 'Local YCLIENTS setup-read'} session ready: ${manifest.landingUrl}\n${plan.diagnosticNoProvider ? 'No owner credential was requested. Only health reads are admitted; no provider network.' : plan.ownerChat ? 'Three owner catalog questions only; bounded model broker. Business writes and notifications remain closed.' : 'Provider writes, model and outbound notifications remain closed.'}\n`);
+    process.stdout.write(`${plan.diagnosticNoProvider ? 'Network-closed diagnostic' : 'Local YCLIENTS setup-read'} session ready: ${manifest.landingUrl}\n${plan.diagnosticNoProvider ? 'No owner credential was requested. Only health reads are admitted; no provider network.' : plan.ownerHistoryReview ? 'Two existing personal-history questions only; bounded planner receives no visit results. No import or business writes.' : plan.ownerChat ? 'Three owner catalog questions only; bounded model broker. Business writes and notifications remain closed.' : 'Provider writes, model and outbound notifications remain closed.'}\n`);
     await Promise.race([
       observer.failure,
       new Promise(resolve => { cancelled = resolve; timer = setTimeout(resolve, duration); if (control.cancelled) resolve(); }),

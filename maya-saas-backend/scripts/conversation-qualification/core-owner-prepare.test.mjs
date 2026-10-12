@@ -4,18 +4,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { prepareLocalCore } from './core-local-prepare.mjs';
-import { CORE_OWNER_READ_PROFILE } from './current-candidate-budget.mjs';
+import { CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE } from './current-candidate-budget.mjs';
 import { coreHash } from './core-conversation-source.mjs';
 import { readOwnerChatLaunch } from '../local-owner-chat-launch.mjs';
 
-test('owner preparation binds retained state and selects only the existing resume launcher; no approval exists', t => {
+for (const profile of [CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE]) test(profile + ' owner preparation binds retained state and selects only the existing resume launcher; no approval exists', t => {
   const parent=fs.mkdtempSync('/private/tmp/maya-owner-prepare-');
   t.after(()=>fs.rmSync(parent,{recursive:true,force:true}));
   const root=path.join(parent,'run');
   const scope={stateDirectory:'/private/tmp/synthetic-owner-state',initialManifestSha256:'a'.repeat(64),privateStateSha256:'b'.repeat(64),
     restartReceiptPath:'/private/tmp/synthetic-owner-restart/restart.json',restartReceiptSha256:'c'.repeat(64),
     tenantId:'synthetic-tenant',userId:'synthetic-owner',branchId:'synthetic-branch',tenantSlug:'synthetic-salon',companyId:'321'};
-  const plan=prepareLocalCore(root,CORE_OWNER_READ_PROFILE,scope);
+  const plan=prepareLocalCore(root,profile,scope);
   assert.deepEqual(plan.ownerScope,scope);
   assert.equal(plan.paidAuthorized,false);
   assert.equal(plan.runnerArgv,null);

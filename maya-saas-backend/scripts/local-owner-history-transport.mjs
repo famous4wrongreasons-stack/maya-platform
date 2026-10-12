@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { HISTORY_LIMITS as L, historyProviderRoute } from './local-owner-history-policy.mjs';
 // Preserves adapter responses. All diagnostics are counts, never provider bodies.
-export function createOwnerHistoryTransport({ plan, nativeFetch, assertCurrent, verifyCurrent, assertSource = assertCurrent, clock = Date.now }) {
+export function createOwnerHistoryTransport({ plan, nativeFetch, assertCurrent, verifyCurrent, assertSource = assertCurrent, clock = Date.now, allowJournal = true }) {
   const context = new AsyncLocalStorage(), active = new Set();
   const counters = { calls: 0, refused: 0, routes: {} };
   let closed = false, used = false, page = 0, totalBytes = 0, poisoned = false;
@@ -16,7 +16,7 @@ export function createOwnerHistoryTransport({ plan, nativeFetch, assertCurrent, 
     current: async () => { const op = context.getStore(); check(op); await verifyCurrent(); check(op); },
     async run(purpose, fn) {
       assertSource(); assertCurrent(); assert.ok(!closed && !poisoned && ['journal','labels'].includes(purpose), 'history_operation_refused');
-      if (purpose === 'journal') { assert.ok(!used, 'history_single_run'); used = true; }
+      if (purpose === 'journal') { assert.ok(allowJournal, 'history_review_import_refused'); assert.ok(!used, 'history_single_run'); used = true; }
       // The canonical adapter may expire between personal reads. A fresh labels
       // operation may refresh its finite public catalogue; duplicates within one
       // operation are still refused. Journal admission, pages and byte/call

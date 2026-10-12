@@ -16,7 +16,7 @@ import {
   CORE_UI_PROFILE,
   CORE_FOLLOWUP_PROFILE,
   CORE_UNION_PROFILE,
-  CORE_OWNER_READ_PROFILE,
+  CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE,
 } from './current-candidate-budget.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
 
@@ -40,7 +40,7 @@ function fixture(
   );
   t.mock.method(Date, 'now', () => at);
   const dir = fs.realpathSync(
-    fs.mkdtempSync(path.join(profileId === CORE_OWNER_READ_PROFILE ? '/private/tmp' : os.tmpdir(), 'maya-core-admission-unit-')),
+    fs.mkdtempSync(path.join([CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE].includes(profileId) ? '/private/tmp' : os.tmpdir(), 'maya-core-admission-unit-')),
   );
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const manifestPath = path.join(dir, 'manifest.json'),
@@ -70,7 +70,7 @@ function fixture(
     reader: process.getuid(),
   };
   const raw = {
-    ...(profileId === CORE_OWNER_READ_PROFILE ? { ownerScope: {
+    ...([CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE].includes(profileId) ? { ownerScope: {
       stateDirectory: dir, initialManifestSha256: 'a'.repeat(64), privateStateSha256: 'b'.repeat(64),
       restartReceiptPath: '/private/tmp/synthetic-owner-restart/restart.json', restartReceiptSha256: 'c'.repeat(64),
       tenantId: 'synthetic-tenant', userId: 'synthetic-owner', branchId: 'synthetic-branch', tenantSlug: 'synthetic-salon', companyId: '321',
@@ -778,4 +778,14 @@ test('owner READ scope is mandatory and must not enter the historical fixture pr
   const f=fixture(t,'ADMITTED_LOCAL_MODEL_HTTP',CORE_OWNER_READ_PROFILE);
   delete f.raw.ownerScope;
   denied(()=>readCoreManifest(f.manifestPath,f.write(f.manifestPath,f.raw),{localStdin:true}));
+});
+
+for (const profile of [CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE]) test('retained profile '+profile+' refuses cross-profile permit, changed tenant, expiry and replay', t => {
+  const f=fixture(t,'ADMITTED_LOCAL_MODEL_HTTP',profile);
+  denied(()=>assertCoreAdmission({...f.options,role:'runner'}));
+  const validate=claimCorePermit(f.options);validate(f.binding);
+  denied(()=>claimCorePermit(f.options));
+  denied(()=>validate({...f.binding,profile:profile===CORE_OWNER_READ_PROFILE?CORE_OWNER_HISTORY_PROFILE:CORE_OWNER_READ_PROFILE}));
+  t.mock.method(Date,'now',()=>Date.parse(f.permit.expiresAt));denied(()=>validate(f.binding));
+  t.mock.restoreAll();f.raw.ownerScope.tenantId='foreign';f.write(f.manifestPath,f.raw);denied(()=>validate(f.binding));
 });

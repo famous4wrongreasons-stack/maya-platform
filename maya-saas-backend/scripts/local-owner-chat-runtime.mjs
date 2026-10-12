@@ -1,3 +1,4 @@
+import { OWNER_HISTORY_REVIEW_PROFILE, HISTORY_REVIEW_TOOLS, createHistoryReviewWindow, assertHistoryPlanningRequest } from './local-owner-history-review-policy.mjs';
 // Local qualification adapter around the existing AppModule, AiCore and broker.
 // No alternate assistant, provider data, grants, identities or business writer.
 import assert from 'node:assert/strict';
@@ -14,8 +15,11 @@ export async function installOwnerChat({ app, prisma, require, backend, launch, 
   launch.assertCurrent();
   const scope = launch.manifest.ownerScope;
   await verifyOwnerChatDatabase(prisma, scope);
+  const historyReview = launch.manifest.profile === OWNER_HISTORY_REVIEW_PROFILE;
+  const profile = historyReview ? OWNER_HISTORY_REVIEW_PROFILE : OWNER_CHAT_PROFILE;
+  const allowedTools = historyReview ? HISTORY_REVIEW_TOOLS : OWNER_CHAT_TOOLS;
   const context = new AsyncLocalStorage();
-  const window = createOwnerChatWindow(scope, { durationMs: Math.max(1, Math.min(600000, launch.admission.expiresAt - Date.now())) });
+  const window = (historyReview ? createHistoryReviewWindow : createOwnerChatWindow)(scope, { durationMs: Math.max(1, Math.min(historyReview ? 1800000 : 600000, launch.admission.expiresAt - Date.now())) });
   const load = file => require(path.join(backend, 'dist/src', file));
   const { ConfigService } = require('@nestjs/config');
   const { ForbiddenException } = require('@nestjs/common');
@@ -51,13 +55,13 @@ export async function installOwnerChat({ app, prisma, require, backend, launch, 
   tools.listTools = async (...args) => {
     await current(args[0]);
     const result = await list(...args);
-    return { ...result, tools: result.tools.filter(tool => OWNER_CHAT_TOOLS.includes(tool.name)) };
+    return { ...result, tools: result.tools.filter(tool => allowedTools.includes(tool.name)) };
   };
   for (const method of ['execute', 'replayCompletedRead']) {
     const original = tools[method].bind(tools);
     tools[method] = async (...args) => {
       const active = context.getStore();
-      if (!active || !OWNER_CHAT_TOOLS.includes(args[1])) return refuse();
+      if (!active || !allowedTools.includes(args[1])) return refuse();
       active.turn.assertCurrent(args[0]); await current(args[0]);
       return original(...args);
     };
@@ -76,7 +80,8 @@ export async function installOwnerChat({ app, prisma, require, backend, launch, 
     const active = context.getStore();
     assert.ok(active, 'owner_chat_model_request_required');
     active.turn.assertCurrent(active.user); await current(active.user);
-    candidateReservation(raw, init, OWNER_CHAT_PROFILE);
+    candidateReservation(raw, init, profile);
+    if (historyReview) assertHistoryPlanningRequest(init);
     // No application header/token crosses the existing broker boundary.
     return socketRequest(launch.manifest.admissionContext.target, '/chat/completions', {
       method: 'POST', body: init.body, signal: init.signal, redirect: 'error', headers: {

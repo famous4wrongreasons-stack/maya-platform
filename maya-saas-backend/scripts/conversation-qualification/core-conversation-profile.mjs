@@ -15,6 +15,7 @@ import {
   CORE_OFFLINE_LIMITS,
   CORE_OFFLINE_LIMITS_SHA256,
   CORE_OWNER_READ_PROFILE, CORE_OWNER_READ_LIMITS, CORE_OWNER_READ_LIMITS_SHA256,
+  CORE_OWNER_HISTORY_PROFILE, CORE_OWNER_HISTORY_LIMITS, CORE_OWNER_HISTORY_LIMITS_SHA256,
 } from './current-candidate-budget.mjs';
 
 const diagnostic = Object.freeze({
@@ -75,6 +76,7 @@ const offline = Object.freeze({
 });
 
 export function coreConversationProfile(profile = CORE_DIAGNOSTIC_PROFILE) {
+  if (profile === CORE_OWNER_HISTORY_PROFILE) return ownerHistory;
   if (profile === CORE_OWNER_READ_PROFILE) return ownerRead;
   if (profile === CORE_DIAGNOSTIC_PROFILE) return diagnostic;
   if (profile === CORE_UI_PROFILE) return ui;
@@ -91,4 +93,12 @@ const ownerRead = Object.freeze({
   casesSha256: 'd38e109b1811690f74da8b748df3f992bec09fd7d6c6003c8f3d24dda678f08c',
   limits: CORE_OWNER_READ_LIMITS, limitsSha256: CORE_OWNER_READ_LIMITS_SHA256,
   dialogs: 3, userTurns: 3,
+});
+
+const ownerHistory = Object.freeze({
+  id: CORE_OWNER_HISTORY_PROFILE,
+  datasetPath: 'maya-saas-backend/datasets/conversation-intelligence/core-owner-personal-history-20261012.json',
+  datasetSha256: '66fb9281e82fe44b3a5744d6398ac2ca88ef74f21d5fba7d08cd63dc7d009087', casesSha256: '79028a1c0afe9a4763100c668fd012a8f9a5444375ce2ada8616176eec0a95a4',
+  limits: CORE_OWNER_HISTORY_LIMITS, limitsSha256: CORE_OWNER_HISTORY_LIMITS_SHA256,
+  dialogs: 2, userTurns: 2,
 });
