@@ -18,6 +18,8 @@ for (const profile of [CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE]) tes
   const plan=prepareLocalCore(root,profile,scope);
   assert.deepEqual(plan.ownerScope,scope);
   assert.equal(plan.paidAuthorized,false);
+  assert.equal(plan.terminalInput.timeoutMs,180000);
+  assert.equal(plan.terminalInput.inputsPerRun,2);
   assert.equal(plan.runnerArgv,null);
   assert.deepEqual(JSON.parse(fs.readFileSync(plan.manifestPath)).ownerScope,scope);
   const command=fs.readFileSync(path.join(root,'launch.command'),'utf8');

@@ -13,6 +13,7 @@ import {
 } from './core-conversation-source.mjs';
 import { readCoreManifest } from './core-conversation-admission.mjs';
 import { assertCoreSocket } from './core-conversation-socket.mjs';
+import { credentialInputTimeoutMs } from './core-local-terminal-credential.mjs';
 import { coreConversationProfile } from './core-conversation-profile.mjs';
 import {
   CORE_DIAGNOSTIC_PROFILE,
@@ -119,7 +120,7 @@ export function prepareLocalCore(output, profileId = CORE_DIAGNOSTIC_PROFILE, ow
     trustBoundary: 'OWNER_MANAGED_SAME_UID_NOT_PROCESS_ISOLATION',
     terminalInput: {
       recipient: 'local broker only',
-      timeoutMs: profile.id === CORE_UI_PROFILE ? 180000 : 30000,
+      timeoutMs: credentialInputTimeoutMs(profile.id),
       storage: 'memory only',
       inputsPerRun: 1,
     },

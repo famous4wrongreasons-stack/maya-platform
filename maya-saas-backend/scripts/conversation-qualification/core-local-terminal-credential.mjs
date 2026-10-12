@@ -1,7 +1,8 @@
 // Local broker only, after the caller has claimed its bounded paid admission.
 // This module does not grant admission, read files/env, or retain the returned key.
+import { CORE_UI_PROFILE, isRetainedOwnerProfile } from './current-candidate-budget.mjs';
 const activeStreams = new WeakSet();
-const PROMPT = 'Provider key (hidden; Enter submits, Ctrl-C cancels):\n';
+const PROMPT = 'Ключ DeepSeek API (НЕ токен YCLIENTS; ввод скрыт; Enter — подтвердить, Ctrl-C — отменить):\n';
 const MAX_KEY_BYTES = 512;
 const MAX_INPUT_BYTES = 4096;
 const failure = (suffix) => new Error(`core_local_terminal_${suffix}`);
@@ -10,6 +11,17 @@ const abortedGetter = Object.getOwnPropertyDescriptor(
   'aborted',
 ).get;
 const isAborted = (signal) => abortedGetter.call(signal);
+
+// Human input is independent of provider request timeouts. It never extends the
+// existing permit or changes its attempt/spend limits.
+export function credentialInputTimeoutMs(profile, remainingMs = 180000) {
+  if (!Number.isSafeInteger(remainingMs) || remainingMs <= 0)
+    throw failure('expired');
+  return Math.min(
+    profile === CORE_UI_PROFILE || isRetainedOwnerProfile(profile) ? 180000 : 30000,
+    remainingMs,
+  );
+}
 
 function optionsFor(value) {
   if (

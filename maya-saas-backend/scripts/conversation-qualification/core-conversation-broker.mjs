@@ -19,7 +19,7 @@ import {
   claimCorePermit,
 } from './core-conversation-admission.mjs';
 import { assertCoreSocket } from './core-conversation-socket.mjs';
-import { readLocalTerminalCredential } from './core-local-terminal-credential.mjs';
+import { credentialInputTimeoutMs, readLocalTerminalCredential } from './core-local-terminal-credential.mjs';
 import { serveCandidateBroker } from './candidate-broker-server.mjs';
 import { assertCoreSources, coreHash } from './core-conversation-source.mjs';
 import {
@@ -414,10 +414,7 @@ export async function startCoreBroker(values, batch = null) {
       else
         localCredential = await readLocalTerminalCredential({
           signal: controller.signal,
-          timeoutMs: Math.min(
-            profile.id === CORE_UI_PROFILE ? 180000 : 30000,
-            remaining,
-          ),
+          timeoutMs: credentialInputTimeoutMs(profile.id, remaining),
         });
       admission(binding);
       controller.signal.throwIfAborted();

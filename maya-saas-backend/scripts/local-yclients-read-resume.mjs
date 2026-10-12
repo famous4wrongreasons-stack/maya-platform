@@ -350,7 +350,7 @@ export async function main(args) {
     if (!diagnosticNoProvider) {
       const abort = new AbortController(); control.terminate = () => abort.abort();
       report.status = 'waiting_input'; diagnosticStage(report.diagnostic, 'waiting_input'); save();
-      process.stdout.write(plan.ownerHistoryReview ? 'Same-database preparation ready. Existing personal history only; no reimport. Enter partner token and model key once for the approved 30-minute window.\n' : historyLaunch ? 'Same-database preparation ready. One explicit fourteen-day journal synchronization, within the approved 30-minute window. Enter the partner token once.\n' : telegramLaunch?.plan.contract === OWNER_TELEGRAM_BATCH_PROFILE
+      process.stdout.write(plan.ownerHistoryReview ? 'Подготовка завершена. Нужны ДВА разных ключа: сначала партнёрский токен YCLIENTS, затем ключ DeepSeek API. После каждого нажмите Enter. На второй ввод — до 3 минут в пределах общего разрешённого срока. Сохранённую историю повторно не загружаем.\n' : historyLaunch ? 'Same-database preparation ready. One explicit fourteen-day journal synchronization, within the approved 30-minute window. Enter the partner token once.\n' : telegramLaunch?.plan.contract === OWNER_TELEGRAM_BATCH_PROFILE
         ? 'Same-database preparation ready. Enter each key once in this terminal. Saved Telegram login only: at most 3 attempts, within the approved 30-minute window.\n'
         : 'Same-database preparation ready. Owner input is required in this terminal; the 1–15 minute web session starts only after backend and web readiness.\n');
       partner = await promptPartnerToken({ timeoutMs: plan.promptDeadlineMs, signal: abort.signal });
@@ -365,8 +365,10 @@ export async function main(args) {
     report.diagnostic.credentialAccepted = !diagnosticNoProvider;
     assert.ok(inputsUnchanged() && jsonEqual(readSourceBinding(), source), 'resume_inputs_or_source_changed'); assert.equal(control.cancelled, null);
     if (chatLaunch) {
+      if (plan.ownerHistoryReview) process.stdout.write('Шаг 1/2 завершён. Теперь вставьте ДРУГОЙ ключ — DeepSeek API — в следующий скрытый запрос и нажмите Enter.\n');
       broker = await startCoreBroker({ mode: 'admitted-local', ...chatLaunch.common, output: path.join(chatLaunch.root, 'broker') });
       await broker.ready;
+      if (plan.ownerHistoryReview) process.stdout.write('Шаг 2/2 завершён. Оба ключа приняты локально. Запускаю Maya; дождитесь сообщения session ready.\n');
       if (plan.ownerHistoryReview) plan.executionExpiresAt = broker.snapshot().expiresAt;
       void broker.closed.then(() => { if (phase === 'runtime') cancel('MODEL_WINDOW_STOP'); }, () => cancel('MODEL_WINDOW_STOP'));
       assert.equal(control.cancelled, null);

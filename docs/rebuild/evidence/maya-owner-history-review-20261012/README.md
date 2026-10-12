@@ -46,3 +46,29 @@ Do not generate an execution allowance until that approval. Preparation alone do
 Historical import evidence reports 162 salon rows for October 5–18, 2026 and four resolved personal matches. Those counts were not reread here. Live history enablement and live AChat replies remain NOT VERIFIED.
 
 Still excluded: production, deployment/migration/grants, new Client binding, YCLIENTS mutations, OTP/SMS/messages, additional model questions, iPhone installation, design changes and C10.
+
+## Subsequent startup observation and operator-input correction
+
+Owner approved the bounded live review. Two startup attempts on `4d270403`
+built the unchanged candidate and resumed the retained database, but both stopped
+before application runtime: the DeepSeek input window elapsed after 30 seconds.
+Both broker reports record `credentialsLoaded: false`, `upstreamCalls: 0` and
+`local_credential_input_refused`; both retained clusters were stopped with source
+and private-state hashes unchanged. No live history or model-quality acceptance
+is claimed. The owner confirmed that only the partner token was entered in the
+first attempt; the second attempt's input contents were not inspected.
+
+The local operator workflow now names the DeepSeek key explicitly in Russian,
+shows the two input steps, and gives retained-owner profiles the existing
+three-minute human-input allowance used by the React diagnostic profile. A
+shared helper keeps prepared-plan and broker deadlines aligned. The wait is
+clipped to the original permit expiry; model request timeouts, budget/attempt
+caps, revocation polling, memory-only secret handling, and no-automatic-renewal
+are unchanged. This correction changes local qualification tooling only.
+
+Focused terminal, broker usage, admission and history-policy checks: 138 PASS,
+zero failures/skips. Synthetic timer proof admits a key after 31 seconds and
+still refuses at a shorter remaining permit deadline. No real credential is
+used by these proofs. A fresh source-bound launch is required; consumed attempts
+are never restarted or relabelled successful, and the original owner window
+must not be extended silently.

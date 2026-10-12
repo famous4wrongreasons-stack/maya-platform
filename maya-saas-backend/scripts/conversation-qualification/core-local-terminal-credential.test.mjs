@@ -2,7 +2,8 @@
 import assert from 'node:assert/strict';
 import { EventEmitter, getEventListeners } from 'node:events';
 import { test } from 'node:test';
-import { readLocalTerminalCredential } from './core-local-terminal-credential.mjs';
+import { credentialInputTimeoutMs, readLocalTerminalCredential } from './core-local-terminal-credential.mjs';
+import { CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE, CORE_UI_PROFILE, CORE_DIAGNOSTIC_PROFILE } from './current-candidate-budget.mjs';
 
 const SYNTHETIC = 'SYNTHETIC_ONLY_123';
 const code = (suffix) => ({ message: `core_local_terminal_${suffix}` });
@@ -61,7 +62,7 @@ function cleaned(f, initialRaw = false) {
   for (const chunk of f.input.chunks)
     assert.ok(chunk.every((byte) => byte === 0));
   assert.deepEqual(f.output.writes, [
-    'Provider key (hidden; Enter submits, Ctrl-C cancels):\n',
+    'Ключ DeepSeek API (НЕ токен YCLIENTS; ввод скрыт; Enter — подтвердить, Ctrl-C — отменить):\n',
   ]);
 }
 
@@ -287,6 +288,25 @@ test('three-minute owner input remains abortable and restores the terminal', asy
   f.controller.abort();
   await assert.rejects(result, code('aborted'));
   cleaned(f);
+});
+
+test('human-input window admits the second key after 30 seconds but remains bounded by permit expiry', async (t) => {
+  for (const profile of [CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE, CORE_UI_PROFILE]) {
+    assert.equal(credentialInputTimeoutMs(profile), 180000);
+    assert.equal(credentialInputTimeoutMs(profile, 12000), 12000);
+  }
+  assert.equal(credentialInputTimeoutMs(CORE_DIAGNOSTIC_PROFILE), 30000);
+  for (const remaining of [0, -1, NaN, Infinity]) assert.throws(() => credentialInputTimeoutMs(CORE_OWNER_HISTORY_PROFILE, remaining));
+  t.mock.timers.enable({apis:['setTimeout']});
+  const f=fixture(t);
+  const result=readLocalTerminalCredential({...f.options,timeoutMs:credentialInputTimeoutMs(CORE_OWNER_HISTORY_PROFILE)});
+  t.mock.timers.tick(31000);
+  f.input.send(SYNTHETIC+'\r');
+  assert.equal(await result,SYNTHETIC);cleaned(f);
+  const g=fixture(t);
+  const expired=readLocalTerminalCredential({...g.options,timeoutMs:credentialInputTimeoutMs(CORE_OWNER_HISTORY_PROFILE,12000)});
+  const refusal=assert.rejects(expired,code('timeout'));
+  t.mock.timers.tick(12000);await refusal;cleaned(g);
 });
 
 test('Ctrl-D is an EOF refusal, never submission of a partially entered scalar', async (t) => {
