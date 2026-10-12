@@ -110,11 +110,14 @@ try {
   const staff=await fixture('staff');assert.equal((await http(staff,historyPath)).status,200);assert.equal((await http(staff,tenantPath,command(zero))).status,403);await empty(staff);
   record('existing-staff-read-role-preserved-non-owner-write-refused');
   const other=await fixture();
-  const foreign=await http(f,historyPath).set('X-Tenant-Id',other.tenant.id);assert.equal(foreign.status,403);
+  // This route resolves the tenant from the authenticated session. An unrelated
+  // caller header is ignored, not a tenant selector: it must return only f's data.
+  const foreign=await http(f,historyPath).set('X-Tenant-Id',other.tenant.id);assert.equal(foreign.status,200);
+  assert.equal(foreign.body.previousRevisionId,revision.id);assert.equal(foreign.body.revision,1);
   await assert.rejects(asActor(f,()=>settings.read(other.tenant.id,f.user.id,'client_capabilities')));
   assert.equal((await current(other)).revision,0);await empty(other);
   assert.equal((await http(null,historyPath)).status,401);
-  record('foreign-tenant-header-context-and-unauthenticated-request-refused');
+  record('caller-header-cannot-switch-tenant-foreign-context-and-unauthenticated-refused');
   for(const [name,change] of [
     ['expired',{trialEndsAt:new Date(Date.now()-1)}],['missing-expiry',{trialEndsAt:null}],['setup-only',{trialFullAccess:false}],['suspended',{status:'suspended'}],['cancelled',{status:'cancelled'}],
   ]){
