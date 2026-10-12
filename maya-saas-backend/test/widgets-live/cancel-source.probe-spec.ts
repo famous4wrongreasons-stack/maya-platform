@@ -277,6 +277,13 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
     company = s.companyA,
     branchId = s.branchId,
   ) {
+    // Setup obeys the current CRM CAS contract, including source replacement.
+    const current = await request(http.app.getHttpServer())
+      .get('/api/integrations/crm')
+      .set('Authorization', 'Bearer ' + s.ownerToken);
+    expect(current.status).toBe(200);
+    const priorVersion =
+      object(object(current.body).connection).configVersion ?? null;
     const response = await request(http.app.getHttpServer())
       .post('/api/integrations/crm/connect')
       .set('Authorization', 'Bearer ' + s.ownerToken)
@@ -284,6 +291,7 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
       .send({
         provider: 'yclients',
         apiToken: 'SYNTHETIC_CANCEL_USER',
+        expectedVersion: priorVersion,
         settingsJson: {
           companyId: company,
           currency: 'RUB',
@@ -294,12 +302,17 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
           },
         },
       });
-    expect(response.status).toBe(201);
+    expect({
+      status: response.status,
+      error: object(response.body).error,
+    }).toMatchObject({ status: 201 });
+    const expectedVersion = object(object(response.body).receipt).configVersion;
+    expect(expectedVersion).toMatch(/^[a-f0-9]{64}$/);
     const active = await request(http.app.getHttpServer())
       .post('/api/integrations/crm/activate')
       .set('Authorization', 'Bearer ' + s.ownerToken)
       .set('Idempotency-Key', randomUUID())
-      .send({});
+      .send({ expectedVersion });
     expect(active.status).toBe(201);
   }
   async function scenario() {

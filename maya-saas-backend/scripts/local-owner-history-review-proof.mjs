@@ -124,11 +124,16 @@ try {
   const beforeRows=await prisma.appointment.findMany({orderBy:{id:'asc'}});
   const beforeRuns=await prisma.reconciliationRun.count();
   assert.equal(beforeRows.length,2);
-  // Entitlements exist only on this disposable fixture, not the owner database.
-  for(const key of ['ai.consultant','ai.owner','booking','booking.customer_app','crm.integration']) {
-    await prisma.feature.upsert({where:{key},create:{key,name:key,module:'synthetic-review'},update:{}});
-    await prisma.tenantEntitlement.upsert({where:{tenantId_featureKey:{tenantId:tenant.id,featureKey:key}},create:{tenantId:tenant.id,featureKey:key,enabled:true,reason:'synthetic-history-review-only'},update:{enabled:true}});
-  }
+  // The disposable tenant already has a current full trial. Exercise the ordinary
+  // resolver; never manufacture per-tenant overrides to make this proof pass.
+  const { EntitlementsService } = load('entitlements/entitlements.service.js');
+  const effective = await context.runAsSystemTenant(tenant.id, () =>
+    app.get(EntitlementsService).getEffectiveEntitlements(tenant.id));
+  for (const key of ['ai.consultant', 'ai.owner', 'booking', 'booking.customer_app', 'crm.integration'])
+    assert.equal(effective.features[key], true, 'ordinary full-trial history prerequisites');
+  assert.notEqual(effective.features['widgets.runtime'], true);
+  assert.equal(await prisma.tenantEntitlement.count(), 0);
+  report.checks.push('ordinary-full-trial-no-entitlement-overrides-and-runtime-remains-dark'); save();
   const channel=path.join(state,'channel');fs.mkdirSync(channel,{mode:0o700});fs.chownSync(channel,process.getuid(),process.getgid());
   const socket=path.join(channel,'b.sock');let modelCalls=0;
   broker=httpModule.createServer(async(req,res)=>{
