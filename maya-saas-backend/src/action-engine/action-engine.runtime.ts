@@ -274,6 +274,10 @@ export class ActionEngineRuntimeService {
     return this.kernel.resolveClientRescheduleCallerAlias(tenantId, key);
   }
 
+  resolveClientCancelCallerAlias(tenantId: string, key: string) {
+    return this.kernel.resolveClientCancelCallerAlias(tenantId, key);
+  }
+
   /** One explicit readback only. Even PROVEN_NOT_EXECUTED -> READY cannot dispatch here. */
   async resolveClientAppointmentStatus(
     tenantId: string,
@@ -374,9 +378,11 @@ export class ActionEngineRuntimeService {
       execution.sourceType === 'authenticated_request' &&
       typeof execution.sourceRef === 'string' &&
       execution.sourceRef.startsWith('client-channel-link:') &&
-      ['crm.appointment.create.v1', 'crm.appointment.reschedule.v1'].includes(
-        execution.capability,
-      ) &&
+      [
+        'crm.appointment.create.v1',
+        'crm.appointment.reschedule.v1',
+        'crm.appointment.cancel.v1',
+      ].includes(execution.capability) &&
       Array.isArray(execution.evidenceRefsJson) &&
       execution.evidenceRefsJson.every((ref) => typeof ref === 'string')
     );

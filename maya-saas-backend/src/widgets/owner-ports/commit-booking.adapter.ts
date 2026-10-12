@@ -164,7 +164,9 @@ export class CommitBookingAdapter implements CommitBookingOwnerPort {
         ? this.create
         : input.capabilityKey === 'crm.appointment.reschedule.v1'
           ? this.reschedule
-          : null;
+          : input.capabilityKey === 'crm.appointment.cancel.v1'
+            ? this.cancel
+            : null;
     if (!owner) return null;
     await input.revalidate();
     const result = await owner.readStatusForAccount(

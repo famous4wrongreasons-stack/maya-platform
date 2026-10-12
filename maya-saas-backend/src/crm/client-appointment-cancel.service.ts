@@ -276,10 +276,68 @@ export class ClientAppointmentCancelService {
     return appointment;
   }
 
+  /** Explicit status READ of an already admitted operation. The server-stored
+   * confirmation key is a locator, never authority to cancel or choose a Client. */
+  async readStatusForAccount(
+    tenantId: string,
+    userId: string,
+    key: string,
+    revalidate: () => Promise<void>,
+  ) {
+    this.context.assertTenantId(tenantId);
+    if (!userId || this.context.get()?.userId !== userId)
+      throw new ForbiddenException('Authenticated account required');
+    await revalidate();
+    const original = await this.crm.readClientCancelStatusTarget(tenantId, key);
+    if (!original) return null;
+    const target = await this.resolveOwnedTarget(
+      tenantId,
+      userId,
+      original.appointmentId,
+      true,
+    );
+    // Internal cancellation is atomic. Recovery must use the original external owner.
+    if (
+      target.appointment.source !== 'external' ||
+      !target.appointment.crmExternalId
+    )
+      return null;
+    const revision = await this.readSourceRevision(target);
+    const authorize = async () => {
+      await revalidate();
+      const current = await this.resolveOwnedTarget(
+        tenantId,
+        userId,
+        target.appointment.id,
+        true,
+      );
+      if (
+        current.linkId !== target.linkId ||
+        current.clientId !== target.clientId ||
+        current.appointment.source !== target.appointment.source ||
+        current.appointment.crmProvider !== target.appointment.crmProvider ||
+        current.appointment.crmExternalId !==
+          target.appointment.crmExternalId ||
+        current.appointment.branchId !== target.appointment.branchId ||
+        (await this.readSourceRevision(current)) !== revision
+      )
+        throw new ForbiddenException('Original Client appointment required');
+    };
+    return this.crm.readClientCancelStatus({
+      tenantId,
+      linkId: target.linkId,
+      appointmentId: target.appointment.id,
+      externalId: target.appointment.crmExternalId,
+      key,
+      authorize,
+    });
+  }
+
   private resolveOwnedTarget(
     tenantId: string,
     userId: string,
     appointmentId: string,
+    statusRead = false,
   ) {
     return this.prisma.$transaction(
       async (tx) => {
@@ -343,6 +401,7 @@ export class ClientAppointmentCancelService {
           );
         }
         if (
+          !statusRead &&
           !isCanceledOutcome(appointment.status) &&
           appointment.startAt.getTime() <= Date.now()
         ) {

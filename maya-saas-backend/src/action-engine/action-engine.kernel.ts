@@ -2157,6 +2157,30 @@ export class ActionEngineKernel {
     tenantId: string,
     key: string,
   ): Promise<ActionExecution | null> {
+    return this.resolveClientAppointmentCallerAlias(
+      tenantId,
+      key,
+      'crm.appointment.reschedule.v1',
+    );
+  }
+
+  async resolveClientCancelCallerAlias(
+    tenantId: string,
+    key: string,
+  ): Promise<ActionExecution | null> {
+    return this.resolveClientAppointmentCallerAlias(
+      tenantId,
+      key,
+      'crm.appointment.cancel.v1',
+    );
+  }
+
+  /** Fixed operation selected by its server owner, never by a caller locator. */
+  private async resolveClientAppointmentCallerAlias(
+    tenantId: string,
+    key: string,
+    capability: 'crm.appointment.reschedule.v1' | 'crm.appointment.cancel.v1',
+  ): Promise<ActionExecution | null> {
     if (!key.trim())
       throw new ActionContractError('Caller idempotency key is blank');
     const scope = 'maya.widgets.booking.commit.v1';
@@ -2176,12 +2200,14 @@ export class ActionEngineKernel {
     if (!execution) return null;
     if (
       execution.tenantId !== tenantId ||
-      execution.capability !== 'crm.appointment.reschedule.v1' ||
+      execution.capability !== capability ||
       execution.sourceType !== 'authenticated_request' ||
       !Array.isArray(execution.evidenceRefsJson) ||
       !execution.evidenceRefsJson.every((ref) => typeof ref === 'string')
     )
-      throw new ActionConflictError('Caller key is not a Client reschedule');
+      throw new ActionConflictError(
+        'Caller key is not the requested Client appointment operation',
+      );
     const principal = readClientActionPrincipal({
       capability: execution.capability,
       sourceType: execution.sourceType,

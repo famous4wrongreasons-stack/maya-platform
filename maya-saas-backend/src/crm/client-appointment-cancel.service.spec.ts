@@ -469,3 +469,148 @@ describe('U-OWN read-only cancel target', () => {
     expect(executeInternal).not.toHaveBeenCalled();
   });
 });
+
+// Status reads use a server-resolved original target; no caller Appointment id.
+describe('existing Client cancellation status authority', () => {
+  function fixture() {
+    const appointment = {
+      ...CANCELLED_APPOINTMENT,
+      status: 'confirmed',
+      source: 'external',
+      crmProvider: 'yclients',
+      crmExternalId: '501',
+      branchId: 'branch-1',
+    };
+    const f = setup({ appointment });
+    const target = jest.fn().mockResolvedValue({ appointmentId: 'appt-1' });
+    const status = jest.fn(
+      async (input: { authorize: () => Promise<void> }) => {
+        await input.authorize();
+        return { executionId: 'cancel-original', state: 'SUCCEEDED' };
+      },
+    );
+    Object.assign(f.crm, {
+      readClientCancelStatusTarget: target,
+      readClientCancelStatus: status,
+    });
+    const revalidate = jest
+      .fn<Promise<void>, []>()
+      .mockResolvedValue(undefined);
+    const read = (tenant = 'tenant-1', user = 'user-1') =>
+      f.service.readStatusForAccount(tenant, user, 'stored-key', revalidate);
+    const noCancel = () => {
+      expect(f.executeCrm).not.toHaveBeenCalled();
+      expect(f.executeInternal).not.toHaveBeenCalled();
+    };
+    return { ...f, appointment, target, status, revalidate, read, noCancel };
+  }
+
+  it('uses only original server alias and exact verified Client ownership', async () => {
+    const f = fixture();
+    await expect(f.read()).resolves.toMatchObject({
+      executionId: 'cancel-original',
+    });
+    expect(f.target).toHaveBeenCalledWith('tenant-1', 'stored-key');
+    expect(f.tx.appointment.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'appt-1', tenantId: 'tenant-1', mayaClientId: 'client-1' },
+      }),
+    );
+    expect(f.status).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant-1',
+        linkId: 'link-1',
+        appointmentId: 'appt-1',
+        externalId: '501',
+        key: 'stored-key',
+      }),
+    );
+    expect(f.crm.assertClientAppointmentBranchOrigin).toHaveBeenCalled();
+    f.noCancel();
+  });
+
+  it('can inspect an old uncertain cancellation, but cannot start cancellation after appointment start', async () => {
+    const f = fixture();
+    f.appointment.startAt = new Date('2000-01-01T00:00:00Z');
+    await expect(f.read()).resolves.toMatchObject({ state: 'SUCCEEDED' });
+    await expect(
+      f.service.forAccount('tenant-1', 'user-1', 'appt-1'),
+    ).rejects.toBeInstanceOf(BadRequestException);
+    f.noCancel();
+  });
+
+  it('returns missing original operation without constructing an action', async () => {
+    const f = fixture();
+    f.target.mockResolvedValue(null);
+    await expect(f.read()).resolves.toBeNull();
+    expect(f.status).not.toHaveBeenCalled();
+    expect(f.tx.appointment.findFirst).not.toHaveBeenCalled();
+    f.noCancel();
+  });
+
+  it.each([
+    'actor',
+    'tenant',
+    'membership',
+    'link',
+    'merged-client',
+    'foreign-appointment',
+    'widget',
+  ])('refuses absent current authority: %s', async (reason) => {
+    const f = fixture();
+    if (reason === 'membership')
+      f.tx.membership.findFirst.mockResolvedValue(null);
+    if (reason === 'link')
+      f.tx.clientChannelLink.findMany.mockResolvedValue([]);
+    if (reason === 'merged-client')
+      f.tx.client.findUnique.mockResolvedValue({
+        id: 'client-1',
+        mergedIntoClientId: 'other',
+      });
+    if (reason === 'foreign-appointment')
+      f.tx.appointment.findFirst.mockResolvedValue(null);
+    if (reason === 'widget')
+      f.revalidate.mockRejectedValue(new Error('widget revoked'));
+    if (reason === 'tenant')
+      f.context.assertTenantId.mockImplementation(() => {
+        throw new ForbiddenException();
+      });
+    await expect(
+      f.read(
+        reason === 'tenant' ? 'tenant-2' : 'tenant-1',
+        reason === 'actor' ? 'user-2' : 'user-1',
+      ),
+    ).rejects.toThrow();
+    expect(f.status).not.toHaveBeenCalled();
+    f.noCancel();
+  });
+
+  it.each([
+    'link',
+    'client',
+    'source',
+    'crmProvider',
+    'crmExternalId',
+    'branchId',
+    'revision',
+  ])('refuses changed %s during the original result read', async (field) => {
+    const f = fixture();
+    f.status.mockImplementation(async (input) => {
+      if (field === 'link')
+        f.tx.clientChannelLink.findMany.mockResolvedValue([]);
+      else if (field === 'client')
+        f.tx.client.findUnique.mockResolvedValue(null);
+      else if (field === 'revision')
+        f.crm.readBranchAvailabilityRevision.mockResolvedValue('changed');
+      else
+        f.tx.appointment.findFirst.mockResolvedValue({
+          ...f.appointment,
+          [field]: 'changed',
+        });
+      await input.authorize();
+      return { executionId: 'cancel-original', state: 'SUCCEEDED' };
+    });
+    await expect(f.read()).rejects.toThrow();
+    f.noCancel();
+  });
+});

@@ -83,6 +83,7 @@ export class WidgetThreadPageService {
               in: [
                 'crm.appointment.create.v1',
                 'crm.appointment.reschedule.v1',
+                'crm.appointment.cancel.v1',
               ],
             },
             consumedAt: { not: null },

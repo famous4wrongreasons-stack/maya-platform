@@ -3450,6 +3450,109 @@ export class CrmService {
     );
   }
 
+  async readClientCancelStatusTarget(tenantId: string, key: string) {
+    this.tenantContext.assertTenantId(tenantId);
+    const execution =
+      await this.actionEngineRuntime.resolveClientCancelCallerAlias(
+        tenantId,
+        key,
+      );
+    if (!execution) return null;
+    const source =
+      await this.actionEngineRuntime.readClientAppointmentStatusSource(
+        tenantId,
+        execution.id,
+      );
+    return source.execution.capability === 'crm.appointment.cancel.v1' &&
+      source.principal.target.kind === 'appointment'
+      ? {
+          executionId: execution.id,
+          appointmentId: source.principal.target.appointmentId,
+        }
+      : null;
+  }
+
+  /** Reuses the original cancellation reconciliation owner, never its dispatcher. */
+  async readClientCancelStatus(input: {
+    tenantId: string;
+    linkId: string;
+    appointmentId: string;
+    externalId: string;
+    key: string;
+    authorize: () => Promise<void>;
+  }): Promise<ExecutionResultV1 | null> {
+    this.tenantContext.assertTenantId(input.tenantId);
+    await input.authorize();
+    const execution =
+      await this.actionEngineRuntime.resolveClientCancelCallerAlias(
+        input.tenantId,
+        input.key,
+      );
+    if (!execution) return null;
+    const source =
+      await this.actionEngineRuntime.readClientAppointmentStatusSource(
+        input.tenantId,
+        execution.id,
+      );
+    const authorize = async () => {
+      await input.authorize();
+      const principal = source.principal;
+      if (
+        source.execution.capability !== 'crm.appointment.cancel.v1' ||
+        principal.linkId !== input.linkId ||
+        principal.target.kind !== 'appointment' ||
+        principal.target.appointmentId !== input.appointmentId ||
+        principal.target.externalId !== input.externalId
+      )
+        throw new ForbiddenException('Original Client cancellation required');
+      // Cancel preserves its source check even when the durable action is completed.
+      await this.assertAppointmentBranchWitness(
+        input.tenantId,
+        {
+          clientPrincipal: {
+            linkId: input.linkId,
+            appointmentId: input.appointmentId,
+          },
+        },
+        execution.id,
+        'crm.appointment.cancel.v1',
+      );
+    };
+    await authorize();
+    if (source.execution.state === 'SUCCEEDED') {
+      const result = await this.getAppointmentActionExecutionResult(
+        input.tenantId,
+        execution.id,
+      );
+      await authorize();
+      return result;
+    }
+    const plan = await this.cancelAppointmentActionPlan(
+      input.tenantId,
+      input.externalId,
+      {
+        sourceType: 'authenticated_request',
+        sourceRef: `client-channel-link:${input.linkId}`,
+        clientPrincipal: {
+          linkId: input.linkId,
+          appointmentId: input.appointmentId,
+        },
+        authorizationCheck: authorize,
+      },
+    );
+    const result =
+      await this.actionEngineRuntime.resolveClientAppointmentStatus(
+        input.tenantId,
+        execution.id,
+        {
+          authorize,
+          reconcile: (...args) => plan.handlers.reconcile(...args),
+        },
+      );
+    await authorize();
+    return result;
+  }
+
   async findCanonicalClientCreate(
     tenantId: string,
     params: CreateAppointmentRequest,
