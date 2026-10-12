@@ -1,0 +1,499 @@
+[
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/react-build.log",
+    "sha256": "3b96d454ab974512513c0090e0fbe164f198c60f79dfbf64cb70d5f9c3685329",
+    "size": 185,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-observations.json",
+    "sha256": "6567a15822c47c39beb17029380bbbe088c42552b1e1bd4dfeca60dbac7fcdbc",
+    "size": 2402,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/pg-restart.log",
+    "sha256": "0b1f272794acd8518e552a0a8a6390eee284f05f80eb03c4ba8d89c22ec288ac",
+    "size": 1349,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-serialized-model-requests.json",
+    "sha256": "fc1eb149f13059071bf48ed51670e55289b9e16b663ded57c8affc541a311bde",
+    "size": 860106,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/shell-build.log",
+    "sha256": "3891e992429c4b0acf5f104354cfabc6203d2f5db77cef5d10fa0fb205caa312",
+    "size": 1010,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-jest.json",
+    "sha256": "075ca23709643feca9d261b71696e792648b36724912a19a8ad3d67feeb3a712",
+    "size": 1537,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/migrations.log",
+    "sha256": "a172ee9b9c50e6df50f5f826f3c6919c04dd1f01ef60aaa28cebe814aa258cc1",
+    "size": 14728,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/postgres.log",
+    "sha256": "1889f23560c1686dd8afbac0ecc15ad360fce5473940a03ea43725e040590f6c",
+    "size": 1246,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/resume-jest.json",
+    "sha256": "2e90f3c4043082fd2f448781a5711bc879d551b2dd8005e1d367850a89addec5",
+    "size": 1537,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/resume-serialized-model-requests.json",
+    "sha256": "baada65ca78c7ab96e584715d3b570fd4397552f4f2e79c10ead308bf93f4b4f",
+    "size": 192702,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/manifest.json",
+    "sha256": "540532ae06ae79506a8e2d13c7bdeb5d8464a4144f7a3a30220fedca256861f8",
+    "size": 857,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare.log",
+    "sha256": "212099e7e390e9ce9b67331654d728ffad093a3e2af441b912aff1a4c21e88ed",
+    "size": 1889,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/resume.log",
+    "sha256": "1205b5d1b8f0e8131c2ad25451e2be93ef7e8d459719fc5cc239d696c2074647",
+    "size": 1706,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/resume-observations.json",
+    "sha256": "aa9b490742a330039224786f346288eaf658c763b8d18d6b6f1048b9d94c463f",
+    "size": 958,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/initdb.log",
+    "sha256": "dc5f9039e8969193cefe1e91ad36ede54d00668a02a05eb6e88de7f7a63c3126",
+    "size": 950,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/resume-browser/output/playwright/unknown-restart.png",
+    "sha256": "84ecb4520ac5def9378f834c240bd42f25db63dabd563031ccbe8619a112ad7a",
+    "size": 127324,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/resume-browser/output/playwright/browser.json",
+    "sha256": "77018988b69e793aca4b02a184e44d2d7a7f5c059a58ef657308aa46bce0113d",
+    "size": 12080,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/resume-browser/output/playwright/success-restart.png",
+    "sha256": "9d31311632b9457fdf42afca4ff4b4e5fc52af477d4dcad911389c6dd6885c97",
+    "size": 160414,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-browser/output/playwright/unknown-result.png",
+    "sha256": "11d9aa39ffd82d6dc838950f26cf2e32ea7917b46aac4c89fad7ae33163c165f",
+    "size": 97146,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-browser/output/playwright/unknown-chat-again.png",
+    "sha256": "6ca4b6bf6873483f61cb140ded737cec683c7d8c3ba164f70d5c144dbf4fd11b",
+    "size": 80569,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-browser/output/playwright/revoked-chat-again.png",
+    "sha256": "431d158ec8c9867076c2e869531d86ef2ee0f01eb0d1d8105dd89d771ac8aad0",
+    "size": 80273,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-browser/output/playwright/success-chat-again.png",
+    "sha256": "3e694e36c205f87abec5779328af3420b229ef7a9a11f7c8638638b95e1237ae",
+    "size": 94213,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-browser/output/playwright/revoked-result.png",
+    "sha256": "1996916f7f166fa2048dbd8464a51307003696fcfc2dc8ab69d274118b3ef89d",
+    "size": 90019,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-browser/output/playwright/incomplete-unavailable.png",
+    "sha256": "cc99f5d339ac7fe9a86ad919f01c5aa244778aaf792dfa6507cd54aae6d4b5ca",
+    "size": 88613,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-browser/output/playwright/success-result.png",
+    "sha256": "801a7d3518caf9450972a4a59c291533ba49201d7f9a2c4d1657c9721245707e",
+    "size": 90181,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-browser/output/playwright/success-preview.png",
+    "sha256": "25653c5801f5fa241f15bbb68bc126b9b535cb905fb735b1037b159f23b9ac28",
+    "size": 123019,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-browser/output/playwright/changed-chat-again.png",
+    "sha256": "226cf7fdfb02c2880d673128133c6c524df1ce52c580953998f1ad6c503493a0",
+    "size": 83468,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-browser/output/playwright/revoked-preview.png",
+    "sha256": "f765d08c896aa6c087cdad8b8b6140b478e2725e57df77b130e515df67ef6f68",
+    "size": 123013,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-browser/output/playwright/changed-preview.png",
+    "sha256": "25653c5801f5fa241f15bbb68bc126b9b535cb905fb735b1037b159f23b9ac28",
+    "size": 123019,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-browser/output/playwright/changed-result.png",
+    "sha256": "ff7f0d330ee1576b1a932af8d76c2f185b6e43d2b51835a287e955654b7da5cf",
+    "size": 89634,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-browser/output/playwright/browser.json",
+    "sha256": "7f84163ae20e26c14d8fc66119fbb9105311b91f23292c0e324af1cab715c51e",
+    "size": 45249,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-wire-current-20261012/prepare-browser/output/playwright/unknown-preview.png",
+    "sha256": "204795ae4873145afd701284e92185997ae360a785109cb375662bd2ab25545d",
+    "size": 117095,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/react-build.log",
+    "sha256": "3b96d454ab974512513c0090e0fbe164f198c60f79dfbf64cb70d5f9c3685329",
+    "size": 185,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-observations.json",
+    "sha256": "387482d983a7f94e68bbd43671a3320fa034e590f2bc147ec7bb7048f2a33e54",
+    "size": 2627,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/pg-restart.log",
+    "sha256": "a91dcfb9ac8a826b74309ec19a22b2b114324803d93594aa28b2eb011e84cfe0",
+    "size": 1349,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-serialized-model-requests.json",
+    "sha256": "c776f3e39b5afa956788ee41f40a6280dccc838a9b9162e7c20e7d8f5a1777cf",
+    "size": 1338690,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/shell-build.log",
+    "sha256": "3891e992429c4b0acf5f104354cfabc6203d2f5db77cef5d10fa0fb205caa312",
+    "size": 1010,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-jest.json",
+    "sha256": "a803937fe6de12f5aa9d3a40eca661f3ab537f179c5bf9a6be5f86a15b57fe66",
+    "size": 1537,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/migrations.log",
+    "sha256": "88c33746c3f96dc576e598a9642ce82bb49206180870a0f1b1d980ba4aa9a705",
+    "size": 14728,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/postgres.log",
+    "sha256": "09e2c84fd8c8ace38beb0e7e5d9d466713997f4ef3105e1aca109c2b5ec66dc1",
+    "size": 1246,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/resume-jest.json",
+    "sha256": "9081c7c718f43af3ac6259bfe827c38887bd5a62ecdad87f66b4a05721f83b46",
+    "size": 1537,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/resume-serialized-model-requests.json",
+    "sha256": "44b5ba9cde999f3076fde86c24fbe4dd998a81f4abaa2fffd65b2ff6ceedbaca",
+    "size": 192154,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/manifest.json",
+    "sha256": "9a0a17fd8c0056c4d5ad3e4f07eb7610870b1effb35cd70aceb6703da9d32519",
+    "size": 856,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare.log",
+    "sha256": "8bba47b4a2f26c829353f7053b668459fb793bf259fb2ae4f01b4b292c97d762",
+    "size": 1908,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/resume.log",
+    "sha256": "c3af5fa15e238292166c4c76221c6f24e000a9f8cccfa08fa41d832d9491fd26",
+    "size": 1709,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/resume-observations.json",
+    "sha256": "62787933161a287b8e867a01d5c14b31991dedeb54cbaca430d8abf98c0d9c11",
+    "size": 957,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/initdb.log",
+    "sha256": "eb616e0ac53234de1220816be8648b73c3ef4f70516635c7da24d657449b43e3",
+    "size": 950,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/resume-browser/output/playwright/unknown-restart.png",
+    "sha256": "446606d384fe462f285dd0cb299eb15cbf836d27d5e9db11699c09bc1910f863",
+    "size": 147993,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/resume-browser/output/playwright/browser.json",
+    "sha256": "2e167dae48db57386d60a420c04044b943b33cbe8728e6f253befdd446397753",
+    "size": 14434,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/resume-browser/output/playwright/success-restart.png",
+    "sha256": "4fc9df2919f439a572f7ac4ff910a74441f5d7c1cd720bc090d3e381622a5388",
+    "size": 154805,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/unknown-result.png",
+    "sha256": "246a2413d8d807ff45b751f7cd8315be8e590b80ff09d3b39bf4da2ee15d3b27",
+    "size": 140146,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/unknown-chat-again.png",
+    "sha256": "8e8061c437f1f1fae241347872c9defa7aee022d8d52122a1e709c2f69a5c940",
+    "size": 94304,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/revoked-chat-again.png",
+    "sha256": "bc566ca290761afd3fc329ffb32024a15aacd949d324520d5f7b7b151ed9680c",
+    "size": 72164,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/success-chat-again.png",
+    "sha256": "e3a12e417529b35925afd2e514e9848fe153d693d01d7e59cf15eaf6af9142c6",
+    "size": 90045,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/revoked-result.png",
+    "sha256": "7ff80576df8cce2b709cb6b641d4ab17697d7521fb0337122b2d023bf9d7bd68",
+    "size": 86140,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/incomplete-unavailable.png",
+    "sha256": "0990067aa5233dd8333df8ab3dec6d3308598c65de1cd36754b7e07c3bf5dbaa",
+    "size": 130077,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/success-result.png",
+    "sha256": "f2765eebd9e1021f6e70e29199d15fbca51c690119f59adb3ece908c306c5e02",
+    "size": 86722,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/success-preview.png",
+    "sha256": "38d197f7661b1bd1b7dfef25cd9d311b00e58318611d28461d1d2509ec1f6b8b",
+    "size": 119358,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/changed-chat-again.png",
+    "sha256": "90c24101b3004d732aa2258f7a2bc5d094dba61e5d9c5a30f3ab2712b3319872",
+    "size": 70154,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/navRevoked-nav-refused.png",
+    "sha256": "c02e1e9545aed5adea230dc7f29f442b2064767e393cd41d4d5379c262469613",
+    "size": 62086,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/revoked-preview.png",
+    "sha256": "c71a0302884fb4b28bb09707a31b71d8222a51ff3bebbf72399e584f31def86d",
+    "size": 119353,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/changed-preview.png",
+    "sha256": "f5f3a83a92075d1daf882e66f125d5da2c96b2b9faf43f090651e35fb062b70a",
+    "size": 119281,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/changed-result.png",
+    "sha256": "edd21fa24f78dd9d82fd94cb65d808b62eaef39d034219907feb8ffae7dc350c",
+    "size": 85553,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/browser.json",
+    "sha256": "a8716bef83685880e93166cfee5950c5a20855db113a6ee23855c30927a3da8a",
+    "size": 57402,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  },
+  {
+    "originalLocalPath": "/private/tmp/maya-personal-booking-catalog-current-20261012/prepare-browser/output/playwright/unknown-preview.png",
+    "sha256": "cc8650f8575078d487233d54cb398f08d79560657fd872c32f50259b3e8959ee",
+    "size": 159942,
+    "committed": false,
+    "reason": "Raw synthetic receipt/build log or browser screenshot retained locally; safe aggregate committed."
+  }
+]

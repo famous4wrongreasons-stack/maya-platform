@@ -1,0 +1,398 @@
+{
+  "testedCandidate": "7f141850a138d37ef8c5fdd30c632842762811f1",
+  "classification": "LOCAL_SYNTHETIC_PROOF_NOT_RELEASE_CERTIFICATION",
+  "productSourcesChanged": false,
+  "realModelCalls": 0,
+  "realYclientsEffects": 0,
+  "retainedOwnerDatabaseUsed": false,
+  "runs": {
+    "schedule": {
+      "status": "PASS",
+      "initialAppointments": 1,
+      "clusterStopped": true,
+      "stages": {
+        "prepare": {
+          "stage": "prepare",
+          "entrySource": "schedule",
+          "initialAppointments": 1,
+          "qualification": "NOT_ISSUED",
+          "syntheticA18Verifier": true,
+          "realModelAcceptance": false,
+          "externalProviderAcceptance": false,
+          "missingBranchBindingRefusedBeforeFacts": true,
+          "factsHttp": {
+            "checks": [
+              {
+                "patch": {
+                  "price": null,
+                  "price_min": null,
+                  "price_max": null
+                },
+                "servicesStatus": 200,
+                "previewStatus": 503,
+                "createStatus": 503
+              },
+              {
+                "patch": {
+                  "price": null,
+                  "price_min": 1000,
+                  "price_max": 2000
+                },
+                "servicesStatus": 200,
+                "previewStatus": 503,
+                "createStatus": 503
+              },
+              {
+                "patch": {
+                  "duration_minutes": null
+                },
+                "servicesStatus": 200,
+                "previewStatus": 503,
+                "createStatus": 503
+              },
+              {
+                "patch": {
+                  "currency": null
+                },
+                "servicesStatus": 200,
+                "previewStatus": 503,
+                "createStatus": 503
+              }
+            ],
+            "observedZeroPreserved": true,
+            "stalePreviewStatus": 409,
+            "actions": 0,
+            "providerDispatches": 0
+          },
+          "readyHeldBeforeClaim": {
+            "state": "READY",
+            "attempts": 0,
+            "syntheticHold": true,
+            "originalFactsPersisted": true
+          },
+          "initialStateVerified": true,
+          "success-result": {
+            "state": "SUCCEEDED",
+            "attempts": 1,
+            "appointments": 2,
+            "membershipUnchanged": true
+          },
+          "revoked-result": {
+            "state": "REFUSED",
+            "attempts": 0,
+            "appointments": 1,
+            "membershipUnchanged": true
+          },
+          "unknown-result": {
+            "state": "UNKNOWN",
+            "attempts": 1,
+            "appointments": 1,
+            "membershipUnchanged": true
+          },
+          "incomplete-result": {
+            "state": "REFUSED",
+            "attempts": 0,
+            "appointments": 1,
+            "membershipUnchanged": true
+          },
+          "changed-result": {
+            "state": "REFUSED",
+            "attempts": 0,
+            "appointments": 1,
+            "membershipUnchanged": true
+          },
+          "providerLedgerCount": 1,
+          "checkpoints": [
+            "success-preview",
+            "success-result",
+            "revoked-preview",
+            "revoked-result",
+            "unknown-preview",
+            "unknown-result",
+            "incomplete-result",
+            "changed-preview",
+            "changed-result"
+          ],
+          "readServiceWrites": {
+            "preview": [],
+            "results": []
+          },
+          "provider": {
+            "dispatches": 1,
+            "reconciliations": 1
+          },
+          "unexpected": []
+        },
+        "resume": {
+          "stage": "resume",
+          "entrySource": "schedule",
+          "initialAppointments": 1,
+          "qualification": "NOT_ISSUED",
+          "syntheticA18Verifier": true,
+          "realModelAcceptance": false,
+          "externalProviderAcceptance": false,
+          "applicationAndPostgresRestart": true,
+          "readyRestartRefusedChangedFacts": {
+            "status": 409,
+            "state": "FAILED",
+            "attempts": 1,
+            "originalEvidenceUnchanged": true,
+            "appointments": 1,
+            "providerDispatches": 0
+          },
+          "success-restart": {
+            "state": "SUCCEEDED",
+            "attempts": 1,
+            "appointments": 2,
+            "membershipUnchanged": true
+          },
+          "unknown-restart": {
+            "state": "UNKNOWN",
+            "attempts": 1,
+            "appointments": 1,
+            "membershipUnchanged": true
+          },
+          "providerLedgerCount": 1,
+          "checkpoints": [
+            "success-restart",
+            "unknown-restart"
+          ],
+          "readServiceWrites": {
+            "preview": [],
+            "results": []
+          },
+          "provider": {
+            "dispatches": 0,
+            "reconciliations": 0
+          },
+          "unexpected": []
+        }
+      }
+    },
+    "catalog": {
+      "status": "PASS",
+      "initialAppointments": 0,
+      "clusterStopped": true,
+      "stages": {
+        "prepare": {
+          "stage": "prepare",
+          "entrySource": "catalog",
+          "initialAppointments": 0,
+          "qualification": "NOT_ISSUED",
+          "syntheticA18Verifier": true,
+          "realModelAcceptance": false,
+          "externalProviderAcceptance": false,
+          "missingBranchBindingRefusedBeforeFacts": true,
+          "factsHttp": {
+            "checks": [
+              {
+                "patch": {
+                  "price": null,
+                  "price_min": null,
+                  "price_max": null
+                },
+                "servicesStatus": 200,
+                "previewStatus": 503,
+                "createStatus": 503
+              },
+              {
+                "patch": {
+                  "price": null,
+                  "price_min": 1000,
+                  "price_max": 2000
+                },
+                "servicesStatus": 200,
+                "previewStatus": 503,
+                "createStatus": 503
+              },
+              {
+                "patch": {
+                  "duration_minutes": null
+                },
+                "servicesStatus": 200,
+                "previewStatus": 503,
+                "createStatus": 503
+              },
+              {
+                "patch": {
+                  "currency": null
+                },
+                "servicesStatus": 200,
+                "previewStatus": 503,
+                "createStatus": 503
+              }
+            ],
+            "observedZeroPreserved": true,
+            "stalePreviewStatus": 409,
+            "actions": 0,
+            "providerDispatches": 0
+          },
+          "readyHeldBeforeClaim": {
+            "state": "READY",
+            "attempts": 0,
+            "syntheticHold": true,
+            "originalFactsPersisted": true
+          },
+          "initialStateVerified": true,
+          "success-result": {
+            "state": "SUCCEEDED",
+            "attempts": 1,
+            "appointments": 1,
+            "membershipUnchanged": true
+          },
+          "revoked-result": {
+            "state": "REFUSED",
+            "attempts": 0,
+            "appointments": 0,
+            "membershipUnchanged": true
+          },
+          "unknown-result": {
+            "state": "UNKNOWN",
+            "attempts": 1,
+            "appointments": 0,
+            "membershipUnchanged": true
+          },
+          "navRevoked-result": {
+            "state": "REFUSED",
+            "attempts": 0,
+            "appointments": 0,
+            "membershipUnchanged": true
+          },
+          "personalNavigationRefusedDurably": true,
+          "incomplete-result": {
+            "state": "REFUSED",
+            "attempts": 0,
+            "appointments": 0,
+            "membershipUnchanged": true
+          },
+          "changed-result": {
+            "state": "REFUSED",
+            "attempts": 0,
+            "appointments": 0,
+            "membershipUnchanged": true
+          },
+          "providerLedgerCount": 1,
+          "checkpoints": [
+            "success-preview",
+            "success-result",
+            "revoked-preview",
+            "revoked-result",
+            "unknown-preview",
+            "unknown-result",
+            "navRevoked-before-nav",
+            "navRevoked-result",
+            "incomplete-result",
+            "changed-preview",
+            "changed-result"
+          ],
+          "readServiceWrites": {
+            "preview": [],
+            "results": []
+          },
+          "provider": {
+            "dispatches": 1,
+            "reconciliations": 1
+          },
+          "unexpected": []
+        },
+        "resume": {
+          "stage": "resume",
+          "entrySource": "catalog",
+          "initialAppointments": 0,
+          "qualification": "NOT_ISSUED",
+          "syntheticA18Verifier": true,
+          "realModelAcceptance": false,
+          "externalProviderAcceptance": false,
+          "applicationAndPostgresRestart": true,
+          "readyRestartRefusedChangedFacts": {
+            "status": 409,
+            "state": "FAILED",
+            "attempts": 1,
+            "originalEvidenceUnchanged": true,
+            "appointments": 0,
+            "providerDispatches": 0
+          },
+          "success-restart": {
+            "state": "SUCCEEDED",
+            "attempts": 1,
+            "appointments": 1,
+            "membershipUnchanged": true
+          },
+          "unknown-restart": {
+            "state": "UNKNOWN",
+            "attempts": 1,
+            "appointments": 0,
+            "membershipUnchanged": true
+          },
+          "providerLedgerCount": 1,
+          "checkpoints": [
+            "success-restart",
+            "unknown-restart"
+          ],
+          "readServiceWrites": {
+            "preview": [],
+            "results": []
+          },
+          "provider": {
+            "dispatches": 0,
+            "reconciliations": 0
+          },
+          "unexpected": []
+        }
+      }
+    }
+  },
+  "guardMutations": {
+    "candidate": "7f141850a138d37ef8c5fdd30c632842762811f1",
+    "sourceSha256": "2c09cf52147dd4e67538baa336f15148d31e0aa74796f80247d87b9e8696a02c",
+    "sourceUnchanged": true,
+    "results": [
+      {
+        "name": "baseline",
+        "exit": 0,
+        "expected": true
+      },
+      {
+        "name": "omit-branches",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "foreign-origin",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "branch-substitution",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "date-substitution",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "staff-substitution",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "service-substitution",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "extra-query",
+        "exit": 1,
+        "expected": true
+      }
+    ],
+    "pass": true
+  },
+  "guardTests": {
+    "passed": 10,
+    "failed": 0,
+    "skipped": 0
+  }
+}

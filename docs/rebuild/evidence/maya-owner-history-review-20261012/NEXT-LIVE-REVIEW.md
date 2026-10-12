@@ -72,3 +72,11 @@ its source-backed synthetic end-to-end evidence for the next proven gap. Do not
 infer authorization for real create/reschedule/cancel, new widgets.runtime grant,
 paid model expansion, design/site work or inventory. A successful history read
 is not booking acceptance or a production release certificate.
+
+## Subsequent local booking check
+
+Both existing personal booking entry paths now pass current React/HTTP/PG restart
+proofs on `7f141850`, with no product-source changes or live effects. See
+[the fresh booking receipt](../maya-personal-booking-current-20261012/README.md).
+The owner subsequently approved the same bounded two-question live history scope
+(`call_fc03710fd8d4404fb997ff4fcdca117c`); a fresh source-bound launch is required.
