@@ -199,7 +199,14 @@ export class Package5Wave1ShadowService {
     return canonicalUtcTransaction(
       this.prisma,
       async (tx) => {
-        const actor = await governed.actor(tx, tenantId, actorUserId);
+        const actor = await governed.actor(
+          tx,
+          tenantId,
+          actorUserId,
+          operation === 'tenant_business_configuration'
+            ? governedNamespace(semanticCommand.namespace)
+            : undefined,
+        );
         let current: Record<string, unknown>,
           desired: Record<string, unknown>,
           targetRef: string,
@@ -1050,7 +1057,7 @@ export class Package5Wave1ExecutableService {
     registration: (typeof PACKAGE5_WAVE1_REGISTRATIONS)[number],
   ): Promise<Package5Wave1ExecutionValue> {
     if (execution.state === ActionExecutionState.SUCCEEDED)
-      return this.restore(execution);
+      return this.restoreCurrent(execution, registration.operation);
     if (execution.state !== ActionExecutionState.READY) {
       throw new Package5Wave1Error(
         `Execution cannot run from ${execution.state}`,
@@ -1080,7 +1087,7 @@ export class Package5Wave1ExecutableService {
         },
       });
       if (locked.state === ActionExecutionState.SUCCEEDED)
-        return this.restore(locked);
+        return this.restoreCurrent(locked, registration.operation, tx, input);
       this.assertExecutable(locked, registration.actionClass);
       await this.assertActor(tx, locked, input);
       const attemptId = await this.begin(tx, locked, input);
@@ -1129,6 +1136,9 @@ export class Package5Wave1ExecutableService {
         tx,
         execution.tenantId,
         execution.actorUserId!,
+        operation === 'tenant_business_configuration'
+          ? governedNamespace(config.namespace)
+          : undefined,
       );
       if (member.id !== input.actorMembershipId)
         throw new ForbiddenException('Admitted membership was replaced');
@@ -1586,6 +1596,48 @@ export class Package5Wave1ExecutableService {
       unknownApplicable: false,
       providerWrites: 0,
     };
+  }
+
+  private async restoreCurrent(
+    execution: ActionExecution,
+    operation: Package5Wave1Operation,
+    tx?: Tx,
+    normalizedInput?: Record<string, unknown>,
+  ): Promise<Package5Wave1ExecutionValue> {
+    // A receipt proves a past effect, not current permission to disclose it.
+    if (
+      operation === 'tenant_business_configuration' ||
+      operation === 'staff_notification_preferences'
+    ) {
+      const input =
+        normalizedInput ??
+        (await this.kernel.readTrustedNormalizedInput(
+          execution.tenantId,
+          execution.id,
+        ));
+      validateGovernedNormalizedInput(operation, input);
+      const check = async (current: Tx) => {
+        await this.assertActor(current, execution, input);
+        if (!this.governed)
+          throw new Package5Wave1Error('Governed A22 support unavailable');
+        await this.governed.actor(
+          current,
+          execution.tenantId,
+          execution.actorUserId!,
+          operation === 'tenant_business_configuration'
+            ? governedNamespace(this.record(input.configJson).namespace)
+            : undefined,
+        );
+      };
+      if (tx) await check(tx);
+      else
+        await this.serializable(async (current) => {
+          await current.$executeRaw`SET TRANSACTION READ ONLY`;
+          await current.$executeRaw`SET LOCAL TIME ZONE 'UTC'`;
+          await check(current);
+        });
+    }
+    return this.restore(execution);
   }
 
   private restore(execution: ActionExecution): Package5Wave1ExecutionValue {

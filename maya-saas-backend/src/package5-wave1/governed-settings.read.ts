@@ -41,19 +41,34 @@ export class GovernedSettingsReadService {
         'Tenant staff AI provider is unavailable in the deployment catalogue',
       );
   }
-  async actor(tx: Prisma.TransactionClient, tenantId: string, userId: string) {
+  async actor(
+    tx: Prisma.TransactionClient,
+    tenantId: string,
+    userId: string,
+    namespace?: TenantConfigurationNamespace,
+  ) {
     const member = await tx.membership.findUnique({
       where: { userId_tenantId: { tenantId, userId } },
       include: {
         user: { select: { status: true } },
-        tenant: { select: { status: true } },
+        tenant: {
+          select: { status: true, trialFullAccess: true, trialEndsAt: true },
+        },
       },
     });
+    // H-2: only the existing own-history namespace participates in full trial.
+    // Derive this from the parsed command/current stored input, never a bypass flag.
+    const fullHistoryTrial =
+      namespace === 'client_capabilities' &&
+      member?.tenant.status === 'trial' &&
+      member.tenant.trialFullAccess === true &&
+      member.tenant.trialEndsAt instanceof Date &&
+      member.tenant.trialEndsAt.getTime() > Date.now();
     if (
       !member ||
       member.status !== 'active' ||
       member.user.status !== 'active' ||
-      member.tenant.status !== 'active' ||
+      (member.tenant.status !== 'active' && !fullHistoryTrial) ||
       !GOVERNED_STAFF_ROLES.has(member.role)
     )
       throw new ForbiddenException('Exact active staff membership required');
@@ -173,7 +188,7 @@ export class GovernedSettingsReadService {
     return canonicalUtcTransaction(
       this.prisma,
       async (tx) => {
-        await this.actor(tx, tenantId, userId);
+        await this.actor(tx, tenantId, userId, namespace);
         return this.configuration(tx, tenantId, namespace);
       },
       { readOnly: true },

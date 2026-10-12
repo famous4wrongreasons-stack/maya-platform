@@ -67,7 +67,12 @@ export class Package5Wave1CanonicalCutoverService {
     if (!this.governed)
       throw new BadRequestException('Governed A22 support unavailable');
     // Current authority precedes both new admission and receipt disclosure.
-    await this.governed.readPersonal(tenantId, actorUserId);
+    if (
+      operation === 'tenant_business_configuration' &&
+      command.namespace === 'client_capabilities'
+    )
+      await this.governed.read(tenantId, actorUserId, 'client_capabilities');
+    else await this.governed.readPersonal(tenantId, actorUserId);
     if (operation === 'tenant_business_configuration') {
       const actor = await this.prisma.membership.findUnique({
         where: { userId_tenantId: { tenantId, userId: actorUserId } },
