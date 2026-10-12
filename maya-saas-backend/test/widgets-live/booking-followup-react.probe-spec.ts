@@ -1,7 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
 import { ConversationIntelligenceService } from '../../src/conversation-intelligence/conversation-intelligence.service';
@@ -285,6 +285,36 @@ describe('Exact17:00 current React → canonical create/reschedule/cancel [SCRIP
               expect(Date.parse(rescheduleStart)).not.toBe(
                 Date.parse(source.startsAt),
               );
+            }
+            if (
+              ['reschedule-preview', 'cancel-preview'].includes(message.name)
+            ) {
+              const browserReport = JSON.parse(
+                readFileSync(
+                  path.join(output, 'current-react/browser.json'),
+                  'utf8',
+                ),
+              ) as {
+                steps: Array<{ name: string; snapshot: { text: string } }>;
+              };
+              const step = browserReport.steps.at(-1)!;
+              expect(step.name).toBe(message.name);
+              const title =
+                message.name === 'reschedule-preview'
+                  ? 'Перенос записи'
+                  : 'Отмена записи';
+              const offset = step.snapshot.text.lastIndexOf(title);
+              expect(offset).toBeGreaterThanOrEqual(0);
+              const card = step.snapshot.text.slice(offset);
+              expect(card).toContain(service.name);
+              expect(card).toContain(staff.displayName);
+              expect(card).toContain('17:30 (Europe/Moscow)');
+              if (message.name === 'reschedule-preview')
+                expect(card).toContain('17:00 (Europe/Moscow)');
+              expect(card).not.toContain(service.id);
+              expect(card).not.toContain(staff.id);
+              expect(card).not.toMatch(/T14:(?:00|30):00\.000Z/);
+              observations[message.name + '-readable-display'] = true;
             }
             if (message.name.endsWith('-commit'))
               expect(message.receiptOutcome).toBe('ACCEPTED');

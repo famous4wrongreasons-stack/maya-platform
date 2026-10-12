@@ -130,7 +130,7 @@ export class BookingConfirmationMinterService implements BookingConfirmationMint
               key: 'booking.when.previous',
               value: p.whenPrevious,
               unit: 'datetime',
-              formatted: p.whenPrevious,
+              formatted: p.whenPreviousFormatted ?? p.whenPrevious,
             }),
       staff_label: cell(p.staffLabel),
       duration_total: measure({

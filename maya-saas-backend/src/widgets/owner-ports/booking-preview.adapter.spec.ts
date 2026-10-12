@@ -79,6 +79,7 @@ describe('FBE2E-2 — selected slot to canonical booking preview', () => {
         create as never,
         {} as never,
         {} as never,
+        {} as never,
       ),
     };
   };

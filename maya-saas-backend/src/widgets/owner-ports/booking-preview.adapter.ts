@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { isDeepStrictEqual } from 'node:util';
 import { mintBookingCreateFactsRef } from '../booking/booking-create-facts-ref';
 
 import { ClientAppointmentCreateService } from '../../appointments/client-appointment-create.service';
 import { ClientAppointmentCancelService } from '../../crm/client-appointment-cancel.service';
 import { ClientAppointmentRescheduleService } from '../../crm/client-appointment-reschedule.service';
+import { ClientAppointmentReadService } from '../../crm/client-appointment-read.service';
+import { isUsableTimezone } from '../../tenants/salon-timezone';
 import type { FactUsed } from '../../widget-contract/envelope';
 import type { BookingConfirmationPreview } from '../booking/booking-confirmation-minter.port';
 import { subjectOf } from '../gates/subject';
@@ -91,6 +94,7 @@ export class BookingPreviewAdapter
     private readonly create: ClientAppointmentCreateService,
     private readonly reschedule: ClientAppointmentRescheduleService,
     private readonly cancel: ClientAppointmentCancelService,
+    private readonly appointments: ClientAppointmentReadService,
   ) {}
 
   async draft(input: ActuatingRoutingInput): Promise<EffectRouteOutcome> {
@@ -169,9 +173,9 @@ export class BookingPreviewAdapter
     if (subject?.space !== 'C9') return refused();
     try {
       if (subject.key === 'appointments.own.reschedule')
-        return this.proposeReschedule(input);
+        return await this.proposeReschedule(input);
       if (subject.key === 'appointments.own.cancel')
-        return this.proposeCancel(input);
+        return await this.proposeCancel(input);
       return refused();
     } catch {
       return refused();
@@ -301,6 +305,28 @@ export class BookingPreviewAdapter
       { start, staffId, serviceIds: [serviceId] },
     );
     const appointment = quoted.target.appointment;
+    const display = await this.ownedDisplay(
+      input,
+      appointment,
+      quoted.prepared,
+    );
+    // Public-label reads can await the CRM. Re-read the existing operation
+    // owner afterwards; display data never renews Client/source authority.
+    const current = await this.cancel.readOwnedCancelTarget(
+      input.routing.tenantId,
+      input.actorUserId,
+      appointmentId,
+    );
+    if (
+      current.alreadyCancelled ||
+      current.target.tenantId !== quoted.target.tenantId ||
+      current.target.clientId !== quoted.target.clientId ||
+      current.target.linkId !== quoted.target.linkId ||
+      (current.target.branchSourceRevision ?? null) !==
+        (quoted.prepared.branchSourceRevision ?? null) ||
+      !isDeepStrictEqual(current.target.appointment, appointment)
+    )
+      return refused();
     const preview: BookingConfirmationPreview = {
       subject: 'reschedule',
       sourceCapabilityKey: 'appointments.own.reschedule',
@@ -309,9 +335,17 @@ export class BookingPreviewAdapter
       appointmentRef: appointmentId,
       producingIntentTokenHash: input.routing.record.intentTokenHash,
       when: quoted.prepared.start,
+      whenFormatted: this.displayTime(
+        quoted.prepared.start,
+        quoted.prepared.timezone,
+      ),
       whenPrevious: appointment.startAt.toISOString(),
-      serviceLabel: serviceId,
-      staffLabel: quoted.prepared.staffId,
+      whenPreviousFormatted: this.displayTime(
+        appointment.startAt.toISOString(),
+        quoted.prepared.timezone,
+      ),
+      serviceLabel: display.serviceLabel,
+      staffLabel: display.staffLabel,
       durationMinutes: Math.max(
         1,
         Math.round(
@@ -344,6 +378,13 @@ export class BookingPreviewAdapter
     );
     if (quoted.alreadyCancelled) return refused();
     const appointment = quoted.target.appointment;
+    const display = await this.ownedDisplay(input, appointment);
+    const current = await this.cancel.readOwnedCancelTarget(
+      input.routing.tenantId,
+      input.actorUserId,
+      appointmentId,
+    );
+    if (!isDeepStrictEqual(current, quoted)) return refused();
     return accepted({
       subject: 'cancel',
       sourceCapabilityKey: 'appointments.own.cancel',
@@ -352,11 +393,13 @@ export class BookingPreviewAdapter
       appointmentRef: appointmentId,
       producingIntentTokenHash: input.routing.record.intentTokenHash,
       when: appointment.startAt.toISOString(),
+      whenFormatted: this.displayTime(
+        appointment.startAt.toISOString(),
+        display.timezone,
+      ),
       whenPrevious: null,
-      serviceLabel: Array.isArray(appointment.serviceIds)
-        ? appointment.serviceIds.join(', ')
-        : 'Appointment',
-      staffLabel: appointment.staffExternalId,
+      serviceLabel: display.serviceLabel,
+      staffLabel: display.staffLabel,
       durationMinutes: Math.max(
         1,
         Math.round(
@@ -371,5 +414,68 @@ export class BookingPreviewAdapter
         input.routing.record.requestedScopeHash,
       ),
     });
+  }
+
+  private async ownedDisplay(
+    input: ActuatingRoutingInput,
+    appointment: Awaited<
+      ReturnType<ClientAppointmentCancelService['readOwnedCancelTarget']>
+    >['target']['appointment'],
+    selection?: { serviceIds: string[]; staffId: string },
+  ) {
+    const rows = await this.appointments.forAccount(
+      input.routing.tenantId,
+      input.actorUserId,
+    );
+    const row = rows.find(
+      (value) =>
+        value.id === appointment.id &&
+        value.tenant_id === input.routing.tenantId,
+    );
+    if (
+      !row ||
+      row.branch_id !== appointment.branchId ||
+      row.staff_external_id !== appointment.staffExternalId ||
+      JSON.stringify(row.service_ids) !==
+        JSON.stringify(appointment.serviceIds) ||
+      row.start_at.getTime() !== appointment.startAt.getTime() ||
+      row.end_at.getTime() !== appointment.endAt.getTime() ||
+      row.updated_at.getTime() !== appointment.updatedAt.getTime() ||
+      row.status !== appointment.status ||
+      row.source !== appointment.source ||
+      row.crm_external_id !== appointment.crmExternalId
+    )
+      throw new Error('booking_preview_display_changed');
+    const text = (value: unknown) =>
+      typeof value === 'string' && value.trim() ? value.trim() : null;
+    return {
+      // Missing public catalogue labels do not acquire identity from an ID or
+      // revoke the existing ability to cancel an owned appointment.
+      serviceLabel:
+        (selection?.serviceIds ?? row.service_ids)
+          .map(
+            (id) =>
+              text(row.services.find((service) => service.id === id)?.name) ??
+              'Название услуги недоступно',
+          )
+          .join(', ') || 'Название услуги недоступно',
+      staffLabel:
+        row.staff.id === (selection?.staffId ?? row.staff_external_id) &&
+        'name' in row.staff
+          ? (text(row.staff.name) ?? 'Имя мастера недоступно')
+          : 'Имя мастера недоступно',
+      timezone: row.branch?.timezone ?? row.timezone,
+    };
+  }
+
+  private displayTime(instant: string, timezone: unknown) {
+    const zone = isUsableTimezone(timezone) ? timezone.trim() : 'UTC';
+    return (
+      new Intl.DateTimeFormat('ru-RU', {
+        timeZone: zone,
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }).format(new Date(instant)) + ` (${zone})`
+    );
   }
 }

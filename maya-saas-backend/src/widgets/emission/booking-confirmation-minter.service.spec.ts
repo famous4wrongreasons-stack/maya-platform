@@ -92,6 +92,52 @@ const preview = (fact: FactUsed): BookingConfirmationPreview => ({
 });
 
 describe('P-MINT-BOOK confirmation minter', () => {
+  it('keeps both reschedule instants unchanged while emitting their server-formatted local labels', async () => {
+    const emitBookingConfirmation = jest.fn((request: MintRequest) => {
+      void request;
+      return Promise.resolve({ envelope: {} } as never);
+    });
+    const service = new BookingConfirmationMinterService(
+      {
+        widgetEmission: {
+          findFirst: jest.fn().mockResolvedValue({
+            turnId: 'turn-1',
+            turn: { conversationId: 'conversation-1' },
+          }),
+        },
+      } as never,
+      { emitBookingConfirmation } as never,
+    );
+    await service.mint({
+      tenantId: 't1',
+      predecessorWidgetId: 'widget-1',
+      principal: principal(),
+      deliveryChannel: 'pwa',
+      now: new Date('2026-09-25T12:00:00Z'),
+      preview: {
+        ...preview(canonicalFact()),
+        subject: 'reschedule',
+        draftRef: null,
+        appointmentRef: 'appointment-1',
+        producingIntentTokenHash: 'server-intent-hash',
+        when: '2026-09-26T10:30:00.000Z',
+        whenFormatted: '26 сент. 2026 г., 13:30 (Europe/Moscow)',
+        whenPrevious: '2026-09-26T10:00:00.000Z',
+        whenPreviousFormatted: '26 сент. 2026 г., 13:00 (Europe/Moscow)',
+      },
+    });
+    expect(emitBookingConfirmation.mock.calls[0][0].body).toMatchObject({
+      when: {
+        value: '2026-09-26T10:30:00.000Z',
+        formatted: '26 сент. 2026 г., 13:30 (Europe/Moscow)',
+      },
+      when_previous: {
+        value: '2026-09-26T10:00:00.000Z',
+        formatted: '26 сент. 2026 г., 13:00 (Europe/Moscow)',
+      },
+    });
+  });
+
   it('FBE2E-2 links create confirmation to its selector while copying the exact canonical owner fact', async () => {
     const fact = canonicalFact();
     const emitBookingConfirmation = jest.fn(

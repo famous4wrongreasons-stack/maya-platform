@@ -13,6 +13,7 @@ export interface BookingConfirmationPreview {
   readonly when: string;
   readonly whenFormatted?: string;
   readonly whenPrevious: string | null;
+  readonly whenPreviousFormatted?: string;
   readonly serviceLabel: string;
   readonly staffLabel: string;
   readonly durationMinutes: number;
