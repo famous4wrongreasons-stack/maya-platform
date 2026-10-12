@@ -206,6 +206,7 @@ try {
   const run = path.join(state, 'run'),
     prepared = prepareLocalCore(run, CORE_OWNER_READ_PROFILE, scope, helper),
     manifest = JSON.parse(fs.readFileSync(prepared.manifestPath));
+  const admittedAt = new Date().toISOString();
   const permit = {
     contract: 'maya.core-conversation-permit/1',
     runId: manifest.runId,
@@ -215,7 +216,7 @@ try {
     profile: manifest.profile,
     limitsSha256: manifest.limitsSha256,
     ownerApprovalRef: 'SYNTHETIC_APP_PROOF_NO_LIVE_AUTHORIZATION',
-    startsAt: new Date().toISOString(),
+    startsAt: admittedAt,
     expiresAt: new Date(Date.now() + 120000).toISOString(),
     revoked: false,
     target: manifest.admissionContext.target,
@@ -226,7 +227,7 @@ try {
       outputNanoUsdPerToken: 3960,
       reference: 'SYNTHETIC_PRICE_ONLY',
       sha256: 'd'.repeat(64),
-      verifiedAt: new Date().toISOString(),
+      verifiedAt: admittedAt,
     },
     claimPath: path.join(run, 'permit.json.claim'),
   };
