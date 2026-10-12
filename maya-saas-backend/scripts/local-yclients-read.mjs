@@ -35,6 +35,7 @@ export const READ_SOURCE_FILES = Object.freeze([
   'maya-saas-backend/scripts/local-keychain.test.mjs',
   'maya-saas-backend/scripts/local-keychain-integration-proof.mjs',
   'maya-saas-backend/scripts/local-keychain-runtime-fixture.mjs',
+  'maya-saas-backend/scripts/local-keychain-app-proof.mjs',
   'maya-saas-backend/scripts/local-yclients-read.mjs',
   'maya-saas-backend/scripts/local-yclients-read-profile.mjs',
   'maya-saas-backend/scripts/local-yclients-read-runtime.mjs',
