@@ -1,0 +1,39 @@
+{
+  "qualification": "LIVE_LOCAL_HISTORY_PARTIAL_NOT_RELEASE_CERTIFICATION",
+  "candidate": "8c6aff11c2bdcc7f205c61f75214f00bc41d5eb9",
+  "finishedAt": "2026-10-12T11:41:23.061Z",
+  "login": "PASS",
+  "ownReader": {
+    "status": 200,
+    "count": 4,
+    "idsSha256": "7e2269b0c2171d501f8ebcaa3a141caae096d9097a832b44c886a03551c17291"
+  },
+  "historyQuestion": {
+    "http": 201,
+    "grounding": "verified",
+    "canonicalReplyMatch": true,
+    "renderedExact": true
+  },
+  "lastVisitQuestion": {
+    "http": 201,
+    "grounding": "blocked",
+    "canonicalReplyMatch": false,
+    "renderedExact": true,
+    "toolExecutions": 0,
+    "expectedClass": "no_confirmed_attendance"
+  },
+  "conversation": {
+    "same": true,
+    "turnsBefore": 7,
+    "turnsAfter": 11,
+    "priorTurnsUnchanged": true
+  },
+  "settingsUnchanged": true,
+  "consentUnchanged": true,
+  "browserGuard": {
+    "blocked": 0,
+    "errors": 0
+  },
+  "screenshotsPublished": 0,
+  "privateHistoryPublished": false
+}

@@ -1,0 +1,51 @@
+[
+  {
+    "source": "/private/tmp/maya-owner-history-review-20261012-06/session/resume.json",
+    "bytes": 550079,
+    "sha256": "5654acaea3ff70dfeaa22085ce6f3b16134d66fbe5888e6c3b9f0012ad6af9a3",
+    "committed": false,
+    "reason": "Keep raw run metadata local; only inspected aggregate evidence is archived."
+  },
+  {
+    "source": "/private/tmp/maya-owner-history-review-20261012-06/broker/broker-report.json",
+    "bytes": 1707,
+    "sha256": "3d114f9efd8caa8864c638f5f63f643c86e3481c11807080e421a642a34a3a45",
+    "committed": false,
+    "reason": "Keep raw run metadata local; only inspected aggregate evidence is archived."
+  },
+  {
+    "source": "/private/tmp/maya-owner-history-review-20261012-06/broker/broker-ledger.jsonl",
+    "bytes": 1480,
+    "sha256": "fc222e2afb3fc56796837e3a19d7d3464b64c090e2a155b24bedff8a2d2bc798",
+    "committed": false,
+    "reason": "Keep raw run metadata local; only inspected aggregate evidence is archived."
+  },
+  {
+    "source": "/private/tmp/maya-owner-history-review-20261012-06/broker/model-responses.jsonl",
+    "bytes": 2943,
+    "sha256": "a604750080c84cd4bfa29e4c133000e99c0f4b98e84456a6634fad0e6ba08549",
+    "committed": false,
+    "reason": "Keep raw run metadata local; only inspected aggregate evidence is archived."
+  },
+  {
+    "source": "/private/tmp/maya-owner-history-review-20261012-06/permit.json",
+    "bytes": 1576,
+    "sha256": "e99a55729dd93f1fbde788540252499aea9f37b2c632910a492f4ade7d0bc1d8",
+    "committed": false,
+    "reason": "Keep raw run metadata local; only inspected aggregate evidence is archived."
+  },
+  {
+    "source": "/private/tmp/maya-owner-history-review-20261012-06/candidate-manifest.json",
+    "bytes": 380777,
+    "sha256": "6c02c49621133771ca5098b539aeced87fa0a0cb1cb228dbb3dc923a22f1346a",
+    "committed": false,
+    "reason": "Keep raw run metadata local; only inspected aggregate evidence is archived."
+  },
+  {
+    "source": "/private/tmp/maya-owner-history-review-20261012-06/owner-execution-scope.json",
+    "bytes": 502,
+    "sha256": "8c7cc4c6d60d8cc6003a0e7dd22260921b2bdf2ff8ec4621f4bb9f71f6200754",
+    "committed": false,
+    "reason": "Keep raw run metadata local; only inspected aggregate evidence is archived."
+  }
+]

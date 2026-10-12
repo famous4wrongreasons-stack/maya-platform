@@ -1,5 +1,11 @@
 # One remaining live AChat history review
 
+**Superseded live status (2026-10-12):** the approved pair ran on `8c6aff11`.
+History PASS; last-visit answer BLOCKED by invalid model tool arguments. Exactly
+two model calls and three catalogue reads; owned session stopped and preserved.
+See [the partial live receipt and offline diagnosis](../maya-history-live-20261012-06/README.md).
+The historical preparation below is not a new allowance or retry instruction.
+
 Date: 2026-10-12. PREPARED, NOT AUTHORIZED. Local Mac only.
 No new permit, credential prompt, retained database startup or external call
 is implied by this preparation. The earlier allowance expired at 14:05:55 Moscow.

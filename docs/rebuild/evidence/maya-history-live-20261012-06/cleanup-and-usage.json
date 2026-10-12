@@ -1,0 +1,57 @@
+{
+  "status": "cancelled",
+  "clusterStopped": true,
+  "samePrivateState": true,
+  "sourceUnchanged": true,
+  "runtimeGroupAbsent": true,
+  "providerReadSummary": {
+    "calls": 3,
+    "refused": 0,
+    "routes": {
+      "book_services": 1,
+      "categories": 1,
+      "team": 1
+    }
+  },
+  "providerReadSummaryStatus": "reported_at_clean_stop",
+  "stopMeaning": "explicit orderly stop after both authorized questions, not transport failure",
+  "broker": {
+    "upstreamCalls": 2,
+    "stopped": true,
+    "stopReason": "SIGTERM",
+    "requests": [
+      {
+        "caseId": "owner-personal-history",
+        "turn": 1,
+        "bytes": 72746,
+        "bodySha256": "ca2c9f6263004321281944a3397baef11020c3d49ea6b4f96a10cf1f38e0d10e",
+        "status": 200
+      },
+      {
+        "caseId": "owner-personal-last-visit",
+        "turn": 1,
+        "bytes": 72887,
+        "bodySha256": "4c3a2e80b4450983973e74e66d87d3a4dbc7556316d09106d0d311835cd30659",
+        "status": 200
+      }
+    ],
+    "rejections": [],
+    "stats": {
+      "dialogs": 2,
+      "turns": 2,
+      "attempts": 2,
+      "inputTokens": 153825,
+      "outputTokens": 2400,
+      "reservedNanoUsd": 212553000,
+      "halted": false
+    }
+  },
+  "billing": {
+    "reportedPromptTokens": 31579,
+    "reportedCompletionTokens": 538,
+    "uncachedPriceEstimateUsd": 0.04381476,
+    "reservedMaximumUsd": 0.212553,
+    "ownerCapUsd": 2,
+    "invoiceVerified": false
+  }
+}
