@@ -1,5 +1,31 @@
 # Local two-credential integration — executable checkpoint
 
+## Owner enrollment after native paste fix (2026-10-12)
+
+On `90891802`, ordinary native Command-V was fixed by installing the standard
+AppKit Edit/Paste responder-chain menu. The original programmatic app had no Edit
+menu: the same public synthetic paste left its secure field empty. The corrected
+app shows masked text through ordinary paste. The earlier direct-field synthetic
+test did not exercise this owner interaction. Empty-field submission now explains
+the missing input before attempting Keychain access.
+
+Fresh committed-head native checks: **24 PASS / 0 FAIL / 0 SKIP**. Storage APIs,
+fixed service/account identities, private pipes, expiry/admission checks and
+overwrite refusal are unchanged. The old binary remains preserved; the new
+installed binary has a new exact SHA/CDHash and was verified before use.
+
+The owner then entered both keys and pressed Save. Native UI reported both saved;
+metadata-only inspection confirmed the exact two records and helper-specific
+decrypt ACL. The agent did not read or type the real values and made no provider
+calls. The cleared input fields are normal after submission. The two real records
+remain intact; they were not deleted as if they were synthetic fixtures.
+
+[Enrollment receipt and tests](paste-enrollment/summary.json) bind the new helper
+and the owner's save action. The external local `owner-storage-source.json`
+contains only the helper pin and storage receipt, not key contents. Future runs
+still require existing current scoped admission and budget; storage does not
+renew an expired run. Provider validity of the saved keys was not tested here.
+
 ## Subsequent owner-authorized OS storage proof (2026-10-12)
 
 The owner approved installing the prepared component and creating, reading after

@@ -1,0 +1,53 @@
+{
+  "contract": "maya.local-keychain-owner-enrollment/1",
+  "candidate": "90891802bf30ad619b2a5988edfdeb4027e2f2d9",
+  "date": "2026-10-12",
+  "result": "ENROLLED_METADATA_VERIFIED_NO_PROVIDER_CHECK",
+  "rootCause": "Programmatic AppKit application had no Edit menu; ordinary Command-V did not insert into secure fields.",
+  "counterfactual": {
+    "oldBinarySha256": "7bbe67dc6aed3cad83973eb00bb7e9849c7c93c8df8a21a27c94d121d0385a46",
+    "oldNativePaste": "FIELD_REMAINS_EMPTY",
+    "newNativePaste": "MASKED_TEXT_VISIBLE",
+    "directClipboardReadsByAgent": 0,
+    "osPasteboardHandledBy": "Standard AppKit responder chain through Paste menu action"
+  },
+  "checks": {
+    "nativeFreshCommittedHead": 24,
+    "failed": 0,
+    "skipped": 0,
+    "helperPinAndSignature": "PASS",
+    "nativePaste": "PASS",
+    "ownerReportedBothFieldsMasked": true,
+    "ownerPerformedSave": true,
+    "uiReportedBothSaved": true,
+    "metadataPresentExactItems": 2,
+    "decryptAcl": "EXACT_MAYA_HELPER_ONLY",
+    "secretValuesReadByAgent": false,
+    "providerKeyValidityChecked": false,
+    "realProviderCalls": 0
+  },
+  "source": {
+    "kind": "macos-keychain",
+    "reference": "/Users/stanislavmosin/Library/Application Support/Maya/LocalCredentials/MayaLocalCredentials.app/Contents/MacOS/MayaLocalCredentials",
+    "owner": 501,
+    "reader": 501,
+    "sha256": "43188a3abe214f01824f140c6ca68a2cd04d3523aa3a27ec6592752075788e7e",
+    "cdhash": "bb4419d6c18b4f2a372ce89f6d87a7ffe12bba89",
+    "storageApprovalRef": "user-call_am7WFIgdHOicGqlRWCTM3LBl"
+  },
+  "sourceSha256": "e2fd1355464f9b60d9cc403e26f580c62d268a48959de4ddd70203c91da1b2dc",
+  "localEnrollmentReceiptPath": "/Users/stanislavmosin/Library/Application Support/Maya/LocalCredentials/owner-storage-source.json",
+  "realEntriesLeftIntact": true,
+  "oldHelperPreservedAt": "/private/tmp/maya-keychain-pre-pastefix-installed-20261012-01.app",
+  "boundary": "Storage only. Existing run admission, candidate, expiry, revocation, source and budget are still required. No current paid or customer-read permit was issued.",
+  "receipts": [
+    {
+      "path": "/private/tmp/maya-keychain-paste-native-final-head-20261012.log",
+      "sha256": "dbab0955b5ef026ec500fd4142aef1def801e33ac56d8274c9afb896063b2f82"
+    },
+    {
+      "path": "/private/tmp/maya-keychain-owner-enrolled-metadata-20261012.json",
+      "sha256": "bd30ed4262e168f9b06a848f6d8799a2f8395f2a3321a10c881c7c8850b8bf42"
+    }
+  ]
+}

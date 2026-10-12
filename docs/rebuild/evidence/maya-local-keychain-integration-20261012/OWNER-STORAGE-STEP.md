@@ -1,5 +1,12 @@
 # Owner storage step
 
+Latest update 2026-10-12: the owner entered and saved the two real credentials in
+the corrected native window. UI success and exact-item metadata/ACL are verified;
+values were not read by the agent and provider validity remains untested. See
+[paste-enrollment/summary.json](paste-enrollment/summary.json). The real records
+must not be removed by the historical synthetic cleanup instructions below.
+Storage is complete; no live/paid/provider run was authorized by this action.
+
 Update 2026-10-12: the owner explicitly approved the bounded **synthetic-value**
 OS storage test below. Installation, create/read-after-process-restart/delete
 passed; both test records are now absent. See
