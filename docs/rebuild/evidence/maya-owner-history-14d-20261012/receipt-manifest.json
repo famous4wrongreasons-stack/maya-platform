@@ -1,0 +1,99 @@
+{
+  "qualification": "SAFE_METADATA_ONLY_NO_RAW_STATE_OR_CUSTOMER_DATA",
+  "executedHead": "f3a1992a7819788d7dfad66f7ea1b194f34670ff",
+  "receipts": [
+    {
+      "name": "unit",
+      "originalLocalPath": "/private/tmp/maya-history-unit-final-f3a1992a.log",
+      "sha256": "73475a77311c425b0ee2aca1f2e4d8b86ebf5cc866ba2c88f889e4e58650152a",
+      "bytes": 11964,
+      "archivalForm": "safe structured projection in proof-summary.json; source receipt retained locally"
+    },
+    {
+      "name": "mutations",
+      "originalLocalPath": "/private/tmp/maya-history-mutations-final-f3a1992a/summary.json",
+      "sha256": "24983e458deb82cbd9bd116a94d39612bf010b6a8d76746c1957edfcd337d2bd",
+      "bytes": 4212,
+      "archivalForm": "safe structured projection in proof-summary.json; source receipt retained locally"
+    },
+    {
+      "name": "historyHttpPgBinary",
+      "originalLocalPath": "/private/tmp/maya-history-operator-proof-20261012-04/summary.json",
+      "sha256": "85cd347368123e7d60cf44a807162431af815a8f0d9895986fefe6115419f359",
+      "bytes": 4476,
+      "archivalForm": "safe structured projection in proof-summary.json; source receipt retained locally"
+    },
+    {
+      "name": "legacyBatchBinary",
+      "originalLocalPath": "/private/tmp/maya-history-legacy-batch-final-f3a1992a/summary.json",
+      "sha256": "e0ce03f1bedd38ca31b9fc055a1a5942da5a248744ff962fd7894298be70d777",
+      "bytes": 5688,
+      "archivalForm": "safe structured projection in proof-summary.json; source receipt retained locally"
+    },
+    {
+      "name": "retainedStatePreflight",
+      "originalLocalPath": "/private/tmp/maya-history-preparation-f3a1992a/preflight.json",
+      "sha256": "5d88aedc027f4085393fd68abb71441366bf931ae7b84883737d572e9831fc5d",
+      "bytes": 612,
+      "archivalForm": "safe structured projection in proof-summary.json; source receipt retained locally"
+    }
+  ],
+  "changedSources": [
+    {
+      "path": "maya-saas-backend/scripts/local-owner-history-launch.mjs",
+      "sha256": "b945139f42f17e00e38303df8745aaa298c87447043ef53373b70fb55a1f6516"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-owner-history-mutations.mjs",
+      "sha256": "1540feac1075d6c0bd5cb0b9b942b4d8cc344323b289992ccc3efec097c940b5"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-owner-history-policy.mjs",
+      "sha256": "d8c8b0e9c45a410140ff6d2a0989fe88fd728d95f331dc7752e9e3811fd7ac06"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-owner-history-proof.mjs",
+      "sha256": "6de5afbe68c0eee3e428be12da09de27f60da63f24ebaaf9e4b907980f5c9ad8"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-owner-history-runtime.mjs",
+      "sha256": "227edcceb76914f3fd285cce8dd3ff9e28fde625a540744ee9769d730c109daa"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-owner-history-transport.mjs",
+      "sha256": "d50a880906034baec79cb60ce2e8df44e544b43c0ef4f1f849d057a2db7d94d1"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-owner-history.test.mjs",
+      "sha256": "dfbb0af8e68fad377cfcd996091af4f91da52b1d554f1cf289248d27433c901d"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-owner-telegram-launch.mjs",
+      "sha256": "8bd2bd03a0597e7cac70dafd4178a143480f270ca6e2f344cc3682617888154b"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-resume.mjs",
+      "sha256": "348165f043279f068e03cd44523963242b38b5c9e078d9a5a4079bbf6b9cdbed"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read-runtime.mjs",
+      "sha256": "96f3e1e874781b1f0cd886b8249f93b94134ac0d2b10e85fae0d320994217707"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.mjs",
+      "sha256": "1d59f4628a1b3b405fce6c5e698c31a26d58cdddeb6c6fe6bdce1f525a7f3262"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-yclients-read.test.mjs",
+      "sha256": "c39c8a00f1be2de318767ff9b3b25dd70b42b6e7c79d4b11f9897eb42799cd12"
+    }
+  ],
+  "excluded": [
+    "private execution plans and retained state",
+    "keys and environment values",
+    "raw provider responses and customer data",
+    "database contents",
+    "synthetic fixture database directories"
+  ],
+  "pinningNote": "Source hashes identify the tested implementation. Documentation-only descendants are not claimed as executed test HEADs."
+}

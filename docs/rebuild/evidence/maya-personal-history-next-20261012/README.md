@@ -111,3 +111,19 @@ allowance; today's synthetic proof is not that allowance.
 **H-1: OWNER SCOPE CHOICE PENDING.**
 **READY FOR REAL HISTORY IMPORT: NO.**
 **PRODUCT HISTORY PATH ON SYNTHETIC DATA: PASS.**
+
+## Subsequent owner decision and preparation — 2026-10-12
+
+The owner subsequently selected **H-1 Option A**, the existing salon journal for
+14 days. This supersedes only the scope-choice-pending status above; the
+question explicitly authorized preparation and did not authorize real reading.
+
+The [bounded local operator implementation and fresh proofs](../maya-owner-history-14d-20261012/README.md)
+are now complete on source checkpoint `f3a1992a7819788d7dfad66f7ea1b194f34670ff`:
+146 unit checks, 15 killed mutations, 15 compiled HTTP/PG/IPC checks and 16
+existing-batch compatibility checks passed. The retained owner database remained
+stopped. No product/schema/carrier source changed.
+
+**H-1: OPTION A SELECTED; LOCAL PREPARATION PASS.**
+**READY TO REQUEST ONE REAL LOCAL EXECUTION ALLOWANCE: YES.**
+**REAL HISTORY IMPORT: NOT AUTHORIZED / NOT EXECUTED.**

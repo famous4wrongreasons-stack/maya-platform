@@ -1,0 +1,45 @@
+{
+  "qualification": "TARGETED_LOCAL_DIFF_REVIEW_NOT_REPOSITORY_WIDE_SECURITY_AUDIT",
+  "sourceRange": "d2f851fe194d092b5a5731d7036ec0f608866ea8..f3a1992a7819788d7dfad66f7ea1b194f34670ff",
+  "filesReviewed": 17,
+  "rules": [
+    "private key PEM",
+    "Telegram bot token shape",
+    "common API key prefixes",
+    "credential-bearing URLs",
+    "phone numbers",
+    "email addresses"
+  ],
+  "findingsReviewed": [
+    {
+      "file": "maya-saas-backend/scripts/local-owner-history-proof.mjs",
+      "lines": [
+        34,
+        54,
+        136
+      ],
+      "resolution": "loopback credential variable only; reserved example.invalid synthetic fixture emails"
+    },
+    {
+      "file": "maya-saas-backend/scripts/local-yclients-read.mjs",
+      "lines": [
+        405
+      ],
+      "resolution": "loopback URL interpolates a runtime credential variable, no value"
+    },
+    {
+      "file": "maya-saas-backend/scripts/local-yclients-read.test.mjs",
+      "lines": [
+        126
+      ],
+      "resolution": "loopback test URL interpolates a runtime credential variable, no value"
+    }
+  ],
+  "privateKeyValuesFound": 0,
+  "realCredentialValuesFound": 0,
+  "rawCustomerDataFound": 0,
+  "productSourceDiffFiles": 0,
+  "retainedPostmasterPidFiles": 0,
+  "receiptPolicy": "only closed safe projections and hashes included; private state, plans and raw provider rows excluded",
+  "limitation": "Pattern scan plus targeted source review, not a guarantee against all possible secret formats."
+}
