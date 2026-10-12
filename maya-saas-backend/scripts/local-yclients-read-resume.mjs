@@ -367,6 +367,7 @@ export async function main(args) {
     if (chatLaunch) {
       broker = await startCoreBroker({ mode: 'admitted-local', ...chatLaunch.common, output: path.join(chatLaunch.root, 'broker') });
       await broker.ready;
+      if (plan.ownerHistoryReview) plan.executionExpiresAt = broker.snapshot().expiresAt;
       void broker.closed.then(() => { if (phase === 'runtime') cancel('MODEL_WINDOW_STOP'); }, () => cancel('MODEL_WINDOW_STOP'));
       assert.equal(control.cancelled, null);
     }

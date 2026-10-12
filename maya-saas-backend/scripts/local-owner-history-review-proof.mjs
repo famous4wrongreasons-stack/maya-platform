@@ -225,7 +225,7 @@ try {
   assert.equal((await h('/api/ai/chat',{surface:'web',requestId:'synthetic-review-forbidden',messages:[{role:'user',content:'Запиши меня'}]},token)).status,403);
   check('HTTP-import-booking-binding-SMS-direct-tool-and-new-question-refused');
   assert.equal((await runtime.importOnce()).status,'failed');
-  await assert.rejects(context.runAsSystemTenant(tenant.id,()=>app.get(AppointmentReconciliationService).run({tenantId:tenant.id,from:new Date(),to:new Date(),holder:'must-refuse'})));
+  await assert.rejects(async()=>context.runAsSystemTenant(tenant.id,()=>app.get(AppointmentReconciliationService).run({tenantId:tenant.id,from:new Date(),to:new Date(),holder:'must-refuse'})));
   const { ActionEngineRuntimeService }=load('action-engine/action-engine.runtime.js');
   assert.throws(()=>app.get(ActionEngineRuntimeService).execute({}));
   check('internal-import-and-business-execution-refused');

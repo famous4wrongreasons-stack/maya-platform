@@ -343,7 +343,7 @@ export async function runReadRuntime(plan, runtimeEnv, state, control, manifest,
     manifest.providerAdmission = plan.providerAdmission;
     manifest.landingUrl = runtimeEnv.CORS_ALLOWED_ORIGINS + '/__local-yclients-read';
     manifest.webUrl = runtimeEnv.CORS_ALLOWED_ORIGINS + '/'; manifest.apiOrigin = origin;
-    const duration = Math.min(plan.durationMs, (plan.ownerTelegram || plan.ownerHistory) ? Date.parse(plan.executionExpiresAt) - Date.now() : plan.durationMs);
+    const duration = Math.min(plan.durationMs, (plan.ownerTelegram || plan.ownerHistory || plan.ownerHistoryReview) ? Date.parse(plan.executionExpiresAt) - Date.now() : plan.durationMs);
     assert.ok(duration > 0, 'local_execution_expired');
     manifest.expiresAt = new Date(Date.now() + duration).toISOString();
     diagnosticStage(diagnostic, 'ready'); save(); wasReady = true;
