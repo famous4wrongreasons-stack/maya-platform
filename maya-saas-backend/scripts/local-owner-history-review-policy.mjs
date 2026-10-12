@@ -95,9 +95,10 @@ export function assertHistoryPlanningRequest(init) {
   const input = JSON.parse(outer.messages[1].content);
   assert.ok(input.phase === 'tool_planning' && Array.isArray(input.tool_results) && input.tool_results.length === 0
     && Array.isArray(input.remembered_notes) && input.remembered_notes.length === 0 && safeRetainedHistoryPlan(input.semantic_plan)
-    && Object.keys(input).every(k => ['phase','surface','principal_role','now_utc','business_timezone','conversation','remembered_notes','tool_results','semantic_plan','required_tools','available_tools','tool_input_schemas','tool_input_property_schemas','tool_input_schema_property_refs','conversation_contract','response_contract'].includes(k))
+    && Object.keys(input).every(k => ['phase','surface','principal_role','now_utc','business_timezone','conversation','remembered_notes','tool_results','semantic_plan','required_tools','available_tools','tool_input_schemas','tool_input_property_schemas','tool_input_schema_property_refs','conversation_contract','response_contract','current_user_request'].includes(k))
     && !Object.hasOwn(input, 'pending_owner_review') && !Object.hasOwn(input, 'grounding_corrections')
     && Array.isArray(input.conversation) && input.conversation.length > 0
     && input.conversation.every(m => exact(m, ['role','content']) && m.role === 'user' && historyQuestions.includes(m.content))
-    && HISTORY_REVIEW_QUESTIONS.includes(input.conversation.at(-1).content), 'history_review_private_model_input_refused');
+    && HISTORY_REVIEW_QUESTIONS.includes(input.conversation.at(-1).content)
+    && input.current_user_request === input.conversation.at(-1).content, 'history_review_private_model_input_refused');
 }

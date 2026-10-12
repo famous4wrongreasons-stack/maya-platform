@@ -1177,6 +1177,11 @@ export class AiCoreModelService {
         tool_call:
           'null or one available tool call with arguments_json containing one JSON object string',
       },
+      // Already privacy-projected by AiCore. Keep the current utterance explicit
+      // after the historical plan/catalogue; neither is the new user request.
+      current_user_request:
+        input.messages.findLast((message) => message.role === 'user')
+          ?.content ?? null,
     };
   }
 

@@ -36,10 +36,10 @@ test('serialized sequence rejects foreign actor, replay, concurrency, expiry and
 });
 
 test('actual model wire must contain only fixed user questions, no private history, memory, assistant or result phase', () => {
-  const input={phase:'tool_planning',conversation:body(0).messages,tool_results:[],remembered_notes:[],semantic_plan:null};
+  const input={phase:'tool_planning',current_user_request:questions[0],conversation:body(0).messages,tool_results:[],remembered_notes:[],semantic_plan:null};
   const wire=value=>({body:JSON.stringify({messages:[{role:'system',content:'synthetic canonical instructions'},{role:'user',content:JSON.stringify(value)}]})});
   assertHistoryPlanningRequest(wire(input));
-  for(const changed of [ {phase:'final_response'}, {tool_results:[{private:'visit'}]}, {remembered_notes:['private']}, {semantic_plan:{private:'visit'}},
+  for(const changed of [ {current_user_request:undefined}, {current_user_request:questions[1]}, {current_user_request:'private visit'}, {phase:'final_response'}, {tool_results:[{private:'visit'}]}, {remembered_notes:['private']}, {semantic_plan:{private:'visit'}},
     {pending_owner_review:{}}, {grounding_corrections:[]}, {conversation:[{role:'assistant',content:'private history'},...body(0).messages]},
     {conversation:[{role:'user',content:'My private phone'},...body(0).messages]} ]) assert.throws(()=>assertHistoryPlanningRequest(wire({...input,...changed})));
 });
@@ -108,7 +108,7 @@ const safePlan = {
 };
 test('canonical retained history intent is safe but appointment data, identity, prose and authority substitutions are refused', () => {
   assert.equal(safeRetainedHistoryPlan(safePlan),true);
-  const input={phase:'tool_planning',conversation:[{role:'user',content:questions[1]}],tool_results:[],remembered_notes:[],semantic_plan:safePlan};
+  const input={phase:'tool_planning',current_user_request:questions[1],conversation:[{role:'user',content:questions[1]}],tool_results:[],remembered_notes:[],semantic_plan:safePlan};
   const wire={body:JSON.stringify({messages:[{role:'system',content:'synthetic'},{role:'user',content:JSON.stringify(input)}]})};assertHistoryPlanningRequest(wire);
   for(const change of [p=>{p.tasks[0].entities.clientId='foreign'},p=>{p.tasks[0].entities.period='upcoming'},p=>{p.tasks[0].tool.name='appointments.create'},p=>{p.tasks[0].clarification_question='private'},p=>{p.context.carried_slots.push({phone:'private'})},p=>{p.parent_request='private phone'},p=>{p.visit={private:'data'}}]){
     const bad=structuredClone(safePlan);change(bad);assert.equal(safeRetainedHistoryPlan(bad),false);
@@ -118,7 +118,7 @@ test('canonical retained history intent is safe but appointment data, identity, 
 test('retained public hours context is canonical empty metadata, never extra model data or tool authority', () => {
   const { ConversationIntelligenceService }=createRequire(import.meta.url)('../dist/src/conversation-intelligence/conversation-intelligence.service.js');
   const ci=new ConversationIntelligenceService();
-  const wire=plan=>({body:JSON.stringify({messages:[{role:'system',content:'synthetic'}, {role:'user',content:JSON.stringify({phase:'tool_planning',conversation:[...OWNER_CHAT_QUESTIONS,questions[0]].map(content=>({role:'user',content})),tool_results:[],remembered_notes:[],semantic_plan:plan})}]})});
+  const wire=plan=>({body:JSON.stringify({messages:[{role:'system',content:'synthetic'}, {role:'user',content:JSON.stringify({phase:'tool_planning',current_user_request:questions[0],conversation:[...OWNER_CHAT_QUESTIONS,questions[0]].map(content=>({role:'user',content})),tool_results:[],remembered_notes:[],semantic_plan:plan})}]})});
   for(const role of ['tenant_owner','client']) for(const parent_request of ['',OWNER_CHAT_QUESTIONS[2]]) {
     const plan=ci.validatePlan({parent_request,language:'ru',dialogue_act:'question',tasks:[{id:'t1',intent:'company.business_hours',entities:{},depends_on:[],confidence:1}],context:{}},role,['appointments.own.list']);
     assert.equal(safeRetainedHistoryPlan(plan),true);assertHistoryPlanningRequest(wire(plan));

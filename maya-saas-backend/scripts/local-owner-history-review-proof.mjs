@@ -136,7 +136,13 @@ try {
       let body='';for await(const c of req)body+=c;
       assertHistoryPlanningRequest({body});
       const input=JSON.parse(JSON.parse(body).messages[1].content);
-      const question=input.conversation.at(-1).content;
+      const question=input.current_user_request;
+      assert.equal(question,input.conversation.at(-1).content);
+      if(modelCalls===1) {
+        assert.equal(input.semantic_plan.parent_request,HISTORY_REVIEW_QUESTIONS[0]);
+        assert.equal(input.semantic_plan.tasks[0].entities.period,'past');
+        report.currentRequestDistinctFromPriorPlan=true;
+      }
       const index=HISTORY_REVIEW_QUESTIONS.indexOf(question);assert.ok(index>=0);
       assert.equal(req.headers.authorization,undefined);
       assert.equal(req.headers['x-candidate-case'],['owner-personal-history','owner-personal-last-visit'][index]);
@@ -160,7 +166,7 @@ try {
   const model=app.get(AiCoreModelService), completion=model.requestDeepSeekCompletion.bind(model);
   model.requestDeepSeekCompletion=async options=>{
     report.syntheticPlannerInputs??=[];
-    const v=options.input;report.syntheticPlannerInputs.push({phase:v.phase,userOnly:v.conversation.every(m=>m.role==='user'),retainedIntent:v.semantic_plan?.tasks?.[0]?.intent??null,memoryCount:v.remembered_notes.length,toolResultCount:v.tool_results?.length});
+    const v=options.input;report.syntheticPlannerInputs.push({phase:v.phase,userOnly:v.conversation.every(m=>m.role==='user'),retainedIntent:v.semantic_plan?.tasks?.[0]?.intent??null,memoryCount:v.remembered_notes.length,toolResultCount:v.tool_results?.length,currentRequestMatchesLatest:v.current_user_request===v.conversation.at(-1).content});
     return completion(options);
   };
   globalThis.fetch=chatRuntime.fetch;

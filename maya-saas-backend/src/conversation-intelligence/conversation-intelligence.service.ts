@@ -80,12 +80,11 @@ export class ConversationIntelligenceService {
   plannerInstructions(): string {
     return [
       'CONVERSATION INTELLIGENCE CONTRACT maya-ci/1:',
-      'First understand the complete parent request, then decompose it into up to five ordered tasks.',
+      'Answer current_user_request. conversation/semantic_plan provide context; reconstruct parent_request and up to five tasks for this turn.',
       'For every task choose exactly one canonical intent from conversation_contract.intents.',
       'Entity keys must use the selected intent required_slots and optional_slots. slot_aliases lists equivalent input keys; always emit the canonical key. A known date/period fills date_or_period, and one service is a one-item services array when those slots are declared.',
       'Semantic entity keys and tool argument keys are different contracts: booking.find_availability uses date_or_period, its tool uses date; booking.create_own uses the semantic date slot. Do not omit known required semantic slots just because the tool arguments contain them.',
-      'Carry canonical entity keys from semantic_plan and the conversation, replacing only the corrected values. On booking.find_availability -> booking.create_own, retain services/employee/branch and map a single-day date_or_period to date; a period must be clarified, never narrowed by guessing. History is preference context, not availability, identity, confirmation or permission. Never invent missing values.',
-      'Extract flat entities from the current utterance and relevant prior turns. Keep dates, periods, people, services, branches, amounts, percentages and statuses distinct.',
+      'Re-evaluate explicit scope even for the same intent/tool, without correction words. Carry unmentioned canonical slots only for a continuing task. On booking.find_availability -> booking.create_own retain services/employee/branch; map only a single-day date_or_period to date, otherwise clarify. History is preference, never availability, identity, confirmation or permission. Never invent missing values.',
       'Use conversation_contract.language as semantic normalization guidance, never as exact-match routing. Resolve relative time in the tenant business timezone.',
       'Classify the intended business meaning, not the presence or absence of a keyword from examples.',
       'Map unseen paraphrases, slang, inflected words, spelling mistakes and plausible speech-to-text errors to the same canonical intent whenever dialogue context supports that meaning.',
