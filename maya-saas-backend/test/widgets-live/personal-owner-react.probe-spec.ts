@@ -399,7 +399,14 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
           // Supported configured provider, with only the owned synthetic
           // adapter above. The real YCLIENTS adapter is never constructed.
           provider: 'yclients',
-          settingsJson: { companyId: 900001 },
+          settingsJson: {
+            companyId: 900001,
+            branchBinding: {
+              contract: 'maya.crm-branch-binding/1',
+              companyId: 900001,
+              branchId: branch.id,
+            },
+          },
           status: 'active',
           encryptedApiToken: db.encryption.encrypt('synthetic'),
           baseUrl: providerUrl,
@@ -479,6 +486,26 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
     const s = saved.incomplete,
       token = await login(s);
     const checks = [];
+    // Source qualification precedes service facts. Preserve the old fixture's
+    // missing-binding refusal as a negative, then restore the exact configured
+    // synthetic company/branch before testing price and duration failures.
+    const integration = await db.prisma.crmIntegration.findUniqueOrThrow({
+      where: { tenantId: s.tenant.id },
+    });
+    await db.prisma.crmIntegration.update({
+      where: { tenantId: s.tenant.id },
+      data: { settingsJson: { companyId: 900001 } },
+    });
+    const unbound = await personal(token, 'appointments/preview', s.dto);
+    expect(unbound.status).toBe(503);
+    expect(unbound.body).toMatchObject({
+      error: { code: 'booking_branch_source_unavailable' },
+    });
+    await db.prisma.crmIntegration.update({
+      where: { tenantId: s.tenant.id },
+      data: { settingsJson: integration.settingsJson! },
+    });
+    observations.missingBranchBindingRefusedBeforeFacts = true;
     for (const patch of [
       { price: null, price_min: null, price_max: null },
       { price: null, price_min: 1000, price_max: 2000 },
