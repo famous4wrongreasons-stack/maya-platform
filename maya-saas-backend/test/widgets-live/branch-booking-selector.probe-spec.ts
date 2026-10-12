@@ -720,14 +720,23 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
       .send({
         provider: 'yclients',
         apiToken: 'SYNTHETIC_BRANCH_SELECTOR_USER',
+        expectedVersion: null,
         settingsJson: settings(s),
       });
-    expect(connect.status).toBe(201);
+    expect({
+      status: connect.status,
+      error: connect.status === 201 ? null : (connect.body as unknown),
+    }).toEqual({
+      status: 201,
+      error: null,
+    });
+    const expectedVersion = object(object(connect.body).receipt).configVersion;
+    expect(expectedVersion).toMatch(/^[a-f0-9]{64}$/);
     const activate = await request(http.app.getHttpServer())
       .post('/api/integrations/crm/activate')
       .set('Authorization', 'Bearer ' + token)
       .set('Idempotency-Key', randomUUID())
-      .send({});
+      .send({ expectedVersion });
     expect(activate.status).toBe(201);
     expect(
       (
@@ -1676,8 +1685,36 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
       expect(mirror.startAt.toISOString()).toBe(s.day + 'T08:00:00.000Z');
       // Current availability is occupied. The status path must not enter a new quote.
       expect((await slots(s, token)).status).toBe(201);
-      await revoke(s);
       const readsBeforeRevoked = reads.length;
+      // Revoke the real synthetic Client link after the actual durable result
+      // query returns, before its awaited owner continuation can disclose it.
+      // Only timing is controlled: normal HTTP authority and DB reads stay real.
+      const crm = http.app.get(CrmService);
+      const readResult = crm.getAppointmentActionExecutionResult.bind(crm);
+      const resultRead = jest
+        .spyOn(crm, 'getAppointmentActionExecutionResult')
+        .mockImplementationOnce(async (tenantId, executionId) => {
+          expect([tenantId, executionId]).toEqual([
+            s.tenantId,
+            s.moveExecutionId,
+          ]);
+          const result = await readResult(tenantId, executionId);
+          await revoke(s);
+          return result;
+        });
+      try {
+        const revokedDuringRead = await read();
+        expect(revokedDuringRead.status).toBe(403);
+        expect(object(revokedDuringRead.body).widgets).toBeUndefined();
+        expect(resultRead).toHaveBeenCalledTimes(1);
+      } finally {
+        resultRead.mockRestore();
+      }
+      expect(
+        await db.prisma.actionExecution.findFirstOrThrow({
+          where: { tenantId: s.tenantId, id: s.moveExecutionId },
+        }),
+      ).toEqual(final);
       const revoked = await read();
       expect(revoked.status).toBe(403);
       expect(reads.length).toBe(readsBeforeRevoked);
@@ -1703,6 +1740,8 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
       scriptedScheduleSource: true,
       repeatedCompletedReadsProviderFree: stage === 'resume',
       foreignAndRevokedReadProviderFree: stage === 'resume',
+      revokedDuringCompletedResultReadRefused: stage === 'resume',
+      durableResultUnchangedAfterRefusal: stage === 'resume',
       realProviderAcceptance: false,
     };
     checkpoints.push(
