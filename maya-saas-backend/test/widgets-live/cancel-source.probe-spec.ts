@@ -276,6 +276,7 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
     s: Scenario,
     company = s.companyA,
     branchId = s.branchId,
+    expectMigrationRefusal = false,
   ) {
     // Setup obeys the current CRM CAS contract, including source replacement.
     const current = await request(http.app.getHttpServer())
@@ -304,6 +305,13 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
           },
         },
       });
+    if (expectMigrationRefusal) {
+      expect(response.status).toBe(409);
+      expect(response.body).toMatchObject({
+        error: { code: 'crm_import_scope_migration_unsupported' },
+      });
+      return;
+    }
     expect({
       status: response.status,
       error: object(response.body).error,
@@ -429,7 +437,10 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
   }
   it('company A preview → company B integration → confirm never deletes the B record with the same ID', async () => {
     const s = await scenario();
-    await connect(s, s.companyB);
+    // Current setup refuses changing an imported identity. Separately inject
+    // out-of-band drift in this disposable proof DB to retain the source fence proof.
+    await connect(s, s.companyB, s.branchId, true);
+    await switchCompany(s);
     const before = transport.length;
     const result = await submit(http, s.token, s.confirmation!, 'COMMIT');
     const appointment = await db.prisma.appointment.findUniqueOrThrow({
@@ -506,8 +517,25 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
     'refuses %s after preview before any DELETE',
     async (mode) => {
       const s = await scenario();
-      if (mode === 'branch-remap')
-        await connect(s, s.companyA, s.otherBranchId);
+      if (mode === 'branch-remap') {
+        await connect(s, s.companyA, s.otherBranchId, true);
+        const integration = await db.prisma.crmIntegration.findUniqueOrThrow({
+          where: { tenantId: s.tenantId },
+        });
+        await db.prisma.crmIntegration.update({
+          where: { id: integration.id },
+          data: {
+            settingsJson: {
+              ...object(integration.settingsJson),
+              branchBinding: {
+                contract: 'maya.crm-branch-binding/1',
+                companyId: s.companyA,
+                branchId: s.otherBranchId,
+              },
+            },
+          },
+        });
+      }
       if (mode === 'missing-branch')
         await db.prisma.appointment.update({
           where: { id: s.appointmentId },
@@ -786,14 +814,44 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
     });
   }, 30000);
   it.each(['unavailable', 'foreign-record'])(
-    'UNKNOWN readback %s reaches the existing manual bound and replay never redispatches',
+    'UNKNOWN readback %s reaches the existing manual bound through explicit status reads and replay never redispatches',
     async (mode) => {
-      const s = await scenario(),
-        key = randomUUID();
+      const s = await scenario();
       readbackReady = mode !== 'unavailable';
       readbackId = mode === 'foreign-record' ? 5002 : 5001;
       afterDelete = () => Promise.resolve('lost');
-      expect((await cancelHttp(s, key)).status).toBe(503);
+      expect(
+        await submit(http, s.token, s.confirmation!, 'COMMIT'),
+      ).toMatchObject({
+        receipt_outcome: 'ACCEPTED',
+        owner_decision: { state: 'UNKNOWN' },
+      });
+      const initial = (await executions(s))[0];
+      expect(initial).toMatchObject({
+        state: 'UNKNOWN',
+        reconciliationState: 'REQUIRED',
+        executionAttemptCount: 1,
+      });
+      expect(
+        await db.prisma.actionAttempt.count({
+          where: { executionId: initial.id, kind: 'RECONCILIATION' },
+        }),
+      ).toBe(1);
+      // Cancel status now yields after each inconclusive read. Exercise the
+      // actual explicit HTTP status path; do not restore automatic polling.
+      for (const attempts of [2, 3]) {
+        const response = await http.resolveWidgets(s.token, {
+          booking_receipt: { widget_id: s.confirmation!.widget_id },
+        });
+        expect(response.status).toBe(200);
+        expect(
+          await db.prisma.actionAttempt.count({
+            where: { executionId: initial.id, kind: 'RECONCILIATION' },
+          }),
+        ).toBe(attempts);
+        expect(await executions(s)).toHaveLength(1);
+        expect(deletes(s)).toHaveLength(1);
+      }
       const execution = await db.prisma.actionExecution.findFirstOrThrow({
         where: {
           tenantId: s.tenantId,
@@ -820,7 +878,17 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
       readbackReady = true;
       readbackId = 5001;
       const before = transport.length;
-      expect((await cancelHttp(s, key)).status).toBe(503);
+      const replay = await submit(http, s.token, s.confirmation!, 'COMMIT');
+      expect(
+        (replay.owner_decision as { state?: string } | null)?.state,
+      ).not.toBe('SUCCEEDED');
+      expect(
+        (
+          await http.resolveWidgets(s.token, {
+            booking_receipt: { widget_id: s.confirmation!.widget_id },
+          })
+        ).status,
+      ).toBe(200);
       expect(transport.slice(before)).toEqual([]);
       expect(deletes(s)).toHaveLength(1);
       expect((await ownedRow(s)).status).toBe('confirmed');
