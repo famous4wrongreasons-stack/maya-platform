@@ -103,11 +103,28 @@ func pipeOutput(_ kind: Kind, store: CredentialStorage) throws {
         }
     }
 }
+// AppKit routes Command-V through the main menu's responder-chain action.
+// A programmatically created app has no default Edit menu. Do not read the
+// pasteboard ourselves or expose secure-field contents to implement paste.
+@MainActor func credentialInputMenu() -> NSMenu {
+    let menu = NSMenu()
+    let application = NSMenuItem(title:"Maya",action:nil,keyEquivalent:"")
+    let applicationMenu = NSMenu(title:"Maya")
+    applicationMenu.addItem(withTitle:"Закрыть Maya",action:#selector(NSApplication.terminate(_:)),keyEquivalent:"q")
+    application.submenu = applicationMenu; menu.addItem(application)
+    let edit = NSMenuItem(title:"Правка",action:nil,keyEquivalent:"")
+    let editMenu = NSMenu(title:"Правка")
+    editMenu.addItem(withTitle:"Вставить",action:#selector(NSText.paste(_:)),keyEquivalent:"v")
+    editMenu.addItem(withTitle:"Выделить всё",action:#selector(NSText.selectAll(_:)),keyEquivalent:"a")
+    edit.submenu = editMenu; menu.addItem(edit)
+    return menu
+}
 @MainActor final class Setup: NSObject, NSApplicationDelegate {
     var window: NSWindow!
     let partner = NSSecureTextField(), deepseek = NSSecureTextField()
     let status = NSTextField(wrappingLabelWithString: "Две записи в локальной Связке ключей. Сохранение не запускает модель или YCLIENTS. Существующие записи не перезаписываются.")
     func applicationDidFinishLaunching(_ notification: Notification) {
+        NSApp.mainMenu = credentialInputMenu()
         window = NSWindow(contentRect: NSRect(x:0,y:0,width:570,height:330), styleMask:[.titled,.closable], backing:.buffered, defer:false)
         window.title = "Maya — ключи локальных проверок"
         partner.placeholderString = "Партнёрский токен YCLIENTS"; deepseek.placeholderString = "API-ключ DeepSeek"
@@ -119,8 +136,9 @@ func pipeOutput(_ kind: Kind, store: CredentialStorage) throws {
     }
     @objc func saveKeys() {
         var one = Data(deepseek.stringValue.utf8), two = Data(partner.stringValue.utf8)
-        deepseek.stringValue = ""; partner.stringValue = ""
         defer { one.resetBytes(in:0..<one.count); two.resetBytes(in:0..<two.count) }
+        guard !one.isEmpty, !two.isEmpty else { status.stringValue = "Заполните оба поля. Для вставки используйте ⌘V или меню Правка → Вставить."; return }
+        deepseek.stringValue = ""; partner.stringValue = ""
         do { try selfIdentity(); let vault = Vault(try LoginKeychainStorage(interactive:true)); try vault.enroll(deepseek:one,partner:two); status.stringValue = "Оба ключа сохранены. Можно закрыть окно. Внешние запросы не выполнялись." }
         catch { status.stringValue = "Сохранение не подтверждено. Проверьте доступ к Связке ключей и отсутствие существующих записей. Значения не записаны в журнал." }
     }
@@ -132,6 +150,16 @@ func pipeOutput(_ kind: Kind, store: CredentialStorage) throws {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender:NSApplication)->Bool { true }
 }
 func memoryProof() throws {
+    try MainActor.assumeIsolated {
+        let menu = credentialInputMenu()
+        guard let edit = menu.item(withTitle:"Правка")?.submenu,
+              let paste = edit.item(withTitle:"Вставить"),
+              paste.action == #selector(NSText.paste(_:)), paste.keyEquivalent == "v",
+              paste.keyEquivalentModifierMask == .command, paste.target == nil,
+              let select = edit.item(withTitle:"Выделить всё"),
+              select.action == #selector(NSText.selectAll(_:)), select.keyEquivalent == "a",
+              select.keyEquivalentModifierMask == .command, select.target == nil else { throw ClosedError.refused }
+    }
     let store = MemoryStorage(), vault = Vault(MemoryStorage())
     let a = Data("SYNTHETIC_DEEPSEEK_KEY_ONLY".utf8), b = Data("SYNTHETIC_PARTNER_KEY_ONLY".utf8)
     try Vault(store).enroll(deepseek:a,partner:b)
