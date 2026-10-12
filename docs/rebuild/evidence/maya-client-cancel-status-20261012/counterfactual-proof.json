@@ -1,0 +1,139 @@
+{
+  "qualification": "OFFLINE_UNIT_OWNER_SEAMS_NOT_PROVIDER_DB_OR_RELEASE_CERTIFICATION",
+  "head": "0149f6686665cee358aaa8033178ebef6358732b",
+  "prior": "14c6ed4489c996de6d2b5bcb2bfe31a873ad767d",
+  "specHashes": {
+    "src/widgets/resolve/booking-cancel-receipt-read.spec.ts": "28fc894acc6ea699c9f346493a9da35465425d15e75fd6238d8f940e690688bc",
+    "src/crm/client-cancel-status.spec.ts": "b4f305965fc144502abd881a0e63442e555698bb965945a86619dd0e292ede79",
+    "src/crm/client-appointment-cancel.service.spec.ts": "630611c806d3f34a7b260b18b95e6d02201365688b80b255c4517919ee2fcde4",
+    "src/action-engine/client-appointment-status.runtime.spec.ts": "2b7f67f3fbbe8621bafc0c466a2f7dc73f37ee03ced74178628f6b76837f5dbe",
+    "src/action-engine/client-reschedule-alias.kernel.spec.ts": "3cf0ba246838bb885eb35a33d1c7ce348da8c04ce9c01020ecacb2379a4c274b"
+  },
+  "baseline": {
+    "exit": 0,
+    "total": 127,
+    "passed": 127,
+    "failed": 0,
+    "failures": [],
+    "receiptSha256": "4e3ff661fd781783cdf4f082f95325dc67a857fb5945f2aa687bf6fc4101c3a8",
+    "logSha256": "982a1bd14a87ad8458ab7db23f412d02d4b644faa6d34f1cf633d728a1d4659a"
+  },
+  "counterfactuals": [
+    {
+      "name": "exact-prior-widget-wiring",
+      "exit": 1,
+      "total": 127,
+      "passed": 126,
+      "failed": 1,
+      "failures": [
+        "explicit cancelled booking receipt recovery reaches only the cancel status reader using the stored confirmation identity"
+      ],
+      "receiptSha256": "12ee3130b84928600aac0763f0b88ff9368eae244426ae0328705d1012c5e5eb",
+      "logSha256": "456bc3487fb7b1649a532f748f0e7b7e78f97ba440b5597b289ade8c4bd344d6",
+      "killed": true
+    },
+    {
+      "name": "cancel-not-admitted-to-status-owner",
+      "exit": 1,
+      "total": 127,
+      "passed": 100,
+      "failed": 27,
+      "failures": [
+        "explicit original cancellation readback reconciles original canceled source once, updates existing mirror and returns same action",
+        "explicit original cancellation readback completed action remains provider-free but requires current source and authority",
+        "explicit original cancellation readback does not return a completed receipt if authority disappears during result retrieval",
+        "explicit original cancellation readback source crm-other / canceled gives UNKNOWN without mutation",
+        "explicit original cancellation readback source crm-501 / confirmed gives READY without mutation",
+        "explicit original cancellation readback source crm-501 / cancelled gives SUCCEEDED without mutation",
+        "explicit original cancellation readback response loss during readback remains UNKNOWN",
+        "explicit original cancellation readback does not settle success if source changes while mirror persistence awaits",
+        "explicit original cancellation readback concurrent checks share one reconciliation claim and never dispatch",
+        "explicit original cancellation readback refuses a substituted adapter without reading it",
+        "Finite verified Client reschedule status yields cancel after one inconclusive read following response loss",
+        "Finite verified Client reschedule status recovers one expired cancel reconciliation claim after restart, then reads at most once",
+        "Finite verified Client cancel status yields cancel after one inconclusive read following response loss",
+        "Finite verified Client cancel status reads the same trusted source and principal without provider calls",
+        "Finite verified Client cancel status settles PROVEN_SUCCEEDED once without dispatching even if READY becomes possible",
+        "Finite verified Client cancel status settles PROVEN_NOT_EXECUTED once without dispatching even if READY becomes possible",
+        "Finite verified Client cancel status preserves the global inconclusive ceiling across explicit status checks",
+        "Finite verified Client cancel status observes MANUAL_REQUIRED without claim, polling or provider read",
+        "Finite verified Client cancel status observes IN_PROGRESS without claim, polling or provider read",
+        "Finite verified Client cancel status recovers one expired cancel reconciliation claim after restart, then reads at most once",
+        "Finite verified Client cancel status leaves a live reconciliation lease alone without polling",
+        "Finite verified Client cancel status preserves MANUAL_REQUIRED when expired claim recovery reaches the existing ceiling",
+        "Finite verified Client cancel status observes a concurrent recovery winner without another claim or provider read",
+        "Finite verified Client cancel status does not poll or read the provider when another status call wins the claim",
+        "Finite verified Client cancel status never publishes provider success after authorization is revoked during the read",
+        "Finite verified Client cancel status records a provider read failure only as inconclusive and closes its claim",
+        "Finite verified Client cancel status fails closed when the original normalized payload has expired"
+      ],
+      "receiptSha256": "e67645e64c3dd894954dec9fa01cf8c8cfeaeb35a46bc184eb6b1722f0007112",
+      "logSha256": "2dcd8ccf57a5b1bac6556bd3e1b16bdc37c489827cd2258ccc6b61fefb615136",
+      "killed": true
+    },
+    {
+      "name": "cross-capability-alias-accepted",
+      "exit": 1,
+      "total": 127,
+      "passed": 125,
+      "failed": 2,
+      "failures": [
+        "Exact existing widget reschedule caller alias rejects a caller binding without exact Client reschedule attribution: {\"capability\":\"crm.appointment.cancel.v1\"}",
+        "Exact existing widget cancel caller alias rejects a caller binding without exact Client reschedule attribution: {\"capability\":\"crm.appointment.reschedule.v1\"}"
+      ],
+      "receiptSha256": "9bda9c09961e0e649b719f1d1a6ab8f4fac7d103e26101cac14a9b89ea02a6b0",
+      "logSha256": "fc455873f38a466e50ccd868e2686ec12a276a48dfba77910e3cff1d45d6cc7b",
+      "killed": true
+    },
+    {
+      "name": "completed-cancel-source-witness-removed",
+      "exit": 1,
+      "total": 127,
+      "passed": 124,
+      "failed": 3,
+      "failures": [
+        "explicit original cancellation readback completed action remains provider-free but requires current source and authority",
+        "explicit original cancellation readback rechecks source after provider read and refuses confirmation/mirror",
+        "explicit original cancellation readback does not settle success if source changes while mirror persistence awaits"
+      ],
+      "receiptSha256": "0278669ca4d32bc9d0c79a0e2c545741a8e5431cb23ffae9fa118ca417a676c8",
+      "logSha256": "58865bcd49e88b5c2c99d20c91e931d10e4a474065eedf27b5952dd429dfdcf6",
+      "killed": true
+    },
+    {
+      "name": "completed-result-post-read-authority-removed",
+      "exit": 1,
+      "total": 127,
+      "passed": 126,
+      "failed": 1,
+      "failures": [
+        "explicit original cancellation readback does not return a completed receipt if authority disappears during result retrieval"
+      ],
+      "receiptSha256": "d1137abd3332c79d88ec34b85a364b621ea460d73e325427a5b65b8f9e02bcc5",
+      "logSha256": "fd50ea2d2ab01fad7882de810f31e1fe29179c7f5e6181abc7483cd6698fba19",
+      "killed": true
+    },
+    {
+      "name": "original-cancel-link-binding-removed",
+      "exit": 1,
+      "total": 127,
+      "passed": 126,
+      "failed": 1,
+      "failures": [
+        "explicit original cancellation readback refuses substituted linkId before provider read"
+      ],
+      "receiptSha256": "e0986c7a346bcf9d6a2a75536d992148283e5d6b6853c3fab8863a2036f603d2",
+      "logSha256": "9e633dc1c3c429f3ae3fc4f23cf03d43f70fb8cf77da80ee945c2f916d9ec83e",
+      "killed": true
+    }
+  ],
+  "restored": {
+    "exit": 0,
+    "total": 127,
+    "passed": 127,
+    "failed": 0,
+    "failures": [],
+    "receiptSha256": "272ffcf8bd2db9a23ef9dce913eac19aca923e19ebd2528c4221c6fd6b6f19e6",
+    "logSha256": "37fac90e84f35981b981efc0a3561299e7ec566372cb992aeb992f91d06828d1"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "qualification": "LOCAL_SCOPED_OFFLINE_CHECKPOINT_NOT_RELEASE_CERTIFICATION_OR_PROVIDER_ACCEPTANCE",
+  "codeCandidate": "0149f6686665cee358aaa8033178ebef6358732b",
+  "baseCandidate": "14c6ed4489c996de6d2b5bcb2bfe31a873ad767d",
+  "recordedAt": "2026-10-12T15:41:33.733270+03:00",
+  "suiteCount": 37,
+  "passed": 585,
+  "failed": 0,
+  "counterfactualsKilled": 6,
+  "counterfactualBaselinePassed": 127,
+  "counterfactualRestoredPassed": 127,
+  "buildTypes": "PASS",
+  "scopedLint": "PASS",
+  "scriptsTypes": "FAIL: four pre-existing TS2339 in reschedule-preference-carry.spec.ts",
+  "realProviderCalls": 0,
+  "paidModelCalls": 0,
+  "realDatabaseReadsOrWrites": 0,
+  "sourceHashes": {
+    "maya-saas-backend/scripts/client-cancel-status-mutations.mjs": "1a35d73b42b3a3151e839ebd69cfb0e270c80556c84415888dbee96b8f83e5ed",
+    "maya-saas-backend/src/action-engine/action-engine.kernel.ts": "46ee6f22f69bf82300a5279f36e93a6dc5932b243c2209298559eabfef57b8cd",
+    "maya-saas-backend/src/action-engine/action-engine.runtime.ts": "c6fcbcdcbb62093b319c42d005edb7c504d881f50ff215d601d155b3fed57ead",
+    "maya-saas-backend/src/action-engine/client-appointment-status.runtime.spec.ts": "2b7f67f3fbbe8621bafc0c466a2f7dc73f37ee03ced74178628f6b76837f5dbe",
+    "maya-saas-backend/src/action-engine/client-reschedule-alias.kernel.spec.ts": "3cf0ba246838bb885eb35a33d1c7ce348da8c04ce9c01020ecacb2379a4c274b",
+    "maya-saas-backend/src/crm/client-appointment-cancel.service.spec.ts": "630611c806d3f34a7b260b18b95e6d02201365688b80b255c4517919ee2fcde4",
+    "maya-saas-backend/src/crm/client-appointment-cancel.service.ts": "294ef9aaeb585721d9c8cb0b79d97afcbfc5b1e394bc86ac32b99215fa052dad",
+    "maya-saas-backend/src/crm/client-cancel-status.spec.ts": "b4f305965fc144502abd881a0e63442e555698bb965945a86619dd0e292ede79",
+    "maya-saas-backend/src/crm/crm.service.ts": "9ee53a2bf1305e357f1a009ecb17d3110de1a616fe8236da3dd3d16111a3c073",
+    "maya-saas-backend/src/widgets/owner-ports/commit-booking.adapter.ts": "23e1aaa25cbd6ba96d66d17465eb05bf7b40a3c8207621e4c8d3342392d46a62",
+    "maya-saas-backend/src/widgets/resolve/booking-cancel-receipt-read.spec.ts": "28fc894acc6ea699c9f346493a9da35465425d15e75fd6238d8f940e690688bc",
+    "maya-saas-backend/src/widgets/resolve/booking-receipt-read.spec.ts": "68413d01fbab61e8a6885d28152769ec42674be6f4366e92bce40725fa4cf834",
+    "maya-saas-backend/src/widgets/resolve/thread-page.service.ts": "462f852c7946b69652381d66c5ada6de80bcc975cf9e9b8c4b35a8625f96e573"
+  },
+  "keychainHelper": {
+    "rebuilt": false,
+    "installed": false,
+    "keychainAccess": false,
+    "binarySha256": "7bbe67dc6aed3cad83973eb00bb7e9849c7c93c8df8a21a27c94d121d0385a46",
+    "cdHash": "d41947ed7ac912609334207875996ffa9d9e0680"
+  }
+}

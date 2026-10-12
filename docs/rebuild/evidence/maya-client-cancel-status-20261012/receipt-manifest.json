@@ -1,0 +1,51 @@
+{
+  "qualification": "LOCAL_SCOPED_OFFLINE_CHECKPOINT_NOT_RELEASE_CERTIFICATION_OR_PROVIDER_ACCEPTANCE",
+  "candidate": "0149f6686665cee358aaa8033178ebef6358732b",
+  "receipts": [
+    {
+      "localPath": "/private/tmp/maya-cancel-final-scoped-20261012.json",
+      "sha256": "a2b1b6840041bb0e371850d3591bdcd19531b7072e20e4e33f864dbe0be72829",
+      "size": 281075
+    },
+    {
+      "localPath": "/private/tmp/maya-cancel-final-scoped-20261012.log",
+      "sha256": "4f646b79072b4002f7aa34251fc7edcdff3b062c3aa80ed28b66591f1156f6d3",
+      "size": 10308
+    },
+    {
+      "localPath": "/private/tmp/maya-cancel-final-scoped-suites-20261012.json",
+      "sha256": "76e01dbf474a0aad92928fb78b587b546c763365deb56e38f9e347d9f7ab0064",
+      "size": 2143
+    },
+    {
+      "localPath": "/private/tmp/maya-cancel-final-build-types-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "localPath": "/private/tmp/maya-cancel-final-lint-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "localPath": "/private/tmp/maya-cancel-final-script-types-20261012.log",
+      "sha256": "eb83f5e7719dd703d43d4b37f1b030506ae6d70b2e25e279daadf05bef62dce2",
+      "size": 884
+    },
+    {
+      "localPath": "/private/tmp/maya-cancel-counterfactual-20261012-01/summary.json",
+      "sha256": "30fe2b1e1e1d3c508e36932195e6314204dcb2e5b206f1fdfd967368b8041f90",
+      "size": 8008
+    },
+    {
+      "localPath": "/private/tmp/maya-cancel-status-before-20261012.json",
+      "sha256": "4c360627161f0457d947f6c5277d2e22a07435d689cddf224083f1238871162a",
+      "size": 2543
+    },
+    {
+      "localPath": "/private/tmp/maya-cancel-status-before-20261012.log",
+      "sha256": "242b8e1b1612bd1eaca45a9ebffb620727a8d56624bf65850db8693f1aecfe60",
+      "size": 1021
+    }
+  ]
+}

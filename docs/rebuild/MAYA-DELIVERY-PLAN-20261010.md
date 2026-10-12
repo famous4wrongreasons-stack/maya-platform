@@ -1,5 +1,15 @@
 # План завершения MAYA — 10 октября 2026
 
+**12 октября, проверка исходного результата отмены — `0149f668`:**
+исправлен backend разрыв explicit receipt read для собственной отмены. Проверка
+переиспользует исходный Action Engine result/reconciliation без нового dispatch,
+с текущей verified Client authority и source witness. 585/585 scoped offline
+тестов, 6/6 counterfactuals, build types/scoped lint PASS; scripts types имеют
+четыре ранее известные ошибки. HTTP/PG/browser и реальный provider recovery этим
+проходом не проверены. Это local development checkpoint, не release certificate.
+[Результат, контракт и ограничения](evidence/maya-client-cancel-status-20261012/README.md).
+
+
 **11 октября, web return исправлен и проверен на `6ca9a5ed`:** Telegram открывается
 в отдельном окне, исходный AChat сохраняет ожидаемый вход в памяти; callback
 проверяется и очищается до штатного `/complete`. Runtime 723 PASS / 7 SKIP,
