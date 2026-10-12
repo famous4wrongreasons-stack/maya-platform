@@ -1,0 +1,85 @@
+{
+  "contract": "maya.telegram-admitted-operation.live-acceptance/1",
+  "date": "2026-10-12",
+  "timezone": "Europe/Moscow",
+  "candidate": "b4e3f3fb88b084fb74f21c6fa8794badc66b8be0",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "sourceSha256": "3a5fad0be485b1902e08bfc38fa44f6eaeeda822a5a94eb8c72a5c6d599462a4",
+  "authorization": {
+    "ownerContinuation": "продолжай",
+    "mode": "owner_telegram_saved_login_batch_v2",
+    "maxMinutes": 30,
+    "maxFreshAttempts": 3,
+    "maxRegistryRowsPerAttempt": 6400,
+    "scope": "exact previously selected local tenant and saved owner; saved Telegram login, exact personal Client match and local initial link only"
+  },
+  "result": {
+    "loginHttpStatus": 201,
+    "clientBinding": "linked",
+    "loginStartedAt": "2026-10-12T07:02:04.578Z",
+    "loginCompletedAt": "2026-10-12T07:03:10.574Z",
+    "durationMs": 65996,
+    "carrierReturnedToAChat": true,
+    "carrierEvidence": "observed native Chrome incognito accessibility state; no auth URL or customer data archived"
+  },
+  "readOnlyObservation": {
+    "databaseIdentity": "PASS",
+    "observedAt": "2026-10-12T07:03:45.249Z",
+    "telegramIdentityCount": 1,
+    "exactUserChannelLinks": 1,
+    "exactUserActiveChannelLinks": 1,
+    "exactUserInitialBindingAuditCount": 1,
+    "currentSessionBindingAudits": 1,
+    "exactAuditLinkMatches": 1,
+    "operation": {
+      "contract": "a18.telegram-oidc-phone.operation.v1",
+      "windowMs": 120000,
+      "acceptedBeforeOriginalExpiry": true,
+      "auditRecordedAfterOriginalExpiry": true,
+      "auditRecordedBeforeOperationDeadline": true,
+      "timestampMeaning": "AuditLog.createdAt; not a PostgreSQL commit timestamp. Private observation used committed* labels for these same audit timestamp comparisons."
+    }
+  },
+  "providerReadSummary": {
+    "calls": 31,
+    "refused": 0,
+    "routes": {
+      "telegram_token": 1,
+      "telegram_jwks": 1,
+      "client_registry": 29
+    }
+  },
+  "providerReadSummaryStatus": "reported_at_clean_stop",
+  "cleanup": {
+    "status": "cancelled",
+    "reason": "owned launcher stopped after successful task completion",
+    "clusterStopped": true,
+    "runtimeGroupAbsent": true,
+    "sourceUnchanged": true,
+    "samePrivateState": true,
+    "privateStateRetained": true,
+    "cleanupFailures": []
+  },
+  "limits": {
+    "productionChanged": false,
+    "productionMigration": false,
+    "providerBusinessWrites": 0,
+    "otpSms": 0,
+    "outboundMessages": 0,
+    "modelCalls": 0,
+    "historyImport": false,
+    "iphoneChanged": false,
+    "releaseCertification": false,
+    "customerRegistryRowsNotArchived": true,
+    "rawClaimsNotArchived": true,
+    "sessionKeysNotPersisted": true,
+    "localDatabaseWrites": "canonical login/session, CRM identity and personal Client binding owners only",
+    "samePrivateStateMeaning": "pinned private-state artifact equality, not absence of local database writes"
+  },
+  "expiredBrowserAttempt": {
+    "observed": true,
+    "visibleOutcome": "Вход устарел — начните заново",
+    "providerExchangeBeforeFreshRetry": false,
+    "handling": "new fresh login inside the same authorized batch; no credential re-entry; no expired code replay"
+  }
+}

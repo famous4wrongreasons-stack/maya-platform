@@ -254,3 +254,51 @@ real owner acceptance has **not** been run. The previous real batch is stopped;
 its consumed authorization cannot authorize the changed source. No new provider
 calls, production writes, OTP/SMS, booking or iPhone actions followed the owner's
 local-only implementation decision. This is not release certification.
+
+## Real owner acceptance after the approved fix — 2026-10-12 10:03 MSK
+
+The owner subsequently said **«продолжай»** after the local fix checkpoint,
+continued the same bounded saved-Telegram acceptance scope, manually launched
+the new pinned batch, and confirmed Telegram in Chrome. This is new live
+authorization for candidate `b4e3f3fb88b084fb74f21c6fa8794badc66b8be0`; the old consumed plan was not
+reused. The runtime/product source remained unchanged during this batch.
+
+The first browser attempt returned only after its login window expired. Maya
+explicitly refused it with «Вход устарел — начните заново», and no provider
+exchange was recorded for that stale attempt. A fresh login was opened inside
+the same batch. Credentials were not re-entered and the expired code was not
+replayed. The owner confirmed the fresh login.
+
+The real login returned **HTTP 201 / client_binding: linked** at
+`2026-10-12T07:03:10.574Z`, after **65,996 ms**. Chrome returned to React
+AChat. A read-only observation against the identity-checked retained loopback
+database confirmed one saved Telegram identity, **exactly one** active
+`maya_user` link for the exact owner and tenant, and exactly one matching
+`client.telegram_initial_link` audit pointing to that link. No identity, phone,
+customer row, token, claim or authorization URL is published here.
+
+The audit records `a18.telegram-oidc-phone.operation.v1`, a 120,000 ms
+operation window, initial acceptance before the original token expired, and
+an audit timestamp after that expiry but before the operation deadline. This
+is the live proof of the approved bounded-operation fix. These timestamp
+comparisons use `AuditLog.createdAt`, not a database commit timestamp; the
+private observation's earlier `committed*` labels are clarified explicitly in
+the repository summary.
+
+At clean shutdown the existing provider counter reported **31 calls**: one
+Telegram token exchange, one JWKS read and 29 client-registry pages, zero
+refused provider calls. Page count is not a claim about the number of customer
+rows. The launcher was stopped as soon as the result was verified. The runtime
+and owned PostgreSQL stopped cleanly, private state was retained, and pinned
+source remained unchanged. `samePrivateState` describes artifact hashes, not
+a claim that the local database had no authorized login/binding writes.
+
+**Real local personal Client binding: PASS.** This supersedes the earlier
+NOT PROVEN live outcome without rewriting it. It does not prove imported visit
+history, booking, messaging, production deployment, a production identity link,
+or release certification. No production, OTP/SMS, provider booking, reschedule,
+cancel, outbound messaging, model, history-import or iPhone action was executed.
+
+See `live-fixed-binding-summary.json` and
+`live-fixed-binding-manifest.json`. Raw receipts remain private and are
+referenced by path/hash/size only.

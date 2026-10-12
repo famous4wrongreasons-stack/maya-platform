@@ -1,0 +1,63 @@
+{
+  "contract": "maya.local-evidence-manifest/1",
+  "candidate": "b4e3f3fb88b084fb74f21c6fa8794badc66b8be0",
+  "relatedSummary": "live-fixed-binding-summary.json",
+  "artifacts": [
+    {
+      "artifact": "plan.json",
+      "originalLocalPath": "/private/tmp/maya-owner-telegram-batch-20261012-02/plan.json",
+      "sha256": "1bc89a44099c244ecf4b99f91eff1873ff870e149ff13203ed2f631ffad9ddec",
+      "size": 1148,
+      "committed": false,
+      "reason": "private exact-scope receipt or local operator artifact; repository contains an allowlisted aggregate only"
+    },
+    {
+      "artifact": "owner-approval-source.json",
+      "originalLocalPath": "/private/tmp/maya-owner-telegram-batch-20261012-02/owner-approval-source.json",
+      "sha256": "6045dba784c38d3cb8a639470fa4a75244e053ac40511923e814b7ae18934966",
+      "size": 638,
+      "committed": false,
+      "reason": "private exact-scope receipt or local operator artifact; repository contains an allowlisted aggregate only"
+    },
+    {
+      "artifact": "preflight.json",
+      "originalLocalPath": "/private/tmp/maya-owner-telegram-batch-20261012-02/preflight.json",
+      "sha256": "e01b08020ee189fe5ac3e5bc0de9114e56000eea96050ddb05ba9076d0999033",
+      "size": 587,
+      "committed": false,
+      "reason": "private exact-scope receipt or local operator artifact; repository contains an allowlisted aggregate only"
+    },
+    {
+      "artifact": "launch.command",
+      "originalLocalPath": "/private/tmp/maya-owner-telegram-batch-20261012-02/launch.command",
+      "sha256": "b90a3f696623c2ae5a8966735b5cb366ed50feff07de495cd81d989b3240fa19",
+      "size": 1075,
+      "committed": false,
+      "reason": "private exact-scope receipt or local operator artifact; repository contains an allowlisted aggregate only"
+    },
+    {
+      "artifact": "session/resume.json",
+      "originalLocalPath": "/private/tmp/maya-owner-telegram-batch-20261012-02/session/resume.json",
+      "sha256": "523ff7b94dbbd0d22c2ae3b48a2c0e9640088e912bbf977d910d9ced21007dd8",
+      "size": 549611,
+      "committed": false,
+      "reason": "private exact-scope receipt or local operator artifact; repository contains an allowlisted aggregate only"
+    },
+    {
+      "artifact": "binding-observation.json",
+      "originalLocalPath": "/private/tmp/maya-owner-telegram-batch-20261012-02/binding-observation.json",
+      "sha256": "9f9e82bed0390ac1c8823784eb25c480b4a87d2630f4ac23785a8e21407afc32",
+      "size": 572,
+      "committed": false,
+      "reason": "private exact-scope receipt or local operator artifact; repository contains an allowlisted aggregate only"
+    },
+    {
+      "artifact": "observe-binding.mjs",
+      "originalLocalPath": "/private/tmp/maya-owner-telegram-batch-20261012-02/observe-binding.mjs",
+      "sha256": "c2da7bbb042da738b056af6b4faece985c3d55ed35c1ffadad384614efbf0962",
+      "size": 4879,
+      "committed": false,
+      "reason": "private exact-scope receipt or local operator artifact; repository contains an allowlisted aggregate only"
+    }
+  ]
+}
