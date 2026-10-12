@@ -1,0 +1,62 @@
+{
+  "qualification": "OFFLINE_OWNER_SEAMS_NOT_HTTP_PG_OR_LIVE_ACCEPTANCE",
+  "head": "fd7e4c4c6e83bfa2cae3e71ab1e2fd63cbc47a72",
+  "prior": "45a162a8a0c5f9135e494a7edc48f411587cc51a",
+  "specSha256": "ebde5f10723a020186e63d1c43ee1c6f8fec76401f83026e875856d6a2ae3845",
+  "sourceSha256": "55f8b1800dc0aaf9d2fafea9f442a66c6e98bf45873ad7e81089024c3178f7d3",
+  "baseline": {
+    "exit": 0,
+    "passed": 13,
+    "failed": 0,
+    "failures": [],
+    "receiptSha256": "849b396cda8740c25baf3365efefc7d41a0cbbc0ed14182b91fec345d4e51026",
+    "logSha256": "7b3924a8e16927370da6446afdc918db12c8ae47207460858cb637cb5a5ce725"
+  },
+  "counterfactuals": [
+    {
+      "name": "exact-prior-owner",
+      "exit": 1,
+      "passed": 11,
+      "failed": 2,
+      "failures": [
+        "explicit original Client appointment status refuses completed create if access is revoked while its durable result is read",
+        "explicit original Client appointment status refuses completed reschedule if access is revoked while its durable result is read"
+      ],
+      "receiptSha256": "8ac5f0da46af044388653a7786ac6e4d369342b8fff2d7e69b03f8b1a22f19d4",
+      "logSha256": "b60046493bf3706784c67a2fa673ad73b7350cc44d5ff9ecd5f11985c0a0dbda",
+      "killed": true
+    },
+    {
+      "name": "omit-create-post-read-authority",
+      "exit": 1,
+      "passed": 12,
+      "failed": 1,
+      "failures": [
+        "explicit original Client appointment status refuses completed create if access is revoked while its durable result is read"
+      ],
+      "receiptSha256": "0602c3a3bbd483b5dd5c69bd66f1f217aee3f41e0fec032606beaaa8def9299e",
+      "logSha256": "81118f5238d095bec8d30e17902c5f014bad1263db4c4c07d2dc9a5e03c64376",
+      "killed": true
+    },
+    {
+      "name": "omit-reschedule-post-read-authority",
+      "exit": 1,
+      "passed": 12,
+      "failed": 1,
+      "failures": [
+        "explicit original Client appointment status refuses completed reschedule if access is revoked while its durable result is read"
+      ],
+      "receiptSha256": "1ed61644772d688e32d790f2d6e61f891a2ac66c5d9781b12a3aa3c74947fe6f",
+      "logSha256": "bb4ea66d19713e154f877a6dbe21d9c456e98c4769668d9e030f61ad37b0df4b",
+      "killed": true
+    }
+  ],
+  "restored": {
+    "exit": 0,
+    "passed": 13,
+    "failed": 0,
+    "failures": [],
+    "receiptSha256": "efaf3407b549cd923a34db93eff2a8f49bbd78db802a08541fda792e5c1684b7",
+    "logSha256": "aa73b3d8368de2656d5a979acceb040681d68e208a1dafba168a5263a3b121d5"
+  }
+}

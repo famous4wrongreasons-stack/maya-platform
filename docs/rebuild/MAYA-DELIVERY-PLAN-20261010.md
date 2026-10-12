@@ -1,5 +1,14 @@
 # План завершения MAYA — 10 октября 2026
 
+**12 октября, доступ к завершённой записи/переносу — `fd7e4c4c`:**
+два воспроизведённых отказа закрыты повторной проверкой Client/widget authority
+после чтения сохранённого результата. 293 scoped tests, 3/3 counterfactuals и
+actual HTTP/PG restart (6 checkpoints) PASS; отзыв Client во время чтения даёт
+403, прежний action сохраняется, новый перенос не отправляется. Старая ошибка
+типов reschedule fixture закрыта; build/scripts/widgets-live types PASS.
+Только synthetic provider и отдельная PG, без реальных ключей/данных/эффектов.
+[Свежие доказательства, failed attempts и пределы](evidence/maya-completed-receipt-authority-20261012/README.md).
+
 **12 октября, restart-проверка результата отмены закрыта — `83ecf5c5`:**
 после перезапуска backend/PostgreSQL React восстанавливает явную кнопку проверки
 исходной receipt, не возвращая COMMIT. 12/12 browser checkpoints: UNKNOWN →

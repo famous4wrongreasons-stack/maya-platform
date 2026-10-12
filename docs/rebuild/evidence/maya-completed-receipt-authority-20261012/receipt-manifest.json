@@ -1,0 +1,1189 @@
+{
+  "testedCommit": "fd7e4c4c6e83bfa2cae3e71ab1e2fd63cbc47a72",
+  "includesFailedAndSupersededAttempts": true,
+  "artifacts": [
+    {
+      "path": "/private/tmp/maya-completed-receipt-authority-after-20261012.json",
+      "sha256": "2e120a36780d5f34baa5884ec23648cf4f9ea733f1b8e2869f1d29aa913a6b4b",
+      "bytes": 82984,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-authority-after-20261012.log",
+      "sha256": "1fa702ae6698d4c6a48294a562800b496cbb6801176f8acc77006b6f1aa13469",
+      "bytes": 1181,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-authority-before-20261012.json",
+      "sha256": "53aeaa53ce2f522ecb49cb8b7b3f727d46ead2c18e5bea0edc1c1550ea46d545",
+      "bytes": 15132,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-authority-before-20261012.log",
+      "sha256": "ceb8000f5dfb822f22e793b1880517c730b5740647104c758a5a1620151dd3c9",
+      "bytes": 2071,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-authority-scoped-20261012.json",
+      "sha256": "0af378e6f2328c5d14c728049a07864b19ce0721ef6b44f0322070f4d92f11b6",
+      "bytes": 129409,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-authority-scoped-20261012.log",
+      "sha256": "0ed882cc942b9d1a5381c851e267e76750e8a181ade4f0465dbadd4b58b0e0ec",
+      "bytes": 822,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-20261012.json",
+      "sha256": "45d7ab8c68d0493390bf6f6e7e37da56ace09d70c46eca4dbee85483910c97e5",
+      "bytes": 140574,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-20261012.log",
+      "sha256": "ad39ca081c50fd49186e21019a7a892bead68f0578119af7aa67cb21e4cbe446",
+      "bytes": 880,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-build-types-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-head-20261012.json",
+      "sha256": "c988c41a43b3ac5dfb3cf4dee4e3d46b03024381235563120535be7ce7f91556",
+      "bytes": 140575,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-head-20261012.log",
+      "sha256": "7edade3c5c3ffc9d369c310212c9d056690cbcacdbb794e13799a26539adf902",
+      "bytes": 885,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-head-build-types-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-head-lint-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-head-live-types-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-head-scripts-types-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-lint-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-r2-20261012.json",
+      "sha256": "f011c05b0759f164e83eeb5a052d8f1166f5a26b1dfeb9710569e3d50f2449f3",
+      "bytes": 140575,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-r2-20261012.log",
+      "sha256": "2df151bc15f3456a98c65660a81bb437cd04d89f4ae9e733f7f98fa74dd3c163",
+      "bytes": 883,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-r2-build-types-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-r2-lint-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-r2-live-types-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-r2-scripts-types-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-final-scripts-types-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-lint-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-20261012/baseline.json",
+      "sha256": "d1762847cd8aff5c9084a0883cc689c2de803ca3954cea6582871b5d90ca50c0",
+      "bytes": 7170,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-20261012/baseline.log",
+      "sha256": "ffac595725bc2ca0eb782676acdf2bad9519764c97838ba35aa8951d7309217b",
+      "bytes": 1660,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-20261012/exact-prior-owner.json",
+      "sha256": "4f06aa9cf3d8b94d9ea93a10b6348db1f27cfafaa600a6478cc38d01a040fdca",
+      "bytes": 15161,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-20261012/exact-prior-owner.log",
+      "sha256": "2c1ca6324d437e849bc6242e87040cfdad6df2dcc8ea54fa075db0ac159073de",
+      "bytes": 3530,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-20261012/omit-create-post-read-authority.json",
+      "sha256": "5dc27ac9abf26b627df81f640746e4ad62c08441b6fa05c49050c15ff687b2d4",
+      "bytes": 11163,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-20261012/omit-create-post-read-authority.log",
+      "sha256": "57b43ff8f5db048293190c7b51ff09204c3b8ff6af4c7053abd52d620b8fd5a1",
+      "bytes": 2623,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-20261012/omit-reschedule-post-read-authority.json",
+      "sha256": "c3523b87364a64f7c98f53423a60fcf29c48c88c8482727a01314fc1c73ddc61",
+      "bytes": 11167,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-20261012/omit-reschedule-post-read-authority.log",
+      "sha256": "91c9a629b292ae06daad17357cb38ca2ea082e342e66ed6cc5560d827e35d69c",
+      "bytes": 2632,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-20261012/restored.json",
+      "sha256": "5fe99bdf5dcd667cd388a00aade0330db48dbf801d4e6cae014664e0042acc40",
+      "bytes": 7170,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-20261012/restored.log",
+      "sha256": "46e21617032731796f82a7e1d68a1acc361826b37c1a5566e38f03948cac094e",
+      "bytes": 1682,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-20261012/summary.json",
+      "sha256": "d0a680aeffb7b1ae21b0a3af7c567ccfe7490e5003eb590e67ffe77fdd94d6e9",
+      "bytes": 2479,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-20261012.log",
+      "sha256": "e61c551135bd9c65f5697f6f6f2f8c7fd56921aaa37c6801e8102fdf088c8d0c",
+      "bytes": 82,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-20261012/baseline.json",
+      "sha256": "9649693ef87ac12aa9bc1a8f3edff050d204526174fda0fc97cd27fdac8b9aa4",
+      "bytes": 7176,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-20261012/baseline.log",
+      "sha256": "2b6fe3868dc293e5813ea3c6f03b8697759990f3f734c11b4713280989968966",
+      "bytes": 1660,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-20261012/exact-prior-owner.json",
+      "sha256": "32bbba94616cad4bf07e414da6eaa0dd9913e84447d95c619ef714540a380851",
+      "bytes": 15179,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-20261012/exact-prior-owner.log",
+      "sha256": "f58fe822322493cdde6371200ee4e6ec12f86945be2ddacfe5292eb7f3402595",
+      "bytes": 3508,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-20261012/omit-create-post-read-authority.json",
+      "sha256": "4ed047434c22eb2dd2c3ecf8add03b8bb8fba6db439910a43395190fe6b9ed6a",
+      "bytes": 11175,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-20261012/omit-create-post-read-authority.log",
+      "sha256": "4d9da7dca4bfc33cb150998e2027bb0330aab3de99b81febcb4dae20723dfddd",
+      "bytes": 2624,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-20261012/omit-reschedule-post-read-authority.json",
+      "sha256": "1844438fcf7f43f0eee7800eeabec2a17ddad484a97051467cbcc5852f6a8209",
+      "bytes": 11179,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-20261012/omit-reschedule-post-read-authority.log",
+      "sha256": "54e83689ba3a3eff89f3d053a365c90a7be97e1615693d66be3965aefb3d82bc",
+      "bytes": 2632,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-20261012/restored.json",
+      "sha256": "528d2d6f2bcbbec389de4d6355f1cbc121ffd61fbe955220e348994db642fd47",
+      "bytes": 7176,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-20261012/restored.log",
+      "sha256": "ecefc23782afdb3267a3e8b5a2fbd22a18be081a3cd056c8289f5f7b49d1c5e6",
+      "bytes": 1661,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-20261012/summary.json",
+      "sha256": "0be3bdb54b3999380b17c7d72b470e2a96d72f638510505d85252efe907abb5e",
+      "bytes": 2479,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-20261012.log",
+      "sha256": "e61c551135bd9c65f5697f6f6f2f8c7fd56921aaa37c6801e8102fdf088c8d0c",
+      "bytes": 82,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-r2-20261012/baseline.json",
+      "sha256": "849b396cda8740c25baf3365efefc7d41a0cbbc0ed14182b91fec345d4e51026",
+      "bytes": 7179,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-r2-20261012/baseline.log",
+      "sha256": "7b3924a8e16927370da6446afdc918db12c8ae47207460858cb637cb5a5ce725",
+      "bytes": 1660,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-r2-20261012/exact-prior-owner.json",
+      "sha256": "8ac5f0da46af044388653a7786ac6e4d369342b8fff2d7e69b03f8b1a22f19d4",
+      "bytes": 15188,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-r2-20261012/exact-prior-owner.log",
+      "sha256": "b60046493bf3706784c67a2fa673ad73b7350cc44d5ff9ecd5f11985c0a0dbda",
+      "bytes": 3523,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-r2-20261012/omit-create-post-read-authority.json",
+      "sha256": "0602c3a3bbd483b5dd5c69bd66f1f217aee3f41e0fec032606beaaa8def9299e",
+      "bytes": 11181,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-r2-20261012/omit-create-post-read-authority.log",
+      "sha256": "81118f5238d095bec8d30e17902c5f014bad1263db4c4c07d2dc9a5e03c64376",
+      "bytes": 2616,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-r2-20261012/omit-reschedule-post-read-authority.json",
+      "sha256": "1ed61644772d688e32d790f2d6e61f891a2ac66c5d9781b12a3aa3c74947fe6f",
+      "bytes": 11185,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-r2-20261012/omit-reschedule-post-read-authority.log",
+      "sha256": "bb4ea66d19713e154f877a6dbe21d9c456e98c4769668d9e030f61ad37b0df4b",
+      "bytes": 2632,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-r2-20261012/restored.json",
+      "sha256": "efaf3407b549cd923a34db93eff2a8f49bbd78db802a08541fda792e5c1684b7",
+      "bytes": 7179,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-r2-20261012/restored.log",
+      "sha256": "aa73b3d8368de2656d5a979acceb040681d68e208a1dafba168a5263a3b121d5",
+      "bytes": 1675,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-r2-20261012/summary.json",
+      "sha256": "7f2ef78bb124b8c96b918b4d30fa1a7f2df7d7098b6bfe54743276c30b6de25d",
+      "bytes": 2479,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-mutations-final-r2-20261012.log",
+      "sha256": "e61c551135bd9c65f5697f6f6f2f8c7fd56921aaa37c6801e8102fdf088c8d0c",
+      "bytes": 82,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/initdb.log",
+      "sha256": "db336913288d3a592d321f571e8c332c59205dccf47fa8145996356c0b1b2964",
+      "bytes": 952,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/manifest.json",
+      "sha256": "482cf2d4d2f5f33a2b60293790962cb9c33b35f0e262016fad30c4e6936c9297",
+      "bytes": 915,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/migrations.log",
+      "sha256": "a82c933253fd8fbf058670b82973d4d42402320efeed13032a2c6e011ef580e2",
+      "bytes": 14720,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/pg-restart.log",
+      "sha256": "df9384146fe009e1bb750fdb3577d31d3038ab88f3efc2a742d5b57383cd2f96",
+      "bytes": 1347,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/postgres.log",
+      "sha256": "f8172baea259af99fff8477137ed691f6a27e59bbe2b4bebb671d601b7115763",
+      "bytes": 1246,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/prepare-jest.json",
+      "sha256": "918be761117956133962f5401116f7d1fc3529cf3af5c23cce1c82133275c24b",
+      "bytes": 1479,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/prepare.json",
+      "sha256": "46f99a8ea0bce1989a23f109dc5b3bc488bebef263517316a8e99eb08172048c",
+      "bytes": 13191,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/prepare.log",
+      "sha256": "50c032e6029b8a68d4bd128299570b01d660c9225895aea38cad39cbd416c438",
+      "bytes": 1381,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/resume-jest.json",
+      "sha256": "0ae64f0257e2796de6171f7668c95ed4a8d5ef4d2080523026a123a5638b5e04",
+      "bytes": 4195,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/resume.json",
+      "sha256": "4dcc00a782292e23e71d08fa2021a2018f87ed8fa95300e780c313103d8f2977",
+      "bytes": 7087,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/resume.log",
+      "sha256": "edf3e86fc889be84fc4ae6d80445c96ea4c08200b62125d28ee749a7d3834da4",
+      "bytes": 2524,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012/source-hashes.json",
+      "sha256": "cc5b16de261a4faa8d171c0e385dc2f6f1f074dd5c1f4ff4c62b5c390b5c1ee1",
+      "bytes": 214502,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-20261012.log",
+      "sha256": "740a9053d0a3c4de88e111d7f9b4e47d81a70b7c6a0f3a33f9c8940fc3452e67",
+      "bytes": 861,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/initdb.log",
+      "sha256": "17530d95af8479d57bd8fb190b73074d01a37f65b84aec162a691d753bc74e6d",
+      "bytes": 952,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/manifest.json",
+      "sha256": "7400ecd55b3d5df827588aab054344f146f40d7401effd9fc8f71ee465c6eec8",
+      "bytes": 956,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/migrations.log",
+      "sha256": "319c0a33c539c8ad1373aa1a887fd3e6c0bd0c87ed7156fc48240baa64e9c556",
+      "bytes": 14720,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/pg-restart.log",
+      "sha256": "2944260edda22335655bfe1ed8bb7d287f5153b70c863137d22372b036fad9b5",
+      "bytes": 1347,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/postgres.log",
+      "sha256": "2ba0ae655a18f9d4fdbfade29317c29e960dd145ab91ad0efaf61b5dcd71bd27",
+      "bytes": 1246,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/prepare-jest.json",
+      "sha256": "8f06e8c61414a4d27764854b1d69d09fd1d2815369e480492de8d62b1b3378ec",
+      "bytes": 1479,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/prepare.json",
+      "sha256": "7d1f016c694e3204a05c2369c28669a2d7d4ee22bfb1d4501cbe96d0c6277c57",
+      "bytes": 13191,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/prepare.log",
+      "sha256": "5c006ad46327eb501031d523dfa1f7612a7b3de6aec33c85b6b7b5a1f05d94e8",
+      "bytes": 1384,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/resume-jest.json",
+      "sha256": "9e8d82375afce0699586e50f22d4f6cb2a08700d9078a432156b2869515d8aa6",
+      "bytes": 1479,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/resume.json",
+      "sha256": "b65e9db7aa8c14f0ff4967651b0dd1066606d48bbf0d379db4a3f3cd82989c9c",
+      "bytes": 7805,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/resume.log",
+      "sha256": "618494a07a910947569a48f6c52e9a1a0f7acf959a0d17087e48d532c3dbb2a6",
+      "bytes": 1388,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012/source-hashes.json",
+      "sha256": "75de8a09f78e7fd67133ae32c90c5f53360e46866c4e98fdb8199302f07e957c",
+      "bytes": 214502,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-native-final-r2-20261012.log",
+      "sha256": "5a7271c29c40d5d3f52811303aeaad297fc1f035e6308779a2c806a415766ab1",
+      "bytes": 180,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-probe-lint-20261012.log",
+      "sha256": "c1f0a5692814fd07c236c0d9724ba18c0c3700b0d76b80c2f8492946f0bbda52",
+      "bytes": 292,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-probe-lint-r2-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-probe-types-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012/initdb.log",
+      "sha256": "e68aa0236b82e5c466b58ffd85eb358fc8b38ba5476b22df17fd35f5f88cb507",
+      "bytes": 952,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012/manifest.json",
+      "sha256": "e7f4dbeec3e394458fb78228da46697f97dfe6de95db05fe379eb02c42d89aad",
+      "bytes": 883,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012/migrations.log",
+      "sha256": "3444905c89b475c60ee480b31c932ab1456a86d2e60ce846fe460195db41766c",
+      "bytes": 14720,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012/postgres.log",
+      "sha256": "0df2e6d644b79944389cfa620c6a8cc5d4f436e1a6da401f9feab379f6b85a1a",
+      "bytes": 1246,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012/prepare-jest.json",
+      "sha256": "1cf81df275b95af54ca9ca996941f0d5bb245a398f186475a9589ea1b20bf1f6",
+      "bytes": 3038,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012/prepare.json",
+      "sha256": "05a704f9894986009df5e7e7f622ab3e2a2f8e29f1af6ef53c07c2f5a2da90fd",
+      "bytes": 606,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012/prepare.log",
+      "sha256": "48e3b6786dea043244bb19fae6e4149672e945aa249047ebc4256e98d2146b7b",
+      "bytes": 2196,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012/source-hashes.json",
+      "sha256": "f7f21f8b2c56c94ebada349347986235aea541fa6861d39b73b50d1b0b1ca9d2",
+      "bytes": 214502,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r2/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r2/initdb.log",
+      "sha256": "2c8241c96c28839e4d49c21194c750e2e8788cb4f52d812e6bfb36db2a459dc5",
+      "bytes": 952,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r2/manifest.json",
+      "sha256": "8dc06143f25c5bf964ed5f020b5e8cb84fe61e079aa43258e9ef0586b91dfabc",
+      "bytes": 883,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r2/migrations.log",
+      "sha256": "a5bfb5e532a64b634deff0d0a44ec9701d183a66bd1bf7089007418d1e2e775c",
+      "bytes": 14720,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r2/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r2/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r2/postgres.log",
+      "sha256": "4918958eefa2a32319d64a0897a341b4d9b74210f61d950d91096e3694e51bef",
+      "bytes": 1246,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r2/prepare-jest.json",
+      "sha256": "cae67afe6762c29133ed58bba701b9d25cd5163bf8fa060f5d17d1efcd4188bc",
+      "bytes": 3177,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r2/prepare.json",
+      "sha256": "86190d8dfced37e6694712a40fb62c693b7c44e9907455bd7e189938fadc3d89",
+      "bytes": 606,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r2/prepare.log",
+      "sha256": "10a7a92efb51a09179cb0597ce9dc2b8490beab68237318cb28817c6f65eaaaf",
+      "bytes": 2268,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r2/source-hashes.json",
+      "sha256": "0bcb1d2cfccb2319d605ea0dc1fd75ffb14cb2480f1a0c473ed64aa014842c1f",
+      "bytes": 214502,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r2.log",
+      "sha256": "4bf62e8b7144ae137836b58bc534a4ca805f18b41c113482272f1ef87bca7aae",
+      "bytes": 844,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r3/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r3/initdb.log",
+      "sha256": "6be5cfe8683f84fa223710a139b0fa472136dc466ebad93d364ca54b42813b15",
+      "bytes": 952,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r3/manifest.json",
+      "sha256": "c3a159ff881801dbf2b1dae6a60178af4142c77b68c3ee696345f285966a08c3",
+      "bytes": 883,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r3/migrations.log",
+      "sha256": "8b6e07914f3cfbb02214a62242a3d27072be9cf02afe47a2043825cab162a166",
+      "bytes": 14720,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r3/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r3/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r3/postgres.log",
+      "sha256": "61b0e4e41b388720f2068fadd40685a5c564892a445638516a66d2f74309aa09",
+      "bytes": 1246,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r3/prepare-jest.json",
+      "sha256": "6fb84a806c636a74d1641717b925da4ea9be64a386d61180f43d88d7cca3ae49",
+      "bytes": 5260,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r3/prepare.json",
+      "sha256": "730bad5a4449e292a80a8153fcac96ed81d14409abb2ced28532b55ec25a336b",
+      "bytes": 606,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r3/prepare.log",
+      "sha256": "9aa36672a976b87c3ab3a48593801362fae09a7843e12e49913d87cc3d8f6dd8",
+      "bytes": 2746,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r3/source-hashes.json",
+      "sha256": "82c39952efd6ea5c0af76949ad0b312a1bf05379b65e35e488acc1f9580255b9",
+      "bytes": 214502,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r3.log",
+      "sha256": "4bf62e8b7144ae137836b58bc534a4ca805f18b41c113482272f1ef87bca7aae",
+      "bytes": 844,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/initdb.log",
+      "sha256": "5e5bd096105898bab3559ff6e1918fef4f2fb2a388d22902bb5cd28bfd477969",
+      "bytes": 952,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/manifest.json",
+      "sha256": "0dca943f24d44109f9f0858f9d6659d02f9a702779653154cee8f8638b965e49",
+      "bytes": 957,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/migrations.log",
+      "sha256": "f87a5bf9ce6a301a4b587ce10b17f2d505067424c88b46f356549b2bf8bdc12c",
+      "bytes": 14720,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/pg-restart.log",
+      "sha256": "7599e806b62cdd37283607d77bee9fe1754aa5892a4b442349c7884ac30f63e0",
+      "bytes": 1349,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/postgres.log",
+      "sha256": "ac77cee00396efd38eb8351ffdfd1b9ce9303668c4c9b5be981c1b0de0237013",
+      "bytes": 1246,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/prepare-jest.json",
+      "sha256": "b54959bafccd53692b5489e314d464f9b92166597263ec3d91a9d85829d7ecff",
+      "bytes": 1464,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/prepare.json",
+      "sha256": "4a58a65be478f83330c49d729a954d4a0a7aa645d36be5f590ce7c081148a2ab",
+      "bytes": 2565,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/prepare.log",
+      "sha256": "930afe418549488eea239cb41b826ec6865a9a687db9191b97e1847cee1e2c0a",
+      "bytes": 1361,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/resume-jest.json",
+      "sha256": "80a4550493ff9107522d9afb0535b0b61a6ddb069db31dd12f6d6e0278f62c8b",
+      "bytes": 1465,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/resume.json",
+      "sha256": "735bed84c97c72db48de6bd0fe0684ef7f7e879091d5c5b5803d0bbc315e3b54",
+      "bytes": 9346,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/resume.log",
+      "sha256": "b9cec0f9e1436c12e7c1419a946947cd178123dc5fc28b86208f0fc6d2572137",
+      "bytes": 1361,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4/source-hashes.json",
+      "sha256": "110f6b4be1e6985cf11e5fae133a01ed1f5bb3c897dcde45ee2ae70aa1163aff",
+      "bytes": 214502,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012-r4.log",
+      "sha256": "3f97210bb2f7c6e808b6b060045fd464dfc15298e41a9019edaa1810d880d0e9",
+      "bytes": 175,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-20261012.log",
+      "sha256": "4bf62e8b7144ae137836b58bc534a4ca805f18b41c113482272f1ef87bca7aae",
+      "bytes": 844,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/initdb.log",
+      "sha256": "49292210da7bc2ae29aa94749788168a7ef605624c2b058e19d98968044303d9",
+      "bytes": 952,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/manifest.json",
+      "sha256": "8d3260b0277c4f47dd5ac8a30932f7ad170793dcfebff10daacca7ea04c5118c",
+      "bytes": 957,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/migrations.log",
+      "sha256": "92b4e6d96b4f14fe8252717a91869319d08ccab032adc723ff868fa586807cc0",
+      "bytes": 14720,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/pg-restart.log",
+      "sha256": "d8a27d50660095c5642d4723cc245e37275c268734d0be63e66a74dfa7067a93",
+      "bytes": 1349,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/postgres.log",
+      "sha256": "559105c1631624dbfaf2456650759fa8a90b4ea1d8014482a27830ea3207ad6c",
+      "bytes": 1246,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/prepare-jest.json",
+      "sha256": "db0f92984a212dca1be0c4c46cf52ee3adff917e4e67f837f2ea705507fbb88f",
+      "bytes": 1464,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/prepare.json",
+      "sha256": "475bb4941f95869bfa6a5be067b0f11a05396d40bf6ac191fe2b83807d077448",
+      "bytes": 2565,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/prepare.log",
+      "sha256": "b0c8161ce99af785c0ab18d10fc60cd6de377aa4a46bd314c245066048554ff7",
+      "bytes": 1380,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/resume-jest.json",
+      "sha256": "e24cc1c9b43a1ed7fe8686ae5bcd03975f808a7ea2eca7fcb9cb0b5dcecaf556",
+      "bytes": 1465,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/resume.json",
+      "sha256": "f298f2b4409c63faa240c218dc76983a8d07561c47fb601883983c2ff936b0d0",
+      "bytes": 9346,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/resume.log",
+      "sha256": "2f51658cde2561bffb470c07f5c8d0214b295223a33c268fecb20cdf0d6ed19d",
+      "bytes": 1364,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012/source-hashes.json",
+      "sha256": "cc5b16de261a4faa8d171c0e385dc2f6f1f074dd5c1f4ff4c62b5c390b5c1ee1",
+      "bytes": 214502,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-restart-final-20261012.log",
+      "sha256": "e5c4c4ed73e59f9e28287c9124d8716d5bbd2ec4988d55127b81a19a1301b96f",
+      "bytes": 178,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-completed-receipt-types-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-reschedule-types-20261011-01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-reschedule-types-20261011-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-reschedule-types-after-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-reschedule-types-before-20261012.log",
+      "sha256": "eb83f5e7719dd703d43d4b37f1b030506ae6d70b2e25e279daadf05bef62dce2",
+      "bytes": 884,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    },
+    {
+      "path": "/private/tmp/maya-reschedule-types-fixture-tests-20261012.log",
+      "sha256": "3f99f07665ee222ccb1dd2da2e590e2eb91a7a862940c2afea1aecfb935302f5",
+      "bytes": 223,
+      "committed": false,
+      "reason": "Local synthetic raw receipt; repository stores aggregates and provenance."
+    }
+  ]
+}

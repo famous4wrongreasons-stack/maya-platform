@@ -1,0 +1,104 @@
+{
+  "contract": "maya.completed-receipt-authority-checkpoint/1",
+  "testedCommit": "fd7e4c4c6e83bfa2cae3e71ab1e2fd63cbc47a72",
+  "baselineCommit": "45a162a8a0c5f9135e494a7edc48f411587cc51a",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "qualification": "SCOPED_LOCAL_ONLY_NOT_RELEASE_CERTIFICATION",
+  "sourceSha256": {
+    "maya-saas-backend/src/crm/crm.service.ts": "55f8b1800dc0aaf9d2fafea9f442a66c6e98bf45873ad7e81089024c3178f7d3",
+    "maya-saas-backend/src/crm/client-appointment-status.spec.ts": "ebde5f10723a020186e63d1c43ee1c6f8fec76401f83026e875856d6a2ae3845",
+    "maya-saas-backend/src/conversation-intelligence/reschedule-preference-carry.spec.ts": "4166dd3b5d12c96eb889010b744b6ac23a8ece28d91b39ccf65ffe87e7b47641",
+    "maya-saas-backend/scripts/completed-receipt-authority-mutations.mjs": "410821d3b0dc4a2bc60bb1dcc98855bed494e3e886dabc5120bf6e331e8825f9",
+    "maya-saas-backend/test/widgets-live/branch-booking-selector.probe-spec.ts": "c95d47e5d78f7724bbeb9fc2f59602c28d225dfc54b550ee33f86fde5c2ec111"
+  },
+  "unit": {
+    "suites": 11,
+    "passed": 293,
+    "failed": 0
+  },
+  "counterfactuals": {
+    "baseline": 13,
+    "killed": 3,
+    "restored": 13
+  },
+  "types": {
+    "build": "PASS",
+    "scripts": "PASS",
+    "widgets-live": "PASS"
+  },
+  "scopedLint": "PASS",
+  "httpPg": {
+    "candidate": "fd7e4c4c6e83bfa2cae3e71ab1e2fd63cbc47a72",
+    "sourceUnchanged": true,
+    "clusterStopped": true,
+    "phases": {
+      "prepare": {
+        "tests": 1,
+        "checkpoints": [
+          "Ordinary closed selection persists as preferences only; fresh explicit day revalidates the same bound branch after restart",
+          "Authorized canonical READY actions and an already UNKNOWN action persist before actual app/PG restart",
+          "Native reschedule original UNKNOWN survives app/PG restart and explicit receipt READ never redispatches PUT"
+        ],
+        "nativeReschedule": {
+          "state": "UNKNOWN",
+          "originalActionEvidenceSha256": "df40f76dc0c3035d844f9dfa46380a2d8682394823dc0f4bb97d29ff49076796",
+          "syntheticCreatePosts": 1,
+          "syntheticReschedulePuts": 1,
+          "executionAttempts": 1,
+          "originalReceiptReused": true,
+          "scriptedScheduleSource": true,
+          "repeatedCompletedReadsProviderFree": false,
+          "foreignAndRevokedReadProviderFree": false,
+          "revokedDuringCompletedResultReadRefused": false,
+          "durableResultUnchangedAfterRefusal": false,
+          "realProviderAcceptance": false
+        },
+        "forbiddenNetworkCalls": 0
+      },
+      "resume": {
+        "tests": 1,
+        "checkpoints": [
+          "Ordinary closed selection persists as preferences only; fresh explicit day revalidates the same bound branch after restart",
+          "Restart READ is inert; explicit retry rechecks original source and Client authority; UNKNOWN sends no second booking POST",
+          "Native reschedule original UNKNOWN survives app/PG restart and explicit receipt READ never redispatches PUT"
+        ],
+        "nativeReschedule": {
+          "state": "SUCCEEDED",
+          "originalActionEvidenceSha256": "df40f76dc0c3035d844f9dfa46380a2d8682394823dc0f4bb97d29ff49076796",
+          "syntheticCreatePosts": 1,
+          "syntheticReschedulePuts": 1,
+          "executionAttempts": 1,
+          "originalReceiptReused": true,
+          "scriptedScheduleSource": true,
+          "repeatedCompletedReadsProviderFree": true,
+          "foreignAndRevokedReadProviderFree": true,
+          "revokedDuringCompletedResultReadRefused": true,
+          "durableResultUnchangedAfterRefusal": true,
+          "realProviderAcceptance": false
+        },
+        "forbiddenNetworkCalls": 0
+      }
+    }
+  },
+  "effects": {
+    "realProviderCalls": 0,
+    "realModelCalls": 0,
+    "realKeychainAccess": 0,
+    "ownerDatabaseAccess": 0,
+    "productionChanges": 0,
+    "newSchemaMigrations": 0,
+    "migrationsOnlyInFreshSyntheticDb": true,
+    "designChanges": 0
+  },
+  "notReverified": [
+    "full backend CI",
+    "browser/carrier suites",
+    "live model response",
+    "live booking",
+    "PWA/iOS release packaging"
+  ],
+  "pending": [
+    "fresh last-visit live acceptance after planner correction",
+    "separately bounded real create/move/cancel acceptance"
+  ]
+}
