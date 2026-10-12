@@ -154,6 +154,13 @@ try {
   const reviewLaunch={manifest:{profile:OWNER_HISTORY_REVIEW_PROFILE,ownerScope:scope,manifestSha256:'e'.repeat(64),limits:CORE_OWNER_HISTORY_LIMITS,admissionContext:{target}},admission:{expiresAt:Date.now()+1800000},assertCurrent(){assert.ok(alive);}};
   runtime=await installOwnerHistory({app,prisma:databaseService,require,backend,launch:{plan:{scope},assertCurrent:reviewLaunch.assertCurrent},nativeFetch:wire,readExistingOnly:true});
   chatRuntime=await installOwnerChat({app,prisma:databaseService,require,backend,launch:reviewLaunch,providerFetch:runtime.fetch});
+  const { AiCoreModelService }=load('ai-tools/ai-core-model.service.js');
+  const model=app.get(AiCoreModelService), completion=model.requestDeepSeekCompletion.bind(model);
+  model.requestDeepSeekCompletion=async options=>{
+    report.syntheticPlannerInputs??=[];
+    const v=options.input;report.syntheticPlannerInputs.push({phase:v.phase,conversation:v.conversation,semantic_plan:v.semantic_plan,remembered_notes:v.remembered_notes,toolResultCount:v.tool_results?.length});
+    return completion(options);
+  };
   globalThis.fetch=chatRuntime.fetch;
   configureHttpApp(app);
   app.use((req,res,next)=>{const reason=historyReviewIngress(req.method,req.originalUrl,req.headers,req.body,origin,scope);if(reason)res.status(403).json({error:{code:reason}});else next();});
