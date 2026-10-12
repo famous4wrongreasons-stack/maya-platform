@@ -1,0 +1,8 @@
+{
+  "scope": "local read-only observation only; no product changes",
+  "reason": "Read raw structured model response from semantic_plan.tasks[].entities_json; fail closed on missing/wrong period",
+  "beforeSha256": "e1a8593d13b0879a835aed9a57ccca7700a35517afb3273058b2ca085d99b03c",
+  "afterSha256": "9d6877a30fb0cd6f44af2ca5d0adee6136158f789b53e9f159d8071ad76395a8",
+  "syntheticChecks": 5,
+  "status": "PASS"
+}

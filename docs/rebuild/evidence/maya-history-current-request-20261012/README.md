@@ -1,5 +1,11 @@
 # Current request versus retained history plan
 
+Follow-up, 13 October: the bounded live history → last-visit pair passed on
+`ccd8ad91d9fef03d9e474b74f91b8fb15f4b82f3` with actual DeepSeek replies.
+[Fresh evidence and its limits](../maya-history-live-requalification-20261013/README.md).
+The open status and next-work list below describe the original 12 October
+offline checkpoint; they are retained as history, not the current blocker.
+
 2026-10-12, branch `codex/maya-local-crm-setup-20261010`.
 Product change: `880b4653`. Final executable proof candidate:
 `e267e9ef622aefda9eed6e35fced3e339efabd86`.

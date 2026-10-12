@@ -1,0 +1,16 @@
+{
+  "qualification": "LIVE_LOCAL_READ_ONLY_AGGREGATE_NOT_CHAT_ACCEPTANCE",
+  "observedAt": "2026-10-12T22:21:21.901Z",
+  "databaseIdentity": "PASS",
+  "tenantStatus": "trial",
+  "membershipRole": "tenant_owner",
+  "membershipStatus": "active",
+  "userStatus": "active",
+  "activeVerifiedPersonalLinks": 1,
+  "totalTenantAppointments": 162,
+  "personalAppointments": 4,
+  "otherOrUnresolvedAppointments": 158,
+  "outOfWindowAppointments": 0,
+  "runs": [],
+  "personalIdsSha256": "7e2269b0c2171d501f8ebcaa3a141caae096d9097a832b44c886a03551c17291"
+}

@@ -1,0 +1,139 @@
+{
+  "candidate": "ccd8ad91d9fef03d9e474b74f91b8fb15f4b82f3",
+  "qualification": "LIVE_LOCAL_PERSONAL_HISTORY_NOT_RELEASE_CERTIFICATION",
+  "receipts": [
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-02/canonical-reply-proof.json",
+      "sha256": "940f6fa7cd716c518cda570a329f96acfb97de5253fe302b03ce780876d5763c",
+      "size": 1900,
+      "archivedCopy": true,
+      "reason": "inspected aggregate evidence; no raw visits, contacts, credentials or account identifiers"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-02/history-observation.json",
+      "sha256": "55bb994cd6b2de38d137621f897249b34a7591e97b4534fc866eee5743ef19cf",
+      "size": 547,
+      "archivedCopy": true,
+      "reason": "inspected aggregate evidence; no raw visits, contacts, credentials or account identifiers"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-02/ui-observation.json",
+      "sha256": "4908a7ab8be6568049b697da6eff9085208049f72aaa01b063dae612909c577c",
+      "size": 789,
+      "archivedCopy": true,
+      "reason": "inspected aggregate evidence; no raw visits, contacts, credentials or account identifiers"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-02/cleanup-and-usage.json",
+      "sha256": "6e91fc19f717b60f76f6947343448a90fe7bca6e173386e84faf913cbfad09e8",
+      "size": 1551,
+      "archivedCopy": true,
+      "reason": "inspected aggregate evidence; no raw visits, contacts, credentials or account identifiers"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-02/proof-parser-check.json",
+      "sha256": "972ceb9e63d018c3f4a4edeff99fb25a17a16efc2d7c9937a1257a9df2e6df61",
+      "size": 413,
+      "archivedCopy": true,
+      "reason": "inspected aggregate evidence; no raw visits, contacts, credentials or account identifiers"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-02/prove-current-replies.mjs",
+      "sha256": "9d6877a30fb0cd6f44af2ca5d0adee6136158f789b53e9f159d8071ad76395a8",
+      "size": 8316,
+      "archivedCopy": false,
+      "reason": "local raw provenance; aggregate evidence archived instead"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-02/prove-current-replies.original.mjs",
+      "sha256": "e1a8593d13b0879a835aed9a57ccca7700a35517afb3273058b2ca085d99b03c",
+      "size": 7969,
+      "archivedCopy": false,
+      "reason": "local raw provenance; aggregate evidence archived instead"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-02/observe-history.mjs",
+      "sha256": "b19005eee1c2cabb1cc65f37f8d6e5de7c50cef411b62d9fafba5062a6a0dd15",
+      "size": 5289,
+      "archivedCopy": false,
+      "reason": "local raw provenance; aggregate evidence archived instead"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-02/session/resume.json",
+      "sha256": "d4885ed6783063410f3f8cc1cf4c0f31ff9ce5391f0634c4213ffbf870d9136f",
+      "size": 554291,
+      "archivedCopy": false,
+      "reason": "local raw provenance; aggregate evidence archived instead"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-02/broker/broker-report.json",
+      "sha256": "ba119482a7ad4beb7d6fc0f8697ce28748ad50eaf5c43d367d987f67faa75745",
+      "size": 1709,
+      "archivedCopy": false,
+      "reason": "local raw provenance; aggregate evidence archived instead"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-02/broker/model-responses.jsonl",
+      "sha256": "a69bf57c7a818f7b102f91e6733b074c4bf1be851dab94c368fb0b2b29cf1132",
+      "size": 2154,
+      "archivedCopy": false,
+      "reason": "local raw provenance; aggregate evidence archived instead"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-02/pricing-evidence.json",
+      "sha256": "4b96b7751e728f16916d11e3ac71eafae23c007b10e226e1fb10c60229166e4a",
+      "size": 435,
+      "archivedCopy": false,
+      "reason": "local raw provenance; aggregate evidence archived instead"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-02/candidate-manifest.json",
+      "sha256": "d2d2fe56889e7f9780b9e1b227c1398f926682f2fca7099952bd0c2ec4237ea7",
+      "size": 384001,
+      "archivedCopy": false,
+      "reason": "local raw provenance; aggregate evidence archived instead"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-02/preflight.json",
+      "sha256": "070343e0d2dc4d74c1e24187b5348f064a04b50180674573a0604d6091b0a3d8",
+      "size": 441,
+      "archivedCopy": false,
+      "reason": "local raw provenance; aggregate evidence archived instead"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261012-03/session/resume.json",
+      "sha256": "db7f15e956c7f82a418bf738e9bc35692f415034ae9fe9c0e1e3b956fe843572",
+      "size": 554221,
+      "archivedCopy": false,
+      "reason": "earlier zero-model-call attempt; retained locally without replacing historical receipt"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261012-03/broker/broker-report.json",
+      "sha256": "9c9fdb996183b40fd67527ef696596c95bfcac423f2118164d0b211491ad0ec6",
+      "size": 1135,
+      "archivedCopy": false,
+      "reason": "earlier zero-model-call attempt; retained locally without replacing historical receipt"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-01/session/resume.json",
+      "sha256": "caf001052ab5a82bbb5c6faba2d9606dc1ae0563a91a6a3f0f166d76539e0a6d",
+      "size": 554221,
+      "archivedCopy": false,
+      "reason": "earlier zero-model-call attempt; retained locally without replacing historical receipt"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-01/broker/broker-report.json",
+      "sha256": "a9da962ecfbbf14441942877670ec4516595cb3ee696bd4dedc0ec2854f84b29",
+      "size": 1135,
+      "archivedCopy": false,
+      "reason": "earlier zero-model-call attempt; retained locally without replacing historical receipt"
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261013-01/browser-interruption.json",
+      "sha256": "bcdde8b1d3274c4411b84bffc7594bb1cd1cd644f08474b4ce61d15144f03155",
+      "size": 652,
+      "archivedCopy": false,
+      "reason": "earlier zero-model-call attempt; retained locally without replacing historical receipt"
+    }
+  ]
+}

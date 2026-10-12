@@ -1,0 +1,46 @@
+{
+  "qualification": "LIVE_LOCAL_PERSONAL_HISTORY_NOT_RELEASE_CERTIFICATION",
+  "observedAt": "2026-10-12T22:25:43.485Z",
+  "candidateCommit": "ccd8ad91d9fef03d9e474b74f91b8fb15f4b82f3",
+  "databaseIdentity": "PASS",
+  "sameConversation": true,
+  "distinctPersistedUserTurns": 2,
+  "conversationSha256": "634c32d6d49c461b62fec305d7ff149fb721777f23b2c7f924b22409d1bad8d3",
+  "modelResponses": 2,
+  "proof": [
+    {
+      "question": "history",
+      "expectedPeriod": "past",
+      "modelPeriod": "past",
+      "tool": "appointments.own.list",
+      "executionCompleted": true,
+      "appointmentCount": 4,
+      "onlyOwnRows": true,
+      "canonicalReplyMatches": true,
+      "replySha256": "dda086f34dd6a82243c74ba27bc2d69934b92fcf8e80ff543ff9ddcc3d7081ff",
+      "normalizedReplySha256": "ab2b0a4374f344b116539847b32627e71913199fe89b08a8717e919e81484058",
+      "noConfirmedAttendance": false,
+      "limitedCoverage": true,
+      "userTurnSha256": "564d5457fe184f10504cff1f7845cda1e5d6654ae1270fecc41d2da0cc61b041",
+      "executionSha256": "0201485a8a94f7ab99fe02cb7448ea928bb69f9862cae80276faf98576e3e555"
+    },
+    {
+      "question": "last_visit",
+      "expectedPeriod": "last_visit",
+      "modelPeriod": "last_visit",
+      "tool": "appointments.own.list",
+      "executionCompleted": true,
+      "appointmentCount": 4,
+      "onlyOwnRows": true,
+      "canonicalReplyMatches": true,
+      "replySha256": "0e58e4fad04ce68ce54affe291c1b756faa1995c4e6d586860312d06726d4a28",
+      "normalizedReplySha256": "8e386fcd096011fd9a012c6df6c817c47fe8acc872a3766a1526482a4420677f",
+      "noConfirmedAttendance": true,
+      "limitedCoverage": true,
+      "userTurnSha256": "47c207ae44f1447999b9caaf897ae7059c4ee34878c0d4095ec5e51f2d87901c",
+      "executionSha256": "5bd195b8968b851972f8c899fabb462ffcb6db8c2042d6f05db5da11994ec314"
+    }
+  ],
+  "status": "PASS",
+  "privateValuesEmitted": false
+}

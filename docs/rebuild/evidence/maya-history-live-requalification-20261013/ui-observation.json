@@ -1,0 +1,16 @@
+{
+  "qualification": "NATIVE_CHROME_AX_OBSERVATION_NOT_BROWSER_DOM_HASH",
+  "observedAt": "2026-10-12T22:26:39.499Z",
+  "sameTabNoRefreshAfterLogin": true,
+  "firstExactQuestionVisible": true,
+  "firstAnswerLeadingTextMatchesCanonical": true,
+  "firstAnswerFullTextHashNotCaptured": true,
+  "secondExactQuestionVisible": true,
+  "secondAnswerFullNormalizedSha256": "8e386fcd096011fd9a012c6df6c817c47fe8acc872a3766a1526482a4420677f",
+  "secondAnswerMatchesCanonical": true,
+  "secondHttpStatus": 201,
+  "secondBrowserRequestSeconds": 5.67,
+  "uiWaitIndicatorGone": true,
+  "observationLimitation": "Native AX state lagged; switching privacy view and returning exposed current response without refresh or login. Earlier history warnings remain historical.",
+  "noRawHistoryArchived": true
+}
