@@ -1,0 +1,322 @@
+{
+  "contract": "maya.restored-receipt-local-proof/1",
+  "candidate": "83ecf5c555817d4eb3be796ba11637bacd220891",
+  "implementationCommit": "59d6e46cb6a9486043352b4807de775bfbdbaffb",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "result": "PASS",
+  "qualification": "SYNTHETIC_NATIVE_PROVIDER_ACTUAL_HTTP_PG_BROWSER_RESTART_NOT_RELEASE",
+  "supersedesBlocker": "react-restart-checkpoint.json (ee002988 historical FAIL retained)",
+  "tests": {
+    "runtime": {
+      "tests": 770,
+      "pass": 763,
+      "fail": 0,
+      "skipped": 7
+    },
+    "carrier": {
+      "tests": 164,
+      "pass": 164,
+      "fail": 0,
+      "skipped": 0
+    }
+  },
+  "targetedMutations": {
+    "baseline": 30,
+    "killed": 11,
+    "restored": 30,
+    "summary": "restored-receipt-counterfactuals.json"
+  },
+  "e2e": {
+    "prepare": {
+      "jestPassed": 1,
+      "jestFailed": 0,
+      "browserSteps": [
+        "recover-schedule",
+        "recover-preview",
+        "recover-unknown",
+        "revoked-schedule",
+        "revoked-preview",
+        "revoked-unknown"
+      ],
+      "cleanup": {
+        "chromeExited": true,
+        "serverClosed": true
+      }
+    },
+    "resume": {
+      "jestPassed": 1,
+      "jestFailed": 0,
+      "browserSteps": [
+        "recover-restored",
+        "recover-pending",
+        "recover-confirmed",
+        "recover-repeat",
+        "revoked-restored",
+        "revoked-refused"
+      ],
+      "cleanup": {
+        "chromeExited": true,
+        "serverClosed": true
+      }
+    }
+  },
+  "observations": {
+    "prepare": [
+      {
+        "name": "recover-schedule",
+        "state": {
+          "action": null,
+          "mirror": "confirmed",
+          "provider": {
+            "canceled": false,
+            "deletes": 0
+          }
+        },
+        "nativeDetailReads": 0
+      },
+      {
+        "name": "recover-preview",
+        "state": {
+          "action": null,
+          "mirror": "confirmed",
+          "provider": {
+            "canceled": false,
+            "deletes": 0
+          }
+        },
+        "nativeDetailReads": 0
+      },
+      {
+        "name": "recover-unknown",
+        "state": {
+          "action": {
+            "id": "f431e396-a7ee-45a9-90b3-561e5774adcd",
+            "state": "UNKNOWN",
+            "attempts": 1,
+            "evidence": [
+              "client-authority:v1:7fe07c0e-584f-4b06-b50a-386c56671818",
+              "client-target:appointment:v1:cmv5dfnv9000z61c9byenxy8h",
+              "crm-branch-source/1:05c962494bc0d8fd1cf8ac9eaed26d80d2410a7c358dab3af003d44cf716e55b"
+            ]
+          },
+          "mirror": "confirmed",
+          "provider": {
+            "canceled": true,
+            "deletes": 1
+          }
+        },
+        "nativeDetailReads": 1
+      },
+      {
+        "name": "revoked-schedule",
+        "state": {
+          "action": null,
+          "mirror": "confirmed",
+          "provider": {
+            "canceled": false,
+            "deletes": 0
+          }
+        },
+        "nativeDetailReads": 0
+      },
+      {
+        "name": "revoked-preview",
+        "state": {
+          "action": null,
+          "mirror": "confirmed",
+          "provider": {
+            "canceled": false,
+            "deletes": 0
+          }
+        },
+        "nativeDetailReads": 0
+      },
+      {
+        "name": "revoked-unknown",
+        "state": {
+          "action": {
+            "id": "6ae4d1b3-6df7-41c3-97d2-28f61ad52e6f",
+            "state": "UNKNOWN",
+            "attempts": 1,
+            "evidence": [
+              "client-authority:v1:94392161-5609-4535-b856-03f499b3dbee",
+              "client-target:appointment:v1:cmv5dfo9h001z61c9o6ygz6ew",
+              "crm-branch-source/1:58d1982df3656de7057121cc5de0523e504a4b240b8e272e826ca6dd76254350"
+            ]
+          },
+          "mirror": "confirmed",
+          "provider": {
+            "canceled": true,
+            "deletes": 1
+          }
+        },
+        "nativeDetailReads": 1
+      }
+    ],
+    "resume": [
+      {
+        "name": "recover-restored",
+        "state": {
+          "action": {
+            "id": "f431e396-a7ee-45a9-90b3-561e5774adcd",
+            "state": "UNKNOWN",
+            "attempts": 1,
+            "evidence": [
+              "client-authority:v1:7fe07c0e-584f-4b06-b50a-386c56671818",
+              "client-target:appointment:v1:cmv5dfnv9000z61c9byenxy8h",
+              "crm-branch-source/1:05c962494bc0d8fd1cf8ac9eaed26d80d2410a7c358dab3af003d44cf716e55b"
+            ]
+          },
+          "mirror": "confirmed",
+          "provider": {
+            "canceled": true,
+            "deletes": 1
+          }
+        },
+        "nativeDetailReads": 0
+      },
+      {
+        "name": "recover-pending",
+        "state": {
+          "action": {
+            "id": "f431e396-a7ee-45a9-90b3-561e5774adcd",
+            "state": "UNKNOWN",
+            "attempts": 1,
+            "evidence": [
+              "client-authority:v1:7fe07c0e-584f-4b06-b50a-386c56671818",
+              "client-target:appointment:v1:cmv5dfnv9000z61c9byenxy8h",
+              "crm-branch-source/1:05c962494bc0d8fd1cf8ac9eaed26d80d2410a7c358dab3af003d44cf716e55b"
+            ]
+          },
+          "mirror": "confirmed",
+          "provider": {
+            "canceled": true,
+            "deletes": 1
+          }
+        },
+        "nativeDetailReads": 1
+      },
+      {
+        "name": "recover-confirmed",
+        "state": {
+          "action": {
+            "id": "f431e396-a7ee-45a9-90b3-561e5774adcd",
+            "state": "SUCCEEDED",
+            "attempts": 1,
+            "evidence": [
+              "client-authority:v1:7fe07c0e-584f-4b06-b50a-386c56671818",
+              "client-target:appointment:v1:cmv5dfnv9000z61c9byenxy8h",
+              "crm-branch-source/1:05c962494bc0d8fd1cf8ac9eaed26d80d2410a7c358dab3af003d44cf716e55b"
+            ]
+          },
+          "mirror": "canceled",
+          "provider": {
+            "canceled": true,
+            "deletes": 1
+          }
+        },
+        "nativeDetailReads": 2
+      },
+      {
+        "name": "recover-repeat",
+        "state": {
+          "action": {
+            "id": "f431e396-a7ee-45a9-90b3-561e5774adcd",
+            "state": "SUCCEEDED",
+            "attempts": 1,
+            "evidence": [
+              "client-authority:v1:7fe07c0e-584f-4b06-b50a-386c56671818",
+              "client-target:appointment:v1:cmv5dfnv9000z61c9byenxy8h",
+              "crm-branch-source/1:05c962494bc0d8fd1cf8ac9eaed26d80d2410a7c358dab3af003d44cf716e55b"
+            ]
+          },
+          "mirror": "canceled",
+          "provider": {
+            "canceled": true,
+            "deletes": 1
+          }
+        },
+        "nativeDetailReads": 2
+      },
+      {
+        "name": "revoked-restored",
+        "state": {
+          "action": {
+            "id": "6ae4d1b3-6df7-41c3-97d2-28f61ad52e6f",
+            "state": "UNKNOWN",
+            "attempts": 1,
+            "evidence": [
+              "client-authority:v1:94392161-5609-4535-b856-03f499b3dbee",
+              "client-target:appointment:v1:cmv5dfo9h001z61c9o6ygz6ew",
+              "crm-branch-source/1:58d1982df3656de7057121cc5de0523e504a4b240b8e272e826ca6dd76254350"
+            ]
+          },
+          "mirror": "confirmed",
+          "provider": {
+            "canceled": true,
+            "deletes": 1
+          }
+        },
+        "nativeDetailReads": 0
+      },
+      {
+        "name": "revoked-refused",
+        "state": {
+          "action": {
+            "id": "6ae4d1b3-6df7-41c3-97d2-28f61ad52e6f",
+            "state": "UNKNOWN",
+            "attempts": 1,
+            "evidence": [
+              "client-authority:v1:94392161-5609-4535-b856-03f499b3dbee",
+              "client-target:appointment:v1:cmv5dfo9h001z61c9o6ygz6ew",
+              "crm-branch-source/1:58d1982df3656de7057121cc5de0523e504a4b240b8e272e826ca6dd76254350"
+            ]
+          },
+          "mirror": "confirmed",
+          "provider": {
+            "canceled": true,
+            "deletes": 1
+          }
+        },
+        "nativeDetailReads": 0
+      }
+    ]
+  },
+  "originalActionAndEvidencePreserved": true,
+  "executionAttemptsPerScenario": 1,
+  "providerDeletesPerScenario": 1,
+  "providerDeletesAfterRestart": 0,
+  "newProcessAndActualPostgresRestart": true,
+  "crossTenantLocatorDoesNotDiscloseOrReadProvider": true,
+  "revokedBindingStatusHttp": 403,
+  "spentControlsRestored": 0,
+  "realProviderCalls": 0,
+  "realModelCalls": 0,
+  "realCredentialsRead": 0,
+  "productionEffects": 0,
+  "productionMigrations": 0,
+  "releaseCertification": false,
+  "clusterStopped": true,
+  "sourcesUnchanged": true,
+  "historicalAttempts": [
+    {
+      "path": "/private/tmp/maya-restored-receipt-mutations-20261012-r1",
+      "result": "baseline refused: isolated copy missing existing test dependency; not a mutation pass"
+    },
+    {
+      "path": "/private/tmp/maya-restored-receipt-mutations-20261012-r2",
+      "result": "restore-unbound counterfactual survived redundant conversation guard; direct owner test added; not complete pass"
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r4",
+      "result": "PASS before shared receipt font correction; superseded by r5/r6"
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r5",
+      "result": "DOM/HTTP/state PASS; screenshot timing did not prove final paint. r6 brings page forward, waits two frames and checks result viewport; product unchanged."
+    }
+  ],
+  "applicationSourceCandidate": "13daeeebe034b77d20140548a751d59912caa18e",
+  "currentApplicationBytesMatchSourceCandidate": true,
+  "confirmedLineViewportAndPaintFramesChecked": true
+}

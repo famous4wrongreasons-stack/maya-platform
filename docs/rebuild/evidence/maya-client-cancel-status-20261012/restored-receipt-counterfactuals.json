@@ -1,0 +1,186 @@
+{
+  "qualification": "OFFLINE_RESTORED_RECEIPT_RUNTIME_DOM_NOT_RELEASE",
+  "head": "83ecf5c555817d4eb3be796ba11637bacd220891",
+  "sourceSha256": "daea70ec6a8a8870d3bbf905e5497c0652a6144143757cfba76a10dfe005461d",
+  "specHashes": {
+    "test/intents.test.mjs": "c66818aab4af4c9f1e0cd6d8f7526f30d998121cf1e5d8eade3e1f258bedd3fe",
+    "test/dom.test.mjs": "4773ce9226b047dbddb387599663644d2cc73c8df78b55b5bc30bf7c06967c3d"
+  },
+  "baseline": {
+    "exit": 0,
+    "total": 30,
+    "passed": 30,
+    "failed": 0,
+    "failures": [],
+    "logSha256": "e2a67d4b8191a8af60ef74b56f416078d49abf592b6a9b185873328eb50cf539"
+  },
+  "mutations": [
+    {
+      "name": "missing-restored-read",
+      "exit": 1,
+      "total": 30,
+      "passed": 6,
+      "failed": 24,
+      "failures": [
+        "restored receipt DOM host projects pending/unavailable and sends only one explicit READ",
+        "restored receipt: actual conversation restore exposes explicit READ without restoring COMMIT or tokens",
+        "restored receipt: unbound tenant refuses status and preserves uncertainty",
+        "restored receipt: widget substitution refuses status and preserves uncertainty",
+        "restored receipt: kind substitution refuses status and preserves uncertainty",
+        "restored receipt: tenant substitution refuses status and preserves uncertainty",
+        "restored receipt: principal substitution refuses status and preserves uncertainty",
+        "restored receipt: turn substitution refuses status and preserves uncertainty",
+        "restored receipt: parent substitution refuses status and preserves uncertainty",
+        "restored receipt: ambiguous rows refuses status and preserves uncertainty",
+        "restored receipt: missing row refuses status and preserves uncertainty",
+        "restored receipt: empty lines refuses status and preserves uncertainty",
+        "restored receipt: conflicting receipt refs refuses status and preserves uncertainty",
+        "restored receipt: revoked authority does not retry or claim success",
+        "restored receipt: lost response does not retry or claim success",
+        "restored receipt: signed out does not retry or claim success",
+        "restored receipt: exception does not retry or claim success",
+        "restored receipt: concurrent clicks share one read; repeated restore keeps one control and one outcome",
+        "restored receipt: sign out aborts read and rejects late response",
+        "restored receipt: dispose aborts read and rejects late response",
+        "restored receipt: display cap aborts read and rejects late response",
+        "restored receipt: privacy erasure aborts read and rejects late response",
+        "restored receipt: confirmed identity cannot change or downgrade; source witness is immutable",
+        "restored receipt: two receipts route by exact local anchor, never by text or display position"
+      ],
+      "logSha256": "83d35bdc62f923f5fee28a76df8e474bb08603c1096e6e722e793b00f73e3221",
+      "killed": true
+    },
+    {
+      "name": "tenant-substitution",
+      "exit": 1,
+      "total": 30,
+      "passed": 29,
+      "failed": 1,
+      "failures": [
+        "restored receipt: tenant substitution refuses status and preserves uncertainty"
+      ],
+      "logSha256": "407b7fbd92701ed703999900d396fa856d71ec3676d8eb90139a2492647425e5",
+      "killed": true
+    },
+    {
+      "name": "principal-substitution",
+      "exit": 1,
+      "total": 30,
+      "passed": 29,
+      "failed": 1,
+      "failures": [
+        "restored receipt: principal substitution refuses status and preserves uncertainty"
+      ],
+      "logSha256": "af9b218ca734d69d7e47b583dc16610db0e39511bf8be8bb97ed3c4e15457c88",
+      "killed": true
+    },
+    {
+      "name": "turn-substitution",
+      "exit": 1,
+      "total": 30,
+      "passed": 29,
+      "failed": 1,
+      "failures": [
+        "restored receipt: turn substitution refuses status and preserves uncertainty"
+      ],
+      "logSha256": "90e6ebb868ca897714558e65b54b323637efc4d68ab113b7a9eee4d2b83ff43b",
+      "killed": true
+    },
+    {
+      "name": "parent-substitution",
+      "exit": 1,
+      "total": 30,
+      "passed": 29,
+      "failed": 1,
+      "failures": [
+        "restored receipt: parent substitution refuses status and preserves uncertainty"
+      ],
+      "logSha256": "ca54caf377364fc10afcdf76722e64abed9ced24d96eae77b6d247d030b044fd",
+      "killed": true
+    },
+    {
+      "name": "ambiguous-read",
+      "exit": 1,
+      "total": 30,
+      "passed": 29,
+      "failed": 1,
+      "failures": [
+        "restored receipt: ambiguous rows refuses status and preserves uncertainty"
+      ],
+      "logSha256": "d015eab59d2bad5a1edbd9abc6a2ef0acbbe4c0c36248f2fc924824dd75788b1",
+      "killed": true
+    },
+    {
+      "name": "concurrent-read",
+      "exit": 1,
+      "total": 30,
+      "passed": 29,
+      "failed": 1,
+      "failures": [
+        "restored receipt: concurrent clicks share one read; repeated restore keeps one control and one outcome"
+      ],
+      "logSha256": "117b5519a3d05fe18f1f118bd454859096b7463a502378b9e3cb95ae9742eb10",
+      "killed": true
+    },
+    {
+      "name": "changed-confirmed-identity",
+      "exit": 1,
+      "total": 30,
+      "passed": 29,
+      "failed": 1,
+      "failures": [
+        "restored receipt: confirmed identity cannot change or downgrade; source witness is immutable"
+      ],
+      "logSha256": "7e40e0d916ea3abca7a2d077e822b1ed011b869a7bd19de06c9c13a302e4e1c8",
+      "killed": true
+    },
+    {
+      "name": "restore-unbound",
+      "exit": 1,
+      "total": 30,
+      "passed": 29,
+      "failed": 1,
+      "failures": [
+        "restored receipt: unbound page cannot create a read control"
+      ],
+      "logSha256": "a08faf25059b5d5de8fcdc0b95c3b39f6242da629b217ea7319278b949e5f11e",
+      "killed": true
+    },
+    {
+      "name": "release-without-abort",
+      "exit": 1,
+      "total": 30,
+      "passed": 26,
+      "failed": 4,
+      "failures": [
+        "restored receipt: sign out aborts read and rejects late response",
+        "restored receipt: dispose aborts read and rejects late response",
+        "restored receipt: display cap aborts read and rejects late response",
+        "restored receipt: privacy erasure aborts read and rejects late response"
+      ],
+      "logSha256": "9f45ff1663c814f82be6fdf7bad177a3e78d33d325bfaf7fcadbcf0abbf6fe35",
+      "killed": true
+    },
+    {
+      "name": "duplicate-outcome",
+      "exit": 1,
+      "total": 30,
+      "passed": 28,
+      "failed": 2,
+      "failures": [
+        "restored receipt: actual conversation restore exposes explicit READ without restoring COMMIT or tokens",
+        "restored receipt: confirmed identity cannot change or downgrade; source witness is immutable"
+      ],
+      "logSha256": "1e114d85d8e271ed88240eb8a74c372652c0d50737f17efa63af82ad7d91395c",
+      "killed": true
+    }
+  ],
+  "restored": {
+    "exit": 0,
+    "total": 30,
+    "passed": 30,
+    "failed": 0,
+    "failures": [],
+    "logSha256": "6e77a37f7a505b53f6a120031efce5926ac12b19891ba4f4c02f870e56790609"
+  }
+}

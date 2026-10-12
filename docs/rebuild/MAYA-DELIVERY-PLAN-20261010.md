@@ -1,5 +1,17 @@
 # План завершения MAYA — 10 октября 2026
 
+**12 октября, restart-проверка результата отмены закрыта — `83ecf5c5`:**
+после перезапуска backend/PostgreSQL React восстанавливает явную кнопку проверки
+исходной receipt, не возвращая COMMIT. 12/12 browser checkpoints: UNKNOWN →
+SUCCEEDED, один исходный provider DELETE, provider-free completed reread,
+чужой tenant без disclosure и revoked Client link → 403. Runtime 763 PASS / 7 SKIP,
+carrier 164 PASS, 11/11 targeted mutations, green baseline/restored 30/30.
+Только synthetic provider и отдельная тестовая база; реальные ключи/данные салона
+не использовались. Это локальный integration checkpoint, не release certification.
+[Контракт, свежие receipts и границы](evidence/maya-client-cancel-status-20261012/RESTORED-RECEIPT.md).
+Запись о restart-барьере ниже сохранена как историческое before-evidence.
+
+
 **12 октября, локальное хранение ключей — `90891802`:** исправлена штатная
 вставка ⌘V в защищённом окне; 24/24 native tests PASS. Владелец сам сохранил
 партнёрский токен YCLIENTS и DeepSeek. Подтверждены UI success, наличие двух

@@ -1,0 +1,188 @@
+{
+  "candidate": "83ecf5c555817d4eb3be796ba11637bacd220891",
+  "qualification": "SYNTHETIC_ONLY_NO_REAL_CUSTOMER_DATA",
+  "artifacts": [
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/manifest.json",
+      "sha256": "8c36e11da6b0aa2051ca3ce8e8dc8d6d20cd1258037e2832362a533e0dce3129",
+      "bytes": 742,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/source-hashes.json",
+      "sha256": "c83fe78194c5ace9fac4c3d10addc2c2704113c7acc25defd087f5da8ee3b2c9",
+      "bytes": 310295,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed."
+    },
+    {
+      "path": "/private/tmp/maya-restored-receipt-mutations-20261012-r5/summary.json",
+      "sha256": "8265edca9bdbf6cdcc21ca6e8b46eac8d46966e806ad96e2454dcad5a8f5df51",
+      "bytes": 7079,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed."
+    },
+    {
+      "path": "/private/tmp/maya-restored-receipt-before-20261012.log",
+      "sha256": "7cc724332c98ef56c356d2f7766b8dbc8e822f8eac762956c3db33a90b24239e",
+      "bytes": 985,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed."
+    },
+    {
+      "path": "/private/tmp/maya-restored-runtime-final-paint-20261012.log",
+      "sha256": "32a83e75d19f29eb10f15e53fe9c877e2b653cde256aeba9d3c844804d73a773",
+      "bytes": 82703,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed."
+    },
+    {
+      "path": "/private/tmp/maya-restored-carrier-final-paint-20261012.log",
+      "sha256": "cb971cd7ee20722a2caee5af428ed4469eeae6dcb746b3c83674bb2cd6b07e5e",
+      "bytes": 13979,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/prepare-jest.json",
+      "sha256": "2e9e012ccb3529e1a41ae616faf764ae106907a6f58e05930c721380c3fbb5f2",
+      "bytes": 1476,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/prepare-observations.json",
+      "sha256": "d52ae4c5d8705545539ce6de11ce72bc499a4c434a8f2963eae11ff56d334c93",
+      "bytes": 10873,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/prepare/current-react/browser.json",
+      "sha256": "a71cc526780c62bfff236602fdfcdb26b5c865015f661121b355b972a23bc0f8",
+      "bytes": 23650,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/prepare/current-react/recover-preview.png",
+      "sha256": "a589f7e23becaa672e9f1f8a789beab213bf42e4aa1092f8fa4814816d24fa9f",
+      "bytes": 84116,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed. Screenshot only for visual inspection."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/prepare/current-react/recover-schedule.png",
+      "sha256": "4db27162067980088da5e394c589ff7c1a520a7bebd2026456be4e3f005fc59c",
+      "bytes": 86287,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed. Screenshot only for visual inspection."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/prepare/current-react/recover-unknown.png",
+      "sha256": "b2b7c4aa04c8f526a7b625d3e32b9dc41fa8c2c02ed7dead165abbb293febef0",
+      "bytes": 78013,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed. Screenshot only for visual inspection."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/prepare/current-react/revoked-preview.png",
+      "sha256": "a589f7e23becaa672e9f1f8a789beab213bf42e4aa1092f8fa4814816d24fa9f",
+      "bytes": 84116,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed. Screenshot only for visual inspection."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/prepare/current-react/revoked-schedule.png",
+      "sha256": "3953ed4dbaed32b91222704abd87c2bb10c017350e81915519e0446145ee6af3",
+      "bytes": 86286,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed. Screenshot only for visual inspection."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/prepare/current-react/revoked-unknown.png",
+      "sha256": "ecfedd2b06b0a7fc1ec9f672641d686062ba61fba818d93958d30fb9deee94ae",
+      "bytes": 78014,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed. Screenshot only for visual inspection."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/resume-jest.json",
+      "sha256": "fa38ca238f568f93633a572225e3e471e688f4ca3ab56879d4a9c030dacd365a",
+      "bytes": 1477,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/resume-observations.json",
+      "sha256": "52ce43b245ee13fc31661725f1c41f8ba4526d4234270b3891d115e02f8d2bdd",
+      "bytes": 4694,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/resume/current-react/browser.json",
+      "sha256": "052836710b3171788cc4afd586e371f0805f8462e231d486c9b161006f177b43",
+      "bytes": 14916,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/resume/current-react/recover-confirmed.png",
+      "sha256": "ba778933a1b38cff94a0fbd883044d4b9e5cadc02c2a0144a1f58863536fb96c",
+      "bytes": 93235,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed. Screenshot only for visual inspection."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/resume/current-react/recover-pending.png",
+      "sha256": "6642f3c88e754f30ba679ee3f824e6654c5a4172f906891fb2593ef2fde8ed80",
+      "bytes": 91136,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed. Screenshot only for visual inspection."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/resume/current-react/recover-repeat.png",
+      "sha256": "416bede56f1ef0a1944c8a60eb47a3f24a8603bfc66e5aff17b16d0c19e24847",
+      "bytes": 93233,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed. Screenshot only for visual inspection."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/resume/current-react/recover-restored.png",
+      "sha256": "3e13171fcfa775b19af80d4d31500702d10b90a3bc71fe6a9338b2ed1d213210",
+      "bytes": 91131,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed. Screenshot only for visual inspection."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/resume/current-react/revoked-refused.png",
+      "sha256": "982cc8bc8fcca882a57ddfd79ad1c41688ef5ceb3396fd4f441993449e2d5ab5",
+      "bytes": 94980,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed. Screenshot only for visual inspection."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/resume/current-react/revoked-restored.png",
+      "sha256": "3e13171fcfa775b19af80d4d31500702d10b90a3bc71fe6a9338b2ed1d213210",
+      "bytes": 91131,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed. Screenshot only for visual inspection."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/shell-build.log",
+      "sha256": "60bc2851d56290e5b42c9d5ef1355ad35bcbc255aaf4526193e0d0e56bd00b2e",
+      "bytes": 1010,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed."
+    },
+    {
+      "path": "/private/tmp/maya-cancel-status-react-20261012-r6/react-web-build.log",
+      "sha256": "c5976e6f8150b4a6fea65c8e05477cf3a6f6450f321e41dd66af59160a9a3289",
+      "bytes": 185,
+      "committed": false,
+      "reason": "Raw local synthetic receipt; structured summary committed."
+    }
+  ]
+}

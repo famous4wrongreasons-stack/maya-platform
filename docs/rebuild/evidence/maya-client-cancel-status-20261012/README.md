@@ -1,5 +1,9 @@
 # Явная проверка результата своей отмены — 12 октября 2026
 
+**Обновление 12 октября:** следующий [restored-receipt checkpoint](RESTORED-RECEIPT.md)
+на `83ecf5c5` закрыл HTTP/PG/browser restart и восстановленную кнопку проверки.
+Текст ниже описывает исторический backend-only checkpoint, а не текущие ограничения.
+
 Code/test candidate: `0149f6686665cee358aaa8033178ebef6358732b`.
 Base: `14c6ed4489c996de6d2b5bcb2bfe31a873ad767d`.
 Branch: `codex/maya-local-crm-setup-20261010`.
