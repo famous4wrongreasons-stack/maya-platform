@@ -146,8 +146,11 @@ try {
     if(kind==='role-changed')await prisma.membership.update({where:{id:pending.member.id},data:{role:'staff'}});
     if(kind==='user-suspended')await prisma.user.update({where:{id:pending.user.id},data:{status:'suspended'}});
     if(kind==='membership-replaced'){
-      await prisma.membership.delete({where:{id:pending.member.id}});
-      await prisma.membership.create({data:{tenantId:pending.tenant.id,userId:pending.user.id,role:'tenant_owner',status:'active'}});
+      // The kernel's actor-pair FK already forbids delete/recreate after admission.
+      await assert.rejects(prisma.membership.delete({where:{id:pending.member.id}}),error=>error.code==='P2003');
+      // Counterfactual fixture: preserve that pair but replace its row identity.
+      // No configuration revision exists yet; no FK/trigger/schema is disabled.
+      await prisma.membership.update({where:{id:pending.member.id},data:{id:randomUUID()}});
     }
     const resume=()=>asActor(pending,()=>executor.resume(pending.tenant.id,admitted.id));
     if(kind==='allow'){const r=await resume();assert.equal(r.actionExecutionId,admitted.id);assert.deepEqual(await counts(pending),{revisions:1,mutations:1,attempts:1});}

@@ -35,8 +35,8 @@ const mutations = [
   ['full-trial-flag', 'read', 'member.tenant.trialFullAccess === true', 'true', 'setup-only'],
   ['trial-status', 'read', "member?.tenant.status === 'trial'", 'true', 'suspended'],
   ['trial-expiry', 'read', 'member.tenant.trialEndsAt.getTime() > Date.now()', 'true', 'exact expiry'],
-  ['current-membership', 'read', "member.status !== 'active'", 'false', 'missing/inactive'],
-  ['current-user', 'read', "member.user.status !== 'active'", 'false', 'missing/inactive'],
+  ['current-membership', 'read', "member.status !== 'active' ||\n      member.user.status !== 'active'", "false ||\n      member.user.status !== 'active'", 'missing/inactive'],
+  ['current-user', 'read', "member.user.status !== 'active' ||\n      (member.tenant.status", "false ||\n      (member.tenant.status", 'missing/inactive'],
   ['terminal-receipt-authority', 'executor', 'return this.restoreCurrent(execution, registration.operation);', 'return this.restore(execution);', 'SUCCEEDED receipt'],
   ['locked-receipt-authority', 'executor', 'return this.restoreCurrent(locked, registration.operation, tx, input);', 'return this.restore(locked);', 'READY receipt'],
 ];
