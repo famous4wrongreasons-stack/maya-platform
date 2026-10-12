@@ -39,6 +39,10 @@ const mutations = [
   ['model-assistant','policy',"m.role === 'user' && historyQuestions.includes(m.content)","['user','assistant'].includes(m.role) && (m.role === 'assistant' || historyQuestions.includes(m.content))",'actual model wire'],
   ['request-expiry','policy','!done && !closed && now() < expires','!done && !closed','serialized sequence'],
   ['request-overlap','policy','!closed && !busy && now() < expires','!closed && now() < expires','serialized sequence'],
+  ['public-context-regression','policy',"if (task.intent === 'company.business_hours') {",'if (false) {','retained public hours context'],
+  ['public-context-private-slots','policy',"entities:{}, depends_on:[], permission:{required:'company.public.read',status:'allowed'},","entities:task.entities, depends_on:[], permission:{required:'company.public.read',status:'allowed'},",'retained public hours context'],
+  ['public-context-tool-authority','policy',"tool:{name:null,alternatives:[],status:'not_available'},",'tool:task.tool,','retained public hours context'],
+  ['public-context-parent','policy',"if (!['', OWNER_CHAT_QUESTIONS[2]].includes(plan.parent_request)) return false;",'','retained public hours context'],
 ];
 try {
   report.baseline = run('baseline'); save(); assert.equal(report.baseline.exit, 0);

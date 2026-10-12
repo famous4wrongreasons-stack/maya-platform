@@ -52,7 +52,9 @@ export function createHistoryReviewWindow(scope, { now = Date.now, durationMs = 
 }
 
 // Canonical C9 may carry the preceding *intent*, not its private tool result.
-// Accept this precise read-only shape; unknown fields/slots/prose are refused.
+// The retained catalogue session ended at company.business_hours. Admit only
+// its empty, revalidated shape with NO available tool, never its public answer
+// or additional tool authority. Unknown fields/slots/prose remain refused.
 export function safeRetainedHistoryPlan(plan) {
   if (plan === null) return true;
   if (!exact(plan, ['version','parent_request','language','dialogue_act','tasks','context'])
@@ -62,8 +64,19 @@ export function safeRetainedHistoryPlan(plan) {
     || !Array.isArray(plan.tasks) || plan.tasks.length !== 1) return false;
   const task = plan.tasks[0];
   if (!/^(?:own|t\d{1,2}|task_?\d{1,2})$/.test(task?.id ?? '')
-    || !Number.isFinite(task.confidence) || task.confidence < 0 || task.confidence > 1
-    || !['past','last_visit'].includes(task.entities?.period)) return false;
+    || !Number.isFinite(task.confidence) || task.confidence < 0 || task.confidence > 1) return false;
+  if (task.intent === 'company.business_hours') {
+    if (!['', OWNER_CHAT_QUESTIONS[2]].includes(plan.parent_request)) return false;
+    return isDeepStrictEqual(task, {
+      id:task.id, domain:'company', intent:'company.business_hours', sub_intent:'company.business_hours', action:'read', data_class:'C', risk:'low',
+      capability:{readiness:'ready',note:null},
+      response_rule:'Answer the requested intent directly, then offer at most one useful next step.',
+      entities:{}, depends_on:[], permission:{required:'company.public.read',status:'allowed'},
+      tool:{name:null,alternatives:[],status:'not_available'},
+      confidence:task.confidence, requires_clarification:false, clarification_question:null, requires_confirmation:false,
+    });
+  }
+  if (!['past','last_visit'].includes(task.entities?.period)) return false;
   return isDeepStrictEqual(task, {
     id:task.id, domain:'booking', intent:'booking.list_own', sub_intent:'booking.list_own', action:'read', data_class:'C', risk:'low',
     capability:{readiness:'ready',note:null},

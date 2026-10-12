@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { createRequire } from 'node:module';
+import { OWNER_CHAT_QUESTIONS } from './local-owner-chat-policy.mjs';
 import { PRIVATE_KEYS, profileEnvironment } from './local-onboarding-profile.mjs';
 import { HISTORY_REVIEW_QUESTIONS as questions, OWNER_HISTORY_REVIEW_PROFILE, historyReviewIngress, createHistoryReviewWindow, assertHistoryPlanningRequest, safeRetainedHistoryPlan } from './local-owner-history-review-policy.mjs';
 import { createOwnerHistoryTransport } from './local-owner-history-transport.mjs';
@@ -110,5 +112,29 @@ test('canonical retained history intent is safe but appointment data, identity, 
   const wire={body:JSON.stringify({messages:[{role:'system',content:'synthetic'},{role:'user',content:JSON.stringify(input)}]})};assertHistoryPlanningRequest(wire);
   for(const change of [p=>{p.tasks[0].entities.clientId='foreign'},p=>{p.tasks[0].entities.period='upcoming'},p=>{p.tasks[0].tool.name='appointments.create'},p=>{p.tasks[0].clarification_question='private'},p=>{p.context.carried_slots.push({phone:'private'})},p=>{p.parent_request='private phone'},p=>{p.visit={private:'data'}}]){
     const bad=structuredClone(safePlan);change(bad);assert.equal(safeRetainedHistoryPlan(bad),false);
+  }
+});
+
+test('retained public hours context is canonical empty metadata, never extra model data or tool authority', () => {
+  const { ConversationIntelligenceService }=createRequire(import.meta.url)('../dist/src/conversation-intelligence/conversation-intelligence.service.js');
+  const ci=new ConversationIntelligenceService();
+  const wire=plan=>({body:JSON.stringify({messages:[{role:'system',content:'synthetic'}, {role:'user',content:JSON.stringify({phase:'tool_planning',conversation:[...OWNER_CHAT_QUESTIONS,questions[0]].map(content=>({role:'user',content})),tool_results:[],remembered_notes:[],semantic_plan:plan})}]})});
+  for(const role of ['tenant_owner','client']) for(const parent_request of ['',OWNER_CHAT_QUESTIONS[2]]) {
+    const plan=ci.validatePlan({parent_request,language:'ru',dialogue_act:'question',tasks:[{id:'t1',intent:'company.business_hours',entities:{},depends_on:[],confidence:1}],context:{}},role,['appointments.own.list']);
+    assert.equal(safeRetainedHistoryPlan(plan),true);assertHistoryPlanningRequest(wire(plan));
+    for(const change of [
+      p=>{p.tasks[0].entities.clientId='synthetic-private'}, p=>{p.tasks[0].entities.phone='synthetic-private'},
+      p=>{p.tasks[0].entities.hours='synthetic-private'}, p=>{p.tasks[0].entities.period='past'},
+      p=>{p.tasks[0].tool.name='company.business-hours.read'}, p=>{p.tasks[0].tool.alternatives=['company.business-hours.read']},
+      p=>{p.tasks[0].tool.status='ready'}, p=>{p.tasks[0].intent='company.address'},
+      p=>{p.tasks[0].action='write'}, p=>{p.tasks[0].permission.required='appointments.create'},
+      p=>{p.tasks[0].permission.status='denied'}, p=>{p.tasks[0].depends_on=['t2']},
+      p=>{p.tasks[0].clarification_question='synthetic-private'},p=>{p.tasks[0].capability.note='synthetic-private'},
+      p=>{p.tasks[0].response_rule='synthetic-private'},p=>{p.tasks.push(structuredClone(p.tasks[0]))},
+      p=>{p.context.carried_slots=['synthetic-private']},p=>{p.context.unresolved_references=['synthetic-private']},
+      p=>{p.parent_request=questions[0]},p=>{p.parent_request='synthetic-private'},p=>{p.visit={note:'synthetic-private'}},
+    ]){
+      const bad=structuredClone(plan);change(bad);assert.equal(safeRetainedHistoryPlan(bad),false);assert.throws(()=>assertHistoryPlanningRequest(wire(bad)));
+    }
   }
 });
