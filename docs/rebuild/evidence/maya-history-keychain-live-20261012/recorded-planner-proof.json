@@ -1,0 +1,30 @@
+{
+  "qualification": "OFFLINE_RECORDED_RESPONSE_DIAGNOSIS_NOT_LIVE_ACCEPTANCE",
+  "candidate": "f653516d1ebf41af1f28c358fbbcd4229f204237",
+  "recordedSourceSha256": "f8a30e0c3245b68ff89ae4c473ab61105f741a9ea29f64dde92c1b952248d46a",
+  "results": [
+    {
+      "caseId": "owner-personal-history",
+      "semanticValidated": true,
+      "period": "past",
+      "argumentKeys": [],
+      "registryAdmitted": true,
+      "errorCode": null
+    },
+    {
+      "caseId": "owner-personal-last-visit",
+      "semanticValidated": true,
+      "period": "past",
+      "argumentKeys": [],
+      "registryAdmitted": true,
+      "errorCode": null
+    }
+  ],
+  "expectedSecondPeriod": "last_visit",
+  "secondPeriodMismatchReproduced": true,
+  "previousInvalidArgumentsDefectObserved": false,
+  "diagnosticOnlyPeriodChangeAccepted": true,
+  "networkCalls": 0,
+  "credentialsLoaded": 0,
+  "productSourceChanged": false
+}

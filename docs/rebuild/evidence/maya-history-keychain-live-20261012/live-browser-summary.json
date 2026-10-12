@@ -1,0 +1,35 @@
+{
+  "qualification": "LIVE_LOCAL_HISTORY_PARTIAL_NOT_RELEASE_CERTIFICATION",
+  "candidate": "f653516d1ebf41af1f28c358fbbcd4229f204237",
+  "at": "2026-10-12T18:38:34.649Z",
+  "login": "PASS",
+  "chatVisible": true,
+  "sameConversation": true,
+  "distinctPersistedUserTurns": true,
+  "distinctRequests": true,
+  "responses": [
+    {
+      "question": "history",
+      "http": 201,
+      "grounding": "verified",
+      "toolCompleted": true,
+      "renderedExactIgnoringWhitespace": true,
+      "dateLines": 4,
+      "lastVisitExpectedAbsenceAnswer": false,
+      "scopeCaveat": true,
+      "coordination": "COMPLETED"
+    },
+    {
+      "question": "last_visit",
+      "http": 201,
+      "grounding": "verified",
+      "toolCompleted": true,
+      "renderedExactIgnoringWhitespace": true,
+      "dateLines": 4,
+      "lastVisitExpectedAbsenceAnswer": false,
+      "scopeCaveat": true,
+      "coordination": "COMPLETED"
+    }
+  ],
+  "noRawPrivateReplyExported": true
+}

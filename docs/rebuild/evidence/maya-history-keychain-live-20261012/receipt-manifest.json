@@ -1,0 +1,66 @@
+{
+  "candidate": "f653516d1ebf41af1f28c358fbbcd4229f204237",
+  "qualification": "LOCAL_PARTIAL_LIVE_ACCEPTANCE_NOT_RELEASE_CERTIFICATION",
+  "receipts": [
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261012-02/live-browser-summary.json",
+      "sha256": "d9fbb2bb81693470e3cc43ab25004a636f34883cfb2d6830f8329ef92aa764e1",
+      "size": 966,
+      "archivedCopy": true
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261012-02/canonical-reply-proof.json",
+      "sha256": "19f6a9946751d853ce0271b46778d1203a8c2fb79884ec2c070de87835ce397d",
+      "size": 1282,
+      "archivedCopy": true
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261012-02/recorded-planner-proof.json",
+      "sha256": "82fac3968cfb631ec347aa095c51b40081368eb51329391b16a917547eb3b409",
+      "size": 903,
+      "archivedCopy": true
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261012-02/recorded-planner-proof.mjs",
+      "sha256": "131d7a0d91b67109177302f21803830140359886c1002b6f74323760225695ce",
+      "size": 3458,
+      "archivedCopy": false
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261012-02/cleanup-and-usage.json",
+      "sha256": "da2657d0915b6157fe4409968b7158293d0b0497da34122bd2c4ef2588492a25",
+      "size": 1495,
+      "archivedCopy": true
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261012-02/history-observation-before-chat.json",
+      "sha256": "5bf08eebb8a2d728008c37190d4343da3c8455068060c87b9995fe2aee5edae4",
+      "size": 608,
+      "archivedCopy": true
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261012-02/session/resume.json",
+      "sha256": "e23d96fc10a71539cb8301640b4705893789b993ff6bf5ad9079dcff7cd912a0",
+      "size": 553512,
+      "archivedCopy": false
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261012-02/broker/broker-report.json",
+      "sha256": "122b9c0dc7963883f91b8b65f9549f59b8b460dcdb87a90dfbbcb0fea0eb12f7",
+      "size": 1709,
+      "archivedCopy": false
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261012-02/broker/model-responses.jsonl",
+      "sha256": "f8a30e0c3245b68ff89ae4c473ab61105f741a9ea29f64dde92c1b952248d46a",
+      "size": 2895,
+      "archivedCopy": false
+    },
+    {
+      "path": "/private/tmp/maya-owner-history-keychain-20261012-02/pricing-evidence.json",
+      "sha256": "4b96b7751e728f16916d11e3ac71eafae23c007b10e226e1fb10c60229166e4a",
+      "size": 435,
+      "archivedCopy": false
+    }
+  ]
+}

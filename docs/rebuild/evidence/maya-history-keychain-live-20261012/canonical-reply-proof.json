@@ -1,0 +1,38 @@
+{
+  "qualification": "LIVE_LOCAL_TOOL_RESULT_COMPARISON_NOT_RELEASE_CERTIFICATION",
+  "observedAt": "2026-10-12T18:38:23.032Z",
+  "databaseIdentity": "PASS",
+  "sourcePrivateValuesEmitted": false,
+  "proof": [
+    {
+      "question": "history",
+      "executionCompleted": true,
+      "tool": "appointments.own.list",
+      "appointmentCount": 4,
+      "appointmentIdsSha256": "7e2269b0c2171d501f8ebcaa3a141caae096d9097a832b44c886a03551c17291",
+      "historyComposerMatchesVisibleReply": true,
+      "lastVisitComposerMatchesVisibleReply": false,
+      "lastVisitExpectedNoConfirmedAttendance": true,
+      "historyScope": {
+        "source": "maya_canonical",
+        "enabled": true,
+        "coverage": "last_synchronized"
+      }
+    },
+    {
+      "question": "last_visit",
+      "executionCompleted": true,
+      "tool": "appointments.own.list",
+      "appointmentCount": 4,
+      "appointmentIdsSha256": "7e2269b0c2171d501f8ebcaa3a141caae096d9097a832b44c886a03551c17291",
+      "historyComposerMatchesVisibleReply": true,
+      "lastVisitComposerMatchesVisibleReply": false,
+      "lastVisitExpectedNoConfirmedAttendance": true,
+      "historyScope": {
+        "source": "maya_canonical",
+        "enabled": true,
+        "coverage": "last_synchronized"
+      }
+    }
+  ]
+}
