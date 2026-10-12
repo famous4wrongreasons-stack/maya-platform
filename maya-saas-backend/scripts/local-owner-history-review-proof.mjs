@@ -66,8 +66,9 @@ try {
   const encryption = new EncryptionService({ get: key => keys[key] });
   await prisma.crmIntegration.create({ data: { tenantId: tenant.id, provider: 'yclients', status: 'active', verifiedAt: new Date(), encryptedApiToken: encryption.encrypt('SYNTHETIC_USER_TOKEN_NOT_REAL'), settingsJson: { companyId: 12345, branchBinding: { contract: 'maya.crm-branch-binding/1', companyId: 12345, branchId: branch.id }, acceptedImportSnapshotHash: 'a'.repeat(64) } } });
   const scope = { stateDirectory: state, initialManifestSha256: '1'.repeat(64), privateStateSha256: '2'.repeat(64), restartReceiptPath: state + '/restart.json', restartReceiptSha256: '3'.repeat(64), tenantId: tenant.id, userId: owner.id, branchId: branch.id, tenantSlug: tenant.slug, companyId: '12345' };
+  const permitNow = Date.now();
   const permit = { contract: OWNER_HISTORY_PROFILE, candidateCommit: source.head, sourceSha256: hash(JSON.stringify(source)), scope, origin,
-    day: '2026-10-12', timezone: 'Europe/Moscow', notBefore: new Date().toISOString(), expiresAt: new Date(Date.now()+1800000).toISOString(), ownerApprovalRef: 'synthetic-history-proof-not-live-authorization' };
+    day: '2026-10-12', timezone: 'Europe/Moscow', notBefore: new Date(permitNow).toISOString(), expiresAt: new Date(permitNow+1800000).toISOString(), ownerApprovalRef: 'synthetic-history-proof-not-live-authorization' };
   const permitPath = path.join(state, 'plan.json'), bytes = JSON.stringify(permit), pin = hash(bytes);
   fs.writeFileSync(permitPath, bytes, { mode: 0o600, flag: 'wx' });
   const launch = readOwnerHistoryLaunch(permitPath, pin, permit.ownerApprovalRef, readSourceBinding, 'claim');
