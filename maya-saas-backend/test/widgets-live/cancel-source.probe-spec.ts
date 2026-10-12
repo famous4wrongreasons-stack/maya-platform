@@ -282,8 +282,10 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
       .get('/api/integrations/crm')
       .set('Authorization', 'Bearer ' + s.ownerToken);
     expect(current.status).toBe(200);
+    const connection = object(current.body).connection;
     const priorVersion =
-      object(object(current.body).connection).configVersion ?? null;
+      connection === null ? null : object(connection).configVersion;
+    if (priorVersion !== null) expect(priorVersion).toMatch(/^[a-f0-9]{64}$/);
     const response = await request(http.app.getHttpServer())
       .post('/api/integrations/crm/connect')
       .set('Authorization', 'Bearer ' + s.ownerToken)
