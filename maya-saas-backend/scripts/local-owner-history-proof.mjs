@@ -7,7 +7,7 @@ import net from 'node:net';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import { PRIVATE_KEYS, profileEnvironment, migrationConfigSource } from './local-onboarding-profile.mjs';
 import { realReadEnvironment } from './local-yclients-read-profile.mjs';
@@ -95,6 +95,7 @@ try {
   const wire=async raw=>{
     wireCalls++; const u=new URL(String(raw));
     if(u.pathname.includes('/records/')) {
+      if(wireMode==='outside-window') return Response.json({success:true,data:[record(9001,701,'2026-09-01')]});
       if(wireMode==='source-change') await prisma.crmIntegration.update({where:{tenantId:tenant.id},data:{settingsJson:{companyId:99999}}});
       if(wireMode==='expire') alive=false;
       if(wireMode==='overfilled') return Response.json({success:true,data:Array(201).fill(record(1,701))});
@@ -127,9 +128,9 @@ try {
   report.checks.push('canonical-personal-reader-excludes-foreign-records-and-notes');
   const settings=await http('/api/governed-settings/tenant/client_capabilities',undefined,token);assert.equal(settings.status,200);
   const command={confirmed:true,namespace:'client_capabilities',expectedRevision:settings.body.revision,previousRevisionId:settings.body.previousRevisionId,content:{client_self_visit_history:true}};
-  const changed=await http('/api/governed-settings/tenant',command,token).set('Idempotency-Key','synthetic-history-setting');assert.equal(changed.status,201);
-  const stale=await http('/api/governed-settings/tenant',command,token).set('Idempotency-Key','synthetic-history-setting-stale');assert.equal(stale.status,409);
-  const consent=await http('/api/client-channel/consent',{privacy:true,marketing:false,idempotencyKey:'synthetic-history-consent'},token);assert.equal(consent.status,201);
+  const changed=await http('/api/governed-settings/tenant',command,token).set('Idempotency-Key',randomUUID());assert.equal(changed.status,201,'synthetic governed setting '+JSON.stringify(changed.body));
+  const stale=await http('/api/governed-settings/tenant',command,token).set('Idempotency-Key',randomUUID());assert.equal(stale.status,409);
+  const consent=await http('/api/client-channel/consent',{privacy:true,marketing:false,idempotencyKey:'synthetic-history-consent'},token);assert.equal(consent.status,201,'synthetic consent '+JSON.stringify(consent.body));
   report.checks.push('governed-history-setting-canonical-CAS-and-explicit-private-consent');
   for(const route of ['/api/ai/chat','/api/widgets/intent','/api/auth/phone/start','/api/client-channel/challenges','/api/integrations/crm/activate']) assert.equal((await http(route,{},token)).status,403);
   const foreignUser=await prisma.user.create({data:{tenantId:tenant.id,email:'foreign@example.invalid',passwordHash:await require('bcrypt').hash(ownerPassword,10),role:'tenant_owner',status:'active'}});
@@ -145,10 +146,19 @@ try {
     runtime=await installOwnerHistory({app,prisma:app.get(PrismaService),require,backend,launch:{plan:permit,assertCurrent(){assert.ok(alive);launch.assertCurrent();}},nativeFetch:wire});globalThis.fetch=runtime.fetch;
     return runtime;
   };
+  await install('outside-window');assert.equal((await runtime.importOnce()).status,'failed');
+  assert.equal(await prisma.appointment.count({where:{tenantId:tenant.id}}),2);
+  report.checks.push('out-of-window-source-row-refused-before-any-appointment-write');
   await install('overfilled');assert.equal((await runtime.importOnce()).status,'failed');
   let last=await prisma.reconciliationRun.findFirst({where:{tenantId:tenant.id},orderBy:{startedAt:'desc'}});assert.equal(last.completeness,null);assert.equal(last.failureCode,'reconciliation_failed');
   assert.equal(await prisma.appointment.count({where:{tenantId:tenant.id}}),2);
   report.checks.push('overfilled-page-fails-without-false-completion-or-extra-rows');
+  await install('happy');
+  const { AppointmentChangeService } = load('crm/appointment-change.service.js');
+  const writer=app.get(AppointmentChangeService), write=writer.applyObservation.bind(writer);let writeCount=0;
+  writer.applyObservation=async input=>{const outcome=await write(input);writeCount++;runtime.stop();return outcome;};
+  assert.equal((await runtime.importOnce()).status,'failed');assert.equal(writeCount,1);
+  report.checks.push('stop-between-rows-cannot-restore-unrestricted-writer');
   await install('partial');const partial=await runtime.importOnce();assert.equal(partial.status,'ran');assert.equal(partial.completeness,'truncated');
   assert.equal(await prisma.appointment.count({where:{tenantId:tenant.id,crmExternalId:'2'}}),1);
   report.checks.push('nonprogressing-source-remains-truncated-no-absence-deletion');

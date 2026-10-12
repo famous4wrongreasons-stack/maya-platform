@@ -73,7 +73,8 @@ test('journal bytes preserved and redirects prohibited',async()=>{
 });
 test('one invocation including failed/concurrent retry; background cannot dispatch',async()=>{
   const t=transport();let release;const pending=t.run('journal',()=>new Promise(r=>release=r));
-  await assert.rejects(t.run('journal',async()=>{}));release();await pending;await assert.rejects(t.run('journal',async()=>{}));
+  try { await assert.rejects(t.run('journal',async()=>{})); } finally { release(); await pending; }
+  await assert.rejects(t.run('journal',async()=>{}));
   const b=transport();await assert.rejects(b.fetch(records(1)));assert.equal(b.counters.calls,0);
 });
 test('ordered pages and replay; foreign request poisons remaining run',async()=>{
