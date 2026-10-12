@@ -834,7 +834,7 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
       });
       expect(
         await db.prisma.actionAttempt.count({
-          where: { executionId: initial.id, kind: 'RECONCILIATION' },
+          where: { actionExecutionId: initial.id, kind: 'RECONCILIATION' },
         }),
       ).toBe(1);
       // Cancel status now yields after each inconclusive read. Exercise the
@@ -846,7 +846,7 @@ describe('Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS]
         expect(response.status).toBe(200);
         expect(
           await db.prisma.actionAttempt.count({
-            where: { executionId: initial.id, kind: 'RECONCILIATION' },
+            where: { actionExecutionId: initial.id, kind: 'RECONCILIATION' },
           }),
         ).toBe(attempts);
         expect(await executions(s)).toHaveLength(1);
