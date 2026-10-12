@@ -23,6 +23,7 @@ import { readOwnerHistoryLaunch } from './local-owner-history-launch.mjs';
 import { installOwnerHistory } from './local-owner-history-runtime.mjs';
 import { OWNER_HISTORY_PROFILE, OWNER_HISTORY_ADMISSION, ownerHistoryIngress } from './local-owner-history-policy.mjs';
 import { resumePlan } from './local-yclients-read-resume.mjs';
+import { OWNER_CHAT_QUESTIONS, OWNER_CHAT_TOOLS } from './local-owner-chat-policy.mjs';
 
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(import.meta.url), output = process.argv[2];
@@ -59,7 +60,7 @@ try {
   const tenant = await prisma.tenant.create({ data: { name: 'Synthetic binary proof', slug: 'synthetic-binary-' + randomBytes(4).toString('hex'), status: 'trial', trialFullAccess: true, trialEndsAt: new Date(Date.now()+3600000), currentPeriodEnd: new Date('2099-01-01'), calendarSource: 'external' } });
   const ownerPassword = 'Synthetic-only-never-real-42!', email = 'synthetic@example.invalid';
   const owner = await prisma.user.create({ data: { tenantId: tenant.id, email, passwordHash: await require('bcrypt').hash(ownerPassword, 10), role: 'tenant_owner', status: 'active' } });
-  await prisma.membership.create({ data: { tenantId: tenant.id, userId: owner.id, role: 'tenant_owner', status: 'active', joinedAt: new Date() } });
+  const member = await prisma.membership.create({ data: { tenantId: tenant.id, userId: owner.id, role: 'tenant_owner', status: 'active', joinedAt: new Date() } });
   const branch = await prisma.branch.create({ data: { tenantId: tenant.id, name: 'Synthetic', timezone: 'Europe/Moscow' } });
   const { EncryptionService } = require(path.join(backend, 'dist/src/encryption/encryption.service.js'));
   const encryption = new EncryptionService({ get: key => keys[key] });
@@ -158,7 +159,7 @@ try {
   const model=app.get(AiCoreModelService), completion=model.requestDeepSeekCompletion.bind(model);
   model.requestDeepSeekCompletion=async options=>{
     report.syntheticPlannerInputs??=[];
-    const v=options.input;report.syntheticPlannerInputs.push({phase:v.phase,userOnly:v.conversation.every(m=>m.role==='user'),retainedIntent:v.semantic_plan!==null,memoryCount:v.remembered_notes.length,toolResultCount:v.tool_results?.length});
+    const v=options.input;report.syntheticPlannerInputs.push({phase:v.phase,userOnly:v.conversation.every(m=>m.role==='user'),retainedIntent:v.semantic_plan?.tasks?.[0]?.intent??null,memoryCount:v.remembered_notes.length,toolResultCount:v.tool_results?.length});
     return completion(options);
   };
   globalThis.fetch=chatRuntime.fetch;
@@ -168,6 +169,23 @@ try {
   const request=require('supertest');
   const h=(route,body,token)=>{const r=body===undefined?request(app.getHttpServer()).get(route):request(app.getHttpServer()).post(route).send(body);r.set('Origin',origin).timeout({response:60000,deadline:75000});if(token)r.set('Authorization','Bearer '+token);return r;};
   const check=name=>{report.checks.push(name);save();};
+  // Prior synthetic catalogue conversation goes through the existing typed writer
+  // and encrypted reply owner. Never seed/clear the retained owner's transcript.
+  const { AI_TYPED_WIDGET_TRIGGER }=load('ai-tools/ai-typed-widget-trigger.port.js');
+  const { ConversationIntelligenceService }=load('conversation-intelligence/conversation-intelligence.service.js');
+  const timeline=app.get(AI_TYPED_WIDGET_TRIGGER), intelligence=app.get(ConversationIntelligenceService);
+  const actor={tenantId:tenant.id,userId:owner.id,role:'tenant_owner',membershipId:member.id,membershipStatus:'active',branchId:null,email,sessionId:'synthetic-fixture'};
+  let priorConversation;
+  await context.runAsAuthPrincipal(actor,async()=>{
+    for(const [index,question] of OWNER_CHAT_QUESTIONS.entries()){
+      const userTurn=await timeline.persistTypedTurn({actor,surface:'web',utterance:question,requestId:randomUUID(),...(priorConversation?{conversationId:priorConversation}:{})});
+      assert.ok(userTurn);priorConversation=userTurn.conversationId;
+      const priorPlan=intelligence.validatePlan({parent_request:'',language:'ru',dialogue_act:'question',tasks:[{id:'t1',intent:'company.business_hours',entities:{},depends_on:[],confidence:1}],context:{}},actor.role,OWNER_CHAT_TOOLS);
+      await timeline.persistAssistantReply({actor,userTurn,reply:`Synthetic public catalogue answer ${index+1}`,completionHash:hash('synthetic-prior-'+index),semanticContext:{version:'maya.chat-semantic-context/1',savedAt:new Date().toISOString(),timezone:'Europe/Moscow',plan:priorPlan}});
+    }
+  });
+  const priorRows=await prisma.widgetTimelineTurn.findMany({where:{tenantId:tenant.id,conversationId:priorConversation},orderBy:{turnIndex:'asc'}});
+  assert.equal(priorRows.length,6);check('prior-public-conversation-persisted-through-canonical-typed-and-reply-owners');
   let token, lastChat;
   web=createReadWebServer({ownerHistoryReview:true},{PORT:String(apiPort),CORS_ALLOWED_ORIGINS:origin});
   web.server.prependListener('request',(req,res)=>{
@@ -189,6 +207,8 @@ try {
   assert.ok(await page.click(button('Войти')));
   assert.ok(await page.waitFor(`!!document.querySelector('[role="log"]')`));assert.equal(typeof token,'string');
   check('one-real-canonical-password-login-with-retained-verified-personal-context');
+  assert.ok(await page.waitFor(`document.querySelectorAll('[data-chat-message="maya"]').length === 3 && document.querySelectorAll('[data-chat-message="user"]').length === 3`));
+  check('actual-React-restores-three-prior-public-question-answer-pairs');
   const settings=await h('/api/governed-settings/tenant/client_capabilities',undefined,token);assert.equal(settings.status,200);
   const command={confirmed:true,namespace:'client_capabilities',expectedRevision:settings.body.revision,previousRevisionId:settings.body.previousRevisionId,content:{client_self_visit_history:true}};
   const settingKey=randomUUID();const changed=await h('/api/governed-settings/tenant',command,token).set('Idempotency-Key',settingKey);assert.equal(changed.status,201,'full trial setting '+JSON.stringify(changed.body));
@@ -213,14 +233,18 @@ try {
     assert.ok(await page.waitFor(`Array.from(document.querySelectorAll('[data-chat-message="maya"]')).at(-1)?.textContent.replace(/^MAYA: /,'').replace(/\\s+/g,' ').trim() === ${JSON.stringify(expected)}`));
     check(index===0?'actual-React-AiCore-C9-own-history-tool-and-server-composed-answer':'second-React-question-with-private-assistant-history-only-user-text-reaches-model');
   }
-  assert.ok(await page.waitFor(`document.querySelectorAll('[data-chat-message="maya"]').length === 2 && document.querySelectorAll('[data-chat-message="user"]').length === 2`));
+  assert.ok(await page.waitFor(`document.querySelectorAll('[data-chat-message="maya"]').length === 5 && document.querySelectorAll('[data-chat-message="user"]').length === 5`));
   const shot=await page.send('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(output,'synthetic-history.png'),Buffer.from(shot.data,'base64'),{mode:0o600});
-  check('one-browser-login-two-rendered-message-pairs');
+  check('one-browser-login-three-prior-plus-two-new-rendered-message-pairs');
   assert.equal(modelCalls,2);check('exactly-two-synthetic-planner-calls-no-private-result-generation-call');
+  assert.deepEqual(report.syntheticPlannerInputs.map(v=>v.retainedIntent),['company.business_hours','booking.list_own']);
+  check('canonical-public-prior-context-then-private-history-intent-cross-actual-planner-wire');
   const restored=await h('/api/ai/conversation',undefined,token);assert.equal(restored.status,200);
-  assert.equal(restored.body.turns.filter(t=>t.role==='user').length,2);
-  assert.equal(restored.body.turns.filter(t=>t.role==='assistant').length,2);
-  check('canonical-two-user-turns-two-replies-persist-and-restore');
+  assert.equal(restored.body.conversationId,priorConversation);
+  assert.equal(restored.body.turns.filter(t=>t.role==='user').length,5);
+  assert.equal(restored.body.turns.filter(t=>t.role==='assistant').length,5);
+  assert.deepEqual(await prisma.widgetTimelineTurn.findMany({where:{id:{in:priorRows.map(r=>r.id)}},orderBy:{turnIndex:'asc'}}),priorRows);
+  check('same-canonical-conversation-two-new-pairs-prior-six-rows-unchanged');
   for(const route of ['/api/integrations/crm/activate','/api/widgets/act','/api/client-channel/challenges','/api/auth/phone/start','/api/ai/tools/execute'])assert.equal((await h(route,{},token)).status,403);
   assert.equal((await h('/api/ai/chat',{surface:'web',requestId:'synthetic-review-forbidden',messages:[{role:'user',content:'Запиши меня'}]},token)).status,403);
   check('HTTP-import-booking-binding-SMS-direct-tool-and-new-question-refused');
