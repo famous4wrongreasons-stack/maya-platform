@@ -10,7 +10,7 @@ export function ReceiptRefresh({ item, t, refreshBookingReceipt }: {
   const c = widgetTheme(t);
   return (<>
       {item.receiptRefresh == null || refreshBookingReceipt === undefined ? null : (
-        <div className="widget-receipt-refresh" style={{ marginTop: 8 }}>
+        <div className="widget-receipt-refresh" style={{ marginTop: 8, fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif' }}>
           <button
             type="button"
             disabled={item.receiptRefresh === 'pending'}
