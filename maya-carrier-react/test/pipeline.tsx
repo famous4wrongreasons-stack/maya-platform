@@ -8,6 +8,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { project } from '../../maya-chat-shell/src/shell/view.ts';
 import { verify } from '../../maya-chat-shell/src/integrity/h7.ts';
 import { render } from '../../maya-chat-shell/src/renderer/render.ts';
+import { ReceiptRefresh } from '../src/widgets/ReceiptRefresh.tsx';
 import { WidgetCard } from '../src/widgets/WidgetCard.tsx';
 import { tokens } from '../src/identity/tokens.ts';
 
@@ -98,4 +99,8 @@ export function detailMarkup(view: unknown, dark = true): string {
       focusFallback={() => undefined}
     />,
   );
+}
+
+export function restoredReceiptMarkup(item: unknown): string {
+  return renderToStaticMarkup(<ReceiptRefresh item={item as never} t={tokens(true)} refreshBookingReceipt={() => { throw Error('Passive rendering must not read'); }} />);
 }

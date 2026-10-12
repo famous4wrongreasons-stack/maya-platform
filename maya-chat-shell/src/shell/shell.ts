@@ -315,9 +315,7 @@ export const createShellRuntime = (deps: ShellRuntimeDeps): ShellRuntime => {
     newAbort: deps.newAbort,
     newRequestId: newId,
     ingestResolution: (resolution) => ingestAuthorizedEnvelope?.(resolution),
-    restoreBookingOutcomes: (page) => restoreBookingOutcomes?.(page.widgets
-      .filter(widget => widget.envelope.kind === 'BOOKING_CONFIRMATION')
-      .map(widget => ({ widgetId: widget.envelope.widget_id, lines: widget.terminal_lines }))),
+    restoreBookingOutcomes: (page) => restoreBookingOutcomes?.(page),
   });
   const shell = createShell({ history: deps.history, session: deps.session });
   const observations = createRenderObserver(deps.transport, deps.newAbort);

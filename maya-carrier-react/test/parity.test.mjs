@@ -27,7 +27,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURES = path.resolve(HERE, '..', '..', 'maya-chat-shell', 'dev', 'fixtures', 'envelopes');
 const INDEX = JSON.parse(fs.readFileSync(path.join(FIXTURES, 'index.json'), 'utf8'));
 
-const { resultOf, markupOf, receiptRefreshMarkup, project, render } = await import(pathToFileURL(path.join(HERE, '.bundle.mjs')).href);
+const { resultOf, markupOf, receiptRefreshMarkup, restoredReceiptMarkup, project, render } = await import(pathToFileURL(path.join(HERE, '.bundle.mjs')).href);
 
 const envelopeOf = (f) => JSON.parse(fs.readFileSync(path.join(FIXTURES, f.file), 'utf8'));
 
@@ -334,4 +334,15 @@ test('the checker catches a drawer that is wrong', () => {
   );
 
   assert.deepEqual(caught, [], 'every perturbation must be caught');
+});
+
+test('restored receipt uses identical READ chrome with no widget result or intent controls', () => {
+  for (const state of ['available', 'pending', 'unavailable']) {
+    const item = { id: 'historical-line', receiptRefresh: state };
+    const restored = parse(restoredReceiptMarkup(item));
+    const live = parse(receiptRefreshMarkup({ ...spentBooking(), ...item }));
+    assert.deepEqual(findAll(restored, el => el.tag === 'button'), findAll(live, el => el.tag === 'button'));
+    assert.equal(findAll(restored, el => el.tag === 'article' || el.attrs['data-ref']).length, 0);
+  }
+  assert.equal(refreshButton(restoredReceiptMarkup({ id: 'ordinary-message' })), null);
 });

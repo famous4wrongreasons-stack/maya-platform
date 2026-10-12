@@ -131,7 +131,7 @@
       },
       {
         "path": "src/shell/conversation.ts",
-        "sha256": "807965f63143f0fb1a336f258fc42871d39069bf16c0f5ef146c02938a782b66"
+        "sha256": "5167179a32487636c285e7ec42fb5097c9a674c4387ff79bd02f4c5734cc60f6"
       },
       {
         "path": "src/shell/deeplink.ts",
@@ -143,7 +143,7 @@
       },
       {
         "path": "src/shell/intents.ts",
-        "sha256": "75137a7b7e8abb4258f83a8427fb6226c3f0a0188bda2d810c7b356da4a4c693"
+        "sha256": "daea70ec6a8a8870d3bbf905e5497c0652a6144143757cfba76a10dfe005461d"
       },
       {
         "path": "src/shell/local-crm-setup.ts",
@@ -155,7 +155,7 @@
       },
       {
         "path": "src/shell/ports.ts",
-        "sha256": "0a9ac034eff080c9c5b276dcfda82e33fc3dd618673c011bd8a6bd24717de987"
+        "sha256": "37684c234ebd0f4e8434b80c7914b7c8c46c1698fb92d202bd95707cd39bb8f9"
       },
       {
         "path": "src/shell/privacy.ts",
@@ -163,7 +163,7 @@
       },
       {
         "path": "src/shell/shell.ts",
-        "sha256": "c29af1e42ecb3c392e8345a59dff8b6e8500f9d3b90e6ae90adf3ed547b02224"
+        "sha256": "d60cd0a5511369683ae04e239693ff495f36287cafb620ae846841b421b2dec1"
       },
       {
         "path": "src/shell/view.ts",
@@ -175,8 +175,8 @@
       }
     ]
   },
-  "bytes": 632637,
-  "digest": "c8d3fa199fd3183bed8fc306ed37bd426f1fbc22dc025b463ac5a750e3cc3795",
+  "bytes": 636869,
+  "digest": "6e6b466b704c58b76f964e76c7d71415dd99d8026bc4a9625d305c91ca94ae6c",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -184,8 +184,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "ae62861f0244b872db7e3760f7cc6691eda1dcad396504ec5d18ec28da46c7c6",
-    "modulePath": "m/ae62861f0244b872/",
+    "digest": "2d4e8d4b4b582e12593d09cd9eb7105802bf66ce51b256c7341725f2e60dfef7",
+    "modulePath": "m/2d4e8d4b4b582e12/",
     "files": [
       {
         "path": "entry/main.js",
@@ -209,8 +209,8 @@
       },
       {
         "path": "src/dom/host.js",
-        "sha256": "39c486eb3ea01e27c8047f0933d01e23971f550df049b71cb5cf2d38ad7c22e5",
-        "bytes": 22302
+        "sha256": "79690eb70f6cd8db791314eff951de70d8049eaf6017b582d60a8c19a05ab494",
+        "bytes": 22370
       },
       {
         "path": "src/dom/nav.js",
@@ -224,8 +224,8 @@
       },
       {
         "path": "src/dom/timeline.js",
-        "sha256": "aba26ddce1250047f134e9331a9afc84159ff63932115ee64e194ef03ee6c655",
-        "bytes": 13914
+        "sha256": "fa785b42dbcfb518e3af56ee93a9d848abb0574b5f1747b03e30b272c0b4e507",
+        "bytes": 14861
       },
       {
         "path": "src/dom/voice-control.js",
@@ -319,8 +319,8 @@
       },
       {
         "path": "src/shell/conversation.js",
-        "sha256": "348bb7ff793dcde8dee44367bdc3b2965ffefbb9ea123c52807b52b59fc04bb4",
-        "bytes": 20746
+        "sha256": "70995c3b44ffcc835676e777db663d5957b2ec1a56f42ba7d82ac37a228a71e0",
+        "bytes": 21225
       },
       {
         "path": "src/shell/deeplink.js",
@@ -339,8 +339,8 @@
       },
       {
         "path": "src/shell/intents.js",
-        "sha256": "f884b1cf853e40ef6a4cae748cfc9af5d05b314eac37a45d210a43efdf2872bc",
-        "bytes": 47706
+        "sha256": "31312baab50916abe60494549a93b7d54d3429f450f84967efede07784f0ae92",
+        "bytes": 49929
       },
       {
         "path": "src/shell/local-crm-setup.js",
@@ -364,8 +364,8 @@
       },
       {
         "path": "src/shell/shell.js",
-        "sha256": "c65566d72b7352970858f75b1c41bb29b17e50648477e9f438fe0c23faf73f9c",
-        "bytes": 9806
+        "sha256": "0c2d23efc98721730a7dcc8a6820e0d86bfe33da7ed8d79d71a1f0604f81c418",
+        "bytes": 9619
       },
       {
         "path": "src/shell/view.js",
@@ -393,7 +393,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "5b75ff9b15bfd6b7cd07d3fce126fca658d311e58afff085ec2a9ef7ec948112",
+      "sha256": "e89884ed0d9186fb688fde61ef7cebc5111e2c23fcc8e73dec283ec58331cce7",
       "bytes": 1344
     },
     "assets": [

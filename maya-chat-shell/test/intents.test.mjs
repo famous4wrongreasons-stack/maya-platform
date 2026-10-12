@@ -63,6 +63,7 @@ const setup = (options = {}) => {
   };
   const runtime = createShellRuntime({
     transport: {
+      ...(options.conversation ? { conversation: options.conversation } : {}),
       resolveWidgets: (request, signal) => options.receiptRead ? options.receiptRead(request, signal) : options.observe ? options.observe(request) : Promise.resolve({ ok: false, failure: { reason: 'forbidden' } }),
       chat: (body, signal) => ((counts.chat += 1), (options.chat ?? (() => new Promise(() => undefined)))(body, signal)),
       transcribe: () => ((counts.transcribe += 1), new Promise(() => undefined)),
@@ -1197,10 +1198,10 @@ test('historical booking outcomes share live receipt dedupe without holding cont
   store.put(card, [confirmed()]);
   const s = setup({ submission: store.port(), receiptRead: store.read });
   const pending = { outcome: 'SUBMITTED', text: 'Запрос принят. Подтверждение ожидается.', action_receipt_ref: null };
-  const history = [
-    { widgetId: card.widget_id, lines: [confirmed(), confirmed()] },
-    { widgetId: 'another-widget', lines: [pending] },
-  ];
+  const history = { tenant_bound: true, widgets: [
+    { envelope: card, terminal_lines: [confirmed(), confirmed()], reread_intent: null },
+    { envelope: terminalCard('another-widget'), terminal_lines: [pending], reread_intent: null },
+  ] };
   s.runtime.widgets.restoreBookingOutcomes(history);
   s.runtime.widgets.restoreBookingOutcomes(history);
   assert.deepEqual(serverLines(s), [CONFIRMED_TEXT, pending.text]);
@@ -1974,4 +1975,168 @@ test('personal receiver follows real Widgets integrity/expiry and survives acces
   assert.equal(s.runtime.shell.view().fullscreen.receiver, undefined);
   assert.equal(personal.view().phase, 'closed'); assert.equal(personal.view().services.length, 0);
   personal.dispose(); s.runtime.dispose();
+});
+
+
+const restoredPage = (card, lines = [submitted()]) => ({ tenant_bound: true,
+  widgets: [{ envelope: card, terminal_lines: lines, reread_intent: null }] });
+const emptyHistory = async () => ({ ok: true, value: { conversationId: 'synthetic-restored-conversation', turns: [], truncated: false } });
+
+test('restored receipt: actual conversation restore exposes explicit READ without restoring COMMIT or tokens', async () => {
+  const card = terminalCard(), reads = [];
+  const s = setup({ conversation: emptyHistory, receiptRead: async request => {
+    reads.push(request);
+    return { ok: true, value: restoredPage(card, request.booking_receipt ? [confirmed()] : [submitted()]) };
+  } });
+  await flush(); await flush();
+  const anchor = s.items().find(i => i.kind === 'assistant' && i.receiptRefresh === 'available');
+  assert.ok(anchor, 'restored canonical receipt must retain a separate status-read affordance');
+  assert.deepEqual(serverLines(s), [SUBMITTED_TEXT]);
+  assert.equal(reads.length, 1, 'passive restore does not reconcile');
+  assert.equal(s.items().some(i => i.kind === 'widget'), false);
+  assert.deepEqual(s.runtime.widgets.lockSources(), []);
+  assert.equal(s.runtime.widgets.heldTokens(), 0);
+  await s.runtime.widgets.activate(anchor.id, 'intent:i1');
+  await s.runtime.widgets.activate(anchor.id, 'intent:i9');
+  await s.runtime.widgets.refreshBookingReceipt(anchor.id);
+  await s.runtime.widgets.refreshBookingReceipt(anchor.id);
+  assert.deepEqual(reads.slice(1), Array(2).fill({ thread_page: { limit: 20 }, booking_receipt: { widget_id: card.widget_id } }));
+  assert.deepEqual(serverLines(s), [SUBMITTED_TEXT, CONFIRMED_TEXT]);
+  assert.equal(s.runtime.widgets.counters().submissions, 0);
+  assert.equal(s.counts.chat, 0);
+  s.runtime.dispose();
+});
+
+const restoredSetup = async (read, page = restoredPage(terminalCard())) => {
+  const s = setup({ conversation: emptyHistory,
+    receiptRead: (request, signal) => request.booking_receipt ? read(request, signal) : Promise.resolve({ ok: true, value: page }),
+  });
+  await flush(); await flush();
+  return { ...s, anchor: s.items().find(i => i.receiptRefresh !== undefined) };
+};
+
+for (const [label, change] of [
+  ['unbound tenant', page => { page.tenant_bound = false; }],
+  ['widget substitution', page => { page.widgets[0].envelope.widget_id = 'foreign-widget'; }],
+  ['kind substitution', page => { page.widgets[0].envelope.kind = 'SCHEDULE'; }],
+  ['tenant substitution', page => { page.widgets[0].envelope.tenant_id = 'foreign-tenant'; }],
+  ['principal substitution', page => { page.widgets[0].envelope.integrity.principal_proof_hash = 'foreign-principal'; }],
+  ['turn substitution', page => { page.widgets[0].envelope.correlation.turn_id = 'foreign-turn'; }],
+  ['parent substitution', page => { page.widgets[0].envelope.correlation.parent_widget_id = 'foreign-parent'; }],
+  ['ambiguous rows', page => { page.widgets.push(structuredClone(page.widgets[0])); }],
+  ['missing row', page => { page.widgets = []; }],
+  ['empty lines', page => { page.widgets[0].terminal_lines = []; }],
+  ['conflicting receipt refs', page => { page.widgets[0].terminal_lines.push(confirmed('foreign-action')); }],
+]) test(`restored receipt: ${label} refuses status and preserves uncertainty`, async () => {
+  const page = restoredPage(terminalCard(), [confirmed()]); change(page);
+  const s = await restoredSetup(async () => ({ ok: true, value: page }));
+  assert.ok(s.anchor);
+  await s.runtime.widgets.refreshBookingReceipt(s.anchor.id);
+  assert.equal(s.item(s.anchor.id).receiptRefresh, 'unavailable');
+  assert.deepEqual(serverLines(s), [SUBMITTED_TEXT]);
+  assert.equal(s.runtime.widgets.heldTokens(), 0);
+  assert.equal(s.runtime.widgets.counters().submissions, 0);
+  s.runtime.dispose();
+});
+
+for (const [label, result] of [
+  ['revoked authority', { ok: false, failure: { reason: 'forbidden' } }],
+  ['lost response', { ok: false, failure: { reason: 'no_connection' } }],
+  ['signed out', { ok: false, failure: { reason: 'signed_out', signedOut: 'session_expired' } }],
+  ['exception', null],
+]) test(`restored receipt: ${label} does not retry or claim success`, async () => {
+  let reads = 0;
+  const s = await restoredSetup(async () => { reads++; if (result === null) throw Error('synthetic'); return result; });
+  await s.runtime.widgets.refreshBookingReceipt(s.anchor.id);
+  await flush();
+  assert.equal(reads, 1);
+  assert.deepEqual(serverLines(s), [SUBMITTED_TEXT]);
+  assert.equal(s.item(s.anchor.id).receiptRefresh, 'unavailable');
+  assert.equal(s.runtime.widgets.counters().submissions, 0);
+  s.runtime.dispose();
+});
+
+test('restored receipt: concurrent clicks share one read; repeated restore keeps one control and one outcome', async () => {
+  let complete, signal, reads = 0;
+  const page = restoredPage(terminalCard());
+  const s = await restoredSetup((_, abort) => { reads++; signal = abort; return new Promise(r => { complete = r; }); }, page);
+  s.runtime.widgets.restoreBookingOutcomes(page);
+  assert.equal(s.items().filter(i => i.receiptRefresh !== undefined).length, 1);
+  const pending = s.runtime.widgets.refreshBookingReceipt(s.anchor.id);
+  const duplicate = s.runtime.widgets.refreshBookingReceipt(s.anchor.id);
+  assert.equal(reads, 1);
+  assert.equal(s.item(s.anchor.id).receiptRefresh, 'pending');
+  assert.equal(signal.aborted, false);
+  complete({ ok: true, value: restoredPage(terminalCard(), [confirmed()]) }); await Promise.all([pending, duplicate]);
+  assert.equal(s.item(s.anchor.id).receiptRefresh, 'available');
+  assert.deepEqual(serverLines(s), [SUBMITTED_TEXT, CONFIRMED_TEXT]);
+  s.runtime.dispose();
+});
+
+for (const ending of ['sign out', 'dispose', 'display cap', 'privacy erasure']) test(`restored receipt: ${ending} aborts read and rejects late response`, async () => {
+  let complete, signal, reads = 0;
+  const s = await restoredSetup((_, abort) => { reads++; signal = abort; return new Promise(r => { complete = r; }); });
+  const pending = s.runtime.widgets.refreshBookingReceipt(s.anchor.id);
+  if (ending === 'sign out') s.signOut();
+  if (ending === 'dispose') s.runtime.dispose();
+  if (ending === 'display cap') for (let i = 0; i < DISPLAY_CAP + 1; i++) s.runtime.conversation.timeline.appendServerLine(`synthetic line ${i}`);
+  if (ending === 'privacy erasure') assert.equal(s.runtime.conversation.freezeForErasure(s.runtime.conversation.erasureTarget()), true);
+  assert.equal(signal.aborted, true);
+  complete({ ok: true, value: restoredPage(terminalCard(), [confirmed()]) }); await pending;
+  await s.runtime.widgets.refreshBookingReceipt(s.anchor.id);
+  assert.equal(reads, 1);
+  assert.equal(serverLines(s).includes(CONFIRMED_TEXT), false);
+  s.runtime.dispose();
+});
+
+test('restored receipt: confirmed identity cannot change or downgrade; source witness is immutable', async () => {
+  const page = restoredPage(terminalCard(), [confirmed()]), requests = [];
+  let next = restoredPage(terminalCard(), [confirmed()]);
+  const s = await restoredSetup(async request => { requests.push(request); return { ok: true, value: next }; }, page);
+  page.widgets[0].envelope.tenant_id = 'mutated-source';
+  page.widgets[0].envelope.widget_id = 'mutated-locator';
+  await s.runtime.widgets.refreshBookingReceipt(s.anchor.id);
+  assert.equal(s.item(s.anchor.id).receiptRefresh, 'available');
+  assert.equal(requests[0].booking_receipt.widget_id, terminalCard().widget_id);
+  for (const lines of [[submitted()], [confirmed('changed-ref')]]) {
+    next = restoredPage(terminalCard(), lines);
+    await s.runtime.widgets.refreshBookingReceipt(s.anchor.id);
+    assert.equal(s.item(s.anchor.id).receiptRefresh, 'unavailable');
+    assert.deepEqual(serverLines(s), [CONFIRMED_TEXT]);
+  }
+  s.runtime.dispose();
+});
+
+test('restored receipt: two receipts route by exact local anchor, never by text or display position', async () => {
+  const a = terminalCard('first-widget'), b = terminalCard('second-widget'), calls = [];
+  const page = { tenant_bound: true, widgets: [
+    ...restoredPage(a).widgets, ...restoredPage(b).widgets,
+  ] };
+  const s = await restoredSetup(async request => {
+    calls.push(request.booking_receipt.widget_id);
+    const card = calls.at(-1) === a.widget_id ? a : b;
+    return { ok: true, value: restoredPage(card, [confirmed(card.widget_id + '-receipt')]) };
+  }, page);
+  const anchors = s.items().filter(i => i.receiptRefresh !== undefined);
+  assert.equal(anchors.length, 2);
+  await s.runtime.widgets.refreshBookingReceipt(anchors[1].id);
+  await s.runtime.widgets.refreshBookingReceipt(anchors[0].id);
+  assert.deepEqual(calls, [b.widget_id, a.widget_id]);
+  assert.equal(serverLines(s).filter(t => t === CONFIRMED_TEXT).length, 2);
+  s.runtime.dispose();
+});
+
+for (const [label, change] of [
+  ['unbound', p => { p.tenant_bound = false; }],
+  ['empty principal', p => { p.widgets[0].envelope.integrity.principal_proof_hash = ''; }],
+  ['empty tenant', p => { p.widgets[0].envelope.tenant_id = ''; }],
+  ['other kind', p => { p.widgets[0].envelope.kind = 'SCHEDULE'; }],
+  ['ambiguous widget', p => { p.widgets.push(structuredClone(p.widgets[0])); }],
+  ['conflicting confirmation', p => { p.widgets[0].terminal_lines = [confirmed(), confirmed('other')]; }],
+]) test(`restored receipt: ${label} page cannot create a read control`, async () => {
+  const page = restoredPage(terminalCard()); change(page);
+  const s = await restoredSetup(async () => { throw Error('Unexpected read'); }, page);
+  assert.equal(s.anchor, undefined);
+  assert.equal(s.runtime.widgets.heldTokens(), 0);
+  s.runtime.dispose();
 });

@@ -12,6 +12,7 @@ import type { WidgetSentence } from '../../../maya-chat-shell/src/shell/ports.ts
 import { widgetTheme } from '../identity/widgetTheme.ts';
 import type { Tokens } from '../identity/tokens.ts';
 import { widgetSentence } from '../runtime/copy.ts';
+import { ReceiptRefresh } from './ReceiptRefresh.tsx';
 import { drawNode } from './nodes.tsx';
 
 const READING = '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
@@ -189,24 +190,7 @@ export function WidgetCard({
         </p>
       )}
 
-      {item.receiptRefresh == null || refreshBookingReceipt === undefined ? null : (
-        <div className="widget-receipt-refresh" style={{ marginTop: 8 }}>
-          <button
-            type="button"
-            disabled={item.receiptRefresh === 'pending'}
-            aria-busy={item.receiptRefresh === 'pending' ? 'true' : undefined}
-            onClick={() => {
-              if (item.receiptRefresh !== 'pending') refreshBookingReceipt(item.id);
-            }}
-            style={{ padding: '10px 12px', border: '1px solid ' + c.line, borderRadius: 12, background: 'transparent', color: c.ink, font: 'inherit', fontSize: 13, cursor: item.receiptRefresh === 'pending' ? 'default' : 'pointer' }}
-          >
-            {item.receiptRefresh === 'pending' ? 'Проверяем результат…' : 'Проверить результат'}
-          </button>
-          <p role="status" style={{ margin: '6px 0 0', fontSize: 12.5, lineHeight: 1.45, color: c.muted }}>
-            {item.receiptRefresh === 'unavailable' ? 'Не удалось проверить результат. Попробуйте ещё раз.' : ''}
-          </p>
-        </div>
-      )}
+      <ReceiptRefresh item={item} t={t} refreshBookingReceipt={refreshBookingReceipt} />
     </div>
   );
 }

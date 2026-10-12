@@ -256,7 +256,9 @@ export type TimelineItemView =
       readonly failure: ChatFailure | null;
       readonly retry: TurnRetry;
     }
-  | { readonly kind: 'assistant'; readonly id: string; readonly text: string }
+  | { readonly kind: 'assistant'; readonly id: string; readonly text: string;
+      /** Restored canonical receipt READ only; no envelope, token or mutation authority. */
+      readonly receiptRefresh?: 'available' | 'pending' | 'unavailable'; }
   | {
       readonly kind: 'widget';
       readonly id: string;

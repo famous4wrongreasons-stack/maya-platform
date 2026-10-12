@@ -136,7 +136,7 @@ function voiceDouble() {
 }
 
 /** The page: dom double + real shell runtime + counting network doubles + mountApp. */
-function page({ signedIn = true, voice = true, chat = null, fragment = '', submission = undefined } = {}) {
+function page({ signedIn = true, voice = true, chat = null, fragment = '', submission = undefined, receiptRead = undefined } = {}) {
   const dom = createDom();
   const scheduler = createScheduler(NOW);
   const s = sessionDouble(signedIn ? { signedIn: true, display: DISPLAY } : { signedIn: false, reason: null });
@@ -144,6 +144,7 @@ function page({ signedIn = true, voice = true, chat = null, fragment = '', submi
   const outcomes = [];
   const history = { pushes: 0, backs: 0, listener: null };
   const transport = {
+    ...(receiptRead ? { resolveWidgets: receiptRead } : {}),
     chat(request, signal) {
       chats.push(request);
       const next = outcomes.shift();
@@ -1469,3 +1470,25 @@ for (const closing of ['Escape', 'closeDetail', 'Back']) {
     p.runtime.dispose();
   });
 }
+
+
+test('restored receipt DOM host projects pending/unavailable and sends only one explicit READ', async () => {
+  const calls = [];
+  const p = page({ voice: false, receiptRead: (request, signal) => new Promise(resolve => calls.push({ request, signal, resolve })) });
+  const card = envelopeOf('kind-booking-confirmation');
+  p.runtime.widgets.restoreBookingOutcomes({ tenant_bound: true, widgets: [{ envelope: card,
+    terminal_lines: [{ outcome: 'SUBMITTED', text: 'Результат пока не подтверждён.', action_receipt_ref: null }], reread_intent: null }] });
+  assert.equal(calls.length, 0);
+  const anchor = p.runtime.conversation.view().items.find(i => i.receiptRefresh === 'available');
+  p.dom.click(p.dom.button(/^Проверить результат$/));
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].request.booking_receipt.widget_id, card.widget_id);
+  assert.equal(p.dom.button(/^Проверяем результат…$/).disabled, true);
+  calls[0].resolve({ ok: false, failure: { reason: 'forbidden' } }); await flush();
+  assert.equal(p.runtime.conversation.view().items.find(i => i.id === anchor.id).receiptRefresh, 'unavailable');
+  assert.match(p.dom.visibleText(), /Не удалось проверить результат/);
+  assert.equal(p.runtime.widgets.counters().submissions, 0);
+  p.runtime.conversation.timeline.appendServerLine('ordinary assistant');
+  assert.equal(p.dom.findAll(el => el.localName === 'button' && p.dom.nameOf(el) === 'Проверить результат').length, 1);
+  p.cancel(); p.runtime.dispose();
+});

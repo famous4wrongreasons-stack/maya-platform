@@ -36,6 +36,7 @@ export interface TimelineMount {
   readonly drawer: WidgetDrawer;
   /** The «Выйти» of the tenant-required state (§1.4 row 11). */
   readonly signOut: () => void;
+  readonly refreshBookingReceipt?: (itemId: string) => void;
   /** Where focus goes when the control it was on leaves the log (a retry that started). */
   readonly focusComposer: () => void;
 }
@@ -263,16 +264,27 @@ export function mountTimeline(mount: TimelineMount): Cancel {
     entry.element.replaceChildren(...parts);
   };
 
-  const drawAssistant = (element: HTMLElement, reply: string): void => {
+  const drawAssistant = (element: HTMLElement, item: Extract<TimelineItemView, { readonly kind: 'assistant' }>): void => {
     const body = factory.create('p');
     body.classList.add('turn-text');
     body.append(author('MAYA: '));
-    for (const segment of replySegments(reply)) {
+    for (const segment of replySegments(item.text)) {
       const anchor = segment.link ? renderReplyLink(factory, segment.text) : null;
       body.append(anchor ?? segment.text);
     }
     element.classList.add('turn', 'turn--maya');
     element.replaceChildren(body);
+    if (item.receiptRefresh !== undefined && mount.refreshBookingReceipt !== undefined) {
+      const button = factory.create('button');
+      button.type = 'button';
+      button.disabled = item.receiptRefresh === 'pending';
+      if (button.disabled) button.setAttribute('aria-busy', 'true');
+      button.textContent = button.disabled ? 'Проверяем результат…' : 'Проверить результат';
+      button.addEventListener('click', () => { if (!button.disabled) mount.refreshBookingReceipt?.(item.id); });
+      const status = text('receipt-read-status', item.receiptRefresh === 'unavailable' ? 'Не удалось проверить результат. Попробуйте ещё раз.' : '');
+      status.setAttribute('role', 'status');
+      element.append(button, status);
+    }
   };
 
   const drawNotice = (element: HTMLElement, notice: NoticeKind): void => {
@@ -298,7 +310,7 @@ export function mountTimeline(mount: TimelineMount): Cancel {
     }
     const known = entries.get(item.id);
     const signature =
-      item.kind === 'user' ? userSignature(item, scheduler.now()) : item.kind === 'assistant' ? `a\u0000${item.text}` : `n\u0000${item.notice}`;
+      item.kind === 'user' ? userSignature(item, scheduler.now()) : item.kind === 'assistant' ? `a\u0000${item.text}\u0000${item.receiptRefresh ?? ""}` : `n\u0000${item.notice}`;
     if (known !== undefined && known.signature === signature) {
       known.item = item;
       return known.element;
@@ -310,7 +322,7 @@ export function mountTimeline(mount: TimelineMount): Cancel {
     entry.signature = signature;
     entries.set(item.id, entry);
     if (item.kind === 'user') drawUser(entry, item);
-    else if (item.kind === 'assistant') drawAssistant(element, item.text);
+    else if (item.kind === 'assistant') drawAssistant(element, item);
     else drawNotice(element, item.notice);
     // The control focus was on is gone (a retry started): continue in the composer.
     if (hadFocus && focusedWithin(element) === null) mount.scheduler.frame(mount.focusComposer);

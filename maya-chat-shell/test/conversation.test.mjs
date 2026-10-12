@@ -260,7 +260,7 @@ test('submitUserTurn is the sole path: only it (and retry of its own turn) calls
   // Surface: the finite attachment seam never calls Transport.chat or creates a local user turn.
   const s = setup();
   assert.deepEqual(Object.keys(s.conversation).sort(), ['dispose', 'erasureTarget', 'finishErasure', 'freezeForErasure', 'retry', 'runGoodsPhotoOperation', 'submitUserTurn', 'subscribe', 'timeline', 'view']);
-  assert.deepEqual(Object.keys(s.conversation.timeline).sort(), ['appendNotice', 'appendServerLine', 'appendWidget', 'hasItem', 'onDropped', 'replaceWidget']);
+  assert.deepEqual(Object.keys(s.conversation.timeline).sort(), ['appendNotice', 'appendServerLine', 'appendWidget', 'hasItem', 'onDropped', 'replaceWidget', 'setReceiptRefresh']);
   s.conversation.timeline.appendNotice('deeplink_refused');
   s.conversation.timeline.appendServerLine('server-authored receipt');
   s.conversation.timeline.appendWidget({ kind: 'widget', id: 'w1', result: {}, display: 'live', pending: null, sentence: null });

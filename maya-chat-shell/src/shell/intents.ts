@@ -36,6 +36,7 @@ import type {
   Transport,
   WidgetSentence,
 } from './ports.ts';
+import type { WidgetResolveProjection } from '../net/types.ts';
 import type { DetailOpener, DetailSource, ShellChrome } from './shell.ts';
 import { conformanceProblems, project } from './view.ts';
 
@@ -190,8 +191,8 @@ export interface WidgetsDeps {
 }
 
 export interface Widgets extends DetailSource {
-  /** Reuse canonical outcome dedupe without restoring envelopes or tokens. */
-  restoreBookingOutcomes(outcomes: readonly { readonly widgetId: string; readonly lines: readonly TerminalLine[] }[]): void;
+  /** Current-authority historical receipts: retain only READ correlation, never old controls. */
+  restoreBookingOutcomes(page: WidgetResolveProjection): void;
   rendered(itemId: string): void;
   ingest(envelope: WidgetEnvelope): IngestOutcome;
   /** Presentation evidence only: H7 passed and the standard approval control is drawn live. */
@@ -230,6 +231,26 @@ interface Entry {
   /** Bumped whenever the entry's emission changes, so a late outcome for a predecessor is ignored. */
   emission: number;
 }
+
+/** A locator plus response-correlation witnesses. The server rechecks authority on EVERY read. */
+interface ReceiptIdentity {
+  readonly widgetId: string;
+  readonly tenant: string;
+  readonly principal: string;
+  readonly turn: string | null;
+  readonly parent: string | null;
+}
+interface RestoredReceipt {
+  readonly source: ReceiptIdentity;
+  inflight: AbortHandle | null;
+  receiptRefresh: 'available' | 'pending' | 'unavailable';
+  confirmedReceiptRef: string | null;
+}
+const receiptIdentity = (source: WidgetEnvelope): ReceiptIdentity => ({
+  widgetId: source.widget_id, tenant: source.tenant_id,
+  principal: source.integrity.principal_proof_hash,
+  turn: source.correlation.turn_id, parent: source.correlation.parent_widget_id,
+});
 
 // ── helpers ────────────────────────────────────────────────────────────────────────────────────
 
@@ -530,6 +551,7 @@ export const createRenderObserver = (transport: Pick<Transport, 'resolveWidgets'
 export const createWidgets = (deps: WidgetsDeps): Widgets => {
   const vault = createTokenVault();
   const entries = new Map<string, Entry>();
+  const restoredReceipts = new Map<string, RestoredReceipt>();
   const renderObservations = new Map<string, Promise<boolean>>();
   const rendered = (itemId: string): void => {
     const entry = entries.get(itemId);
@@ -558,12 +580,12 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
    * would not recover it — it would assert an old fact as a new one.
    */
   const published = new Set<string>();
-  const publishOutcome = (widgetId: string, line: TerminalLine): void => {
-    if (line.text.trim().length === 0) return;
+  const publishOutcome = (widgetId: string, line: TerminalLine): string | null => {
+    if (line.text.trim().length === 0) return null;
     const key = outcomeKey(widgetId, line);
-    if (published.has(key)) return;
+    if (published.has(key)) return null;
     published.add(key);
-    deps.timeline.appendServerLine(line.text);
+    return deps.timeline.appendServerLine(line.text);
   };
   let serial = 0;
   let counters = { activations: 0, stateChanges: 0, sentences: 0, submissions: 0 };
@@ -607,6 +629,8 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
   };
 
   const release = (itemId: string): void => {
+    restoredReceipts.get(itemId)?.inflight?.abort();
+    restoredReceipts.delete(itemId);
     const entry = entries.get(itemId);
     if (entry === undefined) return;
     cancelWork(entry);
@@ -1091,20 +1115,26 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
   };
 
   const refreshBookingReceipt = async (itemId: string): Promise<void> => {
-    const entry = entries.get(itemId);
-    if (entry === undefined || !entry.bookingReceipt || entry.envelope.kind !== 'BOOKING_CONFIRMATION' || entry.inflight !== null) return;
-    const source = entry.envelope;
-    const widgetId = source.widget_id;
-    const tenant = source.tenant_id;
-    const principal = source.integrity.principal_proof_hash;
-    const turn = source.correlation.turn_id;
-    const parent = source.correlation.parent_widget_id;
-    const emission = entry.emission;
+    const live = entries.get(itemId);
+    const restored = restoredReceipts.get(itemId);
+    if (restored === undefined && (live === undefined || !live.bookingReceipt || live.envelope.kind !== 'BOOKING_CONFIRMATION')) return;
+    const entry = restored ?? live!;
+    if (entry.inflight !== null) return;
+    const source = live?.envelope;
+    const identity = restored?.source ?? receiptIdentity(source!);
+    const { widgetId, tenant, principal, turn, parent } = identity;
+    const emission = live?.emission;
+    const publishRead = (): void => {
+      if (restored !== undefined) deps.timeline.setReceiptRefresh(itemId, restored.receiptRefresh);
+      else publish(live!);
+    };
     const abort = deps.newAbort();
     entry.inflight = abort;
-    const active = (): boolean => entries.get(itemId) === entry && entry.emission === emission && entry.envelope === source && entry.inflight === abort && !abort.signal.aborted;
+    const active = (): boolean => entry.inflight === abort && !abort.signal.aborted && (restored !== undefined
+      ? restoredReceipts.get(itemId) === restored && deps.timeline.hasItem(itemId)
+      : entries.get(itemId) === live && live!.emission === emission && live!.envelope === source);
     entry.receiptRefresh = 'pending';
-    publish(entry);
+    publishRead();
     if (!active()) return;
     let lines: readonly TerminalLine[] | null = null;
     try {
@@ -1133,11 +1163,11 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
       }
       if (!active()) return;
       entry.confirmedReceiptRef ??= lines.find(line => line.outcome === 'CONFIRMED')?.action_receipt_ref ?? null;
-      entry.sentence = null;
+      if (live !== undefined) live.sentence = null;
     }
     entry.inflight = null;
     entry.receiptRefresh = lines === null ? 'unavailable' : 'available';
-    publish(entry);
+    publishRead();
   };
 
   const offEnvironment = deps.environment.onA11yChange(() => {
@@ -1156,7 +1186,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     if (reason === 'cleared') {
       // Detail entries may never have had a timeline item. Release every capability and
       // pending callback when the conversation lifetime ends, including privacy erasure.
-      for (const id of [...entries.keys()]) release(id);
+      for (const id of [...entries.keys(), ...restoredReceipts.keys()]) release(id);
       vault.clear();
       detailOpeners.clear();
       seen.clear();
@@ -1166,15 +1196,30 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
   });
 
   return {
-    restoreBookingOutcomes(outcomes) {
-      const fresh = outcomes.flatMap(({ widgetId, lines }) => lines
-        .filter(line => line.text.trim().length > 0 && !published.has(outcomeKey(widgetId, line)))
-        .map(line => ({ widgetId, line })));
-      if (fresh.length === 0) return;
-      // Thread-page is bounded across this principal's history, not restricted
-      // to the newest conversation. Label that scope instead of implying a new effect.
-      deps.timeline.appendNotice('booking_outcomes_restored');
-      for (const { widgetId, line } of fresh) publishOutcome(widgetId, line);
+    restoreBookingOutcomes(page) {
+      if (!page.tenant_bound) return;
+      let disclosed = false;
+      for (const widget of page.widgets) {
+        if (widget.envelope.kind !== 'BOOKING_CONFIRMATION') continue;
+        const source = receiptIdentity(widget.envelope);
+        const { widgetId, tenant, principal } = source;
+        if (![widgetId, tenant, principal].every(value => typeof value === 'string' && value.length > 0)
+          || page.widgets.filter(row => row.envelope.widget_id === widgetId).length !== 1) continue;
+        const confirmed = new Set(widget.terminal_lines.filter(line => line.outcome === 'CONFIRMED').map(line => line.action_receipt_ref));
+        if (confirmed.size > 1 || confirmed.has(null) || confirmed.has('')) continue;
+        const fresh = widget.terminal_lines.filter(line => line.text.trim().length > 0 && !published.has(outcomeKey(widgetId, line)));
+        if (fresh.length === 0) continue;
+        // These are prior outcomes across this principal's bounded thread page, not new effects.
+        if (!disclosed) { deps.timeline.appendNotice('booking_outcomes_restored'); disclosed = true; }
+        let anchor: string | null = null;
+        for (const line of fresh) anchor = publishOutcome(widgetId, line) ?? anchor;
+        if (anchor === null || !deps.timeline.hasItem(anchor)) continue;
+        // No ingest/prepare/render, intent token, historical control or booking authority survives.
+        // The carrier gets only a local line id and state; the same explicit READ rechecks authority.
+        restoredReceipts.set(anchor, { source, inflight: null, receiptRefresh: 'available',
+          confirmedReceiptRef: widget.terminal_lines.find(line => line.outcome === 'CONFIRMED')?.action_receipt_ref ?? null });
+        deps.timeline.setReceiptRefresh(anchor, 'available');
+      }
     },
     ingest,
     hasPresentedApproval,
@@ -1194,7 +1239,7 @@ export const createWidgets = (deps: WidgetsDeps): Widgets => {
     dispose() {
       offEnvironment();
       offDropped();
-      for (const id of [...entries.keys()]) release(id);
+      for (const id of [...entries.keys(), ...restoredReceipts.keys()]) release(id);
       vault.clear();
       seen.clear();
       published.clear();

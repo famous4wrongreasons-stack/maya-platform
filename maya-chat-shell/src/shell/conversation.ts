@@ -59,7 +59,9 @@ export type DropReason = 'cap' | 'cleared';
 export interface TimelineWriter {
   appendWidget(item: WidgetItemView): void;
   /** Server-authored terminal receipt text; never client or LLM-authored. */
-  appendServerLine(text: string): void;
+  appendServerLine(text: string): string | null;
+  /** Attach/update status-read chrome on a server-authored receipt line, never its text. */
+  setReceiptRefresh(itemId: string, state: 'available' | 'pending' | 'unavailable'): boolean;
   /** Replace a widget item at its position (L7). False when the id is not on the timeline. */
   replaceWidget(item: WidgetItemView): boolean;
   hasItem(itemId: string): boolean;
@@ -188,6 +190,7 @@ interface AssistantItem {
   readonly kind: 'assistant';
   readonly id: string;
   readonly text: string;
+  receiptRefresh?: 'available' | 'pending' | 'unavailable';
 }
 
 interface WidgetEntry {
@@ -212,7 +215,7 @@ const itemView = (item: Item): TimelineItemView => {
     case 'user':
       return { ...(item.userTurn === undefined ? {} : { userTurn: item.userTurn }), kind: 'user', id: item.id, text: item.text, modality: item.modality, state: item.state, failure: item.failure, retry: item.retry };
     case 'assistant':
-      return { kind: 'assistant', id: item.id, text: item.text };
+      return { kind: 'assistant', id: item.id, text: item.text, ...(item.receiptRefresh === undefined ? {} : { receiptRefresh: item.receiptRefresh }) };
     case 'widget':
       return item.view;
     case 'notice':
@@ -524,9 +527,19 @@ export const createConversation = (deps: ConversationDeps): Conversation => {
       emit();
     },
     appendServerLine(text) {
-      if (erasurePending || text.trim().length === 0) return;
-      append({ kind: 'assistant', id: nextId('a'), text });
+      if (erasurePending || text.trim().length === 0) return null;
+      const id = nextId('a');
+      append({ kind: 'assistant', id, text });
       emit();
+      return id;
+    },
+    setReceiptRefresh(itemId, state) {
+      if (erasurePending) return false;
+      const item = items.find(item => item.id === itemId);
+      if (item?.kind !== 'assistant') return false;
+      item.receiptRefresh = state;
+      emit();
+      return true;
     },
     replaceWidget(view) {
       if (erasurePending) return false;

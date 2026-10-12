@@ -160,7 +160,7 @@ async function main() {
       for (const outcome of reads) {
         const before = page.apiRequests('/widgets/resolve').length;
         const snapshot = await view(); assert.ok(snapshot.controls.some(c => c.name === 'Проверить результат'));
-        assert.equal(await page.click(`Q.all('button').filter(el=>Q.visible(el)&&Q.name(el)==='Проверить результат'&&!el.disabled).at(-1)`), true);
+        assert.equal(await page.click(`Q.all('[data-chat-message=\"maya\"]').filter(el=>Q.visible(el)&&el.innerText.includes('Результат пока не подтверждён.')).flatMap(el=>Array.from(el.querySelectorAll('button'))).find(el=>Q.name(el)==='Проверить результат'&&!el.disabled)`), true);
         const request = await until(() => page.apiRequests('/widgets/resolve').slice(before).find(r => r.finishedAt || r.failed), 'explicit receipt read');
         assert.equal(JSON.parse(await page.postData(request)).booking_receipt.widget_id, scenario.widgetId);
         if (outcome === 'refused') {

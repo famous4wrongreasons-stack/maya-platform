@@ -21,6 +21,7 @@ import type {
 } from '../../../maya-chat-shell/src/shell/ports.ts';
 import { conversation, goodsPhoto, privacy, session, telegramLink, voice, widgets } from '../runtime/compose.ts';
 import { usePortView } from '../runtime/useView.ts';
+import { ReceiptRefresh } from '../widgets/ReceiptRefresh.tsx';
 import { WidgetCard } from '../widgets/WidgetCard.tsx';
 import { FullscreenDetail } from '../widgets/FullscreenDetail.tsx';
 import {
@@ -292,6 +293,8 @@ function Row({
             ) : null}
           </div>
         </div>
+
+        {item.kind === 'assistant' ? <ReceiptRefresh item={item} t={t} refreshBookingReceipt={widgets.refreshBookingReceipt} /> : null}
 
         {/* dom/timeline.ts:224-246 — the failure line, with the runtime's own retry wording. */}
         {failed && item.kind === 'user' && item.failure !== null ? (

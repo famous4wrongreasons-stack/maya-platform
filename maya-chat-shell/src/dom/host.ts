@@ -603,6 +603,7 @@ function mountSignedIn(mount: AppMount, display: SignInDisplay): Cancel {
     scheduler: mount.scheduler,
     drawer,
     signOut: () => void mount.session.signOut(),
+    refreshBookingReceipt: mount.widgets.refreshBookingReceipt,
     focusComposer,
   });
   composer = mountComposer({ factory, container: conversationPanel, conversation: mount.conversation });
