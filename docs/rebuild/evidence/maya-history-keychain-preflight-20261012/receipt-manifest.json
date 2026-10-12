@@ -1,0 +1,25 @@
+{
+  "candidate": "1bdbc5498732935a229afaa71e74e15030aef3d3",
+  "receipts": [
+    {
+      "path": "/private/tmp/maya-history-keychain-preflight-20261012-01/summary.json",
+      "sha256": "30c025b856d8d4f09fc802d3468be480c35a20cfc69e35c497efa15c0470d6c9",
+      "size": 1876
+    },
+    {
+      "path": "/private/tmp/maya-history-keychain-preflight-20261012-02/summary.json",
+      "sha256": "ff256d3a8e6a1b23af17a2140753cf4d201a8816e7f53301c1dc3ac50be6f751",
+      "size": 2545
+    },
+    {
+      "path": "/private/tmp/maya-keychain-integration-preflight-20261012-02/summary.json",
+      "sha256": "01805bc7fe22480f6e0c001487b47b86ac165ad9f49fa30a15785aab10d88b29",
+      "size": 1181
+    },
+    {
+      "path": "/private/tmp/maya-history-keychain-unit-20261012-01.log",
+      "sha256": "162a7cbc8ebcf2b0a1704947eb6ed1284acae47bd58c1ab14899f6f5a4947b34",
+      "size": 2995
+    }
+  ]
+}
