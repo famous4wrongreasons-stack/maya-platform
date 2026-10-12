@@ -1,0 +1,9 @@
+{
+  "kind": "macos-keychain",
+  "reference": "/Users/stanislavmosin/Library/Application Support/Maya/LocalCredentials/MayaLocalCredentials.app/Contents/MacOS/MayaLocalCredentials",
+  "owner": 501,
+  "reader": 501,
+  "sha256": "7bbe67dc6aed3cad83973eb00bb7e9849c7c93c8df8a21a27c94d121d0385a46",
+  "cdhash": "d41947ed7ac912609334207875996ffa9d9e0680",
+  "storageApprovalRef": "user-call_72e8c1130117427c9c7945e1836915fb"
+}

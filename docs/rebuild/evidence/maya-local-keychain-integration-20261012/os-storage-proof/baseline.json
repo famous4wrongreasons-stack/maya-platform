@@ -1,0 +1,13 @@
+{
+  "approvalRef": "user-call_72e8c1130117427c9c7945e1836915fb",
+  "syntheticOnly": true,
+  "sourceSha256": "ea557d2dc18b713bc02742d5824b2eda159ddf51d1f7f79b248fc62ff4a90e3b",
+  "helperSha256": "7bbe67dc6aed3cad83973eb00bb7e9849c7c93c8df8a21a27c94d121d0385a46",
+  "cdhash": "d41947ed7ac912609334207875996ffa9d9e0680",
+  "installedBefore": false,
+  "services": [
+    "ru.mayaos.dev.local-model.deepseek.v1",
+    "ru.mayaos.dev.local-read.yclients-partner.v1"
+  ],
+  "account": "local-owner-501"
+}

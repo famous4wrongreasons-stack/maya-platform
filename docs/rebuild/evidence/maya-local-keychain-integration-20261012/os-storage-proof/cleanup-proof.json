@@ -1,0 +1,9 @@
+{
+  "result": "PASS",
+  "exactTestItemsAbsent": 2,
+  "missingItemReadsRefused": 2,
+  "decryptAclExactHelperOnly": true,
+  "helperBytesUnchanged": true,
+  "realCredentialsUsed": false,
+  "providerCalls": 0
+}

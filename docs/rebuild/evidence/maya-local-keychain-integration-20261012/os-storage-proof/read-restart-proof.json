@@ -1,0 +1,50 @@
+{
+  "result": "PASS",
+  "helperSha256": "7bbe67dc6aed3cad83973eb00bb7e9849c7c93c8df8a21a27c94d121d0385a46",
+  "checks": [
+    {
+      "pass": "fresh-process",
+      "kind": "deepseek",
+      "result": "PASS",
+      "valueEmitted": false
+    },
+    {
+      "pass": "fresh-process",
+      "kind": "yclientsPartner",
+      "result": "PASS",
+      "valueEmitted": false
+    },
+    {
+      "pass": "second-fresh-process",
+      "kind": "deepseek",
+      "result": "PASS",
+      "valueEmitted": false
+    },
+    {
+      "pass": "second-fresh-process",
+      "kind": "yclientsPartner",
+      "result": "PASS",
+      "valueEmitted": false
+    },
+    {
+      "kind": "deepseek",
+      "check": "stdout-export-refused",
+      "result": "PASS"
+    },
+    {
+      "kind": "yclientsPartner",
+      "check": "stdout-export-refused",
+      "result": "PASS"
+    },
+    {
+      "check": "sha256-substitution-refused-before-read",
+      "result": "PASS"
+    },
+    {
+      "check": "cdhash-substitution-refused-before-read",
+      "result": "PASS"
+    }
+  ],
+  "realCredentialsUsed": false,
+  "providerCalls": 0
+}

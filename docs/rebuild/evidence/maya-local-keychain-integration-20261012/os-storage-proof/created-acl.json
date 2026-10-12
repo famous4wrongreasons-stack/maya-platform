@@ -1,0 +1,119 @@
+{
+  "credentialDataRequested" : false,
+  "items" : [
+    {
+      "accessStatus" : 0,
+      "aclListStatus" : 0,
+      "acls" : [
+        {
+          "allApplications" : false,
+          "authorizations" : [
+            "ACLAuthorizationDecrypt",
+            "ACLAuthorizationDerive",
+            "ACLAuthorizationExportClear",
+            "ACLAuthorizationExportWrapped",
+            "ACLAuthorizationMAC",
+            "ACLAuthorizationSign"
+          ],
+          "contentsStatus" : 0,
+          "trustedApplicationCount" : 1,
+          "trustedApplicationPaths" : [
+            "\/Users\/stanislavmosin\/Library\/Application Support\/Maya\/LocalCredentials\/MayaLocalCredentials.app"
+          ]
+        },
+        {
+          "allApplications" : true,
+          "authorizations" : [
+            "ACLAuthorizationEncrypt"
+          ],
+          "contentsStatus" : 0
+        },
+        {
+          "allApplications" : true,
+          "authorizations" : [
+            "ACLAuthorizationIntegrity"
+          ],
+          "contentsStatus" : 0
+        },
+        {
+          "allApplications" : true,
+          "authorizations" : [
+            "ACLAuthorizationPartitionID"
+          ],
+          "contentsStatus" : 0
+        },
+        {
+          "allApplications" : false,
+          "authorizations" : [
+            "ACLAuthorizationChangeACL"
+          ],
+          "contentsStatus" : 0,
+          "trustedApplicationCount" : 0,
+          "trustedApplicationPaths" : [
+
+          ]
+        }
+      ],
+      "present" : true,
+      "service" : "ru.mayaos.dev.local-model.deepseek.v1",
+      "status" : 0
+    },
+    {
+      "accessStatus" : 0,
+      "aclListStatus" : 0,
+      "acls" : [
+        {
+          "allApplications" : true,
+          "authorizations" : [
+            "ACLAuthorizationEncrypt"
+          ],
+          "contentsStatus" : 0
+        },
+        {
+          "allApplications" : false,
+          "authorizations" : [
+            "ACLAuthorizationDecrypt",
+            "ACLAuthorizationDerive",
+            "ACLAuthorizationExportClear",
+            "ACLAuthorizationExportWrapped",
+            "ACLAuthorizationMAC",
+            "ACLAuthorizationSign"
+          ],
+          "contentsStatus" : 0,
+          "trustedApplicationCount" : 1,
+          "trustedApplicationPaths" : [
+            "\/Users\/stanislavmosin\/Library\/Application Support\/Maya\/LocalCredentials\/MayaLocalCredentials.app"
+          ]
+        },
+        {
+          "allApplications" : true,
+          "authorizations" : [
+            "ACLAuthorizationIntegrity"
+          ],
+          "contentsStatus" : 0
+        },
+        {
+          "allApplications" : true,
+          "authorizations" : [
+            "ACLAuthorizationPartitionID"
+          ],
+          "contentsStatus" : 0
+        },
+        {
+          "allApplications" : false,
+          "authorizations" : [
+            "ACLAuthorizationChangeACL"
+          ],
+          "contentsStatus" : 0,
+          "trustedApplicationCount" : 0,
+          "trustedApplicationPaths" : [
+
+          ]
+        }
+      ],
+      "present" : true,
+      "service" : "ru.mayaos.dev.local-read.yclients-partner.v1",
+      "status" : 0
+    }
+  ]
+}

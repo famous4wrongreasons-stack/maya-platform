@@ -1,4 +1,12 @@
-# Pending owner storage step — not authorized or executed
+# Owner storage step
+
+Update 2026-10-12: the owner explicitly approved the bounded **synthetic-value**
+OS storage test below. Installation, create/read-after-process-restart/delete
+passed; both test records are now absent. See
+[os-storage-proof/summary.json](os-storage-proof/summary.json). The original helper
+remains installed. Real credential enrollment and external/paid runs are still
+not performed or authorized by this storage-test approval. The proposal below
+is preserved as the scope that was approved, not as a new pending question.
 
 Purpose: stop asking for the same two keys at every separately admitted local
 run. Storage consent does not extend a paid budget/window or authorize customer

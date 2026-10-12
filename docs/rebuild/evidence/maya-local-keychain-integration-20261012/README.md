@@ -1,5 +1,37 @@
 # Local two-credential integration — executable checkpoint
 
+## Subsequent owner-authorized OS storage proof (2026-10-12)
+
+The owner approved installing the prepared component and creating, reading after
+process restart, and deleting exactly two records with synthetic values
+(`user-call_72e8c1130117427c9c7945e1836915fb`). This supersedes only the pending
+storage-test status in the historical checkpoint below. It does not authorize
+real credential enrollment or external calls.
+
+Result: **PASS on the actual local login Keychain**, with the original prepared
+helper bytes and signature. Before the test, both exact service/account records
+were absent. The native secure UI created two public synthetic values; four reads
+from fresh helper processes matched them without emitting their contents. Two
+stdout-export attempts and two substituted hash/CDHash pins were refused.
+Metadata-only inspection showed that the decrypt ACL trusts only the installed
+Maya helper; no generic Node or Terminal ACL was added.
+
+The native exact-item delete action removed both test records. A final
+metadata-only query confirmed absence, and both subsequent reads refused.
+Both setup processes exited normally. The helper remains installed at
+`~/Library/Application Support/Maya/LocalCredentials/MayaLocalCredentials.app`.
+It was copied unchanged, not rebuilt or re-signed. No existing Keychain records,
+real provider keys, retained database, provider service, or paid session was used.
+
+Receipts and exact metadata audit source are in
+[os-storage-proof/summary.json](os-storage-proof/summary.json). Repository HEAD
+during the test was `6a1e780e92384cfd9ed56d21949ee3658af371c3`; the helper source
+still matches its original prepared SHA-256. Restart here means a new helper
+process, not a Mac reboot. The documented same-UID caller trust boundary remains.
+Real key enrollment is the next separate owner step, not already completed.
+
+## Historical implementation checkpoint
+
 Implementation/test candidate: `570d806f812b601534bbbcf0f018ef18719a8177`.
 Branch: `codex/maya-local-crm-setup-20261010`.
 Baseline: `0a34e04826c83b38c22f4a334e92db2bcddbb67c`.

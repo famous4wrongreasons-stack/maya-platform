@@ -1,0 +1,82 @@
+{
+  "qualification": "OWNER_AUTHORIZED_SYNTHETIC_VALUES_REAL_LOGIN_KEYCHAIN_NOT_PROVIDER_ACCEPTANCE",
+  "date": "2026-10-12",
+  "observedAt": "2026-10-12T12:58:23.685Z",
+  "repositoryHead": "6a1e780e92384cfd9ed56d21949ee3658af371c3",
+  "implementationCandidate": "570d806f812b601534bbbcf0f018ef18719a8177",
+  "ownerApprovalRef": "user-call_72e8c1130117427c9c7945e1836915fb",
+  "result": "PASS",
+  "existingExactItemsBefore": 0,
+  "createdSyntheticItems": 2,
+  "helperFreshProcessReads": 4,
+  "stdoutExportRefusals": 2,
+  "pinSubstitutionRefusals": 2,
+  "deletedTestItems": 2,
+  "exactItemsAfter": 0,
+  "missingItemReadRefusals": 2,
+  "decryptAclExactHelperOnly": true,
+  "genericNodeTerminalAclAdded": false,
+  "setupProcessesExited": [
+    0,
+    0
+  ],
+  "helperRemainsInstalled": true,
+  "helperRebuiltOrResigned": false,
+  "realCredentialsUsedOrEnrolled": false,
+  "externalProviderCalls": 0,
+  "productionEffects": 0,
+  "paidAllowanceGranted": false,
+  "scopeLimitations": [
+    "Restart means helper process restart, not Mac reboot.",
+    "Actual helper hash/CDHash pin substitution is refused; no modified binary was granted Keychain access.",
+    "Only exact two service/account records were queried; unrelated Keychain entries were not enumerated.",
+    "Same-UID caller trust remains the documented boundary.",
+    "No live Maya paid/provider session was run."
+  ],
+  "harnessDiagnostics": [
+    "Metadata audit needed two compile-only API corrections; retained external compile logs. Final executable audit succeeded.",
+    "UI AX snapshot after closing first setup timed out; process exit 0 independently verified."
+  ],
+  "receipts": [
+    {
+      "file": "baseline.json",
+      "sha256": "67094772cbab429d70f62f39965c0e4beece5d9da0c3d5700916e8c27434a1ef",
+      "size": 496
+    },
+    {
+      "file": "installed-source.json",
+      "sha256": "b19759f97a27b62b3c0f5c29180f4f328889d5eca982065f4173b057996a17e1",
+      "size": 421
+    },
+    {
+      "file": "before-items.json",
+      "sha256": "ce8a180b3d305f11674a00d4ef0b587bf59619421e318087954c259693742156",
+      "size": 307
+    },
+    {
+      "file": "created-acl.json",
+      "sha256": "e498af1a80485ffcd7c4c52448ebaa61ad6b0f305826f0696f0ec8684d69b849",
+      "size": 3179
+    },
+    {
+      "file": "read-restart-proof.json",
+      "sha256": "631aeb6624bc6d11939a98c0eac6da0f1a49dde68a487e468be4ddf5e571094e",
+      "size": 1096
+    },
+    {
+      "file": "after-items.json",
+      "sha256": "ce8a180b3d305f11674a00d4ef0b587bf59619421e318087954c259693742156",
+      "size": 307
+    },
+    {
+      "file": "cleanup-proof.json",
+      "sha256": "3eff068f8849ded1f5c5388b3ac1bf56141dad43848df81339508e457f56286e",
+      "size": 207
+    },
+    {
+      "file": "ExactItemAudit.swift",
+      "sha256": "ed65cb6c048693bd848b2cba521c8d935df318f24cabec741d499886b653bbe3",
+      "size": 3319
+    }
+  ]
+}

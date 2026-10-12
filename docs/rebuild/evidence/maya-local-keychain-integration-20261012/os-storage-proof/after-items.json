@@ -1,0 +1,15 @@
+{
+  "credentialDataRequested" : false,
+  "items" : [
+    {
+      "present" : false,
+      "service" : "ru.mayaos.dev.local-model.deepseek.v1",
+      "status" : -25300
+    },
+    {
+      "present" : false,
+      "service" : "ru.mayaos.dev.local-read.yclients-partner.v1",
+      "status" : -25300
+    }
+  ]
+}
