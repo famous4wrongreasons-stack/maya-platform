@@ -36,6 +36,7 @@ const mutations = [
   ['model-write', 'policy', "(init?.method ?? 'GET') !== 'GET'", 'false', 'write'],
   ['one-invocation', 'transport', "assert.ok(!used, 'history_single_run');", '', 'one invocation'],
   ['replayed-page', 'transport', 'seen.has(String(raw))', 'false', 'catalogue replay'],
+  ['session-call-budget', 'transport', 'counters.calls >= L.calls', 'false', 'same finite total request budget'],
   ['unordered-page', 'transport', 'if (next !== page + 1) refuse();', '', 'ordered pages'],
   ['expired-operation', 'transport', 'clock() >= op.deadline', 'false', 'expired, revoked'],
   ['stale-response-authority', 'transport', 'await verifyCurrent(); check(op); assertSource();\n        const body', 'check(op); assertSource();\n        const body', 'expired, revoked'],
