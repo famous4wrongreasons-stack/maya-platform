@@ -120,7 +120,7 @@ try {
       profile: manifest.profile,
       limitsSha256: manifest.limitsSha256,
       ownerApprovalRef: 'SYNTHETIC_NO_PAID_OR_REAL_STORAGE_AUTHORIZATION',
-      startsAt: new Date(Date.now() - 1000).toISOString(),
+      startsAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 120000).toISOString(),
       revoked: false,
       target: manifest.admissionContext.target,
