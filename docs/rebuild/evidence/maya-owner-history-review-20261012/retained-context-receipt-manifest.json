@@ -1,0 +1,65 @@
+[
+  {
+    "name": "live-summary.json",
+    "localPath": "/private/tmp/maya-owner-history-review-20261012-03/live-summary.json",
+    "sha256": "d213f654502b2f1b968295e03a5bc694131bb759392e5932aaa54cbde4eb16d4",
+    "size": 1076,
+    "publication": "SAFE_SUMMARY_ONLY"
+  },
+  {
+    "name": "resume.json",
+    "localPath": "/private/tmp/maya-owner-history-review-20261012-03/session/resume.json",
+    "sha256": "2dfb28e6cbd995500ad76a55a18c95e363b2eeb58103070c2f1314167aa2d71b",
+    "size": 550079,
+    "publication": "SAFE_SUMMARY_ONLY"
+  },
+  {
+    "name": "broker-report.json",
+    "localPath": "/private/tmp/maya-owner-history-review-20261012-03/broker/broker-report.json",
+    "sha256": "7f86df0a420f478042a3d8eabfb262ca6b6cb818589d6a648374aa4855360d9f",
+    "size": 1136,
+    "publication": "SAFE_SUMMARY_ONLY"
+  },
+  {
+    "name": "context-diagnosis.json",
+    "localPath": "/private/tmp/maya-owner-history-review-20261012-03/context-diagnosis.json",
+    "sha256": "50956302ed37d8629ef89cc966bee142b437744ec66e798c3c373dcfaa34ce6b",
+    "size": 787,
+    "publication": "SAFE_SUMMARY_ONLY"
+  },
+  {
+    "name": "maya-history-retained-all-units-20261012.log",
+    "localPath": "/private/tmp/maya-history-retained-all-units-20261012.log",
+    "sha256": "2813931095c9cdcca3e6089aac7875607a000e8636c303c6bbd70b46ed5ab3af",
+    "size": 48655,
+    "publication": "SYNTHETIC_PROOF_OR_HASH_ONLY"
+  },
+  {
+    "name": "summary.json",
+    "localPath": "/private/tmp/maya-history-retained-before-20261012/summary.json",
+    "sha256": "05c60e3134e617fe8bc52e025188f670835bd8f853ce3be65abe69d0b53249e6",
+    "size": 2145,
+    "publication": "SYNTHETIC_PROOF_OR_HASH_ONLY"
+  },
+  {
+    "name": "summary.json",
+    "localPath": "/private/tmp/maya-history-retained-after-20261012/summary.json",
+    "sha256": "ecc81c1f2dec1106dd30f1b3d40d75bd6e5575310914df1903483aafe36f3879",
+    "size": 2491,
+    "publication": "SYNTHETIC_PROOF_OR_HASH_ONLY"
+  },
+  {
+    "name": "summary.json",
+    "localPath": "/private/tmp/maya-history-retained-mutations-20261012/summary.json",
+    "sha256": "a6a4b9ea5fb5d4310d238df416279845c8924c6b784a0f81e6e8d86b23ad1dc3",
+    "size": 4246,
+    "publication": "SYNTHETIC_PROOF_OR_HASH_ONLY"
+  },
+  {
+    "name": "synthetic-history.png",
+    "localPath": "/private/tmp/maya-history-retained-after-20261012/synthetic-history.png",
+    "sha256": "5cc6fee5ba1b5ae59f84bbb25c4e22f9a735252b55baa66dc4b4508975b28678",
+    "size": 76224,
+    "publication": "SYNTHETIC_PROOF_OR_HASH_ONLY"
+  }
+]

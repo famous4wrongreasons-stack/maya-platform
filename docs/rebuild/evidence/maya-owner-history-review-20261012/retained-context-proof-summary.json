@@ -1,0 +1,246 @@
+{
+  "before": {
+    "qualification": "SYNTHETIC_EXISTING_HISTORY_REVIEW_HTTP_PG_NOT_LIVE_ACCEPTANCE",
+    "head": "8a216e63d825fcd00a72badd80c3d57a37bdc217",
+    "status": "failed",
+    "checks": [
+      "prior-public-conversation-persisted-through-canonical-typed-and-reply-owners",
+      "one-real-canonical-password-login-with-retained-verified-personal-context",
+      "actual-React-restores-three-prior-public-question-answer-pairs",
+      "full-trial-canonical-A22-setting-idempotency-CAS-and-privacy-only-consent",
+      "personal-reader-one-own-visit-foreign-and-note-excluded"
+    ],
+    "completed": [
+      "backend-build",
+      "react-build",
+      "initdb",
+      "pg-start",
+      "createdb",
+      "migrations"
+    ],
+    "realProviderCalls": 0,
+    "syntheticFailure": {
+      "name": "AssertionError",
+      "message": "synthetic AChat {\"message\":\"MAYA AI is temporarily unavailable.\",\"error\":{\"code\":\"ai_model_unavailable\",\"detail\":\"history_review_private_model_input_refused\"}}\n\n503 !== 201\n",
+      "stack": "AssertionError [ERR_ASSERTION]: synthetic AChat {\"message\":\"MAYA AI is temporarily unavailable.\",\"error\":{\"code\":\"ai_model_unavailable\",\"detail\":\"history_review_private_model_input_refused\"}}\n\n503 !== 201\n\n    at file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-saas-backend/scripts/local-owner-history-review-proof.mjs:227:12"
+    },
+    "syntheticPlannerInputs": [
+      {
+        "phase": "tool_planning",
+        "userOnly": true,
+        "retainedIntent": "company.business_hours",
+        "memoryCount": 0,
+        "toolResultCount": 0
+      }
+    ],
+    "clusterStopped": true,
+    "pidFileAbsent": true,
+    "sourceUnchanged": true
+  },
+  "after": {
+    "qualification": "SYNTHETIC_EXISTING_HISTORY_REVIEW_HTTP_PG_NOT_LIVE_ACCEPTANCE",
+    "head": "f5cf6a645da42632033fbda08049e80630368cf1",
+    "status": "passed",
+    "checks": [
+      "prior-public-conversation-persisted-through-canonical-typed-and-reply-owners",
+      "one-real-canonical-password-login-with-retained-verified-personal-context",
+      "actual-React-restores-three-prior-public-question-answer-pairs",
+      "full-trial-canonical-A22-setting-idempotency-CAS-and-privacy-only-consent",
+      "personal-reader-one-own-visit-foreign-and-note-excluded",
+      "actual-React-AiCore-C9-own-history-tool-and-server-composed-answer",
+      "second-React-question-with-private-assistant-history-only-user-text-reaches-model",
+      "one-browser-login-three-prior-plus-two-new-rendered-message-pairs",
+      "exactly-two-synthetic-planner-calls-no-private-result-generation-call",
+      "canonical-public-prior-context-then-private-history-intent-cross-actual-planner-wire",
+      "same-canonical-conversation-two-new-pairs-prior-six-rows-unchanged",
+      "HTTP-import-booking-binding-SMS-direct-tool-and-new-question-refused",
+      "internal-import-and-business-execution-refused",
+      "catalogue-cache-expiry-label-refresh-no-journal",
+      "revoked-current-client-link-refuses-history",
+      "existing-journal-byte-values-unchanged-no-reimport-or-widget-grant",
+      "expired-local-allowance-refuses-read"
+    ],
+    "completed": [
+      "backend-build",
+      "react-build",
+      "initdb",
+      "pg-start",
+      "createdb",
+      "migrations"
+    ],
+    "realProviderCalls": 0,
+    "syntheticPlannerInputs": [
+      {
+        "phase": "tool_planning",
+        "userOnly": true,
+        "retainedIntent": "company.business_hours",
+        "memoryCount": 0,
+        "toolResultCount": 0
+      },
+      {
+        "phase": "tool_planning",
+        "userOnly": true,
+        "retainedIntent": "booking.list_own",
+        "memoryCount": 0,
+        "toolResultCount": 0
+      }
+    ],
+    "clusterStopped": true,
+    "pidFileAbsent": true,
+    "sourceUnchanged": true
+  },
+  "mutations": {
+    "qualification": "SYNTHETIC_LOCAL_GUARD_NOT_RELEASE_CERTIFICATION",
+    "head": "f5cf6a645da42632033fbda08049e80630368cf1",
+    "baseline": {
+      "exit": 0,
+      "passed": 7,
+      "failed": 0,
+      "failures": [],
+      "assertion": false
+    },
+    "mutations": [
+      {
+        "name": "import-admission",
+        "exit": 1,
+        "passed": 6,
+        "failed": 1,
+        "failures": [
+          "review transport cannot import even through direct journal operation; labels still use exact company and existing bounded transport"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "model-results",
+        "exit": 1,
+        "passed": 6,
+        "failed": 1,
+        "failures": [
+          "actual model wire must contain only fixed user questions, no private history, memory, assistant or result phase"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "model-memory",
+        "exit": 1,
+        "passed": 6,
+        "failed": 1,
+        "failures": [
+          "actual model wire must contain only fixed user questions, no private history, memory, assistant or result phase"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "model-phase",
+        "exit": 1,
+        "passed": 6,
+        "failed": 1,
+        "failures": [
+          "actual model wire must contain only fixed user questions, no private history, memory, assistant or result phase"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "model-retained-plan",
+        "exit": 1,
+        "passed": 5,
+        "failed": 2,
+        "failures": [
+          "actual model wire must contain only fixed user questions, no private history, memory, assistant or result phase",
+          "retained public hours context is canonical empty metadata, never extra model data or tool authority"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "model-assistant",
+        "exit": 1,
+        "passed": 6,
+        "failed": 1,
+        "failures": [
+          "actual model wire must contain only fixed user questions, no private history, memory, assistant or result phase"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "request-expiry",
+        "exit": 1,
+        "passed": 6,
+        "failed": 1,
+        "failures": [
+          "serialized sequence rejects foreign actor, replay, concurrency, expiry and closed request"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "request-overlap",
+        "exit": 1,
+        "passed": 6,
+        "failed": 1,
+        "failures": [
+          "serialized sequence rejects foreign actor, replay, concurrency, expiry and closed request"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "public-context-regression",
+        "exit": 1,
+        "passed": 6,
+        "failed": 1,
+        "failures": [
+          "retained public hours context is canonical empty metadata, never extra model data or tool authority"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "public-context-private-slots",
+        "exit": 1,
+        "passed": 6,
+        "failed": 1,
+        "failures": [
+          "retained public hours context is canonical empty metadata, never extra model data or tool authority"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "public-context-tool-authority",
+        "exit": 1,
+        "passed": 6,
+        "failed": 1,
+        "failures": [
+          "retained public hours context is canonical empty metadata, never extra model data or tool authority"
+        ],
+        "assertion": true,
+        "killed": true
+      },
+      {
+        "name": "public-context-parent",
+        "exit": 1,
+        "passed": 6,
+        "failed": 1,
+        "failures": [
+          "retained public hours context is canonical empty metadata, never extra model data or tool authority"
+        ],
+        "assertion": true,
+        "killed": true
+      }
+    ],
+    "restored": {
+      "exit": 0,
+      "passed": 7,
+      "failed": 0,
+      "failures": [],
+      "assertion": false
+    },
+    "workingSourceUnchanged": true
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "contract": "maya.local-personal-history-review-result/1",
+  "observedAt": "2026-10-12T10:55:05.985Z",
+  "candidate": "6c13a04378c72d52cd78f253727139b1dc4a0010",
+  "qualification": "PARTIAL_LIVE_HISTORY_READ_PASS_ACHAT_BLOCKED_BEFORE_MODEL",
+  "ordinaryLoginCount": 1,
+  "settingCommandHttp": 201,
+  "settingReadHttp": 200,
+  "historyEnabled": true,
+  "settingRevision": 1,
+  "privacyConsent": true,
+  "marketingConsent": false,
+  "personalReadHttp": 200,
+  "personalVisitCount": 4,
+  "exactVerifiedClientRowsMatch": true,
+  "historyReimport": false,
+  "chat": [
+    {
+      "question": "Покажи историю моих визитов",
+      "http": 503,
+      "errorCode": "ai_model_unavailable",
+      "completed": false
+    }
+  ],
+  "secondQuestion": "NOT_SENT",
+  "rootCause": "existing canonical company.business_hours context is refused by local history-only planning guard",
+  "privateVisitDataEmittedToModel": false,
+  "productSourcesChangedDuringRun": false,
+  "requiresSyntheticRegressionBeforeNextLiveAttempt": true,
+  "otherClientsInSameTenantNotReturned": 158,
+  "cleanup": {
+    "runtimeGroupAbsent": true,
+    "clusterStopped": true,
+    "sourceUnchanged": true,
+    "privateStateRetained": true,
+    "stopped": true,
+    "stoppedAt": "2026-10-12T10:55:06.188Z",
+    "stopReason": "SIGINT",
+    "connectionsAtStop": 0,
+    "requestsAtStop": 0,
+    "upstreamCalls": 0
+  },
+  "publicLabelReads": {
+    "calls": 3,
+    "refused": 0,
+    "routes": {
+      "book_services": 1,
+      "categories": 1,
+      "team": 1
+    }
+  },
+  "sourceFieldClarification": "158 are other/unresolved Clients in the same salon, not records of another tenant; source observation mislabeled this aggregate."
+}

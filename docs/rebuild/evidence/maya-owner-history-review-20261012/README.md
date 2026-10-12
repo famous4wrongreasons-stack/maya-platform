@@ -1,5 +1,9 @@
 # Existing personal history — one local AChat acceptance window
 
+Latest result: [live local setting and four personal visits passed; retained-context
+qualification defect fixed](LIVE-RESULT.md). The earlier sections below describe
+their original checkpoints. Live external-model AChat answers remain unverified.
+
 Date: 2026-10-12. Tested source: `63d61fadaeac2d56d107ffd86b8a940c848c1d36`.
 Branch: `codex/maya-local-crm-setup-20261010`.
 This is local acceptance preparation after C9, not C10, a release certificate, deployment, or evidence of a completed live history review.
