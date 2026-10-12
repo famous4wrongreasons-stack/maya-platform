@@ -122,7 +122,7 @@ export function resumePlan(env, state, pgBin, minutes, output, diagnosticNoProvi
   assert.ok(typeof output === 'string' && path.isAbsolute(output) && output !== state && !output.startsWith(state + path.sep), 'separate_output_required');
   const db = new URL(env.DATABASE_URL), web = new URL(env.CORS_ALLOWED_ORIGINS);
   const plan = readSessionPlan({ stateDirectory: state, pgBin, database: db.pathname.slice(1), pgPort: Number(db.port), apiPort: Number(env.PORT), webPort: Number(web.port), minutes: batch ? 10 : minutes, diagnosticNoProvider });
-  // Only this separately pinned saved-login contract admits a 30-minute runtime.
+  // Only the separately pinned saved-login and history contracts admit 30 minutes.
   // Generic setup, chat, diagnostics and the historical Telegram mode keep their bounds.
   if (batch) plan.durationMs = 1800000;
   // Compiling the explicitly approved candidate does not migrate the retained DB.
@@ -319,6 +319,7 @@ export async function main(args) {
       source, initialSourceHead: initial.source.head, initialManifestSha256: pins.initial, completedRestartSha256: pins.receipt,
       stateDirectory: state, ownedCluster: plan.cluster, samePrivateState: true, completed: [], resources: initial.resources,
       privateStateRetained: true, partnerTokenPersistence: false, executesNoInitdbMigrationSeedOrSignup: true,
+      ...(historyLaunch ? { ownerHistoryContract: historyLaunch.plan.contract, historyDay: historyLaunch.plan.day, historyTimezone: historyLaunch.plan.timezone } : {}),
       ...(telegramLaunch ? { ownerTelegramContract: telegramLaunch.plan.contract, maxLoginAttempts: ownerTelegramLimits(telegramLaunch.plan.contract).attempts ?? null } : {}),
       diagnostic: createDiagnostic(diagnosticNoProvider) };
     save = () => fs.writeFileSync(path.join(output, 'resume.json'), JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
@@ -347,7 +348,7 @@ export async function main(args) {
     if (!diagnosticNoProvider) {
       const abort = new AbortController(); control.terminate = () => abort.abort();
       report.status = 'waiting_input'; diagnosticStage(report.diagnostic, 'waiting_input'); save();
-      process.stdout.write(telegramLaunch?.plan.contract === OWNER_TELEGRAM_BATCH_PROFILE
+      process.stdout.write(historyLaunch ? 'Same-database preparation ready. One explicit fourteen-day journal synchronization, within the approved 30-minute window. Enter the partner token once.\n' : telegramLaunch?.plan.contract === OWNER_TELEGRAM_BATCH_PROFILE
         ? 'Same-database preparation ready. Enter each key once in this terminal. Saved Telegram login only: at most 3 attempts, within the approved 30-minute window.\n'
         : 'Same-database preparation ready. Owner input is required in this terminal; the 1–15 minute web session starts only after backend and web readiness.\n');
       partner = await promptPartnerToken({ timeoutMs: plan.promptDeadlineMs, signal: abort.signal });

@@ -107,7 +107,7 @@ try {
     if(u.pathname.includes('staff')) return Response.json({success:true,data:[{id:51,name:'Synthetic staff',bookable:true}]});
     throw Error('Synthetic unlisted wire');
   };
-  runtime=await installOwnerHistory({app,prisma:databaseService,require,backend,launch:{plan:permit,assertCurrent(){assert.ok(alive);launch.assertCurrent();}},nativeFetch:wire});
+  runtime=await installOwnerHistory({app,prisma:databaseService,require,backend,launch:{plan:permit,assertPermitCurrent(){assert.ok(alive);launch.assertPermitCurrent();},assertCurrent(){assert.ok(alive);launch.assertCurrent();}},nativeFetch:wire});
   globalThis.fetch=runtime.fetch;
   configureHttpApp(app);
   app.use((req,res,next)=>{const reason=ownerHistoryIngress(req.method,req.originalUrl,req.headers,req.body,origin,scope);if(reason)res.status(403).json({error:{code:reason}});else next();});
@@ -143,7 +143,7 @@ try {
     // New AppModule per case avoids retaining an interceptor from a stopped qualification.
     await app.close();globalThis.fetch=async()=>{throw Error('startup provider forbidden');};
     app=await NestFactory.create(AppModule,{bodyParser:false,logger:false,abortOnError:false});
-    runtime=await installOwnerHistory({app,prisma:app.get(PrismaService),require,backend,launch:{plan:permit,assertCurrent(){assert.ok(alive);launch.assertCurrent();}},nativeFetch:wire});globalThis.fetch=runtime.fetch;
+    runtime=await installOwnerHistory({app,prisma:app.get(PrismaService),require,backend,launch:{plan:permit,assertPermitCurrent(){assert.ok(alive);launch.assertPermitCurrent();},assertCurrent(){assert.ok(alive);launch.assertCurrent();}},nativeFetch:wire});globalThis.fetch=runtime.fetch;
     return runtime;
   };
   await install('outside-window');assert.equal((await runtime.importOnce()).status,'failed');
@@ -159,7 +159,14 @@ try {
   writer.applyObservation=async input=>{const outcome=await write(input);writeCount++;runtime.stop();return outcome;};
   assert.equal((await runtime.importOnce()).status,'failed');assert.equal(writeCount,1);
   report.checks.push('stop-between-rows-cannot-restore-unrestricted-writer');
-  await install('partial');const partial=await runtime.importOnce();assert.equal(partial.status,'ran');assert.equal(partial.completeness,'truncated');
+  await install('happy');
+  const lateWriter=app.get(AppointmentChangeService), lateWrite=lateWriter.applyObservation.bind(lateWriter);let completedWrites=0;
+  lateWriter.applyObservation=async input=>{const outcome=await lateWrite(input);if(++completedWrites===2)alive=false;return outcome;};
+  assert.equal((await runtime.importOnce()).status,'failed');
+  const lateRun=await prisma.reconciliationRun.findFirst({where:{tenantId:tenant.id},orderBy:{startedAt:'desc'}});
+  assert.equal(lateRun.completeness,null);assert.equal(lateRun.finishedAt,null);assert.equal(lateRun.failureCode,'reconciliation_failed');alive=true;
+  report.checks.push('expiry-after-final-row-cannot-mark-reconciliation-complete');
+  await install('partial');const partialStart=performance.now();const partial=await runtime.importOnce();report.partialReconciliationMs=Math.round(performance.now()-partialStart);assert.equal(partial.status,'ran');assert.equal(partial.completeness,'truncated');
   assert.equal(await prisma.appointment.count({where:{tenantId:tenant.id,crmExternalId:'2'}}),1);
   report.checks.push('nonprogressing-source-remains-truncated-no-absence-deletion');
   await install('expire');assert.equal((await runtime.importOnce()).status,'failed');

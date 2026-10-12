@@ -24,11 +24,12 @@ export async function installOwnerHistory({ app, prisma, require, backend, launc
   const auth = app.get(AuthService), sessions = app.get(AuthSessionService), crm = app.get(CrmService);
   const reconciliation = app.get(AppointmentReconciliationService), context = app.get(TenantContextService);
   let stopped = false, sourcePin;
+  const permitCurrent = launch.assertPermitCurrent ?? launch.assertCurrent;
   const refuse = () => { throw new ForbiddenException({ error: { code: 'local_owner_history_scope_refused' } }); };
   const current = async () => {
     if (stopped) return refuse();
     try {
-      launch.assertCurrent(); await verifyOwnerChatDatabase(prisma, scope);
+      permitCurrent(); await verifyOwnerChatDatabase(prisma, scope);
       const [tenant, branch, integration] = await Promise.all([
         prisma.tenant.findUnique({ where: { id: scope.tenantId }, select: { defaultTimezone: true, calendarSource: true } }),
         prisma.branch.findUnique({ where: { id: scope.branchId }, select: { timezone: true } }),
@@ -42,11 +43,11 @@ export async function installOwnerHistory({ app, prisma, require, backend, launc
       const pin = createHash('sha256').update(JSON.stringify({ tenant, branch, integration })).digest('hex');
       if (sourcePin === undefined) sourcePin = pin;
       assert.ok(sourcePin === pin, 'history_source_changed');
-      launch.assertCurrent(); if (stopped) return refuse();
+      permitCurrent(); if (stopped) return refuse();
     } catch { return refuse(); }
   };
-  await current();
-  const transport = createOwnerHistoryTransport({ plan, nativeFetch, assertCurrent: launch.assertCurrent, verifyCurrent: current });
+  launch.assertCurrent(); await current();
+  const transport = createOwnerHistoryTransport({ plan, nativeFetch, assertCurrent: permitCurrent, assertSource: launch.assertCurrent, verifyCurrent: current });
   const patch = (object, method, wrapper) => {
     assert.equal(typeof object[method], 'function', 'history_canonical_owner_required');
     const original = object[method]; object[method] = wrapper(original.bind(object)); undo.push(() => { object[method] = original; });
@@ -93,6 +94,16 @@ export async function installOwnerHistory({ app, prisma, require, backend, launc
     patch(app.get(AppointmentChangeService), 'applyObservation', original => async (input) => {
       await transport.current(); if (!importing || input.tenantId !== scope.tenantId || input.ingestionMethod !== 'reconciliation') return refuse();
       return original(input);
+    });
+    // Full committed-source proof at completion, before the canonical success
+    // write. Per-row checks still reread the permit, tenant/source and identity
+    // owner. Do not re-hash thousands of loaded source files for every row.
+    patch(prisma.reconciliationRun, 'update', original => async input => {
+      if (input.data?.finishedAt) {
+        await transport.current(); launch.assertCurrent();
+        if (!importing) return refuse();
+      }
+      return original(input); // Canonical failure/lease cleanup remains available.
     });
     // Public labels may be fetched only within the canonical private reader.
     const appointments = app.get(ClientAppointmentReadService);

@@ -113,3 +113,8 @@ test('catalogue replay is refused independently of journal page ordering',async(
 test('explicit foreign company in provider response is refused',async()=>{
   const t=transport({nativeFetch:async()=>Response.json({data:[{id:1,company_id:99999}]})});await assert.rejects(t.run('journal',()=>t.fetch(records(1))));
 });
+test('changed source cannot expose a response while the execution permit stays current',async()=>{
+  let sourceCurrent=true;const t=transport({assertSource:()=>assert.ok(sourceCurrent),nativeFetch:async()=>{sourceCurrent=false;return Response.json({data:[]});}});
+  // Check exposure inside the operation: the outer completion fence alone is insufficient.
+  let exposed=false;await assert.rejects(t.run('journal',async()=>{await t.fetch(records(1));exposed=true;}));assert.equal(exposed,false);
+});

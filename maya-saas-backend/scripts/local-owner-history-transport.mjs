@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { HISTORY_LIMITS as L, historyProviderRoute } from './local-owner-history-policy.mjs';
 // Preserves adapter responses. All diagnostics are counts, never provider bodies.
-export function createOwnerHistoryTransport({ plan, nativeFetch, assertCurrent, verifyCurrent, clock = Date.now }) {
+export function createOwnerHistoryTransport({ plan, nativeFetch, assertCurrent, verifyCurrent, assertSource = assertCurrent, clock = Date.now }) {
   const context = new AsyncLocalStorage(), active = new Set(), seen = new Set();
   const counters = { calls: 0, refused: 0, routes: {} };
   let closed = false, used = false, page = 0, totalBytes = 0, poisoned = false;
@@ -15,11 +15,11 @@ export function createOwnerHistoryTransport({ plan, nativeFetch, assertCurrent, 
     counters,
     current: async () => { const op = context.getStore(); check(op); await verifyCurrent(); check(op); },
     async run(purpose, fn) {
-      assertCurrent(); assert.ok(!closed && !poisoned && ['journal','labels'].includes(purpose), 'history_operation_refused');
+      assertSource(); assertCurrent(); assert.ok(!closed && !poisoned && ['journal','labels'].includes(purpose), 'history_operation_refused');
       if (purpose === 'journal') { assert.ok(!used, 'history_single_run'); used = true; }
       const op = { purpose, active: true, deadline: clock() + L.operationMs, controller: new AbortController() };
       active.add(op); const timer = setTimeout(() => op.controller.abort(), L.operationMs);
-      try { const value = await context.run(op, fn); check(op); return value; }
+      try { const value = await context.run(op, fn); check(op); assertSource(); return value; }
       finally { clearTimeout(timer); op.active = false; op.controller.abort(); active.delete(op); }
     },
     stop() { closed = true; for (const op of active) { op.active = false; op.controller.abort(); } },
@@ -27,6 +27,7 @@ export function createOwnerHistoryTransport({ plan, nativeFetch, assertCurrent, 
       const op = context.getStore(); let reader; const chunks = [];
       try {
         check(op); await verifyCurrent(); check(op);
+        assertSource();
         const route = historyProviderRoute(raw, init, plan, op.purpose);
         if (!route || counters.calls >= L.calls || seen.has(String(raw))) refuse();
         if (route === 'history_records') {
@@ -46,7 +47,7 @@ export function createOwnerHistoryTransport({ plan, nativeFetch, assertCurrent, 
           if (bytes > L.responseBytes || totalBytes > L.totalBytes) refuse();
           chunks.push(Buffer.from(part.value));
         }
-        await verifyCurrent(); check(op);
+        await verifyCurrent(); check(op); assertSource();
         const body = Buffer.concat(chunks);
         try {
           const parsed = JSON.parse(body.toString('utf8'));

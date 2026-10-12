@@ -66,9 +66,12 @@ export function readPinnedLocalLaunch(filename, hash, approvalRef, readSource, r
     const fd = fs.openSync(used + '.child', fs.constants.O_WRONLY | fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_NOFOLLOW, 0o600);
     try { fs.writeFileSync(fd, expected); } finally { fs.closeSync(fd); }
   }
-  return { plan, assertCurrent() {
+  const assertPermitCurrent = () => {
     assert.ok(role !== 'inspect', 'local_telegram_claim_required'); assertClaim();
     assert.ok(digest(JSON.stringify(readPlan(filename, hash))) === digest(JSON.stringify(plan)), 'local_telegram_plan_changed');
-    validate(plan, readSource(), approvalRef);
+    validate(plan, source, approvalRef);
+  };
+  return { plan, assertPermitCurrent, assertCurrent() {
+    assertPermitCurrent(); validate(plan, readSource(), approvalRef);
   } };
 }
