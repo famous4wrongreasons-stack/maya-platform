@@ -110,6 +110,20 @@ test('provider errors sanitized; no retry; no private data in result projection'
 test('catalogue replay is refused independently of journal page ordering',async()=>{
   const t=transport();await assert.rejects(t.run('labels',async()=>{await t.fetch(base+'services/12345');await t.fetch(base+'services/12345');}));
 });
+test('later personal read may refresh public labels after journal adapter cache expires',async()=>{
+  const t=transport();const url=base+'services/12345';
+  await t.run('journal',()=>t.fetch(url));
+  await t.run('labels',()=>t.fetch(url));
+  assert.equal(t.counters.calls,2);assert.equal(t.counters.refused,0);
+  await assert.rejects(t.run('journal',()=>t.fetch(records(1))));
+});
+test('label refresh operations share the same finite total request budget',async()=>{
+  const t=transport();const url=base+'services/12345';
+  for(let i=0;i<L.calls;i++)await t.run('labels',()=>t.fetch(url));
+  assert.equal(t.counters.calls,L.calls);
+  await assert.rejects(t.run('labels',()=>t.fetch(url)));
+  assert.equal(t.counters.calls,L.calls);
+});
 test('explicit foreign company in provider response is refused',async()=>{
   const t=transport({nativeFetch:async()=>Response.json({data:[{id:1,company_id:99999}]})});await assert.rejects(t.run('journal',()=>t.fetch(records(1))));
 });

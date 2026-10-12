@@ -123,9 +123,13 @@ try {
   const rows=await prisma.appointment.findMany({where:{tenantId:tenant.id}});assert.equal(rows.length,2);assert.equal(rows.filter(r=>r.mayaClientId===personal.id).length,1);assert.equal(rows.filter(r=>r.mayaClientId===other.id).length,1);
   assert.equal((await runtime.importOnce()).status,'failed');assert.equal(await prisma.reconciliationRun.count({where:{tenantId:tenant.id}}),1);
   report.checks.push('real-adapter-to-canonical-reconciliation-two-distinct-clients','one-import-concurrent-and-later-replay-refused');
+  // Real acceptance reached this read after the five-minute canonical adapter
+  // cache expired. Reproduce that boundary without sleeping or changing clocks.
+  const cachedAdapter=crm.adapterCache.get(tenant.id);assert.ok(cachedAdapter);cachedAdapter.expiresAt=Date.now()-1;
   const personalRead=await http('/api/client-channel/appointments',undefined,token);assert.equal(personalRead.status,200);assert.equal(personalRead.body.length,1);
   assert.ok(!JSON.stringify(personalRead.body).includes('Synthetic foreign'));assert.ok(!JSON.stringify(personalRead.body).includes('SYNTHETIC PRIVATE NOTE'));
   report.checks.push('canonical-personal-reader-excludes-foreign-records-and-notes');
+  report.checks.push('expired-adapter-cache-refreshes-labels-without-reimport');
   const settings=await http('/api/governed-settings/tenant/client_capabilities',undefined,token);assert.equal(settings.status,200);
   const command={confirmed:true,namespace:'client_capabilities',expectedRevision:settings.body.revision,previousRevisionId:settings.body.previousRevisionId,content:{client_self_visit_history:true}};
   const changed=await http('/api/governed-settings/tenant',command,token).set('Idempotency-Key',randomUUID());assert.equal(changed.status,201,'synthetic governed setting '+JSON.stringify(changed.body));
