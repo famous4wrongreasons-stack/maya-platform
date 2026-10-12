@@ -139,9 +139,9 @@ async function main() {
     const { data } = await page.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
     fs.writeFileSync(path.join(output, name + '.png'), Buffer.from(data, 'base64'), { flag: 'wx', mode: 0o600 });
   }
-  async function newPage(origin) {
+  async function newPage(origin, scenario) {
     const page = await browser.newPage(); pages.push(page);
-    guards.push(await installGuard(page, origin));
+    guards.push(await installGuard(page, origin, scenario));
     await page.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
     await page.goto(origin + '/');
     return page;
@@ -234,7 +234,7 @@ async function main() {
     };
     if (input.notBefore) while (Date.now() < input.notBefore) await pause(Math.min(1000, input.notBefore - Date.now()));
     for (const scenario of input.scenarios) {
-      const page = await newPage(origin); activePage = page;
+      const page = await newPage(origin, scenario); activePage = page;
       await login(page, scenario.email);
       const opened = await openPersonal(page, scenario.key);
       if (opened === null) continue;
@@ -256,13 +256,22 @@ async function main() {
         continue;
       }
       assert.ok(await page.waitFor('document.body.innerText.includes("Запись для вашего подтверждённого")'));
+      const branchRequest = await until(() => page.apiRequests('/branches').find(r => r.finishedAt), 'canonical branches');
+      assert.equal(branchRequest.status, 200);
+      const branches = JSON.parse(await page.responseBody(branchRequest.requestId));
+      const branch = branches.find(item => item.id === scenario.branchId);
+      assert.ok(branch, 'Current server branch must include the synthetic salon branch');
+      assert.equal(branch.timezone, 'Europe/Moscow');
+      await clickPersonalChoice(page, `${branch.name} · ${branch.timezone}`);
       await clickPersonalChoice(page, scenario.serviceName); await clickPersonalChoice(page, scenario.staffName);
       assert.equal(await page.fill('Q.all("input[data-personal-control]").find(Q.visible)', scenario.date), true);
       await clickNamed(page, 'Показать свободное время');
       const slotsRequest = await until(() => page.apiRequests('/available-slots').find(r => r.finishedAt), 'live availability');
       assert.equal(slotsRequest.status, 200);
+      assert.equal(new URL(slotsRequest.url).searchParams.get('branchId'), branch.id);
       const slot = JSON.parse(await page.responseBody(slotsRequest.requestId))[0]; assert.ok(slot);
-      const label = new Intl.DateTimeFormat('ru', { timeZone: 'UTC', dateStyle: 'short', timeStyle: 'short' }).format(new Date(slot.start)) + ' UTC';
+      assert.equal(slot.branchId, branch.id);
+      const label = new Intl.DateTimeFormat('ru', { timeZone: branch.timezone, dateStyle: 'short', timeStyle: 'short' }).format(new Date(slot.start)) + ` (${branch.timezone})`;
       await clickNamed(page, label);
       if (scenario.key === 'incomplete') {
         const refused = await until(() => page.apiRequests('/personal-client/appointments/preview').find(r => r.finishedAt), 'incomplete facts preview refusal');

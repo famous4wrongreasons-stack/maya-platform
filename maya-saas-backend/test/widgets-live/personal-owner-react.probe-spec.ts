@@ -769,6 +769,9 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
                 scenarios: keys.map((key) => ({
                   key,
                   email: saved[key].user.email,
+                  branchId: saved[key].dto.branchId,
+                  serviceId: saved[key].dto.serviceIds[0],
+                  staffId: saved[key].dto.staffId,
                   serviceName: ['unknown', 'incomplete'].includes(key)
                     ? 'Консультация'
                     : 'PRIVATE_OWNER_VISIT',

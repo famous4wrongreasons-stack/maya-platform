@@ -14,14 +14,19 @@ export function localOrigin(raw) {
 
 // Request-stage admission, never response fulfillment. There is no UI/API fixture.
 // Only the finite synthetic catalog prompt and existing booking widget intents are admitted.
-export function admitted(request, origin) {
+export function admitted(request, origin, scope) {
   try {
     const url = new URL(request.url);
     if (url.origin !== localOrigin(origin) || url.username || url.password || url.hash) return false;
     if (request.method === 'GET') {
-      if (url.pathname === '/api/available-slots') return Array.from(url.searchParams.keys()).sort().join(',') === 'date,serviceIds,staffId';
+      if (url.pathname === '/api/available-slots') {
+        const query = url.searchParams;
+        return Array.from(query.keys()).sort().join(',') === 'branchId,date,serviceIds,staffId' &&
+          query.get('branchId') === scope.branchId && query.get('date') === scope.date &&
+          query.get('serviceIds') === scope.serviceId && query.get('staffId') === scope.staffId;
+      }
       if (url.search) return false;
-      if (['/api/services', '/api/staff', '/api/personal-client/appointments/results'].includes(url.pathname)) return true;
+      if (['/api/branches', '/api/services', '/api/staff', '/api/personal-client/appointments/results'].includes(url.pathname)) return true;
       return /^\/(?:api\/ai\/conversation|index\.html|styles\.css|manifest\.webmanifest|favicon\.ico|icons\/maya-(?:192|512|512-maskable|apple-180)\.png|m\/[A-Za-z0-9]+\/main\.js)?$/.test(url.pathname);
     }
     if (request.method !== 'POST' || url.search) return false;
@@ -44,13 +49,13 @@ export function admitted(request, origin) {
   } catch { return false; }
 }
 
-export async function installGuard(page, origin) {
+export async function installGuard(page, origin, scope) {
   localOrigin(origin);
   const blocked = [], errors = [];
   const listener = (event) => {
     if (event.sessionId !== page.sessionId || event.method !== 'Fetch.requestPaused') return;
     const { requestId, request } = event.params;
-    const allow = admitted(request, origin);
+    const allow = admitted(request, origin, scope);
     // Never retain query, body, tokens, email or OTP in evidence.
     if (!allow) blocked.push({ method: request.method, path: new URL(request.url).pathname });
     void page.send(allow ? 'Fetch.continueRequest' : 'Fetch.failRequest', {
