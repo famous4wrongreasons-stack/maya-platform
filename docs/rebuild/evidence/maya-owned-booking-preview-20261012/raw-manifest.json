@@ -1,0 +1,954 @@
+{
+  "qualification": "HASH_ONLY_RAW_PROVENANCE",
+  "rawContentsCommitted": false,
+  "artifacts": [
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-01/booking-followup-observations.json",
+      "sha256": "41fe7aa76d99f5b7019c0095cf7de9be76534fd16ba70186409600af0710c29f",
+      "bytes": 8734,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-01/browser-jest.json",
+      "sha256": "ddd811577cd68a3b0af5972373ce64922f838a4e095d65f7576a506b5706ee15",
+      "bytes": 1491,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-01/browser.log",
+      "sha256": "54933e384847512b2506ca1f395c7bb8c313f64b08ee920a4d6298de603bcfcb",
+      "bytes": 1400,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-01/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-01/current-react/browser.json",
+      "sha256": "f73b4efa5198b21bf7d059d4e1033db1286ac38a22d4c3463dcbdbd8dd92757f",
+      "bytes": 92232,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-01/initdb.log",
+      "sha256": "25572a73d91fc872323861f22477821441736d1feee2e5c5bb632db8c7609351",
+      "bytes": 962,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-01/manifest.json",
+      "sha256": "816d4dddb240140fe208f7a9036000acd341794e6309f2e965de65aabf894975",
+      "bytes": 1110,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-01/migrations.log",
+      "sha256": "7e713ffde425f73534cd773843b3f9f575baaf2f6c0ac70547496e054dbbf9d4",
+      "bytes": 14734,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-01/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-01/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-01/postgres.log",
+      "sha256": "d628180788a846eadc004832f8ec607156991f8d202640d681652afd4e6a572c",
+      "bytes": 1246,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-01/react-web-build.log",
+      "sha256": "c5976e6f8150b4a6fea65c8e05477cf3a6f6450f321e41dd66af59160a9a3289",
+      "bytes": 185,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-01/source-hashes.json",
+      "sha256": "47d1b888135e2d337425994c3d60fdbd1d0480e3db7f7046d9e123781678a31c",
+      "bytes": 310367,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-01.log",
+      "sha256": "990450661621ab6877bec33e9cbed1f36e806e48321bc74cd85d508d82ace967",
+      "bytes": 162,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-02/booking-followup-observations.json",
+      "sha256": "878a0c3ec22786c500211d0b2fe2b3758206d37c70dc258f9692007005854116",
+      "bytes": 8824,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-02/browser-jest.json",
+      "sha256": "f0f6b866681c8e43687f04ac81ea828c43d084ba3326d93cfe8cc9d6d5675e3b",
+      "bytes": 1491,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-02/browser.log",
+      "sha256": "12a8a1688a194be0782642ee61c06f0e90b400d1e353cd52eb99ffd8e441f2b8",
+      "bytes": 1416,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-02/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-02/current-react/browser.json",
+      "sha256": "cbe1661c71c7dcf1008497f149a0bf7c14ce54afa57b6cb43be11c34848f07cb",
+      "bytes": 92371,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-02/initdb.log",
+      "sha256": "975d12062db0c939582d546e10e3253827d06574df061c73e9af606c020aa2ee",
+      "bytes": 962,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-02/manifest.json",
+      "sha256": "6ad4899d33e20e4a2621dc19abed8f4c66632a81ebc2fea24946a54f3a3104af",
+      "bytes": 1110,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-02/migrations.log",
+      "sha256": "c6969cdf8a67a6765f7bf1c1e16b0e64b2fa83360c1c4ba3885ba59ff76bda83",
+      "bytes": 14734,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-02/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-02/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-02/postgres.log",
+      "sha256": "792bf857a3c4d847f44fad5f9cbd6187faa1645ea22324c34943d29e38a74e37",
+      "bytes": 1246,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-02/react-web-build.log",
+      "sha256": "c5976e6f8150b4a6fea65c8e05477cf3a6f6450f321e41dd66af59160a9a3289",
+      "bytes": 185,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-02/source-hashes.json",
+      "sha256": "efc75d3fd0baf6cba4d26ddf09115c1bdd2752b63ffff6dfce81efc8ea79b4ff",
+      "bytes": 310494,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-booking-lifecycle-current-20261012-02.log",
+      "sha256": "93cca7fea5bdc40e7eaee601cbca1c095812410b1c1d751cf7f999859c65799e",
+      "bytes": 162,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-after-initial-20261012.json",
+      "sha256": "1702b282460fc40fcb5a2abd5c9bef5d88eab4581e25ad75227002f4bc9648e2",
+      "bytes": 7586,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-after-initial-20261012.log",
+      "sha256": "63bbd51e8f55572e8571009b07dc4929e3c5d0dc444bf15f340376de0d17d0b8",
+      "bytes": 447,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-before-20261012.json",
+      "sha256": "6c034bcc862c0f50c67b8ef5baf273b5e39c344baa61ddfb098f979eb0beb16c",
+      "bytes": 8222,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-before-20261012.log",
+      "sha256": "f28795d0126fddb2346f97c605c854404ab17c23b8a8d244975be8b454c86905",
+      "bytes": 3254,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-history-guards-20261012.log",
+      "sha256": "da60ba40c46f5354466a4a91cf66d32eab12af28f9705f6c2582845d2a919e6e",
+      "bytes": 1149,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-history-trial-20261012-01/summary.json",
+      "sha256": "ac4a99c5004e951908065c61af6056601124032d613dd2b363879038c53b3056",
+      "bytes": 2755,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-history-trial-20261012-01.log",
+      "sha256": "9753bb3ca658569e98a520ef4cddd47b60d35dd8fb2fbb52679bf3687b6b2b23",
+      "bytes": 139,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-k3-20261012-02.log",
+      "sha256": "378e93addd6207e68ac6a6745263c79568d037efcf979f7c74dfd13075683401",
+      "bytes": 7984,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-k3-20261012-final.log",
+      "sha256": "378e93addd6207e68ac6a6745263c79568d037efcf979f7c74dfd13075683401",
+      "bytes": 7984,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-k3-20261012.log",
+      "sha256": "c25c6478517dc1727a92619e124e5e8188402efa7d5aa75aa81f538ece18428b",
+      "bytes": 7837,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-lint-20261012-02.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-lint-20261012.log",
+      "sha256": "128d4a4943de5c717f63a9c796d71b92868548fbbca522c18fde3787bc1cb889",
+      "bytes": 710,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-live-types-20261012-02.log",
+      "sha256": "af23999580eb892546dbced3f83ef0e7c21d95556f2fc5f0638e748a0cbbaf09",
+      "bytes": 572,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-live-types-20261012-03.log",
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "bytes": 128,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-live-types-20261012-final.log",
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "bytes": 128,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-live-types-20261012.log",
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "bytes": 128,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/baseline.json",
+      "sha256": "78ea7528cda0a33f55d1b4e64032697e8e01d0dcb0b7fd37b5de3b8186a9f7b9",
+      "bytes": 16520,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/baseline.log",
+      "sha256": "5af3cdac313730d0d92c0135b0639dcfb14da44884463abf9969d7e9a0a9264b",
+      "bytes": 436,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/discard-previous-local-time.json",
+      "sha256": "8d3509b502f256dcdffdd4c3d2a0a9d3931fc0da8db5014cb4f52be51e659b7a",
+      "bytes": 18807,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/discard-previous-local-time.log",
+      "sha256": "a42a5ce641c85c13f1db78405381de1c1696a1c82a8450b0ecb422f658c3ef08",
+      "bytes": 1567,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/exact-prior-adapter.json",
+      "sha256": "8825e540a2d9ab440c22d5e858c666d2f037a6ff05486825eac0c2572231cd15",
+      "bytes": 142728,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/exact-prior-adapter.log",
+      "sha256": "beb92e48226c2d6e2ed3bc6319d05b9950a95e2dca498832b33cea0de83d76f4",
+      "bytes": 47359,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/force-UTC-display.json",
+      "sha256": "2142aa97870adc49817e3552139415be3adfe7d709513383ac79a3ffb6903dae",
+      "bytes": 27195,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/force-UTC-display.log",
+      "sha256": "0b5210b0a746dafa8f20e11c22ce59b9b5aec14ef2b456eb33188736cd350a82",
+      "bytes": 5550,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/restored.json",
+      "sha256": "3dfca0314f2eb2350ec08b64fc16ee6111ce05e5125b91b44017eaddea264d4a",
+      "bytes": 16520,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/restored.log",
+      "sha256": "6e94687f9704d80d265b048b72ecca8292392d09f8a0e8becf0e2e9f7a3b071f",
+      "bytes": 451,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/skip-cancel-current-authority.json",
+      "sha256": "e374970cda1e73438c1bad3fe168872542b8572d83775fccb8959beb5edf01b3",
+      "bytes": 49525,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/skip-cancel-current-authority.log",
+      "sha256": "5e433f31c9001eb48e379e766a573ac336c9ccbb54138847b1695434786ede3c",
+      "bytes": 11514,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/skip-exact-display-snapshot.json",
+      "sha256": "775ca086bed15080f3ae867b759ce88998cfe7e42eac9e0ce91d4fd08735c304",
+      "bytes": 68782,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/skip-exact-display-snapshot.log",
+      "sha256": "9b3650c1acfccf3e2fa002655d20c3542030ba12d962510a08c5f39b66861f93",
+      "bytes": 20652,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/skip-reschedule-current-authority.json",
+      "sha256": "8a0a9c9c183326b490a1469dc02d32fee814f03a6f82878e5f42efaa41d46703",
+      "bytes": 53481,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/skip-reschedule-current-authority.log",
+      "sha256": "94b16dd45d9ccab21dfc47a9a8114c6864745c768c437276789967255a33a5ab",
+      "bytes": 12702,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01/summary.json",
+      "sha256": "adcf74138a7dd5b6c453621fcd32f80a3a24fb1b506605b395f20e04a5c0204a",
+      "bytes": 10310,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-mutations-20261012-01.log",
+      "sha256": "cbaa477ddbada8b7cddfad311214b2d80bf48704f5c8947abe8ed8604b4fe162",
+      "bytes": 91,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-01/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-01/initdb.log",
+      "sha256": "abc4b81deff505c2fd37ecb731a6b7bd6ce7e899ba693dab174f6080c1d4fd68",
+      "bytes": 948,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-01/manifest.json",
+      "sha256": "8f0e743d6ce569a0c66a06fef6867746baa247f9ef7f228ab1c110ca49937d96",
+      "bytes": 675,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-01/migrations.log",
+      "sha256": "9ef41e374d3ee6ba1c9171440b0d4246ec3306a38ce6002bd7d6689da0c8f7bf",
+      "bytes": 14720,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-01/observations.json",
+      "sha256": "21016a350bf38a3db3272d6949af5bec2beb2facaf7a8f72f17687ed470d15ed",
+      "bytes": 7367,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-01/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-01/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-01/postgres.log",
+      "sha256": "27fdb4cbcc271b3628bdab5c41a3dbb544f2bd4134e7e974129d294a1297323c",
+      "bytes": 1246,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-01/regression-jest.json",
+      "sha256": "3a4c8c53e2e4c0f139ee08ffed4c084f8d1b21a5c7766396901ea85d6204c1e2",
+      "bytes": 46624,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-01/regression.log",
+      "sha256": "dfba42d0b2cdff0c5dd273cb97dbd5c9e54a5b7600be862adff96fdbb1cdc87b",
+      "bytes": 19481,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-01/source-hashes.json",
+      "sha256": "721da14d578661b3f6d54634e81e9287157d58615532bc72574840846c00ae7a",
+      "bytes": 250145,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-01.log",
+      "sha256": "df738c663c9049e00dcdb9de0ecaf0d05ff28d70077cc2c228c5ed6ef9669403",
+      "bytes": 670,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-02/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-02/initdb.log",
+      "sha256": "805e4e1340b06ad4aadae8fd8a0d901d5ab582e520c04ec520848c2f68fcc83f",
+      "bytes": 948,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-02/manifest.json",
+      "sha256": "e7061a1ed1a7a7e1453d686fbf2bb891edbd089e12f8d88789bc3181098df3d6",
+      "bytes": 675,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-02/migrations.log",
+      "sha256": "8914af7c599f17fe911047ce86d56ce370c1e4d18a79829d566fd8c0929a3fea",
+      "bytes": 14720,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-02/observations.json",
+      "sha256": "21016a350bf38a3db3272d6949af5bec2beb2facaf7a8f72f17687ed470d15ed",
+      "bytes": 7367,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-02/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-02/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-02/postgres.log",
+      "sha256": "49c5a8d6dd196a1987c417e1e113759c8603f73dfd62de00d4434cf9d62db5cb",
+      "bytes": 1246,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-02/regression-jest.json",
+      "sha256": "da8c20ae39b5e5ac1d01e867599f371e3624a5f2ffe88a1bd100eef96ebf20eb",
+      "bytes": 71572,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-02/regression.log",
+      "sha256": "fc06349360cbddc29f5986e230fa05bbe8f45111cff608007f4ce19931d99ded",
+      "bytes": 22333,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-02/source-hashes.json",
+      "sha256": "afa9e6c1c2e367b599d0e675ff757b67915236ee72fb1280d3613109709b6246",
+      "bytes": 250145,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-02.log",
+      "sha256": "65e4588bed22795e5f94be1169bec21654c634cf8ba693806e1422fbe3eb4343",
+      "bytes": 670,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-03/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-03/initdb.log",
+      "sha256": "ec89c13a213fab572775cd1c5350f3194039cb7aa271177d48767f1c4f5e3232",
+      "bytes": 948,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-03/manifest.json",
+      "sha256": "9027ef25f04f5726979fb3836c6bfb7f89e5d842160e7c6dc0cc147aa5872015",
+      "bytes": 675,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-03/migrations.log",
+      "sha256": "d7b3b5d6266b426d1e135809ccbb669075d3a3df7439f63a01f420a4a62be423",
+      "bytes": 14720,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-03/observations.json",
+      "sha256": "8ee6ff78cb296cc19cfb1a1010d125c3fc77ade46859b5d0f73049c4da2f8355",
+      "bytes": 194538,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-03/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-03/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-03/postgres.log",
+      "sha256": "69970369bc180e4d4ddb4551c9d81efcfda92fb775b87b69b90356e9d767c9ca",
+      "bytes": 6957,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-03/regression-jest.json",
+      "sha256": "a3046aa549a32c8a1dc80af1d3644b1b82640376aabcc93dbb2cc59ee58c6182",
+      "bytes": 18249,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-03/regression.log",
+      "sha256": "e105a0332b76b4466126e9ea3c887b8cba9a460088a53c385f9ff48a18faa82c",
+      "bytes": 6391,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-03/source-hashes.json",
+      "sha256": "bcaa9215ac33c7eac0a02e4659f16444674507183cf8d47230cd87e269cc66e5",
+      "bytes": 250145,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-03.log",
+      "sha256": "f1d19b4b4b552e56d25e1b594e81126a63a9c7c054e959fdbce7d58507d10514",
+      "bytes": 670,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-04/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-04/initdb.log",
+      "sha256": "a9e1768f4b9abdbc55d6751566a4e1e0c18c15e450664ee93e29107471d9b263",
+      "bytes": 948,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-04/manifest.json",
+      "sha256": "6cabbe50f10a76fe1ba3ca10fa05ffaa3f63813861419621bce7dacc41d4943d",
+      "bytes": 675,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-04/migrations.log",
+      "sha256": "3b8a96a8c8f2c6435fe7e390d82a253f5ceeb8d1dcf3dc04c413e3aa9afac4ba",
+      "bytes": 14720,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-04/observations.json",
+      "sha256": "c3e155e7066df9e717d52147c4606871ab3b016cdb6c31ce0d57fc3b07f634c2",
+      "bytes": 195466,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-04/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-04/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-04/postgres.log",
+      "sha256": "12016306263f73add312f2683d0122db8eab7e70f5d43e8f5684655052539e9b",
+      "bytes": 6957,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-04/regression-jest.json",
+      "sha256": "19f436d2b52df5401bee1068afbd8c744def55c87eb4ec9b48e70d651a5905ed",
+      "bytes": 27460,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-04/regression.log",
+      "sha256": "00e1e6a8651e98a35d6b48acb4e02f9635d19ffb54cf46600f3d99b3ac211b45",
+      "bytes": 11042,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-04/source-hashes.json",
+      "sha256": "895d4e24dd81d35df9bff517230c7e9af4e3d3ff0dc5f98260bc47a7b7331280",
+      "bytes": 250145,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-04.log",
+      "sha256": "69b8523d9e31b340285db0d84659be718e18e855e1dcdc2f05d005164117686f",
+      "bytes": 670,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-05/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-05/initdb.log",
+      "sha256": "99e2dc5076ca694b68cba7012dbf2312f44afe508bf93a6f5c6738db4a6a800a",
+      "bytes": 948,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-05/manifest.json",
+      "sha256": "7964f2d58f9dec0c84798c3d840ff7ab0fc758ebb4340deaf38086e77a8b8bbd",
+      "bytes": 675,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-05/migrations.log",
+      "sha256": "d32877fe00c8c48a8e570b5984153a0a0dffa6c5741b0170ff8652888df34ea5",
+      "bytes": 14720,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-05/observations.json",
+      "sha256": "8cafa5712ad7a30b59534dbb30ce67e9a3418963ca29d9500a489d1273ecbed8",
+      "bytes": 195466,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-05/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-05/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-05/postgres.log",
+      "sha256": "5152221575944def72082ebd8cd60a330970123d846817642c495b19ec7d18bb",
+      "bytes": 6957,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-05/regression-jest.json",
+      "sha256": "0dbada50842978159f8ce54a1ea5e828d868ecfeaf06373abbf150321d4239f2",
+      "bytes": 14342,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-05/regression.log",
+      "sha256": "a14138d687287945d1d15c5a0e3d925e3377f7d1ffa5c8b4874a31d1947554d6",
+      "bytes": 4642,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-05/source-hashes.json",
+      "sha256": "509cdf66b3d7b8b957956162a18db6dcb9499ef825ab14fb97e13f74eff9f1a2",
+      "bytes": 250145,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-05.log",
+      "sha256": "c3ce61f99cf98238a677071fa09230ab3df18dd3616a08d3cf06f831ec2218ec",
+      "bytes": 670,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-06/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-06/initdb.log",
+      "sha256": "e21b6863c140e10b0f77e9e999cd6852dddee9473e34db870bf6b4b6919ea73e",
+      "bytes": 948,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-06/manifest.json",
+      "sha256": "1acb482f75bcda9f7548e1ede3b4d00154b3ca73f9a7d784b9f8607310141ad9",
+      "bytes": 642,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-06/migrations.log",
+      "sha256": "d08b8baf32589224430a031f4457f2c8ef45fbdd9927ec710290e36106aaec3c",
+      "bytes": 14720,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-06/observations.json",
+      "sha256": "8ede7ff1d1f7342ea4d4306445977561fd417bbf72a794f0e67dcd4fa18cb968",
+      "bytes": 196744,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-06/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-06/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-06/postgres.log",
+      "sha256": "a2b40562085d0ee802bed8bc10cf635b9d6e10fe50557850d8a168850da33982",
+      "bytes": 6957,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-06/regression-jest.json",
+      "sha256": "84c7888a83c1a71cce6508929c405b26a9cda1ea02d89d1345b075a1232be244",
+      "bytes": 11803,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-06/regression.log",
+      "sha256": "648f76e41525b00fdf9a1507a5b276d2591c7d78ee037a7850f4e6ac37e30a34",
+      "bytes": 3140,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-06/source-hashes.json",
+      "sha256": "dc5e1724bf08392092553db159179a66bb468ecd9b1c3505d144a6f8aa1b5387",
+      "bytes": 250145,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-cancel-20261012-06.log",
+      "sha256": "6ac1d2ebbebaffbe24d8e2e707e2cdd019c286c9307f63b11d4c7b825a5d2d3a",
+      "bytes": 47,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/initdb.log",
+      "sha256": "6d190303cf386e7f65ea4881b0be804bd482aba6c3a614997fa030b1311c664e",
+      "bytes": 952,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/manifest.json",
+      "sha256": "1d5824a9a715b1b035a0ef7ed0dca4dc171a065bb89c22e46d69537baa3df428",
+      "bytes": 956,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/migrations.log",
+      "sha256": "2cf50afa7603b61d584062db3208a8e9c13273113b1c44b8aae87672ffe1d101",
+      "bytes": 14720,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/pg-restart.log",
+      "sha256": "0f4ef0fe07b305b20610be3ca439cc346c9f967c1cb6067c9003d96fe71c7b84",
+      "bytes": 1347,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/postgres.log",
+      "sha256": "c89bd5cf7bf03df25105c840c5b5b8b68e7f4f11f93cda7967d0109734aef810",
+      "bytes": 1246,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/prepare-jest.json",
+      "sha256": "a5c37920aec32e339e7b2e190c22460d08e211404fd2a91a64e8cf15b6bc6faf",
+      "bytes": 1479,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/prepare.json",
+      "sha256": "7e26588e97b5cec791dcedc648750892244a34582a0f2a5e51ae0bccfb7dc0fa",
+      "bytes": 13191,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/prepare.log",
+      "sha256": "6f53221e7556a51cab26c87824df1f7012b0e4fb9fc1cf720a3d15ce788426df",
+      "bytes": 1379,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/resume-jest.json",
+      "sha256": "4b6c487531eb7a9af4f17c39cec6c3d2233403f46efba1411f5f04f14d4dff97",
+      "bytes": 1479,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/resume.json",
+      "sha256": "75d45a45406e6aaeb55e23b806d9e99fc5dd5560122f6c5f1a65fb4836a48598",
+      "bytes": 7805,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/resume.log",
+      "sha256": "28b9ae84a716c71218d4c3beba84ec64832c72f87973e50f7ce4d4cb79fd7375",
+      "bytes": 1383,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01/source-hashes.json",
+      "sha256": "baa01374eaf557fd692d0843f8d50f18d17d5fe990e93a39a35cc165f8ed51ac",
+      "bytes": 214894,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-native-move-20261012-01.log",
+      "sha256": "6268d91e9fe24814b268ed934536bc1386050d9a84f610e160fc8b5e18aee122",
+      "bytes": 175,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-proof-lint-20261012-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-proof-lint-20261012.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-scoped-20261012.json",
+      "sha256": "b99e3efabb7c83566adad816d15b6d3c1e93ca73048a59db23034361dfa12a4f",
+      "bytes": 92162,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-scoped-20261012.log",
+      "sha256": "7d1e0927ff5d7edaf691ab6a1dd80286f32549556cfab31ce54d61564e69f573",
+      "bytes": 838,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-types-20261012.log",
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "bytes": 103,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-unit-20261012-01.json",
+      "sha256": "3d8432b7d46bdebc59865ef25b467bcd289821f1482bce8efa6ac334ccf094bc",
+      "bytes": 23908,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-unit-20261012-01.log",
+      "sha256": "a4c370bdabbf8221cc42c60012ea99aae2911d662c635cc92fabb0f3a69f8066",
+      "bytes": 502,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    },
+    {
+      "path": "/private/tmp/maya-owned-preview-widget-contract-20261012.log",
+      "sha256": "bebe953a66851b7112f6a081047c0918731c0ad9a69715eb8b557352c8f916f8",
+      "bytes": 6777,
+      "reasonNotCopied": "Raw local test output; only inspected aggregate evidence is admissible in this archive."
+    }
+  ]
+}

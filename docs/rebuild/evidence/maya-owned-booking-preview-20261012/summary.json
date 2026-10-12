@@ -1,0 +1,357 @@
+{
+  "qualification": "LOCAL_SYNTHETIC_CHECKPOINT_NOT_RELEASE_CERTIFICATION",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "productCommit": "8bd701e5d0c7e81ebcb09548b97542017ff4c324",
+  "finalExecutableCandidate": "cd15a31a7e24773c1d7119315397a132a75ec6a2",
+  "productBytesUnchangedAfterProductCommit": true,
+  "scopedUnit": {
+    "passed": 183,
+    "failed": 0,
+    "suites": 10,
+    "source": "product-commit-bytes"
+  },
+  "actualReactLifecycle": {
+    "candidate": "8bd701e5d0c7e81ebcb09548b97542017ff4c324",
+    "status": "passed-synthetic-booking-lifecycle",
+    "calendar": "synthetic internal",
+    "scriptedModel": true,
+    "checkpoints": 11,
+    "canonicalLogins": 2,
+    "chatPosts": 4,
+    "acceptedIntents": 6,
+    "readableReschedule": true,
+    "readableCancel": true,
+    "checkpointsState": [
+      {
+        "name": "initial-slots",
+        "receiptOutcome": null,
+        "appointment": null,
+        "executions": []
+      },
+      {
+        "name": "selected-17",
+        "receiptOutcome": null,
+        "appointment": null,
+        "executions": []
+      },
+      {
+        "name": "create-preview",
+        "receiptOutcome": "ACCEPTED",
+        "appointment": null,
+        "executions": []
+      },
+      {
+        "name": "create-commit",
+        "receiptOutcome": "ACCEPTED",
+        "appointment": {
+          "idHash": "f7323db26018e39f12ef79ca9a16de99f7b42b640adf4f53d42438c3b9f6bd19",
+          "clientHash": "8e7b6c34838a349e4aed0df516be4ee55374b90c1b75045544e9e38721806dac",
+          "status": "confirmed",
+          "start": "2026-10-13T14:00:00.000Z",
+          "serviceHash": "bbe947b7c08faa4ea5b013f39760ec0229d8df415360d180fa8421bfa29ec75b",
+          "staffHash": "9b0681055daefcfcbf5d5d73c311bfbef8cf8e1af06950918f40aa91f385feb6"
+        },
+        "executions": [
+          {
+            "idHash": "c342c032bd6cf72381220637d57262101d03439feda67a12daa09fa59d1588f5",
+            "capability": "crm.appointment.create.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          }
+        ]
+      },
+      {
+        "name": "own-before-reschedule",
+        "receiptOutcome": null,
+        "appointment": {
+          "idHash": "f7323db26018e39f12ef79ca9a16de99f7b42b640adf4f53d42438c3b9f6bd19",
+          "clientHash": "8e7b6c34838a349e4aed0df516be4ee55374b90c1b75045544e9e38721806dac",
+          "status": "confirmed",
+          "start": "2026-10-13T14:00:00.000Z",
+          "serviceHash": "bbe947b7c08faa4ea5b013f39760ec0229d8df415360d180fa8421bfa29ec75b",
+          "staffHash": "9b0681055daefcfcbf5d5d73c311bfbef8cf8e1af06950918f40aa91f385feb6"
+        },
+        "executions": [
+          {
+            "idHash": "c342c032bd6cf72381220637d57262101d03439feda67a12daa09fa59d1588f5",
+            "capability": "crm.appointment.create.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          }
+        ]
+      },
+      {
+        "name": "reschedule-preview",
+        "receiptOutcome": "ACCEPTED",
+        "appointment": {
+          "idHash": "f7323db26018e39f12ef79ca9a16de99f7b42b640adf4f53d42438c3b9f6bd19",
+          "clientHash": "8e7b6c34838a349e4aed0df516be4ee55374b90c1b75045544e9e38721806dac",
+          "status": "confirmed",
+          "start": "2026-10-13T14:00:00.000Z",
+          "serviceHash": "bbe947b7c08faa4ea5b013f39760ec0229d8df415360d180fa8421bfa29ec75b",
+          "staffHash": "9b0681055daefcfcbf5d5d73c311bfbef8cf8e1af06950918f40aa91f385feb6"
+        },
+        "executions": [
+          {
+            "idHash": "c342c032bd6cf72381220637d57262101d03439feda67a12daa09fa59d1588f5",
+            "capability": "crm.appointment.create.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          }
+        ]
+      },
+      {
+        "name": "reschedule-commit",
+        "receiptOutcome": "ACCEPTED",
+        "appointment": {
+          "idHash": "f7323db26018e39f12ef79ca9a16de99f7b42b640adf4f53d42438c3b9f6bd19",
+          "clientHash": "8e7b6c34838a349e4aed0df516be4ee55374b90c1b75045544e9e38721806dac",
+          "status": "confirmed",
+          "start": "2026-10-13T14:30:00.000Z",
+          "serviceHash": "bbe947b7c08faa4ea5b013f39760ec0229d8df415360d180fa8421bfa29ec75b",
+          "staffHash": "9b0681055daefcfcbf5d5d73c311bfbef8cf8e1af06950918f40aa91f385feb6"
+        },
+        "executions": [
+          {
+            "idHash": "c342c032bd6cf72381220637d57262101d03439feda67a12daa09fa59d1588f5",
+            "capability": "crm.appointment.create.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          },
+          {
+            "idHash": "616d66c9c80bfcf5721b98399b4952d705bdda8df2c392dc42a56733f80d1d6f",
+            "capability": "crm.appointment.reschedule.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          }
+        ]
+      },
+      {
+        "name": "own-before-cancel",
+        "receiptOutcome": null,
+        "appointment": {
+          "idHash": "f7323db26018e39f12ef79ca9a16de99f7b42b640adf4f53d42438c3b9f6bd19",
+          "clientHash": "8e7b6c34838a349e4aed0df516be4ee55374b90c1b75045544e9e38721806dac",
+          "status": "confirmed",
+          "start": "2026-10-13T14:30:00.000Z",
+          "serviceHash": "bbe947b7c08faa4ea5b013f39760ec0229d8df415360d180fa8421bfa29ec75b",
+          "staffHash": "9b0681055daefcfcbf5d5d73c311bfbef8cf8e1af06950918f40aa91f385feb6"
+        },
+        "executions": [
+          {
+            "idHash": "c342c032bd6cf72381220637d57262101d03439feda67a12daa09fa59d1588f5",
+            "capability": "crm.appointment.create.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          },
+          {
+            "idHash": "616d66c9c80bfcf5721b98399b4952d705bdda8df2c392dc42a56733f80d1d6f",
+            "capability": "crm.appointment.reschedule.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          }
+        ]
+      },
+      {
+        "name": "cancel-preview",
+        "receiptOutcome": "ACCEPTED",
+        "appointment": {
+          "idHash": "f7323db26018e39f12ef79ca9a16de99f7b42b640adf4f53d42438c3b9f6bd19",
+          "clientHash": "8e7b6c34838a349e4aed0df516be4ee55374b90c1b75045544e9e38721806dac",
+          "status": "confirmed",
+          "start": "2026-10-13T14:30:00.000Z",
+          "serviceHash": "bbe947b7c08faa4ea5b013f39760ec0229d8df415360d180fa8421bfa29ec75b",
+          "staffHash": "9b0681055daefcfcbf5d5d73c311bfbef8cf8e1af06950918f40aa91f385feb6"
+        },
+        "executions": [
+          {
+            "idHash": "c342c032bd6cf72381220637d57262101d03439feda67a12daa09fa59d1588f5",
+            "capability": "crm.appointment.create.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          },
+          {
+            "idHash": "616d66c9c80bfcf5721b98399b4952d705bdda8df2c392dc42a56733f80d1d6f",
+            "capability": "crm.appointment.reschedule.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          }
+        ]
+      },
+      {
+        "name": "cancel-commit",
+        "receiptOutcome": "ACCEPTED",
+        "appointment": {
+          "idHash": "f7323db26018e39f12ef79ca9a16de99f7b42b640adf4f53d42438c3b9f6bd19",
+          "clientHash": "8e7b6c34838a349e4aed0df516be4ee55374b90c1b75045544e9e38721806dac",
+          "status": "canceled",
+          "start": "2026-10-13T14:30:00.000Z",
+          "serviceHash": "bbe947b7c08faa4ea5b013f39760ec0229d8df415360d180fa8421bfa29ec75b",
+          "staffHash": "9b0681055daefcfcbf5d5d73c311bfbef8cf8e1af06950918f40aa91f385feb6"
+        },
+        "executions": [
+          {
+            "idHash": "c342c032bd6cf72381220637d57262101d03439feda67a12daa09fa59d1588f5",
+            "capability": "crm.appointment.create.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          },
+          {
+            "idHash": "616d66c9c80bfcf5721b98399b4952d705bdda8df2c392dc42a56733f80d1d6f",
+            "capability": "crm.appointment.reschedule.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          },
+          {
+            "idHash": "59151dca33c1d1d08f0c584a0205f04f66f284a51052e79b5747cd10c5ebd5dd",
+            "capability": "crm.appointment.cancel.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          }
+        ]
+      },
+      {
+        "name": "reload",
+        "receiptOutcome": null,
+        "appointment": {
+          "idHash": "f7323db26018e39f12ef79ca9a16de99f7b42b640adf4f53d42438c3b9f6bd19",
+          "clientHash": "8e7b6c34838a349e4aed0df516be4ee55374b90c1b75045544e9e38721806dac",
+          "status": "canceled",
+          "start": "2026-10-13T14:30:00.000Z",
+          "serviceHash": "bbe947b7c08faa4ea5b013f39760ec0229d8df415360d180fa8421bfa29ec75b",
+          "staffHash": "9b0681055daefcfcbf5d5d73c311bfbef8cf8e1af06950918f40aa91f385feb6"
+        },
+        "executions": [
+          {
+            "idHash": "c342c032bd6cf72381220637d57262101d03439feda67a12daa09fa59d1588f5",
+            "capability": "crm.appointment.create.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          },
+          {
+            "idHash": "616d66c9c80bfcf5721b98399b4952d705bdda8df2c392dc42a56733f80d1d6f",
+            "capability": "crm.appointment.reschedule.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          },
+          {
+            "idHash": "59151dca33c1d1d08f0c584a0205f04f66f284a51052e79b5747cd10c5ebd5dd",
+            "capability": "crm.appointment.cancel.v1",
+            "state": "SUCCEEDED",
+            "attempts": 1
+          }
+        ]
+      }
+    ],
+    "cleanup": {
+      "chromeExited": true,
+      "serverClosed": true
+    },
+    "clusterStopped": true,
+    "sourcesUnchanged": true
+  },
+  "nativeCancel": {
+    "candidate": "cd15a31a7e24773c1d7119315397a132a75ec6a2",
+    "status": "passed",
+    "passed": 21,
+    "failed": 0,
+    "tests": [
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] company A preview → company B integration → confirm never deletes the B record with the same ID",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] refuses branch-remap after preview before any DELETE",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] refuses missing-branch after preview before any DELETE",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] refuses missing-origin after preview before any DELETE",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] refuses provider-change after preview before any DELETE",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] refuses internal-source after preview before any DELETE",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] refuses revoked-link after preview before any DELETE",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] unchanged source cancellation, concurrent same-key callers and replay share one AE/DELETE",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] rechecks current Client after a concurrent waiter receives the completed AE result",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] widget COMMIT preserves late Client revocation instead of disclosing a completed cancel",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] rechecks source inside the native DELETE seam",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] rechecks revoke inside the native DELETE seam",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] rechecks record-identity inside the native DELETE seam",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] source changes after DELETE (ok): UNKNOWN, no company-B read/mirror/retry",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] source changes after DELETE (gone): UNKNOWN, no company-B read/mirror/retry",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] source changes after DELETE (lost): UNKNOWN, no company-B read/mirror/retry",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] lost DELETE response reconciles the original provider within the existing finite attempt budget",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] source changes during UNKNOWN readback: retains UNKNOWN without mirror or company-B access",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] UNKNOWN readback unavailable reaches the existing manual bound through explicit status reads and replay never redispatches",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] UNKNOWN readback foreign-record reaches the existing manual bound through explicit status reads and replay never redispatches",
+      "Client cancellation source fence [ACTUAL HTTP PG / SYNTHETIC YCLIENTS] foreign tenant cannot cancel the owned appointment"
+    ],
+    "clusterStopped": true,
+    "sourcesUnchanged": true
+  },
+  "nativeCreateMoveRestart": {
+    "candidate": "69b1b9875e1e2e9f7adc063542d2d4aa8262c785",
+    "status": "passed",
+    "completed": [
+      "initdb",
+      "pg-start",
+      "createdb",
+      "migrations",
+      "prepare",
+      "pg-restart",
+      "resume"
+    ],
+    "clusterStopped": true,
+    "sourcesUnchanged": true,
+    "stages": {
+      "prepare": {
+        "checkpoints": [
+          "Ordinary closed selection persists as preferences only; fresh explicit day revalidates the same bound branch after restart",
+          "Authorized canonical READY actions and an already UNKNOWN action persist before actual app/PG restart",
+          "Native reschedule original UNKNOWN survives app/PG restart and explicit receipt READ never redispatches PUT"
+        ],
+        "forbidden": []
+      },
+      "resume": {
+        "checkpoints": [
+          "Ordinary closed selection persists as preferences only; fresh explicit day revalidates the same bound branch after restart",
+          "Restart READ is inert; explicit retry rechecks original source and Client authority; UNKNOWN sends no second booking POST",
+          "Native reschedule original UNKNOWN survives app/PG restart and explicit receipt READ never redispatches PUT"
+        ],
+        "forbidden": []
+      }
+    }
+  },
+  "historyWithoutOverrides": {
+    "head": "462c08bfeab8e65ba61459d75427c03d0d9fca7c",
+    "qualification": "SYNTHETIC_EXISTING_HISTORY_REVIEW_HTTP_PG_NOT_LIVE_ACCEPTANCE",
+    "status": "passed",
+    "checks": [
+      "ordinary-full-trial-no-entitlement-overrides-and-runtime-remains-dark",
+      "prior-public-conversation-and-interrupted-user-turn-persisted-through-canonical-owners",
+      "one-real-canonical-password-login-with-retained-verified-personal-context",
+      "actual-React-restores-prior-pairs-and-interrupted-turn-without-auto-resubmit",
+      "full-trial-canonical-A22-setting-idempotency-CAS-and-privacy-only-consent",
+      "personal-reader-one-own-visit-foreign-and-note-excluded",
+      "actual-React-AiCore-C9-own-history-tool-and-server-composed-answer",
+      "second-React-question-with-private-assistant-history-only-user-text-reaches-model",
+      "one-browser-login-prior-pairs-interrupted-turn-and-two-new-rendered-pairs",
+      "exactly-two-synthetic-planner-calls-no-private-result-generation-call",
+      "canonical-public-prior-context-then-private-history-intent-cross-actual-planner-wire",
+      "same-canonical-conversation-two-new-pairs-prior-seven-rows-unchanged-no-false-completion",
+      "HTTP-import-booking-binding-SMS-direct-tool-and-new-question-refused",
+      "internal-import-and-business-execution-refused",
+      "catalogue-cache-expiry-label-refresh-no-journal",
+      "revoked-current-client-link-refuses-history",
+      "existing-journal-byte-values-unchanged-no-reimport-or-widget-grant",
+      "expired-local-allowance-refuses-read"
+    ],
+    "clusterStopped": true,
+    "sourceUnchanged": true,
+    "pidFileAbsent": true,
+    "realProviderCalls": 0
+  },
+  "boundaries": {
+    "realProviderCalls": 0,
+    "realModelCalls": 0,
+    "retainedOwnerDatabaseOpened": false,
+    "productionChanged": false,
+    "realKeysRead": false,
+    "realOtpSmsMessages": 0,
+    "iPhoneOperation": false,
+    "newProductMigration": false,
+    "releaseCertification": false
+  }
+}

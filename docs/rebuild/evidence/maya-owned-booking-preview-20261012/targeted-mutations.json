@@ -1,0 +1,145 @@
+{
+  "qualification": "OFFLINE_TARGETED_PREVIEW_MUTATIONS_NOT_RELEASE_CERTIFICATION",
+  "head": "8bd701e5d0c7e81ebcb09548b97542017ff4c324",
+  "prior": "06bc12e3719caebb5c2485b059fe40093fb453d3",
+  "specHashes": [
+    "6ecffa1ec33b0ba77c4d4207355607e6b26e45b3617c3fc6a77a5e5fca043da3",
+    "7b508a8dbb430f7e33dcbdcd2a574f9e2376ac1246097f423a038c72d0efdcae"
+  ],
+  "baseline": {
+    "exit": 0,
+    "total": 30,
+    "passed": 30,
+    "failed": 0,
+    "failures": [],
+    "logSha256": "5af3cdac313730d0d92c0135b0639dcfb14da44884463abf9969d7e9a0a9264b"
+  },
+  "mutations": [
+    {
+      "name": "exact-prior-adapter",
+      "exit": 1,
+      "total": 30,
+      "passed": 3,
+      "failed": 27,
+      "failures": [
+        "own booking confirmation uses canonical display without label authority cancel shows names and local time, keeping opaque handles and canonical instants",
+        "own booking confirmation uses canonical display without label authority reschedule shows names and local time, keeping opaque handles and canonical instants",
+        "own booking confirmation uses canonical display without label authority cancel preserves access with unavailable catalogue labels and never displays IDs as names",
+        "own booking confirmation uses canonical display without label authority reschedule preserves access with unavailable catalogue labels and never displays IDs as names",
+        "own booking confirmation uses canonical display without label authority does not mislabel a changed service or staff with the original appointment labels",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"tenant_id\":\"foreign-tenant\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"id\":\"foreign-appointment\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"branch_id\":\"foreign-branch\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"staff_external_id\":\"substituted\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"service_ids\":[\"substituted\"]}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"start_at\":\"2027-01-01T00:00:00.000Z\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"end_at\":\"2027-01-01T00:00:00.000Z\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"updated_at\":\"2027-01-01T00:00:00.000Z\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"status\":\"canceled\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"source\":\"internal\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"crm_external_id\":\"foreign-record\"}",
+        "own booking confirmation uses canonical display without label authority cancel refuses revocation during awaited public-label read",
+        "own booking confirmation uses canonical display without label authority reschedule refuses revocation during awaited public-label read",
+        "own booking confirmation uses canonical display without label authority refuses client drift while resolving display",
+        "own booking confirmation uses canonical display without label authority refuses link drift while resolving display",
+        "own booking confirmation uses canonical display without label authority refuses source drift while resolving display",
+        "own booking confirmation uses canonical display without label authority refuses appointment drift while resolving display",
+        "own booking confirmation uses canonical display without label authority returns ordinary refusal when the existing personal read owner rejects",
+        "own booking confirmation uses canonical display without label authority formats display in America/Los_Angeles without changing canonical time",
+        "own booking confirmation uses canonical display without label authority formats display in Asia/Tokyo without changing canonical time",
+        "own booking confirmation uses canonical display without label authority formats display in Pacific/Kiritimati without changing canonical time",
+        "own booking confirmation uses canonical display without label authority formats display in Invalid/Zone without changing canonical time"
+      ],
+      "logSha256": "beb92e48226c2d6e2ed3bc6319d05b9950a95e2dca498832b33cea0de83d76f4",
+      "killed": true
+    },
+    {
+      "name": "skip-reschedule-current-authority",
+      "exit": 1,
+      "total": 30,
+      "passed": 25,
+      "failed": 5,
+      "failures": [
+        "own booking confirmation uses canonical display without label authority reschedule refuses revocation during awaited public-label read",
+        "own booking confirmation uses canonical display without label authority refuses client drift while resolving display",
+        "own booking confirmation uses canonical display without label authority refuses link drift while resolving display",
+        "own booking confirmation uses canonical display without label authority refuses source drift while resolving display",
+        "own booking confirmation uses canonical display without label authority refuses appointment drift while resolving display"
+      ],
+      "logSha256": "94b16dd45d9ccab21dfc47a9a8114c6864745c768c437276789967255a33a5ab",
+      "killed": true
+    },
+    {
+      "name": "skip-cancel-current-authority",
+      "exit": 1,
+      "total": 30,
+      "passed": 25,
+      "failed": 5,
+      "failures": [
+        "own booking confirmation uses canonical display without label authority cancel refuses revocation during awaited public-label read",
+        "own booking confirmation uses canonical display without label authority refuses client drift while resolving display",
+        "own booking confirmation uses canonical display without label authority refuses link drift while resolving display",
+        "own booking confirmation uses canonical display without label authority refuses source drift while resolving display",
+        "own booking confirmation uses canonical display without label authority refuses appointment drift while resolving display"
+      ],
+      "logSha256": "5e433f31c9001eb48e379e766a573ac336c9ccbb54138847b1695434786ede3c",
+      "killed": true
+    },
+    {
+      "name": "skip-exact-display-snapshot",
+      "exit": 1,
+      "total": 30,
+      "passed": 21,
+      "failed": 9,
+      "failures": [
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"branch_id\":\"foreign-branch\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"staff_external_id\":\"substituted\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"service_ids\":[\"substituted\"]}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"start_at\":\"2027-01-01T00:00:00.000Z\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"end_at\":\"2027-01-01T00:00:00.000Z\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"updated_at\":\"2027-01-01T00:00:00.000Z\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"status\":\"canceled\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"source\":\"internal\"}",
+        "own booking confirmation uses canonical display without label authority refuses substituted/stale display projection {\"crm_external_id\":\"foreign-record\"}"
+      ],
+      "logSha256": "9b3650c1acfccf3e2fa002655d20c3542030ba12d962510a08c5f39b66861f93",
+      "killed": true
+    },
+    {
+      "name": "force-UTC-display",
+      "exit": 1,
+      "total": 30,
+      "passed": 25,
+      "failed": 5,
+      "failures": [
+        "own booking confirmation uses canonical display without label authority cancel shows names and local time, keeping opaque handles and canonical instants",
+        "own booking confirmation uses canonical display without label authority reschedule shows names and local time, keeping opaque handles and canonical instants",
+        "own booking confirmation uses canonical display without label authority formats display in America/Los_Angeles without changing canonical time",
+        "own booking confirmation uses canonical display without label authority formats display in Asia/Tokyo without changing canonical time",
+        "own booking confirmation uses canonical display without label authority formats display in Pacific/Kiritimati without changing canonical time"
+      ],
+      "logSha256": "0b5210b0a746dafa8f20e11c22ce59b9b5aec14ef2b456eb33188736cd350a82",
+      "killed": true
+    },
+    {
+      "name": "discard-previous-local-time",
+      "exit": 1,
+      "total": 30,
+      "passed": 29,
+      "failed": 1,
+      "failures": [
+        "P-MINT-BOOK confirmation minter keeps both reschedule instants unchanged while emitting their server-formatted local labels"
+      ],
+      "logSha256": "a42a5ce641c85c13f1db78405381de1c1696a1c82a8450b0ecb422f658c3ef08",
+      "killed": true
+    }
+  ],
+  "restored": {
+    "exit": 0,
+    "total": 30,
+    "passed": 30,
+    "failed": 0,
+    "failures": [],
+    "logSha256": "6e94687f9704d80d265b048b72ecca8292392d09f8a0e8becf0e2e9f7a3b071f"
+  }
+}
