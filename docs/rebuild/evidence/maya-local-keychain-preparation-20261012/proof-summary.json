@@ -1,0 +1,20 @@
+{
+  "status": "PREPARATION_ONLY_NOT_CONNECTED",
+  "contractTests": {
+    "passed": 25,
+    "failed": 0
+  },
+  "swiftTypecheck": "PASS",
+  "sdkWarnings": [
+    "SecTrustedApplicationCreateFromPath deprecated",
+    "SecAccessCreate deprecated",
+    "SecKeychainSetUserInteractionAllowed deprecated"
+  ],
+  "actualKeychainReads": 0,
+  "actualKeychainWrites": 0,
+  "aclChanges": 0,
+  "secretEnrollment": 0,
+  "nativeAppStarted": false,
+  "signedHelperIdentityVerified": false,
+  "realCredentialIntegrationReady": false
+}
