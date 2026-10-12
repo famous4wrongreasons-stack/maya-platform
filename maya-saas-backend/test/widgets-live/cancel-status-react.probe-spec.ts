@@ -37,7 +37,7 @@ assert.ok(
 );
 assert.match(
   database.database,
-  /^maya_widget_gate_proof_cancelstatus_[a-f0-9]+$/,
+  /^maya_widget_gate_proof_c9occ_[a-f0-9]+$/,
 );
 const origin = 'https://synthetic-cancel-source.invalid';
 type Scenario = {

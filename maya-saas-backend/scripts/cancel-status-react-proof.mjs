@@ -84,7 +84,7 @@ await new Promise((resolve, reject) => {
 const port = server.address().port;
 await new Promise((resolve) => server.close(resolve));
 const database =
-  'maya_widget_gate_proof_cancelstatus_' + randomBytes(6).toString('hex');
+  'maya_widget_gate_proof_c9occ_' + randomBytes(6).toString('hex');
 const env = proofEnvironment(
   process.env,
   `postgresql://c9_proof@127.0.0.1:${port}/${database}`,
