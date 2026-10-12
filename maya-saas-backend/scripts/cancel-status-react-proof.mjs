@@ -100,14 +100,50 @@ const steps = proofCommands({
   receipt: path.join(privateRoot, 'unused.json'),
   branchBinding: true,
 }).slice(0, 4);
-steps.push({ name: 'shell-build', command: process.execPath, args: ['build.mjs'], cwd: path.resolve(backend, '../maya-chat-shell') });
-steps.push({ name: 'react-web-build', command: process.execPath, args: ['build.mjs', '--target=web'], cwd: path.resolve(backend, '../maya-carrier-react') });
+steps.push({
+  name: 'shell-build',
+  command: process.execPath,
+  args: ['build.mjs'],
+  cwd: path.resolve(backend, '../maya-chat-shell'),
+});
+steps.push({
+  name: 'react-web-build',
+  command: process.execPath,
+  args: ['build.mjs', '--target=web'],
+  cwd: path.resolve(backend, '../maya-carrier-react'),
+});
 for (const stage of ['prepare', 'resume']) {
-  if (stage === 'resume') steps.push({ name: 'pg-restart', command: path.join(pgBin, 'pg_ctl'), args: ['-D', cluster, '-w', '-t', '30', '-m', 'fast', 'restart'] });
-  steps.push({ name: stage, command: process.execPath, args: [
-    'node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--testRegex', 'cancel-status-react\\.probe-spec\\.ts$',
-    '--runInBand', '--runTestsByPath', 'test/widgets-live/cancel-status-react.probe-spec.ts', '--json', '--outputFile=' + path.join(values.output, stage + '-jest.json'),
-  ], env: { JEST_CANCEL_STATUS_OUTPUT: values.output, JEST_CANCEL_STATUS_STAGE: stage, JEST_CANCEL_STATUS_RECEIPT: path.join(privateRoot, 'private-restart.json') }, timeoutMs: 240000 });
+  if (stage === 'resume')
+    steps.push({
+      name: 'pg-restart',
+      command: path.join(pgBin, 'pg_ctl'),
+      args: ['-D', cluster, '-w', '-t', '30', '-m', 'fast', 'restart'],
+    });
+  steps.push({
+    name: stage,
+    command: process.execPath,
+    args: [
+      'node_modules/jest/bin/jest.js',
+      '--config',
+      'test/jest-widgets-live.json',
+      '--testRegex',
+      'cancel-status-react\\.probe-spec\\.ts$',
+      '--runInBand',
+      '--runTestsByPath',
+      'test/widgets-live/cancel-status-react.probe-spec.ts',
+      '--json',
+      '--outputFile=' + path.join(values.output, stage + '-jest.json'),
+    ],
+    env: {
+      JEST_CANCEL_STATUS_OUTPUT: values.output,
+      JEST_CANCEL_STATUS_STAGE: stage,
+      JEST_CANCEL_STATUS_RECEIPT: path.join(
+        privateRoot,
+        'private-restart.json',
+      ),
+    },
+    timeoutMs: 240000,
+  });
 }
 const manifest = {
   contract: 'maya.cancel-status-react-proof/1',
@@ -120,7 +156,8 @@ const manifest = {
   completed: [],
   realProviderCalls: 0,
   realModelCalls: 0,
-  qualification: 'SYNTHETIC_NATIVE_PROVIDER_ACTUAL_HTTP_PG_BROWSER_RESTART_NOT_RELEASE',
+  qualification:
+    'SYNTHETIC_NATIVE_PROVIDER_ACTUAL_HTTP_PG_BROWSER_RESTART_NOT_RELEASE',
 };
 const save = () =>
   fs.writeFileSync(

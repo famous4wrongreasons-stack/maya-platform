@@ -35,10 +35,7 @@ assert.ok(
   output && receipt && ['prepare', 'resume'].includes(stage ?? ''),
   'Use cancel-status-react-proof.mjs',
 );
-assert.match(
-  database.database,
-  /^maya_widget_gate_proof_c9occ_[a-f0-9]+$/,
-);
+assert.match(database.database, /^maya_widget_gate_proof_c9occ_[a-f0-9]+$/);
 const origin = 'https://synthetic-cancel-source.invalid';
 type Scenario = {
   tenantId: string;
@@ -205,6 +202,7 @@ describe('Cancel status current React / HTTP / PG restart [SYNTHETIC NATIVE PROV
         data = [
           {
             id: 71,
+            company_id: company,
             name: 'Synthetic staff',
             bookable: true,
             fired: false,
@@ -287,9 +285,18 @@ describe('Cancel status current React / HTTP / PG restart [SYNTHETIC NATIVE PROV
         forbidden++;
         throw new Error('Unadmitted synthetic route: ' + method + ' ' + route);
       }
-      return new Response(JSON.stringify({ success: true, data }), {
-        status: 200,
-      });
+      const team =
+        route === `company/${company}/staff` || route === `staff/${company}`;
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data,
+          ...(team ? { meta: { total_count: 1, count: 1, page: 1 } } : {}),
+        }),
+        {
+          status: 200,
+        },
+      );
     });
   });
   afterAll(async () => {
@@ -331,6 +338,7 @@ describe('Cancel status current React / HTTP / PG restart [SYNTHETIC NATIVE PROV
       .send({
         provider: 'yclients',
         apiToken: 'SYNTHETIC_CANCEL_USER',
+        expectedVersion: null,
         settingsJson: {
           companyId: company,
           currency: 'RUB',
@@ -341,12 +349,22 @@ describe('Cancel status current React / HTTP / PG restart [SYNTHETIC NATIVE PROV
           },
         },
       });
-    expect(response.status).toBe(201);
+    observations.push({
+      setup: 'connect',
+      status: response.status,
+      error: object(response.body).error ?? null,
+    });
+    expect({
+      status: response.status,
+      error: object(response.body).error,
+    }).toMatchObject({ status: 201 });
+    const expectedVersion = object(object(response.body).receipt).configVersion;
+    expect(expectedVersion).toMatch(/^[a-f0-9]{64}$/);
     const active = await request(http.app.getHttpServer())
       .post('/api/integrations/crm/activate')
       .set('Authorization', 'Bearer ' + s.ownerToken)
       .set('Idempotency-Key', randomUUID())
-      .send({});
+      .send({ expectedVersion });
     expect(active.status).toBe(201);
   }
   async function scenario(key: string) {
