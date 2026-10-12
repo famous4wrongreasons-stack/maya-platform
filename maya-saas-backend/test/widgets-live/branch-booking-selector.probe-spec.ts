@@ -1665,7 +1665,7 @@ describe('Branch-preserving native booking selector [SYNTHETIC PROVIDER / ACTUAL
         expect(row?.terminal_lines).toEqual([
           {
             outcome: 'CONFIRMED',
-            text: 'Запись подтверждена.',
+            text: 'Запись перенесена.',
             action_receipt_ref: s.moveExecutionId,
           },
         ]);
