@@ -34,7 +34,7 @@ async function main() {
   fs.mkdirSync(output, { mode: 0o700 });
   const report = { contract: 'maya.exact-booking-followup-browser/1', status: 'running', realReactAndAuth: true, scriptedModel: true, syntheticInternalCalendar: input.nativeSyntheticYclients !== true, nativeSyntheticYclients: input.nativeSyntheticYclients === true, realModelCalls: 0, realProviderCalls: 0, steps: [], blocked: [] };
   const save = () => fs.writeFileSync(path.join(output, 'browser.json'), JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
-  let browser, chrome, profile, dev, page, guard, closing;
+  let browser, chrome, profile, dev, page, guard, closing, lastSubmission;
   const cleanup = () => closing ??= (async () => {
     try { await browser?.close(); }
     finally {
@@ -59,7 +59,7 @@ async function main() {
     const row = { name, reply: body?.reply ?? null, envelopeKind: body?.resolution?.receipt?.envelope?.kind ?? body?.next_envelope?.kind ?? null, receiptOutcome: body?.receipt_outcome ?? null, code: body?.code ?? null, snapshot };
     report.steps.push(row); save();
     const acknowledgement = receive('continue:' + name);
-    process.send({ type: 'checkpoint', name, receiptOutcome: row.receiptOutcome, envelopeKind: row.envelopeKind, selectedStart: body?.next_envelope?.body?.when?.value ?? null });
+    process.send({ type: 'checkpoint', name, receiptOutcome: row.receiptOutcome, envelopeKind: row.envelopeKind, selectedStart: body?.next_envelope?.body?.when?.value ?? null, ...(input.nativeSyntheticYclients && name.endsWith('-commit') ? { proofSubmission: lastSubmission } : {}) });
     await acknowledgement;
   }
   async function chat(prompt, name) {
@@ -82,7 +82,7 @@ async function main() {
     const controlName = await page.eval(`Q.name(${control})`);
     assert.equal(await page.click(control), true);
     const request = await until(() => page.apiRequests('/widgets/intent').slice(before).find(r => r.finishedAt || r.failed), 'widget intent');
-    const submission = JSON.parse(await page.postData(request));
+    const submission = JSON.parse(await page.postData(request)); lastSubmission = submission;
     assert.equal(submission.widget_id, envelope.widget_id, 'Click must belong to the current canonical envelope');
     const raw = await page.responseBody(request.requestId), body = JSON.parse(raw);
     report.intents ??= []; report.intents.push({ controlName, widgetId: envelope.widget_id, status: request.status, outcome: body.receipt_outcome ?? null, code: body.code ?? null, responseSha256: hash(raw), nextKind: body.next_envelope?.kind ?? null }); save();

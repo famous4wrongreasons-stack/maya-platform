@@ -1,6 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { spawn } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { AiCoreModelService } from '../../src/ai-tools/ai-core-model.service';
@@ -170,9 +170,18 @@ describe(`Exact17:00 current React → canonical create/reschedule/cancel [SCRIP
       { mode: 0o600 },
     );
     jest.restoreAllMocks();
-    await fx?.teardown();
-    await http?.close();
-    await db?.close();
+    // Native setup imports Staff referenced by Appointment. Keep this fresh
+    // proof DB as evidence; the driver always stops its owned cluster.
+    // Teardown must never skip closing app/PG pools if fixture deletion fails.
+    try {
+      if (!nativeFollowup) await fx?.teardown();
+    } finally {
+      try {
+        await http?.close();
+      } finally {
+        await db?.close();
+      }
+    }
   });
   it('clicks the selected17:00 slot, explicitly confirms once, then reviews and confirms own move/cancel', async () => {
     const client = await db.prisma.client.findFirstOrThrow({
@@ -268,6 +277,7 @@ describe(`Exact17:00 current React → canonical create/reschedule/cancel [SCRIP
               name: string;
               selectedStart: string | null;
               receiptOutcome: string | null;
+              proofSubmission?: Record<string, unknown>;
             };
             if (message.type === 'ready') {
               child.send({
@@ -368,6 +378,35 @@ describe(`Exact17:00 current React → canonical create/reschedule/cancel [SCRIP
               ].slice(0, expectedExecutions),
             );
             expect(externalCalls).toBe(0);
+            if (native && message.name.endsWith('-commit')) {
+              expect(message.proofSubmission).toBeDefined();
+              const replays = await Promise.all(
+                Array.from({ length: 3 }, () =>
+                  http.postIntent(source.token, {
+                    ...message.proofSubmission,
+                    client_nonce: randomUUID(),
+                  }),
+                ),
+              );
+              for (const replay of replays) {
+                expect(replay.status).toBe(200);
+                expect(replay.body).toMatchObject({
+                  outcome: 'expired',
+                  receipt_outcome: null,
+                });
+              }
+              expect(
+                await db.prisma.actionExecution.count({
+                  where: {
+                    ...where,
+                    capability: { in: native.bookingCapabilities },
+                  },
+                }),
+              ).toBe(expectedExecutions);
+              observations.concurrentConsumedIntentRefusals =
+                Number(observations.concurrentConsumedIntentRefusals ?? 0) +
+                replays.length;
+            }
             const providerState = await native?.checkpoint(index);
             checkpoints.push({
               ...(providerState ? { providerState } : {}),
