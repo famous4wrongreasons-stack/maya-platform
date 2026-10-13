@@ -1,7 +1,7 @@
 // K5 — the network client. The ONLY `fetch` in the bundle (N-1).
 //
 // Every request uses the closed PATHS allowlist. The privacy erasure and retained-report read
-// add only a guarded UUID and their fixed suffix; both constructions are checked by the ratchet.
+// add only guarded identifiers and fixed suffixes; explicit Inbox mark-read has the same finite rule.
 //
 // Typed methods only. Each builds its request body as a fresh literal of the DTO's keys, so no
 // extra property (an audience, a tenant, a role or mode value) can ride along on the wire; each
@@ -11,7 +11,7 @@
 // only `session.ts` implements.
 
 import { projectPersonalBranches, projectPersonalChoices, projectPersonalSlots, projectPersonalPreview, projectPersonalResults } from './personal.ts';
-import { projectFeed, projectReports, projectReport, reportKey } from './workspace-reads.ts';
+import { projectFeed, projectReports, projectReport, reportKey, feedKey } from './workspace-reads.ts';
 import { projectIdeas } from './ideas.ts';
 import type { IdeasSnapshot } from './types.ts';
 import type { FeedSnapshot, ReportsSnapshot, ReportSummary, ReportSnapshot, WorkspaceReadFailure } from './types.ts';
@@ -78,6 +78,7 @@ import type {
 const PATHS = {
   ideas: '/analytics/valuations',
   feed: '/inbox',
+  feedRead: '/inbox/',
   reports: '/owner-reports',
   reportSnapshot: '/owner-reports/',
   ownTasks: '/operational-work',
@@ -195,9 +196,10 @@ const parseRetryAfter = (value: string | null): number | null => {
  * The one request site. A caller's abort and the timeout both abort the fetch; they are told apart,
  * because an abort is the shell's own decision and a timeout is a lost connection.
  */
-async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | null, signal: AbortSignal | null, timeoutMs: number, search: string | null = null, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = '', idempotencyKey: string = '', crmLocator: CrmOperationLocator | null = null, reportRunId: string = ''): Promise<Exchange> {
+async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | null, signal: AbortSignal | null, timeoutMs: number, search: string | null = null, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = '', idempotencyKey: string = '', crmLocator: CrmOperationLocator | null = null, reportRunId: string = '', feedItemId: string = ''): Promise<Exchange> {
   if (endpoint === 'historyErasure' && (erasureConversationId.length !== 36 || !/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(erasureConversationId))) return { kind: 'aborted' };
   if (endpoint === 'reportSnapshot' && (reportRunId.length !== 36 || !/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(reportRunId))) return { kind: 'aborted' };
+  if (endpoint === 'feedRead' && !/^[A-Za-z0-9_-]{1,160}$/.test(feedItemId)) return { kind: 'aborted' };
   if (signal !== null && signal.aborted) return { kind: 'aborted' };
   const controller = new AbortController();
   let timedOut = false;
@@ -216,7 +218,7 @@ async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | 
   const multipart = endpoint === 'goodsPhotoPreview' && body instanceof FormData;
   const idempotency = endpoint === 'taskCreate' || endpoint === 'taskComplete' || endpoint === 'crmSetupStage' || endpoint === 'crmSetupActivate' ? { 'Idempotency-Key': idempotencyKey } : {};
   const headers: Readonly<Record<string, string>> = { ...auth, ...context, ...idempotency, ...(reading || multipart ? {} : { 'Content-Type': 'application/json' }) };
-  const path = endpoint === 'historyErasure' ? `${PATHS.historyErasure}/${encodeURIComponent(erasureConversationId)}/erasure` : endpoint === 'reportSnapshot' ? `${PATHS.reportSnapshot}${encodeURIComponent(reportRunId)}/snapshot` : PATHS[endpoint];
+  const path = endpoint === 'historyErasure' ? `${PATHS.historyErasure}/${encodeURIComponent(erasureConversationId)}/erasure` : endpoint === 'reportSnapshot' ? `${PATHS.reportSnapshot}${encodeURIComponent(reportRunId)}/snapshot` : endpoint === 'feedRead' ? `${PATHS.feedRead}${encodeURIComponent(feedItemId)}/read` : PATHS[endpoint];
   try {
     const response = await fetch(API_BASE + path + (crmLocator !== null ? `?operation=${encodeURIComponent(crmLocator.operation)}&requestId=${encodeURIComponent(crmLocator.requestId)}` : slots !== null ? slots.branchId === undefined ? `?date=${encodeURIComponent(slots.date)}&serviceIds=${encodeURIComponent(slots.serviceId)}&staffId=${encodeURIComponent(slots.staffId)}` : `?date=${encodeURIComponent(slots.date)}&serviceIds=${encodeURIComponent(slots.serviceId)}&staffId=${encodeURIComponent(slots.staffId)}&branchId=${encodeURIComponent(slots.branchId)}` : search === null ? '' : `?q=${encodeURIComponent(search)}`), {
       method: reading ? 'GET' : 'POST',
@@ -557,16 +559,16 @@ const unlessAborted = <T>(work: Promise<T>, signal: AbortSignal): Promise<T | nu
 };
 
 /** 401 → refresh once → retry once (§1.4). A second 401 ends the session; it never loops. */
-async function authorizedExchange(auth: Authorizer, endpoint: 'ideas' | 'taskCreate' | 'taskComplete' | 'feed' | 'reports' | 'reportSnapshot' | 'ownTasks' | 'telegramLinkStart' | 'telegramLinkComplete' | 'crmSetupStatus' | 'crmSetupStage' | 'crmSetupActivate' | 'crmSetupOperation' | 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate' | 'goodsPhotoPreview' | 'goodsPhotoSearch' | 'goodsPhotoItem' | 'goodsPhotoReview', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = '', idempotencyKey: string = '', crmLocator: CrmOperationLocator | null = null, reportRunId: string = ''): Promise<AuthorizedExchange> {
+async function authorizedExchange(auth: Authorizer, endpoint: 'feedRead' | 'ideas' | 'taskCreate' | 'taskComplete' | 'feed' | 'reports' | 'reportSnapshot' | 'ownTasks' | 'telegramLinkStart' | 'telegramLinkComplete' | 'crmSetupStatus' | 'crmSetupStage' | 'crmSetupActivate' | 'crmSetupOperation' | 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate' | 'goodsPhotoPreview' | 'goodsPhotoSearch' | 'goodsPhotoItem' | 'goodsPhotoReview', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = '', idempotencyKey: string = '', crmLocator: CrmOperationLocator | null = null, reportRunId: string = '', feedItemId: string = ''): Promise<AuthorizedExchange> {
   const first = await unlessAborted(auth.authorize(), signal);
   if (first === null) return { kind: 'aborted' };
   if (first.kind !== 'bearer') return first;
-  const ex = await exchange(endpoint, body, first.bearer, signal, timeoutMs, null, slots, erasureConversationId, idempotencyKey, crmLocator, reportRunId);
+  const ex = await exchange(endpoint, body, first.bearer, signal, timeoutMs, null, slots, erasureConversationId, idempotencyKey, crmLocator, reportRunId, feedItemId);
   if (ex.kind !== 'response' || ex.status !== 401) return ex;
   const second = await unlessAborted(auth.reauthorize(first.serial), signal);
   if (second === null) return { kind: 'aborted' };
   if (second.kind !== 'bearer') return second;
-  const retried = await exchange(endpoint, body, second.bearer, signal, timeoutMs, null, slots, erasureConversationId, idempotencyKey, crmLocator, reportRunId);
+  const retried = await exchange(endpoint, body, second.bearer, signal, timeoutMs, null, slots, erasureConversationId, idempotencyKey, crmLocator, reportRunId, feedItemId);
   if (retried.kind === 'response' && retried.status === 401) {
     auth.refused(second.serial);
     return { kind: 'signed_out', reason: 'session_revoked' };
@@ -724,6 +726,14 @@ export function createTransport(auth: Authorizer, timeouts: Timeouts = { request
     },
     async feed(signal: AbortSignal): Promise<Outcome<FeedSnapshot, WorkspaceReadFailure>> {
       return workspaceReadOutcome(await authorizedExchange(auth, 'feed', {}, signal, timeouts.requestMs), projectFeed);
+    },
+    async markFeedRead(key: string, signal: AbortSignal): Promise<Outcome<true, WorkspaceReadFailure>> {
+      if (!feedKey(key)) return fail({ reason: 'invalid_response' });
+      // Acceptance is not proof of a changed row: the existing owner deliberately returns ok for no match.
+      return workspaceReadOutcome(await authorizedExchange(auth, 'feedRead', {}, signal, timeouts.requestMs, null, '', '', null, '', key), raw => {
+        const value = raw as { ok?: unknown } | null;
+        return value && typeof value === 'object' && !Array.isArray(value) && value.ok === true && Object.keys(value).length === 1 ? true : null;
+      });
     },
     async reports(signal: AbortSignal): Promise<Outcome<ReportsSnapshot, WorkspaceReadFailure>> {
       return workspaceReadOutcome(await authorizedExchange(auth, 'reports', {}, signal, timeouts.requestMs), projectReports);

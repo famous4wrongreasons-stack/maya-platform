@@ -50,6 +50,8 @@ describe('Companion retained reads through actual Nest JWT/tenant/role guards an
     throw new Error('No authority read may mutate');
   });
 
+  const acknowledge = jest.fn();
+
   function fixture() {
     return {
       user: {
@@ -128,7 +130,7 @@ describe('Companion retained reads through actual Nest JWT/tenant/role guards an
     },
     inboxItem: {
       findMany: jest.fn().mockResolvedValue([]),
-      updateMany: write,
+      updateMany: acknowledge,
       create: write,
     },
     ownerReportRun: {
@@ -175,8 +177,12 @@ describe('Companion retained reads through actual Nest JWT/tenant/role guards an
         JSON.stringify(canonical),
       ),
     };
-    prisma.ownerReportRun.findMany.mockImplementation(async () => [run]);
-    prisma.ownerReportRun.findUniqueOrThrow.mockImplementation(async () => run);
+    prisma.ownerReportRun.findMany.mockImplementation(() =>
+      Promise.resolve([run]),
+    );
+    prisma.ownerReportRun.findUniqueOrThrow.mockImplementation(() =>
+      Promise.resolve(run),
+    );
   }
   beforeAll(async () => {
     process.env[keys[0]] = bridgeSecret;
@@ -241,6 +247,9 @@ describe('Companion retained reads through actual Nest JWT/tenant/role guards an
   beforeEach(() => {
     state = fixture();
     jest.clearAllMocks();
+    acknowledge.mockReset().mockImplementation(() => {
+      throw new Error('Unexpected Inbox acknowledgement');
+    });
     plan = {
       contract: OWNER_REPORT_CONTRACT,
       tenantId: 'tenant-a',
@@ -319,7 +328,7 @@ describe('Companion retained reads through actual Nest JWT/tenant/role guards an
     const response = await get(
       paths[0] + '?tenantId=tenant-b&userId=other',
     ).expect(200);
-    expect(response.body.items[0]).toMatchObject({
+    expect((response.body as { items: unknown[] }).items[0]).toMatchObject({
       title: row.title,
       read_at: null,
     });
@@ -345,7 +354,7 @@ describe('Companion retained reads through actual Nest JWT/tenant/role guards an
       where: {
         tenantId: 'tenant-a',
         intentEncrypted: { not: null },
-        payloadRetentionUntil: { gt: expect.any(Date) },
+        payloadRetentionUntil: { gt: expect.any(Date) as unknown },
       },
       orderBy: [{ periodLocalDate: 'desc' }, { id: 'desc' }],
       take: 100,
@@ -370,7 +379,7 @@ describe('Companion retained reads through actual Nest JWT/tenant/role guards an
           userId: 'user-a',
           status: 'active',
           user: { status: 'active' },
-        }),
+        }) as unknown,
       }),
     );
   });
@@ -445,4 +454,182 @@ describe('Companion retained reads through actual Nest JWT/tenant/role guards an
       await get(path).expect(403);
     },
   );
+
+  // Same canonical Inbox owner; synthetic persistence only. No Action Engine, task or delivery write.
+  function acknowledgementFixture() {
+    const rows = [
+      {
+        id: 'own-item',
+        tenantId: 'tenant-a',
+        userId: 'user-a',
+        deletedAt: null,
+        readAt: null,
+      },
+      {
+        id: 'other-user',
+        tenantId: 'tenant-a',
+        userId: 'user-b',
+        deletedAt: null,
+        readAt: null,
+      },
+      {
+        id: 'other-tenant',
+        tenantId: 'tenant-b',
+        userId: 'user-a',
+        deletedAt: null,
+        readAt: null,
+      },
+      {
+        id: 'deleted-item',
+        tenantId: 'tenant-a',
+        userId: 'user-a',
+        deletedAt: new Date(0),
+        readAt: null,
+      },
+    ] as Array<{
+      id: string;
+      tenantId: string;
+      userId: string;
+      deletedAt: Date | null;
+      readAt: Date | null;
+    }>;
+    acknowledge.mockImplementation(
+      ({
+        where,
+        data,
+      }: {
+        where: Record<string, unknown>;
+        data: { readAt: Date };
+      }) => {
+        expect(where).toEqual({
+          id: expect.any(String) as unknown,
+          tenantId: 'tenant-a',
+          userId: 'user-a',
+          deletedAt: null,
+        });
+        expect(Object.keys(data)).toEqual(['readAt']);
+        expect(data.readAt).toBeInstanceOf(Date);
+        const selected = rows.filter(
+          (row) =>
+            row.id === where.id &&
+            row.tenantId === where.tenantId &&
+            row.userId === where.userId &&
+            row.deletedAt === where.deletedAt,
+        );
+        for (const row of selected) row.readAt = data.readAt;
+        return Promise.resolve({ count: selected.length });
+      },
+    );
+    prisma.inboxItem.findMany.mockImplementation(() =>
+      Promise.resolve(
+        rows
+          .filter(
+            (row) =>
+              row.tenantId === 'tenant-a' &&
+              row.userId === 'user-a' &&
+              row.deletedAt === null,
+          )
+          .map((row) => ({
+            ...row,
+            type: 'owner_alert',
+            title: 'Synthetic notification',
+            bodyText: 'Synthetic text',
+            createdAt: new Date('2026-10-14T09:00:00Z'),
+          })),
+      ),
+    );
+    return rows;
+  }
+  const mark = (id: string, credential: string | null = token()) => {
+    const call = request(app.getHttpServer() as Server).post(
+      '/api/inbox/' + id + '/read',
+    );
+    if (credential) call.set('Authorization', 'Bearer ' + credential);
+    return call;
+  };
+  it('explicit Inbox acknowledgement updates only readAt for the current tenant/user and fresh GET confirms it', async () => {
+    const rows = acknowledgementFixture();
+    expect(
+      (
+        (await get('/api/inbox').expect(200)).body as {
+          items: Array<{ read_at: string | null }>;
+        }
+      ).items[0].read_at,
+    ).toBeNull();
+    expect(
+      (
+        await mark('own-item')
+          .send({ tenantId: 'tenant-b', userId: 'user-b', readAt: 'forged' })
+          .expect(201)
+      ).body,
+    ).toEqual({ ok: true });
+    expect(rows[0].readAt).toBeInstanceOf(Date);
+    expect(rows.slice(1).every((row) => row.readAt === null)).toBe(true);
+    expect(
+      (
+        (await get('/api/inbox').expect(200)).body as {
+          items: Array<{ read_at: string | null }>;
+        }
+      ).items[0].read_at,
+    ).toBe(rows[0].readAt!.toISOString());
+    expect(acknowledge).toHaveBeenCalledTimes(1);
+  });
+  it.each(['other-user', 'other-tenant', 'deleted-item', 'missing-item'])(
+    'ok is deliberately non-disclosing: marking %s changes no row and does not prove read state',
+    async (id) => {
+      const rows = acknowledgementFixture();
+      expect((await mark(id).send({}).expect(201)).body).toEqual({ ok: true });
+      expect(rows.every((row) => row.readAt === null)).toBe(true);
+      expect(
+        (
+          (await get('/api/inbox').expect(200)).body as {
+            items: Array<{ read_at: string | null }>;
+          }
+        ).items[0].read_at,
+      ).toBeNull();
+    },
+  );
+  it('repeated and concurrent acknowledgements never create a second item or task/delivery effect', async () => {
+    const rows = acknowledgementFixture();
+    await mark('own-item').send({}).expect(201);
+    await Promise.all([
+      mark('own-item').send({}).expect(201),
+      mark('own-item').send({}).expect(201),
+    ]);
+    expect(rows).toHaveLength(4);
+    expect(rows[0].readAt).toBeInstanceOf(Date);
+    expect(rows.slice(1).every((row) => row.readAt === null)).toBe(true);
+    expect(acknowledge).toHaveBeenCalledTimes(3);
+  });
+  it('anonymous invalid revoked and tenant-substituted sessions cannot mark read', async () => {
+    acknowledgementFixture();
+    await mark('own-item', null).send({}).expect(401);
+    await mark('own-item', 'invalid').send({}).expect(401);
+    const credential = token();
+    state.session.revokedAt = new Date();
+    await mark('own-item', credential).send({}).expect(401);
+    state.session.revokedAt = null;
+    const foreign = jwt.sign(
+      {
+        user_id: 'user-a',
+        tenant_id: 'tenant-b',
+        session_id: 'session-a',
+        role: UserRole.TENANT_OWNER,
+      },
+      { expiresIn: 60 },
+    );
+    await mark('own-item', foreign).send({}).expect(401);
+    expect(acknowledge).not.toHaveBeenCalled();
+  });
+  it('revoked membership and client role are not notification-owner authority', async () => {
+    acknowledgementFixture();
+    const credential = token();
+    state.membership.status = 'revoked';
+    await mark('own-item', credential).send({}).expect(401);
+    state.membership.status = 'active';
+    state.membership.role = 'client';
+    state.user.role = 'client';
+    await mark('own-item', credential).send({}).expect(403);
+    expect(acknowledge).not.toHaveBeenCalled();
+  });
 });

@@ -12,7 +12,7 @@
 
 import type { HistorisedWidget, WidgetEnvelope, WidgetIntentSubmission } from '../contract.ts';
 
-/** Current-user task display only; key is a React key, never a command locator. */
+/** Current-user Inbox display; only the explicit mark-read owner may consume its loaded key. */
 export interface FeedRow { readonly key: string; readonly type: string; readonly title: string; readonly body: string; readonly createdAt: string; readonly unread: boolean; }
 export interface FeedSnapshot { readonly rows: readonly FeedRow[]; readonly possiblyCapped: boolean; }
 export interface ReportSummary { readonly key: string; readonly type: 'daily_report' | 'morning_owner' | 'morning_staff'; readonly period: string; readonly title: string; }
@@ -49,6 +49,7 @@ export interface IdeaRead {
 export interface IdeasSnapshot { readonly rows: readonly IdeaRead[]; readonly possiblyCapped: boolean; }
 export interface IdeasTransport { ideas(signal: AbortSignal): Promise<Outcome<IdeasSnapshot, WorkspaceReadFailure>>; }
 export interface WorkspaceReadTransport {
+  markFeedRead(key: string, signal: AbortSignal): Promise<Outcome<true, WorkspaceReadFailure>>;
   feed(signal: AbortSignal): Promise<Outcome<FeedSnapshot, WorkspaceReadFailure>>;
   reports(signal: AbortSignal): Promise<Outcome<ReportsSnapshot, WorkspaceReadFailure>>;
   report(selected: ReportSummary, signal: AbortSignal): Promise<Outcome<ReportSnapshot, WorkspaceReadFailure>>;

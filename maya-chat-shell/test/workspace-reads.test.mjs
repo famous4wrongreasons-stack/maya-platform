@@ -57,7 +57,7 @@ function rig(signedIn=true){
   const session={view:()=>sessionView,subscribe:fn=>{listeners.add(fn);return()=>listeners.delete(fn);}};
   const shell=createShell({session,history:{push(){},back(){},onBack(){return()=>{};}}});
   const request=(method,signal,selection)=>new Promise(resolve=>requests.push({method,signal,selection,resolve}));
-  const port=createWorkspaceReads({session,shell,newAbort:()=>new AbortController(),scheduler:{now:()=>now,after:(ms,fn)=>{const t={fn,at:now+ms,cancelled:false};timers.push(t);return()=>t.cancelled=true;}},transport:{feed:s=>request('feed',s),reports:s=>request('reports',s),report:(row,s)=>request('report',s,row)}});
+  const port=createWorkspaceReads({session,shell,newAbort:()=>new AbortController(),scheduler:{now:()=>now,after:(ms,fn)=>{const t={fn,at:now+ms,cancelled:false};timers.push(t);return()=>t.cancelled=true;}},transport:{markFeedRead:(key,s)=>request('markRead',s,key),feed:s=>request('feed',s),reports:s=>request('reports',s),report:(row,s)=>request('report',s,row)}});
   return {port,shell,requests,session(value){sessionView={signedIn:value};for(const fn of [...listeners])fn(sessionView);},advance(ms){now+=ms;for(const t of timers.splice(0))if(!t.cancelled&&t.at<=now)t.fn();},dispose(){port.dispose();shell.dispose();}};
 }
 const loadReports=async(r)=>{r.port.openLibrary();r.requests.at(-1).resolve(ok(projectReports({reports:[report(),{...report(other),title:'Аналитика'}]})));await tick();};
@@ -109,6 +109,12 @@ test('build admits only fixed UUID report suffix and exact Inbox READ literal ow
     const check=(id,text,direction)=>runFixture(ts,contract,{id,direction,row:'net',files:files().set('src/net/client.ts',text),expect:new Set(),probes:false,typecheck:null},shared);
     assert.deepEqual(check('workspace-admit',source,'admit').refusals,[]);
     for(const [id,from,to,rule] of [
+      ['feed-suffix','}/read`','}/devices`','fetch-shape'],
+      ['feed-prefix',"feedRead: '/inbox/'","feedRead: '/inbox/internal/'",'literal-ban'],
+      ['feed-guard',"if (endpoint === 'feedRead' && !/^[A-Za-z0-9_-]{1,160}$/.test(feedItemId))","if (endpoint === 'feed' && !/^[A-Za-z0-9_-]{1,160}$/.test(feedItemId))",'fetch-shape'],
+      ['feed-encoding','${encodeURIComponent(feedItemId)}/read','${feedItemId}/read','fetch-shape'],
+      ['feed-reassign','const controller = new AbortController();',"feedItemId = '../devices'; const controller = new AbortController();",'fetch-shape'],
+      ['feed-arbitrary-prefix','export function createTransport(',"const forbiddenPrefix = '/inbox/'; export function createTransport(",'literal-ban'],
       ['suffix','}/snapshot`','}/download`','fetch-shape'],
       ['prefix',"reportSnapshot: '/owner-reports/'","reportSnapshot: '/owner-reports-admin/'",'fetch-shape'],
       ['guard',"if (endpoint === 'reportSnapshot' && (reportRunId.length","if (endpoint === 'feed' && (reportRunId.length",'fetch-shape'],
@@ -118,4 +124,66 @@ test('build admits only fixed UUID report suffix and exact Inbox READ literal ow
       ['inbox-mutation',"feed: '/inbox'","feed: '/inbox/read'",'literal-ban'],
     ]){const mutated=source.replace(from,to);assert.notEqual(mutated,source,id);assert.ok(check(id,mutated,'refuse').got.includes(rule),id);}
   }finally{fs.rmSync(tmp,{recursive:true,force:true});}
+});
+
+const feedSnapshot=(read=false,key='one')=>projectFeed({items:[{...feed(key),read_at:read?'2026-10-14T09:00:00.000Z':null}]});
+const loadedFeed=async(r)=>{r.port.openFeed();r.requests.at(-1).resolve(ok(feedSnapshot()));await tick();};
+test('mark read uses the exact authenticated finite POST, empty body and no caller authority',async()=>{
+ const n=net([{body:{ok:true}}]);assert.deepEqual(await n.transport.markFeedRead('cm123_real-id',signal()),ok(true));
+ assert.equal(n.calls[0].url,'/api/inbox/cm123_real-id/read');
+ assert.deepEqual({...n.calls[0].init,signal:null},{method:'POST',headers:{Authorization:'Bearer synthetic-only','Content-Type':'application/json'},body:'{}',signal:null,credentials:'omit',cache:'no-store',redirect:'error'});
+ for(const key of ['', '../admin','../internal/ingest','x/read','x?tenant=other','x#read','%2f','..',' x', 'x'.repeat(161),null,4]){
+  const refused=net([]);assert.equal((await refused.transport.markFeedRead(key,signal())).ok,false);assert.equal(refused.calls.length,0);
+ }
+});
+test('mark read transport rejects forged acceptance, refreshes only 401 and never retries uncertain POST',async()=>{
+ for(const body of [{},{ok:false},{ok:1},{ok:'true'},[{ok:true}],{ok:true,read_at:'forged'}]){const n=net([{body}]);assert.equal((await n.transport.markFeedRead('one',signal())).failure.reason,'invalid_response');assert.equal(n.calls.length,1);}
+ let n=net([{status:401},{body:{ok:true}}]);assert.equal((await n.transport.markFeedRead('one',signal())).ok,true);assert.equal(n.counts.refresh,1);assert.equal(n.calls.length,2);
+ n=net([{status:401},{status:401}]);assert.equal((await n.transport.markFeedRead('one',signal())).failure.reason,'forbidden');assert.equal(n.counts.refused,1);
+ for(const [status,reason] of [[403,'forbidden'],[429,'rate_limited'],[404,'unavailable'],[500,'unavailable']]){n=net([{status,headers:{'Retry-After':'3'}}]);assert.equal((await n.transport.markFeedRead('one',signal())).failure.reason,reason);assert.equal(n.calls.length,1);}
+ n=net([]);const a=new AbortController();a.abort();assert.equal((await n.transport.markFeedRead('one',a.signal)).failure.reason,'aborted');assert.equal(n.calls.length,0);
+ n=net([]);globalThis.fetch=async()=>{n.calls.push('lost');throw Error('synthetic lost response');};assert.equal((await n.transport.markFeedRead('one',signal())).failure.reason,'unavailable');assert.equal(n.calls.length,1);
+});
+test('mark read requires current visible unread selection and single flight; acceptance alone never flips state',async()=>{
+ const r=rig();await r.port.markRead('one');assert.equal(r.requests.length,0);await loadedFeed(r);
+ const foreign=r.port.markRead('foreign');assert.equal(r.requests.length,1);await foreign;
+ const p=r.port.markRead('one');assert.equal(r.requests[1].selection,'one');assert.equal(r.port.view().markingRead,'one');assert.equal(r.port.view().feed[0].unread,true);
+ const duplicate=r.port.markRead('one');assert.equal(r.requests.length,2);await duplicate;await r.port.refresh();assert.equal(r.requests.length,2);
+ r.requests[1].resolve(ok(true));await tick();assert.equal(r.requests[2].method,'feed');assert.equal(r.port.view().feed[0].unread,true);
+ r.requests[2].resolve(ok(feedSnapshot(true)));await p;assert.equal(r.port.view().feed[0].unread,false);assert.equal(r.port.view().markingRead,null);assert.match(r.port.view().notice,/Отмечено/);
+ const already=r.port.markRead('one');assert.equal(r.requests.length,3);await already;r.dispose();
+});
+test('mark read requires exact persisted state, not ok, absence or a foreign read row',async()=>{
+ for(const snapshot of [feedSnapshot(),{rows:[],possiblyCapped:false},feedSnapshot(true,'foreign')]){
+  const r=rig();await loadedFeed(r);const p=r.port.markRead('one');r.requests[1].resolve(ok(true));await tick();r.requests[2].resolve(ok(snapshot));await p;
+  assert.match(r.port.view().notice,/Не удалось подтвердить/);assert.equal(r.port.view().markingRead,null);assert.equal(r.requests.filter(x=>x.method==='markRead').length,1);r.dispose();
+ }
+});
+test('lost mark response reconciles by read only; unread filter updates from persisted state',async()=>{
+ const r=rig();await loadedFeed(r);r.port.filterUnread(true);const p=r.port.markRead('one');
+ r.requests[1].resolve({ok:false,failure:{reason:'unavailable'}});await tick();assert.equal(r.requests[2].method,'feed');
+ r.requests[2].resolve(ok(feedSnapshot(true)));await p;assert.equal(r.port.view().feed.length,0);assert.match(r.port.view().notice,/Отмечено/);
+ r.port.filterUnread(false);assert.equal(r.port.view().feed[0].unread,false);assert.equal(r.requests.length,3);r.dispose();
+});
+test('mark read denial clears content; rate limit delays only manual reads and never replays writes',async()=>{
+ for(const reason of ['forbidden','rate_limited']){
+  const r=rig();await loadedFeed(r);const p=r.port.markRead('one');r.requests[1].resolve({ok:false,failure:{reason,retryAfterSec:3}});await p;
+  assert.equal(r.port.view().phase,'failed');assert.deepEqual(r.port.view().feed,[]);assert.equal(r.port.view().markingRead,null);assert.equal(r.requests.length,2);
+  if(reason==='rate_limited'){await r.port.refresh();assert.equal(r.requests.length,2);r.advance(3000);assert.equal(r.requests.length,2);}
+  r.dispose();
+ }
+ for(const reason of ['forbidden','invalid_response','unavailable']){
+  const r=rig();await loadedFeed(r);const p=r.port.markRead('one');r.requests[1].resolve(ok(true));await tick();r.requests[2].resolve({ok:false,failure:{reason}});await p;
+  assert.equal(r.port.view().phase,'failed');assert.deepEqual(r.port.view().feed,[]);assert.equal(r.port.view().markingRead,null);r.dispose();
+ }
+});
+test('late mark and reread cannot survive close, workspace switch, replacement or disposal',async()=>{
+ for(const stage of ['post','reread'])for(const boundary of ['close','library','replacement','signout','dispose']){
+  const r=rig();await loadedFeed(r);const p=r.port.markRead('one');
+  if(stage==='reread'){r.requests[1].resolve(ok(true));await tick();}
+  const q=r.requests.at(-1),count=r.requests.length;
+  if(boundary==='close')r.port.close();if(boundary==='library')r.port.openLibrary();if(boundary==='replacement')r.session(true);if(boundary==='signout')r.session(false);if(boundary==='dispose')r.port.dispose();
+  const after=r.requests.length;assert.equal(q.signal.aborted,true);q.resolve(ok(stage==='post'?true:feedSnapshot(true)));await p;
+  assert.equal(r.port.view().markingRead,null);assert.deepEqual(r.port.view().feed,[]);assert.equal(r.requests.length,after);assert.ok(after>=count);r.dispose();
+ }
 });

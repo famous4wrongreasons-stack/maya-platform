@@ -1,4 +1,4 @@
-// Read-only projections of Inbox and retained OwnerReport snapshots. No links/payload authority.
+// Finite Inbox and retained OwnerReport projections. No links/payload authority.
 import type { FeedSnapshot, ReportSummary, ReportsSnapshot, ReportSnapshot } from './types.ts';
 const object = (v: unknown): Record<string, unknown> | null => v !== null && typeof v === 'object' && !Array.isArray(v) ? v as Record<string, unknown> : null;
 const text = (v: unknown, max: number): v is string => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
@@ -6,6 +6,8 @@ const instant = (v: unknown): v is string => typeof v === 'string' && /^\d{4}-\d
 export const reportKey = (v: unknown): v is string => typeof v === 'string' && v.length === 36 && /^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(v);
 const reportType = (v: unknown): v is ReportSummary['type'] => v === 'daily_report' || v === 'morning_owner' || v === 'morning_staff';
 const day = (v: unknown): v is string => typeof v === 'string' && /^\d{4}-\d\d-\d\d$/.test(v) && instant(v + 'T00:00:00.000Z');
+/** Opaque current Inbox ID; never a path, URL, query or display index. */
+export const feedKey = (v: unknown): v is string => typeof v === 'string' && /^[A-Za-z0-9_-]{1,160}$/.test(v);
 export function projectFeed(raw: unknown): FeedSnapshot | null {
   const v = object(raw);
   if (!v || !Array.isArray(v.items) || v.items.length > 50) return null;

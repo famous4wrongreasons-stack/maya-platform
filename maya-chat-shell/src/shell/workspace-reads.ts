@@ -8,15 +8,17 @@ export interface WorkspaceReadsView {
   readonly unreadOnly: boolean; readonly possiblyCapped: boolean;
   readonly order: 'recent' | 'title'; readonly layout: 'list' | 'grid';
   readonly detail: { readonly phase: 'loading'; readonly title: string } | { readonly phase: 'ready'; readonly report: ReportSnapshot } | null;
+  readonly markingRead: string | null;
   readonly notice: string; readonly retryAt: number | null;
 }
 export interface WorkspaceReadsPort {
   view(): WorkspaceReadsView; subscribe(listener: (view: WorkspaceReadsView) => void): () => void;
   openFeed(): void; openLibrary(): void; close(): void; refresh(): Promise<void>;
   filterUnread(value: boolean): void; order(value: 'recent' | 'title'): void; layout(value: 'list' | 'grid'): void;
+  markRead(key: string): Promise<void>;
   read(key: string): Promise<void>; back(): void; dispose(): void;
 }
-const empty = (): WorkspaceReadsView => ({ workspace: null, phase: 'closed', feed: [], reports: [], unreadOnly: false, possiblyCapped: false, order: 'recent', layout: 'list', detail: null, notice: '', retryAt: null });
+const empty = (): WorkspaceReadsView => ({ workspace: null, phase: 'closed', feed: [], reports: [], unreadOnly: false, possiblyCapped: false, order: 'recent', layout: 'list', detail: null, markingRead: null, notice: '', retryAt: null });
 const message = (f: WorkspaceReadFailure): string => f.reason === 'forbidden' ? 'Материалы недоступны для текущего входа.' : f.reason === 'invalid_response' ? 'Не удалось проверить ответ. Попробуйте обновить список.' : f.reason === 'rate_limited' ? 'Можно обновить список немного позже.' : 'Не удалось загрузить материалы. Попробуйте ещё раз.';
 export function createWorkspaceReads(deps: {
   transport: WorkspaceReadTransport; session: Pick<SessionPort, 'view' | 'subscribe'>;
@@ -34,16 +36,16 @@ export function createWorkspaceReads(deps: {
   const fail = (failure: WorkspaceReadFailure, version: number) => {
     allFeed = []; allReports = [];
     const retryAt = failure.reason === 'rate_limited' ? deps.scheduler.now() + failure.retryAfterSec * 1000 : null;
-    publish({ phase: 'failed', feed: [], reports: [], detail: null, notice: message(failure), possiblyCapped: false, retryAt });
+    publish({ phase: 'failed', feed: [], reports: [], detail: null, markingRead: null, notice: message(failure), possiblyCapped: false, retryAt });
     if (retryAt !== null) offTimer = deps.scheduler.after(Math.max(0, retryAt - deps.scheduler.now()), () => { offTimer = null; if (live(version)) publish({ retryAt: null }); });
   };
   const sorted = () => current.order === 'title' ? [...allReports].sort((a, b) => a.title.localeCompare(b.title, 'ru')) : allReports;
   const refresh = async () => {
     const workspace = current.workspace;
-    if (!workspace || disposed || current.phase === 'loading' || !deps.session.view().signedIn || current.retryAt !== null && current.retryAt > deps.scheduler.now()) return;
+    if (!workspace || disposed || current.phase === 'loading' || current.markingRead !== null || !deps.session.view().signedIn || current.retryAt !== null && current.retryAt > deps.scheduler.now()) return;
     cancel(); const version = serial;
     allFeed = []; allReports = [];
-    publish({ phase: 'loading', feed: [], reports: [], detail: null, notice: '', possiblyCapped: false, retryAt: null });
+    publish({ phase: 'loading', feed: [], reports: [], detail: null, markingRead: null, notice: '', possiblyCapped: false, retryAt: null });
     if (workspace === 'feed') {
       const result = await deps.transport.feed(abort.signal);
       if (!live(version)) return;
@@ -75,6 +77,24 @@ export function createWorkspaceReads(deps: {
     filterUnread(value) { if (current.workspace !== 'feed' || current.phase !== 'ready' || typeof value !== 'boolean') return; publish({ unreadOnly: value, feed: allFeed.filter(row => !value || row.unread) }); },
     order(value) { if (current.workspace !== 'library' || current.phase !== 'ready' || !['recent', 'title'].includes(value)) return; publish({ order: value }); publish({ reports: sorted() }); },
     layout(value) { if (current.workspace === 'library' && ['list', 'grid'].includes(value)) publish({ layout: value }); },
+    async markRead(key) {
+      if (disposed || current.workspace !== 'feed' || current.phase !== 'ready' || current.markingRead !== null || !deps.session.view().signedIn) return;
+      const selected = current.feed.find(row => row.key === key && row.unread);
+      if (!selected || !/^[A-Za-z0-9_-]{1,160}$/.test(selected.key)) return;
+      cancel(); const version = serial;
+      publish({ markingRead: selected.key, notice: 'Сохраняю отметку…' });
+      const accepted = await deps.transport.markFeedRead(selected.key, abort.signal);
+      if (!live(version)) return;
+      if (!accepted.ok && (accepted.failure.reason === 'forbidden' || accepted.failure.reason === 'rate_limited')) { fail(accepted.failure, version); return; }
+      // Even ok:true (or a lost response) cannot establish read state. Never replay the POST automatically.
+      publish({ notice: 'Проверяю отметку в ленте…' });
+      const result = await deps.transport.feed(abort.signal);
+      if (!live(version)) return;
+      if (!result.ok) { fail(result.failure, version); return; }
+      allFeed = result.value.rows;
+      const confirmed = allFeed.some(row => row.key === selected.key && !row.unread);
+      publish({ markingRead: null, feed: allFeed.filter(row => !current.unreadOnly || row.unread), possiblyCapped: result.value.possiblyCapped, notice: confirmed ? 'Отмечено как прочитанное.' : 'Не удалось подтвердить отметку. Обновите список.' });
+    },
     async read(key) {
       if (disposed || current.workspace !== 'library' || current.phase !== 'ready' || !deps.session.view().signedIn) return;
       const selected = allReports.find(row => row.key === key);

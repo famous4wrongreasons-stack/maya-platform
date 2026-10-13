@@ -8,6 +8,17 @@ import { fileURLToPath } from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'maya-workspace-reads-mutations-'));
 const mutations=[
+  ['mark POST becomes GET','net/client.ts',"const reading = endpoint === 'ideas'", "const reading = endpoint === 'feedRead' || endpoint === 'ideas'",'mark read uses the exact'],
+  ['mark invalid key','net/client.ts','if (!feedKey(key))','if (false)','mark read uses the exact'],
+  ['mark forged acceptance','net/client.ts','value.ok === true','Boolean(value.ok)','mark read transport rejects'],
+  ['mark extra acceptance fields','net/client.ts',' && Object.keys(value).length === 1','','mark read transport rejects'],
+  ['mark foreign selection','shell/workspace-reads.ts','current.feed.find(row => row.key === key && row.unread)','current.feed.find(row => row.unread)','mark read requires current visible'],
+  ['mark already read','shell/workspace-reads.ts','row.key === key && row.unread','row.key === key','mark read requires current visible'],
+  ['mark exact confirmation','shell/workspace-reads.ts','row.key === selected.key && !row.unread','!row.unread','mark read requires exact persisted'],
+  ['mark persisted unread','shell/workspace-reads.ts','row.key === selected.key && !row.unread','row.key === selected.key','mark read requires exact persisted'],
+  ['mark deny boundary','shell/workspace-reads.ts',"accepted.failure.reason === 'forbidden' || ",'','mark read denial clears'],
+  ['mark concurrent flight','shell/workspace-reads.ts',"current.phase !== 'ready' || current.markingRead !== null || ","current.phase !== 'ready' || ",'mark read requires current visible'],
+
   ['feed cap','net/workspace-reads.ts','possiblyCapped: rows.length === 50','possiblyCapped: false','feed projection is text-only'],
   ['feed duplicate','net/workspace-reads.ts','ids.has(r.id) || ','','feed malformed'],
   ['report duplicate','net/workspace-reads.ts','ids.has(r.runId) || ','','report list refuses'],

@@ -26,11 +26,12 @@ const turns=[
   {id:'10000000-0000-4000-8000-000000000003',role:'assistant',text:'Привет! Давай посмотрим, что тебя интересует. Можем обсудить услуги или вернуться к истории визитов.',createdAt:'2026-10-13T09:00:01.000Z',completed:true},
 ];
 const wire=[];
-let browser, page, origin, mode='normal', pending=null;
+const markNetwork=[];
+let browser, page, origin, mode='normal', pending=null, markMode='normal', marked=false, pendingMark=null;
 const reportId='20000000-0000-4000-8000-000000000001', otherId='20000000-0000-4000-8000-000000000002';
 const summary={runId:reportId,reportType:'daily_report',periodLocalDate:'2026-10-12',title:'Итоги дня: всё важное рядом'};
 const reportBody={contract:'maya.owner-report-snapshot/1',...summary,timezone:'Europe/Moscow',content:{title:summary.title,bodyText:'Это сохранённый отчёт для учебного салона.\n\nДень завершён. Команда подготовила расписание на завтра и проверила остатки материалов.\n\nЭто искусственные данные: они не относятся к реальному салону. <script>Никакого исполнения</script>',payload:{private:'MUST NOT REACH DOM'},deepLink:'https://blocked.invalid'}};
-const feedBody=()=>({items:mode==='empty'?[]:Array.from({length:mode==='cap'?50:2},(_,i)=>({id:'feed-'+i,type:'owner_alert',title:i===0?'Расписание на завтра готово':'Итоги дня уже в библиотеке',body_text:i===0?'Команда завершила подготовку. Время мастеров сверено — можно спокойно планировать следующий день.':'Сохранённый обзор доступен получателям отчёта. Это учебный пример, без данных салона.',created_at:'2026-10-13T09:00:00.000Z',read_at:i===0?null:'2026-10-13T10:00:00.000Z',payload:{private:'MUST NOT REACH DOM'},deep_link:'https://blocked.invalid'}))});
+const feedBody=()=>({items:mode==='empty'?[]:Array.from({length:mode==='cap'?50:2},(_,i)=>({id:'feed-'+i,type:'owner_alert',title:i===0?'Расписание на завтра готово':'Итоги дня уже в библиотеке',body_text:i===0?'Команда завершила подготовку. Время мастеров сверено — можно спокойно планировать следующий день.':'Сохранённый обзор доступен получателям отчёта. Это учебный пример, без данных салона.',created_at:'2026-10-13T09:00:00.000Z',read_at:i===0&&!marked?null:'2026-10-13T10:00:00.000Z',payload:{private:'MUST NOT REACH DOM'},deep_link:'https://blocked.invalid'}))});
 const json=(res,value,status=200)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
 const server=http.createServer(async(req,res)=>{
   let body='';for await(const chunk of req)body+=chunk;
@@ -38,6 +39,14 @@ const server=http.createServer(async(req,res)=>{
     const data=body?JSON.parse(body):null;wire.push({path:req.url,method:req.method,body:data});
     if(req.url==='/api/auth/login')return json(res,{access_token:'synthetic-only',refresh_token:'synthetic-only-refresh',expires_in:900,refresh_expires_at:'2099-01-01T00:00:00.000Z',user:{name:'Тестовый пользователь',tenant:{name:'Учебный салон'}}},201);
     if(req.url==='/api/ai/conversation')return json(res,{contract:'maya.conversation-history/1',conversationId:cid,truncated:false,interrupted:false,turns});
+    if(req.url==='/api/inbox/feed-0/read'){
+      if(markMode==='delayed'){pendingMark=res;return;}
+      if(markMode==='denied')return json(res,{},403);
+      if(markMode==='limited'){res.setHeader('Retry-After','2');return json(res,{},429);}
+      if(markMode==='lost'){marked=true;res.destroy();return;}
+      if(markMode==='normal')marked=true;
+      return json(res,{ok:true});
+    }
     if(req.url==='/api/inbox'){
       if(mode==='delayed'){pending=res;return;}
       if(mode==='denied')return json(res,{},403);
@@ -76,6 +85,7 @@ try {
     '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE 127.0.0.1','--disable-quic']);
   page=await browser.newPage();
   browser.listeners.add(msg=>{
+    if(msg.method==='Network.requestWillBeSent' && msg.params.request.url.endsWith('/api/inbox/feed-0/read')) markNetwork.push({requestId:msg.params.requestId,method:msg.params.request.method,type:msg.params.type});
     if(msg.method!=='Fetch.requestPaused')return;
     const url=new URL(msg.params.request.url);
     if(url.origin===origin||url.protocol==='data:')void browser.send('Fetch.continueRequest',{requestId:msg.params.requestId},msg.sessionId);
@@ -145,14 +155,55 @@ try {
   await check("!document.querySelector('.companion-report-body')",'late report cannot reopen reader');
   mode='empty';await click('Обновить список');await check("document.querySelector('.companion-tasks-empty h2').textContent.includes('В этой части библиотеки')",'bounded empty library honest');await screenshot('library-empty');
   await close();await open('Лента');await check("document.querySelector('.companion-tasks-empty h2').textContent==='В этой части ленты пока пусто'",'successful feed empty distinct');
+
+  const marks=()=>wire.filter(x=>x.path==='/api/inbox/feed-0/read');
+  mode='normal';await click('Обновить список');await loadedFeed();assert.equal(marks().length,0);
+  report.checks.push('opening filtering and reading never acknowledges automatically');
+  markMode='delayed';await click('Отметить прочитанным');
+  await check("document.querySelector('.companion-tasks-status').textContent.includes('Сохраняю') && document.querySelector('.companion-feed-list button').disabled && document.querySelector('.companion-feed-dot').classList.contains('is-unread')",'pending mark retains unread and disables duplicate');
+  await screenshot('feed-read-pending-393');
+  assert.equal(marks().length,1);assert.equal(pendingMark!==null,true);
+  assert.ok(await page.eval(`${button('Обновить список')}.disabled`));
+  await page.click("document.querySelector('.companion-feed-list button')");assert.equal(marks().length,1);
+  marked=true;json(pendingMark,{ok:true});pendingMark=null;
+  await check("document.querySelector('.companion-tasks-status').textContent.includes('Отмечено') && !document.querySelector('.companion-feed-list button,.companion-feed-dot.is-unread')",'persisted reread confirms mark');
+  await check("document.activeElement.id==='maya-reads-heading'",'mark completion restores focus');
+  assert.equal(marks().length,1);assert.deepEqual(marks()[0].body,{});assert.equal(marks()[0].method,'POST');
+  report.checks.push('one exact mark POST with empty body, no tenant user or business action');
+  await screenshot('feed-read-confirmed-393');
+  marked=false;await click('Обновить список');await loadedFeed();
+  markMode='no-change';await click('Отметить прочитанным');
+  await check("document.querySelector('.companion-tasks-status').textContent.includes('Не удалось подтвердить') && !!document.querySelector('.companion-feed-dot.is-unread')",'ok alone cannot fabricate read state');
+  await screenshot('feed-read-unconfirmed-393');
+  markMode='lost';await click('Непрочитанные');await click('Отметить прочитанным');
+  await check("document.querySelector('.companion-tasks-status').textContent.includes('Отмечено') && document.querySelectorAll('.companion-feed-list li').length===0 && document.querySelector('.companion-tasks-empty h2').textContent.includes('нет непрочитанных')",'lost response resolved through read with unread filter preserved');
+  const deliveredAfterLoss=marks().length;
+  assert.equal(markNetwork.length,3);assert.ok(deliveredAfterLoss>=3);
+  // Chrome may retry an unacknowledged socket write within one Fetch request. The application
+  // issues only one Fetch per gesture; the existing server mark-read is state-idempotent.
+  report.acknowledgementDelivery={logicalFetches:markNetwork.length,httpDeliveries:deliveredAfterLoss,socketLossInjected:true};
+  report.checks.push('lost response triggers no new application Fetch; transport redelivery is explicitly recorded');
+  await click('Все');await check("document.querySelectorAll('.companion-feed-list li').length===2 && !document.querySelector('.companion-feed-dot.is-unread')",'all filter reflects persisted read');
+  marked=false;await click('Обновить список');await loadedFeed();markMode='denied';await click('Отметить прочитанным');
+  await check("document.querySelector('.companion-tasks-status').textContent.includes('недоступны') && !document.querySelector('.companion-feed-list li')",'mark denial clears retained notification content');
+  markMode='normal';await click('Обновить список');await loadedFeed();markMode='limited';await click('Отметить прочитанным');
+  await check(`${button('Обновить список')}.disabled && !document.querySelector('.companion-feed-list li')`,'mark rate limit clears content and blocks refresh');
+  await check(`!${button('Обновить список')}.disabled`,'rate limit becomes manually retryable');assert.equal(marks().length,deliveredAfterLoss+2);assert.equal(markNetwork.length,5);
+  report.checks.push('rate limit expiry sends no automatic write');
+  markMode='delayed';await click('Обновить список');await loadedFeed();await click('Отметить прочитанным');
+  await check("document.querySelector('.companion-tasks-status').textContent.includes('Сохраняю')",'late mark started');
+  await close();if(pendingMark){json(pendingMark,{ok:true});pendingMark=null;}
+  await check(`document.activeElement===${composer} && ${composer}.value==='Черновик — сохранить' && !document.querySelector('.companion-reads')`,'late mark cannot reopen workspace or lose draft');
+  await open('Лента');await loadedFeed();assert.equal(marks().length,deliveredAfterLoss+3);assert.equal(markNetwork.length,6);
+  await check("!!document.querySelector('.companion-feed-dot.is-unread')",'reopen rereads real state after cancelled acknowledgement');
   await click('Приватность и данные');await check("!document.querySelector('.companion-reads') && !!document.querySelector('[aria-label=\"Приватность\"]')",'canonical privacy replaces workspace');
-  assert.ok(reads().every(r=>r.method==='GET'&&r.body===null));report.checks.push('only finite authenticated reads, no write endpoints');
+  assert.ok(reads().every(r=>r.method==='GET'&&r.body===null));report.checks.push('list and report requests remain GET; only explicit bounded mark-read POST added');
   assert.equal(wire.filter(x=>x.path==='/api/ai/chat').length,0);report.checks.push('draft never submitted and no model call');
   assert.deepEqual(report.unexpected,[]);assert.equal(report.externalRequests,0);assert.deepEqual(page.exceptions,[]);
   assert.equal(page.issues.filter(i=>i.code==='ContentSecurityPolicyIssue').length,0);
   report.checks.push('zero unexpected API/network/CSP/JS errors');report.status='PASS';
 } catch(error) {
-  report.status='FAIL';report.failure=error.message;
+  report.status='FAIL';report.failure=error.message;report.syntheticWire=wire;report.markNetwork=markNetwork;
   if(page){await screenshot('failure').catch(()=>{});report.exceptions=page.exceptions;report.issues=page.issues;}
   process.exitCode=1;
 } finally {

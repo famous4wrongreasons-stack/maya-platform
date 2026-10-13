@@ -77,7 +77,7 @@
       },
       {
         "path": "src/net/client.ts",
-        "sha256": "22d63377befe06eba1fa05fd7dc9c5c69d24145ba79f880300469e9ec0c44bed"
+        "sha256": "3a9a721c7099c87ace5078a3a9d3611ed11eeaef1dcd9ad7191f7d11753571bb"
       },
       {
         "path": "src/net/crm-setup.ts",
@@ -117,11 +117,11 @@
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "bdbc081996dbd0b22bea7ed0777c855f2148e34407a8931f4f7fda1e76aca6e5"
+        "sha256": "46720bb235792bb57d79ebfbd409806642384562c9f8a790f9032a556cd46739"
       },
       {
         "path": "src/net/workspace-reads.ts",
-        "sha256": "e7438b3887e3f857b459585c598fa6e173bf05dd187b7822c470c52407e61143"
+        "sha256": "5105e3c54d043fc0c6e1abc33debd30b1398a0af6c8da803c32371841479cb7f"
       },
       {
         "path": "src/renderer/cells.ts",
@@ -201,12 +201,12 @@
       },
       {
         "path": "src/shell/workspace-reads.ts",
-        "sha256": "cd339f9c0ce692186b7e10aebd4ba11c8680dbdda6405979a1fa5575fe14142f"
+        "sha256": "b23937b2f0cdebe564634ee9ceeb17a4f6a768aa96615b88cff1eeec5bd2986f"
       }
     ]
   },
-  "bytes": 686290,
-  "digest": "8b65c43eb5b98cac7b6a68b41dff3efb5074fcd4caccb2705fffc4c95cbcd047",
+  "bytes": 689238,
+  "digest": "75b81a8c5b80c4c5f10b16da7a5bcae502cc08c2675a903d96538984a226f745",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -214,8 +214,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "a3633ebac8a63f71ad95eb30d1bee565182761e5d2d274988feed808243ba6da",
-    "modulePath": "m/a3633ebac8a63f71/",
+    "digest": "d6c78989aa5d32f6a06578b9950e92a16791085839c24cd3a9cb941f22dbd3d7",
+    "modulePath": "m/d6c78989aa5d32f6/",
     "files": [
       {
         "path": "entry/main.js",
@@ -274,8 +274,8 @@
       },
       {
         "path": "src/net/client.js",
-        "sha256": "f474f4b13b6f4459c497fd7308a61e2071656728cad5265d3e5b25e2384ac1c9",
-        "bytes": 44816
+        "sha256": "c439680f737607dec0a9f6d697b8d5a4eb5e741d98e2e8d36bbcfe667ebe64d7",
+        "bytes": 45613
       },
       {
         "path": "src/net/crm-setup.js",
@@ -329,8 +329,8 @@
       },
       {
         "path": "src/net/workspace-reads.js",
-        "sha256": "35b3d0c319d4d36f87c08108a2c2bf6d18498f03c8fce5450a7bf5f397de26f8",
-        "bytes": 2437
+        "sha256": "2daa0bb897982cc63473e37a2848918fd28e5af3bd99b73fc613ba109f484d3c",
+        "bytes": 2526
       },
       {
         "path": "src/renderer/cells.js",
@@ -434,8 +434,8 @@
       },
       {
         "path": "src/shell/workspace-reads.js",
-        "sha256": "d76ed1aad65cc6c91b22cba1fd5d55efc7c00e299347b2f0f252aab196bc8864",
-        "bytes": 6005
+        "sha256": "511e66d4c7266ab67ca89ae032e8058ad1a25b433e560eedb8ea697ca698d390",
+        "bytes": 7785
       },
       {
         "path": "src/voice/capture.js",
@@ -453,7 +453,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "8d1ca3ce0184fc65f45772b04fd8f3f06d45b1375db375408cbaeba10b483649",
+      "sha256": "2a8c1e21359d1f1172a0f03e3ef9a79999adea0243b72ac25471a94900f9b874",
       "bytes": 1344
     },
     "assets": [

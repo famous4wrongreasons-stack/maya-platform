@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { WorkspaceReadsPanel } from './.bundle.mjs';
-const view={workspace:'feed',phase:'ready',feed:[],reports:[],unreadOnly:false,possiblyCapped:false,order:'recent',layout:'list',detail:null,notice:'',retryAt:null};
+const view={workspace:'feed',phase:'ready',feed:[],reports:[],unreadOnly:false,possiblyCapped:false,order:'recent',layout:'list',detail:null,markingRead:null,notice:'',retryAt:null};
 const forbidden=()=>{throw Error('render must be inert');};
-const port=Object.fromEntries(['refresh','filterUnread','layout','order','read','back'].map(k=>[k,forbidden]));
+const port=Object.fromEntries(['refresh','filterUnread','layout','order','read','back','markRead'].map(k=>[k,forbidden]));
 const render=patch=>renderToStaticMarkup(createElement(WorkspaceReadsPanel,{view:{...view,...patch},port,close:forbidden}));
-test('feed is inert plain text with explicit UTC/read state; no links, save or command',()=>{
+test('feed is inert plain text with explicit UTC/read state; no links, save or implicit acknowledgment',()=>{
   const html=render({feed:[{key:'private-id',title:'<img src=x>',body:'<script>evil()</script> https://unsafe.invalid',unread:true,createdAt:'2026-10-13T09:00:00.000Z'}]});
   assert.ok(html.includes('&lt;img'));assert.ok(html.includes('&lt;script&gt;'));assert.ok(html.includes('09:00 UTC'));assert.ok(html.includes('Не прочитано'));
   assert.ok(!/private-id|<img|<script|href=|Сохранить|Обсудить/.test(html));
@@ -22,4 +22,14 @@ test('library always discloses pre-filter cap; report reader escapes body and ne
 test('denial/loading are not empty success; rate limit disables refresh and feed cap is disclosed',()=>{
   for(const phase of ['loading','failed']){const html=render({phase,notice:'Недоступно'});assert.ok(!html.includes('пока пусто'));assert.ok(html.includes(phase==='loading'?'Загружаю':'Недоступно'));}
   assert.ok(render({retryAt:4}).includes('disabled="">Обновить список'));assert.ok(render({possiblyCapped:true}).includes('50 последних'));
+});
+
+test('only unread feed rows offer explicit acknowledgement; pending blocks both write and refresh',()=>{
+ const row={key:'private-id',title:'Уведомление',body:'Текст',unread:true,createdAt:'2026-10-13T09:00:00.000Z'};
+ const ready=render({feed:[row]});assert.ok(ready.includes('Отметить прочитанным'));assert.ok(!ready.includes('disabled="">Отметить'));assert.ok(!ready.includes('private-id'));
+ assert.ok(!render({feed:[{...row,unread:false}]}).includes('>Отметить прочитанным'));
+ const busy=render({feed:[row],markingRead:row.key,notice:'Сохраняю отметку…'});
+ assert.ok(busy.includes('aria-busy="true"'));assert.ok(busy.includes('disabled="">Отметить прочитанным'));assert.ok(busy.includes('disabled="">Обновить список'));assert.ok(busy.includes('Не прочитано'));
+ assert.ok(render({unreadOnly:true}).includes('В этой части ленты нет непрочитанных'));
+ assert.ok(render({notice:'Не удалось подтвердить отметку.',possiblyCapped:true}).includes('Не удалось подтвердить отметку. Показана часть ленты'));
 });
