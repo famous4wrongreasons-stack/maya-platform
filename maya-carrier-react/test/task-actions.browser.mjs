@@ -102,6 +102,7 @@ try {
   await click('Новая задача +');
   await check("document.querySelector('dialog.companion-task-dialog').open && document.activeElement===document.querySelector('.companion-task-dialog input')",'native dialog opens with focus');
   await check(`${button('Создать задачу +')}.disabled`,'empty form cannot submit');
+  await check("document.querySelector('.companion-task-dialog input').maxLength===160",'title uses actual executor maximum');
   await page.fill("document.querySelector('.companion-task-dialog input')",'Подготовить рабочую неделю');
   await page.fill("document.querySelector('.companion-task-dialog textarea')",'Сверить график и записать вопросы к планёрке.');
   for(const [width,height] of [[393,852],[320,740],[427,952],[1280,900]]){await size(width,height);await check("document.documentElement.scrollWidth<=innerWidth && document.querySelector('.companion-task-dialog').scrollWidth<=document.querySelector('.companion-task-dialog').clientWidth",'task form no overflow '+width);if(width<600)await check("Math.abs(document.querySelector('.companion-task-dialog').getBoundingClientRect().width-innerWidth)<1 && document.querySelector('.companion-task-dialog').getBoundingClientRect().left===0",'mobile sheet fills viewport '+width);await screenshot('new-task-'+width);}

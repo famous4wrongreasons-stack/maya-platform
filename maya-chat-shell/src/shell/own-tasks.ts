@@ -84,7 +84,7 @@ export function createOwnTasks(deps: { transport: OwnTasksTransport & Partial<Ta
     filter(value) { if (current.phase !== 'ready' || !['active', 'done'].includes(value)) return; publish({ filter: value, rows: all.filter(r => r.completed === (value === 'done')) }); },
     refresh,
     async create(title, detail) {
-      if (!context?.canCreate || typeof title !== 'string' || !title.trim() || title.length > 300 || typeof detail !== 'string' || !detail.trim() || detail.length > 4000) return;
+      if (!context?.canCreate || typeof title !== 'string' || !title.trim() || title.length > 160 || typeof detail !== 'string' || !detail.trim() || detail.length > 4000) return;
       await start({ kind: 'create', assignee: context.userId, title: title.trim(), detail: detail.trim() });
     },
     async complete(key) {

@@ -95,7 +95,7 @@
       },
       {
         "path": "src/net/own-tasks.ts",
-        "sha256": "f2cbcaa925e9c8005d6e4b2d7cd30bc35695971ef475f2b0c28060273ebbd387"
+        "sha256": "72dbf9acdd4adfac2262305a8059fd2207432a824bd102b459ff9c9b167beee2"
       },
       {
         "path": "src/net/personal.ts",
@@ -163,7 +163,7 @@
       },
       {
         "path": "src/shell/own-tasks.ts",
-        "sha256": "20f671258c342fc8533ad5b7d90946ff6e810f558e0ff08aa95dafaef841afd0"
+        "sha256": "929342e2cf994aa1da0bc0bb36683394a1508b10ef044fb99a5c76d199afc1e7"
       },
       {
         "path": "src/shell/personal-booking.ts",
@@ -196,7 +196,7 @@
     ]
   },
   "bytes": 669482,
-  "digest": "b6c2471b0408c89e2c04205b11c507addd0552a5c22acd339437aa02e391e70b",
+  "digest": "bbd3021f3d31a042d138d04307a1ef8670882570f63604639aa15060bb0a2afa",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -204,8 +204,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "94740738510a87dd494f1a007606771a360d50c07804e6c604f023f434f8b51d",
-    "modulePath": "m/94740738510a87dd/",
+    "digest": "3958fbf7aa90503f6bac1606434fb22879141a37b8276c5b9d7f06c1f5aaa8cb",
+    "modulePath": "m/3958fbf7aa90503f/",
     "files": [
       {
         "path": "entry/main.js",
@@ -289,8 +289,8 @@
       },
       {
         "path": "src/net/own-tasks.js",
-        "sha256": "15a9224ef92c4d28fa365151602d66dad919cc8e2a8f12ce1dfeff7d7a5aa537",
-        "bytes": 3771
+        "sha256": "e3d7398291517c00baedf317c3ccdc63cfd47ce1aa54c247aedeac4ce95dabdd",
+        "bytes": 3773
       },
       {
         "path": "src/net/personal.js",
@@ -379,7 +379,7 @@
       },
       {
         "path": "src/shell/own-tasks.js",
-        "sha256": "4d6191d8f48309ed0ef6a7c48b6fd564a17819e7f0238861be7ccd304bad1ae5",
+        "sha256": "603eab7e56d6a052df7817d29c6ca59a2ba6df7df2943996ad992f885ccacc1a",
         "bytes": 7680
       },
       {
@@ -433,7 +433,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "34bfa0b149e72afd4c75f7d875c89411c20076931a6b1ed6bf81f6dfbb80afc9",
+      "sha256": "19523a1813c83d124cc353ea6e7e2de5de46b578135c6d11b1fa1324d5c5ee78",
       "bytes": 1344
     },
     "assets": [

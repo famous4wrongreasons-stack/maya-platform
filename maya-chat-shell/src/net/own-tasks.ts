@@ -14,7 +14,8 @@ export function projectOwnTasks(raw: unknown): OwnTasksSnapshot | null {
     rows.push({ key: r.work_item_id, title: r.title, detail: r.detail, dueAt: r.due_at as string | null, completed: r.status === 'COMPLETED' });
   }
   // v1 has no hasMore/total. At its cap we explicitly decline to claim completeness.
-  if (v.action_contract === undefined) return { rows, possiblyCapped: rows.length === 50 };
+  const snapshot = { rows, possiblyCapped: rows.length === 50 };
+  if (v.action_contract === undefined) return snapshot;
   if (v.action_contract !== 'maya.operational-work.actions/1' || typeof v.can_create !== 'boolean') return null;
   const completions: { key: string; inboxId: string }[] = [], bindings = new Set<string>();
   for (const entry of v.tasks) {
@@ -27,12 +28,12 @@ export function projectOwnTasks(raw: unknown): OwnTasksSnapshot | null {
     }
     if (r.status === 'OPEN' && r.task_id !== null && r.next_actions.includes('done')) completions.push({ key: r.work_item_id as string, inboxId: r.task_id as string });
   }
-  return { rows, possiblyCapped: rows.length === 50, actions: { userId: v.current_user_id, tenantId: v.tenant_id, canCreate: v.can_create, completions } };
+  return { ...snapshot, actions: { userId: v.current_user_id, tenantId: v.tenant_id, canCreate: v.can_create, completions } };
 }
 
 export const taskIdentity = (value: unknown): value is string => typeof value === 'string' && /^companion-task:[a-f0-9-]{36}$/.test(value);
 export function taskBody(command: TaskCommand): { assigneeUserId: string; title: string; bodyText: string; dueAt: null } | { inboxItemId: string } | null {
-  if (command.kind === 'create' && text(command.assignee, 160) && text(command.title, 300) && text(command.detail, 4000))
+  if (command.kind === 'create' && text(command.assignee, 160) && text(command.title, 160) && text(command.detail, 4000))
     return { assigneeUserId: command.assignee, title: command.title.trim(), bodyText: command.detail.trim(), dueAt: null };
   if (command.kind === 'complete' && text(command.key, 160) && text(command.inboxId, 160) && !/^\d+$/.test(command.inboxId)) return { inboxItemId: command.inboxId };
   return null;

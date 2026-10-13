@@ -22,7 +22,7 @@ export function OwnTasksPanel({ view, port, close }: { readonly view: OwnTasksVi
       <div className="companion-task-fields">
         <div className="companion-tasks-heading"><h2 id="new-task-title">Новая задача</h2><button type="button" className="companion-circle" aria-label="Закрыть новую задачу" onClick={closeForm}>×</button></div>
         <p>Для вас · без срока</p>
-        <label>Название<input ref={titleInput} id="maya-new-task-name" type="text" maxLength={300} required disabled={busy} value={title} onChange={event => setTitle(event.target.value)} placeholder="Например, подготовить расписание" /></label>
+        <label>Название<input ref={titleInput} id="maya-new-task-name" type="text" maxLength={160} required disabled={busy} value={title} onChange={event => setTitle(event.target.value)} placeholder="Например, подготовить расписание" /></label>
         <label>Что нужно сделать?<textarea id="maya-new-task-detail" maxLength={4000} required disabled={busy} value={detail} onChange={event => setDetail(event.target.value)} placeholder="Добавьте детали задачи" /></label>
         {commandNotice}
         <button className="companion-task-add" type="button" onClick={() => void port.create(title, detail)} disabled={busy || !title.trim() || !detail.trim() || view.phase !== 'ready' || !view.canCreate}>Создать задачу +</button>

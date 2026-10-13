@@ -34,7 +34,7 @@ test('typed task commands use finite A23 owners, explicit idempotency and stripp
   }
 });
 test('invalid commands never dispatch; loss/malformed success/409/5xx remain unknown without auto replay',async()=>{
-  let n=net([]);for(const cmd of [{...create,title:''},{...create,detail:' '},{...complete,inboxId:'123'}])assert.equal((await n.transport.taskCommand(cmd,identity,new AbortController().signal)).ok,false);
+  let n=net([]);for(const cmd of [{...create,title:''},{...create,title:'x'.repeat(161)},{...create,detail:' '},{...complete,inboxId:'123'}])assert.equal((await n.transport.taskCommand(cmd,identity,new AbortController().signal)).ok,false);
   await n.transport.taskCommand(create,'forged',new AbortController().signal);assert.equal(n.calls.length,0);
   for(const reply of ['lost',{body:{}},{status:409},{status:500},{status:429}]){n=net([reply]);assert.equal((await n.transport.taskCommand(create,identity,new AbortController().signal)).failure.reason,'unknown');assert.equal(n.calls.length,1);}
   n=net([{status:403}]);assert.equal((await n.transport.taskCommand(create,identity,new AbortController().signal)).failure.reason,'refused');
@@ -79,4 +79,8 @@ test('changed principal/tenant on reread blocks uncertain retry; read-only peers
 
 test('navigation during pending command keeps progress and refreshes when late outcome arrives',async()=>{
   for(const ok of [true,false]){const r=rig();await ready(r);const p=r.port.complete('work-one');r.port.close();r.port.open();assert.equal(r.port.view().command.phase,'pending');r.commands[0].resolve(ok?{ok:true,value:projectTaskReceipt(result('complete'),complete)}:{ok:false,failure:{reason:'unknown'}});await p;assert.equal(r.port.view().phase,'ready');assert.equal(r.port.view().command.phase,ok?'confirmed':'unknown');r.dispose();}
+});
+
+test('create respects actual A23 executor title bound 160, stricter than legacy HTTP parser',async()=>{
+  const r=rig();await ready(r);await r.port.create('x'.repeat(161),'Detail');assert.equal(r.commands.length,0);const p=r.port.create('x'.repeat(160),'Detail');assert.equal(r.commands.length,1);r.commands[0].resolve({ok:true,value:projectTaskReceipt(result(),create)});await p;r.dispose();
 });
