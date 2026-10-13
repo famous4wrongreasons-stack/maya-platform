@@ -11,6 +11,7 @@
 
 Реализация: `20261013120000_public_booking_restrict_parent_replacement`.
 Повторяемая проверка: `maya-saas-backend/scripts/public-booking-fk-migration-proof.mjs`.
+[Свежие результаты: clean/upgrade, сохранность данных, rollback и контрпроверки](evidence/maya-guest-fk-and-source-probes-20261013/README.md).
 Ниже сохранены первоначальное предложение и предыдущие проверки; их фраза
 «решение ещё не принято» описывает исторический статус, снятый этим решением.
 

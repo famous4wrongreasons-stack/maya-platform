@@ -1,0 +1,23 @@
+{
+  "auditSha256": "ce07d6013f16fb5ca102b38d05a24504eb8da88d09be3cb80dd252b97acc1cb9",
+  "auditSourceHead": "8bdfc5b680bb4c48944c951784a6e50f62652797",
+  "totalClauses": 165,
+  "conforming": 0,
+  "globalHandoffStop": [
+    "G6-6",
+    "G13-R8"
+  ],
+  "unqualifiedApplicable": 163,
+  "activation": {
+    "certificate_for_current_release": "NOT_ISSUED",
+    "fullContractCertified": false,
+    "production": "NOT_AUTHORIZED",
+    "handoff": "STOP",
+    "scheduleEditor": "NOT_USER_REACHABLE",
+    "governance": "single-operator",
+    "independentHumanReview": false,
+    "reviewerId": null
+  },
+  "auditModified": false,
+  "interpretation": "unqualified evidence duties, not product defect count; current proof does not promote the audit"
+}

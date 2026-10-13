@@ -1,0 +1,588 @@
+{
+  "sourceHead": "8bdfc5b680bb4c48944c951784a6e50f62652797",
+  "artifacts": [
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/backend-build.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/backend-full.json",
+      "size": 4963371,
+      "sha256": "f8c119cd0f99f991963614caf8c9840a8707f76f6acaaab55f3410ff6d6519ac",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/backend-full.log",
+      "size": 1393897,
+      "sha256": "4a1dd0bbb467d226993d146a57296223bc04dee912c1e11988adb118230f1b96",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/backend-npm-ci.log",
+      "size": 1376,
+      "sha256": "95dc10dd59a1ae517c3dc423a488dd709388ed2c0d064ff92d2fa780c5b84b3b",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/carrier-full.log",
+      "size": 33468,
+      "sha256": "e505f458cd969dd4aa082493dbf6774c81d074031f59d1caf52d4f1ce1965e74",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/carrier-harness.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/carrier-npm-ci.log",
+      "size": 27,
+      "sha256": "d41fbabcfdaa3e2b2b16208bc5be3c0185d0007f42998b5ec02e920b9bce0042",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/checkout.log",
+      "size": 96,
+      "sha256": "9b347c601dcb3e7a84a1a3a8e2c6a9cae167ce6de620f6570f00635ad0c4eb57",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/clone.log",
+      "size": 82,
+      "sha256": "d951cb8fc9bdcba13c12865fb3a0f0ca4fc76de2ac65df9981783377689123b5",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/collector-tests.log",
+      "size": 11296,
+      "sha256": "b4f67e0d1fee747b9305dbe7760e863713df439df841309fbecaffb4296f3bb8",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/createdb-maya_widget_gate_proof_fk_fresh.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/createdb-maya_widget_gate_proof_fk_upgrade.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/declaration-dry-run.log",
+      "size": 210342,
+      "sha256": "afba7d5a2f2beb813ee6750ed2282d449fd554dde4eefd5f13f1a7f8f11aa444",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/dry-run.json",
+      "size": 210342,
+      "sha256": "afba7d5a2f2beb813ee6750ed2282d449fd554dde4eefd5f13f1a7f8f11aa444",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/evidence-verify.log",
+      "size": 724,
+      "sha256": "df8b091ded7bfcba2139d04c1323aa95e50988b3e9b050d71bc2d2fc9175b8c2",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/executed-runner.mjs",
+      "size": 13586,
+      "sha256": "d3e2e15c19965b3069779937f26276c4ee064e5d89b551b40d469652c8e44dfa",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/fence-extra-refused.json",
+      "size": 6880,
+      "sha256": "e160339114c5cecd427900307bf54bdb14f7a23a6bc4e2fb7c6eeda6370bf40c",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/fence-green.json",
+      "size": 2855,
+      "sha256": "900854477edb1b1900f77564ff5f75ae2d795a9d88c1ea51f33aabb8ea1a3c39",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/fence-hash-refused.json",
+      "size": 6195,
+      "sha256": "397739085dc7247de3c2baac6cf87fd466cab5342e084623ba2962b2db6c17ae",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/fence-restored.json",
+      "size": 2855,
+      "sha256": "90318ad50f9d34ae3726bf5bced5837ec644fbc77f4fb566a7ebcaf1751561c9",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/fk-migration-proof.log",
+      "size": 2238,
+      "sha256": "9593f7bb310748bb41c9e84b13bc2ac0ad2194db32c07ca44039d35310a8efae",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/full-binary.json",
+      "size": 3927,
+      "sha256": "b27467c83bed712362de9f1674b402ceb39f174c44ad3b907a1dc634691aeab2",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/full-http.json",
+      "size": 392452,
+      "sha256": "f35976bcd8c5137de2a9ac6368843cac527e11e014735cc4fe133f91ea2503db",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/full-widgets-binary.log",
+      "size": 3182,
+      "sha256": "1e870ef06673c4db4bcbcee1782d7851f0914f351c629d4c4ad3635eb21c8505",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/full-widgets-http.log",
+      "size": 61961,
+      "sha256": "315f4b5b19547c4d61084797153b65eceda729ca7e4848e37949f511403f24a4",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/http-bin.log",
+      "size": 3881,
+      "sha256": "7520c564a1cf6bc14cfbf12ed3d0fd47579fe49a6126a4de3220a667f02bed71",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/loopback.sb",
+      "size": 100,
+      "sha256": "0ec3539984d17ee604e68eb0d330e45f54f330070a447c8252998e0fc0a6e29b",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/manifest.json",
+      "size": 23188,
+      "sha256": "21d6ada12571ad6ee001acabe523c1577189b08eb5fed982020b87fc31d0a6c7",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/migration-fence-extra-refused.log",
+      "size": 1629,
+      "sha256": "6af24868f9e3aa5d885abc24ef0bd7485bbe20d0428e8b84a07c39a9db398300",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/migration-fence-green.log",
+      "size": 683,
+      "sha256": "380e20672c9efd6d04c136072f8cc2f0ca6156ee5859161070ec7e14d6670ae2",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/migration-fence-hash-refused.log",
+      "size": 1311,
+      "sha256": "619f19acff5c27aa09838f9ca4350574e4ded4fa344036142775d72dab20c1b1",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/migration-fence-restored.log",
+      "size": 688,
+      "sha256": "934f90dfc1807377c637b6ee91709830dfd3404515af0a9b59d70d25f92f80d7",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/network-boundary.log",
+      "size": 41,
+      "sha256": "f47f5a249fc9852ff6ba5d14e79c2a254debd61a7b3778bc709a57e63e7a0ee1",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/ns1-extra-read-refused.log",
+      "size": 1202,
+      "sha256": "006a8591629b1447d9f9cc63529efe8b951786b4156449ecd467b6e3cfcf4281",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/ns1-roundtrip.log",
+      "size": 1150,
+      "sha256": "9fd777832b3ae3f76e75fa85d605c0cfb88f5f27b2fa0641601dfe16d6039dc5",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/packaging-tests.log",
+      "size": 1267,
+      "sha256": "33789808712cdc7c6f4d4684c98b006db4f002d971e4a08e11b64b8e3a862d12",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/pg-init.log",
+      "size": 902,
+      "sha256": "72f0ee67f3080f918661e33c86c5c1e4cca65625ea321a9be1e5e639f97c5866",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/pg-start.log",
+      "size": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/pg-stop.log",
+      "size": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/plan.json",
+      "size": 7034,
+      "sha256": "3e6948b8d08e571b63cc09429fdfb7878dc7896069a9d80374f040b53a79fc64",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/postgres.log",
+      "size": 115808,
+      "sha256": "8f6a5e56e75167e0ab1f22201ccbee7cbe3774883e5bcb510a09effbc98d3f2a",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/prisma-generate.log",
+      "size": 318,
+      "sha256": "8580beac4bc7e07ffabe3ba7190035dbf1cf6607880a42ecf639db49088bd613",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/probe-lint.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/runtime-artifact.log",
+      "size": 1010,
+      "sha256": "1b0abb348e438c52db3153d0d42e642fd68f9e030464da805f07bdcc70f55829",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/runtime-full.log",
+      "size": 192982,
+      "sha256": "a96413c5cf507e1fb3d946274f40db3522e452e44313487fe58d39428d62e982",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/source-carrier-jest.json",
+      "size": 1550,
+      "sha256": "2b79fb3840d6b5cd8a44966dc3b810f861465f6b3a20fd88f1e4ab24b11340c6",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/source-carrier-observation.json.journal.json",
+      "size": 56927,
+      "sha256": "b6bdb1b5e9ded1dee43043a58e9e3bf4fc384762f8de3a6c6647b564e3e08916",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/source-carrier-observation.json.personal.json",
+      "size": 688,
+      "sha256": "62b76372a971c8e62c888440da62360227c967d3f64af464341d2e022e14c864",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/source-carrier.log",
+      "size": 2138,
+      "sha256": "5c9598362362a9868736fd1b6ec8b5685ea26e16dee4a93ec844084e5b81e0a4",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-8bdfc5b6-20261013-01/widgets-types.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/contract-types.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/contract.log",
+      "size": 6777,
+      "sha256": "bebe953a66851b7112f6a081047c0918731c0ad9a69715eb8b557352c8f916f8",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/create-db.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/dependency-audit.log",
+      "size": 366,
+      "sha256": "07734426b2b6084f979e8cfe7437651399dce9ef8be47eb6fbb94091d6648114",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/e2e.json",
+      "size": 1082,
+      "sha256": "6319ad0bea2929e0da27e7b2feea5e4332acff4ccee5f0d71f57c751b420fd9f",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/e2e.log",
+      "size": 288,
+      "sha256": "fabc7ea433e9adbdc48785d8d87ddd9cd82fe5797a02b3c9fd6fec2a8b7ade80",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/events-create-db.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/events-live.json",
+      "size": 3319,
+      "sha256": "e90c9d5e0d874ac0dc9dc41fd99d83b0376b80663bd56c7b88c50deeceebe354",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/events-live.log",
+      "size": 856,
+      "sha256": "630b97c93f254ba1e1e32960ecf7875f44230f03abb93ea04f2e630bb59d16e7",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/events-migrate.log",
+      "size": 14877,
+      "sha256": "16ad7d93155823638dd2b22c12f4461922f30e5235e22f71b62cf7fef87c9e9c",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/executed-runner.mjs",
+      "size": 9995,
+      "sha256": "815ae7cd91056a3eae851f74064bc33aa1fb7b447fb5920ed489dea318a38781",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/frontend-parse.log",
+      "size": 304,
+      "sha256": "0c479910b1adf24b78a6472ab90349377b397f2c94ec5396db78a635bb72eb74",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/full-build.log",
+      "size": 158,
+      "sha256": "b74e5c60033b62edf5aa47fcace858704866272bf6c05a53d7b76d4f3abdaf15",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/http-smoke.log",
+      "size": 341,
+      "sha256": "eb8a8cc6b37bbf578fa6c9b806b5ae4eb1a8d49d950329c466118405c6ec0edd",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/ios-built-app-verify.log",
+      "size": 735,
+      "sha256": "2e767bd2dc5b413a9afbdadf916bfeef23a56c7397f96c58a855c58fab66b87a",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/ios-unsigned-build.log",
+      "size": 498565,
+      "sha256": "e134824965712d2d44338a4834b3280ac3acae8de2ff4c5c0fb05c4a92e688fe",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/k1-dossier.log",
+      "size": 1304,
+      "sha256": "13cc78b7c621f558203f6afbe815cc2eb9ca6b43199005c892c040e6311cf52a",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/k3.log",
+      "size": 7984,
+      "sha256": "378e93addd6207e68ac6a6745263c79568d037efcf979f7c74dfd13075683401",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/lint.log",
+      "size": 2382,
+      "sha256": "181c8907ed8275f8df7741b98824e27cf9994da7d3af629f21acadd1943859b8",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/manifest.json",
+      "size": 19043,
+      "sha256": "f45f4f21bec1f1d1f031ad5d65652bd06122e3ec71b57f27c916d156d1fcd5ca",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/maya-ios-carrier-npm-ci.log",
+      "size": 246,
+      "sha256": "45b6f9d55e91460af8d29bd3a3eddf1386310cc86c87631e5d6f98151dc9f111",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/migration-clean-replay.log",
+      "size": 14876,
+      "sha256": "6b63bf181f170d9c6ebaab93d67ce882ee0dd88fd17805b705faf71d371184e9",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/migration-idempotent-replay.log",
+      "size": 273,
+      "sha256": "8f1fd66501c25d8c8320447d927c214425ad0c31fdb6917e7df76242a27a3d05",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/operator-compiled.log",
+      "size": 2137,
+      "sha256": "b73f5ca93495296c209e549659cd5544212d1ee13a64d77c208a47875de95d25",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/operator-tests.log",
+      "size": 4617,
+      "sha256": "398935ef6c1c61349874698768c419b51b414484cf29588e0e804378c81bfde3",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/pg-init.log",
+      "size": 906,
+      "sha256": "335fe7873b344cd5a0158ca7a5707139aeb4322f7acad282dcaa86fc0e2e9797",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/pg-start.log",
+      "size": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/pg-stop.log",
+      "size": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/postgres.log",
+      "size": 2370,
+      "sha256": "57e91f74c2059e5a9dec4ca9f18ca2571f4b9a73c17d25bf48495a5f52947dc2",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/prepublication-tests.log",
+      "size": 1654,
+      "sha256": "51ab070b366fc22799df9407aba872d6ca008558f43f6fa0fa2f944a2a1770d9",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/prepublication.log",
+      "size": 78,
+      "sha256": "c9b82d22c11b498c44890c95a03a46c33f85f2697a0b04820b131a4cfd5108fb",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/prisma-validate.log",
+      "size": 142,
+      "sha256": "e1344514cb0e93026a245afd134e0c874287a64f7c5798cbda02eff700d2aa22",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/release-packaging-tests.log",
+      "size": 3389,
+      "sha256": "b91fd1a0b9080dae9e5661cd41acf5bd9d380a7aa625cf40b15888da1c54bcff",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/release-sync.log",
+      "size": 2880,
+      "sha256": "97b425ff4521ade5b07ef4da034b90207613c5dab9966cc8dc0f9686d77b78e1",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/seed.log",
+      "size": 656,
+      "sha256": "8072875de5f509a3392420292559de101651ea50c47334d5f4e69ad63caad3d1",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/staging-http-binary.log",
+      "size": 239,
+      "sha256": "13de1589744a062d550dba90c0003dfe4faf8b0279695293efeead73cf5e4724",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/typecheck-scripts.log",
+      "size": 113,
+      "sha256": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/typecheck.log",
+      "size": 103,
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "publication": "local raw only; repository stores allowlisted aggregates"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/staging-http-binary/legacy-jest.json",
+      "size": 21593,
+      "sha256": "bd073c868861155da1598b19b9396ac2c563b8dd745ec73a044da1a16b932875",
+      "publication": "local raw only; synthetic fixtures"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/staging-http-binary/manifest.json",
+      "size": 804,
+      "sha256": "60322b12e0d7bd73b62287ab7a95a0b8e9071cf6169bae50e0fe58c67ec35f2b",
+      "publication": "local raw only; synthetic fixtures"
+    },
+    {
+      "path": "/private/tmp/maya-post-fk-ci-8bdfc5b6-20261013-01/staging-http-binary/staging-http-binary-jest.json",
+      "size": 11592,
+      "sha256": "5756f411a655443b7bcfde8dd0ac2d5c3943493e56f690cbadfb13643a58d60e",
+      "publication": "local raw only; synthetic fixtures"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-ccfdf1ef-20261013-01/backend-full.json",
+      "size": 4967676,
+      "sha256": "07922bde2968a4e38643ef4a0ec3325b642bc84d4bca7224b4de34f915f6f85e",
+      "publication": "retained before/failure diagnostic, never a final certificate receipt"
+    },
+    {
+      "path": "/private/tmp/maya-fk-final-ccfdf1ef-20261013-01/manifest.json",
+      "size": 12146,
+      "sha256": "348237f8c2ad0e4d2a198c3253b7c7e462fc6690e843f9007226d88d0e535adf",
+      "publication": "retained before/failure diagnostic, never a final certificate receipt"
+    },
+    {
+      "path": "/private/tmp/maya-source-carrier-f1a45c23-20261013/source-carrier-jest.json",
+      "size": 2582,
+      "sha256": "d967411ef9ba666846db00697516054e87c0d659728e9dc6e3736dde52eaaf9d",
+      "publication": "retained before/failure diagnostic, never a final certificate receipt"
+    },
+    {
+      "path": "/private/tmp/maya-source-observation-f1a45c23-20261013/child-observations.jsonl",
+      "size": 178,
+      "sha256": "d13f2e794234b803ddedbff8ab69003038723a241fbdf174f20464a2327508bb",
+      "publication": "retained before/failure diagnostic, never a final certificate receipt"
+    },
+    {
+      "path": "/private/tmp/maya-source-carrier-overlay-f1a45c23-20261013-02/ns1-roundtrip.log",
+      "size": 1160,
+      "sha256": "030cb80dbd35ffceb4e3269238840e1e399f1f30f1eb7d4dffdf232f2002901f",
+      "publication": "retained before/failure diagnostic, never a final certificate receipt"
+    },
+    {
+      "path": "/private/tmp/maya-schema-fbe2e-f1a45c23-20261013/schema-diff.sql",
+      "size": 1059,
+      "sha256": "e4895d5f05c19fd90a9a0ce0b71264f8f1ef1ed80b8adcb2f1f9dd3179394c7c",
+      "publication": "retained before/failure diagnostic, never a final certificate receipt"
+    }
+  ],
+  "excluded": "dependency caches, synthetic PG clusters, raw auth-bearing fixtures, build blobs, raw logs and screenshots are not committed"
+}

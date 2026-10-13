@@ -1,0 +1,170 @@
+{
+  "sourceHead": "8bdfc5b680bb4c48944c951784a6e50f62652797",
+  "recordedAt": "2026-10-13T12:37:24.333902+00:00",
+  "classification": "fresh local qualification of approved migration and integration test maintenance; not release certification",
+  "backend": {
+    "numPassedTests": 9819,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTestSuites": 725
+  },
+  "widgetsLive": {
+    "numPassedTests": 687,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTestSuites": 59
+  },
+  "compiledBinary": {
+    "numPassedTests": 4,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTestSuites": 4
+  },
+  "sourceCarrier": {
+    "numPassedTests": 2,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTestSuites": 1
+  },
+  "runtime": {
+    "tests": 770,
+    "pass": 763,
+    "fail": 0,
+    "skipped": 7
+  },
+  "carrier": {
+    "tests": 164,
+    "pass": 164,
+    "fail": 0,
+    "skipped": 0
+  },
+  "packaging": {
+    "tests": 18,
+    "pass": 18,
+    "fail": 0,
+    "skipped": 0
+  },
+  "e2e": {
+    "numPassedTests": 1,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTestSuites": 1
+  },
+  "eventsLive": {
+    "numPassedTests": 4,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTestSuites": 1
+  },
+  "stagingHttpBinary": {
+    "numPassedTests": 17,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTestSuites": 2
+  },
+  "legacyReleaseHttpBinary": {
+    "numPassedTests": 34,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTestSuites": 6
+  },
+  "operator": {
+    "tests": 30,
+    "pass": 30,
+    "fail": 0,
+    "skipped": 0
+  },
+  "operatorCompiled": {
+    "tests": 9,
+    "pass": 9,
+    "fail": 0,
+    "skipped": 0
+  },
+  "prepublication": {
+    "tests": 8,
+    "pass": 8,
+    "fail": 0,
+    "skipped": 0
+  },
+  "collector": {
+    "tests": 60,
+    "pass": 60,
+    "fail": 0,
+    "skipped": 0
+  },
+  "migration": {
+    "checks": 13,
+    "scope": "fresh and upgraded synthetic databases only",
+    "schemaDiff": "EMPTY on both",
+    "originalChecksumsUnchanged": true,
+    "midMigrationRollback": "PASS",
+    "replacementCounterfactuals": 3
+  },
+  "migrationFence": {
+    "green": {
+      "numPassedTests": 5,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTotalTestSuites": 1
+    },
+    "hash-refused": {
+      "numPassedTests": 4,
+      "numFailedTests": 1,
+      "numPendingTests": 0,
+      "numTotalTestSuites": 1
+    },
+    "extra-refused": {
+      "numPassedTests": 4,
+      "numFailedTests": 1,
+      "numPendingTests": 0,
+      "numTotalTestSuites": 1
+    },
+    "restored": {
+      "numPassedTests": 5,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numTotalTestSuites": 1
+    }
+  },
+  "ns1": {
+    "checks": 16,
+    "pass": 16,
+    "extraReadCounterfactual": "REFUSED: two assertions fail; no changed product code"
+  },
+  "httpBin": {
+    "contract": "maya.widgets-intent-http-proof/2",
+    "cases": 21,
+    "status": "PASS",
+    "failed": 0,
+    "binary": {
+      "health": 200
+    },
+    "mint_provenance": {
+      "captured": 47,
+      "malformed": 0
+    }
+  },
+  "freshEvidence": {
+    "lines": 35,
+    "claims": 31,
+    "captured_mints": {
+      "HTTP": 325,
+      "BIN": 47
+    },
+    "refused_mints": 0,
+    "records_before_teardown": 657,
+    "harness_files_scanned": 40,
+    "violations": []
+  },
+  "contract": "31 checks PASS; four explicit later-package pending declarations; no conformance promotion",
+  "ciScope": "fresh backend/frontend workflow checks and Widget Contract locally on macOS; legacy Python job NOT RERUN; not hosted CI or full Platform CI claim",
+  "packagingVerification": "React AChat PWA/Capacitor parity and actual unsigned simulator App.app verification PASS; no installation",
+  "completeMutationCorpus": "545 declarations, 47 batteries, 68 jobs resolve in DRY-RUN; complete execution NOT RUN",
+  "fullFbe2eQualification": "NOT COMPLETE; source-carrier and NS-1 results are bounded proofs",
+  "certificate": "NOT_ISSUED",
+  "ownerDatabaseAccessed": false,
+  "productionEffects": 0,
+  "realProviderEffects": 0,
+  "savedKeysRead": false,
+  "allOwnedClustersStopped": true
+}

@@ -1,0 +1,145 @@
+{
+  "sourceHead": "8bdfc5b680bb4c48944c951784a6e50f62652797",
+  "canonicalOwner": "React AChat",
+  "endpointDifference": "approved production endpoint substitution, static bytes only; not contacted",
+  "payloads": {
+    "pwa": [
+      {
+        "path": "icons/maya-192.png",
+        "size": 1970,
+        "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+      },
+      {
+        "path": "icons/maya-512-maskable.png",
+        "size": 4476,
+        "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+      },
+      {
+        "path": "icons/maya-512.png",
+        "size": 5951,
+        "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+      },
+      {
+        "path": "icons/maya-apple-180.png",
+        "size": 1977,
+        "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+      },
+      {
+        "path": "index.html",
+        "size": 847,
+        "sha256": "7996b498e84aabeef55c040ae283402d5e68da1a45ded82e60e30faf56ab2e97"
+      },
+      {
+        "path": "m/ETJSGWHO/main.js",
+        "size": 1642485,
+        "sha256": "95fd281bd7127d2f350ce231f210948d1027d6da3d8cad9d139f7e77c283f694"
+      },
+      {
+        "path": "manifest.webmanifest",
+        "size": 670,
+        "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+      },
+      {
+        "path": "styles.css",
+        "size": 4363,
+        "sha256": "69d66a10a31bcd8c75329a23a0b7afc7409787e411d8917cc6d0a0c3c89128e1"
+      }
+    ],
+    "capacitor": [
+      {
+        "path": "icons/maya-192.png",
+        "size": 1970,
+        "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+      },
+      {
+        "path": "icons/maya-512-maskable.png",
+        "size": 4476,
+        "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+      },
+      {
+        "path": "icons/maya-512.png",
+        "size": 5951,
+        "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+      },
+      {
+        "path": "icons/maya-apple-180.png",
+        "size": 1977,
+        "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+      },
+      {
+        "path": "index.html",
+        "size": 873,
+        "sha256": "bcab4f91376310e51172ffc2fc3db4d2891846abae7e77d3b2df82fd02d17a63"
+      },
+      {
+        "path": "m/cf353f189550be48/main.js",
+        "size": 1642502,
+        "sha256": "cf353f189550be4897a1be3c3a5ccda82f5e53c2bd89b1e8c4e3a99b07fe5684"
+      },
+      {
+        "path": "manifest.webmanifest",
+        "size": 670,
+        "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+      },
+      {
+        "path": "styles.css",
+        "size": 4363,
+        "sha256": "69d66a10a31bcd8c75329a23a0b7afc7409787e411d8917cc6d0a0c3c89128e1"
+      }
+    ],
+    "builtIosPublic": [
+      {
+        "path": "cordova.js",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "cordova_plugins.js",
+        "size": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "icons/maya-192.png",
+        "size": 1970,
+        "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+      },
+      {
+        "path": "icons/maya-512-maskable.png",
+        "size": 4476,
+        "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+      },
+      {
+        "path": "icons/maya-512.png",
+        "size": 5951,
+        "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+      },
+      {
+        "path": "icons/maya-apple-180.png",
+        "size": 1977,
+        "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+      },
+      {
+        "path": "index.html",
+        "size": 873,
+        "sha256": "bcab4f91376310e51172ffc2fc3db4d2891846abae7e77d3b2df82fd02d17a63"
+      },
+      {
+        "path": "m/cf353f189550be48/main.js",
+        "size": 1642502,
+        "sha256": "cf353f189550be4897a1be3c3a5ccda82f5e53c2bd89b1e8c4e3a99b07fe5684"
+      },
+      {
+        "path": "manifest.webmanifest",
+        "size": 670,
+        "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+      },
+      {
+        "path": "styles.css",
+        "size": 4363,
+        "sha256": "69d66a10a31bcd8c75329a23a0b7afc7409787e411d8917cc6d0a0c3c89128e1"
+      }
+    ]
+  },
+  "appVerified": true,
+  "installed": false
+}

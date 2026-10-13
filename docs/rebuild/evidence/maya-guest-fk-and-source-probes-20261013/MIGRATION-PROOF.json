@@ -1,0 +1,23 @@
+{
+  "contract": "maya.public-booking-fk-proof/1",
+  "passed": 13,
+  "stages": [
+    "old three replacements allowed; deletes and updates refused; rows unchanged",
+    "upgrade fixture exists under original migrations",
+    "mid-migration failure rolls back all constraint changes and retains data",
+    "upgrade retains all fixture rows, keys, indexes, user triggers and immutable function",
+    "three replacement refusals; deletes and updates refused; rows unchanged",
+    "three replacement refusals; deletes and updates refused; rows unchanged",
+    "clean replay equals upgraded schema",
+    "upgrade second replay, checksums and empty schema diff",
+    "fresh second replay, checksums and empty schema diff",
+    "counterfactual PublicBookingSession_tenantId_fkey kills replacement-refusal oracle and rolls back",
+    "counterfactual PublicBookingQuote_sessionId_tenantId_fkey kills replacement-refusal oracle and rolls back",
+    "counterfactual PublicBookingAttempt_quoteId_sessionId_tenantId_fkey kills replacement-refusal oracle and rolls back",
+    "all source migration hashes unchanged during execution"
+  ],
+  "sourceHead": "8bdfc5b680bb4c48944c951784a6e50f62652797",
+  "migrationSha256": "d9acc1fcb012c4bb4cf53497ce2900802e437612634108639a1c2964e231c538",
+  "certificate": "NOT_ISSUED",
+  "realEffects": 0
+}
