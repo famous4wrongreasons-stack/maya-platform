@@ -84,7 +84,7 @@ Private signing material remains operator-controlled outside Git/chat.
   their original assertions.
 
 These targeted proofs are not full release certification. Fresh results and
-exact SHA will be recorded separately after the committed-source run. No prior
+exact SHA are recorded in `LOCAL-STAGING-RESULT.md` after the committed-source run. No prior
 `CERTIFIED_FOR_PROFILE` claim is inherited. Later real acceptance still needs
 all six execution preconditions in the approved decision packet, including fresh
 release admission and separately authorized owner-data/provider operations.

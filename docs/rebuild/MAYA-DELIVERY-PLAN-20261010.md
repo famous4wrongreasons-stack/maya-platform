@@ -1,5 +1,16 @@
 # План завершения MAYA — 10 октября 2026
 
+**13 октября, локальный staging single-operator AR-1 — `98761bc6`: IMPLEMENTATION PASS.**
+После принятия Option A добавлен отдельный staging-контракт в существующем AR-1:
+свои trust/tenant allowlist, точный сертификат/сборка/профиль, настоящий global
+platform operator, CAS/аудит/expiry/revoke. Production V1/V2 не расширены,
+HANDOFF STOP и отсутствие plan/trial grants сохранены. На committed SHA прошли
+241 unit, 51 HTTP/binary, 39 operator, 13 refusal checks и 17/17 targeted mutations
+с зелёными unmutated/restored controls. [Результаты и границы](evidence/maya-native-booking-lifecycle-20261013/LOCAL-STAGING-RESULT.md).
+Все данные/ключи синтетические; owner DB не открывалась и не копировалась,
+реальных grants/effects нет. Это закрывает реализацию локального admission
+контракта, но не выдаёт новый release certificate и не делает реальный цикл READY.
+
 **13 октября, цельный native booking — `374965c5`: LOCAL SYNTHETIC PASS.**
 Текущий React → HTTP/Auth/Action Engine → настоящий YCLIENTS adapter с
 искусственным провайдером прошёл 11 checkpoints создания, переноса, отмены и
@@ -44,8 +55,9 @@ Planner явно получает последнюю безопасную реп
 ещё не доказан. Реальных запросов и расходов в этом проходе нет.
 [Изменение, неудачные попытки, receipts и границы](evidence/maya-history-current-request-20261012/README.md).
 
-**Ближайший остаток:** решить точный локальный AR-1 admission boundary,
-подготовить текущий certificate/profile и лишь затем отдельно разрешённую реальную
+**Ближайший остаток:** подготовить свежий certificate/profile для текущего
+кандидата с реализованным локальным AR-1, проверить platform signing/session и
+отдельно разрешённый staging snapshot; лишь затем отдельно разрешённую реальную
 приёмку записи → результата → переноса → отмены в YCLIENTS.
 Живой переход history → last_visit закрыт 13 октября. Цельный booking путь теперь
 прошёл и с native YCLIENTS adapter на искусственном провайдере; внешних business

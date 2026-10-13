@@ -1,0 +1,266 @@
+[
+  {
+    "artifact": "summary.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/summary.json",
+    "sha256": "5e951759a08b7f96d85b3189cbe69a0abee416c912026c79eb7d3f7630ce69e3",
+    "size": 12436,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "baseline-unit.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/baseline-unit.json",
+    "sha256": "198cecd6c744af3ae4212f93081bb2b0bb63080382bb0f3458ad3a799a8e3ce1",
+    "size": 111419,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "restored-unit.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/restored-unit.json",
+    "sha256": "24aa3c5c9d5e7f551c5aa94d86aaa4a9710e5c43e2e90be490928d2e054f7282",
+    "size": 111419,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "manifest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/LSO-M10/manifest.json",
+    "sha256": "573441c0ec9214120d8b0bb7ea0ca88298d8a3a134568d0f806348ad61d9270b",
+    "size": 702,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "manifest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/LSO-M11/manifest.json",
+    "sha256": "3aefc6156a0d26bd9065c6aaab14997ba8a179a9dc93e29d33cc4a23b383b843",
+    "size": 702,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "manifest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/LSO-M12/manifest.json",
+    "sha256": "7a876fb205f989aeaf9e95a48c3e4680744b9c2b26b1b88c3ed5c10bbd38bb69",
+    "size": 702,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "manifest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/LSO-M13/manifest.json",
+    "sha256": "e3e1b05636611cda886940f919efbc8cb3df05446e6a4db21d3bf912cf7e2796",
+    "size": 702,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "manifest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/LSO-M14/manifest.json",
+    "sha256": "e1fa3f0d13dd13fe3d7a052082a60230213aec90801905d80d5a2f5065496743",
+    "size": 702,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "manifest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/PU-M9/manifest.json",
+    "sha256": "fc5db45708e2ee3896beeeff26eaa6013efbd7cca4584e1816e2f366bad97c40",
+    "size": 777,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "manifest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/SO-M7/manifest.json",
+    "sha256": "d0f57c83ac6a2f96a9fbc10eba0d89a9faab36e9207f8dca769bbcf339739212",
+    "size": 777,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "manifest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/baseline-live/manifest.json",
+    "sha256": "9f88b505396adad7f5108a8646378df9e849dbd4b503584f7d46d34cd3c4be40",
+    "size": 803,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "manifest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/restored-live/manifest.json",
+    "sha256": "989fa998ceb2ad1ccde09b6482d2351038faecc489e99d3fbfac9e781971b183",
+    "size": 803,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "staging-http-binary-jest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/LSO-M10/staging-http-binary-jest.json",
+    "sha256": "b3b2aef17c3e5eb696478dc968a32b877a6d29ae7921e1238bed7e42de7c1c1c",
+    "size": 12752,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "staging-http-binary-jest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/LSO-M11/staging-http-binary-jest.json",
+    "sha256": "43f98465ed2d079ddc88ff3026593504e1b8df800f7f8bd76ca7af0fc7e0ab32",
+    "size": 13018,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "staging-http-binary-jest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/LSO-M12/staging-http-binary-jest.json",
+    "sha256": "6ea195715165cadc48f5e7a1eaea7f207f7cab5ea22365a303f9918d9767581b",
+    "size": 12879,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "staging-http-binary-jest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/LSO-M13/staging-http-binary-jest.json",
+    "sha256": "f823e7dfd2df0d30726f8c7fb288f2474cfbdcac4c0c668fd8f3dfd624b585b0",
+    "size": 16833,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "staging-http-binary-jest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/LSO-M14/staging-http-binary-jest.json",
+    "sha256": "ed284c2a16e38b994d4c71a91b34cf84e658ae039680c193188aea01c49df39d",
+    "size": 18175,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "legacy-jest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/PU-M9/legacy-jest.json",
+    "sha256": "e780213f070827fd6b24bc3f9581737bccbc100757f3ac8cd0cbe6d6ce8c579b",
+    "size": 23880,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "staging-http-binary-jest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/PU-M9/staging-http-binary-jest.json",
+    "sha256": "63441c1fe354603ad447fe6e76650fd9c5c7e06baa52be6d4c8a9454f218b345",
+    "size": 11571,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "legacy-jest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/SO-M7/legacy-jest.json",
+    "sha256": "0bad8aff3539a7abf403205b196732fe258ace1d2b38cf9e32fcb46c8fe9aaa9",
+    "size": 22720,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "staging-http-binary-jest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/SO-M7/staging-http-binary-jest.json",
+    "sha256": "35786711713bb6768c60ff5eb43256338a4dbca731b31ea34b6c723c0fa25a18",
+    "size": 11571,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "legacy-jest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/baseline-live/legacy-jest.json",
+    "sha256": "6dd109ea80245c2551f3ddb8513436d748e108a096b3c7b79dbe8af521857eb6",
+    "size": 21533,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "staging-http-binary-jest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/baseline-live/staging-http-binary-jest.json",
+    "sha256": "1c68b5153604b6d15012210b3d9fd33509b3b45766303608041b0dba604bae0b",
+    "size": 11571,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "legacy-jest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/restored-live/legacy-jest.json",
+    "sha256": "8fadee4f0cf0519e2baa6c024c83c9a0d97eb71b0af7a87a7aefa11f0175b8d6",
+    "size": 21533,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "staging-http-binary-jest.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-02/restored-live/staging-http-binary-jest.json",
+    "sha256": "092a89bd6ebde5159c1acc65bb4ef95ca8fe86d95005be530bfbc9d5a638e655",
+    "size": 11571,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "maya-staging-98761bc6-operator.log",
+    "source": "/private/tmp/maya-staging-98761bc6-operator.log",
+    "sha256": "63f21ec606575df69df931c5dbd4319f19ead57465cce7d01270de1a83d3e2bb",
+    "size": 2687,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "maya-staging-98761bc6-types.log",
+    "source": "/private/tmp/maya-staging-98761bc6-types.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "maya-staging-98761bc6-live-types.log",
+    "source": "/private/tmp/maya-staging-98761bc6-live-types.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "maya-staging-98761bc6-lint.log",
+    "source": "/private/tmp/maya-staging-98761bc6-lint.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "maya-staging-98761bc6-refusal.json",
+    "source": "/private/tmp/maya-staging-98761bc6-refusal.json",
+    "sha256": "1848c741e5a7bc3076f6555263d32694658fb05ef07ce6d3e045dd932d5c626a",
+    "size": 8067,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "manifest.json",
+    "source": "/private/tmp/maya-staging-ar1-20261013-01/manifest.json",
+    "sha256": "3c553a114fd4b438bf8451f0cad7971d6989f08c931f54de6f15a771fbfd1662",
+    "size": 702,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "manifest.json",
+    "source": "/private/tmp/maya-staging-ar1-20261013-03/manifest.json",
+    "sha256": "ce35312426198ef7df6d64925c34edd95157961039ddbbba73c3e66c0ab1bc38",
+    "size": 702,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  },
+  {
+    "artifact": "summary.json",
+    "source": "/private/tmp/maya-staging-mutations-20261013-01/summary.json",
+    "sha256": "3fb8f10c23925d77811466bedc7a00d3b303691a92a80b80ba72612f81096bf7",
+    "size": 7639,
+    "containsRealSecretsOrCustomerPII": false,
+    "reasonRawNotCommitted": "Synthetic raw receipt retained locally; repository summary preserves result and provenance"
+  }
+]
