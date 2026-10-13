@@ -1,0 +1,53 @@
+digest 0372a5bf030953bc360a11b0fea10e2d07c94a0aed504abbf79665325ef21b36
+web 10dcb08698def93bad39b2df457d63021763d23164d66152dfae30dafc87e1ab (web; 46 modules; styles.css present; index.html present; 5 pwa assets)
+contract: #contract -> 281 declarations in os.tmpdir(); 201 exports (+1 pending name) in the collision set
+baseline: 0 live entries (build-baseline/routes.json absent, build-baseline/renderer.json absent); 0 refused sites admitted by it
+pwa: manifest.webmanifest id /maya-chat-shell/, start_url ./, standalone portrait; 3 manifest icons + 1 apple-touch icon; no service worker
+serving: do NOT serve this tree at or under /app/ — the retired PWA's service worker is still live at /app/service-worker.js (max-age=604800) and its scope is /app/; a shell served there would be controlled by a worker this build never wrote. Check a path with: node build.mjs --serve-path=<the path this tree will be served from>
+entry: present
+net/client.ts: present
+built 49 sources -> dist/web/m/10dcb08698def93b/
+gate: PASS (38 source files, 0 refusals)
+  typecheck  src/chat/IdeasPanel.tsx(33,140): error TS2339: Property 'value' does not exist on type '{ readonly kind: "unavailable" | "unsupported" | "invalid"; } | { readonly kind: "scenario"; readonly value: string; readonly currency: string; readonly horizonEnd: string; }'.
+  Property 'value' does not exist on type '{ readonly kind: "unavailable" | "unsupported" | "invalid"; }'.
+  typecheck  src/chat/IdeasPanel.tsx(33,149): error TS2339: Property 'currency' does not exist on type '{ readonly kind: "unavailable" | "unsupported" | "invalid"; } | { readonly kind: "scenario"; readonly value: string; readonly currency: string; readonly horizonEnd: string; }'.
+  Property 'currency' does not exist on type '{ readonly kind: "unavailable" | "unsupported" | "invalid"; }'.
+  typecheck  src/chat/IdeasPanel.tsx(33,296): error TS2339: Property 'horizonEnd' does not exist on type '{ readonly kind: "unavailable" | "unsupported" | "invalid"; } | { readonly kind: "scenario"; readonly value: string; readonly currency: string; readonly horizonEnd: string; }'.
+  Property 'horizonEnd' does not exist on type '{ readonly kind: "unavailable" | "unsupported" | "invalid"; }'.
+file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/build.mjs:85
+      throw new R.CarrierRefused(diags.map(() => R.refusal('typecheck', 'src', 0, '', 'typecheck failed')));
+            ^
+
+CarrierRefused: BUILD REFUSED — 3 refusal(s)
+    at typecheck (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/build.mjs:85:13)
+    at async file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/build.mjs:105:1 {
+  refusals: [
+    {
+      rule: 'typecheck',
+      file: 'src',
+      line: 0,
+      name: '',
+      message: 'typecheck failed'
+    },
+    {
+      rule: 'typecheck',
+      file: 'src',
+      line: 0,
+      name: '',
+      message: 'typecheck failed'
+    },
+    {
+      rule: 'typecheck',
+      file: 'src',
+      line: 0,
+      name: '',
+      message: 'typecheck failed'
+    }
+  ]
+}
+
+Node.js v22.23.3
+RELEASE PACKAGING REFUSED: release command failed: build.mjs
+
+1 !== 0
+

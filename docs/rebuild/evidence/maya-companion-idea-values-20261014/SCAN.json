@@ -1,0 +1,24 @@
+{
+  "scope": "new code plus documentation/copied text; not historical repository audit",
+  "candidate": "e8aa7e484433ef591f7b0389159ce83f3ec0f766",
+  "filesChecked": 42,
+  "manifestHashes": "PASS",
+  "highConfidenceSecretScan": "PASS",
+  "piiPatternScan": "PASS",
+  "syntheticScreenshotsOnly": true,
+  "reviewedFalsePositives": [
+    {
+      "file": "docs/rebuild/evidence/maya-companion-idea-values-20261014/logs/carrier.txt",
+      "pattern": "email-like substring in synthetic URL",
+      "source": "maya-carrier-react/test/telegram-popup.test.mjs:65",
+      "classification": "intentional fake URL credentials in provider-substitution refusal test; not an email or real credential"
+    },
+    {
+      "file": "docs/rebuild/evidence/maya-companion-idea-values-20261014/logs/carrier.txt",
+      "pattern": "email-like substring in synthetic URL",
+      "source": "maya-carrier-react/test/telegram-popup.test.mjs:65",
+      "classification": "intentional fake URL credentials in provider-substitution refusal test; not an email or real credential"
+    }
+  ],
+  "unresolvedFindings": []
+}

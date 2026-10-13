@@ -1,0 +1,132 @@
+{
+  "candidate": "e8aa7e484433ef591f7b0389159ce83f3ec0f766",
+  "baseline": true,
+  "mutations": [
+    {
+      "name": "value availability",
+      "status": "KILLED",
+      "proof": "Ideas values require current"
+    },
+    {
+      "name": "value qualification",
+      "status": "KILLED",
+      "proof": "Ideas values require current"
+    },
+    {
+      "name": "value version",
+      "status": "KILLED",
+      "proof": "Ideas values require current"
+    },
+    {
+      "name": "value count",
+      "status": "KILLED",
+      "proof": "Ideas values reject missing"
+    },
+    {
+      "name": "value dimension",
+      "status": "KILLED",
+      "proof": "Ideas values reject missing"
+    },
+    {
+      "name": "value scalar",
+      "status": "KILLED",
+      "proof": "Ideas values reject missing"
+    },
+    {
+      "name": "value unit",
+      "status": "KILLED",
+      "proof": "Ideas values reject missing"
+    },
+    {
+      "name": "policy scope",
+      "status": "KILLED",
+      "proof": "Ideas policy uses literal"
+    },
+    {
+      "name": "policy boolean",
+      "status": "KILLED",
+      "proof": "Ideas policy uses literal"
+    },
+    {
+      "name": "scenario scope",
+      "status": "KILLED",
+      "proof": "Ideas scenario is exact"
+    },
+    {
+      "name": "scenario horizon",
+      "status": "KILLED",
+      "proof": "Ideas scenario is exact"
+    },
+    {
+      "name": "duplicates",
+      "status": "KILLED",
+      "proof": "Ideas malformed"
+    },
+    {
+      "name": "authority",
+      "status": "KILLED",
+      "proof": "Ideas malformed"
+    },
+    {
+      "name": "prediction",
+      "status": "KILLED",
+      "proof": "Ideas malformed"
+    },
+    {
+      "name": "cap",
+      "status": "KILLED",
+      "proof": "Ideas retain only"
+    },
+    {
+      "name": "read becomes write",
+      "status": "KILLED",
+      "proof": "Ideas use one finite"
+    },
+    {
+      "name": "foreign selection",
+      "status": "KILLED",
+      "proof": "Ideas loaded selection"
+    },
+    {
+      "name": "substitute id",
+      "status": "KILLED",
+      "proof": "Ideas loaded selection"
+    },
+    {
+      "name": "revision",
+      "status": "KILLED",
+      "proof": "Ideas loaded selection"
+    },
+    {
+      "name": "digest",
+      "status": "KILLED",
+      "proof": "Ideas loaded selection"
+    },
+    {
+      "name": "late response",
+      "status": "KILLED",
+      "proof": "Ideas late response"
+    },
+    {
+      "name": "expiry",
+      "status": "KILLED",
+      "proof": "Ideas expiry"
+    },
+    {
+      "name": "expired list",
+      "status": "KILLED",
+      "proof": "Ideas already expired"
+    },
+    {
+      "name": "one flight",
+      "status": "KILLED",
+      "proof": "Ideas lazy load"
+    },
+    {
+      "name": "retry",
+      "status": "KILLED",
+      "proof": "Ideas rate limit"
+    }
+  ],
+  "status": "PASS"
+}

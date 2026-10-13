@@ -56,3 +56,13 @@ binding, local expiry and session invalidation. Recommendations, numerical displ
 plan execution and plan-to-task mapping are not implemented by this unit. The source
 review above remains historical; see `../../MAYA-COMPANION-IDEAS-CHECKPOINT-20261014.md`
 and `../maya-companion-ideas-20261014/README.md` for fresh scoped evidence.
+
+## Ideas value presentation checkpoint (2026-10-14)
+
+`e8aa7e484433ef591f7b0389159ce83f3ec0f766` extends the same read-only Ideas source
+with finite observed values, literal dormancy boolean and conditional appointment
+scenario. No generic financial formatter, ranking members, inferred prediction,
+recommendation or task writer was added. All existing access/reread/expiry owners
+remain in place. This supersedes only the numerical-display gap in the metadata
+checkpoint above. See `../../MAYA-COMPANION-IDEA-VALUES-CHECKPOINT-20261014.md` and
+`../maya-companion-idea-values-20261014/README.md` for fresh scoped evidence.

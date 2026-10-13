@@ -1,0 +1,44 @@
+FAIL src/valuation/c8.companion-list.spec.ts
+  Companion Ideas existing C8 list source
+    ✓ passes the actual C8 list through the shipped runtime projector without exposing subjects or unprojected evidence (56 ms)
+    ✓ returns canonical explanation metadata and authority boundaries without computing (1 ms)
+    ✓ filters foreign tenant rows even if persistence returns them (1 ms)
+    ✓ filters branch scope mismatch (1 ms)
+    ✓ does not expose superseded or stale published results (1 ms)
+    ✓ preserves unavailable and prediction limitations (2 ms)
+    ✓ rechecks authority after dependency resolution and before list exposure (10 ms)
+    ✓ queries expiry and omits expired rows (1 ms)
+    ✓ discloses pre-filter cap even when first page is inaccessible (1 ms)
+  Companion Ideas deterministic production values through reader and projector
+    ✓ preserves canonical observed_attended_count meaning without writes (106 ms)
+    ✓ preserves canonical confirmed_cash meaning without writes (100 ms)
+    ✓ preserves canonical confirmed_refunds meaning without writes (99 ms)
+    ✓ preserves canonical confirmed_cash_net_linked_refunds meaning without writes (102 ms)
+    ✓ preserves canonical booked_value meaning without writes (101 ms)
+    ✓ preserves canonical provider_reported_gross meaning without writes (98 ms)
+    ✕ preserves canonical dormancy meaning without writes
+    ✓ preserves canonical scenario meaning without writes (103 ms)
+
+  ● Companion Ideas deterministic production values through reader and projector › preserves canonical dormancy meaning without writes
+
+    unexpected policy read
+
+      93 |     {
+      94 |       policy: jest.fn(async () => {
+    > 95 |         if (!policyContent) throw Error('unexpected policy read');
+         |                                   ^
+      96 |         return {
+      97 |           id: row.policyRevisionId,
+      98 |           hash: row.policyContentHash,
+
+      at Object.<anonymous> (valuation/c8.companion-list.spec.ts:95:35)
+      at valuation/c8.read.ts:212:45
+      at C8ReadService.present (valuation/c8.read.ts:181:22)
+      at C8ReadService.listInternal (valuation/c8.read.ts:537:19)
+      at valuation/c8.companion-list.spec.ts:376:28
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 16 passed, 17 total
+Snapshots:   0 total
+Time:        1.219 s
+Ran all test suites matching src/valuation/c8.companion-list.spec.ts.
