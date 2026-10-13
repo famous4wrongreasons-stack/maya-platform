@@ -1,0 +1,17 @@
+PASS src/package5-wave1/operational-work.http.spec.ts
+  R04 A23 through actual Nest JWT/tenant/role guards
+    ✓ forwards exact normalized command and identity to A23 with current actor/tenant (34 ms)
+    ✓ rejects missing/invalid signed sessions before admission (4 ms)
+    ✓ revocation takes effect on next request (5 ms)
+    ✓ suspended membership cannot use stale role to promote itself (1 ms)
+    ✓ staff cannot create a management command; Client cannot read tasks (3 ms)
+    ✓ rejects forged authority/unsupported semantics and missing identity (14 ms)
+    ✓ rejects invalid time and raw journal IDs before admission (13 ms)
+    ✓ completion delegates existing Inbox binding with current actor/tenant (2 ms)
+    ✓ repeated reads stay personal canonical projection without writes/admission (5 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       9 passed, 9 total
+Snapshots:   0 total
+Time:        1.272 s, estimated 2 s
+Ran all test suites matching src/package5-wave1/operational-work.http.spec.ts.

@@ -3,43 +3,55 @@
     "source": "/private/tmp/maya-tasks-final-runtime.log",
     "sha256": "751763de887e0399fbe210e98b212401e0991e8b0aad95180d8a5c6c886a00fa",
     "bytes": 195313,
-    "repository": "receipts/runtime.log",
-    "synthetic": true
+    "repository": "receipts/runtime.txt",
+    "synthetic": true,
+    "repositorySha256": "751763de887e0399fbe210e98b212401e0991e8b0aad95180d8a5c6c886a00fa",
+    "normalization": "trailing whitespace only; original local log and its source hash retained"
   },
   {
     "source": "/private/tmp/maya-tasks-final-carrier.log",
     "sha256": "7791dd0c009000bfe4d34c675c04140f043a535e74de5fcb9221020a85a0d15b",
     "bytes": 35400,
-    "repository": "receipts/carrier.log",
-    "synthetic": true
+    "repository": "receipts/carrier.txt",
+    "synthetic": true,
+    "repositorySha256": "7791dd0c009000bfe4d34c675c04140f043a535e74de5fcb9221020a85a0d15b",
+    "normalization": "trailing whitespace only; original local log and its source hash retained"
   },
   {
     "source": "/private/tmp/maya-tasks-final-ratchets.log",
     "sha256": "9c9dd5d2e95815e834abf4fb37f14e912fa39892a46a54fa8263132617a98256",
     "bytes": 7864,
-    "repository": "receipts/ratchets.log",
-    "synthetic": true
+    "repository": "receipts/ratchets.txt",
+    "synthetic": true,
+    "repositorySha256": "5a71a6ba5543f81d2dd72deccde61b8e8eb59d504be4e1f898f21d8f38c19236",
+    "normalization": "trailing whitespace only; original local log and its source hash retained"
   },
   {
     "source": "/private/tmp/maya-tasks-final-parity.log",
     "sha256": "08676ca18484fdaa1bac897ba77428f3c5a5ebe52623c4b1b3f74f27894b82b0",
     "bytes": 732,
-    "repository": "receipts/parity.log",
-    "synthetic": true
+    "repository": "receipts/parity.txt",
+    "synthetic": true,
+    "repositorySha256": "08676ca18484fdaa1bac897ba77428f3c5a5ebe52623c4b1b3f74f27894b82b0",
+    "normalization": "trailing whitespace only; original local log and its source hash retained"
   },
   {
     "source": "/private/tmp/maya-tasks-final-packaging.log",
     "sha256": "a53054dcb36c9baa60520682a7968664ffe6fc63665105f2e61e3e12840ca3b8",
     "bytes": 3307,
-    "repository": "receipts/packaging.log",
-    "synthetic": true
+    "repository": "receipts/packaging.txt",
+    "synthetic": true,
+    "repositorySha256": "a53054dcb36c9baa60520682a7968664ffe6fc63665105f2e61e3e12840ca3b8",
+    "normalization": "trailing whitespace only; original local log and its source hash retained"
   },
   {
     "source": "/private/tmp/maya-tasks-final-backend.log",
     "sha256": "b8cf504844efcc1679730e6768ab42ebec997269c413470a5a8f64bee36e3c74",
     "bytes": 1020,
-    "repository": "receipts/backend.log",
-    "synthetic": true
+    "repository": "receipts/backend.txt",
+    "synthetic": true,
+    "repositorySha256": "b8cf504844efcc1679730e6768ab42ebec997269c413470a5a8f64bee36e3c74",
+    "normalization": "trailing whitespace only; original local log and its source hash retained"
   },
   {
     "source": "/private/tmp/maya-companion-chat-438909a8/chat-1280.png",
