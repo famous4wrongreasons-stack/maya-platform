@@ -1,0 +1,303 @@
+[
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-02/booking-followup-observations.json",
+    "sha256": "e86c049bd9bc9869e9cf06771d740f189648b6d13461396e8ffabbae523d0650",
+    "size": 15399,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-02/browser-jest.json",
+    "sha256": "632d4c7bc17d380be38269caa1c8923c4024f18dcf581feeb425a5062949d5a8",
+    "size": 1497,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-02/browser.log",
+    "sha256": "20f49657ef15633bed42666a6bfe4aa2576834c1d4bb3be18f2e7c4301380f98",
+    "size": 1420,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-02/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-02/current-react/browser.json",
+    "sha256": "8a978f30b9322456d489926799fe7d57052a48c12be22831d19c41386576e4c9",
+    "size": 73697,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-02/initdb.log",
+    "sha256": "062a2e6e471f02bec4c384cd9b099b36e88517599daaa2205bcb3db668c1ca15",
+    "size": 962,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-02/manifest.json",
+    "sha256": "de8888d7177e4e26e4fb4b7b5bec8587721513f1303e2cda6662121f7021297d",
+    "size": 1146,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-02/migrations.log",
+    "sha256": "80da0bfbc5d68ee9ead1b612c84fbb6bb4b0669ae5c5ab93d8455b2ccef7201e",
+    "size": 15602,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-02/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-02/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-02/postgres.log",
+    "sha256": "c582004a7711c3e4dc2433b6897949a661d64d3f361b91dbee0febc17687df0d",
+    "size": 1246,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-02/react-web-build.log",
+    "sha256": "c5976e6f8150b4a6fea65c8e05477cf3a6f6450f321e41dd66af59160a9a3289",
+    "size": 185,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-02/source-hashes.json",
+    "sha256": "0a7e256e51ae1a8f1a4ef7abdecc815be2842cf0b5f7b12ba369fc50857e293a",
+    "size": 310620,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-internal-booking-lifecycle-20261013-01/booking-followup-observations.json",
+    "sha256": "4d623e22e6d9641b8dd0d293e48a5e6094e298e1596c0c3be28a63cceb6a2fb3",
+    "size": 8852,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-internal-booking-lifecycle-20261013-01/browser-jest.json",
+    "sha256": "cdef8cd6c7101bb5aa470ff3f33b66b274ccd915682ce8961d1f7b60b976901a",
+    "size": 1491,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-internal-booking-lifecycle-20261013-01/browser.log",
+    "sha256": "0cb113dac8011b8b216f39602e467346831515df393dccafe5d74ff59b7e3fa8",
+    "size": 1419,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-internal-booking-lifecycle-20261013-01/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-internal-booking-lifecycle-20261013-01/current-react/browser.json",
+    "sha256": "0c4aaa0d005d1dac26b34b057802747de8531b1c4a96ba64d1b6e6408bafc679",
+    "size": 92407,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-internal-booking-lifecycle-20261013-01/initdb.log",
+    "sha256": "62902e07ac66fe9c7aae2e226ed5b678fffdb1a74683c0790c34f8f5c2ca561a",
+    "size": 962,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-internal-booking-lifecycle-20261013-01/manifest.json",
+    "sha256": "db189f0e7bc07d97c0e024fd8a8b5bb410460dd81a47c8a63277626d17892b5c",
+    "size": 1146,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-internal-booking-lifecycle-20261013-01/migrations.log",
+    "sha256": "3d1d6f7a80ab66ea59a53550b5dd1e8226428e978d0768763b984240e23e5e1a",
+    "size": 14734,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-internal-booking-lifecycle-20261013-01/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-internal-booking-lifecycle-20261013-01/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-internal-booking-lifecycle-20261013-01/postgres.log",
+    "sha256": "03b588bd4b07d85e996313fe11d39798e24fb0a1c6776c406694f32a2d6ebf06",
+    "size": 1246,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-internal-booking-lifecycle-20261013-01/react-web-build.log",
+    "sha256": "c5976e6f8150b4a6fea65c8e05477cf3a6f6450f321e41dd66af59160a9a3289",
+    "size": 185,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-internal-booking-lifecycle-20261013-01/source-hashes.json",
+    "sha256": "0a7e256e51ae1a8f1a4ef7abdecc815be2842cf0b5f7b12ba369fc50857e293a",
+    "size": 310620,
+    "committed": false,
+    "reason": "Raw synthetic test artifact; only allowlisted evidence projection committed. May contain synthetic auth/session values."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-01/booking-followup-observations.json",
+    "sha256": "cf8f5e90964851fa7d618cdedd27b1882096686b8a3a8cd437bce64c5888dfc4",
+    "size": 15358,
+    "committed": false,
+    "reason": "Preserved failed cleanup attempt; not admissible as final PASS."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-01/browser-jest.json",
+    "sha256": "129e2a0284a52576ab094aa0facd2c12336245ee098d91516cbca91049d19ce9",
+    "size": 3289,
+    "committed": false,
+    "reason": "Preserved failed cleanup attempt; not admissible as final PASS."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-01/browser.log",
+    "sha256": "bb8d078bacc8ea198bbe3180af98aa95570494ac7940c2452b8054551afeb803",
+    "size": 3156,
+    "committed": false,
+    "reason": "Preserved failed cleanup attempt; not admissible as final PASS."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-01/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "committed": false,
+    "reason": "Preserved failed cleanup attempt; not admissible as final PASS."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-01/current-react/browser.json",
+    "sha256": "1eb42ebfcc80071157328730966a50f51f262d0ca7c95877641e6ce7befabfec",
+    "size": 73697,
+    "committed": false,
+    "reason": "Preserved failed cleanup attempt; not admissible as final PASS."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-01/initdb.log",
+    "sha256": "e6c51541f1253709b1e62b67f1186f35f75f3a7028f4530893aa9f2712773df8",
+    "size": 962,
+    "committed": false,
+    "reason": "Preserved failed cleanup attempt; not admissible as final PASS."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-01/manifest.json",
+    "sha256": "6c0bcde2e8dad11eaa0b2d838f74dca6dfb69bc71d580a9ef20138e93059280b",
+    "size": 1131,
+    "committed": false,
+    "reason": "Preserved failed cleanup attempt; not admissible as final PASS."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-01/migrations.log",
+    "sha256": "83387c5265de6b2fa64646fb27453ebf31292d80d0b1bac9d2a1c68a8a8b1eca",
+    "size": 14734,
+    "committed": false,
+    "reason": "Preserved failed cleanup attempt; not admissible as final PASS."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-01/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "committed": false,
+    "reason": "Preserved failed cleanup attempt; not admissible as final PASS."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-01/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "committed": false,
+    "reason": "Preserved failed cleanup attempt; not admissible as final PASS."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-01/postgres.log",
+    "sha256": "ccb2cb676acf21ac406e21f24342a2a86c05814acd486f3d94259640e7e3635f",
+    "size": 1696,
+    "committed": false,
+    "reason": "Preserved failed cleanup attempt; not admissible as final PASS."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-01/react-web-build.log",
+    "sha256": "c5976e6f8150b4a6fea65c8e05477cf3a6f6450f321e41dd66af59160a9a3289",
+    "size": 185,
+    "committed": false,
+    "reason": "Preserved failed cleanup attempt; not admissible as final PASS."
+  },
+  {
+    "path": "/private/tmp/maya-native-booking-lifecycle-20261013-01/source-hashes.json",
+    "sha256": "1892155afba3a9f457e83499d817251951d178fa96b7d0d514d7e431115e02db",
+    "size": 310620,
+    "committed": false,
+    "reason": "Preserved failed cleanup attempt; not admissible as final PASS."
+  },
+  {
+    "path": "/private/tmp/maya-local-ar1-boundary-20261013.json",
+    "sha256": "83f22ada18c8c17d7fa2855f7c341615b44d12bb7b6078c8366c77df8bc8a81f",
+    "size": 15247,
+    "committed": false,
+    "reason": "Local detailed receipt; summary committed."
+  },
+  {
+    "path": "/private/tmp/maya-local-ar1-boundary-20261013.log",
+    "sha256": "636e37711d79df85a91a6cf2e1707bdb217a81c9fb33cdee379e1f168a521403",
+    "size": 323,
+    "committed": false,
+    "reason": "Local detailed receipt; summary committed."
+  },
+  {
+    "path": "/private/tmp/maya-native-followup-lint-20261013-final.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "committed": false,
+    "reason": "Local detailed receipt; summary committed."
+  },
+  {
+    "path": "/private/tmp/maya-native-followup-types-20261013-final.log",
+    "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+    "size": 128,
+    "committed": false,
+    "reason": "Local detailed receipt; summary committed."
+  }
+]
