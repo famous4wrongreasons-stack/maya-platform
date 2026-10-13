@@ -1,0 +1,59 @@
+{
+  "basis": "e7aac44bcd6ffaf1b6d7425f45915559975a8fb4",
+  "kind": "precommit targeted dependency repair; not release certification",
+  "results": {
+    "proxy_before": {
+      "numPassedTests": 2,
+      "numFailedTests": 2,
+      "numTotalTests": 4,
+      "numPassedTestSuites": 0,
+      "numFailedTestSuites": 1,
+      "success": false
+    },
+    "targeted_after": {
+      "numPassedTests": 44,
+      "numFailedTests": 0,
+      "numTotalTests": 44,
+      "numPassedTestSuites": 5,
+      "numFailedTestSuites": 0,
+      "success": true
+    }
+  },
+  "raw": [
+    {
+      "path": "/private/tmp/maya-ci-packaging-followup-20261013.mjs",
+      "sha256": "f0fc1c4914b79e083f0369722734ed209311e9508f997aec9f19e64acf78246f",
+      "size": 9265
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/manifest.json",
+      "sha256": "3ccb877cab387c7f10ddff370ac14c7aba2563f751b758c9bd72ba97e8caec87",
+      "size": 2111
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/post-audit-diagnostic-overlay.json",
+      "sha256": "4d6e7f46173d3e95672c233cbe798dfb9585c90602cc9fba4f264084a9575d01",
+      "size": 273
+    },
+    {
+      "path": "/private/tmp/maya-proxy-before-20261013.log",
+      "sha256": "f7e07e468ea27a17222b4987a9cbecb15a66a996e2f2fd2021eb7bcad0936c3d",
+      "size": 1987
+    },
+    {
+      "path": "/private/tmp/maya-proxy-before-20261013.json",
+      "sha256": "67112612b0e7521bff6f8918064267d75845b7d16b18824cf88668363fd961b5",
+      "size": 9743
+    },
+    {
+      "path": "/private/tmp/maya-dependency-after-20261013.json",
+      "sha256": "9544779542fca01bb0fe500d51ccf18672da44ce8546ec38c14207546e99f8f7",
+      "size": 20785
+    },
+    {
+      "path": "/private/tmp/maya-dependency-after-20261013.log",
+      "sha256": "85885ff75b119aeb7631c16692a090c940a4ecbb065e21402643dc31acd21799",
+      "size": 646
+    }
+  ]
+}

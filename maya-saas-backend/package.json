@@ -93,7 +93,7 @@
     "qrcode": "^1.5.4",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "sharp": "^0.35.4",
+    "sharp": "^0.35.5",
     "socks-proxy-agent": "^8.0.5",
     "swagger-ui-express": "^5.0.1",
     "web-push": "3.6.7"
@@ -154,8 +154,10 @@
       "js-yaml": "^4.3.1"
     },
     "@nestjs/swagger": {
-      "js-yaml": "^5.2.3"
+      "js-yaml": "^5.4.1"
     },
+    "proxy-addr": "^2.0.8",
+    "ip-address": "^10.7.1",
     "multer": "^2.3.0",
     "mysql2": "^3.24.4",
     "qs": "^6.16.0",
