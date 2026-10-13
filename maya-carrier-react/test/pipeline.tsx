@@ -113,3 +113,4 @@ export function restoredReceiptMarkup(item: unknown): string {
 
 export { companionContext, MayaCompanion } from '../src/identity/MayaCompanion.tsx';
 export { companionTokens } from '../src/identity/tokens.ts';
+export { OwnTasksPanel } from '../src/chat/OwnTasksPanel.tsx';

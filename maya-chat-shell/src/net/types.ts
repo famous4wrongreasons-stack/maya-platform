@@ -12,6 +12,12 @@
 
 import type { HistorisedWidget, WidgetEnvelope, WidgetIntentSubmission } from '../contract.ts';
 
+/** Current-user task display only; key is a React key, never a command locator. */
+export interface OwnTask { readonly key: string; readonly title: string; readonly detail: string; readonly dueAt: string | null; readonly completed: boolean; }
+export interface OwnTasksSnapshot { readonly rows: readonly OwnTask[]; readonly possiblyCapped: boolean; }
+export type OwnTasksFailure = { readonly reason: 'forbidden' | 'unavailable' | 'invalid_response' | 'aborted' } | { readonly reason: 'rate_limited'; readonly retryAfterSec: number };
+export interface OwnTasksTransport { ownTasks(signal: AbortSignal): Promise<Outcome<OwnTasksSnapshot, OwnTasksFailure>>; }
+
 // ── requests ───────────────────────────────────────────────────────────────────────────────────
 
 /** `POST /auth/email/start` — `StartEmailAuthDto`. */

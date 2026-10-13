@@ -151,6 +151,31 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
   .maya-companion-chat .maya-chat-lane { padding-top:calc(var(--maya-chat-header-height, 78px) + 8px)!important; }
 }
 
+/* Current-user tasks: owner-supplied layout, read-only canonical data. */
+.companion-tasks { padding:0 4px 16px; }
+.companion-tasks-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.companion-tasks-heading h2 { font-size:28px; line-height:1.2; letter-spacing:-.03em; margin:0; font-weight:650; }
+.companion-tasks-subtitle,.companion-tasks-scope { color:#65696f; font-size:13px; line-height:1.5; margin:8px 0 16px; }
+.companion-tasks-scope { margin-bottom:22px; }
+.companion-task-filters { display:flex; padding:4px; gap:4px; border:1px solid #e6e7e9; border-radius:28px; box-shadow:0 4px 14px #34394404; }
+.companion-task-filters button { flex:1; min-height:44px; padding:8px; border:0; border-radius:24px; background:transparent; color:#191a1b; font:inherit; font-size:14px; line-height:1.4; font-weight:500; cursor:pointer; }
+.companion-task-filters button[aria-pressed=true] { background:#f1f2f3; box-shadow:inset 0 1px 2px #fff; }
+.companion-task-filters button:disabled { color:#74777c; cursor:default; }
+.companion-tasks-status { font-size:12px; line-height:1.5; color:#65696f; margin:18px 0 8px; }
+.companion-task-list { margin:0; padding:0; list-style:none; }
+.companion-task-list li { display:flex; align-items:flex-start; gap:14px; padding:22px 0; border-bottom:1px solid #e6e7e9; }
+.companion-task-list li > div { min-width:0; }
+.companion-task-list h2 { margin:0; font-size:16px; font-weight:600; line-height:1.4; overflow-wrap:anywhere; }
+.companion-task-list p { margin:8px 0 0; font-size:13px; line-height:1.55; color:#65696f; white-space:pre-wrap; overflow-wrap:anywhere; }
+.companion-task-mark { box-sizing:border-box; flex:none; width:21px; height:21px; margin-top:1px; border:1px solid #a8aeb5; border-radius:6px; display:grid; place-items:center; }
+.companion-task-mark.is-done { background:#eaf3ee; border-color:#7b998a; color:#3f6c56; }
+.companion-tasks-empty { padding:32px 0; }
+.companion-tasks-empty h2 { font-size:18px; line-height:1.4; }
+.companion-tasks-empty p { font-size:14px; color:#65696f; }
+.companion-tasks-footer { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; margin-top:20px; }
+.companion-tasks-footer button { min-height:44px; padding:10px 0; border:0; background:transparent; color:#0068ed; font:inherit; font-size:14px; cursor:pointer; }
+.companion-tasks-footer button:disabled { color:#74777c; cursor:default; }
+
 /* Same 320×340 stage and atlas crops as the package; no SVG/image/HTML DOM sinks. */
 .companion { display:inline-block; width:94px; height:94px; position:relative; flex:none; contain:layout style; }
 .companion-stage { position:absolute; width:320px; height:340px; left:2.765px; top:0; transform:scale(.2764705882); transform-origin:0 0; }

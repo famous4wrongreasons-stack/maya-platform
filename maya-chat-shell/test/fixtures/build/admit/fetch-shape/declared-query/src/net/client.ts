@@ -1,6 +1,7 @@
 import { API_BASE } from './endpoint.ts';
 
 const PATHS = {
+  ownTasks: '/operational-work',
   trialActivation: '/onboarding/trial-activations',
   trialSignup: '/onboarding/trial',
   crmStatus: '/integrations/crm',

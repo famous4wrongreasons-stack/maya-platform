@@ -215,6 +215,7 @@ const TOKEN_PROPERTIES = new Set([
  * the hand-off and lands it.
  */
 export const P1_PATHS = [
+  '/operational-work',
   '/auth/email/start',
   '/auth/email/verify',
   '/auth/login',

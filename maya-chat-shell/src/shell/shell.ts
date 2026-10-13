@@ -49,6 +49,7 @@ export interface ShellState {
   /** At most ONE fullscreen surface. Two was the old bug; one is a type, not a convention. */
   readonly fullscreen: FullscreenView | null;
   readonly opener: DetailOpener | null;
+  readonly workspace?: 'tasks';
 }
 
 export const initialState = (): ShellState => ({
@@ -67,22 +68,21 @@ export const asPrimaryRoute = (value: unknown): PrimaryRoute | null => BASE_ROUT
 export const navigateState = (state: ShellState, route: unknown): ShellState => {
   const primary = asPrimaryRoute(route);
   if (primary === null) return state;
-  if (primary === state.primary && state.fullscreen === null) return state;
-  return { ...state, primary, fullscreen: null, opener: null };
+  if (primary === state.primary && state.fullscreen === null && !state.workspace) return state;
+  const { workspace: _workspace, ...base } = state;
+  return { ...base, primary, fullscreen: null, opener: null };
 };
 
 /** A detail in PROGRESS, replacing whatever detail was showing: one at a time. */
-export const progressState = (state: ShellState, opener: DetailOpener): ShellState => ({
-  ...state,
-  fullscreen: { phase: 'progress', itemId: opener.itemId },
-  opener,
-});
+export const progressState = (state: ShellState, opener: DetailOpener): ShellState => {
+  const { workspace: _workspace, ...base } = state;
+  return { ...base, fullscreen: { phase: 'progress', itemId: opener.itemId }, opener };
+};
 
-export const openState = (state: ShellState, opener: DetailOpener, itemId: string, result: RenderResult, receiver?: 'personal_booking'): ShellState => ({
-  ...state,
-  fullscreen: { phase: 'open', itemId, result, ...(receiver === undefined ? {} : { receiver }) },
-  opener,
-});
+export const openState = (state: ShellState, opener: DetailOpener, itemId: string, result: RenderResult, receiver?: 'personal_booking'): ShellState => {
+  const { workspace: _workspace, ...base } = state;
+  return { ...base, fullscreen: { phase: 'open', itemId, result, ...(receiver === undefined ? {} : { receiver }) }, opener };
+};
 
 /** The escape verb §4 requires on every tier. Closing is always available and never fails. */
 export const closedState = (state: ShellState): ShellState =>
@@ -120,6 +120,8 @@ export interface ShellController extends ShellChrome {
   subscribe(listener: (view: ShellView) => void): Cancel;
   state(): ShellState;
   navigate(route: PrimaryRoute): void;
+  /** Signed-in host gesture only. No route string/params and no WidgetContract admission. */
+  openTasks(): void;
   presentDetail(envelope: WidgetEnvelope, opener: DetailOpener): PresentOutcome;
   connect(source: DetailSource): Cancel;
   dispose(): void;
@@ -149,7 +151,7 @@ export const createShell = (deps: ShellDeps): ShellController => {
     state = next;
     // A detail that left the screen, or was replaced by another, releases its tokens.
     if (before?.phase === 'open' && (next.fullscreen?.phase !== 'open' || next.fullscreen.itemId !== before.itemId)) source?.releaseDetail(before.itemId);
-    current = { primary: state.primary, fullscreen: state.fullscreen };
+    current = { primary: state.primary, fullscreen: state.fullscreen, ...(state.workspace ? { workspace: state.workspace } : {}) };
     for (const listener of [...listeners]) {
       try {
         listener(current);
@@ -220,6 +222,11 @@ export const createShell = (deps: ShellDeps): ShellController => {
       return () => void listeners.delete(listener);
     },
     state: () => state,
+    openTasks() {
+      if (!signedIn || state.workspace === 'tasks') return;
+      closeDetail();
+      set({ ...navigateState(state, 'shell.root'), workspace: 'tasks' });
+    },
     navigate(route) {
       const primary = asPrimaryRoute(route);
       if (primary === null) return;

@@ -6,9 +6,10 @@ type ButtonRef = HTMLButtonElement | null;
 type HeaderRef = HTMLElement | null;
 
 /** Local chrome over existing destinations. It invents no route or business permission. */
-export function CompanionHeader({ tenantName, privacyOpen, openPrivacy, openPhoto, photoEnabled, state, event, greet }: {
+export function CompanionHeader({ tenantName, privacyOpen, openPrivacy, openPhoto, openTasks, photoEnabled, state, event, greet }: {
   readonly tenantName: string | null; readonly privacyOpen: boolean;
   readonly openPrivacy: () => void; readonly openPhoto: () => void;
+  readonly openTasks: () => void;
   readonly photoEnabled: boolean;
   readonly state: CompanionState; readonly event: number; readonly greet: () => void;
 }) {
@@ -58,6 +59,7 @@ export function CompanionHeader({ tenantName, privacyOpen, openPrivacy, openPhot
         <button type="button" className="companion-circle" aria-label="Закрыть меню" onClick={() => setMenu(false)}>×</button></div>
       <h2>Maya</h2>
       <p className="companion-menu-business">{tenantName ?? 'Ваш разговор'}</p>
+      <button type="button" className="companion-menu-row" onClick={() => { setMenu(false); openTasks(); }}>Мои задачи <span aria-hidden="true">↗</span></button>
       <button type="button" className="companion-menu-row" onClick={() => { setMenu(false); openPrivacy(); }}>Приватность и данные <span aria-hidden="true">↗</span></button>
       <button type="button" className="companion-menu-row" disabled={!photoEnabled} onClick={() => { setMenu(false); openPhoto(); }}>Товар по фото накладной <span aria-hidden="true">+</span></button>
       <button type="button" className="companion-menu-row" aria-label="Движения Maya" aria-pressed={moving} onClick={() => setMoving(value => !value)}>

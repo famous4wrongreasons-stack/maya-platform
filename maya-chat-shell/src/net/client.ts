@@ -11,6 +11,8 @@
 // only `session.ts` implements.
 
 import { projectPersonalBranches, projectPersonalChoices, projectPersonalSlots, projectPersonalPreview, projectPersonalResults } from './personal.ts';
+import { projectOwnTasks } from './own-tasks.ts';
+import type { OwnTasksSnapshot, OwnTasksFailure } from './types.ts';
 import type { PersonalSelection, PersonalFailure } from './types.ts';
 import { goodsPhotoQuery, projectGoodsPhotoContext, projectGoodsPhotoPreview, projectGoodsPhotoSearch, projectGoodsPhotoItem, projectGoodsPhotoProposal, projectGoodsPhotoReview } from './goods-photo.ts';
 import type { GoodsPhotoFile, GoodsPhotoFailure, GoodsPhotoProposal, GoodsPhotoRequestContext, GoodsPhotoResponse } from './types.ts';
@@ -70,6 +72,7 @@ import type {
 } from './types.ts';
 
 const PATHS = {
+  ownTasks: '/operational-work',
   businessSearch: '/mobile/pwa/search',
   telegramStart: '/auth/oauth/telegram/start',
   telegramComplete: '/auth/oauth/telegram/complete',
@@ -193,7 +196,7 @@ async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | 
   if (signal !== null) signal.addEventListener('abort', onAbort, { once: true });
   // A `search` term makes this a GET that carries the term in the query string, and a GET sends no
   // body and declares no content type — which also keeps it a simple request, with no preflight.
-  const reading = endpoint === 'crmSetupStatus' || endpoint === 'crmSetupOperation' || search !== null || endpoint === 'conversation' || endpoint === 'personalBranches' || endpoint === 'personalServices' || endpoint === 'personalStaff' || endpoint === 'personalSlots' || endpoint === 'personalResults';
+  const reading = endpoint === 'ownTasks' || endpoint === 'crmSetupStatus' || endpoint === 'crmSetupOperation' || search !== null || endpoint === 'conversation' || endpoint === 'personalBranches' || endpoint === 'personalServices' || endpoint === 'personalStaff' || endpoint === 'personalSlots' || endpoint === 'personalResults';
   const auth: Readonly<Record<string, string>> = bearer === null ? {} : { Authorization: 'Bearer ' + bearer };
   const personal = endpoint === 'personalPreview' || endpoint === 'personalResults' || endpoint === 'personalCreate';
   const context = personal ? { 'X-Maya-Authority-Context': 'personal_client' } : {};
@@ -541,7 +544,7 @@ const unlessAborted = <T>(work: Promise<T>, signal: AbortSignal): Promise<T | nu
 };
 
 /** 401 → refresh once → retry once (§1.4). A second 401 ends the session; it never loops. */
-async function authorizedExchange(auth: Authorizer, endpoint: 'telegramLinkStart' | 'telegramLinkComplete' | 'crmSetupStatus' | 'crmSetupStage' | 'crmSetupActivate' | 'crmSetupOperation' | 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate' | 'goodsPhotoPreview' | 'goodsPhotoSearch' | 'goodsPhotoItem' | 'goodsPhotoReview', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = '', idempotencyKey: string = '', crmLocator: CrmOperationLocator | null = null): Promise<AuthorizedExchange> {
+async function authorizedExchange(auth: Authorizer, endpoint: 'ownTasks' | 'telegramLinkStart' | 'telegramLinkComplete' | 'crmSetupStatus' | 'crmSetupStage' | 'crmSetupActivate' | 'crmSetupOperation' | 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate' | 'goodsPhotoPreview' | 'goodsPhotoSearch' | 'goodsPhotoItem' | 'goodsPhotoReview', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = '', idempotencyKey: string = '', crmLocator: CrmOperationLocator | null = null): Promise<AuthorizedExchange> {
   const first = await unlessAborted(auth.authorize(), signal);
   if (first === null) return { kind: 'aborted' };
   if (first.kind !== 'bearer') return first;
@@ -692,6 +695,17 @@ const crmSetupCompletion = (ex: AuthorizedExchange, locator: CrmOperationLocator
 /** The two authenticated calls of P1, shaped as `shell/ports.ts` `Transport`. */
 export function createTransport(auth: Authorizer, timeouts: Timeouts = { requestMs: REQUEST_TIMEOUT_MS, transcribeMs: TRANSCRIBE_TIMEOUT_MS }) {
   return {
+    async ownTasks(signal: AbortSignal): Promise<Outcome<OwnTasksSnapshot, OwnTasksFailure>> {
+      const ex = await authorizedExchange(auth, 'ownTasks', {}, signal, timeouts.requestMs);
+      if (ex.kind === 'aborted') return fail({ reason: 'aborted' });
+      if (ex.kind === 'signed_out' || ex.kind === 'response' && [401, 403].includes(ex.status)) return fail({ reason: 'forbidden' });
+      if (ex.kind === 'response' && ex.status === 429) return fail({ reason: 'rate_limited', retryAfterSec: retryAfterOf(ex) });
+      if (ex.kind === 'response' && isSuccess(ex.status)) {
+        const value = projectOwnTasks(ex.body);
+        return value === null ? fail({ reason: 'invalid_response' }) : { ok: true, value };
+      }
+      return fail({ reason: 'unavailable' });
+    },
     async goodsPhotoPreview(photo: GoodsPhotoFile, signal: AbortSignal): Promise<Outcome<GoodsPhotoResponse, GoodsPhotoFailure>> {
       if (!(photo instanceof Blob) || photo.size < 12 || photo.size > 2 * 1024 * 1024 || !['image/png', 'image/jpeg', 'image/webp'].includes(photo.type)) return fail({ reason: 'invalid_photo' });
       const body = new FormData();
