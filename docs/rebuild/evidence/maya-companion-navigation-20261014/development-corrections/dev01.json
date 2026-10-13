@@ -1,0 +1,80 @@
+{
+  "candidate": "4e9a8c89a055537ea41f7455d216a2037a6ec72a",
+  "dirtySource": true,
+  "contract": "maya.companion.navigation-ui/1",
+  "realBackend": false,
+  "realProviders": false,
+  "realKeys": false,
+  "payload": {
+    "icons/maya-192.png": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
+    "icons/maya-512-maskable.png": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
+    "icons/maya-512.png": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
+    "icons/maya-apple-180.png": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
+    "index.html": "a2b8ab31270c9f3bf0aebf00df04b33386b948fd7ff2ae13d263f50f964dc9d1",
+    "m/S52DV4JW/main.js": "8431ae7f95d99e621cd9e258d9b278ccbb17d4be6285e3222591ae8f410ff34d",
+    "manifest.webmanifest": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
+    "styles.css": "c09d736e2e80f9cf725f7663606bec95e0b4098521bbb3ec0f962e427d94c2ac"
+  },
+  "checks": [
+    "real emitted sign-in",
+    "history restored through canonical runtime",
+    "five real workspaces in navigation landmark",
+    "current section is Чат",
+    "mounting navigation does not preload business data",
+    "active chat selection is inert",
+    "navigation/composer fit and touch targets at 393",
+    "no horizontal overflow at 393",
+    "navigation/composer fit and touch targets at 320",
+    "no horizontal overflow at 320",
+    "navigation/composer fit and touch targets at 427",
+    "no horizontal overflow at 427",
+    "navigation/composer fit and touch targets at 1280",
+    "no horizontal overflow at 1280",
+    "desktop text entry keeps navigation available"
+  ],
+  "screenshots": [
+    "signin-393.png",
+    "navigation-chat-393.png",
+    "navigation-chat-320.png",
+    "navigation-chat-427.png",
+    "navigation-chat-1280.png",
+    "failure.png"
+  ],
+  "externalRequests": 0,
+  "unexpected": [],
+  "status": "FAIL",
+  "failure": "current section is Лента",
+  "exceptions": [],
+  "issues": [
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 43,
+          "violatingNodeAttribute": ""
+        }
+      }
+    },
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 45,
+          "violatingNodeAttribute": ""
+        }
+      }
+    },
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 47,
+          "violatingNodeAttribute": ""
+        }
+      }
+    }
+  ]
+}

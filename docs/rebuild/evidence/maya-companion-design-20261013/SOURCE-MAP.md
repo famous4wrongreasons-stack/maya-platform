@@ -90,3 +90,16 @@ including repeated delivery updating only readAt. This closes acknowledgement on
 not Save, categories, task completion or message/booking authority. Earlier read-only
 Feed evidence is historical. See `../../MAYA-COMPANION-FEED-READ-CHECKPOINT-20261014.md`
 and `../maya-companion-feed-read-20261014/README.md` for fresh scoped evidence.
+
+## Five-section navigation checkpoint (2026-10-14)
+
+`a05d0c5b17375694704d9c692aaff1498e28f4a6` connects the five owner-design tabs to the already implemented
+Chat, Inbox Feed, C8 Ideas, A23 own Tasks and retained owner-report Library.
+Current section remains a ShellView projection; no new reader, route, authority
+or writer was added. Re-selecting a section is inert. Composer draft/history and
+single-turn ownership survive switching. Measured layout reserves navigation
+space; coarse-pointer text entry hides it, and width changes remeasure wrapped
+composer content. Source/runtime/backend contracts remain unchanged.
+See `../../MAYA-COMPANION-NAVIGATION-CHECKPOINT-20261014.md` and
+`../maya-companion-navigation-20261014/README.md` for fresh scoped evidence.
+The policy gaps listed earlier remain open; this is not release certification.
