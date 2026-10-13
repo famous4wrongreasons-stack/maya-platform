@@ -4,8 +4,9 @@ import { pathToFileURL } from 'node:url';
 import { ForbiddenException } from '@nestjs/common';
 import type { C8ResultRevision } from '@prisma/client';
 import { C8ReadService } from './c8.read';
+import { c8ComputeDeterministic } from './c8.deterministic';
 // Existing reader/explanation; synthetic persistence/viewer. No provider, model or writes.
-function fixture() {
+function fixture(policyContent?: unknown) {
   const row = {
     id: 'result-one',
     tenantId: 'tenant-a',
@@ -20,6 +21,7 @@ function fixture() {
     ruleKey: 'c8.value/count',
     ruleVersion: 1,
     policyRevisionId: 'private-policy',
+    policyContentHash: 'b'.repeat(64),
     scopeJson: { branchIds: [], serviceScope: [] },
     t0: new Date('2026-10-14T08:00:00.000Z'),
     periodFrom: new Date('2026-10-01T00:00:00.000Z'),
@@ -29,19 +31,33 @@ function fixture() {
     snapshotHash: 'a'.repeat(64),
     revision: 1,
     rankingJson: null,
-    valuesJson: { values: [{ key: 'count', value: '3' }] },
+    valuesJson: {
+      values: [
+        {
+          key: 'count',
+          type: 'observed',
+          value: '3',
+          unit: 'count',
+          basis: 'observed_attended_count',
+          currency: null,
+        },
+      ],
+    },
     reasonsJson: [],
     horizonEnd: null,
     modelVersionId: null,
   } as unknown as C8ResultRevision;
   let rows = [row],
-    active = true;
+    active = true,
+    financeAllowed = true;
   const member = { role: 'tenant_owner', branchId: null as string | null };
   const viewer = {
-    viewer: jest.fn(async (tenant: string, user: string) => {
+    viewer: jest.fn(async (tenant: string, user: string, purpose: string) => {
       expect(tenant).toBe('tenant-a');
       expect(user).toBe('user-a');
       if (!active) throw new ForbiddenException('revoked');
+      if (!financeAllowed && purpose === 'business_period')
+        throw new ForbiddenException('finance_denied');
       return member;
     }),
   };
@@ -78,7 +94,16 @@ function fixture() {
     } as never,
     viewer as never,
     store as never,
-    { policy: write } as never,
+    {
+      policy: jest.fn(async () => {
+        if (!policyContent) throw Error('unexpected policy read');
+        return {
+          id: row.policyRevisionId,
+          hash: row.policyContentHash,
+          content: policyContent,
+        };
+      }),
+    } as never,
     { compute: write } as never,
     { compute: write } as never,
   );
@@ -93,41 +118,53 @@ function fixture() {
     rows: (v: C8ResultRevision[]) => {
       rows = v;
     },
+    denyFinance: () => {
+      financeAllowed = false;
+    },
     revoke: () => {
       active = false;
     },
     read: () => reader.list('tenant-a', 'user-a'),
   };
 }
+function project(list: unknown) {
+  const moduleUrl = pathToFileURL(
+    resolve(__dirname, '../../../maya-chat-shell/src/net/ideas.ts'),
+  ).href;
+  return JSON.parse(
+    execFileSync(
+      process.execPath,
+      [
+        '--experimental-strip-types',
+        '--input-type=module',
+        '-e',
+        `import fs from 'node:fs'; import { projectIdeas } from ${JSON.stringify(moduleUrl)}; process.stdout.write(JSON.stringify(projectIdeas(JSON.parse(fs.readFileSync(0,'utf8')))));`,
+      ],
+      {
+        input: JSON.stringify(list),
+        encoding: 'utf8',
+        timeout: 10000,
+        env: { PATH: process.env.PATH, HOME: process.env.HOME },
+      },
+    ),
+  );
+}
 describe('Companion Ideas existing C8 list source', () => {
-  it('passes the actual C8 list through the shipped runtime projector without exposing subjects or values', async () => {
+  it('passes the actual C8 list through the shipped runtime projector without exposing subjects or unprojected evidence', async () => {
     const list = await fixture().read();
-    const moduleUrl = pathToFileURL(
-      resolve(__dirname, '../../../maya-chat-shell/src/net/ideas.ts'),
-    ).href;
-    const projected = JSON.parse(
-      execFileSync(
-        process.execPath,
-        [
-          '--experimental-strip-types',
-          '--input-type=module',
-          '-e',
-          `import fs from 'node:fs'; import { projectIdeas } from ${JSON.stringify(moduleUrl)}; process.stdout.write(JSON.stringify(projectIdeas(JSON.parse(fs.readFileSync(0,'utf8')))));`,
-        ],
-        {
-          input: JSON.stringify(list),
-          encoding: 'utf8',
-          timeout: 10000,
-          env: { PATH: process.env.PATH, HOME: process.env.HOME },
-        },
-      ),
-    );
+    const projected = project(list);
     expect(projected).not.toBeNull();
     expect(projected.rows[0]).toMatchObject({
       key: 'result-one',
       scope: 'tenant',
       coverage: 'PARTIAL',
       available: true,
+      finding: {
+        kind: 'observation',
+        basis: 'observed_attended_count',
+        value: '3',
+        currency: null,
+      },
     });
     expect(JSON.stringify(projected)).not.toMatch(
       /private-policy|tenant-a|subjectId|values|boundaries/,
@@ -167,6 +204,19 @@ describe('Companion Ideas existing C8 list source', () => {
     });
     expect(f.findMany).toHaveBeenCalledTimes(1);
     expect(f.viewer.viewer.mock.calls.length).toBeGreaterThanOrEqual(4);
+    expect(f.write).not.toHaveBeenCalled();
+  });
+  it('does not substitute general access for existing financial reader authority', async () => {
+    const f = fixture();
+    f.row.basis = 'confirmed_cash';
+    f.row.currency = 'RUB';
+    f.denyFinance();
+    expect((await f.read()).items).toEqual([]);
+    expect(f.viewer.viewer).toHaveBeenCalledWith(
+      'tenant-a',
+      'user-a',
+      'business_period',
+    );
     expect(f.write).not.toHaveBeenCalled();
   });
   it('filters foreign tenant rows even if persistence returns them', async () => {
@@ -229,6 +279,145 @@ describe('Companion Ideas existing C8 list source', () => {
     expect(await f.read()).toMatchObject({
       items: [],
       nextCursor: 'result-24',
+    });
+  });
+});
+
+// Reuse actual deterministic producer and reader; no alternate frontend arithmetic/authority.
+describe('Companion Ideas deterministic production values through reader and projector', () => {
+  const policy = {
+    version: 1,
+    valueMeasures: [],
+    predictionTargets: [],
+    dormancyRules: [
+      {
+        ruleKey: 'cadence',
+        serviceScope: [],
+        elapsed: { unit: 'day', count: 30 },
+        comparison: 'gt',
+        evidence: 'proven_attendance',
+        minimumCoverage: 'PARTIAL',
+      },
+    ],
+    rankingObjectives: [],
+    minimumEvidence: [],
+    exclusions: {
+      serviceScope: [],
+      branchIds: [],
+      subjectStates: [],
+      requiredFeatures: [],
+    },
+    opportunityAdmission: { enabled: false, rules: [] },
+    modelUse: [],
+  };
+  it.each([
+    'observed_attended_count',
+    'confirmed_cash',
+    'confirmed_refunds',
+    'confirmed_cash_net_linked_refunds',
+    'booked_value',
+    'provider_reported_gross',
+    'dormancy',
+    'scenario',
+  ])('preserves canonical %s meaning without writes', async (basis) => {
+    const f = fixture(policy),
+      r = f.row;
+    const dormancy = basis === 'dormancy',
+      scenario = basis === 'scenario',
+      count = basis === 'observed_attended_count';
+    r.eligibility = 'ELIGIBLE';
+    r.basis = dormancy
+      ? 'proven_attendance_policy'
+      : scenario
+        ? 'booked_value'
+        : basis;
+    r.kind = dormancy
+      ? 'POLICY_SIGNAL'
+      : scenario
+        ? 'SCENARIO'
+        : 'OBSERVED_VALUE';
+    r.subjectKind = dormancy ? 'client' : scenario ? 'appointment' : 'tenant';
+    r.ruleKey = dormancy
+      ? 'c8.dormancy/cadence'
+      : scenario
+        ? 'c8.scenario/booked_appointment'
+        : 'c8.value/measure';
+    r.currency = dormancy || count ? null : 'RUB';
+    r.horizonEnd = scenario ? new Date('2026-11-01T00:00:00.000Z') : null;
+    r.inputSnapshotJson = {
+      version: 1,
+      features: [
+        {
+          key: dormancy ? 'last_proven_visit_at' : r.basis,
+          value: dormancy
+            ? '2026-08-01T00:00:00.000Z'
+            : count
+              ? '3'
+              : '9007199254740993',
+          unit: dormancy ? 'instant' : count ? 'count' : 'money_minor',
+          basis: dormancy ? 'proven_attendance' : r.basis,
+          currency: r.currency,
+          sourceRefs: [
+            {
+              owner: 'MeasurementRevision',
+              tenantId: r.tenantId,
+              id: 'private-source',
+              revisionOrStateHash: 'b'.repeat(64),
+              observedAt: r.t0.toISOString(),
+              asOf: r.t0.toISOString(),
+              qualification: 'VERIFIED',
+              coverage: 'PARTIAL',
+              expiresAt: r.expiresAt.toISOString(),
+            },
+          ],
+        },
+      ],
+      missingness: [],
+      coverage: 'PARTIAL',
+      dependencies: [],
+    };
+    const output = c8ComputeDeterministic(r, {
+      ...policy,
+      valueMeasures:
+        dormancy || scenario
+          ? []
+          : [
+              {
+                key: 'measure',
+                basis: r.basis,
+                currency: r.currency,
+                window: { unit: 'day', count: 30 },
+                serviceScope: [],
+              },
+            ],
+    });
+    r.valuesJson = output.valuesJson as never;
+    r.reasonsJson = output.reasonsJson as never;
+    const result = project(await f.read()).rows[0].finding;
+    expect(result).toMatchObject(
+      dormancy
+        ? { kind: 'policy', met: true }
+        : scenario
+          ? {
+              kind: 'scenario',
+              value: '9007199254740993',
+              currency: 'RUB',
+              horizonEnd: r.horizonEnd?.toISOString(),
+            }
+          : {
+              kind: 'observation',
+              basis,
+              value: count ? '3' : '9007199254740993',
+              currency: r.currency,
+            },
+    );
+    expect(JSON.stringify(result)).not.toMatch(
+      /private|sourceRefs|ruleKey|subjectId/,
+    );
+    expect(f.write).not.toHaveBeenCalled();
+    r.state = 'UNAVAILABLE';
+    expect(project(await f.read()).rows[0].finding).toEqual({
+      kind: 'unavailable',
     });
   });
 });

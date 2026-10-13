@@ -8,6 +8,17 @@ import { fileURLToPath } from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'maya-ideas-mutations-'));
 const mutations=[
+ ['value availability','net/ideas.ts',"!x.current || !x.available || ",'','Ideas values require current'],
+ ['value qualification','net/ideas.ts'," || x.qualification === 'UNQUALIFIED'",'','Ideas values require current'],
+ ['value version','net/ideas.ts',"rule.version !== 1 || ",'','Ideas values require current'],
+ ['value count','net/ideas.ts',"x.values.length !== 1","x.values.length < 1",'Ideas values reject missing'],
+ ['value dimension','net/ideas.ts',"v.basis !== x.basis || v.currency !== x.currency","false",'Ideas values reject missing'],
+ ['value scalar','net/ideas.ts',"v.type !== 'observed' || !integral(v.value)","v.type !== 'observed'",'Ideas values reject missing'],
+ ['value unit','net/ideas.ts',"v.unit !== (count ? 'count' : 'money_minor') || ",'','Ideas values reject missing'],
+ ['policy scope','net/ideas.ts',"scope !== 'client' || ",'','Ideas policy uses literal'],
+ ['policy boolean','net/ideas.ts',"typeof v.value !== 'boolean'","false",'Ideas policy uses literal'],
+ ['scenario scope','net/ideas.ts',"scope !== 'appointment' || ",'','Ideas scenario is exact'],
+ ['scenario horizon','net/ideas.ts'," || x.horizonEnd <= (x.asOf as string)",'','Ideas scenario is exact'],
  ['duplicates','net/ideas.ts','ids.has(x.id) || ','','Ideas malformed'],
  ['authority','net/ideas.ts',"boundaries[k] !== false","false",'Ideas malformed'],
  ['prediction','net/ideas.ts'," || x.kind === 'PREDICTION'",'', 'Ideas malformed'],

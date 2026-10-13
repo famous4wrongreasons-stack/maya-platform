@@ -1,10 +1,39 @@
 // A bounded read projection, not a recommendation/plan/recipient or action authority.
-import type { IdeasSnapshot, IdeaRead } from './types.ts';
+import type { IdeasSnapshot, IdeaRead, IdeaFinding, IdeaBasis } from './types.ts';
 const object = (v: unknown): Record<string, unknown> | null => v !== null && typeof v === 'object' && !Array.isArray(v) ? v as Record<string, unknown> : null;
 const text = (v: unknown, n: number): v is string => typeof v === 'string' && v.trim().length > 0 && v.length <= n;
 const instant = (v: unknown): v is string => typeof v === 'string' && /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(v) && Number.isFinite(Date.parse(v)) && new Date(v).toISOString() === v;
 const kinds = ['OBSERVED_VALUE', 'POLICY_SIGNAL', 'PREDICTION', 'SCENARIO', 'RANKING'] as const;
 const scopes = ['client', 'appointment', 'staff', 'tenant', 'branch', 'cohort'] as const;
+const bases = ['confirmed_cash', 'confirmed_refunds', 'confirmed_cash_net_linked_refunds', 'booked_value', 'provider_reported_gross', 'observed_attended_count'];
+const integral = (v: unknown): v is string => typeof v === 'string' && v.length <= 240 && /^-?(0|[1-9]\d*)$/.test(v);
+const currency = (v: unknown): v is string => typeof v === 'string' && /^[A-Z]{3}$/.test(v);
+function finding(x: Record<string, unknown>, scope: unknown): IdeaFinding {
+  // A value never makes an unavailable/unqualified result usable.
+  if (!x.current || !x.available || !['COMPLETE', 'PARTIAL'].includes(x.completeness as string) || x.qualification === 'UNQUALIFIED') return { kind: 'unavailable' };
+  if (x.kind === 'PREDICTION' || x.kind === 'RANKING') return { kind: 'unsupported' };
+  const rule = object(x.rule);
+  if (!rule || rule.version !== 1 || typeof rule.key !== 'string') return { kind: 'unsupported' };
+  const observed = x.kind === 'OBSERVED_VALUE' && /^c8\.value\/[a-z][a-z0-9_]{0,79}$/.test(rule.key);
+  const policy = x.kind === 'POLICY_SIGNAL' && /^c8\.dormancy\/[a-z][a-z0-9_]{0,79}$/.test(rule.key);
+  const scenario = x.kind === 'SCENARIO' && rule.key === 'c8.scenario/booked_appointment';
+  if (!observed && !policy && !scenario) return { kind: 'unsupported' };
+  if (!Array.isArray(x.values) || x.values.length !== 1) return { kind: 'invalid' };
+  const v = object(x.values[0]);
+  if (!v || v.basis !== x.basis || v.currency !== x.currency) return { kind: 'invalid' };
+  if (observed) {
+    if (!bases.includes(x.basis as string)) return { kind: 'unsupported' };
+    const count = x.basis === 'observed_attended_count';
+    if (v.key !== rule.key.slice('c8.value/'.length) || v.type !== 'observed' || !integral(v.value) || v.unit !== (count ? 'count' : 'money_minor') || !(count ? x.currency === null : currency(x.currency))) return { kind: 'invalid' };
+    return { kind: 'observation', basis: x.basis as IdeaBasis, value: v.value, currency: x.currency as string | null };
+  }
+  if (policy) {
+    if (scope !== 'client' || x.qualification !== 'VERIFIED' || x.basis !== 'proven_attendance_policy' || x.currency !== null || v.key !== rule.key.slice('c8.dormancy/'.length) || v.type !== 'policy' || v.unit !== 'boolean' || typeof v.value !== 'boolean') return { kind: 'invalid' };
+    return { kind: 'policy', met: v.value };
+  }
+  if (scope !== 'appointment' || x.basis !== 'booked_value' || v.key !== 'conditional_booked_value' || v.type !== 'scenario' || v.unit !== 'money_minor' || !integral(v.value) || !currency(x.currency) || !instant(x.horizonEnd) || x.horizonEnd <= (x.asOf as string)) return { kind: 'invalid' };
+  return { kind: 'scenario', value: v.value, currency: x.currency, horizonEnd: x.horizonEnd };
+}
 export function projectIdeas(raw: unknown): IdeasSnapshot | null {
   const v = object(raw);
   if (!v || v.contract !== 'c8.valuation.list/1' || v.numericPredictionsAvailable !== false || !Array.isArray(v.items) || v.items.length > 25 || !(v.nextCursor === null || text(v.nextCursor, 240))) return null;
@@ -15,8 +44,8 @@ export function projectIdeas(raw: unknown): IdeasSnapshot | null {
     if (!boundaries || ['factIsPrediction', 'predictionIsPolicy', 'valueImpliesConsent', 'rankingImpliesContactPermission', 'rankingImpliesActionAuthority', 'opportunityImpliesExecution'].some(k => boundaries[k] !== false) || x.numericPrediction !== null || x.activation !== 'DISABLED') return null;
     if (x.available && (!x.current || !x.snapshotHash || x.kind === 'PREDICTION')) return null;
     ids.add(x.id);
-    rows.push({ key: x.id, revision: x.revision as number, digest: x.snapshotHash as string | null, kind: x.kind as IdeaRead['kind'], scope: subject.kind as IdeaRead['scope'], asOf: x.asOf, expiresAt: x.expiresAt, from: p.from, to: p.to, timezone: p.timezone, current: x.current, available: x.available, coverage: x.completeness as IdeaRead['coverage'], qualification: x.qualification as IdeaRead['qualification'], message: x.message });
+    rows.push({ key: x.id, revision: x.revision as number, digest: x.snapshotHash as string | null, kind: x.kind as IdeaRead['kind'], scope: subject.kind as IdeaRead['scope'], asOf: x.asOf, expiresAt: x.expiresAt, from: p.from, to: p.to, timezone: p.timezone, current: x.current, available: x.available, coverage: x.completeness as IdeaRead['coverage'], qualification: x.qualification as IdeaRead['qualification'], message: x.message, finding: finding(x, subject.kind) });
   }
-  // No subject id, ranking members, raw values, source references, action intents or contact data retained.
+  // No subject id, ranking members, unprojected values, source references, action intents or contact data retained.
   return { rows, possiblyCapped: v.nextCursor !== null };
 }

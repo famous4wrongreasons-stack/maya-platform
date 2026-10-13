@@ -93,7 +93,7 @@
       },
       {
         "path": "src/net/ideas.ts",
-        "sha256": "e709ce4348fd8916854c7392d1b74e83a287d090eaba60542bcc3896c113dc87"
+        "sha256": "a8ccf11cddeb77254cb2509257d6c82f8477432a5525a146a27e4f68ba337542"
       },
       {
         "path": "src/net/onboarding.ts",
@@ -117,7 +117,7 @@
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "fbd19b6620a79d1532afbdc952796efa39bc8a823fecf73deb868b7913415681"
+        "sha256": "c74b700e59db96dd67a88090104fc50c1985a8e926db51d1409606fc32bc2bca"
       },
       {
         "path": "src/net/workspace-reads.ts",
@@ -205,8 +205,8 @@
       }
     ]
   },
-  "bytes": 680443,
-  "digest": "0e19174fea2266c7651579613e4f78a394b3666483dfaae157bb38b43bb64065",
+  "bytes": 683969,
+  "digest": "01ca435c07fa6703b745d17f719f67d8d2ec21bd7aff29de4c0bda3c374ae5ba",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -214,8 +214,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "2a0970d7b4566895da07de7e080f25f8cf2cb29a76359b07eed0c8ad896c0969",
-    "modulePath": "m/2a0970d7b4566895/",
+    "digest": "10dcb08698def93bad39b2df457d63021763d23164d66152dfae30dafc87e1ab",
+    "modulePath": "m/10dcb08698def93b/",
     "files": [
       {
         "path": "entry/main.js",
@@ -294,8 +294,8 @@
       },
       {
         "path": "src/net/ideas.js",
-        "sha256": "caff8b367868e1ed1333343997339f7099b54f701821d482c8c911fcc8e06f8f",
-        "bytes": 2657
+        "sha256": "32225f06fd74f9ff4292a65dd64238a80f9a52f3c0cd2653a7c27b6a6054c200",
+        "bytes": 5346
       },
       {
         "path": "src/net/onboarding.js",
@@ -453,7 +453,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "edd5beba2f064b0c1aa90d184ae1b9e3e5bfbf578f1e347acbc16cdc604fd049",
+      "sha256": "69d50e7f37a11a3119864e5437e52ce1192e79ad4a926c37d49506058145dd04",
       "bytes": 1344
     },
     "assets": [

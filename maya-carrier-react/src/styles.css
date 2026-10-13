@@ -291,3 +291,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .companion-idea-facts { margin:24px 0; }
 .companion-idea-facts .companion-idea-label { color:#65696f; font-size:12px; margin:16px 0 2px; }
 .companion-idea-facts p { margin:0; }
+
+.companion-idea-value { margin:16px 0; }
+.companion-idea-value .companion-idea-number { color:#202124; font-size:20px; font-weight:600; line-height:1.45; overflow-wrap:anywhere; }

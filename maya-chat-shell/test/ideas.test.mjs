@@ -44,3 +44,42 @@ test('Ideas late response cannot survive session replacement, close or disposal'
 test('Ideas expiry removes both rows and open detail without any request or renewed validity',async()=>{const r=rig();await loaded(r,[row({expiresAt:'2026-10-14T09:00:01.000Z'})]);const p=r.port.read('result-one');r.requests[1].resolve(ok(snapshot([row({expiresAt:'2026-10-14T09:00:01.000Z'})])));await p;r.advance(1000);assert.equal(r.port.view().detail,null);assert.equal(r.port.view().rows.length,0);await r.port.read('result-one');assert.equal(r.requests.length,2);assert.match(r.port.view().notice,/истёк/);r.dispose();});
 test('Ideas already expired response is not displayed as empty success',async()=>{const r=rig();await loaded(r,[row({expiresAt:'2026-10-14T08:59:59.000Z'})]);assert.equal(r.port.view().rows.length,0);assert.match(r.port.view().notice,/истёк/);r.dispose();});
 test('Ideas rate limit delays manual retry and never retries automatically',async()=>{const r=rig();r.port.open();r.requests[0].resolve({ok:false,failure:{reason:'rate_limited',retryAfterSec:4}});await tick();await r.port.refresh();assert.equal(r.requests.length,1);r.advance(4000);assert.equal(r.port.view().retryAt,null);assert.equal(r.requests.length,1);const p=r.port.refresh();r.requests[1].resolve(ok(snapshot()));await p;assert.equal(r.port.view().phase,'ready');r.dispose();});
+
+const observed=(patch={}, valuePatch={})=>row({basis:'confirmed_cash',currency:'RUB',rule:{key:'c8.value/cash',version:1},values:[{key:'cash',type:'observed',value:'9007199254740993',unit:'money_minor',basis:'confirmed_cash',currency:'RUB',...valuePatch}],...patch});
+const found=x=>snapshot([x]).rows[0].finding;
+const policy=(patch={},valuePatch={})=>row({kind:'POLICY_SIGNAL',subject:{kind:'client',id:'PRIVATE'},basis:'proven_attendance_policy',currency:null,rule:{key:'c8.dormancy/cadence',version:1},values:[{key:'cadence',type:'policy',value:false,unit:'boolean',basis:'proven_attendance_policy',currency:null,...valuePatch}],...patch});
+const scenario=(patch={},valuePatch={})=>row({kind:'SCENARIO',subject:{kind:'appointment',id:'PRIVATE'},basis:'booked_value',currency:'RUB',rule:{key:'c8.scenario/booked_appointment',version:1},horizonEnd:'2026-10-15T08:00:00.000Z',values:[{key:'conditional_booked_value',type:'scenario',value:'-150',unit:'money_minor',basis:'booked_value',currency:'RUB',...valuePatch}],...patch});
+test('Ideas values preserve exact zero negative huge counts and independent currency without private data',()=>{
+ for(const value of ['0','-150','9007199254740993','1'.repeat(240)])assert.equal(found(observed({}, {value})).value,value);
+ for(const basis of ['confirmed_cash','confirmed_refunds','confirmed_cash_net_linked_refunds','booked_value','provider_reported_gross'])assert.equal(found(observed({basis},{basis})).basis,basis);
+ assert.deepEqual(found(observed({basis:'observed_attended_count',currency:null},{basis:'observed_attended_count',currency:null,unit:'count',value:'3'})),{kind:'observation',basis:'observed_attended_count',currency:null,value:'3'});
+ assert.equal(found(observed({currency:'JPY'},{currency:'JPY'})).currency,'JPY');
+ assert.ok(!/PRIVATE|rule|key|sourceRef/.test(JSON.stringify(found(observed()))));
+});
+test('Ideas values reject missing duplicate nonintegral unbounded and coerced scalars without inventing zero',()=>{
+ for(const value of [null,0,false,'','1.2','01','1e6','NaN','Infinity',' 1','1'.repeat(241)])assert.equal(found(observed({}, {value})).kind,'invalid',String(value));
+ for(const values of [[],[{},{}],null,[null],[...observed().values,...observed().values]])assert.equal(found(observed({values})).kind,'invalid');
+ for(const patch of [{type:'scenario'},{key:'other'},{unit:'count'},{basis:'booked_value'},{currency:'USD'}])assert.equal(found(observed({},patch)).kind,'invalid');
+ assert.equal(found(observed({currency:null},{currency:null})).kind,'invalid');
+ assert.equal(found(observed({basis:'observed_attended_count'},{basis:'observed_attended_count',unit:'count'})).kind,'invalid');
+});
+test('Ideas values require current available qualified covered versioned released meaning',()=>{
+ for(const patch of [{available:false},{available:false,current:false},{qualification:'UNQUALIFIED'},{completeness:'UNAVAILABLE'},{completeness:'NOT_MEASURED'}])assert.deepEqual(found(observed(patch)),{kind:'unavailable'});
+ assert.equal(found(observed({qualification:'SOURCE_LABELLED'})).kind,'observation');
+ for(const patch of [{rule:null},{rule:{key:'c8.value/cash',version:2}},{rule:{key:'forecast',version:1}},{kind:'RANKING'},{kind:'POLICY_SIGNAL'}])assert.equal(found(observed(patch)).kind,'unsupported');
+ assert.equal(found(observed({basis:'clv'},{basis:'clv'})).kind,'unsupported');
+ assert.equal(found(observed({kind:'PREDICTION',available:false})).kind,'unavailable');
+});
+test('Ideas policy uses literal boolean and exact verified client dormancy with no inferred threshold',()=>{
+ for(const value of [true,false])assert.deepEqual(found(policy({}, {value})),{kind:'policy',met:value});
+ for(const patch of [{subject:{kind:'tenant'}},{qualification:'SOURCE_LABELLED'},{basis:'confirmed_cash'},{currency:'RUB'}])assert.equal(found(policy(patch)).kind,'invalid');
+ for(const patch of [{value:'false'},{value:0},{type:'observed'},{key:'another'},{unit:'count'},{currency:'RUB'}])assert.equal(found(policy({},patch)).kind,'invalid');
+ assert.ok(!/30|threshold|PRIVATE/.test(JSON.stringify(found(policy()))));
+});
+test('Ideas scenario is exact appointment conditional value with explicit valid horizon',()=>{
+ assert.deepEqual(found(scenario()),{kind:'scenario',value:'-150',currency:'RUB',horizonEnd:'2026-10-15T08:00:00.000Z'});
+ for(const patch of [{subject:{kind:'client'}},{basis:'confirmed_cash'},{horizonEnd:null},{horizonEnd:'invalid'},{horizonEnd:'2026-10-14T08:00:00.000Z'},{horizonEnd:'2026-10-13T08:00:00.000Z'},{currency:null}])assert.equal(found(scenario(patch)).kind,'invalid');
+ for(const patch of [{key:'other'},{type:'observed'},{unit:'count'},{value:'1.50'}])assert.equal(found(scenario({},patch)).kind,'invalid');
+ assert.equal(found(scenario({rule:{key:'c8.scenario/future_revenue',version:1}})).kind,'unsupported');
+});
+test('Ideas value disappears on fresh unavailable response instead of retaining previous amount',async()=>{const r=rig();await loaded(r,[observed()]);assert.equal(r.port.view().rows[0].finding.kind,'observation');const p=r.port.read('result-one');r.requests[1].resolve(ok(snapshot([observed({available:false,current:false})])));await p;assert.deepEqual(r.port.view().detail.finding,{kind:'unavailable'});assert.ok(!JSON.stringify(r.port.view()).includes('9007199254740993'));r.dispose();});
