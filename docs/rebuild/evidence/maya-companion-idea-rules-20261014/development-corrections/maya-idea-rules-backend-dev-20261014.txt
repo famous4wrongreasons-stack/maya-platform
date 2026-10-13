@@ -1,0 +1,51 @@
+FAIL src/valuation/c8.companion-list.spec.ts
+  Companion Ideas existing C8 list source
+    ✓ passes the actual C8 list through the shipped runtime projector without exposing subjects or unprojected evidence (56 ms)
+    ✓ returns canonical explanation metadata and authority boundaries without computing (1 ms)
+    ✓ does not substitute general access for existing financial reader authority (1 ms)
+    ✓ filters foreign tenant rows even if persistence returns them
+    ✓ filters branch scope mismatch (1 ms)
+    ✓ does not expose superseded or stale published results (2 ms)
+    ✓ preserves unavailable and prediction limitations (1 ms)
+    ✓ rechecks authority after dependency resolution and before list exposure (10 ms)
+    ✓ queries expiry and omits expired rows
+    ✓ discloses pre-filter cap even when first page is inaccessible (1 ms)
+  Companion Ideas deterministic production values through reader and projector
+    ✓ preserves canonical observed_attended_count meaning without writes (101 ms)
+    ✓ preserves canonical confirmed_cash meaning without writes (100 ms)
+    ✓ preserves canonical confirmed_refunds meaning without writes (102 ms)
+    ✓ preserves canonical confirmed_cash_net_linked_refunds meaning without writes (104 ms)
+    ✓ preserves canonical booked_value meaning without writes (105 ms)
+    ✓ preserves canonical provider_reported_gross meaning without writes (102 ms)
+    ✓ preserves canonical dormancy meaning without writes (113 ms)
+    ✓ preserves canonical scenario meaning without writes (103 ms)
+    ✓ retains exact source rule day/37/gt with no inferred schedule (58 ms)
+    ✓ retains exact source rule calendar_month/2/gte with no inferred schedule (59 ms)
+    ✓ does not borrow replacement parameters after policy-id substitution (48 ms)
+    ✓ does not borrow replacement parameters after policy-hash substitution (51 ms)
+    ✓ does not borrow replacement parameters after service-scope substitution (50 ms)
+    ✓ does not borrow replacement parameters after version substitution (48 ms)
+    ✓ rechecks revocation during exact rule read before exposing parameters (1 ms)
+    ✕ withholds expired rule while read is in flight (1 ms)
+
+  ● Companion Ideas deterministic production values through reader and projector › withholds expired rule while read is in flight
+
+    NotFoundException: c8_result_unavailable
+
+      262 |     await this.access(tenantId, userId, row); // Revocation while resolving dependencies also denies exposure.
+      263 |     if (observed.parameters && row.expiresAt <= new Date())
+    > 264 |       throw new NotFoundException('c8_result_unavailable');
+          |             ^
+      265 |     return {
+      266 |       contract: 'c8.valuation.read/1' as const,
+      267 |       id: row.id,
+
+      at C8ReadService.present (valuation/c8.read.ts:264:13)
+      at C8ReadService.listInternal (valuation/c8.read.ts:537:19)
+      at Object.<anonymous> (valuation/c8.companion-list.spec.ts:519:20)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 25 passed, 26 total
+Snapshots:   0 total
+Time:        1.688 s, estimated 2 s
+Ran all test suites matching src/valuation/c8.companion-list.spec.ts.

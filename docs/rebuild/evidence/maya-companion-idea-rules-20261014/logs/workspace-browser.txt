@@ -1,0 +1,1 @@
+{"status":"PASS","checks":52,"out":"/private/tmp/maya-companion-rules-final01-workspace-browser-20261014"}

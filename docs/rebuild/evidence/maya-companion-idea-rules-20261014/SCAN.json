@@ -1,0 +1,33 @@
+{
+  "scope": "new code plus documentation/copied text; not historical repository audit",
+  "candidate": "dda3d3b77380bb9c08121fd1f42977dbf9761c9f",
+  "filesChecked": 42,
+  "manifestHashes": "PASS",
+  "highConfidenceSecretScan": "PASS",
+  "piiPatternScan": "PASS",
+  "syntheticScreenshotsOnly": true,
+  "reviewedFalsePositives": [
+    {
+      "file": "docs/rebuild/evidence/maya-companion-idea-rules-20261014/logs/carrier.txt",
+      "line": 984,
+      "pattern": "email-like substring in synthetic URL",
+      "source": "maya-carrier-react/test/telegram-popup.test.mjs:65",
+      "classification": "intentional fake URL credentials in provider-substitution refusal test; not an email or real credential"
+    },
+    {
+      "file": "docs/rebuild/evidence/maya-companion-idea-rules-20261014/logs/carrier.txt",
+      "line": 985,
+      "pattern": "email-like substring in synthetic URL",
+      "source": "maya-carrier-react/test/telegram-popup.test.mjs:65",
+      "classification": "intentional fake URL credentials in provider-substitution refusal test; not an email or real credential"
+    },
+    {
+      "file": "maya-carrier-react/test/ideas.browser.mjs",
+      "line": 82,
+      "pattern": "reserved .invalid email fixture",
+      "source": "maya-carrier-react/test/ideas.browser.mjs:82",
+      "classification": "synthetic browser login on an isolated intercepted API; no real user or address"
+    }
+  ],
+  "unresolvedFindings": []
+}

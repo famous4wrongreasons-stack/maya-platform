@@ -66,3 +66,15 @@ recommendation or task writer was added. All existing access/reread/expiry owner
 remain in place. This supersedes only the numerical-display gap in the metadata
 checkpoint above. See `../../MAYA-COMPANION-IDEA-VALUES-CHECKPOINT-20261014.md` and
 `../maya-companion-idea-values-20261014/README.md` for fresh scoped evidence.
+
+## Ideas rule parameters checkpoint (2026-10-14)
+
+`dda3d3b77380bb9c08121fd1f42977dbf9761c9f` adds exact current dormancy parameters
+from the same existing C8 reader: interval, boundary inclusion, evidence, required
+coverage, service scope summary and timezone. The list has a compact explanation;
+the detail explains day/calendar-month semantics. Missing/invalid parameters are
+not borrowed from defaults or other results. No local policy evaluation, action
+writer, recommendation or plan-to-task authority was added. This closes only the
+rule-parameter display gap retained by the previous checkpoint. See
+`../../MAYA-COMPANION-IDEA-RULES-CHECKPOINT-20261014.md` and
+`../maya-companion-idea-rules-20261014/README.md` for fresh scoped evidence.

@@ -1,0 +1,1 @@
+{"status":"FAIL","checks":61,"failure":"successful bounded empty state","out":"/private/tmp/maya-companion-rules-dev01-20261014"}

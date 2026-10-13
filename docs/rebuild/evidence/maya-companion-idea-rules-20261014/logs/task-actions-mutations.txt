@@ -1,0 +1,62 @@
+{
+  "candidate": "dda3d3b77380bb9c08121fd1f42977dbf9761c9f",
+  "baseline": true,
+  "mutations": [
+    {
+      "name": "binding substitution",
+      "status": "KILLED",
+      "proof": "completion uses exact retained"
+    },
+    {
+      "name": "create other user",
+      "status": "KILLED",
+      "proof": "self creation freezes"
+    },
+    {
+      "name": "allow create for staff",
+      "status": "KILLED",
+      "proof": "changed principal/tenant"
+    },
+    {
+      "name": "duplicate command",
+      "status": "KILLED",
+      "proof": "self creation freezes"
+    },
+    {
+      "name": "new retry identity",
+      "status": "KILLED",
+      "proof": "lost response survives"
+    },
+    {
+      "name": "cross tenant retry",
+      "status": "KILLED",
+      "proof": "changed principal/tenant"
+    },
+    {
+      "name": "accept stale session",
+      "status": "KILLED",
+      "proof": "session replacement/signout"
+    },
+    {
+      "name": "no receipt target match",
+      "status": "KILLED",
+      "proof": "receipt proof rejects"
+    },
+    {
+      "name": "provider effect admitted",
+      "status": "KILLED",
+      "proof": "receipt proof rejects"
+    },
+    {
+      "name": "invent null locator",
+      "status": "KILLED",
+      "proof": "action context is explicit"
+    },
+    {
+      "name": "drop idempotency header",
+      "status": "KILLED",
+      "proof": "typed task commands"
+    }
+  ],
+  "status": "PASS"
+}
