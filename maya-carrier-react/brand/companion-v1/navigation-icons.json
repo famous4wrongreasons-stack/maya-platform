@@ -1,0 +1,70 @@
+{
+  "source": "/Users/stanislavmosin/Downloads/Maya_full_design_package/prototype/dist/client/assets/index-Bu7yZRu0.js",
+  "sourceSha256": "5f520d6da3fe96b349be048f52202eb00340836c8fae625d0ff1afa343378c21",
+  "package": "@phosphor-icons/react",
+  "sourceUse": "Owner-provided prototype; ten path strings extracted as data only, without running its code. CSS inline SVG preserves the existing carrier resource boundary.",
+  "icons": [
+    {
+      "section": "chat",
+      "icon": "ChatCircle",
+      "weight": "regular",
+      "pathSha256": "5a02ed9de21247bd33ded17db6aad72b395f2c7eccac646ba8d6b4c747d2760e"
+    },
+    {
+      "section": "chat",
+      "icon": "ChatCircle",
+      "weight": "bold",
+      "pathSha256": "2a69ac151937b9ef2eb3375a72bdeb770a0193ed1362d93625ba0347d0b60577"
+    },
+    {
+      "section": "feed",
+      "icon": "Newspaper",
+      "weight": "regular",
+      "pathSha256": "2d5f3526716eebe94dda5ffa174261a165b0eab7b1616b5b23f9eacdf3a6efd4"
+    },
+    {
+      "section": "feed",
+      "icon": "Newspaper",
+      "weight": "bold",
+      "pathSha256": "45378fc630f6e98eb60310d96574e0c736323760c0d49f1a99f4cf7655c3220b"
+    },
+    {
+      "section": "ideas",
+      "icon": "Lightbulb",
+      "weight": "regular",
+      "pathSha256": "c22dcaecf464dc99fac50fd4d07618253c43b7c8f5b5a41e6a5cd5812cfdbf17"
+    },
+    {
+      "section": "ideas",
+      "icon": "Lightbulb",
+      "weight": "bold",
+      "pathSha256": "641e9c404e1afee0f36c49e8cd523eaffe0c1e6bd2e201d5652cbdb5a4a0c72e"
+    },
+    {
+      "section": "tasks",
+      "icon": "CheckSquare",
+      "weight": "regular",
+      "pathSha256": "40eaa807de7d3a29ac7418fe888ce131d26838d1a121b15df44ed48a5072e430"
+    },
+    {
+      "section": "tasks",
+      "icon": "CheckSquare",
+      "weight": "bold",
+      "pathSha256": "5ba829753c1cd394bea1fb2cf1e86214ca579df8da71f31998174f9f23fb364b"
+    },
+    {
+      "section": "library",
+      "icon": "Shapes",
+      "weight": "regular",
+      "pathSha256": "2f212e7acc5d6df9ae9e0e63773ce18c7180755ce4f505391521c5365cd7a671"
+    },
+    {
+      "section": "library",
+      "icon": "Shapes",
+      "weight": "bold",
+      "pathSha256": "55dbfb6feb0cde569535182672a13555a43746bb82f1e59423ee9d3c1aca1cb3"
+    }
+  ],
+  "license": "MIT; Copyright (c) 2020 Phosphor Icons. Full notice retained in emitted styles.css.",
+  "licenseSource": "https://github.com/phosphor-icons/react/blob/master/LICENSE"
+}

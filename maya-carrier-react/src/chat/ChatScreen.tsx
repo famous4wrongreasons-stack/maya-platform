@@ -50,6 +50,7 @@ import { TelegramLinkPanel } from './TelegramLinkPanel.tsx';
 import { PrivacyPanel } from './PrivacyPanel.tsx';
 import { GoodsPhotoPanel } from './GoodsPhotoPanel.tsx';
 import { CompanionHeader } from './CompanionHeader.tsx';
+import { CompanionNavigation, type CompanionSection } from './CompanionNavigation.tsx';
 import { useCompanion } from '../identity/MayaCompanion.tsx';
 
 /** The reading face MAYA's own words are set in (app.html:21307). */
@@ -367,6 +368,7 @@ export function ChatScreen({
   const [draft, setDraft] = useState('');
   const [composerHeight, setComposerHeight] = useState(50);
   const [refused, setRefused] = useState<Refusal>(null);
+  const [editing, setEditing] = useState(false);
   const hasDraft = draft.trim().length > 0;
   const noteId = useId();
   const tooLong = draft.length > COMPOSER_LIMIT;
@@ -390,6 +392,7 @@ export function ChatScreen({
   const tasksView = usePortView(ownTasks);
   const voiceView = usePortView(voice);
   const sessionView = usePortView(session);
+  const navigationVisible = companion && shellView.primary === 'shell.root' && shellView.fullscreen === null && goodsPhotoView.phase === 'closed';
   const mascot = useCompanion(view, draft, voiceView);
   const listening = voiceView.state === 'listening' || voiceView.state === 'held';
   const micLive = listening || voiceView.state === 'recording';
@@ -540,8 +543,28 @@ export function ChatScreen({
     stickRef.current = lane.scrollHeight - lane.scrollTop - lane.clientHeight <= STICK_TO_END_PX;
   }, [workspaceOpen]);
 
+  const openWorkspace = (section: Exclude<CompanionSection, 'chat'>) => {
+    if (shellView.workspace === section) return;
+    if (!workspaceOpen) workspaceReturnScroll.current = laneRef.current?.scrollTop ?? 0;
+    composerRef.current?.blur();
+    voice.cancel();
+    if (section === 'feed') workspaceReads.openFeed();
+    else if (section === 'library') workspaceReads.openLibrary();
+    else if (section === 'tasks') ownTasks.open();
+    else ideas.open();
+  };
+  const chooseSection = (section: CompanionSection) => {
+    if (section !== 'chat') { openWorkspace(section); return; }
+    widgets.navigate('shell.root');
+    // Returning to the conversation need not summon the mobile keyboard.
+    window.requestAnimationFrame(() => laneRef.current?.focus({ preventScroll: true }));
+  };
+
   return (
-    <div className={companion ? 'maya-companion-chat' : undefined} style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: t.bg }}>
+    <div className={companion ? 'maya-companion-chat' + (editing ? ' is-editing' : '') : undefined}
+      onFocusCapture={event => setEditing(event.target instanceof HTMLElement && event.target.matches('input,textarea,select'))}
+      onBlurCapture={event => setEditing(event.relatedTarget instanceof HTMLElement && event.relatedTarget.matches('input,textarea,select'))}
+      style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: t.bg }}>
       <div style={{ position: 'absolute', inset: 0 }}>
         <Backdrop t={t} />
       </div>
@@ -564,10 +587,10 @@ export function ChatScreen({
           tenantName={sessionView.signedIn ? sessionView.display.tenantName : null}
           privacyOpen={privacyOpen} openPrivacy={() => widgets.navigate('shell.privacy')}
           openPhoto={() => { widgets.navigate('shell.root'); goodsPhoto.open(); }}
-          openIdeas={() => { if (!workspaceOpen) workspaceReturnScroll.current = laneRef.current?.scrollTop ?? 0; voice.cancel(); ideas.open(); }}
-          openTasks={() => { if (!workspaceOpen) workspaceReturnScroll.current = laneRef.current?.scrollTop ?? 0; voice.cancel(); ownTasks.open(); }}
-          openFeed={() => { if (!workspaceOpen) workspaceReturnScroll.current = laneRef.current?.scrollTop ?? 0; voice.cancel(); workspaceReads.openFeed(); }}
-          openLibrary={() => { if (!workspaceOpen) workspaceReturnScroll.current = laneRef.current?.scrollTop ?? 0; voice.cancel(); workspaceReads.openLibrary(); }} photoEnabled={view.composer.enabled && !view.inFlight}
+          openIdeas={() => openWorkspace('ideas')}
+          openTasks={() => openWorkspace('tasks')}
+          openFeed={() => openWorkspace('feed')}
+          openLibrary={() => openWorkspace('library')} photoEnabled={view.composer.enabled && !view.inFlight}
           state={mascot.state} event={mascot.event} greet={mascot.greet}
         /> : (
         <div
@@ -669,7 +692,7 @@ export function ChatScreen({
         <div
           className="maya-chat-lane"
           ref={laneRef}
-          tabIndex={privacyOpen ? -1 : undefined}
+          tabIndex={privacyOpen || companion ? -1 : undefined}
           onScroll={onLaneScroll}
           role={privacyOpen || workspaceOpen ? 'region' : 'log'}
           aria-live={privacyOpen || workspaceOpen ? 'off' : 'polite'}
@@ -682,7 +705,7 @@ export function ChatScreen({
             overscrollBehavior: 'contain',
             WebkitOverflowScrolling: 'touch',
             padding: companion
-              ? `calc(var(--maya-chat-header-height, 150px) + 8px) 14px calc(env(safe-area-inset-bottom, 0px) + ${workspaceOpen ? 16 : composerHeight + 62}px)`
+              ? `calc(var(--maya-chat-header-height, 150px) + 8px) 14px calc(env(safe-area-inset-bottom, 0px) + ${workspaceOpen ? 16 : composerHeight + 62}px + ${navigationVisible ? 'var(--maya-navigation-space, 0px)' : '0px'})`
               : `calc(env(safe-area-inset-top, 0px) + 84px) 18px calc(env(safe-area-inset-bottom, 0px) + ${composerHeight + 62}px)`,
           }}
         >
@@ -756,12 +779,12 @@ export function ChatScreen({
         </p>
 
         {/* app.html:21759-21762 — the footer overlays the lane; only the pill takes pointer events. */}
-        <div hidden={workspaceOpen}
+        <div className="maya-chat-composer-dock" hidden={workspaceOpen}
           style={{
             position: 'absolute',
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: navigationVisible ? 'var(--maya-navigation-space, 0px)' : 0,
             zIndex: 5,
             display: workspaceOpen ? 'none' : 'flex',
             flexDirection: 'column',
@@ -1054,6 +1077,7 @@ export function ChatScreen({
             </div>
           </div>
         </div>
+        {navigationVisible ? <CompanionNavigation current={shellView.workspace ?? 'chat'} choose={chooseSection} /> : null}
       </section>
 
       {/* The detail sheet lives beside the conversation, not inside its scroller. */}

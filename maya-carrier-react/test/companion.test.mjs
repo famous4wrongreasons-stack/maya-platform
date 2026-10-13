@@ -6,12 +6,24 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ARTWORK, artworkUrls, designStyles } from '../tools/design-assets.mjs';
 import { checkCss, scanJsx, scanNames } from '../tools/ratchets.mjs';
-import { companionContext, MayaCompanion, companionTokens, companionMarkup, markupOf, resultOf } from './.bundle.mjs';
+import { CompanionNavigation, companionContext, MayaCompanion, companionTokens, companionMarkup, markupOf, resultOf } from './.bundle.mjs';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const view = { items: [], inFlight: false, dropped: 0, composer: { enabled: true } };
 const voice = { state: 'idle', elapsedMs: 0, level: 0, unavailable: null, notice: null };
+
+test('navigation exposes five labelled destinations and one current page without invoking a port', () => {
+  for (const [current, label] of [['chat','Чат'],['feed','Лента'],['ideas','Идеи'],['tasks','Задачи'],['library','Файлы']]) {
+    const html = renderToStaticMarkup(createElement(CompanionNavigation, { current,
+      choose() { throw Error('Passive navigation rendering invoked a port'); } }));
+    assert.match(html, /<nav[^>]*aria-label="Разделы Maya"/);
+    assert.equal((html.match(/<button\b/g) ?? []).length, 5);
+    assert.equal((html.match(/aria-current="page"/g) ?? []).length, 1);
+    assert.match(html, new RegExp('<button[^>]*aria-current="page"[^>]*>.*?' + label + '</span></button>'));
+    assert.equal((html.match(/aria-hidden="true"/g) ?? []).length, 5);
+  }
+});
 
 test('finite artwork admission accepts selected bytes and refuses every unrelated resource', () => {
   assert.equal(ARTWORK.length, 2);
