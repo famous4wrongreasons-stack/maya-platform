@@ -33,7 +33,7 @@ const readSourceHashes = scopes => {
 };
 if (values['exact-followup']) {
   assert.equal(values['browser-only'], true, 'Exact continuation runs only its single targeted browser proof');
-  const scopes = ['src', 'prisma', 'test/widgets-live', 'test/jest-widgets-live.json', 'scripts/booking-confirmation-proof.mjs', 'package.json', 'package-lock.json', 'tsconfig.json', '../maya-carrier-react', '../maya-chat-shell'];
+  const scopes = ['src', 'prisma', 'test/widgets-live', 'test/widgets-diagnostics/support/booking-followup-native.ts', 'test/jest-widgets-live.json', 'scripts/booking-confirmation-proof.mjs', 'package.json', 'package-lock.json', 'tsconfig.json', '../maya-carrier-react', '../maya-chat-shell'];
   sourceScopes = scopes;
   assert.equal(execFileSync('git', ['status', '--porcelain', '--untracked-files=all', '--', ...scopes], { cwd: backend, encoding: 'utf8' }), '', 'Commit exact source before the proof');
   sourceHashes = readSourceHashes(scopes);
