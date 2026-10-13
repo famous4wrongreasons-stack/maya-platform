@@ -94,15 +94,52 @@ export async function developmentIntegrationFixture(
           'Only exact general/pricing turns may use the scripted model',
         );
       }
+      const priceDecision =
+        text === INTEGRATION_PROMPTS.price
+          ? http.app.get(AiCoreModelService)['validatePlanningResponse'](
+              JSON.stringify({
+                semantic_plan: {
+                  parent_request: text,
+                  language: 'ru',
+                  dialogue_act: 'request',
+                  tasks: [
+                    {
+                      id: 'price',
+                      intent: 'services.price_update',
+                      entities_json: JSON.stringify({
+                        service: 'Стрижка',
+                        requested_price: 2500,
+                      }),
+                      depends_on: [],
+                      confidence: 1,
+                      requires_clarification: false,
+                      clarification_question: null,
+                    },
+                  ],
+                  context: {
+                    carried_slots: [],
+                    replaced_slots: [],
+                    unresolved_references: [],
+                  },
+                },
+                // The existing utterance/catalog owner must replace these forged values.
+                tool_call: {
+                  name: 'catalog.service.price.update',
+                  arguments_json: JSON.stringify({
+                    service_id: '999999',
+                    price_rubles: 9999,
+                  }),
+                },
+              }),
+              input,
+            )
+          : { toolCall: null };
       return Promise.resolve({
+        ...priceDecision,
         reply:
           text === INTEGRATION_PROMPTS.general
             ? 'Здравствуйте. Чем помочь?'
             : 'Подготовлю изменение цены.',
-        toolCall:
-          text === INTEGRATION_PROMPTS.price
-            ? { name: 'catalog.service.price.update', arguments: {} }
-            : null,
         provider: 'openai',
         model: 'SCRIPTED_SYNTHETIC_COMBINED',
         usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
