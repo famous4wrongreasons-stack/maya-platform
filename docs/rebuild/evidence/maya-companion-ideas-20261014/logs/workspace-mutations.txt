@@ -1,0 +1,72 @@
+{
+  "candidate": "e9cd4ad2d7da61288e2026222835437b32ebd29c",
+  "baseline": true,
+  "mutations": [
+    {
+      "name": "feed cap",
+      "status": "KILLED",
+      "proof": "feed projection is text-only"
+    },
+    {
+      "name": "feed duplicate",
+      "status": "KILLED",
+      "proof": "feed malformed"
+    },
+    {
+      "name": "report duplicate",
+      "status": "KILLED",
+      "proof": "report list refuses"
+    },
+    {
+      "name": "substituted detail",
+      "status": "KILLED",
+      "proof": "report projection binds"
+    },
+    {
+      "name": "changed period",
+      "status": "KILLED",
+      "proof": "report projection binds"
+    },
+    {
+      "name": "read becomes write",
+      "status": "KILLED",
+      "proof": "finite authenticated GETs"
+    },
+    {
+      "name": "report read becomes write",
+      "status": "KILLED",
+      "proof": "finite authenticated GETs"
+    },
+    {
+      "name": "late response accepted",
+      "status": "KILLED",
+      "proof": "late detail cannot overwrite"
+    },
+    {
+      "name": "foreign key accepted",
+      "status": "KILLED",
+      "proof": "only current loaded report keys"
+    },
+    {
+      "name": "deny retains titles",
+      "status": "KILLED",
+      "proof": "denied detail clears"
+    },
+    {
+      "name": "duplicate refresh",
+      "status": "KILLED",
+      "proof": "lazy one-flight lists"
+    },
+    {
+      "name": "rate limit ignored",
+      "status": "KILLED",
+      "proof": "denied detail clears"
+    },
+    {
+      "name": "same session replacement retains",
+      "status": "KILLED",
+      "proof": "late detail cannot overwrite"
+    }
+  ],
+  "status": "PASS"
+}

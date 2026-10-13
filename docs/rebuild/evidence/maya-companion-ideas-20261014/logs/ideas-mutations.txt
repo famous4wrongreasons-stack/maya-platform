@@ -1,0 +1,77 @@
+{
+  "candidate": "e9cd4ad2d7da61288e2026222835437b32ebd29c",
+  "baseline": true,
+  "mutations": [
+    {
+      "name": "duplicates",
+      "status": "KILLED",
+      "proof": "Ideas malformed"
+    },
+    {
+      "name": "authority",
+      "status": "KILLED",
+      "proof": "Ideas malformed"
+    },
+    {
+      "name": "prediction",
+      "status": "KILLED",
+      "proof": "Ideas malformed"
+    },
+    {
+      "name": "cap",
+      "status": "KILLED",
+      "proof": "Ideas retain only"
+    },
+    {
+      "name": "read becomes write",
+      "status": "KILLED",
+      "proof": "Ideas use one finite"
+    },
+    {
+      "name": "foreign selection",
+      "status": "KILLED",
+      "proof": "Ideas loaded selection"
+    },
+    {
+      "name": "substitute id",
+      "status": "KILLED",
+      "proof": "Ideas loaded selection"
+    },
+    {
+      "name": "revision",
+      "status": "KILLED",
+      "proof": "Ideas loaded selection"
+    },
+    {
+      "name": "digest",
+      "status": "KILLED",
+      "proof": "Ideas loaded selection"
+    },
+    {
+      "name": "late response",
+      "status": "KILLED",
+      "proof": "Ideas late response"
+    },
+    {
+      "name": "expiry",
+      "status": "KILLED",
+      "proof": "Ideas expiry"
+    },
+    {
+      "name": "expired list",
+      "status": "KILLED",
+      "proof": "Ideas already expired"
+    },
+    {
+      "name": "one flight",
+      "status": "KILLED",
+      "proof": "Ideas lazy load"
+    },
+    {
+      "name": "retry",
+      "status": "KILLED",
+      "proof": "Ideas rate limit"
+    }
+  ],
+  "status": "PASS"
+}

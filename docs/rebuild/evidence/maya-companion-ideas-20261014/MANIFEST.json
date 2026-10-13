@@ -1,0 +1,651 @@
+{
+  "candidate": "e9cd4ad2d7da61288e2026222835437b32ebd29c",
+  "kind": "scoped local evidence, not release certification",
+  "artifacts": [
+    {
+      "path": "summary.json",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/summary.json",
+      "sourceSha256": "9ec1d7a3ad8e41a8be8760b76f7f247c720f1d5cd473a655cc4965f9376a71ec",
+      "sourceSize": 11526,
+      "sha256": "9ec1d7a3ad8e41a8be8760b76f7f247c720f1d5cd473a655cc4965f9376a71ec",
+      "size": 11526,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/source-http-contracts.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/source-http-contracts.txt",
+      "sourceSha256": "c36f6b12e02970ff54f1e3bf00a5100aa148af5079d5ac8fea03161c0d8bbfdb",
+      "sourceSize": 2164,
+      "sha256": "c36f6b12e02970ff54f1e3bf00a5100aa148af5079d5ac8fea03161c0d8bbfdb",
+      "size": 2164,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/runtime.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/runtime.txt",
+      "sourceSha256": "becb8ec172bc9ac23d2f10d89edf1913802df670f18b8fb3b5ce92ff7fb2f943",
+      "sourceSize": 204362,
+      "sha256": "becb8ec172bc9ac23d2f10d89edf1913802df670f18b8fb3b5ce92ff7fb2f943",
+      "size": 204362,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/runtime-reproducible.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/runtime-reproducible.txt",
+      "sourceSha256": "4b421a03826d0dcb9d7d1179904d3a7994164e294eba24b66d8d7bc6710af3c9",
+      "sourceSize": 1150,
+      "sha256": "4b421a03826d0dcb9d7d1179904d3a7994164e294eba24b66d8d7bc6710af3c9",
+      "size": 1150,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/carrier.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/carrier.txt",
+      "sourceSha256": "ad0d13fc70c77ce4628d4ea75c74b62cc0b8f0f8f48a7f24157a7a1cf0d73ab2",
+      "sourceSize": 37240,
+      "sha256": "ad0d13fc70c77ce4628d4ea75c74b62cc0b8f0f8f48a7f24157a7a1cf0d73ab2",
+      "size": 37240,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/runtime-ratchets.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/runtime-ratchets.txt",
+      "sourceSha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "sourceSize": 12458,
+      "sha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "size": 12458,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/carrier-ratchets.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/carrier-ratchets.txt",
+      "sourceSha256": "9c9dd5d2e95815e834abf4fb37f14e912fa39892a46a54fa8263132617a98256",
+      "sourceSize": 7864,
+      "sha256": "5a71a6ba5543f81d2dd72deccde61b8e8eb59d504be4e1f898f21d8f38c19236",
+      "size": 7861,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/packaging-parity.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/packaging-parity.txt",
+      "sourceSha256": "f24508925f9ee2732d603f5b883e9c5e23c78bc5228529a47aea16a64daa249d",
+      "sourceSize": 732,
+      "sha256": "f24508925f9ee2732d603f5b883e9c5e23c78bc5228529a47aea16a64daa249d",
+      "size": 732,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/workspace-mutations.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/workspace-mutations.txt",
+      "sourceSha256": "e6efbb6de10691a355b4aadf7e4a3255774e15e41d8b325fd13ce1f0617dfabf",
+      "sourceSize": 1644,
+      "sha256": "e6efbb6de10691a355b4aadf7e4a3255774e15e41d8b325fd13ce1f0617dfabf",
+      "size": 1644,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/tasks-mutations.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/tasks-mutations.txt",
+      "sourceSha256": "d58fc844246b47b5083d9b562e84acc4fcb51d4d274af774eb60e96b8ae96f4c",
+      "sourceSize": 1130,
+      "sha256": "d58fc844246b47b5083d9b562e84acc4fcb51d4d274af774eb60e96b8ae96f4c",
+      "size": 1130,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/packaging-tests.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/packaging-tests.txt",
+      "sourceSha256": "f28ceb0d0587e17b45d8086d205acf7ad5bec0cab4c8f21e9dfd6cc42976d06b",
+      "sourceSize": 3312,
+      "sha256": "f28ceb0d0587e17b45d8086d205acf7ad5bec0cab4c8f21e9dfd6cc42976d06b",
+      "size": 3312,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/chat-browser.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/chat-browser.txt",
+      "sourceSha256": "9c3a7b5bd5686a2819a7a1b4916ea79216cefe591caa948e5882f423897d5953",
+      "sourceSize": 102,
+      "sha256": "9c3a7b5bd5686a2819a7a1b4916ea79216cefe591caa948e5882f423897d5953",
+      "size": 102,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "browsers/chat-browser.json",
+      "source": "/private/tmp/maya-companion-ideas-final02-chat-browser-20261014/receipt.json",
+      "sourceSha256": "08e1fbeab2647c4876a78ab6002c5e42c7729e4374eaf9421ae9df7449012fb5",
+      "sourceSize": 2953,
+      "sha256": "08e1fbeab2647c4876a78ab6002c5e42c7729e4374eaf9421ae9df7449012fb5",
+      "size": 2953,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/tasks-browser.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/tasks-browser.txt",
+      "sourceSha256": "b86aa7821f6071760d35e91e241eb7e56a2a86d9e18975d0f8bd58353f414605",
+      "sourceSize": 103,
+      "sha256": "b86aa7821f6071760d35e91e241eb7e56a2a86d9e18975d0f8bd58353f414605",
+      "size": 103,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "browsers/tasks-browser.json",
+      "source": "/private/tmp/maya-companion-ideas-final02-tasks-browser-20261014/receipt.json",
+      "sourceSha256": "99a338aba7019cb1a02c9ad349a3133ebdd0e9f37c69c5e20a67359e3d22a4d5",
+      "sourceSize": 2743,
+      "sha256": "99a338aba7019cb1a02c9ad349a3133ebdd0e9f37c69c5e20a67359e3d22a4d5",
+      "size": 2743,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/workspace-browser.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/workspace-browser.txt",
+      "sourceSha256": "4d137f62211671da0d4f012846d1882912a0a0d53b9424daa0fbcf308f8b6d1f",
+      "sourceSize": 107,
+      "sha256": "4d137f62211671da0d4f012846d1882912a0a0d53b9424daa0fbcf308f8b6d1f",
+      "size": 107,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "browsers/workspace-browser.json",
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/receipt.json",
+      "sourceSha256": "71314c6264a4ffdf1301054ee27492dcb3519169b21c32460a4d63e86a79fae2",
+      "sourceSize": 3331,
+      "sha256": "71314c6264a4ffdf1301054ee27492dcb3519169b21c32460a4d63e86a79fae2",
+      "size": 3331,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/task-actions-mutations.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/task-actions-mutations.txt",
+      "sourceSha256": "694ff862a61edd0b18471d51b9b99ff874d209618507ec73384f36cdebb3763b",
+      "sourceSize": 1425,
+      "sha256": "694ff862a61edd0b18471d51b9b99ff874d209618507ec73384f36cdebb3763b",
+      "size": 1425,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/task-actions-browser.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/task-actions-browser.txt",
+      "sourceSha256": "1979aa98755f1b03ee136a4c361a288258755494be1e5c8aea9af8a9b635cd0a",
+      "sourceSize": 110,
+      "sha256": "1979aa98755f1b03ee136a4c361a288258755494be1e5c8aea9af8a9b635cd0a",
+      "size": 110,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "browsers/task-actions-browser.json",
+      "source": "/private/tmp/maya-companion-ideas-final02-task-actions-browser-20261014/receipt.json",
+      "sourceSha256": "af3a7ab16602ea8402dff36ce700d329bfb03517e30ed0d1f66f5c3d7ddf0f00",
+      "sourceSize": 2580,
+      "sha256": "af3a7ab16602ea8402dff36ce700d329bfb03517e30ed0d1f66f5c3d7ddf0f00",
+      "size": 2580,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/ideas-mutations.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/ideas-mutations.txt",
+      "sourceSha256": "cfd8ee93a71767a518386b1dd67031697553f140c256c00270d02d0186545a42",
+      "sourceSize": 1566,
+      "sha256": "cfd8ee93a71767a518386b1dd67031697553f140c256c00270d02d0186545a42",
+      "size": 1566,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "logs/ideas-browser.txt",
+      "source": "/private/tmp/maya-companion-ideas-final02-20261014/ideas-browser.txt",
+      "sourceSha256": "29e5e90366e933eb7c4ff9bec3191c96b52e9f254ffbf75b19d4b1857893b92f",
+      "sourceSize": 103,
+      "sha256": "29e5e90366e933eb7c4ff9bec3191c96b52e9f254ffbf75b19d4b1857893b92f",
+      "size": 103,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "browsers/ideas-browser.json",
+      "source": "/private/tmp/maya-companion-ideas-final02-ideas-browser-20261014/receipt.json",
+      "sourceSha256": "10a56431958b2c174c3f0e908036433ba395395dfa471d7cc2b0735249cbf9a8",
+      "sourceSize": 2879,
+      "sha256": "10a56431958b2c174c3f0e908036433ba395395dfa471d7cc2b0735249cbf9a8",
+      "size": 2879,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "screenshots/signin-393.png",
+      "source": "/private/tmp/maya-companion-ideas-final02-ideas-browser-20261014/signin-393.png",
+      "sourceSha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "sourceSize": 27941,
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "sensitiveData": false,
+      "normalization": "none"
+    },
+    {
+      "path": "screenshots/ideas-320.png",
+      "source": "/private/tmp/maya-companion-ideas-final02-ideas-browser-20261014/ideas-320.png",
+      "sourceSha256": "896b35340de26540de61cee82414a95fbd493285afd0660e35eae2ee02489fd1",
+      "sourceSize": 63426,
+      "sha256": "896b35340de26540de61cee82414a95fbd493285afd0660e35eae2ee02489fd1",
+      "size": 63426,
+      "sensitiveData": false,
+      "normalization": "none"
+    },
+    {
+      "path": "screenshots/ideas-393.png",
+      "source": "/private/tmp/maya-companion-ideas-final02-ideas-browser-20261014/ideas-393.png",
+      "sourceSha256": "4af20b0fa312172634581ead1766f46881a02adf2a87f704612dbed87d06c282",
+      "sourceSize": 71979,
+      "sha256": "4af20b0fa312172634581ead1766f46881a02adf2a87f704612dbed87d06c282",
+      "size": 71979,
+      "sensitiveData": false,
+      "normalization": "none"
+    },
+    {
+      "path": "screenshots/ideas-427.png",
+      "source": "/private/tmp/maya-companion-ideas-final02-ideas-browser-20261014/ideas-427.png",
+      "sourceSha256": "4d6520f1488487a5872aedba981c1b3c1c92d629da64f11350b05472cbd1f3d5",
+      "sourceSize": 72965,
+      "sha256": "4d6520f1488487a5872aedba981c1b3c1c92d629da64f11350b05472cbd1f3d5",
+      "size": 72965,
+      "sensitiveData": false,
+      "normalization": "none"
+    },
+    {
+      "path": "screenshots/ideas-1280.png",
+      "source": "/private/tmp/maya-companion-ideas-final02-ideas-browser-20261014/ideas-1280.png",
+      "sourceSha256": "882b67d6f114c49d2e0d1c4135c807807e31d0be64061765d01cbd4129fa3f9d",
+      "sourceSize": 89249,
+      "sha256": "882b67d6f114c49d2e0d1c4135c807807e31d0be64061765d01cbd4129fa3f9d",
+      "size": 89249,
+      "sensitiveData": false,
+      "normalization": "none"
+    },
+    {
+      "path": "screenshots/ideas-detail-393.png",
+      "source": "/private/tmp/maya-companion-ideas-final02-ideas-browser-20261014/ideas-detail-393.png",
+      "sourceSha256": "e096dd8f724656cccee3ba7e903d636835d2b390bcec76bdc2b868b2f1ffdef1",
+      "sourceSize": 66678,
+      "sha256": "e096dd8f724656cccee3ba7e903d636835d2b390bcec76bdc2b868b2f1ffdef1",
+      "size": 66678,
+      "sensitiveData": false,
+      "normalization": "none"
+    },
+    {
+      "path": "screenshots/ideas-denied.png",
+      "source": "/private/tmp/maya-companion-ideas-final02-ideas-browser-20261014/ideas-denied.png",
+      "sourceSha256": "b38d2b35c67b0da5988e1a403cc46f5a51e33eb9a7a8a7d86ffb7158b37647b1",
+      "sourceSize": 39148,
+      "sha256": "b38d2b35c67b0da5988e1a403cc46f5a51e33eb9a7a8a7d86ffb7158b37647b1",
+      "size": 39148,
+      "sensitiveData": false,
+      "normalization": "none"
+    },
+    {
+      "path": "screenshots/ideas-empty.png",
+      "source": "/private/tmp/maya-companion-ideas-final02-ideas-browser-20261014/ideas-empty.png",
+      "sourceSha256": "00fea5823cc5cf58309ccb3e558c58c507b2cf21c1ba3e383add84792944ee15",
+      "sourceSize": 59287,
+      "sha256": "00fea5823cc5cf58309ccb3e558c58c507b2cf21c1ba3e383add84792944ee15",
+      "size": 59287,
+      "sensitiveData": false,
+      "normalization": "none"
+    },
+    {
+      "path": "runner.py",
+      "source": "/private/tmp/maya-companion-ideas-final02-run.py",
+      "sourceSha256": "2c91da83e2e1fb20d01cd15c3decaae586ff45cc7261a9b49b7f35020a0fe6fe",
+      "sourceSize": 3542,
+      "sha256": "2c91da83e2e1fb20d01cd15c3decaae586ff45cc7261a9b49b7f35020a0fe6fe",
+      "size": 3542,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "prior-incomplete/summary.json",
+      "source": "/private/tmp/maya-companion-ideas-final-20261014/summary.json",
+      "sourceSha256": "595e18cb4d252268c78aa434b790c3c4f1f2a64e697e6275d099f17e527ee954",
+      "sourceSize": 2146,
+      "sha256": "595e18cb4d252268c78aa434b790c3c4f1f2a64e697e6275d099f17e527ee954",
+      "size": 2146,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "prior-incomplete/source-http-contracts.txt",
+      "source": "/private/tmp/maya-companion-ideas-final-20261014/source-http-contracts.txt",
+      "sourceSha256": "f07eb6e04e12245642903915ca7a06fcecd00024a6a3bdf07309b8be4d4a55a5",
+      "sourceSize": 3578,
+      "sha256": "f07eb6e04e12245642903915ca7a06fcecd00024a6a3bdf07309b8be4d4a55a5",
+      "size": 3578,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    },
+    {
+      "path": "runtime-manifest.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-chat-shell/dist/manifest.json",
+      "sourceSha256": "823aa6f01c8ff89e5eda5094d9fc3116a52f87248dd9fb088b3d6308c9124ab8",
+      "sourceSize": 16332,
+      "sha256": "823aa6f01c8ff89e5eda5094d9fc3116a52f87248dd9fb088b3d6308c9124ab8",
+      "size": 16332,
+      "sensitiveData": false,
+      "normalization": "trailing whitespace only"
+    }
+  ],
+  "screenshotsNotCopied": [
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-chat-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-chat-browser-20261014/chat-393.png",
+      "sha256": "29c13da18c899b9b7e2a7d85989527ce5a65f0cb501cf1183bcdde521fa86081",
+      "size": 41730,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-chat-browser-20261014/chat-320.png",
+      "sha256": "6c129ffc114e7db971fc0da3d0eb32e1f1f7f8a8afbb9e513db7eaae36753bc4",
+      "size": 40342,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-chat-browser-20261014/chat-427.png",
+      "sha256": "032fc2b36e57992eadd4a46ab1ca8cb06e2a255b04e66ea67d91b9fcb08ba224",
+      "size": 42189,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-chat-browser-20261014/chat-1280.png",
+      "sha256": "8341fb5ad5199eb217cfb7b54d8327cad059377fe313253aa919ede683b92777",
+      "size": 47149,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-chat-browser-20261014/large-text-393.png",
+      "sha256": "da49dfb9de18a989ab6fdacbc12cb4e829883af59582396a1e1c4aef8fdf15bd",
+      "size": 61178,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-chat-browser-20261014/keyboard-height-393.png",
+      "sha256": "12f07d038e63d12197834575fed4250424bb9a377f3202f0366a43ce6bd9f2d0",
+      "size": 32554,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-chat-browser-20261014/menu-393.png",
+      "sha256": "fd9abcd0c35282fd71f3f4df080d198285b3558ddea1d50514eda95df57e0a99",
+      "size": 38932,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-chat-browser-20261014/thinking-393.png",
+      "sha256": "190d2d1e66294068a7505459f460f8ca5b10451e28eba091ac45b5a0837f0492",
+      "size": 46487,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-chat-browser-20261014/failure-393.png",
+      "sha256": "b60f095bb58871ac0ce6a77efbda928a5b51ae8d14113728229567fd0d037a91",
+      "size": 60543,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-tasks-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-tasks-browser-20261014/tasks-393.png",
+      "sha256": "f25d78898d3f50b689a4e9cc3c5b572a1a150380b2f9d376b965bd0e9b083fd0",
+      "size": 51405,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-tasks-browser-20261014/tasks-320.png",
+      "sha256": "583b182071b7ec16ece4bb7c4693b0d40e7814f3f6e1167b57650a7249258066",
+      "size": 51168,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-tasks-browser-20261014/tasks-427.png",
+      "sha256": "db70f706f17362f3ad386f8465f8224961d9b9055352aa75d4b1d29a8af3387b",
+      "size": 51777,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-tasks-browser-20261014/tasks-1280.png",
+      "sha256": "11a3cb15488f08cbbe9c5091d06c32a89c2a5090550e40e9c9ec51caccac52e8",
+      "size": 58264,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-tasks-browser-20261014/tasks-large-text.png",
+      "sha256": "25c6882cb117a495d644c349181b250f73ad2a3699c9d72ea8c25242767de123",
+      "size": 67423,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-tasks-browser-20261014/tasks-denied.png",
+      "sha256": "f4bd108b701f036e8b89f716e4dd0046883f4adf8a69eb6fd5f00e35a0770c81",
+      "size": 38818,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-tasks-browser-20261014/tasks-cap.png",
+      "sha256": "5a2393000b2a69d105c57e1c8dd6033ec8d8df5f1818b29336cede0c24770e17",
+      "size": 50971,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/feed-393.png",
+      "sha256": "9d005bf45cfafdd967ac160a23e89b1642c1901be80b36013e595d79cdda6e69",
+      "size": 63324,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/feed-320.png",
+      "sha256": "bcfee60bb02b66fbdfec25e5b0a8138e01ec10e720d968a7d301a8e296411d93",
+      "size": 59419,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/feed-427.png",
+      "sha256": "f6fb17d5d7a7b00a9248fe3140a9d8e0820325565a0b11ac3b7223087c7e81ff",
+      "size": 64085,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/feed-1280.png",
+      "sha256": "76f155c645f135937b5a05d29a4782a8d1bf8e1d85a33796d31f89ab176d4b3f",
+      "size": 71144,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/library-list-393.png",
+      "sha256": "0776b5fac316603741b49bea8bcddfdfe59144ac6b670ba68389a557fd051d63",
+      "size": 49539,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/library-grid-393.png",
+      "sha256": "d4da0cd8dc0a78df35223095daeb1b8c3349c80154e6bb5a99b6b35f8877966d",
+      "size": 48903,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/library-grid-320.png",
+      "sha256": "2c7541f16f38fd51c553b9ce213359fc80a5a8ef756daf84557bbe8586b67c0b",
+      "size": 42894,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/library-grid-427.png",
+      "sha256": "d156c44a0a52aaac4a797a6e7abd4b9d8a9d900f0ae12ef4121b902a8853f617",
+      "size": 49390,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/library-grid-1280.png",
+      "sha256": "f73c453f2192cb904c0450579cc3d459590109ac61f8ed12e60a92981d2ac511",
+      "size": 52233,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/report-393.png",
+      "sha256": "768954706f6c77554c9e708e4377911d9e15c7d16f71e2b0108a2f2128d60705",
+      "size": 50262,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/report-large-text.png",
+      "sha256": "5a0ec40d83e979c583613ebd78aab87a8d536b932dbf11eefb2c99048131ee02",
+      "size": 67372,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/feed-denied.png",
+      "sha256": "f83ddabbc4e99e8170b8c14237c3cc8e8b441525cd4ad86910fffc2e3100a57f",
+      "size": 38243,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-workspace-browser-20261014/library-empty.png",
+      "sha256": "e3dee098d79c5034e396abd2ca000f2d54f7aaae52cc41c4e7104ab7b052b1fb",
+      "size": 50074,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-task-actions-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-task-actions-browser-20261014/new-task-393.png",
+      "sha256": "e2d4ef6dacd7654228707ab4e3e6ee41323149cc6c28eecc1307ec75c1d1c857",
+      "size": 59216,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-task-actions-browser-20261014/new-task-320.png",
+      "sha256": "1637af4a4b85bad2277c7c8311e611ef5827412f5776169b11085b904fee9836",
+      "size": 48690,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-task-actions-browser-20261014/new-task-427.png",
+      "sha256": "8042a860d8f4fcdbda288cd17319501c3c02e615532b9c070672cf00a00ad9cd",
+      "size": 67355,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-task-actions-browser-20261014/new-task-1280.png",
+      "sha256": "03551c1bb093af85d537ec9a33a6e6cb3c10a6201c7a69d2db371c85e8352e48",
+      "size": 72045,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-task-actions-browser-20261014/created-task.png",
+      "sha256": "c9090a90a0f01a930993f67275ec1868e9e7d2a6edc06377157a6f0c573ea655",
+      "size": 59789,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-ideas-final02-task-actions-browser-20261014/task-done.png",
+      "sha256": "c8a5545c47553aa812411ad3b2380596042d562748c4a11a273e92c0f834028d",
+      "size": 51851,
+      "reason": "unchanged surface; fresh browser receipt and hashes retained",
+      "sensitiveData": false
+    }
+  ],
+  "designReferences": [
+    {
+      "source": "/Users/stanislavmosin/Downloads/Maya_full_design_package/screens/03-ideas.png",
+      "sha256": "51285d6c669b47bf851516d557968420517fc831281b04bc33b232798378d8e0",
+      "size": 22620,
+      "purpose": "owner design reference, not live data or authority"
+    },
+    {
+      "source": "/Users/stanislavmosin/Downloads/Maya_full_design_package/screens/12-action-plan.png",
+      "sha256": "7f58cfe75eaac49d5412a4951f8a30be48dd5ba57fe63f7dda07688efb2807e4",
+      "size": 24174,
+      "purpose": "owner design reference, not live data or authority"
+    },
+    {
+      "source": "/Users/stanislavmosin/Downloads/Maya_full_design_package/01_IMPLEMENTATION.txt",
+      "sha256": "8190b1f109140eaa34eda9765ba9a77602085b066481a5401f18c3b95e6d4e07",
+      "size": 20419,
+      "purpose": "owner design reference, not live data or authority"
+    }
+  ]
+}

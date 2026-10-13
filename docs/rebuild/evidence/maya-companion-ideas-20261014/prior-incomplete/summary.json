@@ -1,0 +1,51 @@
+{
+  "contract": "maya.companion.ideas.scoped-checks/1",
+  "candidate": "e9cd4ad2d7da61288e2026222835437b32ebd29c",
+  "startedAt": "2026-10-13T21:25:56Z",
+  "node": "v22.23.3",
+  "scrubbedEnvironment": true,
+  "cleanAtStart": true,
+  "fullReleaseCertification": false,
+  "realProviders": false,
+  "realDatabase": false,
+  "checks": [
+    {
+      "name": "source-http-contracts",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-saas-backend",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "src/owner-reports/companion-retained-reads.http.spec.ts",
+        "src/inbox/inbox.service.spec.ts",
+        "src/owner-reports/owner-report.contract.spec.ts",
+        "src/package5-wave1/operational-work.http.spec.ts",
+        "src/package5-wave1/package5-wave1-canonical-cutover.service.spec.ts",
+        "src/package5-wave1/operational-tasks.read.spec.ts",
+        "src/valuation/c8.architecture.spec.ts",
+        "src/valuation/c8.calendar-time.spec.ts",
+        "src/valuation/c8.companion-list.spec.ts",
+        "src/valuation/c8.consumers.architecture.spec.ts",
+        "src/valuation/c8.contract.spec.ts",
+        "src/valuation/c8.deterministic.spec.ts",
+        "src/valuation/c8.eligibility.spec.ts",
+        "src/valuation/c8.opportunity.spec.ts",
+        "src/valuation/c8.producer.calendar-time.spec.ts",
+        "src/valuation/c8.prospective.spec.ts",
+        "src/valuation/c8.read.lifecycle-rule.spec.ts",
+        "src/valuation/c8.read.two-months.spec.ts",
+        "src/valuation/c8.store.calendar-time.spec.ts",
+        "src/valuation/c8.time.spec.ts",
+        "src/valuation/c8.wave2.architecture.spec.ts",
+        "src/valuation/c8.wave3.architecture.spec.ts"
+      ],
+      "exitCode": 1,
+      "seconds": 7.735,
+      "log": "source-http-contracts.txt",
+      "sha256": "f07eb6e04e12245642903915ca7a06fcecd00024a6a3bdf07309b8be4d4a55a5"
+    }
+  ],
+  "status": "FAIL",
+  "failure": "source-http-contracts",
+  "finishedAt": "2026-10-13T21:26:40Z"
+}

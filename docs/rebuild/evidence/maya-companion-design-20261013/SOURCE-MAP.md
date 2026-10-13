@@ -47,3 +47,12 @@ Ideas or task-command owner gaps. Earlier checkpoint receipts remain historical.
 историческим. Date selection, assignment, undo и Ideas-to-task не включены.
 См. [checkpoint](../../MAYA-COMPANION-TASK-ACTIONS-CHECKPOINT-20261013.md) и
 [source review](../maya-companion-task-actions-20261013/IDEAS-SOURCE-REVIEW.md).
+
+## Ideas source inspection checkpoint (2026-10-14)
+
+`e9cd4ad2d7da61288e2026222835437b32ebd29c` connects the existing C8 list reader
+for inspection of retained calculation metadata, with current reread, exact revision
+binding, local expiry and session invalidation. Recommendations, numerical displays,
+plan execution and plan-to-task mapping are not implemented by this unit. The source
+review above remains historical; see `../../MAYA-COMPANION-IDEAS-CHECKPOINT-20261014.md`
+and `../maya-companion-ideas-20261014/README.md` for fresh scoped evidence.
