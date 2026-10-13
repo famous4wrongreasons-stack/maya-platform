@@ -92,7 +92,7 @@
     "description": "PU-AUDIT-NOOP",
     "file": "src/entitlements/widget-release.service.ts",
     "find": "if (isProfileExecutionAuthorization(a)) {\n          const recorded",
-    "replace": "if (false) {\n          const recorded",
+    "replace": "if (isProfileExecutionAuthorization(a) && a.environment !== 'production') {\n          const recorded",
     "killers": [
       "PU-AUDIT-NOOP"
     ],

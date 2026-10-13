@@ -30,7 +30,7 @@ const mutations=[
   {id:'LSO-M7',phase:'unit',file:policy,find:'this.buildDigest(a.contract === STAGING_SINGLE_OPERATOR_AUTH)',replace:'this.buildDigest()',killer:'LSO-BYTES'},
   {id:'LSO-M8',phase:'unit',file:policy,find:'return null;\n      if (isProductionAuthorization(a)) this.productionTenant(tenantId);\n      if (a.contract === STAGING_SINGLE_OPERATOR_AUTH)\n        this.stagingTenant(tenantId);',replace:'return null;\n      if (isProductionAuthorization(a)) this.productionTenant(tenantId);',killer:'LSO-READER'},
   {id:'LSO-M9',phase:'unit',file:policy,find:"!verify(null, bytes, publicKey, Buffer.from(v.signature, 'base64url'))",replace:'false',killer:'LSO-FORGED'},
-  {id:'LSO-M10',phase:'live',file:writer,find:'if (isProfileExecutionAuthorization(a)) {\n          const recorded',replace:'if (false) {\n          const recorded',killer:'LSO-AUDIT-NOOP'},
+  {id:'LSO-M10',phase:'live',file:writer,find:'if (isProfileExecutionAuthorization(a)) {\n          const recorded',replace:"if (isProfileExecutionAuthorization(a) && a.environment !== 'staging') {\n          const recorded",killer:'LSO-AUDIT-NOOP'},
   {id:'LSO-M11',phase:'live',file:writer,find:'previousVersion !== a.expectedVersion',replace:'false',killer:'LSO-STALE'},
   {id:'LSO-M12',phase:'live',file:writer,find:'granted.contract === STAGING_SINGLE_OPERATOR_AUTH &&',replace:'false &&',killer:'LSO-REVOKE-VERSION legacy-revokes-staging'},
   {id:'LSO-M13',phase:'live',file:writer,find:'await this.authority(tx, actor);',replace:'/* mutation: skip actual global session authority */',all:3,killer:'LSO-TENANT-SESSION'},
