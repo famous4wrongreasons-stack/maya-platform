@@ -2,7 +2,7 @@
   {
     "id": "PI-M06",
     "file": "src/widgets/composition/chat-read.trigger.ts",
-    "find": "!(await this.releaseAccess.canProject(\n            tenantId,\n            previous.widgetId,\n            tx,\n          ))",
+    "find": "!(await this.releaseAccess.canProject(\n              tenantId,\n              previous.widgetId,\n              tx,\n            ))",
     "replace": "false",
     "killers": [
       "PROFILE-CACHE"

@@ -23,7 +23,7 @@ const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const declared = registry(path.join(backend, 'test/widgets-live/mutations'));
 const head = 'a'.repeat(40);
 
-test('contract registry census preserves historical pins and admits only exact approved goods/pricing additions', () => {
+test('contract registry census preserves historical pins and exact approved goods/pricing and development READ additions', () => {
   const checkerFile = path.join(backend, 'scripts/widget-contract-check.mjs');
   const checker = ts.createSourceFile(checkerFile, fs.readFileSync(checkerFile, 'utf8'), ts.ScriptTarget.ES2022, true);
   const expectedNodes = [];
@@ -41,7 +41,12 @@ test('contract registry census preserves historical pins and admits only exact a
   assert.deepEqual(expected.historical, baseline, 'Historical pins must not advance with new registrations');
   const pricing = { AE: 'crm.service.fixed-price.update.v1', POLICY: 'crm.service.fixed-price.update.v1', TOOL: 'catalog.service.price.update', C9: 'catalog.service.price.update' };
   const goods = { AE: ['crm.goods.receipt.create.v1'], POLICY: ['crm.goods.receipt.create.v1'], TOOL: ['inventory.goods.receipt.prepare', 'inventory.goods.read'], C9: ['inventory.goods.receipt.prepare', 'inventory.goods.read'] };
-  const keys = Object.fromEntries(Object.entries(baseline).map(([space, count]) => [space, [...Array.from({ length: count }, (_, index) => `historical:${space}:${index}`), pricing[space], ...goods[space]]]));
+  const developmentReads = {
+    AE: [], POLICY: [],
+    TOOL: ['inventory.goods.search', 'catalog.service.rename.preview'],
+    C9: ['inventory.goods.search', 'catalog.service.rename.preview'],
+  };
+  const keys = Object.fromEntries(Object.entries(baseline).map(([space, count]) => [space, [...Array.from({ length: count }, (_, index) => `historical:${space}:${index}`), pricing[space], ...goods[space], ...developmentReads[space]]]));
   const source = fs.readFileSync(path.join(backend, 'scripts/widget-contract/registry-probe.js'), 'utf8');
   const census = rows => {
     let output = '';
@@ -61,6 +66,23 @@ test('contract registry census preserves historical pins and admits only exact a
     return JSON.parse(output);
   };
   assert.deepEqual(census(keys), expected);
+  for (const space of ['TOOL', 'C9']) {
+    for (const key of developmentReads[space]) {
+      const renamed = structuredClone(keys);
+      renamed[space][renamed[space].indexOf(key)] += '.unapproved';
+      assert.deepEqual(census(renamed).current, expected.current);
+      assert.notDeepEqual(census(renamed), expected, 'Same-count READ substitution must fail');
+      const missing = structuredClone(keys);
+      missing[space] = missing[space].filter(value => value !== key);
+      assert.notDeepEqual(census(missing), expected, 'Every exact declared READ is required');
+    }
+  }
+  for (const space of ['AE', 'POLICY']) {
+    const widened = structuredClone(keys);
+    widened[space].push(developmentReads.TOOL[0]);
+    assert.notDeepEqual(census(widened).current, expected.current);
+    assert.notDeepEqual(census(widened), expected, 'A READ must not acquire an AE/policy registration');
+  }
   for (const space of Object.keys(baseline)) {
     const renamed = structuredClone(keys);
     renamed[space][renamed[space].indexOf(goods[space][0])] += '.unapproved';

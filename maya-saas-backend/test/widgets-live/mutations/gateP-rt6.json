@@ -12,8 +12,8 @@
     "id": "RT6-M2",
     "description": "the erasure statement no longer takes Gate 9's transaction advisory lock",
     "file": "src/widgets/consent/erasure.job.ts",
-    "find": "SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))",
-    "replace": "SELECT hashtextextended(${lockKey}, 0)",
+    "find": "await TimelineStore.lockConversation(\n      tx,\n      request.tenantId,\n      request.conversationId,\n    );",
+    "replace": "await Promise.resolve();\n    void TimelineStore;",
     "killers": ["RT6-ATOMIC-1"],
     "expect": "build-killed"
   },
@@ -28,10 +28,10 @@
   },
   {
     "id": "RT6-M4",
-    "description": "already-erased drafts remain eligible and can produce duplicate tombstones",
+    "description": "Already-erased drafts remain eligible in the target selector. This structural mutant proves the selection fence; the independent row-update erasedAt fence remains in place.",
     "file": "src/widgets/consent/erasure.job.ts",
-    "find": "            AND d.\"erasedAt\" IS NULL\n        ),",
-    "replace": "        ),",
+    "find": "            AND d.\"erasedAt\" IS NULL\n            AND EXISTS (",
+    "replace": "            AND EXISTS (",
     "killers": ["RT6-RETRY-1"],
     "expect": "build-killed"
   },
@@ -39,8 +39,8 @@
     "id": "RT6-M5",
     "description": "the tombstone insertion is detached from the rows changed by the atomic statement",
     "file": "src/widgets/consent/erasure.job.ts",
-    "find": "        FROM changed\n      `,",
-    "replace": "        FROM changed WHERE false\n      `,",
+    "find": "        FROM changed\n      `;",
+    "replace": "        FROM changed WHERE false\n      `;",
     "killers": ["RT6-ATOMIC-1"],
     "expect": "build-killed"
   },
@@ -48,8 +48,8 @@
     "id": "RT6-M6",
     "description": "the timeline target loses the exact subject fence",
     "file": "src/widgets/consent/erasure.job.ts",
-    "find": "            AND t.\"principalProofHash\" = ${request.subjectPrincipalProofHash}\n            AND t.\"erasedAt\" IS NULL",
-    "replace": "            AND t.\"erasedAt\" IS NULL",
+    "find": "            AND t.\"principalProofHash\" = ${request.subjectPrincipalProofHash}\n        ),",
+    "replace": "        ),",
     "killers": ["RT6-SCOPE-1"],
     "expect": "build-killed"
   },

@@ -52,8 +52,8 @@
   {
     "id": "WR-M06",
     "file": "src/widgets/resolve/thread-page.service.ts",
-    "find": "if (!outcomes.includes(value.outcome as TerminalLine['outcome']))",
-    "replace": "if (false)",
+    "find": "!Object.prototype.hasOwnProperty.call(TERMINAL_TEXT, line.outcome)",
+    "replace": "false",
     "killers": [
       "WR-L21"
     ],
@@ -62,8 +62,8 @@
   {
     "id": "WR-M07",
     "file": "src/widgets/resolve/thread-page.service.ts",
-    "find": "value.action_receipt_ref.trim().length > 0",
-    "replace": "true",
+    "find": "line.action_receipt_ref.trim().length === 0",
+    "replace": "false",
     "killers": [
       "WR-L21"
     ],
@@ -72,8 +72,8 @@
   {
     "id": "WR-M08",
     "file": "src/widgets/resolve/thread-page.service.ts",
-    "find": "value.action_receipt_ref === null;",
-    "replace": "true;",
+    "find": "line.action_receipt_ref !== null",
+    "replace": "false",
     "killers": [
       "WR-L21"
     ],
@@ -167,8 +167,8 @@
   {
     "id": "WR-M17",
     "file": "src/widgets/composition/chat-read.trigger.ts",
-    "find": "? await this.emitter.emitBookingSelector(mintRequest, {\n                source: input.result,\n              })",
-    "replace": "? await this.emitter.emit(mintRequest)",
+    "find": "? await this.emitter\n                  .emitBookingSelector(\n                    mintRequest,\n                    {\n                      source: input.result,\n                      ...(input.bookingSelector\n                        ? {\n                            bookingSelection: input.bookingSelector,\n                            revalidateSource: input.bookingSelector.revalidate,\n                          }\n                        : {}),\n                      ...(input.revalidateSource\n                        ? { revalidateSource: input.revalidateSource }\n                        : {}),\n                    },\n                    new Date(),\n                    tx,\n                  )\n                  .catch((error: unknown) => {\n                    // A completed READ can truthfully have no options, or no\n                    // inherited service selection. It still remains a READ;\n                    // never invent an actionable selector to present it.\n                    if (\n                      error instanceof IntentTemplateRefusal &&\n                      error.code === 'booking_selector_source_unavailable'\n                    )\n                      return null;\n                    throw error;\n                  })",
+    "replace": "? await this.emitter.emit(mintRequest, new Date(), tx)",
     "killers": [
       "WR-L11"
     ],

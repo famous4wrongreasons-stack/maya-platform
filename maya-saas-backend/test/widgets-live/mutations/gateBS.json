@@ -2,8 +2,8 @@
   {
     "id": "BS-M01",
     "file": "src/widgets/owner-ports/personal-schedule.adapter.ts",
-    "find": "const personal = await this.contexts.select(actor, 'personal_client');",
-    "replace": "const personal = { revalidate: () => Promise.resolve() };",
+    "find": "const personal = await this.contexts.select(actor, 'personal_client');\n    const source",
+    "replace": "const personal = { revalidate: () => Promise.resolve() };\n    const source",
     "killers": [
       "BS-REVOKED"
     ],

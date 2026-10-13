@@ -191,8 +191,8 @@
     "id": "MINT-M18",
     "description": "pass the encoded booking availability owner ref to the canonical owner instead of decoding the exact server format",
     "file": "src/widgets/owner-ports/noun-resolution.owners.provider.ts",
-    "find": "      const ownerValue = bookingSlot\n        ? decodeBookingSlotOwnerRef(opened.ownerRef)\n        : opened.ownerRef;",
-    "replace": "      const ownerValue = opened.ownerRef;\n      void bookingSlot;",
+    "find": "const ownerValue = bookingSlot\n        ? (slot?.start ?? null)",
+    "replace": "const ownerValue = bookingSlot\n        ? opened.ownerRef",
     "killers": [
       "decodes only the recognized opaque booking slot"
     ],

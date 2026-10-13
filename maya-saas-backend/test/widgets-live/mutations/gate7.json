@@ -217,19 +217,19 @@
   },
   {
     "id": "M7-24",
-    "description": "C9a is deleted for MONEY outside the sole exact F32a catalogue-price exception: an unrelated financial capability becomes actuatable when it reaches the allowlist.",
+    "description": "C9a is deleted for MONEY outside the exact approved F32a catalogue-price and F32b goods-receipt exceptions: an unrelated financial capability becomes actuatable when it reaches the allowlist.",
     "file": "src/widgets/gates/gate7.ts",
-    "find": "  if (MONEY(cap) && !cataloguePrice)\n    return no('C9a', `${ae.key} is MONEY (\u00a73.10)`);",
-    "replace": "  const isMoney: boolean = MONEY(cap) && !cataloguePrice && false;\n  if (isMoney) return no('C9a', `${ae.key} is MONEY (\u00a73.10)`);",
+    "find": "  if (MONEY(cap) && !cataloguePrice && !goodsReceipt)\n    return no('C9a', `${ae.key} is MONEY (\u00a73.10)`);",
+    "replace": "  const isMoney: boolean = MONEY(cap) && !cataloguePrice && !goodsReceipt && false;\n  if (isMoney) return no('C9a', `${ae.key} is MONEY (\u00a73.10)`);",
     "killers": ["G7-N9a"],
     "expect": "build-killed"
   },
   {
     "id": "M7-25",
-    "description": "C9a regresses to a historical F31-shaped faulty predicate that admits MONEY on PAYMENT_HANDOFF. The exact current F32a catalogue-price exception stays intact; the mutant wrongly admits the unrelated loyalty.internal-adjust.execute.v1 key through C9a despite V1.4's closed PAYMENT_HANDOFF fence.",
+    "description": "C9a regresses to a historical F31-shaped faulty predicate that admits MONEY on PAYMENT_HANDOFF. Both approved F32a/F32b exceptions stay intact; the mutant wrongly admits unrelated loyalty.internal-adjust.execute.v1 through C9a despite the closed PAYMENT_HANDOFF fence.",
     "file": "src/widgets/gates/gate7.ts",
-    "find": "  if (MONEY(cap) && !cataloguePrice)\n    return no('C9a', `${ae.key} is MONEY (\u00a73.10)`);",
-    "replace": "  if (MONEY(cap) && !cataloguePrice && r.widgetKind !== 'PAYMENT_HANDOFF')\n    return no('C9a', `${ae.key} is MONEY (\u00a73.10)`);",
+    "find": "  if (MONEY(cap) && !cataloguePrice && !goodsReceipt)\n    return no('C9a', `${ae.key} is MONEY (\u00a73.10)`);",
+    "replace": "  if (MONEY(cap) && !cataloguePrice && !goodsReceipt && r.widgetKind !== 'PAYMENT_HANDOFF')\n    return no('C9a', `${ae.key} is MONEY (\u00a73.10)`);",
     "killers": ["G7-N9b"],
     "expect": "build-killed"
   },

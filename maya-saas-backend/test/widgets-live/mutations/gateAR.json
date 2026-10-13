@@ -36,7 +36,7 @@
     "id": "AR-M4",
     "description": "Running candidate binding bypass",
     "file": "src/entitlements/widget-release-policy.service.ts",
-    "find": "a.candidateSha !==\n        this.config.get<string>('WIDGET_RELEASE_CANDIDATE_SHA') ||\n      a.buildDigest !== this.buildDigest()",
+    "find": "a.candidateSha !==\n        this.config.get<string>('WIDGET_RELEASE_CANDIDATE_SHA') ||\n      a.buildDigest !==\n        this.buildDigest(a.contract === STAGING_SINGLE_OPERATOR_AUTH)",
     "replace": "false",
     "killers": [
       "AR1-RUNNING"

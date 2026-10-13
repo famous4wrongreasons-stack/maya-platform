@@ -25,8 +25,8 @@
     "id": "PU-M3",
     "description": "PU-ALLOWLIST",
     "file": "src/entitlements/widget-release-policy.service.ts",
-    "find": "for (const tenant of tenants) identifier(tenant);",
-    "replace": "// mutation: wildcard entries accepted",
+    "find": "for (const tenant of tenants) identifier(tenant);\n    if (!tenants.includes(tenantId)) releaseDeny('production_tenant');",
+    "replace": "// mutation: wildcard entries accepted\n    if (!tenants.includes(tenantId)) releaseDeny('production_tenant');",
     "killers": [
       "PU-ALLOWLIST"
     ],
@@ -69,8 +69,8 @@
     "id": "PU-M7",
     "description": "PU-BYTES",
     "file": "src/entitlements/widget-release-policy.service.ts",
-    "find": "this.fingerprint &&\n      this.config.get<string>('NODE_ENV') !== 'production'",
-    "replace": "this.fingerprint",
+    "find": "this.fingerprint &&\n      !recheck &&\n      this.config.get<string>('NODE_ENV') !== 'production'",
+    "replace": "this.fingerprint && !recheck",
     "killers": [
       "PU-BYTES"
     ],
