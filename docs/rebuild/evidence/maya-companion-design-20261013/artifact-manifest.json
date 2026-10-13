@@ -1,0 +1,165 @@
+{
+  "candidate": "5b8d99db12a41e5522ad71f0a9a7972e2070f0ec",
+  "artifacts": [
+    {
+      "name": "carrier-ratchets.log",
+      "localSource": "/private/tmp/maya-companion-final-5b8d99db/carrier-ratchets.log",
+      "size": 7864,
+      "sha256": "9c9dd5d2e95815e834abf4fb37f14e912fa39892a46a54fa8263132617a98256",
+      "repositoryCopy": "receipts/carrier-ratchets.log",
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "carrier-test-harness.log",
+      "localSource": "/private/tmp/maya-companion-final-5b8d99db/carrier-test-harness.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "repositoryCopy": "receipts/carrier-test-harness.log",
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "carrier-tests.log",
+      "localSource": "/private/tmp/maya-companion-final-5b8d99db/carrier-tests.log",
+      "size": 34510,
+      "sha256": "d16d1b1d20aa0f7814eb1fdbe65e8e31fa08ca4c73da2fef3b66f4346df25a1f",
+      "repositoryCopy": "receipts/carrier-tests.log",
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "emitted-browser.log",
+      "localSource": "/private/tmp/maya-companion-final-5b8d99db/emitted-browser.log",
+      "size": 83,
+      "sha256": "547e0db49fbee440d4799c9148a8c4c911425f86a5867e5a4f6e5593aab7a431",
+      "repositoryCopy": "receipts/emitted-browser.log",
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "receipt.json",
+      "localSource": "/private/tmp/maya-companion-final-5b8d99db/receipt.json",
+      "size": 4745,
+      "sha256": "a55391387b4328ab37b30c520421ea2b0fad9c7041f25b550bc355da19e23d4d",
+      "repositoryCopy": "receipts/receipt.json",
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "release-build.log",
+      "localSource": "/private/tmp/maya-companion-final-5b8d99db/release-build.log",
+      "size": 2288,
+      "sha256": "a7e1c1d206419d5152abea54ebd579e2d453b294c59fea014f09f374629ec12d",
+      "repositoryCopy": "receipts/release-build.log",
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "release-tests.log",
+      "localSource": "/private/tmp/maya-companion-final-5b8d99db/release-tests.log",
+      "size": 3307,
+      "sha256": "a8d7162b141420d9fefd0af728332bf557feb12872951700b523c11dd94b6182",
+      "repositoryCopy": "receipts/release-tests.log",
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "release-verify.log",
+      "localSource": "/private/tmp/maya-companion-final-5b8d99db/release-verify.log",
+      "size": 732,
+      "sha256": "129c46e9994d7c62452440acb5c9d35dd4199924f7e9ac51bece684d44fda86c",
+      "repositoryCopy": "receipts/release-verify.log",
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "runtime-tests.log",
+      "localSource": "/private/tmp/maya-companion-final-5b8d99db/runtime-tests.log",
+      "size": 193061,
+      "sha256": "1a7fb90026610a31db1fc1916de21510bc6009967dcb49280ed288c696756507",
+      "repositoryCopy": "receipts/runtime-tests.log",
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "chat-1280.png",
+      "localSource": "/private/tmp/maya-companion-browser-5b8d99db/chat-1280.png",
+      "size": 47142,
+      "sha256": "6a993fe0033db6faa1cbb84038707d28168bc6824f1f84214690c96c5eb7feb5",
+      "repositoryCopy": null,
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "chat-320.png",
+      "localSource": "/private/tmp/maya-companion-browser-5b8d99db/chat-320.png",
+      "size": 40332,
+      "sha256": "74b0811e3bd1eb30db1b45e7c49ad4bd1da0e340f1aa87fed56e954a2945261b",
+      "repositoryCopy": null,
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "chat-393.png",
+      "localSource": "/private/tmp/maya-companion-browser-5b8d99db/chat-393.png",
+      "size": 41730,
+      "sha256": "29c13da18c899b9b7e2a7d85989527ce5a65f0cb501cf1183bcdde521fa86081",
+      "repositoryCopy": "chat-393.png",
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "chat-427.png",
+      "localSource": "/private/tmp/maya-companion-browser-5b8d99db/chat-427.png",
+      "size": 42187,
+      "sha256": "052eca15f56677cc9c7dfdf773494a0e3747190d029364c2cad1e5913ebf705e",
+      "repositoryCopy": null,
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "failure-393.png",
+      "localSource": "/private/tmp/maya-companion-browser-5b8d99db/failure-393.png",
+      "size": 60543,
+      "sha256": "b60f095bb58871ac0ce6a77efbda928a5b51ae8d14113728229567fd0d037a91",
+      "repositoryCopy": null,
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "keyboard-height-393.png",
+      "localSource": "/private/tmp/maya-companion-browser-5b8d99db/keyboard-height-393.png",
+      "size": 32554,
+      "sha256": "12f07d038e63d12197834575fed4250424bb9a377f3202f0366a43ce6bd9f2d0",
+      "repositoryCopy": null,
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "large-text-393.png",
+      "localSource": "/private/tmp/maya-companion-browser-5b8d99db/large-text-393.png",
+      "size": 61185,
+      "sha256": "448ac283240442a03585a68fd7fcce4850031c2716de87899b0effa15fb5d35c",
+      "repositoryCopy": null,
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "menu-393.png",
+      "localSource": "/private/tmp/maya-companion-browser-5b8d99db/menu-393.png",
+      "size": 33123,
+      "sha256": "bc5155a2c04e343b54061eb94c2449e0d15ef8eeb0248c3ec64e943cb607c9c8",
+      "repositoryCopy": "menu-393.png",
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "receipt.json",
+      "localSource": "/private/tmp/maya-companion-browser-5b8d99db/receipt.json",
+      "size": 2953,
+      "sha256": "64845c6a02fbd2f3c4f1169ce0f8de356b6042f87cd9faa2e42f0af54074af36",
+      "repositoryCopy": "receipts/browser.json",
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "signin-393.png",
+      "localSource": "/private/tmp/maya-companion-browser-5b8d99db/signin-393.png",
+      "size": 27941,
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "repositoryCopy": null,
+      "content": "synthetic-only verification; no real keys or customer data"
+    },
+    {
+      "name": "thinking-393.png",
+      "localSource": "/private/tmp/maya-companion-browser-5b8d99db/thinking-393.png",
+      "size": 46447,
+      "sha256": "14c36122fde945d364ee9bb86ac9c0037a591a5669dae61d744127273eeb2311",
+      "repositoryCopy": null,
+      "content": "synthetic-only verification; no real keys or customer data"
+    }
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "candidate": "5b8d99db12a41e5522ad71f0a9a7972e2070f0ec",
+  "scope": "Companion v1 presentation-only, not release certification",
+  "node": "v22.23.3",
+  "steps": [
+    {
+      "name": "release-build",
+      "cwd": ".",
+      "argv": [
+        "node",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/tools/release.mjs",
+        "build"
+      ],
+      "exitCode": 0,
+      "seconds": 16.091,
+      "log": "release-build.log",
+      "sha256": "a7e1c1d206419d5152abea54ebd579e2d453b294c59fea014f09f374629ec12d"
+    },
+    {
+      "name": "carrier-ratchets",
+      "cwd": "maya-carrier-react",
+      "argv": [
+        "node",
+        "build.mjs",
+        "--self-test"
+      ],
+      "exitCode": 0,
+      "seconds": 0.193,
+      "log": "carrier-ratchets.log",
+      "sha256": "9c9dd5d2e95815e834abf4fb37f14e912fa39892a46a54fa8263132617a98256"
+    },
+    {
+      "name": "carrier-test-harness",
+      "cwd": "maya-carrier-react",
+      "argv": [
+        "node",
+        "test/build-harness.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 0.041,
+      "log": "carrier-test-harness.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "carrier-tests",
+      "cwd": "maya-carrier-react",
+      "argv": [
+        "node",
+        "--test",
+        "test/parity.test.mjs",
+        "test/reply-link.test.mjs",
+        "test/voice.test.mjs",
+        "test/detail.test.mjs",
+        "test/privacy.test.mjs",
+        "test/goods-photo.test.mjs",
+        "test/onboarding.test.mjs",
+        "test/local-setup-entry.test.mjs",
+        "test/local-setup-compose.test.mjs",
+        "test/telegram-popup.test.mjs",
+        "test/companion.test.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 0.36,
+      "log": "carrier-tests.log",
+      "sha256": "d16d1b1d20aa0f7814eb1fdbe65e8e31fa08ca4c73da2fef3b66f4346df25a1f"
+    },
+    {
+      "name": "runtime-tests",
+      "cwd": "maya-chat-shell",
+      "argv": [
+        "node",
+        "--test",
+        "conformance.test.mjs",
+        "test/approval-presentation.test.mjs",
+        "test/booking-outcome.test.mjs",
+        "test/brand.test.mjs",
+        "test/build.selftest.test.mjs",
+        "test/conversation.test.mjs",
+        "test/deeplink.test.mjs",
+        "test/development-integration.test.mjs",
+        "test/dom.test.mjs",
+        "test/goods-photo-net.test.mjs",
+        "test/goods-photo.test.mjs",
+        "test/goods-receipt-outcome.test.mjs",
+        "test/history-erasure-net.test.mjs",
+        "test/integrity.parity.test.mjs",
+        "test/intents.test.mjs",
+        "test/k15-census.test.mjs",
+        "test/local-api.history.test.mjs",
+        "test/local-crm-setup.test.mjs",
+        "test/net.test.mjs",
+        "test/onboarding.test.mjs",
+        "test/personal-booking.test.mjs",
+        "test/privacy.test.mjs",
+        "test/renderer.conformance.test.mjs",
+        "test/routes.conformance.test.mjs",
+        "test/serve.test.mjs",
+        "test/service-price-outcome.test.mjs",
+        "test/shell.test.mjs",
+        "test/view.tokenfree.test.mjs",
+        "test/voice.test.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 25.587,
+      "log": "runtime-tests.log",
+      "sha256": "1a7fb90026610a31db1fc1916de21510bc6009967dcb49280ed288c696756507"
+    },
+    {
+      "name": "release-tests",
+      "cwd": "maya-carrier-react",
+      "argv": [
+        "node",
+        "--test",
+        "test/release.test.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 19.271,
+      "log": "release-tests.log",
+      "sha256": "a8d7162b141420d9fefd0af728332bf557feb12872951700b523c11dd94b6182"
+    },
+    {
+      "name": "emitted-browser",
+      "cwd": ".",
+      "argv": [
+        "node",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/test/companion.browser.mjs",
+        "/private/tmp/maya-companion-browser-5b8d99db"
+      ],
+      "exitCode": 0,
+      "seconds": 15.57,
+      "log": "emitted-browser.log",
+      "sha256": "547e0db49fbee440d4799c9148a8c4c911425f86a5867e5a4f6e5593aab7a431"
+    },
+    {
+      "name": "release-verify",
+      "cwd": ".",
+      "argv": [
+        "node",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/tools/release.mjs",
+        "verify"
+      ],
+      "exitCode": 0,
+      "seconds": 6.468,
+      "log": "release-verify.log",
+      "sha256": "129c46e9994d7c62452440acb5c9d35dd4199924f7e9ac51bece684d44fda86c"
+    }
+  ],
+  "realBackend": false,
+  "realProviders": false,
+  "realKeys": false,
+  "productionEffects": 0,
+  "headUnchanged": true,
+  "worktreeClean": true,
+  "status": "PASS"
+}
