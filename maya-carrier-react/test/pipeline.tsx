@@ -10,7 +10,7 @@ import { verify } from '../../maya-chat-shell/src/integrity/h7.ts';
 import { render } from '../../maya-chat-shell/src/renderer/render.ts';
 import { ReceiptRefresh } from '../src/widgets/ReceiptRefresh.tsx';
 import { WidgetCard } from '../src/widgets/WidgetCard.tsx';
-import { tokens } from '../src/identity/tokens.ts';
+import { tokens, companionTokens } from '../src/identity/tokens.ts';
 
 const A11Y = {
   reduced_motion: false,
@@ -39,6 +39,12 @@ export function markupOf(item: unknown, dark = true): string {
   return renderToStaticMarkup(
     <WidgetCard item={item as never} t={tokens(dark)} activate={() => undefined} />,
   );
+}
+
+export function companionMarkup(item: unknown): string {
+  const unexpected = () => { throw Error('Decoration must not invoke authority'); };
+  return renderToStaticMarkup(<WidgetCard item={item as never} t={companionTokens()}
+    activate={unexpected} rendered={unexpected} refreshBookingReceipt={unexpected} />);
 }
 
 /** SSR must never activate an intent or initiate even a receipt READ. */
@@ -104,3 +110,6 @@ export function detailMarkup(view: unknown, dark = true): string {
 export function restoredReceiptMarkup(item: unknown): string {
   return renderToStaticMarkup(<ReceiptRefresh item={item as never} t={tokens(true)} refreshBookingReceipt={() => { throw Error('Passive rendering must not read'); }} />);
 }
+
+export { companionContext, MayaCompanion } from '../src/identity/MayaCompanion.tsx';
+export { companionTokens } from '../src/identity/tokens.ts';

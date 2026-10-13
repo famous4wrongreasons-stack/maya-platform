@@ -6,27 +6,14 @@
 // the runtime clears the timeline, aborts the flight and resets the shell on that transition, and a
 // component that survived it would be holding a copy of something that no longer exists.
 
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import { ChatScreen } from './chat/ChatScreen.tsx';
 import { SignIn } from './signin/SignIn.tsx';
 import { OnboardingComplete } from './signin/StandardOnboarding.tsx';
 import { LocalCrmSetup } from './setup/LocalCrmSetup.tsx';
 import { conversation, landFragment, localCrmSetupEnabled, onboarding, session } from './runtime/compose.ts';
 import { usePortView } from './runtime/useView.ts';
-import { tokens } from './identity/tokens.ts';
-
-const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-function useDark(): boolean {
-  return useSyncExternalStore(
-    (onChange) => {
-      const fire = (): void => onChange();
-      darkQuery.addEventListener('change', fire);
-      return () => darkQuery.removeEventListener('change', fire);
-    },
-    () => darkQuery.matches,
-  );
-}
+import { companionTokens } from './identity/tokens.ts';
 
 /** UIKit owns native geometry; only browsers need a VisualViewport correction. */
 export function useVisibleViewport(): void {
@@ -67,7 +54,6 @@ function useLandedFragment(): void {
 }
 
 export function App() {
-  const dark = useDark();
   const sessionView = usePortView(session);
   const chat = usePortView(conversation);
   const onboardingView = usePortView(onboarding);
@@ -76,7 +62,8 @@ export function App() {
   useVisibleViewport();
   useLandedFragment();
 
-  const t = tokens(dark);
+  // Shared visual chrome only. A theme is never a role or a capability evaluator.
+  const t = companionTokens();
   if (!sessionView.signedIn) return <SignIn t={t} reason={sessionView.reason} localSetup={localCrmSetupEnabled} />;
   if (onboardingView.phase === 'completed') return <OnboardingComplete view={onboardingView} t={t} finish={() => onboarding.finish()} />;
   if (localCrmSetupEnabled && !setupClosed) return <LocalCrmSetup t={t} onClose={() => setSetupClosed(true)} />;

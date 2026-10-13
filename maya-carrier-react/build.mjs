@@ -17,6 +17,7 @@ import { createRequire } from 'node:module';
 import * as R from './tools/ratchets.mjs';
 import { assertTree, writeTree } from './tools/payload-files.mjs';
 import { nativeApiTarget, parseDevelopmentApi } from './tools/native-api-target.mjs';
+import { designStyles } from './tools/design-assets.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const SHELL = path.join(ROOT, '..', 'maya-chat-shell');
@@ -218,7 +219,7 @@ if (!flags.has('--typecheck')) {
 
   // The stylesheet is emitted beside the page and re-checked as EMITTED bytes, because that is what
   // a browser loads — the source check would miss anything the copy step could do.
-  const cssText = fs.readFileSync(path.join(ROOT, 'src', 'styles.css'), 'utf8');
+  const cssText = designStyles(fs.readFileSync(path.join(ROOT, 'src', 'styles.css'), 'utf8'), ROOT);
   expected.set('styles.css', Buffer.from(cssText));
   report(R.checkCss(`dist/${target}/styles.css`, cssText));
 

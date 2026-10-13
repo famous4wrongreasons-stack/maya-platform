@@ -1,7 +1,8 @@
 // The canonical MAYA chat screen, over the headless runtime.
 //
-// The presentation is app.html:21176-22335 — the owner's AChat tail, ported at M5 and unchanged
-// here. What changed is where the content comes from: this screen now renders a `ConversationView`
+// The M5 carrier originated in app.html:21176-22335. Companion v1 (2026-10-11 owner package)
+// updates its visual leaves; the Aurora fixture remains available for semantic comparison.
+// This screen renders a `ConversationView`
 // published by the runtime, and hands gestures back through `ConversationPort`. It owns no message
 // list, mints no request id, assembles no history, and decides nothing.
 //
@@ -45,6 +46,8 @@ import { ReplyText } from '../reply-link.tsx';
 import { TelegramLinkPanel } from './TelegramLinkPanel.tsx';
 import { PrivacyPanel } from './PrivacyPanel.tsx';
 import { GoodsPhotoPanel } from './GoodsPhotoPanel.tsx';
+import { CompanionHeader } from './CompanionHeader.tsx';
+import { useCompanion } from '../identity/MayaCompanion.tsx';
 
 /** The reading face MAYA's own words are set in (app.html:21307). */
 const READING = '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
@@ -182,6 +185,7 @@ function Row({
   readonly focusComposer: () => void;
 }) {
   const dark = t.dark;
+  const companion = t.name === 'companion';
 
   if (item.kind === 'notice')
     return (
@@ -244,25 +248,21 @@ function Row({
           position: 'relative',
           zIndex: 1,
           width: user ? 'fit-content' : '100%',
-          maxWidth: user ? '78%' : '100%',
+          maxWidth: companion ? '95%' : user ? '78%' : '100%',
           minWidth: 0,
           flex: user ? '0 1 auto' : '1 1 100%',
           transformOrigin: user ? 'right center' : 'left center',
         }}
       >
-        {/*
-          The asymmetry that IS the design: only the person speaks inside a container. MAYA's words
-          are the page itself — no background, no border, no radius, no padding. Giving MAYA a
-          bubble turns a conversation into a support ticket.
-        */}
+        {/* Companion package uses two message surfaces; authority and text remain unchanged. */}
         <div
           style={{
             width: '100%',
             minWidth: 0,
             boxSizing: 'border-box',
-            borderRadius: user ? 20 : 0,
-            padding: user ? '10px 15px' : 0,
-            background: user ? (dark ? '#2A2A2C' : '#ECEAE5') : 'transparent',
+            borderRadius: companion ? (user ? '24px 24px 7px 24px' : '24px 24px 24px 7px') : user ? 20 : 0,
+            padding: companion ? '17px 18px' : user ? '10px 15px' : 0,
+            background: companion ? (user ? '#DCEEFF' : '#F1F2F3') : user ? (dark ? '#2A2A2C' : '#ECEAE5') : 'transparent',
             opacity: item.kind === 'user' && item.state === 'sending' ? 0.62 : 1,
             transition: 'opacity .18s ease',
           }}
@@ -270,11 +270,11 @@ function Row({
           <div
             style={{
               fontFamily: user ? DISPLAY : READING,
-              fontSize: user ? 15 : 17,
-              lineHeight: user ? '22px' : '25px',
+              fontSize: companion ? 16 : user ? 15 : 17,
+              lineHeight: companion ? 1.42 : user ? '22px' : '25px',
               letterSpacing: user ? 0 : '-0.01em',
               fontWeight: 400,
-              color: dark ? '#F4F0EB' : '#0B0B0C',
+              color: t.ink,
               whiteSpace: 'pre-wrap',
               overflowWrap: 'anywhere',
             }}
@@ -282,7 +282,7 @@ function Row({
             {/* Without a speaker, a screen reader hears one undifferentiated stream of turns. */}
             <span className="vh">{user ? 'Вы: ' : 'MAYA: '}</span>
             {/* Only MAYA's words are scanned for targets; the person's own text is never linkified. */}
-            {user ? item.text : <ReplyText reply={item.text} accent={MAYA_ACCENT} />}
+            {user ? item.text : <ReplyText reply={item.text} accent={t.accent} />}
             {item.kind === 'user' && item.modality === 'spoken' ? (
               <>
                 {' '}
@@ -360,6 +360,7 @@ export function ChatScreen({
   readonly status?: string;
 }) {
   const dark = t.dark;
+  const companion = t.name === 'companion';
   const [draft, setDraft] = useState('');
   const [composerHeight, setComposerHeight] = useState(50);
   const [refused, setRefused] = useState<Refusal>(null);
@@ -378,6 +379,8 @@ export function ChatScreen({
   const shellView = usePortView(widgets);
   const privacyOpen = shellView.primary === 'shell.privacy';
   const voiceView = usePortView(voice);
+  const sessionView = usePortView(session);
+  const mascot = useCompanion(view, draft, voiceView);
   const listening = voiceView.state === 'listening' || voiceView.state === 'held';
   const micLive = listening || voiceView.state === 'recording';
   const micUsable = view.composer.enabled && (voiceView.state === 'idle' || listening);
@@ -493,7 +496,7 @@ export function ChatScreen({
   }, []);
 
   return (
-    <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: t.bg }}>
+    <div className={companion ? 'maya-companion-chat' : undefined} style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: t.bg }}>
       <div style={{ position: 'absolute', inset: 0 }}>
         <Backdrop t={t} />
       </div>
@@ -512,7 +515,13 @@ export function ChatScreen({
           overflow: 'hidden',
         }}
       >
-        {/* app.html:21510-21522 — the header floats and is transparent; the lane scrolls UNDER it. */}
+        {companion ? <CompanionHeader
+          tenantName={sessionView.signedIn ? sessionView.display.tenantName : null}
+          privacyOpen={privacyOpen} openPrivacy={() => widgets.navigate('shell.privacy')}
+          openPhoto={() => { widgets.navigate('shell.root'); goodsPhoto.open(); }}
+          photoEnabled={view.composer.enabled && !view.inFlight}
+          state={mascot.state} event={mascot.event} greet={mascot.greet}
+        /> : (
         <div
           style={{
             position: 'absolute',
@@ -544,7 +553,7 @@ export function ChatScreen({
                 borderRadius: 999,
                 minWidth: 0,
                 maxWidth: '100%',
-                background: MAYA_ACCENT,
+                background: t.accent,
                 border: '0',
                 boxShadow: '0 8px 22px rgba(10,132,255,.38)',
               }}
@@ -600,6 +609,7 @@ export function ChatScreen({
             Приватность и данные
           </button>
         </div>
+        )}
 
         {/* app.html:21647-21658 — the one scroller. 84px clears the header, 212px the composer. */}
         {/*
@@ -609,6 +619,7 @@ export function ChatScreen({
           how a blocking limitation still announces assertively inside a polite log.
         */}
         <div
+          className="maya-chat-lane"
           ref={laneRef}
           tabIndex={privacyOpen ? -1 : undefined}
           onScroll={onLaneScroll}
@@ -622,7 +633,9 @@ export function ChatScreen({
             overflow: 'auto',
             overscrollBehavior: 'contain',
             WebkitOverflowScrolling: 'touch',
-            padding: `calc(env(safe-area-inset-top, 0px) + 84px) 18px calc(env(safe-area-inset-bottom, 0px) + ${composerHeight + 62}px)`,
+            padding: companion
+              ? `calc(var(--maya-chat-header-height, 150px) + 8px) 14px calc(env(safe-area-inset-bottom, 0px) + ${composerHeight + 62}px)`
+              : `calc(env(safe-area-inset-top, 0px) + 84px) 18px calc(env(safe-area-inset-bottom, 0px) + ${composerHeight + 62}px)`,
           }}
         >
           {privacyOpen ? (
@@ -648,7 +661,7 @@ export function ChatScreen({
               {view.items.map((item) => (
                 <Row key={item.id} item={item} t={t} now={now} focusComposer={focusComposer} />
               ))}
-              <GoodsPhotoPanel view={goodsPhotoView} port={goodsPhoto} disabled={!view.composer.enabled || view.inFlight} t={t} />
+              {companion && goodsPhotoView.phase === 'closed' ? null : <GoodsPhotoPanel view={goodsPhotoView} port={goodsPhoto} disabled={!view.composer.enabled || view.inFlight} t={t} />}
             </>
           )}
         </div>
@@ -658,7 +671,7 @@ export function ChatScreen({
           stays visible behind it. The canonical condition was hands-free or recording; here it is
           the states where the person is actually engaged with the microphone.
         */}
-        {micEngaged ? (
+        {micEngaged && !companion ? (
           <div
             aria-hidden="true"
             style={{
@@ -751,7 +764,7 @@ export function ChatScreen({
                 top: -40,
                 pointerEvents: 'none',
                 zIndex: 0,
-                background: dark
+                background: companion ? 'linear-gradient(to top, #fff 0%, rgba(255,255,255,.96) 65%, rgba(255,255,255,0) 100%)' : dark
                   ? 'linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.88) 38%, rgba(0,0,0,0.45) 68%, rgba(0,0,0,0) 100%)'
                   : 'linear-gradient(to top, rgba(244,240,235,0.99) 0%, rgba(244,240,235,0.92) 38%, rgba(244,240,235,0.5) 68%, rgba(244,240,235,0) 100%)',
               }}
@@ -777,24 +790,26 @@ export function ChatScreen({
             )}
 
             <div style={{ position: 'relative', zIndex: 1, width: '100%', height: composerHeight + 2 }}>
+
               <div
+                className="maya-composer-pill"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 6,
+                  gap: companion ? 2 : 6,
                   width: '100%',
                   height: '100%',
                   minHeight: 52,
                   borderRadius: 26,
                   boxSizing: 'border-box',
-                  background: dark ? 'rgba(18,18,20,0.98)' : 'rgba(252,249,244,0.98)',
+                  background: companion ? 'rgba(255,255,255,.92)' : dark ? 'rgba(18,18,20,0.98)' : 'rgba(252,249,244,0.98)',
                   border: '1px solid ' + (dark ? 'rgba(244,240,235,0.22)' : 'rgba(24,22,15,0.16)'),
-                  boxShadow: dark
+                  boxShadow: companion ? 'inset 0 2px 2px #fff, 0 7px 25px #34394407' : dark
                     ? '0 12px 32px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07)'
                     : '0 12px 28px rgba(24,22,15,0.14), inset 0 1px 0 rgba(255,255,255,0.85)',
                   backdropFilter: 'blur(32px) saturate(1.2)',
                   WebkitBackdropFilter: 'blur(32px) saturate(1.2)',
-                  padding: '0 8px 0 17px',
+                  padding: companion ? '0 5px' : '0 8px 0 17px',
                   overflow: 'hidden',
                 }}
               >
@@ -806,6 +821,8 @@ export function ChatScreen({
                   `readOnly` + `aria-disabled` rather than `disabled`, so the reason stays reachable
                   to a screen reader instead of the control vanishing from the tab order.
                 */}
+                {companion ? <button type="button" className="companion-compose-control" aria-label="Товар по фото накладной"
+                  disabled={!view.composer.enabled || view.inFlight} onClick={() => goodsPhoto.open()}><span aria-hidden="true">+</span></button> : null}
                 {listening ? (
                   // app.html:21830-21836 — while listening the field IS the status: a pulsing dot,
                   // the elapsed time in tabular figures so it does not jitter, and the one hint
@@ -938,8 +955,8 @@ export function ChatScreen({
                     else voice.send(proof);
                   }}
                   style={{
-                    width: 36,
-                    height: 36,
+                    width: companion ? 44 : 36,
+                    height: companion ? 44 : 36,
                     borderRadius: 999,
                     flexShrink: 0,
                     display: 'flex',
@@ -947,8 +964,8 @@ export function ChatScreen({
                     justifyContent: 'center',
                     border: '0',
                     padding: 0,
-                    background: micLive ? t.ink : MAYA_ACCENT,
-                    color: micLive ? t.bg : MAYA_ACCENT_ON,
+                    background: micLive ? t.ink : companion ? 'transparent' : t.accent,
+                    color: micLive ? t.bg : companion ? t.ink : t.accentOn,
                     opacity: micUsable ? 1 : 0.38,
                     cursor: micUsable ? 'pointer' : 'default',
                     touchAction: 'none',
@@ -956,7 +973,7 @@ export function ChatScreen({
                     transition: 'transform .16s ease, background .16s ease',
                   }}
                 >
-                  <MayaVolumeMark size={18} />
+                  {companion ? <span className="companion-mic-icon" aria-hidden="true" /> : <MayaVolumeMark size={18} />}
                 </button>
 
                 {/* app.html:21861-21863 */}
@@ -967,8 +984,8 @@ export function ChatScreen({
                   aria-disabled={!canSend}
                   onClick={() => send()}
                   style={{
-                    width: 36,
-                    height: 36,
+                    width: companion ? 44 : 36,
+                    height: companion ? 44 : 36,
                     borderRadius: 999,
                     flexShrink: 0,
                     display: 'flex',
@@ -977,9 +994,9 @@ export function ChatScreen({
                     border: '0',
                     padding: 0,
                     cursor: canSend ? 'pointer' : 'default',
-                    background: MAYA_ACCENT,
+                    background: t.accent,
                     color: MAYA_ACCENT_ON,
-                    boxShadow: '0 6px 16px rgba(10,132,255,.4)',
+                    boxShadow: companion ? 'none' : '0 6px 16px rgba(10,132,255,.4)',
                     opacity: view.inFlight ? 0.5 : canSend ? 1 : 0.55,
                   }}
                 >

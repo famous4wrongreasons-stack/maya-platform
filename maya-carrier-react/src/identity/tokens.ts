@@ -10,7 +10,7 @@
 // what ships, and the discrepancy is disclosed rather than resolved unilaterally.
 
 export interface Tokens {
-  readonly name: 'aurora';
+  readonly name: 'aurora' | 'companion';
   readonly dark: boolean;
   /** The page ground. */
   readonly bg: string;
@@ -31,4 +31,10 @@ export const tokens = (dark: boolean): Tokens => ({
   ink: dark ? '#F4F0EB' : '#0B0B0C',
   accent: MAYA_ACCENT,
   accentOn: MAYA_ACCENT_ON,
+});
+
+/** Owner-supplied 2026-10-11 visual package. No dark variant was supplied. */
+export const companionTokens = (): Tokens => ({
+  name: 'companion', dark: false, bg: '#FFFFFF', ink: '#191A1B',
+  accent: '#0068ED', accentOn: '#FFFFFF',
 });

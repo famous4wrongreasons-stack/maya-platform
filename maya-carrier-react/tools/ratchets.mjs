@@ -14,6 +14,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
+import { artworkUrls } from './design-assets.mjs';
 
 export class CarrierRefused extends Error {
   constructor(refusals) {
@@ -454,7 +455,10 @@ const crypto_sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
 export function checkCss(rel, css) {
   const out = [];
   // An inline SVG data: URI is bytes in this file, not a fetch — admitted by shape, as in the shell.
-  const outside = css.replace(/url\("data:image\/svg\+xml,[^"]*"\)/g, 'INLINE_SVG');
+  // Only the two hash-verified owner-supplied PNG byte strings may supplement inline SVG.
+  // A data: prefix, local pathname, interpolated URL or arbitrary PNG is NOT an allowance.
+  let outside = css.replace(/url\("data:image\/svg\+xml,[^"]*"\)/g, 'INLINE_SVG');
+  for (const exact of artworkUrls()) outside = outside.split(exact).join('PINNED_ARTWORK');
   for (const [re, name, why] of [
     [/url\(/g, 'url(', 'no external resource: a font, icon or image from a third party leaks the visit, the Referer and the IP of every salon client (152-FZ contour)'],
     [/@import/g, '@import', 'no external resource'],

@@ -1,6 +1,6 @@
 // The signed-out surface.
 //
-// Presentation uses the same Aurora tokens, Maya mark and pill controls as the chat.
+// Presentation shares the chat's tokens, selected local wordmark and pill controls.
 // Session and business selection remain owned by the shared runtime.
 //
 // Two paths, both the runtime's: hand this browser to Telegram for a chosen business, or a one-time
@@ -36,7 +36,6 @@ import {
   signedOutSentence,
 } from '../runtime/copy.ts';
 import { Backdrop } from '../identity/Backdrop.tsx';
-import { MayaMark } from '../identity/MayaMark.tsx';
 import { MAYA_ACCENT, MAYA_ACCENT_ON, type Tokens } from '../identity/tokens.ts';
 
 const READING = '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
@@ -180,7 +179,7 @@ export function SignIn({
       >
         <div style={{ width: '100%', maxWidth: 400, margin: 'auto', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 18 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: t.ink }}>
-          <MayaMark size={40} />
+          <span className="companion-logo" role="img" aria-label="Maya" />
           <h2
             style={{
               margin: 0,

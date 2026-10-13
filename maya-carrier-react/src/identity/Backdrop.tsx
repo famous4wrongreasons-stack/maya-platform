@@ -15,6 +15,7 @@ const WASH_LIGHT =
   'radial-gradient(60% 45% at 50% 110%, rgba(255,255,255,0.14), transparent 60%)';
 
 export function Backdrop({ t }: { readonly t: Tokens }) {
+  if (t.name === 'companion') return <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: t.bg }} />;
   return (
     <div aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: t.bg }}>
       <div

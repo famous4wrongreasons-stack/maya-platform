@@ -1,0 +1,20 @@
+{
+  "sourcePackage": "Maya_full_design_package/2026-10-11",
+  "packageManifestSha256": "fcb463bd245b1a1223bfdf1ae59fedecf3db4e6d98771d6bd29b6e4ebe09be09",
+  "assets": [
+    {
+      "source": "assets/maya-logo.png",
+      "file": "maya-logo.png",
+      "variable": "--maya-logo-image",
+      "sha256": "53d4b9fb9aa48915d89d88b5fc945568afa1aa7f532475c34333b8096bc41600",
+      "size": 284452
+    },
+    {
+      "source": "assets/motion/maya-rig.png",
+      "file": "maya-rig.png",
+      "variable": "--maya-companion-atlas",
+      "sha256": "26f12592f2fb6a6f38b13ffeda50ac818995995dad56cf013b9ae093b48d7e60",
+      "size": 812947
+    }
+  ]
+}

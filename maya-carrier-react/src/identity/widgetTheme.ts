@@ -25,6 +25,11 @@ export interface WidgetTheme {
 }
 
 export const widgetTheme = (t: Tokens): WidgetTheme => {
+  if (t.name === 'companion') return {
+    ink: t.ink, muted: '#65696F', faint: '#74777C', line: '#E6E7E9', line2: '#D7DADE',
+    surf: '#F1F2F3', surf2: '#E9EDF1', bg2: '#FFFFFF',
+    invBg: t.accent, invText: t.accentOn, errc: '#983636',
+  };
   const dark = t.dark;
   return {
     ink: t.ink,
