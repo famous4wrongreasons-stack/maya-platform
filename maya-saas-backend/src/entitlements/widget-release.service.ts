@@ -1,9 +1,10 @@
 import { NO_HANDOFF_PROFILE } from './widget-release-profile.contract';
+import { SINGLE_OPERATOR } from './widget-release-production.contract';
 import {
-  isProductionAuthorization,
-  SINGLE_OPERATOR_RELEASE_AUTH,
-  SINGLE_OPERATOR,
-} from './widget-release-production.contract';
+  isProfileExecutionAuthorization,
+  isSingleOperatorAuthorization,
+  STAGING_SINGLE_OPERATOR_AUTH,
+} from './widget-release-staging.contract';
 import { ConflictException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { Prisma, TenantEntitlement } from '@prisma/client';
@@ -161,10 +162,16 @@ export class WidgetReleaseService {
             state.certificateDigest !== a.certificateDigest
           )
             releaseDeny('revoke_target');
-          if (isProductionAuthorization(a)) {
-            const granted = object(
-              object(object(state.command).authorization).payload,
-            );
+          const granted = object(
+            object(object(state.command).authorization).payload,
+          );
+          // Neither legacy staging authority nor any other version may revoke this lineage.
+          if (
+            granted.contract === STAGING_SINGLE_OPERATOR_AUTH &&
+            a.contract !== granted.contract
+          )
+            releaseDeny('staging_revoke_target');
+          if (isProfileExecutionAuthorization(a)) {
             if (
               granted.contract !== a.contract ||
               granted.releaseId !== a.releaseId ||
@@ -172,7 +179,7 @@ export class WidgetReleaseService {
               granted.profileDigest !== a.profileDigest ||
               granted.evidenceDigest !== a.evidenceDigest ||
               granted.buildDigest !== a.buildDigest ||
-              (a.contract === SINGLE_OPERATOR_RELEASE_AUTH &&
+              (isSingleOperatorAuthorization(a) &&
                 (granted.governance !== SINGLE_OPERATOR ||
                   granted.independentHumanReview !== false ||
                   granted.reviewerId !== null ||
@@ -190,7 +197,7 @@ export class WidgetReleaseService {
             previousVersion,
             candidateSha: a.candidateSha,
             certificateDigest: a.certificateDigest,
-            ...(a.contract === SINGLE_OPERATOR_RELEASE_AUTH
+            ...(isSingleOperatorAuthorization(a)
               ? { governance: SINGLE_OPERATOR, independentHumanReview: false }
               : {}),
           };
@@ -229,13 +236,13 @@ export class WidgetReleaseService {
           appliedAt: now.toISOString(),
           expiresAt: updated.expiresAt?.toISOString() ?? null,
           auditId,
-          ...(a.contract === SINGLE_OPERATOR_RELEASE_AUTH
+          ...(isSingleOperatorAuthorization(a)
             ? {
                 governance: SINGLE_OPERATOR,
                 independentHumanReview: false as const,
               }
             : {}),
-          ...(isProductionAuthorization(a)
+          ...(isProfileExecutionAuthorization(a)
             ? {
                 execution: {
                   releaseId: a.releaseId,
@@ -277,8 +284,8 @@ export class WidgetReleaseService {
           },
           tx,
         );
-        // Production must fail closed even if an audit adapter silently drops the write.
-        if (isProductionAuthorization(a)) {
+        // Profile executions fail closed even if the audit adapter silently drops the write.
+        if (isProfileExecutionAuthorization(a)) {
           const recorded = await tx.auditLog.findUnique({
             where: { id: auditId },
           });

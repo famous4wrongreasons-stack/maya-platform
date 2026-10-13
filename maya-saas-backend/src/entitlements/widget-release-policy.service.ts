@@ -7,9 +7,16 @@ import {
 } from './widget-release-profile.contract';
 import { widgetProofEnvironment } from './widget-release-environment';
 import {
+  isProfileExecutionAuthorization,
+  isSingleOperatorAuthorization,
+  stagingSingleOperatorAuthorization,
+  STAGING_SINGLE_OPERATOR_AUTH,
+  STAGING_SINGLE_OPERATOR_TRUST,
+  STAGING_SINGLE_OPERATOR_TENANTS,
+} from './widget-release-staging.contract';
+import {
   productionAuthorization,
   isProductionAuthorization,
-  SINGLE_OPERATOR_RELEASE_AUTH,
   SINGLE_OPERATOR,
   type AnyReleaseAuthorization,
 } from './widget-release-production.contract';
@@ -61,10 +68,11 @@ export interface ReleaseOverride {
 export class WidgetReleasePolicy {
   constructor(private readonly config: ConfigService = new ConfigService()) {}
   private fingerprint: string | undefined;
-  buildDigest(): string {
-    // Production admission rechecks bytes, including after an earlier successful read.
+  buildDigest(recheck = false): string {
+    // Production and explicit local staging admission recheck bytes after earlier reads.
     if (
       this.fingerprint &&
+      !recheck &&
       this.config.get<string>('NODE_ENV') !== 'production'
     )
       return this.fingerprint;
@@ -125,19 +133,54 @@ export class WidgetReleasePolicy {
     for (const tenant of tenants) identifier(tenant);
     if (!tenants.includes(tenantId)) releaseDeny('production_tenant');
   }
+  private stagingTenant(tenantId: string): void {
+    const tenants: unknown = JSON.parse(
+      this.config.get<string>(STAGING_SINGLE_OPERATOR_TENANTS) ?? '[]',
+    );
+    if (
+      !Array.isArray(tenants) ||
+      !tenants.length ||
+      new Set(tenants).size !== tenants.length
+    )
+      releaseDeny('staging_tenant');
+    for (const tenant of tenants) identifier(tenant);
+    if (!tenants.includes(tenantId)) releaseDeny('staging_tenant');
+  }
   private readAuthorization(value: unknown) {
+    const environment = this.environment();
+    // The caller can select a contract, never its trust key or execution environment.
+    if (
+      object(object(value).payload).contract === STAGING_SINGLE_OPERATOR_AUTH
+    ) {
+      const db = new URL(this.config.get<string>('DATABASE_URL') ?? 'invalid:');
+      if (
+        environment !== 'staging' ||
+        !['development', 'test'].includes(
+          this.config.get<string>('NODE_ENV') ?? '',
+        ) ||
+        db.hostname !== '127.0.0.1' ||
+        !db.port ||
+        db.port === '5432'
+      )
+        releaseDeny('local_staging_environment');
+      return this.signed<AnyReleaseAuthorization>(
+        value,
+        'owner',
+        stagingSingleOperatorAuthorization,
+        STAGING_SINGLE_OPERATOR_TRUST,
+      );
+    }
     return this.signed<AnyReleaseAuthorization>(
       value,
       'owner',
-      this.environment() === 'production'
-        ? productionAuthorization
-        : authorization,
+      environment === 'production' ? productionAuthorization : authorization,
     );
   }
   private signed<T>(
     value: unknown,
     purpose: TrustKey['purpose'],
     parse: (v: unknown) => T,
+    trustNamespace?: typeof STAGING_SINGLE_OPERATOR_TRUST,
   ): { payload: T; principalId: string; signed: Signed<T> } {
     const v = exact(value, ['payload', 'keyId', 'signature']);
     identifier(v.keyId);
@@ -149,9 +192,10 @@ export class WidgetReleasePolicy {
     const trust = object(
       JSON.parse(
         this.config.get<string>(
-          this.environment() === 'production'
-            ? 'WIDGET_RELEASE_PRODUCTION_TRUST_JSON'
-            : 'WIDGET_RELEASE_TRUST_JSON',
+          trustNamespace ??
+            (this.environment() === 'production'
+              ? 'WIDGET_RELEASE_PRODUCTION_TRUST_JSON'
+              : 'WIDGET_RELEASE_TRUST_JSON'),
         ) ?? '{}',
       ),
     );
@@ -205,6 +249,8 @@ export class WidgetReleasePolicy {
     let c: ReleaseCertificate | ProfileCertificate | undefined;
     if (operation === 'grant') {
       if (isProductionAuthorization(a)) this.productionTenant(tenantId);
+      if (a.contract === STAGING_SINGLE_OPERATOR_AUTH)
+        this.stagingTenant(tenantId);
       c = this.checkCertificate(input.certificate, a, now);
       if (
         instant(a.grantExpiresAt) <= now.getTime() ||
@@ -225,16 +271,15 @@ export class WidgetReleasePolicy {
     a: AnyReleaseAuthorization,
     now: Date,
   ) {
-    const { payload: c, principalId } =
-      a.contract === SINGLE_OPERATOR_RELEASE_AUTH
-        ? // Exactly one owner execution signature binds this raw certificate's digest.
-          // A second self-signature is neither needed nor represented as security review.
-          { payload: profileCertificate(value), principalId: null }
-        : this.signed(value, 'security', (value) =>
-            object(value).contract === PROFILE_CERT
-              ? profileCertificate(value)
-              : certificate(value),
-          );
+    const { payload: c, principalId } = isSingleOperatorAuthorization(a)
+      ? // Exactly one owner execution signature binds this raw certificate's digest.
+        // A second self-signature is neither needed nor represented as security review.
+        { payload: profileCertificate(value), principalId: null }
+      : this.signed(value, 'security', (value) =>
+          object(value).contract === PROFILE_CERT
+            ? profileCertificate(value)
+            : certificate(value),
+        );
     if (
       principalId !== a.reviewerId ||
       releaseHash(value) !== a.certificateDigest ||
@@ -244,7 +289,7 @@ export class WidgetReleasePolicy {
     )
       releaseDeny('certificate_binding');
     if (
-      isProductionAuthorization(a) &&
+      isProfileExecutionAuthorization(a) &&
       (c.contract !== PROFILE_CERT ||
         c.scope !== a.profileId ||
         c.profileDigest !== a.profileDigest ||
@@ -254,7 +299,8 @@ export class WidgetReleasePolicy {
     if (
       a.candidateSha !==
         this.config.get<string>('WIDGET_RELEASE_CANDIDATE_SHA') ||
-      a.buildDigest !== this.buildDigest()
+      a.buildDigest !==
+        this.buildDigest(a.contract === STAGING_SINGLE_OPERATOR_AUTH)
     )
       releaseDeny('running_candidate');
     if (
@@ -304,6 +350,8 @@ export class WidgetReleasePolicy {
       )
         return null;
       if (isProductionAuthorization(a)) this.productionTenant(tenantId);
+      if (a.contract === STAGING_SINGLE_OPERATOR_AUTH)
+        this.stagingTenant(tenantId);
       if (
         instant(state.appliedAt) < instant(a.notBefore) ||
         instant(state.appliedAt) >= instant(a.expiresAt) ||
@@ -319,7 +367,7 @@ export class WidgetReleasePolicy {
         version: state.version,
         certificateDigest: a.certificateDigest,
         profileDigest: cert.contract === PROFILE_CERT ? PROFILE_DIGEST : null,
-        ...(a.contract === SINGLE_OPERATOR_RELEASE_AUTH
+        ...(isSingleOperatorAuthorization(a)
           ? {
               governance: SINGLE_OPERATOR,
               independentHumanReview: false as const,

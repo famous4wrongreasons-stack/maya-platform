@@ -42,3 +42,23 @@ test('single-operator preflight accepts one real owner key and explicitly record
  assert.equal(r.independentHumanReview,false);assert.equal(r.keys.length,1);assert.equal(r.authorityGranted,false);assert.equal(r.sessionVerified,false);
  for(const t of [{},trust,{security:trust.security}]) {e.WIDGET_RELEASE_PRODUCTION_TRUST_JSON=JSON.stringify(t);assert.throws(()=>checkConfig(e,'test-tenant','a'.repeat(40),'single-operator'));}
 });
+
+const stagingConfig = () => ({ NODE_ENV:'development', WIDGET_RELEASE_ENVIRONMENT:'staging',
+ DATABASE_URL:'postgresql://test@127.0.0.1:55729/maya_widget_release_staging_synthetic',
+ WIDGET_RELEASE_CANDIDATE_SHA:'a'.repeat(40), WIDGET_RELEASE_STAGING_SINGLE_OPERATOR_TENANTS_JSON:'["test-tenant"]',
+ WIDGET_RELEASE_STAGING_SINGLE_OPERATOR_TRUST_JSON:JSON.stringify({owner:trust.owner}) });
+const stagingCheck = e => checkConfig(e,'test-tenant','a'.repeat(40),'single-operator','local-staging');
+test('local staging preflight is separate, public-only and grants no authority',()=>{
+ const r=stagingCheck(stagingConfig());assert.equal(r.execution,'local-staging');assert.equal(r.independentHumanReview,false);assert.equal(r.authorityGranted,false);assert.equal(r.sessionVerified,false);
+ assert.throws(()=>checkConfig(stagingConfig(),'test-tenant','a'.repeat(40),'single-operator'));
+});
+for (const [name,edit] of [
+ ['production runtime',e=>e.NODE_ENV='production'],
+ ['production execution',e=>e.WIDGET_RELEASE_ENVIRONMENT='production'],
+ ['owner database',e=>e.DATABASE_URL='postgresql://test@127.0.0.1:55729/maya_local_onboarding_x'],
+ ['remote database',e=>e.DATABASE_URL=e.DATABASE_URL.replace('127.0.0.1','remote.example')],
+ ['shared port',e=>e.DATABASE_URL=e.DATABASE_URL.replace('55729','5432')],
+ ['wildcard',e=>e.WIDGET_RELEASE_STAGING_SINGLE_OPERATOR_TENANTS_JSON='["*"]'],
+ ['production trust fallback',e=>{e.WIDGET_RELEASE_PRODUCTION_TRUST_JSON=e.WIDGET_RELEASE_STAGING_SINGLE_OPERATOR_TRUST_JSON;delete e.WIDGET_RELEASE_STAGING_SINGLE_OPERATOR_TRUST_JSON;}],
+ ['legacy trust fallback',e=>{e.WIDGET_RELEASE_TRUST_JSON=e.WIDGET_RELEASE_STAGING_SINGLE_OPERATOR_TRUST_JSON;delete e.WIDGET_RELEASE_STAGING_SINGLE_OPERATOR_TRUST_JSON;}],
+]) test('local staging operator refuses '+name,()=>{const e=stagingConfig();edit(e);assert.throws(()=>stagingCheck(e));});

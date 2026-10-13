@@ -12,6 +12,7 @@ import {
   NO_HANDOFF_PROFILE,
   PROFILE_DIGEST,
 } from './widget-release-profile.contract';
+import type { StagingSingleOperatorAuthorization } from './widget-release-staging.contract';
 
 /** A separate owner execution decision. A certificate, legacy authorization or config flag is insufficient. */
 export const PRODUCTION_RELEASE_AUTH =
@@ -45,7 +46,9 @@ export interface SingleOperatorReleaseAuthorization extends Omit<
 export type ProductionAuthorization =
   ProductionReleaseAuthorization | SingleOperatorReleaseAuthorization;
 export type AnyReleaseAuthorization =
-  ReleaseAuthorization | ProductionAuthorization;
+  | ReleaseAuthorization
+  | ProductionAuthorization
+  | StagingSingleOperatorAuthorization;
 export function isProductionAuthorization(
   a: AnyReleaseAuthorization,
 ): a is ProductionAuthorization {

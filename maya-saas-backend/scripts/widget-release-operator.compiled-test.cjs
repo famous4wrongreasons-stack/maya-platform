@@ -30,13 +30,21 @@ function command(single=false) {
     expectedVersion:'absent',notBefore:new Date(now-1000).toISOString(),expiresAt,grantExpiresAt:expiresAt,releaseId:'synthetic-only',profileId:NO_HANDOFF_PROFILE,profileDigest:PROFILE_DIGEST,evidenceDigest:payload.evidenceDigest});
   return {certificate,authorization};
 }
-function check(c, actor=operator) {
+function check(c, actor=operator, localStaging=false) {
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'maya-operator-offline-'));
   try {
     const settings=structuredClone(env); if(c.authorization?.payload?.contract===SINGLE_OPERATOR_RELEASE_AUTH) settings.WIDGET_RELEASE_PRODUCTION_TRUST_JSON=JSON.stringify({owner:{purpose:'owner',principalId:operator,publicKey:keys.owner.publicKey.export({type:'spki',format:'pem'})}});
+    if(localStaging){
+      settings.NODE_ENV='development';settings.WIDGET_RELEASE_ENVIRONMENT='staging';
+      settings.DATABASE_URL='postgresql://test@127.0.0.1:55729/maya_widget_release_staging_synthetic';
+      settings.WIDGET_RELEASE_STAGING_SINGLE_OPERATOR_TENANTS_JSON=JSON.stringify([tenant]);
+      settings.WIDGET_RELEASE_STAGING_SINGLE_OPERATOR_TRUST_JSON=JSON.stringify({owner:{purpose:'owner',principalId:operator,publicKey:keys.owner.publicKey.export({type:'spki',format:'pem'})}});
+      delete settings.WIDGET_RELEASE_PRODUCTION_TRUST_JSON;
+      delete settings.WIDGET_RELEASE_PRODUCTION_TENANTS_JSON;
+    }
     fs.writeFileSync(path.join(dir,'public.env'),Object.entries(settings).map(([k,v])=>k+"='"+v+"'").join('\n'),{mode:0o600});
     fs.writeFileSync(path.join(dir,'test-command.json'),JSON.stringify(c),{mode:0o600});
-    return spawnSync(process.execPath,[path.join(__dirname,'widget-release-operator.cjs'),'check-command',path.join(dir,'public.env'),tenant,candidate,path.join(dir,'test-command.json'),actor],
+    return spawnSync(process.execPath,[path.join(__dirname,'widget-release-operator.cjs'),localStaging?'check-staging-command':'check-command',path.join(dir,'public.env'),tenant,candidate,path.join(dir,'test-command.json'),actor],
       {cwd:path.resolve(__dirname,'..'),env:{PATH:process.env.PATH,HOME:process.env.HOME},encoding:'utf8'});
   } finally { fs.rmSync(dir,{recursive:true,force:true}); }
 }
@@ -56,4 +64,12 @@ test('compiled single-operator CLI validates one execution signature and raw cer
  const c=command(true),r=check(c);assert.equal(r.status,0,r.stderr);const p=JSON.parse(r.stdout);assert.equal(p.governance,'single-operator');assert.equal(p.independentHumanReview,false);assert.equal(p.keys.length,1);assert.equal(p.authorityGranted,false);assert.equal(p.sessionVerified,false);
  for(const edit of [x=>x.certificate.carrierDigest='b'.repeat(64),x=>x.authorization.signature='a'.repeat(86),x=>x.authorization=signed('owner',{...x.authorization.payload,independentHumanReview:true}),x=>x.authorization=signed('owner',{...x.authorization.payload,reviewerId:operator}),x=>x.certificate=signed('owner',x.certificate)]){const x=command(true);edit(x);assert.equal(check(x).status,1);}
  assert.equal(check(command(true),'other-operator').status,1);
+});
+
+test('compiled local staging command preflight validates its own contract and refuses production or second self-signature',()=>{
+ const make=()=>{const c=command(true);c.certificate.environment='staging';c.authorization=signed('owner',{...c.authorization.payload,contract:'maya.widget-release-staging-authorization/1',environment:'staging',certificateDigest:releaseHash(c.certificate)});return c;};
+ const c=make(),r=check(c,operator,true);assert.equal(r.status,0,r.stderr);
+ const body=JSON.parse(r.stdout);assert.equal(body.execution,'local-staging');assert.equal(body.authorityGranted,false);assert.equal(body.sessionVerified,false);
+ assert.equal(check(c).status,1);assert.equal(check(command(true),operator,true).status,1);
+ for(const edit of [x=>x.authorization=signed('owner',{...x.authorization.payload,independentHumanReview:true}),x=>x.authorization=signed('owner',{...x.authorization.payload,reviewerId:operator}),x=>x.certificate=signed('owner',x.certificate)]){const x=make();edit(x);assert.equal(check(x,operator,true).status,1);}
 });

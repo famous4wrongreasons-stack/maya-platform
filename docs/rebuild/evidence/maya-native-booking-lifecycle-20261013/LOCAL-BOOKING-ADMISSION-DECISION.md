@@ -2,6 +2,12 @@
 
 Status: PROPOSED ONLY. No authorization, trust, database copy, grant, provider call or product change is issued by this document.
 
+**Subsequent owner decision, 2026-10-13:** Option A approved for local
+implementation and synthetic verification. The proposal below is retained as
+the decision's provenance. Implementation contract: `LOCAL-STAGING-AR1.md`.
+Real execution preconditions below remain open; the approval does not authorize
+database copying, real signing/grants, spending or external effects.
+
 ## Established boundary
 
 Current development branch: `codex/maya-local-crm-setup-20261010`.

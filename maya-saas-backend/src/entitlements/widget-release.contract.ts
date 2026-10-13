@@ -86,7 +86,7 @@ export interface ReleaseReceipt {
   independentHumanReview?: false;
   execution?: {
     releaseId: string;
-    environment: 'production';
+    environment: 'production' | 'staging';
     profileId: string;
     profileDigest: string;
     evidenceDigest: string;

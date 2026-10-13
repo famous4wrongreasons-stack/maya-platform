@@ -1,0 +1,10 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": "widgets-live/widget-staging.*\\.staging-spec\\.ts$",
+  "transform": { "^.+\\.(t|j)s$": "ts-jest" },
+  "globalSetup": "<rootDir>/widgets-live/support/widget-staging-environment.ts",
+  "setupFiles": ["<rootDir>/widgets-live/support/widget-staging-setup.ts"],
+  "testTimeout": 120000
+}
