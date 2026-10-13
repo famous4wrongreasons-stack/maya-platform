@@ -1,0 +1,59 @@
+{
+  "contract": "maya.companion.tasks.scoped-evidence/1",
+  "candidate": "438909a88dcae9e3e7f72973f70953ed3300594e",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "node": "v22.23.3",
+  "collectedAt": "2026-10-13T15:07:24.423569+00:00",
+  "cleanProductHeadAtRuns": true,
+  "runtime": {
+    "tests": 779,
+    "pass": 772,
+    "fail": 0,
+    "skipped": 7
+  },
+  "carrier": {
+    "tests": 172,
+    "pass": 172,
+    "fail": 0,
+    "skipped": 0
+  },
+  "packaging": {
+    "tests": 18,
+    "pass": 18,
+    "fail": 0,
+    "skipped": 0
+  },
+  "backendHttp": {
+    "pass": 9,
+    "fail": 0,
+    "database": "synthetic Prisma fixture; actual Nest guards/controller"
+  },
+  "carrierRatchets": {
+    "refuse": 72,
+    "admit": 45,
+    "failures": 0
+  },
+  "mutations": {
+    "greenBaseline": true,
+    "killed": 9,
+    "survived": 0
+  },
+  "browser": {
+    "chat": 35,
+    "tasks": 32,
+    "externalRequests": 0,
+    "syntheticHttp": true
+  },
+  "parity": {
+    "pass": true,
+    "filesPerTarget": 8,
+    "sameCssArtwork": true,
+    "onlyApprovedEndpointSubstitution": true,
+    "nativeInstall": false
+  },
+  "fullReleaseCertificate": "NOT ISSUED",
+  "realEffects": 0,
+  "productionAccess": false,
+  "retainedDatabaseAccess": false,
+  "keychainAccess": false
+}

@@ -1,0 +1,184 @@
+[
+  {
+    "source": "/private/tmp/maya-tasks-final-runtime.log",
+    "sha256": "751763de887e0399fbe210e98b212401e0991e8b0aad95180d8a5c6c886a00fa",
+    "bytes": 195313,
+    "repository": "receipts/runtime.log",
+    "synthetic": true
+  },
+  {
+    "source": "/private/tmp/maya-tasks-final-carrier.log",
+    "sha256": "7791dd0c009000bfe4d34c675c04140f043a535e74de5fcb9221020a85a0d15b",
+    "bytes": 35400,
+    "repository": "receipts/carrier.log",
+    "synthetic": true
+  },
+  {
+    "source": "/private/tmp/maya-tasks-final-ratchets.log",
+    "sha256": "9c9dd5d2e95815e834abf4fb37f14e912fa39892a46a54fa8263132617a98256",
+    "bytes": 7864,
+    "repository": "receipts/ratchets.log",
+    "synthetic": true
+  },
+  {
+    "source": "/private/tmp/maya-tasks-final-parity.log",
+    "sha256": "08676ca18484fdaa1bac897ba77428f3c5a5ebe52623c4b1b3f74f27894b82b0",
+    "bytes": 732,
+    "repository": "receipts/parity.log",
+    "synthetic": true
+  },
+  {
+    "source": "/private/tmp/maya-tasks-final-packaging.log",
+    "sha256": "a53054dcb36c9baa60520682a7968664ffe6fc63665105f2e61e3e12840ca3b8",
+    "bytes": 3307,
+    "repository": "receipts/packaging.log",
+    "synthetic": true
+  },
+  {
+    "source": "/private/tmp/maya-tasks-final-backend.log",
+    "sha256": "b8cf504844efcc1679730e6768ab42ebec997269c413470a5a8f64bee36e3c74",
+    "bytes": 1020,
+    "repository": "receipts/backend.log",
+    "synthetic": true
+  },
+  {
+    "source": "/private/tmp/maya-companion-chat-438909a8/chat-1280.png",
+    "sha256": "b0117764f6c8432158091971fd0d338b766d7086fe12cb54c405ecc2fc298236",
+    "bytes": 47155,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-chat-438909a8/chat-320.png",
+    "sha256": "154bbf552f7e5a175f6d30b9b24de07c493301126cce0c1be43eb13fc9573d45",
+    "bytes": 40340,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-chat-438909a8/chat-393.png",
+    "sha256": "29c13da18c899b9b7e2a7d85989527ce5a65f0cb501cf1183bcdde521fa86081",
+    "bytes": 41730,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-chat-438909a8/chat-427.png",
+    "sha256": "6724250faa0047410e06d1932ce0e2eca8be919aae4e581032eb5d1a47f5903f",
+    "bytes": 42191,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-chat-438909a8/failure-393.png",
+    "sha256": "c15eafe2e08bba533d61120380913542af2028d1de7135517da3841f14f4ef98",
+    "bytes": 60563,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-chat-438909a8/keyboard-height-393.png",
+    "sha256": "12f07d038e63d12197834575fed4250424bb9a377f3202f0366a43ce6bd9f2d0",
+    "bytes": 32554,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-chat-438909a8/large-text-393.png",
+    "sha256": "d715090b8dca18327c381d448593bf3236220c2ec439cf1fc5835fc69e0b359e",
+    "bytes": 61212,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-chat-438909a8/menu-393.png",
+    "sha256": "a793081427fa4dc3fe878bd787f9d288f11da3ee4975b456e0f23b63a16ccdfb",
+    "bytes": 34973,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-chat-438909a8/receipt.json",
+    "sha256": "2d1c4be39d4313fa3eee47ca71a7a4b8ff010e0afe71a0b7fc80f48ded1cc5ad",
+    "bytes": 2953,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-chat-438909a8/signin-393.png",
+    "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+    "bytes": 27941,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-chat-438909a8/thinking-393.png",
+    "sha256": "7e722734c84f162b8344c135a4da6c2a0cc72e4b7daeef556c3611d5b859ec36",
+    "bytes": 46448,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-tasks-438909a8/receipt.json",
+    "sha256": "de6a0681ffbbc0bfd1198dc61edc0fce2fa28b9e0c8d31fd0a52a0224028ddf2",
+    "bytes": 2743,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-tasks-438909a8/signin-393.png",
+    "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+    "bytes": 27941,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-tasks-438909a8/tasks-1280.png",
+    "sha256": "3d97227056d7221227c354de1444cbbaf2759d1cfab7c5275fe160e4bb125cec",
+    "bytes": 58276,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-tasks-438909a8/tasks-320.png",
+    "sha256": "0061f2fd2e9860e7e32e9a589f329b33f22095ad83642566626ddc81168a67ef",
+    "bytes": 51167,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-tasks-438909a8/tasks-393.png",
+    "sha256": "08c25533f040981cd738f713e2670fef50d572aae54c4c268246a0b51d21ecc5",
+    "bytes": 51412,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-tasks-438909a8/tasks-427.png",
+    "sha256": "f33bf97823fe57bc66a6f6ef1d4fdfdda9fbae8bf6180d50e0ccc4fe702f3971",
+    "bytes": 51825,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-tasks-438909a8/tasks-cap.png",
+    "sha256": "4439c82f55b8797842ecae24d7f639644ba20a414e16490d26bc85ae94878613",
+    "bytes": 50959,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-tasks-438909a8/tasks-denied.png",
+    "sha256": "5fe1882210c06341ad759e98b607a78448c059a29bba9e7e52e14e57a79becd1",
+    "bytes": 38816,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  },
+  {
+    "source": "/private/tmp/maya-companion-tasks-438909a8/tasks-large-text.png",
+    "sha256": "cb392437271343913af7872770ae4c0dbf51fd686181af5faed78b78993c2c35",
+    "bytes": 67430,
+    "synthetic": true,
+    "retention": "local browser artifact; selected views and full receipt also archived"
+  }
+]
