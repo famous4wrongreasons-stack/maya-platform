@@ -83,6 +83,15 @@ function fixture(policyContent?: unknown) {
   const write = jest.fn(() => {
     throw Error('read cannot compute or mutate');
   });
+  const policyRecord = {
+    id: row.policyRevisionId,
+    hash: row.policyContentHash,
+    content: policyContent,
+  };
+  const policyRead = jest.fn(async () => {
+    if (!policyContent) throw Error('unexpected policy read');
+    return policyRecord;
+  });
   const reader = new C8ReadService(
     { c8ResultRevision: { findMany } } as never,
     {
@@ -94,21 +103,14 @@ function fixture(policyContent?: unknown) {
     } as never,
     viewer as never,
     store as never,
-    {
-      policy: jest.fn(async () => {
-        if (!policyContent) throw Error('unexpected policy read');
-        return {
-          id: row.policyRevisionId,
-          hash: row.policyContentHash,
-          content: policyContent,
-        };
-      }),
-    } as never,
+    { policy: policyRead } as never,
     { compute: write } as never,
     { compute: write } as never,
   );
   return {
     row,
+    policyRecord,
+    policyRead,
     member,
     store,
     tx,
@@ -419,5 +421,101 @@ describe('Companion Ideas deterministic production values through reader and pro
     expect(project(await f.read()).rows[0].finding).toEqual({
       kind: 'unavailable',
     });
+  });
+  function ruleFixture(
+    unit = 'day',
+    count = 37,
+    comparison = 'gt',
+    services: string[] = [],
+  ) {
+    const content = JSON.parse(JSON.stringify(policy));
+    content.dormancyRules[0] = {
+      ...content.dormancyRules[0],
+      elapsed: { unit, count },
+      comparison,
+      serviceScope: services,
+    };
+    const f = fixture(content),
+      r = f.row;
+    r.kind = 'POLICY_SIGNAL';
+    r.subjectKind = 'client';
+    r.subjectId = 'private-client';
+    r.basis = 'proven_attendance_policy';
+    r.currency = null;
+    r.ruleKey = 'c8.dormancy/cadence';
+    r.scopeJson = { branchIds: [], serviceScope: services };
+    r.valuesJson = {
+      values: [
+        {
+          key: 'cadence',
+          type: 'policy',
+          value: false,
+          unit: 'boolean',
+          basis: 'proven_attendance_policy',
+          currency: null,
+        },
+      ],
+    };
+    return f;
+  }
+  it.each([
+    ['day', 37, 'gt'],
+    ['calendar_month', 2, 'gte'],
+  ])(
+    'retains exact source rule %s/%s/%s with no inferred schedule',
+    async (unit, count, comparison) => {
+      const f = ruleFixture(String(unit), Number(count), String(comparison), [
+        'private-service',
+      ]);
+      const list = await f.read(),
+        result = project(list).rows[0].finding;
+      expect(result).toEqual({
+        kind: 'policy',
+        met: false,
+        parameters: {
+          elapsed: { unit, count },
+          comparison,
+          evidence: 'proven_attendance',
+          minimumCoverage: 'PARTIAL',
+          serviceScope: { restricted: true, count: 1 },
+          timezone: 'Europe/Moscow',
+        },
+      });
+      expect(f.policyRead).toHaveBeenCalledTimes(1);
+      expect(f.policyRead).toHaveBeenCalledWith(f.tx);
+      expect(JSON.stringify(result)).not.toMatch(
+        /private|subjectId|serviceIds|policyContentHash/,
+      );
+      expect(f.write).not.toHaveBeenCalled();
+    },
+  );
+  it.each(['policy-id', 'policy-hash', 'service-scope', 'version'])(
+    'does not borrow replacement parameters after %s substitution',
+    async (change) => {
+      const f = ruleFixture();
+      if (change === 'policy-id') f.policyRecord.id = 'other-policy';
+      if (change === 'policy-hash') f.policyRecord.hash = 'f'.repeat(64);
+      if (change === 'service-scope')
+        f.row.scopeJson = { branchIds: [], serviceScope: ['other-service'] };
+      if (change === 'version') f.row.ruleVersion = 2;
+      expect(project(await f.read()).rows).toEqual([]);
+      expect(f.write).not.toHaveBeenCalled();
+    },
+  );
+  it('rechecks revocation during exact rule read before exposing parameters', async () => {
+    const f = ruleFixture();
+    f.policyRead.mockImplementation(async () => {
+      f.revoke();
+      return f.policyRecord;
+    });
+    await expect(f.read()).rejects.toThrow('revoked');
+  });
+  it('withholds expired rule while read is in flight', async () => {
+    const f = ruleFixture();
+    f.policyRead.mockImplementation(async () => {
+      f.row.expiresAt = new Date('2000-01-01T00:00:00.000Z');
+      return f.policyRecord;
+    });
+    await expect(f.read()).rejects.toThrow('c8_result_unavailable');
   });
 });

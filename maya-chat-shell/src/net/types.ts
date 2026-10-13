@@ -20,13 +20,20 @@ export interface ReportsSnapshot { readonly rows: readonly ReportSummary[]; }
 export interface ReportSnapshot extends ReportSummary { readonly timezone: string; readonly body: string; }
 export type WorkspaceReadFailure = { readonly reason: 'forbidden' | 'unavailable' | 'invalid_response' | 'aborted' } | { readonly reason: 'rate_limited'; readonly retryAfterSec: number };
 export type IdeaBasis = 'confirmed_cash' | 'confirmed_refunds' | 'confirmed_cash_net_linked_refunds' | 'booked_value' | 'provider_reported_gross' | 'observed_attended_count';
+export interface IdeaRuleParameters {
+  readonly elapsed: { readonly unit: 'day' | 'calendar_month'; readonly count: number };
+  readonly comparison: 'gt' | 'gte'; readonly evidence: 'proven_attendance';
+  readonly minimumCoverage: 'COMPLETE' | 'PARTIAL';
+  readonly serviceScope: { readonly restricted: boolean; readonly count: number };
+  readonly timezone: string;
+}
 /** Finite display values only. Rule/subject identities and execution authority stay server-owned. */
 export type IdeaFinding =
   | { readonly kind: 'unavailable' }
   | { readonly kind: 'unsupported' }
   | { readonly kind: 'invalid' }
   | { readonly kind: 'observation'; readonly basis: IdeaBasis; readonly value: string; readonly currency: string | null }
-  | { readonly kind: 'policy'; readonly met: boolean }
+  | { readonly kind: 'policy'; readonly met: boolean; readonly parameters: IdeaRuleParameters | null }
   | { readonly kind: 'scenario'; readonly value: string; readonly currency: string; readonly horizonEnd: string };
 export interface IdeaRead {
   readonly key: string; readonly revision: number; readonly digest: string | null;

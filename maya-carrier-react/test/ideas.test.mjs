@@ -18,7 +18,7 @@ test('Ideas values show exact kopecks without floating point truncation or curre
 });
 test('Ideas value meanings retain money proxy conditional and policy limitations',()=>{
  for(const [basis,phrase] of [['confirmed_cash','без вычета возвратов'],['confirmed_refunds','а не поступления'],['confirmed_cash_net_linked_refunds','это не прибыль'],['booked_value','не означает, что оплата уже получена'],['provider_reported_gross','не подтверждает полученные деньги']])assert.ok(htmlFor({kind:'observation',basis,currency:'RUB',value:'100'}).includes(phrase));
- for(const met of [true,false]){const html=htmlFor({kind:'policy',met});assert.ok(html.includes(met?'Условие правила выполнено':'Условие правила не выполнено'));assert.ok(html.includes('не согласие клиента'));assert.ok(html.includes('Порог правила здесь не показан'));}
+ for(const met of [true,false]){const html=htmlFor({kind:'policy',met});assert.ok(html.includes(met?'Условие правила выполнено':'Условие правила не выполнено'));assert.ok(html.includes('не согласие клиента'));assert.ok(html.includes('Параметры этого правила не подтверждены'));}
  const html=htmlFor({kind:'scenario',value:'250000',currency:'RUB',horizonEnd:row.expiresAt});for(const text of ['При сохранении этой записи','не полученная оплата','не ожидаемый доход','Горизонт сценария'])assert.ok(html.includes(text));
 });
 test('Ideas invalid unsupported and unavailable values never render zero or stale scalar',()=>{
@@ -26,4 +26,26 @@ test('Ideas invalid unsupported and unavailable values never render zero or stal
  assert.ok(htmlFor({kind:'unsupported'}).includes('пока не поддерживается'));
  assert.ok(htmlFor({kind:'unavailable'}).includes('отсутствие не означает ноль'));
  const html=render({detail:{...row,available:false,finding:{kind:'observation',basis:'confirmed_cash',currency:'RUB',value:'87654321'}}});assert.ok(!html.includes('876'));assert.ok(!html.includes('₽'));
+});
+
+const parameters=(patch={})=>({elapsed:{unit:'day',count:37},comparison:'gt',evidence:'proven_attendance',minimumCoverage:'PARTIAL',serviceScope:{restricted:false,count:0},timezone:'Europe/Moscow',...patch});
+test('Ideas rule explanation preserves strict elapsed-day semantics coverage and literal false result',()=>{
+ const html=htmlFor({kind:'policy',met:false,parameters:parameters()});
+ for(const phrase of ['37 дней','строго после','истёкшие 24 часа','допускает частичное','не ограничено отдельными услугами','Условие правила не выполнено','не согласие клиента'])assert.ok(html.includes(phrase),phrase);
+ assert.ok(!html.includes('включительно'));
+});
+test('Ideas rule explanation preserves inclusive calendar months timezone month end and bounded services',()=>{
+ const html=htmlFor({kind:'policy',met:true,parameters:parameters({elapsed:{unit:'calendar_month',count:2},comparison:'gte',minimumCoverage:'COMPLETE',serviceScope:{restricted:true,count:3}})});
+ for(const phrase of ['2 календарных месяца','включительно','Europe/Moscow','последним днём месяца','требует полного','набором услуг (3)','названия услуг здесь не раскрыты'])assert.ok(html.includes(phrase),phrase);
+ assert.ok(!html.includes('24 часа'));assert.ok(!html.includes('строго после'));assert.ok(!/60 дней|PRIVATE|Отправить|Добавить в задачи/.test(html));
+});
+test('Ideas rule counts retain plural meaning and unavailable result cannot expose parameters',()=>{
+ for(const [count,word] of [[1,'день'],[2,'дня'],[5,'дней'],[11,'дней'],[21,'день'],[22,'дня'],[111,'дней']])assert.ok(htmlFor({kind:'policy',met:true,parameters:parameters({elapsed:{unit:'day',count}})}).includes(`${count} ${word}`));
+ const html=render({detail:{...row,current:false,available:false,finding:{kind:'policy',met:true,parameters:parameters()}}});assert.ok(!html.includes('37'));assert.ok(!html.includes('Условие правила выполнено'));
+});
+
+test('Ideas rule list stays compact and keeps exact threshold; complete explanation is in detail',()=>{
+ const html=render({rows:[{...row,finding:{kind:'policy',met:true,parameters:parameters()}}]}).replaceAll('<!-- -->','');
+ assert.ok(html.includes('Интервал: 37 дней (по 24 часа)'));assert.ok(html.includes('Граница срока не включена'));assert.ok(!html.includes('Правило допускает частичное'));
+ assert.ok(html.includes('Посмотреть основание'));
 });

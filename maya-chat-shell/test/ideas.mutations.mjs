@@ -8,6 +8,18 @@ import { fileURLToPath } from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'maya-ideas-mutations-'));
 const mutations=[
+ ['rule extra fields','net/ideas.ts','Object.keys(value).length === names.length && ','','Ideas parameters reject missing'],
+ ['rule unit','net/ideas.ts',"!['day', 'calendar_month'].includes(window.unit as string) || ",'','Ideas parameters reject missing'],
+ ['rule integer','net/ideas.ts','!Number.isSafeInteger(window.count) || ','','Ideas parameters reject missing'],
+ ['rule zero','net/ideas.ts','(window.count as number) < 1','(window.count as number) < 0','Ideas parameters reject missing'],
+ ['rule evidence','net/ideas.ts',"p.evidence !== 'proven_attendance' || ",'','Ideas parameters reject missing'],
+ ['rule coverage','net/ideas.ts',"!['COMPLETE', 'PARTIAL'].includes(p.minimumCoverage as string)",'false','Ideas parameters reject missing'],
+ ['rule scope bound','net/ideas.ts','(scope.count as number) > 100 || ','','Ideas parameters require consistent'],
+ ['rule scope consistency','net/ideas.ts',' || scope.restricted !== ((scope.count as number) > 0)','','Ideas parameters require consistent'],
+ ['rule timezone binding','net/ideas.ts',' || p.timezone !== sourcePeriod.timezone.trim()','','Ideas parameters require consistent'],
+ ['rule timezone valid','net/ideas.ts',"try { new Intl.DateTimeFormat('ru-RU', { timeZone: p.timezone }); } catch { return null; }",'','Ideas parameters require consistent'],
+ ['rule comparison substitution','net/ideas.ts',"comparison: p.comparison as 'gt' | 'gte'","comparison: 'gt'",'Ideas parameters preserve exact'],
+
  ['value availability','net/ideas.ts',"!x.current || !x.available || ",'','Ideas values require current'],
  ['value qualification','net/ideas.ts'," || x.qualification === 'UNQUALIFIED'",'','Ideas values require current'],
  ['value version','net/ideas.ts',"rule.version !== 1 || ",'','Ideas values require current'],

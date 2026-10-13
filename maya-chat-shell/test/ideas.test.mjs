@@ -27,7 +27,7 @@ test('Ideas use one finite authenticated GET without body/query/tenant/model/com
 test('Ideas refresh auth once and expose forbidden/rate/invalid/unavailable/abort distinctly',async()=>{
  let n=net([{status:401},{body:wire()}]);assert.equal((await n.transport.ideas(new AbortController().signal)).ok,true);assert.equal(n.counts.refresh,1);
  n=net([{status:401},{status:401}]);assert.equal((await n.transport.ideas(new AbortController().signal)).failure.reason,'forbidden');assert.equal(n.counts.refused,1);
- for(const [r,reason] of [[{status:403},'forbidden'],[{status:429,headers:{'Retry-After':'4'}},'rate_limited'],[{body:{}},'invalid_response'],[{status:503},'unavailable']]){n=net([r]);assert.equal((await n.transport.ideas(new AbortController().signal)).failure.reason,reason);assert.equal(n.counts.refresh,0);}
+ for(const [r,reason] of [[{status:403},'forbidden'],[{status:429,headers:{'Retry-After':'4'}},'rate_limited'],[{body:{}},'invalid_response'],[{status:503},'unavailable'],[{status:404},'unavailable']]){n=net([r]);assert.equal((await n.transport.ideas(new AbortController().signal)).failure.reason,reason);assert.equal(n.counts.refresh,0);}
  n=net([]);const a=new AbortController();a.abort();assert.equal((await n.transport.ideas(a.signal)).failure.reason,'aborted');assert.equal(n.calls.length,0);
 });
 function rig(signedIn=true){let now=t0,sessionView={signedIn};const listeners=new Set(),timers=[],requests=[];const session={view:()=>sessionView,subscribe:fn=>{listeners.add(fn);return()=>listeners.delete(fn);}};const shell=createShell({session,history:{push(){},back(){},onBack(){return()=>{};}}});const port=createIdeas({session,shell,newAbort:()=>new AbortController(),scheduler:{now:()=>now,after:(ms,fn)=>{const t={fn,at:now+ms,cancelled:false};timers.push(t);return()=>t.cancelled=true;}},transport:{ideas:signal=>new Promise(resolve=>requests.push({signal,resolve}))}});return{port,shell,requests,session(value){sessionView={signedIn:value};for(const fn of [...listeners])fn(sessionView);},advance(ms){now+=ms;for(const t of [...timers])if(!t.cancelled&&t.at<=now){t.cancelled=true;t.fn();}},dispose(){port.dispose();shell.dispose();}};}
@@ -71,7 +71,7 @@ test('Ideas values require current available qualified covered versioned release
  assert.equal(found(observed({kind:'PREDICTION',available:false})).kind,'unavailable');
 });
 test('Ideas policy uses literal boolean and exact verified client dormancy with no inferred threshold',()=>{
- for(const value of [true,false])assert.deepEqual(found(policy({}, {value})),{kind:'policy',met:value});
+ for(const value of [true,false])assert.deepEqual(found(policy({}, {value})),{kind:'policy',met:value,parameters:null});
  for(const patch of [{subject:{kind:'tenant'}},{qualification:'SOURCE_LABELLED'},{basis:'confirmed_cash'},{currency:'RUB'}])assert.equal(found(policy(patch)).kind,'invalid');
  for(const patch of [{value:'false'},{value:0},{type:'observed'},{key:'another'},{unit:'count'},{currency:'RUB'}])assert.equal(found(policy({},patch)).kind,'invalid');
  assert.ok(!/30|threshold|PRIVATE/.test(JSON.stringify(found(policy()))));
@@ -83,3 +83,36 @@ test('Ideas scenario is exact appointment conditional value with explicit valid 
  assert.equal(found(scenario({rule:{key:'c8.scenario/future_revenue',version:1}})).kind,'unsupported');
 });
 test('Ideas value disappears on fresh unavailable response instead of retaining previous amount',async()=>{const r=rig();await loaded(r,[observed()]);assert.equal(r.port.view().rows[0].finding.kind,'observation');const p=r.port.read('result-one');r.requests[1].resolve(ok(snapshot([observed({available:false,current:false})])));await p;assert.deepEqual(r.port.view().detail.finding,{kind:'unavailable'});assert.ok(!JSON.stringify(r.port.view()).includes('9007199254740993'));r.dispose();});
+
+const params=(patch={})=>({elapsed:{unit:'day',count:37},comparison:'gt',evidence:'proven_attendance',minimumCoverage:'PARTIAL',serviceScope:{restricted:false,count:0},timezone:'Europe/Moscow',...patch});
+const withParams=(parameters=params(),patch={})=>policy({rule:{key:'c8.dormancy/cadence',version:1,parameters},...patch});
+test('Ideas parameters preserve exact day month threshold comparison coverage and finite service scope',()=>{
+ for(const unit of ['day','calendar_month'])for(const comparison of ['gt','gte'])for(const minimumCoverage of ['PARTIAL','COMPLETE'])for(const count of [0,1,100]) {
+  const p=params({elapsed:{unit,count:37},comparison,minimumCoverage,serviceScope:{restricted:count>0,count}});
+  assert.deepEqual(found(withParams(p)),{kind:'policy',met:false,parameters:p});
+ }
+ const p=params({elapsed:{unit:'day',count:Number.MAX_SAFE_INTEGER}});assert.equal(found(withParams(p)).parameters.elapsed.count,Number.MAX_SAFE_INTEGER);
+});
+test('Ideas parameters reject missing unknown nested or coercible contract fields without defaults',()=>{
+ for(const key of Object.keys(params())){const p=params();delete p[key];assert.equal(found(withParams(p)).parameters,null,key);}
+ const bad=[null,[],{},params({extra:'PRIVATE'}),params({elapsed:{unit:'day',count:3,extra:'PRIVATE'}}),params({serviceScope:{restricted:false,count:0,ids:['PRIVATE']}}),params({comparison:'eq'}),params({evidence:'phone_match'}),params({minimumCoverage:'ANY'})];
+ for(const unit of ['month','hour','days',null])bad.push(params({elapsed:{unit,count:2}}));
+ for(const count of [0,-1,1.2,'37',false,null,Number.MAX_SAFE_INTEGER+1])bad.push(params({elapsed:{unit:'day',count}}));
+ for(const p of bad){assert.equal(found(withParams(p)).parameters,null,JSON.stringify(p));assert.equal(found(withParams(p)).met,false);}
+});
+test('Ideas parameters require consistent bounded service restrictions and exact usable source timezone',()=>{
+ for(const scope of [{restricted:true,count:0},{restricted:false,count:1},{restricted:'true',count:1},{restricted:true,count:101},{restricted:false,count:-1},{restricted:true,count:1.2},{restricted:true,count:'1'}])assert.equal(found(withParams(params({serviceScope:scope}))).parameters,null);
+ for(const timezone of ['UTC','Europe/NoSuchPlace',' Europe/Moscow ','',null])assert.equal(found(withParams(params({timezone}))).parameters,null);
+ const invalidPeriod={...row().period,timezone:'Europe/NoSuchPlace'};assert.equal(found(withParams(params({timezone:invalidPeriod.timezone}),{period:invalidPeriod})).parameters,null);
+ assert.equal(found(withParams(params({timezone:'UTC'}),{period:{...row().period,timezone:'UTC'}})).parameters.timezone,'UTC');
+});
+test('Ideas parameters cannot escape policy validity or appear on other result kinds',()=>{
+ for(const patch of [{available:false},{available:false,current:false},{qualification:'UNQUALIFIED'},{qualification:'SOURCE_LABELLED'},{completeness:'UNAVAILABLE'},{subject:{kind:'tenant'}},{rule:{key:'c8.dormancy/cadence',version:2,parameters:params()}}])assert.ok(!JSON.stringify(found(withParams(params(),patch))).includes('37'));
+ const x=observed({rule:{key:'c8.value/cash',version:1,parameters:params()}});assert.ok(!JSON.stringify(found(x)).includes('parameters'));
+});
+test('Ideas parameters are reread with same selected result and never reused after absence invalidation or expiry',async()=>{
+ const r=rig();await loaded(r,[withParams()]);let p=r.port.read('result-one');r.requests[1].resolve(ok(snapshot([withParams()])));await p;assert.equal(r.port.view().detail.finding.parameters.elapsed.count,37);
+ r.port.back();p=r.port.read('result-one');r.requests[2].resolve(ok(snapshot([withParams(null)])));await p;assert.equal(r.port.view().detail.finding.parameters,null);
+ r.port.back();p=r.port.read('result-one');r.requests[3].resolve(ok(snapshot([withParams(params(),{available:false,current:false})])));await p;assert.deepEqual(r.port.view().detail.finding,{kind:'unavailable'});r.dispose();
+ const exp=rig();await loaded(exp,[withParams(params(),{expiresAt:'2026-10-14T09:00:01.000Z'})]);exp.advance(1000);assert.deepEqual(exp.port.view().rows,[]);assert.equal(exp.port.view().detail,null);exp.dispose();
+});
