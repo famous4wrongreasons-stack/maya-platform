@@ -215,7 +215,7 @@ export const localCrmSetup = createLocalCrmSetup({ enabled: localCrmSetupEnabled
   pending: createCrmPendingLocation({ href: () => window.location.href, replace: relative => window.history.replaceState(null, '', relative) }),
 });
 export const workspaceReads = createWorkspaceReads({ transport: net.transport, session, shell: runtime.shell, scheduler, newAbort });
-export const ownTasks = createOwnTasks({ transport: net.transport, session, shell: runtime.shell, scheduler, newAbort });
+export const ownTasks = createOwnTasks({ transport: net.transport, session, shell: runtime.shell, scheduler, newAbort, newId: () => crypto.randomUUID() });
 export const personalBooking = createPersonalBooking({ transport: net.transport, widgets, session, newAbort });
 
 /**

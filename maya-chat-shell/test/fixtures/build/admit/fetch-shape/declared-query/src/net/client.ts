@@ -3,6 +3,7 @@ import { API_BASE } from './endpoint.ts';
 const PATHS = {
   feed: '/inbox', reports: '/owner-reports', reportSnapshot: '/owner-reports/',
   ownTasks: '/operational-work',
+  taskCreate: '/operational-work/create', taskComplete: '/operational-work/complete',
   trialActivation: '/onboarding/trial-activations',
   trialSignup: '/onboarding/trial',
   crmStatus: '/integrations/crm',

@@ -181,6 +181,7 @@ describe('R04 A23 through actual Nest JWT/tenant/role guards', () => {
   beforeEach(() => {
     state = fixture();
     jest.clearAllMocks();
+    prisma.operationalWorkItem.findMany.mockResolvedValue([]);
   });
   afterEach(() => {
     expect(write).not.toHaveBeenCalled();
@@ -307,5 +308,96 @@ describe('R04 A23 through actual Nest JWT/tenant/role guards', () => {
     );
     expect(canonical.createTask).not.toHaveBeenCalled();
     expect(canonical.completeTask).not.toHaveBeenCalled();
+  });
+  it('Companion advertises create only for current management roles; staff remains read/complete', async () => {
+    for (const [role, allowed] of [
+      ['tenant_owner', true],
+      ['manager', true],
+      ['staff', false],
+      ['provider', false],
+    ] as const) {
+      state.membership.role = role;
+      state.user.role = role;
+      const response = await request(app.getHttpServer() as Server)
+        .get('/api/operational-work')
+        .set('Authorization', 'Bearer ' + token())
+        .expect(200);
+      expect(response.body).toMatchObject({
+        action_contract: 'maya.operational-work.actions/1',
+        can_create: allowed,
+        current_user_id: 'user-a',
+        tenant_id: 'tenant-a',
+      });
+    }
+  });
+  it('Companion completion locator is exact current-user Inbox binding; absent projection stays unavailable', async () => {
+    prisma.operationalWorkItem.findMany.mockResolvedValueOnce([
+      {
+        id: 'work-a',
+        title: 'Synthetic task',
+        bodyText: 'Details',
+        status: 'OPEN',
+        dueAt: null,
+        inboxItems: [{ id: 'inbox-a' }],
+        createActionExecutionId: 'ae-create',
+        completeActionExecutionId: null,
+      },
+      {
+        id: 'work-b',
+        title: 'Pending projection',
+        bodyText: 'Details',
+        status: 'OPEN',
+        dueAt: null,
+        inboxItems: [],
+        createActionExecutionId: 'ae-create-b',
+        completeActionExecutionId: null,
+      },
+    ] as never);
+    const response = await request(app.getHttpServer() as Server)
+      .get('/api/operational-work')
+      .set('Authorization', 'Bearer ' + token())
+      .expect(200);
+    expect(response.body.tasks).toEqual([
+      expect.objectContaining({
+        work_item_id: 'work-a',
+        task_id: 'inbox-a',
+        next_actions: ['done'],
+      }),
+      expect.objectContaining({
+        work_item_id: 'work-b',
+        task_id: null,
+        next_actions: [],
+      }),
+    ]);
+    expect(prisma.operationalWorkItem.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        select: expect.objectContaining({
+          inboxItems: expect.objectContaining({
+            where: {
+              tenantId: 'tenant-a',
+              userId: 'user-a',
+              type: 'maya_task',
+              deletedAt: null,
+            },
+          }),
+        }),
+      }),
+    );
+  });
+  it('Companion DTO cannot supply a second writer, receipt or completion work-item substitution', async () => {
+    for (const field of [
+      'workItemId',
+      'receipt',
+      'completed',
+      'tenantId',
+      'actorUserId',
+    ])
+      await post('complete', {
+        inboxItemId: 'inbox-a',
+        [field]: 'forged',
+      }).expect(400);
+    await post('create', { ...command, receipt: 'forged' }).expect(400);
+    expect(canonical.completeTask).not.toHaveBeenCalled();
+    expect(canonical.createTask).not.toHaveBeenCalled();
   });
 });

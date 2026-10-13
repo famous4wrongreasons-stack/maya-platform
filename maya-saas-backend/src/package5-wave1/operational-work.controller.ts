@@ -75,6 +75,8 @@ export class OperationalWorkController {
       contract: 'maya.operational-work/1',
       ok: true,
       read_only: true,
+      action_contract: 'maya.operational-work.actions/1',
+      can_create: MANAGERS.includes(actor.role),
       current_user_id: actor.userId,
       tenant_id: tenantId,
       tasks: rows.map((row) => ({

@@ -323,7 +323,7 @@ test('PATHS holds exactly the approved literals; one fetch call site; API_BASE i
   const values = [...block[1].matchAll(/'([^']*)'/g)].map((m) => m[1]).sort();
   assert.deepEqual(values, [
     '/inbox', '/owner-reports', '/owner-reports/',
-    '/operational-work',
+    '/operational-work', '/operational-work/create', '/operational-work/complete',
     '/ai/chat',
     '/ai/conversation',
     '/ai/goods/photo-preview',
@@ -375,7 +375,7 @@ test('typed methods only: the two widget methods are explicit; no generic reques
   assert.deepEqual(Object.keys(net.onboarding).sort(), ['cancel', 'dispose', 'finish', 'submit', 'subscribe', 'view']);
   assert.deepEqual(Object.keys(net.telegramLink).sort(), ['cancel', 'start', 'subscribe', 'view']);
   assert.deepEqual(Object.keys(net.session).sort(), ['completeTelegram', 'findBusinesses', 'landing', 'onLanding', 'signInPassword', 'signOut', 'startEmail', 'startTelegram', 'subscribe', 'verifyEmail', 'view']);
-  assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'conversation', 'crmSetupActivate', 'crmSetupOperation', 'crmSetupStage', 'crmSetupStatus', 'eraseConversation', 'feed', 'goodsPhotoItem', 'goodsPhotoPreview', 'goodsPhotoReview', 'goodsPhotoSearch', 'ownTasks', 'personalBranches', 'personalCreate', 'personalPreview', 'personalResults', 'personalServices', 'personalSlots', 'personalStaff', 'report', 'reports', 'resolveWidgets', 'transcribe', 'widgetIntent']);
+  assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'conversation', 'crmSetupActivate', 'crmSetupOperation', 'crmSetupStage', 'crmSetupStatus', 'eraseConversation', 'feed', 'goodsPhotoItem', 'goodsPhotoPreview', 'goodsPhotoReview', 'goodsPhotoSearch', 'ownTasks', 'personalBranches', 'personalCreate', 'personalPreview', 'personalResults', 'personalServices', 'personalSlots', 'personalStaff', 'report', 'reports', 'resolveWidgets', 'taskCommand', 'transcribe', 'widgetIntent']);
 });
 
 test('widget transport sends only typed bodies and retains only authorized response members', async () => {

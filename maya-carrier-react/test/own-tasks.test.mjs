@@ -22,3 +22,10 @@ test('loading, denied and capped-filter-empty states never claim an empty author
   assert.ok(!capped.includes('Сейчас нет задач'));
   assert.ok(render({retryAt:3000}).includes('disabled="">Обновить список'));
 });
+
+test('action controls need server capabilities; a pending command cannot be sent again', () => {
+  const html=render({canCreate:true,completable:['one'],rows:[{key:'one',title:'Task',detail:'Details',dueAt:null,completed:false}],command:{phase:'pending',message:'Сохраняю задачу…'}});
+  assert.ok(html.includes('Новая задача +'));assert.ok(html.includes('aria-label="Завершить: Task" disabled=""'));
+  assert.ok(!html.includes('inbox'));assert.ok(!html.includes('type="checkbox"'));
+  assert.ok(render({command:{phase:'unknown',message:'Не подтверждено'}}).includes('Повторить ту же операцию'));
+});

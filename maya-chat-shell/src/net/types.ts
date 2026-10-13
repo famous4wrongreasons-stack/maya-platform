@@ -25,7 +25,15 @@ export interface WorkspaceReadTransport {
   report(selected: ReportSummary, signal: AbortSignal): Promise<Outcome<ReportSnapshot, WorkspaceReadFailure>>;
 }
 export interface OwnTask { readonly key: string; readonly title: string; readonly detail: string; readonly dueAt: string | null; readonly completed: boolean; }
-export interface OwnTasksSnapshot { readonly rows: readonly OwnTask[]; readonly possiblyCapped: boolean; }
+export interface OwnTaskContext {
+  readonly userId: string; readonly tenantId: string; readonly canCreate: boolean;
+  readonly completions: readonly { readonly key: string; readonly inboxId: string }[];
+}
+export interface OwnTasksSnapshot { readonly rows: readonly OwnTask[]; readonly possiblyCapped: boolean; readonly actions?: OwnTaskContext; }
+export type TaskCommand = { readonly kind: 'create'; readonly assignee: string; readonly title: string; readonly detail: string } | { readonly kind: 'complete'; readonly key: string; readonly inboxId: string };
+export interface TaskReceipt { readonly executionId: string; readonly target: string; readonly projectionPending: boolean; }
+export type TaskFailure = { readonly reason: 'unknown' | 'refused' | 'invalid' };
+export interface TaskCommandTransport { taskCommand(command: TaskCommand, identity: string, signal: AbortSignal): Promise<Outcome<TaskReceipt, TaskFailure>>; }
 export type OwnTasksFailure = { readonly reason: 'forbidden' | 'unavailable' | 'invalid_response' | 'aborted' } | { readonly reason: 'rate_limited'; readonly retryAfterSec: number };
 export interface OwnTasksTransport { ownTasks(signal: AbortSignal): Promise<Outcome<OwnTasksSnapshot, OwnTasksFailure>>; }
 

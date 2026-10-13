@@ -13,8 +13,8 @@
 import { projectPersonalBranches, projectPersonalChoices, projectPersonalSlots, projectPersonalPreview, projectPersonalResults } from './personal.ts';
 import { projectFeed, projectReports, projectReport, reportKey } from './workspace-reads.ts';
 import type { FeedSnapshot, ReportsSnapshot, ReportSummary, ReportSnapshot, WorkspaceReadFailure } from './types.ts';
-import { projectOwnTasks } from './own-tasks.ts';
-import type { OwnTasksSnapshot, OwnTasksFailure } from './types.ts';
+import { projectOwnTasks, taskBody, taskIdentity, projectTaskReceipt } from './own-tasks.ts';
+import type { OwnTasksSnapshot, OwnTasksFailure, TaskCommand, TaskReceipt, TaskFailure } from './types.ts';
 import type { PersonalSelection, PersonalFailure } from './types.ts';
 import { goodsPhotoQuery, projectGoodsPhotoContext, projectGoodsPhotoPreview, projectGoodsPhotoSearch, projectGoodsPhotoItem, projectGoodsPhotoProposal, projectGoodsPhotoReview } from './goods-photo.ts';
 import type { GoodsPhotoFile, GoodsPhotoFailure, GoodsPhotoProposal, GoodsPhotoRequestContext, GoodsPhotoResponse } from './types.ts';
@@ -78,6 +78,8 @@ const PATHS = {
   reports: '/owner-reports',
   reportSnapshot: '/owner-reports/',
   ownTasks: '/operational-work',
+  taskCreate: '/operational-work/create',
+  taskComplete: '/operational-work/complete',
   businessSearch: '/mobile/pwa/search',
   telegramStart: '/auth/oauth/telegram/start',
   telegramComplete: '/auth/oauth/telegram/complete',
@@ -123,6 +125,8 @@ export const TRANSCRIBE_TIMEOUT_MS = 30_000;
 export const DEFAULT_RETRY_AFTER_SEC = 60;
 
 type RequestBody =
+  | { readonly assigneeUserId: string; readonly title: string; readonly bodyText: string; readonly dueAt: null }
+  | { readonly inboxItemId: string }
   | { readonly source: 'web' }
   | { readonly trialActivationToken: string; readonly name: string; readonly slug: string; readonly ownerEmail: string; readonly password: string; readonly branchName: string; readonly branchTimezone: string; readonly calendarSource: 'external' }
   | FormData
@@ -207,7 +211,7 @@ async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | 
   const personal = endpoint === 'personalPreview' || endpoint === 'personalResults' || endpoint === 'personalCreate';
   const context = personal ? { 'X-Maya-Authority-Context': 'personal_client' } : {};
   const multipart = endpoint === 'goodsPhotoPreview' && body instanceof FormData;
-  const idempotency = endpoint === 'crmSetupStage' || endpoint === 'crmSetupActivate' ? { 'Idempotency-Key': idempotencyKey } : {};
+  const idempotency = endpoint === 'taskCreate' || endpoint === 'taskComplete' || endpoint === 'crmSetupStage' || endpoint === 'crmSetupActivate' ? { 'Idempotency-Key': idempotencyKey } : {};
   const headers: Readonly<Record<string, string>> = { ...auth, ...context, ...idempotency, ...(reading || multipart ? {} : { 'Content-Type': 'application/json' }) };
   const path = endpoint === 'historyErasure' ? `${PATHS.historyErasure}/${encodeURIComponent(erasureConversationId)}/erasure` : endpoint === 'reportSnapshot' ? `${PATHS.reportSnapshot}${encodeURIComponent(reportRunId)}/snapshot` : PATHS[endpoint];
   try {
@@ -550,7 +554,7 @@ const unlessAborted = <T>(work: Promise<T>, signal: AbortSignal): Promise<T | nu
 };
 
 /** 401 → refresh once → retry once (§1.4). A second 401 ends the session; it never loops. */
-async function authorizedExchange(auth: Authorizer, endpoint: 'feed' | 'reports' | 'reportSnapshot' | 'ownTasks' | 'telegramLinkStart' | 'telegramLinkComplete' | 'crmSetupStatus' | 'crmSetupStage' | 'crmSetupActivate' | 'crmSetupOperation' | 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate' | 'goodsPhotoPreview' | 'goodsPhotoSearch' | 'goodsPhotoItem' | 'goodsPhotoReview', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = '', idempotencyKey: string = '', crmLocator: CrmOperationLocator | null = null, reportRunId: string = ''): Promise<AuthorizedExchange> {
+async function authorizedExchange(auth: Authorizer, endpoint: 'taskCreate' | 'taskComplete' | 'feed' | 'reports' | 'reportSnapshot' | 'ownTasks' | 'telegramLinkStart' | 'telegramLinkComplete' | 'crmSetupStatus' | 'crmSetupStage' | 'crmSetupActivate' | 'crmSetupOperation' | 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate' | 'goodsPhotoPreview' | 'goodsPhotoSearch' | 'goodsPhotoItem' | 'goodsPhotoReview', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = '', idempotencyKey: string = '', crmLocator: CrmOperationLocator | null = null, reportRunId: string = ''): Promise<AuthorizedExchange> {
   const first = await unlessAborted(auth.authorize(), signal);
   if (first === null) return { kind: 'aborted' };
   if (first.kind !== 'bearer') return first;
@@ -722,6 +726,18 @@ export function createTransport(auth: Authorizer, timeouts: Timeouts = { request
       if (!reportKey(selected.key)) return fail({ reason: 'invalid_response' });
       const exact = { key: selected.key, type: selected.type, period: selected.period, title: selected.title };
       return workspaceReadOutcome(await authorizedExchange(auth, 'reportSnapshot', {}, signal, timeouts.requestMs, null, '', '', null, exact.key), raw => projectReport(raw, exact));
+    },
+    async taskCommand(command: TaskCommand, identity: string, signal: AbortSignal): Promise<Outcome<TaskReceipt, TaskFailure>> {
+      const body = taskBody(command);
+      if (!body || !taskIdentity(identity) || signal.aborted) return fail({ reason: 'invalid' });
+      const ex = await authorizedExchange(auth, command.kind === 'create' ? 'taskCreate' : 'taskComplete', body, signal, timeouts.requestMs, null, '', identity);
+      if (ex.kind === 'response' && isSuccess(ex.status)) {
+        const value = projectTaskReceipt(ex.body, command);
+        return value === null ? fail({ reason: 'unknown' }) : { ok: true, value };
+      }
+      if (ex.kind === 'signed_out' || ex.kind === 'response' && [400, 401, 403, 404].includes(ex.status)) return fail({ reason: 'refused' });
+      // A lost response, conflict or server error cannot prove that no task was committed.
+      return fail({ reason: 'unknown' });
     },
     async ownTasks(signal: AbortSignal): Promise<Outcome<OwnTasksSnapshot, OwnTasksFailure>> {
       const ex = await authorizedExchange(auth, 'ownTasks', {}, signal, timeouts.requestMs);

@@ -13,7 +13,7 @@ const mutations=[
   ['unknown status','net/own-tasks.ts',"(r.status !== 'OPEN' && r.status !== 'COMPLETED')",'false','malformed rows'],
   ['read becomes write','net/client.ts',"endpoint === 'ownTasks' || ",'','only GET current-user'],
   ['late response accepted','shell/own-tasks.ts','version !== serial || ','','close / signout'],
-  ['old rows survive reset','shell/own-tasks.ts','all = []; current = empty(); publish({});','all = []; publish({});','lazy one-flight'],
+  ['old rows survive reset','shell/own-tasks.ts','all = []; context = undefined; current = empty(); publish({});','all = []; publish({});','lazy one-flight'],
   ['duplicate refresh','shell/own-tasks.ts',"current.phase === 'loading' || ",'','lazy one-flight'],
   ['rate limit ignored','shell/own-tasks.ts','current.retryAt !== null && current.retryAt > deps.scheduler.now()','false','refresh clears old snapshot'],
   ['workspace not cleared','shell/shell.ts','&& !state.workspace','', 'workspace has no WidgetRoute'],

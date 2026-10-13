@@ -216,7 +216,7 @@ const TOKEN_PROPERTIES = new Set([
  */
 export const P1_PATHS = [
   '/inbox', '/owner-reports', '/owner-reports/',
-  '/operational-work',
+  '/operational-work', '/operational-work/create', '/operational-work/complete',
   '/auth/email/start',
   '/auth/email/verify',
   '/auth/login',
