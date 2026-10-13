@@ -1,0 +1,51 @@
+FAIL src/owner-reports/companion-retained-reads.http.spec.ts
+  Companion retained reads through actual Nest JWT/tenant/role guards and source owners
+    ✓ reads Inbox scoped by current user and tenant, default cap 50; ignores caller-selected query authority (18 ms)
+    ✓ lists only retained recipient summaries and opens the exact immutable server snapshot (6 ms)
+    ✓ foreign recipient is absent from list and cannot read a known run id (5 ms)
+    ✓ membership authority is freshly checked for each snapshot after list (3 ms)
+    ✓ retention expiry and manifest substitution are refused by the existing source owner (5 ms)
+    ✓ missing, invalid, revoked and tenant-substituted session cannot read /api/inbox (5 ms)
+    ✓ missing, invalid, revoked and tenant-substituted session cannot read /api/owner-reports (2 ms)
+    ✓ missing, invalid, revoked and tenant-substituted session cannot read /api/owner-reports/10000000-0000-4000-8000-000000000001/snapshot (3 ms)
+    ✓ personal Client role does not inherit business feed/report access: /api/inbox (1 ms)
+    ✓ personal Client role does not inherit business feed/report access: /api/owner-reports (2 ms)
+    ✓ personal Client role does not inherit business feed/report access: /api/owner-reports/10000000-0000-4000-8000-000000000001/snapshot (2 ms)
+    ✓ explicit Inbox acknowledgement updates only readAt for the current tenant/user and fresh GET confirms it (7 ms)
+    ✓ ok is deliberately non-disclosing: marking other-user changes no row and does not prove read state (3 ms)
+    ✓ ok is deliberately non-disclosing: marking other-tenant changes no row and does not prove read state (2 ms)
+    ✓ ok is deliberately non-disclosing: marking deleted-item changes no row and does not prove read state (1 ms)
+    ✓ ok is deliberately non-disclosing: marking missing-item changes no row and does not prove read state (2 ms)
+    ✓ repeated and concurrent acknowledgements never create a second item or task/delivery effect (2 ms)
+    ✓ anonymous invalid revoked and tenant-substituted sessions cannot mark read (3 ms)
+    ✕ revoked membership and client role are not notification-owner authority (6 ms)
+
+  ● Companion retained reads through actual Nest JWT/tenant/role guards and source owners › revoked membership and client role are not notification-owner authority
+
+    expected 403 "Forbidden", got 401 "Unauthorized"
+
+      516 |     const credential = token();
+      517 |     state.membership.status = 'revoked';
+    > 518 |     await mark('own-item', credential).send({}).expect(403);
+          |                                                 ^
+      519 |     state.membership.status = 'active';
+      520 |     state.membership.role = 'client';
+      521 |     state.user.role = 'client';
+
+      at Object.<anonymous> (owner-reports/companion-retained-reads.http.spec.ts:518:49)
+      ----
+      at Test._assertStatus (../node_modules/supertest/lib/test.js:309:14)
+      at ../node_modules/supertest/lib/test.js:365:13
+      at Test._assertFunction (../node_modules/supertest/lib/test.js:342:13)
+      at Test.assert (../node_modules/supertest/lib/test.js:195:23)
+      at localAssert (../node_modules/supertest/lib/test.js:138:14)
+      at ../node_modules/supertest/lib/test.js:156:7
+      at Test.fn [as callback] (../node_modules/superagent/src/node/index.js:904:3)
+      at callback (../node_modules/superagent/src/node/index.js:1183:18)
+      at IncomingMessage.fn (../node_modules/superagent/src/node/parsers/json.js:19:7)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 18 passed, 19 total
+Snapshots:   0 total
+Time:        0.678 s, estimated 1 s
+Ran all test suites matching src/owner-reports/companion-retained-reads.http.spec.ts.

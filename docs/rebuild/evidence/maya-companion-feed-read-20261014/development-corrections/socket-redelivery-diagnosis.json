@@ -1,0 +1,47 @@
+{
+  "candidate": "8a06bb2e68ebb5e0f9ab0877d7e0c13342436f15",
+  "dirtySource": true,
+  "contract": "maya.companion.workspace-reads-ui/1",
+  "status": "FAIL",
+  "failure": "Expected values to be strictly equal:\n\n4 !== 3\n",
+  "markNetwork": [
+    {
+      "requestId": "18930.34",
+      "method": "POST",
+      "type": "Fetch"
+    },
+    {
+      "requestId": "18930.37",
+      "method": "POST",
+      "type": "Fetch"
+    },
+    {
+      "requestId": "18930.39",
+      "method": "POST",
+      "type": "Fetch"
+    }
+  ],
+  "httpMarkDeliveries": [
+    {
+      "path": "/api/inbox/feed-0/read",
+      "method": "POST",
+      "body": {}
+    },
+    {
+      "path": "/api/inbox/feed-0/read",
+      "method": "POST",
+      "body": {}
+    },
+    {
+      "path": "/api/inbox/feed-0/read",
+      "method": "POST",
+      "body": {}
+    },
+    {
+      "path": "/api/inbox/feed-0/read",
+      "method": "POST",
+      "body": {}
+    }
+  ],
+  "scope": "Synthetic development diagnosis, not final admission. Unrelated fixture requests omitted."
+}

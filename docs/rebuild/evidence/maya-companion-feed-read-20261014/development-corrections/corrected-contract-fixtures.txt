@@ -1,0 +1,550 @@
+TAP version 13
+# Subtest: self-test: every refuse fixture refused with its named rule, every admit fixture admitted
+ok 1 - self-test: every refuse fixture refused with its named rule, every admit fixture admitted
+  ---
+  duration_ms: 6493.369458
+  type: 'test'
+  ...
+# Subtest: self-test is not vacuous: a planted admit, an empty refuse and a misnamed rule each fail
+ok 2 - self-test is not vacuous: a planted admit, an empty refuse and a misnamed rule each fail
+  ---
+  duration_ms: 3535.449709
+  type: 'test'
+  ...
+# Subtest: a planted fetch in the renderer is refused while the baseline is live (the K5 mutation, on a virtual copy)
+ok 3 - a planted fetch in the renderer is refused while the baseline is live (the K5 mutation, on a virtual copy)
+  ---
+  duration_ms: 3877.781417
+  type: 'test'
+  ...
+# Subtest: reflection cannot reach a sink, a page object or a store: the reflection row is required and refused 13/13 (integration finding: Reflect bypass)
+ok 4 - reflection cannot reach a sink, a page object or a store: the reflection row is required and refused 13/13 (integration finding: Reflect bypass)
+  ---
+  duration_ms: 4023.446542
+  type: 'test'
+  ...
+# Subtest: every shell source under src/ and entry/ is text: no NUL or other C0 control character
+ok 5 - every shell source under src/ and entry/ is text: no NUL or other C0 control character
+  ---
+  duration_ms: 3.942
+  type: 'test'
+  ...
+# Subtest: the build refuses a raw control character in a source (k5-text) and admits its escape
+ok 6 - the build refuses a raw control character in a source (k5-text) and admits its escape
+  ---
+  duration_ms: 3563.518625
+  type: 'test'
+  ...
+# Subtest: write guard: nothing is written outside outDir, directly or by a tsc emit that resolves there
+ok 7 - write guard: nothing is written outside outDir, directly or by a tsc emit that resolves there
+  ---
+  duration_ms: 244.849208
+  type: 'test'
+  ...
+# Subtest: the emitted module graph imports in Node (every module outside entry/)
+ok 8 - the emitted module graph imports in Node (every module outside entry/)
+  ---
+  duration_ms: 5255.710583
+  type: 'test'
+  ...
+# Subtest: digests are identical under LANG=en_US.UTF-8 and LANG=et_EE.UTF-8, and the locale really differed
+ok 9 - digests are identical under LANG=en_US.UTF-8 and LANG=et_EE.UTF-8, and the locale really differed
+  ---
+  duration_ms: 12034.998167
+  type: 'test'
+  ...
+# Subtest: the build prints the live baseline count, and it never exceeds the eight admissible entries
+ok 10 - the build prints the live baseline count, and it never exceeds the eight admissible entries
+  ---
+  duration_ms: 5918.174458
+  type: 'test'
+  ...
+# Subtest: PATHS holds exactly the approved literals; one fetch call site; API_BASE is the one endpoint line
+ok 11 - PATHS holds exactly the approved literals; one fetch call site; API_BASE is the one endpoint line
+  ---
+  duration_ms: 72.246792
+  type: 'test'
+  ...
+# Subtest: typed methods only: the two widget methods are explicit; no generic request or token accessor
+ok 12 - typed methods only: the two widget methods are explicit; no generic request or token accessor
+  ---
+  duration_ms: 0.534584
+  type: 'test'
+  ...
+# Subtest: widget transport sends only typed bodies and retains only authorized response members
+ok 13 - widget transport sends only typed bodies and retains only authorized response members
+  ---
+  duration_ms: 9.917125
+  type: 'test'
+  ...
+# Subtest: explicit booking receipt transport projects only the widget locator; passive reads never inherit it
+ok 14 - explicit booking receipt transport projects only the widget locator; passive reads never inherit it
+  ---
+  duration_ms: 0.948375
+  type: 'test'
+  ...
+# Subtest: NS-1: `resolved_widget` survives projection in its envelope shape only; every other shape is null, never a rejection
+ok 15 - NS-1: `resolved_widget` survives projection in its envelope shape only; every other shape is null, never a rejection
+  ---
+  duration_ms: 2.672917
+  type: 'test'
+  ...
+# Subtest: email start keeps {next_step} only — debug_code never survives
+ok 16 - email start keeps {next_step} only — debug_code never survives
+  ---
+  duration_ms: 0.400625
+  type: 'test'
+  ...
+# Subtest: email verify (one business): tokens + TOP-LEVEL tenant.name + user.name; every other key dropped
+ok 17 - email verify (one business): tokens + TOP-LEVEL tenant.name + user.name; every other key dropped
+  ---
+  duration_ms: 0.64025
+  type: 'test'
+  ...
+# Subtest: email verify (select_business): businesses[].role dropped, slug echoed verbatim at re-verify
+ok 18 - email verify (select_business): businesses[].role dropped, slug echoed verbatim at re-verify
+  ---
+  duration_ms: 1.37975
+  type: 'test'
+  ...
+# Subtest: password login: body keys exactly {tenantSlug, email, password}; tenant NESTED at user.tenant; null name → ""
+ok 19 - password login: body keys exactly {tenantSlug, email, password}; tenant NESTED at user.tenant; null name → ""
+  ---
+  duration_ms: 2.552833
+  type: 'test'
+  ...
+# Subtest: signInPassword refuses an empty business address before any request (V2-6)
+ok 20 - signInPassword refuses an empty business address before any request (V2-6)
+  ---
+  duration_ms: 0.5795
+  type: 'test'
+  ...
+# Subtest: refresh: tokens + session only → grant; display stays what sign-in set
+ok 21 - refresh: tokens + session only → grant; display stays what sign-in set
+  ---
+  duration_ms: 0.675792
+  type: 'test'
+  ...
+# Subtest: malformed success bodies are unexpected_response, never a partial sign-in
+ok 22 - malformed success bodies are unexpected_response, never a partial sign-in
+  ---
+  duration_ms: 0.427292
+  type: 'test'
+  ...
+# Subtest: the password path never tells an existing account from a wrong password: /auth/login 401, 403 (either body) and 404 are one state
+ok 23 - the password path never tells an existing account from a wrong password: /auth/login 401, 403 (either body) and 404 are one state
+  ---
+  duration_ms: 0.104917
+  type: 'test'
+  ...
+# Subtest: §1.4 sign-in failure table: every row maps to its named state; silent login outcomes = 0
+ok 24 - §1.4 sign-in failure table: every row maps to its named state; silent login outcomes = 0
+  ---
+  duration_ms: 1.855834
+  type: 'test'
+  ...
+# Subtest: row 9 client-side: the same field state before sending, 0 requests (IsEmail shape, 4..8 digits, MinLength 8)
+ok 25 - row 9 client-side: the same field state before sending, 0 requests (IsEmail shape, 4..8 digits, MinLength 8)
+  ---
+  duration_ms: 0.066917
+  type: 'test'
+  ...
+# Subtest: row 10: a sign-in request that times out is no_connection
+ok 26 - row 10: a sign-in request that times out is no_connection
+  ---
+  duration_ms: 25.97975
+  type: 'test'
+  ...
+# Subtest: row 11: /ai/chat → 403 tenant_required is its own named failure
+ok 27 - row 11: /ai/chat → 403 tenant_required is its own named failure
+  ---
+  duration_ms: 0.558834
+  type: 'test'
+  ...
+# Subtest: /ai/chat request: exactly {surface, requestId, messages}, surface "web", Bearer, omit, no-store; no audience or tenant on the wire
+ok 28 - /ai/chat request: exactly {surface, requestId, messages}, surface "web", Bearer, omit, no-store; no audience or tenant on the wire
+  ---
+  duration_ms: 0.266541
+  type: 'test'
+  ...
+# Subtest: approval_required: action_status copies action.status only — never action.approval (V2-5)
+ok 29 - approval_required: action_status copies action.status only — never action.approval (V2-5)
+  ---
+  duration_ms: 0.218875
+  type: 'test'
+  ...
+# Subtest: B4: /ai/chat retains one exact SH-19 authorized envelope and rejects an incomplete substitute
+ok 30 - B4: /ai/chat retains one exact SH-19 authorized envelope and rejects an incomplete substitute
+  ---
+  duration_ms: 0.555792
+  type: 'test'
+  ...
+# Subtest: /ai/chat taxonomy: 402, 403×3, 429, 400, 503 modelFailure, 409, 502/network, 5xx, unexpected — one named failure each
+ok 31 - /ai/chat taxonomy: 402, 403×3, 429, 400, 503 modelFailure, 409, 502/network, 5xx, unexpected — one named failure each
+  ---
+  duration_ms: 1.561667
+  type: 'test'
+  ...
+# Subtest: /ai/chat timeout (80 s in production) is no_connection; a caller abort is aborted
+ok 32 - /ai/chat timeout (80 s in production) is no_connection; a caller abort is aborted
+  ---
+  duration_ms: 31.743333
+  type: 'test'
+  ...
+# Subtest: 401 → one refresh → one retry with the new bearer
+ok 33 - 401 → one refresh → one retry with the new bearer
+  ---
+  duration_ms: 0.756209
+  type: 'test'
+  ...
+# Subtest: two or more parallel 401s produce exactly one /auth/refresh (single flight); every call retried with the new bearer
+ok 34 - two or more parallel 401s produce exactly one /auth/refresh (single flight); every call retried with the new bearer
+  ---
+  duration_ms: 21.400084
+  type: 'test'
+  ...
+# Subtest: a 401 that arrives after another call already refreshed reuses the new grant (no second refresh)
+ok 35 - a 401 that arrives after another call already refreshed reuses the new grant (no second refresh)
+  ---
+  duration_ms: 5.155291
+  type: 'test'
+  ...
+# Subtest: proactive refresh within 30 s of expiry: parallel calls share one refresh
+ok 36 - proactive refresh within 30 s of expiry: parallel calls share one refresh
+  ---
+  duration_ms: 11.687958
+  type: 'test'
+  ...
+# Subtest: terminal refresh codes end the session with that reason, notify once, and send no retry
+ok 37 - terminal refresh codes end the session with that reason, notify once, and send no retry
+  ---
+  duration_ms: 1.264917
+  type: 'test'
+  ...
+# Subtest: refresh that cannot complete now keeps the session: 429 → rate_limited, network → no_connection
+ok 38 - refresh that cannot complete now keeps the session: 429 → rate_limited, network → no_connection
+  ---
+  duration_ms: 0.454666
+  type: 'test'
+  ...
+# Subtest: refresh 400 validation, 401 without a code and a malformed 2xx each end the session (no silent loop)
+ok 39 - refresh 400 validation, 401 without a code and a malformed 2xx each end the session (no silent loop)
+  ---
+  duration_ms: 0.881084
+  type: 'test'
+  ...
+# Subtest: a 401 on the retry after a successful refresh ends the session (session_revoked); never a loop
+ok 40 - a 401 on the retry after a successful refresh ends the session (session_revoked); never a loop
+  ---
+  duration_ms: 0.266542
+  type: 'test'
+  ...
+# Subtest: a lapsed refresh token ends the session as session_expired with 0 requests
+ok 41 - a lapsed refresh token ends the session as session_expired with 0 requests
+  ---
+  duration_ms: 0.094292
+  type: 'test'
+  ...
+# Subtest: aborting a turn while it waits on a shared refresh returns aborted at once; the refresh still lands
+ok 42 - aborting a turn while it waits on a shared refresh returns aborted at once; the refresh still lands
+  ---
+  duration_ms: 11.579708
+  type: 'test'
+  ...
+# Subtest: /ai/transcribe: body exactly {audioBase64}; {transcript} kept; failures mapped (§1.9)
+ok 43 - /ai/transcribe: body exactly {audioBase64}; {transcript} kept; failures mapped (§1.9)
+  ---
+  duration_ms: 26.449292
+  type: 'test'
+  ...
+# Subtest: never signed in: view reason null; chat and transcribe answer signed_out with 0 requests
+ok 44 - never signed in: view reason null; chat and transcribe answer signed_out with 0 requests
+  ---
+  duration_ms: 0.14675
+  type: 'test'
+  ...
+# Subtest: signOut: signed out locally at once, then /auth/logout with the bearer; later calls send nothing
+ok 45 - signOut: signed out locally at once, then /auth/logout with the bearer; later calls send nothing
+  ---
+  duration_ms: 0.295083
+  type: 'test'
+  ...
+# Subtest: signOut never throws when logout fails, and a failing subscriber does not stop the others
+ok 46 - signOut never throws when logout fails, and a failing subscriber does not stop the others
+  ---
+  duration_ms: 11.636458
+  type: 'test'
+  ...
+# Subtest: signOut with an expired access token refreshes once to revoke; the refreshed grant is never installed
+ok 47 - signOut with an expired access token refreshes once to revoke; the refreshed grant is never installed
+  ---
+  duration_ms: 0.56075
+  type: 'test'
+  ...
+# Subtest: signOut after the refresh token lapsed sends nothing: there is no server session left to revoke
+ok 48 - signOut after the refresh token lapsed sends nothing: there is no server session left to revoke
+  ---
+  duration_ms: 0.100667
+  type: 'test'
+  ...
+# Subtest: signOut during an in-flight refresh: logout uses the refreshed bearer; the waiting turn ends signed_out
+ok 49 - signOut during an in-flight refresh: logout uses the refreshed bearer; the waiting turn ends signed_out
+  ---
+  duration_ms: 6.506833
+  type: 'test'
+  ...
+# Subtest: a grant from a later sign-in is never handed to a call made under the earlier one
+ok 50 - a grant from a later sign-in is never handed to a call made under the earlier one
+  ---
+  duration_ms: 5.974667
+  type: 'test'
+  ...
+# Subtest: the purity gates admit src/net/** as written (fetch shape, PATHS, surface, audience, globals, imports, collisions)
+ok 51 - the purity gates admit src/net/** as written (fetch shape, PATHS, surface, audience, globals, imports, collisions)
+  ---
+  duration_ms: 4287.0575
+  type: 'test'
+  ...
+# Subtest: the gates are not vacuous over these files: a tenth path, a second fetch, a storage read and surface "voice" are refused
+ok 52 - the gates are not vacuous over these files: a tenth path, a second fetch, a storage read and surface "voice" are refused
+  ---
+  duration_ms: 308.20225
+  type: 'test'
+  ...
+# Subtest: createNet() is structurally SessionPort + Transport (shell/ports.ts, frozen in S0) with no adapter
+ok 53 - createNet() is structurally SessionPort + Transport (shell/ports.ts, frozen in S0) with no adapter
+  ---
+  duration_ms: 300.175167
+  type: 'test'
+  ...
+# Subtest: no storage, no document, no cookie: never touched at runtime, never named in src/net
+ok 54 - no storage, no document, no cookie: never touched at runtime, never named in src/net
+  ---
+  duration_ms: 0.650458
+  type: 'test'
+  ...
+# Subtest: the finder: one GET to the allowlisted path, the term percent-encoded, no body and no content type
+ok 55 - the finder: one GET to the allowlisted path, the term percent-encoded, no body and no content type
+  ---
+  duration_ms: 0.375333
+  type: 'test'
+  ...
+# Subtest: the finder refuses a one-character term before any request, and names the server's own minimum
+ok 56 - the finder refuses a one-character term before any request, and names the server's own minimum
+  ---
+  duration_ms: 0.04
+  type: 'test'
+  ...
+# Subtest: Telegram start: the web body names this page's callback, the native body names none, and only Telegram's own URL is followed
+ok 57 - Telegram start: the web body names this page's callback, the native body names none, and only Telegram's own URL is followed
+  ---
+  duration_ms: 0.527958
+  type: 'test'
+  ...
+# Subtest: the landing signs in: body exactly {state, code}, the login projection reused verbatim, is_new_user carried
+ok 58 - the landing signs in: body exactly {state, code}, the login projection reused verbatim, is_new_user carried
+  ---
+  duration_ms: 0.525875
+  type: 'test'
+  ...
+# Subtest: a callback nobody here asked for is refused before any request — the whole defence against a delivered pair
+ok 59 - a callback nobody here asked for is refused before any request — the whole defence against a delivered pair
+  ---
+  duration_ms: 0.141083
+  type: 'test'
+  ...
+# Subtest: one login, one landing: the second delivery of the same callback is refused without spending a request
+ok 60 - one login, one landing: the second delivery of the same callback is refused without spending a request
+  ---
+  duration_ms: 0.203
+  type: 'test'
+  ...
+# Subtest: the two carriers land the same callback: an object from the native shim, this page’s fragment on the web
+ok 61 - the two carriers land the same callback: an object from the native shim, this page’s fragment on the web
+  ---
+  duration_ms: 0.717083
+  type: 'test'
+  ...
+# Subtest: a fragment that is not exactly a callback is not one: no mark, a repeated key, a bad escape, a route
+ok 62 - a fragment that is not exactly a callback is not one: no mark, a repeated key, a bad escape, a route
+  ---
+  duration_ms: 0.432791
+  type: 'test'
+  ...
+# Subtest: the provider said no: error=access_denied is its own state and sends nothing
+ok 63 - the provider said no: error=access_denied is its own state and sends nothing
+  ---
+  duration_ms: 0.117875
+  type: 'test'
+  ...
+# Subtest: every completion failure the server can answer is a named state, and each one restarts the login
+ok 64 - every completion failure the server can answer is a named state, and each one restarts the login
+  ---
+  duration_ms: 1.104625
+  type: 'test'
+  ...
+# Subtest: a 2xx that is not a login does not sign anyone in
+ok 65 - a 2xx that is not a login does not sign anyone in
+  ---
+  duration_ms: 0.302041
+  type: 'test'
+  ...
+# Subtest: conversation history is authenticated GET with no selector/body, refreshes once, and strips action authority
+ok 66 - conversation history is authenticated GET with no selector/body, refreshes once, and strips action authority
+  ---
+  duration_ms: 0.62175
+  type: 'test'
+  ...
+# Subtest: a fresh login over an active session clears its timeline and rejects a delayed previous history, even with identical display names
+ok 67 - a fresh login over an active session clears its timeline and rejects a delayed previous history, even with identical display names
+  ---
+  duration_ms: 13.349959
+  type: 'test'
+  ...
+# Subtest: web window is reserved before asynchronous start; same memory owner consumes once and closes first
+ok 68 - web window is reserved before asynchronous start; same memory owner consumes once and closes first
+  ---
+  duration_ms: 0.377875
+  type: 'test'
+  ...
+# Subtest: blocked or throwing window preparation sends no start and never navigates the parent
+ok 69 - blocked or throwing window preparation sends no start and never navigates the parent
+  ---
+  duration_ms: 0.070958
+  type: 'test'
+  ...
+# Subtest: web window closed cancels current state before completion
+ok 70 - web window closed cancels current state before completion
+  ---
+  duration_ms: 0.115666
+  type: 'test'
+  ...
+# Subtest: web window expired cancels current state before completion
+ok 71 - web window expired cancels current state before completion
+  ---
+  duration_ms: 0.079083
+  type: 'test'
+  ...
+# Subtest: web signout invalidates pending callback and closes its window
+ok 72 - web signout invalidates pending callback and closes its window
+  ---
+  duration_ms: 0.084375
+  type: 'test'
+  ...
+# Subtest: web password invalidates pending callback and closes its window
+ok 73 - web password invalidates pending callback and closes its window
+  ---
+  duration_ms: 0.057375
+  type: 'test'
+  ...
+# Subtest: web email invalidates pending callback and closes its window
+ok 74 - web email invalidates pending callback and closes its window
+  ---
+  duration_ms: 0.0535
+  type: 'test'
+  ...
+# Subtest: web dispose invalidates pending callback and closes its window
+ok 75 - web dispose invalidates pending callback and closes its window
+  ---
+  duration_ms: 0.05825
+  type: 'test'
+  ...
+# Subtest: late start cannot navigate after cancellation or close a newer window
+ok 76 - late start cannot navigate after cancellation or close a newer window
+  ---
+  duration_ms: 0.132667
+  type: 'test'
+  ...
+# Subtest: failed start/redirect closes the reserved window without a pending login
+ok 77 - failed start/redirect closes the reserved window without a pending login
+  ---
+  duration_ms: 0.208542
+  type: 'test'
+  ...
+# Subtest: cancellation during landing publication cannot reserve or dispatch a web attempt
+ok 78 - cancellation during landing publication cannot reserve or dispatch a web attempt
+  ---
+  duration_ms: 0.04675
+  type: 'test'
+  ...
+# Subtest: a newer auth intent during completion cleanup prevents the old code exchange
+ok 79 - a newer auth intent during completion cleanup prevents the old code exchange
+  ---
+  duration_ms: 0.096042
+  type: 'test'
+  ...
+# Subtest: account link uses authenticated exact endpoint and preserves the existing grant/context
+ok 80 - account link uses authenticated exact endpoint and preserves the existing grant/context
+  ---
+  duration_ms: 0.432041
+  type: 'test'
+  ...
+# Subtest: signed-out account linking never requests or opens provider
+ok 81 - signed-out account linking never requests or opens provider
+  ---
+  duration_ms: 0.033041
+  type: 'test'
+  ...
+# Subtest: account link refuses foreign-state without sending a link completion
+ok 82 - account link refuses foreign-state without sending a link completion
+  ---
+  duration_ms: 0.146833
+  type: 'test'
+  ...
+# Subtest: account link refuses declined without sending a link completion
+ok 83 - account link refuses declined without sending a link completion
+  ---
+  duration_ms: 0.113459
+  type: 'test'
+  ...
+# Subtest: account link refuses cancelled without sending a link completion
+ok 84 - account link refuses cancelled without sending a link completion
+  ---
+  duration_ms: 0.143667
+  type: 'test'
+  ...
+# Subtest: account link refuses signed-out without sending a link completion
+ok 85 - account link refuses signed-out without sending a link completion
+  ---
+  duration_ms: 0.131084
+  type: 'test'
+  ...
+# Subtest: account link refuses other-login without sending a link completion
+ok 86 - account link refuses other-login without sending a link completion
+  ---
+  duration_ms: 0.199375
+  type: 'test'
+  ...
+# Subtest: concurrent/replayed account link callbacks never dispatch a second consumption
+ok 87 - concurrent/replayed account link callbacks never dispatch a second consumption
+  ---
+  duration_ms: 0.185792
+  type: 'test'
+  ...
+# Subtest: late account link response after sign-out cannot announce success or install a session
+ok 88 - late account link response after sign-out cannot announce success or install a session
+  ---
+  duration_ms: 0.259375
+  type: 'test'
+  ...
+# Subtest: an uncertain account link is never retried automatically and cannot claim Client verification
+ok 89 - an uncertain account link is never retried automatically and cannot claim Client verification
+  ---
+  duration_ms: 0.180833
+  type: 'test'
+  ...
+# Subtest: every request of this suite went to an approved URL, and all approved URLs were exercised
+ok 90 - every request of this suite went to an approved URL, and all approved URLs were exercised
+  ---
+  duration_ms: 0.027083
+  type: 'test'
+  ...
+1..90
+# tests 90
+# suites 0
+# pass 90
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 45144.818209

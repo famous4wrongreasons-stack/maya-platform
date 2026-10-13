@@ -78,3 +78,15 @@ writer, recommendation or plan-to-task authority was added. This closes only the
 rule-parameter display gap retained by the previous checkpoint. See
 `../../MAYA-COMPANION-IDEA-RULES-CHECKPOINT-20261014.md` and
 `../maya-companion-idea-rules-20261014/README.md` for fresh scoped evidence.
+
+## Feed acknowledgement checkpoint (2026-10-14)
+
+`7c477a9a2a769cad19a38b4f27bf7364169c3c58` connects explicit mark-read to the
+existing Inbox owner; final candidate `be123b3d3b26101713a045b04976071cc4b07ae2`
+also updates the exact closed network fixture inventories. Opening/filtering remain
+inert. `{ok:true}` alone is not confirmation: the exact item is reread, without an
+application replay after a lost response. Backend product semantics remain intact,
+including repeated delivery updating only readAt. This closes acknowledgement only,
+not Save, categories, task completion or message/booking authority. Earlier read-only
+Feed evidence is historical. See `../../MAYA-COMPANION-FEED-READ-CHECKPOINT-20261014.md`
+and `../maya-companion-feed-read-20261014/README.md` for fresh scoped evidence.

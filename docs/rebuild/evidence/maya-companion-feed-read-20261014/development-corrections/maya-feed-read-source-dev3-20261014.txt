@@ -1,0 +1,27 @@
+PASS src/owner-reports/companion-retained-reads.http.spec.ts
+  Companion retained reads through actual Nest JWT/tenant/role guards and source owners
+    ✓ reads Inbox scoped by current user and tenant, default cap 50; ignores caller-selected query authority (19 ms)
+    ✓ lists only retained recipient summaries and opens the exact immutable server snapshot (7 ms)
+    ✓ foreign recipient is absent from list and cannot read a known run id (4 ms)
+    ✓ membership authority is freshly checked for each snapshot after list (3 ms)
+    ✓ retention expiry and manifest substitution are refused by the existing source owner (5 ms)
+    ✓ missing, invalid, revoked and tenant-substituted session cannot read /api/inbox (5 ms)
+    ✓ missing, invalid, revoked and tenant-substituted session cannot read /api/owner-reports (4 ms)
+    ✓ missing, invalid, revoked and tenant-substituted session cannot read /api/owner-reports/10000000-0000-4000-8000-000000000001/snapshot (3 ms)
+    ✓ personal Client role does not inherit business feed/report access: /api/inbox (1 ms)
+    ✓ personal Client role does not inherit business feed/report access: /api/owner-reports (2 ms)
+    ✓ personal Client role does not inherit business feed/report access: /api/owner-reports/10000000-0000-4000-8000-000000000001/snapshot (1 ms)
+    ✓ explicit Inbox acknowledgement updates only readAt for the current tenant/user and fresh GET confirms it (8 ms)
+    ✓ ok is deliberately non-disclosing: marking other-user changes no row and does not prove read state (2 ms)
+    ✓ ok is deliberately non-disclosing: marking other-tenant changes no row and does not prove read state (2 ms)
+    ✓ ok is deliberately non-disclosing: marking deleted-item changes no row and does not prove read state (2 ms)
+    ✓ ok is deliberately non-disclosing: marking missing-item changes no row and does not prove read state (2 ms)
+    ✓ repeated and concurrent acknowledgements never create a second item or task/delivery effect (3 ms)
+    ✓ anonymous invalid revoked and tenant-substituted sessions cannot mark read (3 ms)
+    ✓ revoked membership and client role are not notification-owner authority (2 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       19 passed, 19 total
+Snapshots:   0 total
+Time:        0.679 s, estimated 1 s
+Ran all test suites matching src/owner-reports/companion-retained-reads.http.spec.ts.

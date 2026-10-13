@@ -1,0 +1,292 @@
+{
+  "scope": "new code plus documentation/copied text; not historical repository audit",
+  "candidate": "be123b3d3b26101713a045b04976071cc4b07ae2",
+  "filesChecked": 58,
+  "manifestHashes": "PASS",
+  "highConfidenceSecretScan": "PASS",
+  "piiPatternScan": "PASS",
+  "syntheticScreenshotsOnly": true,
+  "reviewedFalsePositives": [
+    {
+      "file": "docs/rebuild/evidence/maya-companion-feed-read-20261014/logs/carrier.txt",
+      "line": 984,
+      "pattern": "email-like substring in synthetic URL",
+      "source": "maya-carrier-react/test/telegram-popup.test.mjs:65",
+      "classification": "intentional fake URL credentials in provider-substitution refusal test; not an email or real credential"
+    },
+    {
+      "file": "docs/rebuild/evidence/maya-companion-feed-read-20261014/logs/carrier.txt",
+      "line": 985,
+      "pattern": "email-like substring in synthetic URL",
+      "source": "maya-carrier-react/test/telegram-popup.test.mjs:65",
+      "classification": "intentional fake URL credentials in provider-substitution refusal test; not an email or real credential"
+    },
+    {
+      "file": "maya-carrier-react/test/workspace-reads.browser.mjs",
+      "line": 99,
+      "pattern": "reserved .invalid email fixture",
+      "source": "maya-carrier-react/test/workspace-reads.browser.mjs:99",
+      "classification": "synthetic browser login on an isolated intercepted API; no real user or address"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 147,
+      "pattern": "phone",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 520,
+      "pattern": "phone",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 146,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 162,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 311,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 498,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 503,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 505,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 511,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 523,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 528,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 530,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 541,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 551,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 553,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 558,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 565,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 570,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 575,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 576,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 584,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 587,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 611,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 677,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 678,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 679,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 703,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 706,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 718,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 719,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 720,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 722,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 728,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 1118,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 1207,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 1547,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    },
+    {
+      "file": "maya-chat-shell/test/net.test.mjs",
+      "line": 1689,
+      "pattern": "email",
+      "source": "maya-chat-shell/test/net.test.mjs:1-58, 141-165 (inline fixtures, global fetch recorder)",
+      "classification": "pre-existing synthetic login/projection fixtures; network replaced before module load; not retained user data"
+    }
+  ],
+  "unresolvedFindings": []
+}
