@@ -1,0 +1,10 @@
+digest 4ea9391b4a828331b99ba81e5cdb7bbdea804aaa470ddb78bf4856186a017e18
+web 2e355f0804bcc009bdd55d0a58ac5395c008ac24e9ef4b0591c66d6bf63ee7ba (web; 44 modules; styles.css present; index.html present; 5 pwa assets)
+contract: #contract -> 281 declarations in os.tmpdir(); 201 exports (+1 pending name) in the collision set
+baseline: 0 live entries (build-baseline/routes.json absent, build-baseline/renderer.json absent); 0 refused sites admitted by it
+pwa: manifest.webmanifest id /maya-chat-shell/, start_url ./, standalone portrait; 3 manifest icons + 1 apple-touch icon; no service worker
+serving: do NOT serve this tree at or under /app/ — the retired PWA's service worker is still live at /app/service-worker.js (max-age=604800) and its scope is /app/; a shell served there would be controlled by a worker this build never wrote. Check a path with: node build.mjs --serve-path=<the path this tree will be served from>
+entry: present
+net/client.ts: present
+reproducible: 4ea9391b4a828331b99ba81e5cdb7bbdea804aaa470ddb78bf4856186a017e18
+web reproducible: 2e355f0804bcc009bdd55d0a58ac5395c008ac24e9ef4b0591c66d6bf63ee7ba (44 per-file hashes equal)

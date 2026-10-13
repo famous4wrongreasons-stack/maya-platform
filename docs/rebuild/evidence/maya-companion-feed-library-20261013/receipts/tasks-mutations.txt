@@ -1,0 +1,52 @@
+{
+  "candidate": "ccd38792e3772f65165a9b2f0a7706e1151b145d",
+  "baseline": true,
+  "mutations": [
+    {
+      "name": "projection cap",
+      "status": "KILLED",
+      "proof": "A23 read projection"
+    },
+    {
+      "name": "duplicate identity",
+      "status": "KILLED",
+      "proof": "malformed rows"
+    },
+    {
+      "name": "unknown status",
+      "status": "KILLED",
+      "proof": "malformed rows"
+    },
+    {
+      "name": "read becomes write",
+      "status": "KILLED",
+      "proof": "only GET current-user"
+    },
+    {
+      "name": "late response accepted",
+      "status": "KILLED",
+      "proof": "close / signout"
+    },
+    {
+      "name": "old rows survive reset",
+      "status": "KILLED",
+      "proof": "lazy one-flight"
+    },
+    {
+      "name": "duplicate refresh",
+      "status": "KILLED",
+      "proof": "lazy one-flight"
+    },
+    {
+      "name": "rate limit ignored",
+      "status": "KILLED",
+      "proof": "refresh clears old snapshot"
+    },
+    {
+      "name": "workspace not cleared",
+      "status": "KILLED",
+      "proof": "workspace has no WidgetRoute"
+    }
+  ],
+  "status": "PASS"
+}

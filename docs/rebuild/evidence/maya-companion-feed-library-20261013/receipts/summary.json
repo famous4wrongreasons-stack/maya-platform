@@ -1,0 +1,219 @@
+{
+  "contract": "maya.companion.feed-library.scoped-checks/1",
+  "candidate": "ccd38792e3772f65165a9b2f0a7706e1151b145d",
+  "startedAt": "2026-10-13T20:20:24Z",
+  "node": "v22.23.3",
+  "scrubbedEnvironment": true,
+  "cleanAtStart": true,
+  "fullReleaseCertification": false,
+  "realProviders": false,
+  "realDatabase": false,
+  "checks": [
+    {
+      "name": "runtime-reproducible",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-chat-shell",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "build.mjs",
+        "--check"
+      ],
+      "exitCode": 0,
+      "seconds": 8.441,
+      "log": "runtime-reproducible.txt",
+      "sha256": "6b989dd76673919e9d318e9f2617330d8607e320d8f4bb8f27e585100c5692d0"
+    },
+    {
+      "name": "carrier",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/npm",
+        "test"
+      ],
+      "exitCode": 0,
+      "seconds": 0.6,
+      "log": "carrier.txt",
+      "sha256": "40ee077242406888360d1b494ba5b67fbaccecd764d4baefe0cdef439c1fcced"
+    },
+    {
+      "name": "runtime-ratchets",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-chat-shell",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "build.mjs",
+        "--self-test"
+      ],
+      "exitCode": 0,
+      "seconds": 9.141,
+      "log": "runtime-ratchets.txt",
+      "sha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a"
+    },
+    {
+      "name": "carrier-ratchets",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "build.mjs",
+        "--self-test"
+      ],
+      "exitCode": 0,
+      "seconds": 0.228,
+      "log": "carrier-ratchets.txt",
+      "sha256": "9c9dd5d2e95815e834abf4fb37f14e912fa39892a46a54fa8263132617a98256"
+    },
+    {
+      "name": "packaging-parity",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "tools/release.mjs",
+        "verify"
+      ],
+      "exitCode": 0,
+      "seconds": 11.461,
+      "log": "packaging-parity.txt",
+      "sha256": "4640e19ed542a1cb6c30fd2d05b00716e8b8901bf933c3f6b6dc241d29dbde9c"
+    },
+    {
+      "name": "workspace-mutations",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-chat-shell",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "test/workspace-reads.mutations.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 2.037,
+      "log": "workspace-mutations.txt",
+      "sha256": "d91f9460aa53a59bd940b1b6c312f913c87879797aac9523cbc266e30b93b57d"
+    },
+    {
+      "name": "tasks-mutations",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-chat-shell",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "test/own-tasks.mutations.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 1.352,
+      "log": "tasks-mutations.txt",
+      "sha256": "d89fa03ab5468237aa01ad323776805b8543054d7beb78e086ea6f1f46ee80fe"
+    },
+    {
+      "name": "source-http-contracts",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-saas-backend",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "src/owner-reports/companion-retained-reads.http.spec.ts",
+        "src/inbox/inbox.service.spec.ts",
+        "src/owner-reports/owner-report.contract.spec.ts",
+        "src/package5-wave1/operational-work.http.spec.ts"
+      ],
+      "exitCode": 0,
+      "seconds": 1.31,
+      "log": "source-http-contracts.txt",
+      "sha256": "5ca03dc746d40ff0ea2a0f6f33100111735dc77f9c6c1299cfece2ebd437a3b2"
+    },
+    {
+      "name": "packaging-tests",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "--test",
+        "test/release.test.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 33.903,
+      "log": "packaging-tests.txt",
+      "sha256": "865458bc096c8471180f71a7e9f7dbc493bcb01095bc593259b9fc7e0222c52c"
+    },
+    {
+      "name": "runtime",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-chat-shell",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "--test",
+        "conformance.test.mjs",
+        "test/approval-presentation.test.mjs",
+        "test/booking-outcome.test.mjs",
+        "test/brand.test.mjs",
+        "test/build.selftest.test.mjs",
+        "test/conversation.test.mjs",
+        "test/deeplink.test.mjs",
+        "test/development-integration.test.mjs",
+        "test/dom.test.mjs",
+        "test/goods-photo-net.test.mjs",
+        "test/goods-photo.test.mjs",
+        "test/goods-receipt-outcome.test.mjs",
+        "test/history-erasure-net.test.mjs",
+        "test/integrity.parity.test.mjs",
+        "test/intents.test.mjs",
+        "test/k15-census.test.mjs",
+        "test/local-api.history.test.mjs",
+        "test/local-crm-setup.test.mjs",
+        "test/net.test.mjs",
+        "test/onboarding.test.mjs",
+        "test/own-tasks.test.mjs",
+        "test/personal-booking.test.mjs",
+        "test/privacy.test.mjs",
+        "test/renderer.conformance.test.mjs",
+        "test/routes.conformance.test.mjs",
+        "test/serve.test.mjs",
+        "test/service-price-outcome.test.mjs",
+        "test/shell.test.mjs",
+        "test/view.tokenfree.test.mjs",
+        "test/voice.test.mjs",
+        "test/workspace-reads.test.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 48.9,
+      "log": "runtime.txt",
+      "sha256": "29959dcdf00cdd10e5e319a70fb33251b645689322b5715cd7d82b0aca789937"
+    },
+    {
+      "name": "chat-browser",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "test/companion.browser.mjs",
+        "/private/tmp/maya-companion-feed-library-final-chat-browser-20261013"
+      ],
+      "exitCode": 0,
+      "seconds": 15.649,
+      "log": "chat-browser.txt",
+      "sha256": "eb71e7aea6a1a60d0f342e87f841a1816694a175cdf8ab1b50e51fd40d9682b0",
+      "artifacts": "/private/tmp/maya-companion-feed-library-final-chat-browser-20261013"
+    },
+    {
+      "name": "tasks-browser",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "test/own-tasks.browser.mjs",
+        "/private/tmp/maya-companion-feed-library-final-tasks-browser-20261013"
+      ],
+      "exitCode": 0,
+      "seconds": 15.59,
+      "log": "tasks-browser.txt",
+      "sha256": "c53dd004ced5774f22601e2f3282db8f0b3fddda3f760b6f7eaa7ac33f28820b",
+      "artifacts": "/private/tmp/maya-companion-feed-library-final-tasks-browser-20261013"
+    },
+    {
+      "name": "workspace-browser",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "test/workspace-reads.browser.mjs",
+        "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013"
+      ],
+      "exitCode": 0,
+      "seconds": 15.587,
+      "log": "workspace-browser.txt",
+      "sha256": "e517023bc1176c54bcdfe4fcb589dfea6f46dfb97887299ca6ebfe02aeb231ee",
+      "artifacts": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013"
+    }
+  ],
+  "headUnchanged": true,
+  "cleanAtEnd": true,
+  "status": "PASS"
+}

@@ -31,3 +31,11 @@ Concrete policy gaps in the supplied prototype are **task undo**, **Save from Fe
 **generic media storage**, and **new route/source vocabulary**. No decision for those
 was silently made in the AChat visual change. This map is not a release blocker
 for the old closed-input profile and does not reopen C10 or HANDOFF.
+
+## Implemented continuation (2026-10-13)
+
+The retained Feed/report readers described above now have a bounded local
+implementation at `ccd38792e3772f65165a9b2f0a7706e1151b145d`:
+[Feed/Library checkpoint](../../MAYA-COMPANION-FEED-LIBRARY-CHECKPOINT-20261013.md).
+This does not close the separate Save, generic media, model-context discussion,
+Ideas or task-command owner gaps. Earlier checkpoint receipts remain historical.

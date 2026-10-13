@@ -1,0 +1,392 @@
+{
+  "candidate": "ccd38792e3772f65165a9b2f0a7706e1151b145d",
+  "artifacts": [
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-20261013/carrier-ratchets.txt",
+      "size": 7864,
+      "sha256": "9c9dd5d2e95815e834abf4fb37f14e912fa39892a46a54fa8263132617a98256",
+      "containsRealPrivateData": false,
+      "repositoryNormalization": "strip trailing line whitespace; source unchanged",
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/carrier-ratchets.txt",
+      "repositorySha256": "5a71a6ba5543f81d2dd72deccde61b8e8eb59d504be4e1f898f21d8f38c19236"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-20261013/carrier.txt",
+      "size": 36168,
+      "sha256": "40ee077242406888360d1b494ba5b67fbaccecd764d4baefe0cdef439c1fcced",
+      "containsRealPrivateData": false,
+      "repositoryNormalization": "strip trailing line whitespace; source unchanged",
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/carrier.txt",
+      "repositorySha256": "40ee077242406888360d1b494ba5b67fbaccecd764d4baefe0cdef439c1fcced"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-20261013/chat-browser.txt",
+      "size": 107,
+      "sha256": "eb71e7aea6a1a60d0f342e87f841a1816694a175cdf8ab1b50e51fd40d9682b0",
+      "containsRealPrivateData": false,
+      "repositoryNormalization": "strip trailing line whitespace; source unchanged",
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/chat-browser.txt",
+      "repositorySha256": "eb71e7aea6a1a60d0f342e87f841a1816694a175cdf8ab1b50e51fd40d9682b0"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-20261013/packaging-parity.txt",
+      "size": 732,
+      "sha256": "4640e19ed542a1cb6c30fd2d05b00716e8b8901bf933c3f6b6dc241d29dbde9c",
+      "containsRealPrivateData": false,
+      "repositoryNormalization": "strip trailing line whitespace; source unchanged",
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/packaging-parity.txt",
+      "repositorySha256": "4640e19ed542a1cb6c30fd2d05b00716e8b8901bf933c3f6b6dc241d29dbde9c"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-20261013/packaging-tests.txt",
+      "size": 3309,
+      "sha256": "865458bc096c8471180f71a7e9f7dbc493bcb01095bc593259b9fc7e0222c52c",
+      "containsRealPrivateData": false,
+      "repositoryNormalization": "strip trailing line whitespace; source unchanged",
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/packaging-tests.txt",
+      "repositorySha256": "865458bc096c8471180f71a7e9f7dbc493bcb01095bc593259b9fc7e0222c52c"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-20261013/runtime-ratchets.txt",
+      "size": 12458,
+      "sha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "containsRealPrivateData": false,
+      "repositoryNormalization": "strip trailing line whitespace; source unchanged",
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/runtime-ratchets.txt",
+      "repositorySha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-20261013/runtime-reproducible.txt",
+      "size": 1150,
+      "sha256": "6b989dd76673919e9d318e9f2617330d8607e320d8f4bb8f27e585100c5692d0",
+      "containsRealPrivateData": false,
+      "repositoryNormalization": "strip trailing line whitespace; source unchanged",
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/runtime-reproducible.txt",
+      "repositorySha256": "6b989dd76673919e9d318e9f2617330d8607e320d8f4bb8f27e585100c5692d0"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-20261013/runtime.txt",
+      "size": 198482,
+      "sha256": "29959dcdf00cdd10e5e319a70fb33251b645689322b5715cd7d82b0aca789937",
+      "containsRealPrivateData": false,
+      "repositoryNormalization": "strip trailing line whitespace; source unchanged",
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/runtime.txt",
+      "repositorySha256": "29959dcdf00cdd10e5e319a70fb33251b645689322b5715cd7d82b0aca789937"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-20261013/source-http-contracts.txt",
+      "size": 542,
+      "sha256": "5ca03dc746d40ff0ea2a0f6f33100111735dc77f9c6c1299cfece2ebd437a3b2",
+      "containsRealPrivateData": false,
+      "repositoryNormalization": "strip trailing line whitespace; source unchanged",
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/source-http-contracts.txt",
+      "repositorySha256": "5ca03dc746d40ff0ea2a0f6f33100111735dc77f9c6c1299cfece2ebd437a3b2"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-20261013/summary.json",
+      "size": 8641,
+      "sha256": "7685465709df08653beca69331eaacb8f6fa008203662063548ecbf2a9a974b4",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/summary.json",
+      "repositorySha256": "7685465709df08653beca69331eaacb8f6fa008203662063548ecbf2a9a974b4"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-20261013/tasks-browser.txt",
+      "size": 108,
+      "sha256": "c53dd004ced5774f22601e2f3282db8f0b3fddda3f760b6f7eaa7ac33f28820b",
+      "containsRealPrivateData": false,
+      "repositoryNormalization": "strip trailing line whitespace; source unchanged",
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/tasks-browser.txt",
+      "repositorySha256": "c53dd004ced5774f22601e2f3282db8f0b3fddda3f760b6f7eaa7ac33f28820b"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-20261013/tasks-mutations.txt",
+      "size": 1130,
+      "sha256": "d89fa03ab5468237aa01ad323776805b8543054d7beb78e086ea6f1f46ee80fe",
+      "containsRealPrivateData": false,
+      "repositoryNormalization": "strip trailing line whitespace; source unchanged",
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/tasks-mutations.txt",
+      "repositorySha256": "d89fa03ab5468237aa01ad323776805b8543054d7beb78e086ea6f1f46ee80fe"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-20261013/workspace-browser.txt",
+      "size": 112,
+      "sha256": "e517023bc1176c54bcdfe4fcb589dfea6f46dfb97887299ca6ebfe02aeb231ee",
+      "containsRealPrivateData": false,
+      "repositoryNormalization": "strip trailing line whitespace; source unchanged",
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/workspace-browser.txt",
+      "repositorySha256": "e517023bc1176c54bcdfe4fcb589dfea6f46dfb97887299ca6ebfe02aeb231ee"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-20261013/workspace-mutations.txt",
+      "size": 1644,
+      "sha256": "d91f9460aa53a59bd940b1b6c312f913c87879797aac9523cbc266e30b93b57d",
+      "containsRealPrivateData": false,
+      "repositoryNormalization": "strip trailing line whitespace; source unchanged",
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/workspace-mutations.txt",
+      "repositorySha256": "d91f9460aa53a59bd940b1b6c312f913c87879797aac9523cbc266e30b93b57d"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-chat-browser-20261013/chat-1280.png",
+      "size": 47159,
+      "sha256": "17b1bbf1d6fd072011fb96abf00fe97cb2eb9a64a8cbdba7b030600cdbb94a15",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-chat-browser-20261013/chat-320.png",
+      "size": 40338,
+      "sha256": "e12eb88c3275ea159401f184ad5ed0a0d415f954dbd099f251a4e7b25003ddfb",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-chat-browser-20261013/chat-393.png",
+      "size": 41751,
+      "sha256": "e5dd291e46c55bb880ad476cc04ddc1e5c664f54b5e76a72905de4ead6085a7b",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-chat-browser-20261013/chat-427.png",
+      "size": 42184,
+      "sha256": "23576ef6c04de35257144fb04a99143f34c2b8468f8366a05e4563d944e632c8",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-chat-browser-20261013/failure-393.png",
+      "size": 60542,
+      "sha256": "c59dfbae5de882dec8e00fef6241f2ab483553b5fdcff1c8b1b35a07f5c0edaa",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-chat-browser-20261013/keyboard-height-393.png",
+      "size": 32554,
+      "sha256": "12f07d038e63d12197834575fed4250424bb9a377f3202f0366a43ce6bd9f2d0",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-chat-browser-20261013/large-text-393.png",
+      "size": 61174,
+      "sha256": "6517ffa9f881d2f8dba410f87ed58f98fa0c3d51ea4ca8856eb7aa621e0a1640",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-chat-browser-20261013/menu-393.png",
+      "size": 37965,
+      "sha256": "9afd575a796a76e423195ca3154ae77beb2515abb44c8a63e37bbc273a2f1726",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-chat-browser-20261013/receipt.json",
+      "size": 2953,
+      "sha256": "813b61be1d6dd97099f87b71f9e1c4dfa816fbc31942281bc12bcc9520c714d3",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/chat-browser.json",
+      "repositorySha256": "813b61be1d6dd97099f87b71f9e1c4dfa816fbc31942281bc12bcc9520c714d3"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-chat-browser-20261013/signin-393.png",
+      "size": 27941,
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-chat-browser-20261013/thinking-393.png",
+      "size": 46447,
+      "sha256": "4c454e832b19600f20d339487bc471fe656f6ff95cfa88a7641e4c299deb7186",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-tasks-browser-20261013/receipt.json",
+      "size": 2743,
+      "sha256": "205f0027fdb4aa3e956180e1c538df74ab515764c9929e6b0f4981fb9bf1a997",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/tasks-browser.json",
+      "repositorySha256": "205f0027fdb4aa3e956180e1c538df74ab515764c9929e6b0f4981fb9bf1a997"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-tasks-browser-20261013/signin-393.png",
+      "size": 27941,
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-tasks-browser-20261013/tasks-1280.png",
+      "size": 58273,
+      "sha256": "d6414ae2c9328437b138c42a0b26583155780046330a2a19422de1400a70c661",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-tasks-browser-20261013/tasks-320.png",
+      "size": 51168,
+      "sha256": "583b182071b7ec16ece4bb7c4693b0d40e7814f3f6e1167b57650a7249258066",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-tasks-browser-20261013/tasks-393.png",
+      "size": 51405,
+      "sha256": "f25d78898d3f50b689a4e9cc3c5b572a1a150380b2f9d376b965bd0e9b083fd0",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-tasks-browser-20261013/tasks-427.png",
+      "size": 51777,
+      "sha256": "db70f706f17362f3ad386f8465f8224961d9b9055352aa75d4b1d29a8af3387b",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-tasks-browser-20261013/tasks-cap.png",
+      "size": 50963,
+      "sha256": "dd60c4a59bc6499278087493b6ae7b9a7944f81c3388e6d91f5b61fbb71413e4",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-tasks-browser-20261013/tasks-denied.png",
+      "size": 38816,
+      "sha256": "161f8a5c81dece0af4d33a7b92d20106cdf6c25baae8f8c75d97cd62451ca8a7",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-tasks-browser-20261013/tasks-large-text.png",
+      "size": 67424,
+      "sha256": "28aad6754828970c7c70c325015c5ca638a0369ecfc24ef8548a46dc30227a56",
+      "containsRealPrivateData": false,
+      "notCommittedReason": "Regression screenshots repeat earlier archived chat/tasks visuals; fresh receipt and all hashes preserved, rerunnable harness committed."
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/feed-1280.png",
+      "size": 71140,
+      "sha256": "6815f6d3a336bd56447a55d35954e4c3e69771c8159fe0453a6f7e1dbd8e471e",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/screens/feed-1280.png",
+      "repositorySha256": "6815f6d3a336bd56447a55d35954e4c3e69771c8159fe0453a6f7e1dbd8e471e"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/feed-320.png",
+      "size": 59419,
+      "sha256": "bcfee60bb02b66fbdfec25e5b0a8138e01ec10e720d968a7d301a8e296411d93",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/screens/feed-320.png",
+      "repositorySha256": "bcfee60bb02b66fbdfec25e5b0a8138e01ec10e720d968a7d301a8e296411d93"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/feed-393.png",
+      "size": 63322,
+      "sha256": "01a11d6aeb5da74daecda8059225f36cf05c6b2d0eacf8b05ce98f7906e2cf83",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/screens/feed-393.png",
+      "repositorySha256": "01a11d6aeb5da74daecda8059225f36cf05c6b2d0eacf8b05ce98f7906e2cf83"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/feed-427.png",
+      "size": 64085,
+      "sha256": "f6fb17d5d7a7b00a9248fe3140a9d8e0820325565a0b11ac3b7223087c7e81ff",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/screens/feed-427.png",
+      "repositorySha256": "f6fb17d5d7a7b00a9248fe3140a9d8e0820325565a0b11ac3b7223087c7e81ff"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/feed-denied.png",
+      "size": 38265,
+      "sha256": "d5c284ce9a9ccdd246bacc2a269671fb39b21727067490b5e56db6d47a750362",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/screens/feed-denied.png",
+      "repositorySha256": "d5c284ce9a9ccdd246bacc2a269671fb39b21727067490b5e56db6d47a750362"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/library-empty.png",
+      "size": 50064,
+      "sha256": "81a6090dd758a89dba7806eb8fb6271bc7b93bb24aab3840b362bd3db992bdea",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/screens/library-empty.png",
+      "repositorySha256": "81a6090dd758a89dba7806eb8fb6271bc7b93bb24aab3840b362bd3db992bdea"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/library-grid-1280.png",
+      "size": 52231,
+      "sha256": "01cd4456eaac85ce77a46a9eaaad3c681a6f941ec4ef2d02854a13cc1baf2160",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/screens/library-grid-1280.png",
+      "repositorySha256": "01cd4456eaac85ce77a46a9eaaad3c681a6f941ec4ef2d02854a13cc1baf2160"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/library-grid-320.png",
+      "size": 42924,
+      "sha256": "f834336d4dd199678fea735c6e91e14df5e48d076510a81e050218fcd4de134f",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/screens/library-grid-320.png",
+      "repositorySha256": "f834336d4dd199678fea735c6e91e14df5e48d076510a81e050218fcd4de134f"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/library-grid-393.png",
+      "size": 48905,
+      "sha256": "b05475ca5b273d9ffefdbfb551353cc827ade16852e026f2f5ff668ab6ffcd21",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/screens/library-grid-393.png",
+      "repositorySha256": "b05475ca5b273d9ffefdbfb551353cc827ade16852e026f2f5ff668ab6ffcd21"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/library-grid-427.png",
+      "size": 49385,
+      "sha256": "60521a7650a498d807e1cbee4ee12e1cd262fb0454be66297bbd8947c282f58f",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/screens/library-grid-427.png",
+      "repositorySha256": "60521a7650a498d807e1cbee4ee12e1cd262fb0454be66297bbd8947c282f58f"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/library-list-393.png",
+      "size": 49512,
+      "sha256": "bd7de6a678d3fac44d62e854bbb73c920cc77478958e6a7e0374327714d30452",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/screens/library-list-393.png",
+      "repositorySha256": "bd7de6a678d3fac44d62e854bbb73c920cc77478958e6a7e0374327714d30452"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/receipt.json",
+      "size": 3331,
+      "sha256": "d43f79228a004a1d971265c7c0a5037910b8e8b631bcd25213dfb64a62b45c94",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/receipts/workspace-browser.json",
+      "repositorySha256": "d43f79228a004a1d971265c7c0a5037910b8e8b631bcd25213dfb64a62b45c94"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/report-393.png",
+      "size": 50264,
+      "sha256": "d2aef66fb1087307bc1314b330ef8fab1f7c5f22e2875daf8776e6a4d61897ad",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/screens/report-393.png",
+      "repositorySha256": "d2aef66fb1087307bc1314b330ef8fab1f7c5f22e2875daf8776e6a4d61897ad"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/report-large-text.png",
+      "size": 67375,
+      "sha256": "1b94044b8fb75406737283570098885242cfc41d086ce972316dc3e52b0b4693",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/screens/report-large-text.png",
+      "repositorySha256": "1b94044b8fb75406737283570098885242cfc41d086ce972316dc3e52b0b4693"
+    },
+    {
+      "source": "/private/tmp/maya-companion-feed-library-final-workspace-browser-20261013/signin-393.png",
+      "size": 27941,
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "containsRealPrivateData": false,
+      "repository": "docs/rebuild/evidence/maya-companion-feed-library-20261013/screens/signin-393.png",
+      "repositorySha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88"
+    }
+  ]
+}
