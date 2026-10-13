@@ -205,5 +205,7 @@
       ],
       "vacuous": []
     }
-  ]
+  ],
+  "archival_only": true,
+  "release_admissible": false
 }

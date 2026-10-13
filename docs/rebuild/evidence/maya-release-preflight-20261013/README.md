@@ -212,3 +212,8 @@ Raw logs, synthetic receipt bodies and controllers remain at the exact local
 paths in `RAW-MANIFEST.json`, with sizes and SHA256. Only aggregate evidence and
 selected non-sensitive crash/runtime metadata are archived. No real credentials,
 private signing material, owner database or raw customer data are included.
+
+The archived 19-anchor diagnostic explicitly sets `archival_only: true` and
+`release_admissible: false`. The real collector rejects that exact archive
+before assembly; `ARCHIVE-REFUSAL.json` records the executable negative and
+artifact hash. This extra documentation check issues no certificate.

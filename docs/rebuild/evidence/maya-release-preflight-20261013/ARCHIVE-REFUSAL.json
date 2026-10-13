@@ -1,0 +1,10 @@
+{
+  "kind": "ARCHIVE_ADMISSION_NEGATIVE_NOT_CERTIFICATION",
+  "testedCollectorCandidate": "27c410255783feac7a5044f6331eabf1fb25a164",
+  "artifact": "targeted-anchor-results.json",
+  "expectedRefusal": "archival/unverified evidence is inadmissible for release",
+  "result": "PASS",
+  "historicalPartialReceiptPromoted": false,
+  "executionHead": "4c2b18028c2d7a3d74bb7964b15e74fe8366b56f",
+  "archivedArtifactSha256": "307d468c8668ac3bd4a75b392b29564f4b2d1daaeaff7a4230a6c98b31ea52dc"
+}
