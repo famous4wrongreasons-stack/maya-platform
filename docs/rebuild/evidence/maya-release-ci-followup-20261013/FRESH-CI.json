@@ -1,0 +1,84 @@
+{
+  "sourceHead": "a6d9c12d7b738c7bd3db37d29276a8905d270598",
+  "sourceTree": "e36fe3979bf369da04bd41d48f380fc562ec017d",
+  "date": "2026-10-13 10:18:51.230249+00:00",
+  "kind": "fresh local Platform CI equivalent and canonical release packaging; not hosted CI or certificate",
+  "node": "v22.23.3",
+  "backend": {
+    "numPassedTests": 9819,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTestSuites": 725
+  },
+  "e2e": {
+    "numPassedTests": 1,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTestSuites": 1
+  },
+  "eventsLive": {
+    "numPassedTests": 4,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTestSuites": 1
+  },
+  "carrier": {
+    "tests": 164,
+    "pass": 164,
+    "fail": 0,
+    "skipped": 0
+  },
+  "releasePackagingTests": {
+    "tests": 18,
+    "pass": 18,
+    "fail": 0,
+    "skipped": 0
+  },
+  "operator": {
+    "tests": 30,
+    "pass": 30,
+    "fail": 0,
+    "skipped": 0
+  },
+  "operatorCompiled": {
+    "tests": 9,
+    "pass": 9,
+    "fail": 0,
+    "skipped": 0
+  },
+  "frontendPrepublication": {
+    "tests": 8,
+    "pass": 8,
+    "fail": 0,
+    "skipped": 0
+  },
+  "legacyPython": {
+    "tests": 618,
+    "durationSeconds": 416.433,
+    "skipped": 0,
+    "status": "PASS",
+    "network": "loopback only; actual external refusal verified"
+  },
+  "productionDependencyAudit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "migrationCleanReplay": "PASS on disposable synthetic PG16",
+  "migrationSecondReplay": "PASS no pending migrations",
+  "httpSmoke": "PASS on synthetic tenants/provider fixtures",
+  "widgetContract": "31 PASS; 4 explicit pending later-package declarations; not conformance promotion",
+  "k1": "15 PASS",
+  "k3": "10 PASS",
+  "pwaCapacitorParity": "PASS approved endpoint substitution only",
+  "ios": "unsigned simulator build and actual app-bundle verification PASS; no installation",
+  "clusterStopped": true,
+  "certificate": "NOT_ISSUED",
+  "fullMutationCorpus": "NOT RUN",
+  "realOwnerDatabaseAccessed": false,
+  "productionEffects": 0,
+  "realProviderBusinessEffects": 0
+}

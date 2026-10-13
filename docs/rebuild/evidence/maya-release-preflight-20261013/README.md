@@ -198,6 +198,16 @@ are not a substitute for release payload byte-equivalence verification.
 The approved staging implementation has its separate 17-mutant results on
 `98761bc6` in the preceding local-staging packet. Those are explicitly historical
 here; no full-corpus kill or current release certificate is inferred from them.
+
+## Later committed-candidate follow-up
+
+The [fresh CI and packaging follow-up](../maya-release-ci-followup-20261013/README.md)
+records the subsequent dependency repair and complete local Platform CI equivalent,
+release payload/iOS verification, fresh widget/runtime baseline, 17 targeted AR-1
+mutations and synthetic native lifecycle on committed `a6d9c12d`. These complete
+the previously unexecuted CI/packaging surfaces for that newer candidate without
+rewriting this packet's `27c41025` results. Full release qualification remains
+unissued; the 545-declaration corpus was checked in DRY-RUN only.
 The 19 repaired-anchor diagnostics in this folder likewise retain their actual
 pre-commit/source provenance. Nothing is labeled 545/545 killed.
 

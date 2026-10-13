@@ -1,0 +1,38 @@
+{
+  "qualification": "SYNTHETIC_LIFECYCLE_NOT_REAL_PROVIDER_ACCEPTANCE",
+  "candidate": "a6d9c12d7b738c7bd3db37d29276a8905d270598",
+  "result": {
+    "numPassedTests": 1,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTestSuites": 1
+  },
+  "checkpoints": [
+    "initial-slots",
+    "selected-17",
+    "create-preview",
+    "create-commit",
+    "own-before-reschedule",
+    "reschedule-preview",
+    "reschedule-commit",
+    "own-before-cancel",
+    "cancel-preview",
+    "cancel-commit",
+    "reload"
+  ],
+  "exactlyOneTestProviderRecord": true,
+  "testProviderEffects": {
+    "create": 1,
+    "reschedule": 1,
+    "cancel": 1
+  },
+  "finalTestRecordCanceled": true,
+  "concurrentConsumedIntentRefusals": 9,
+  "realProviderCalls": 0,
+  "realModelCalls": 0,
+  "sourceSha256": "b565f60cc7c746cd6117182ad70ca49b877cdf25244e178caf9e4fd9ebc4a1b4",
+  "relocatedHelperSha256": "0b989eab693175057e988c46fae106a9614c582d1268f2faeaa0179f67850ff1",
+  "sourcesUnchanged": true,
+  "ownedClusterStopped": true,
+  "ownedBrowserClosed": true
+}

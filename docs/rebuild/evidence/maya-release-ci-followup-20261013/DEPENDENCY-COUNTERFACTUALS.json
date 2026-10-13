@@ -1,0 +1,17 @@
+{
+  "kind": "bounded dependency counterfactuals; synthetic only",
+  "cases": [
+    {
+      "label": "before",
+      "ipv6IntoIpv4": true,
+      "ipv4IntoIpv6": true,
+      "emptyMergeBudgetRefused": false
+    },
+    {
+      "label": "after",
+      "ipv6IntoIpv4": false,
+      "ipv4IntoIpv6": false,
+      "emptyMergeBudgetRefused": true
+    }
+  ]
+}

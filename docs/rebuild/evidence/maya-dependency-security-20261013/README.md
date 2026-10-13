@@ -72,3 +72,18 @@ repair overlay; it is not a clean final-HEAD receipt.
 
 Real owner data/keys, production, grants, OTP/SMS, YCLIENTS/model calls, device
 installation and C10: untouched. Full qualification and real booking remain open.
+
+## Committed-candidate follow-up
+
+The [fresh follow-up packet](../maya-release-ci-followup-20261013/README.md) records
+successful local CI and packaging on committed `a6d9c12d`, including 9,819 backend
+tests, zero production-dependency findings, widget/runtime/staging checks and
+synthetic browser lifecycle. It preserves the initial failed audit and a separate
+failed runner setup rather than treating either as a mutation kill.
+
+After the clean clone validation, the original dependency symlink was preserved
+outside the checkout and a private dependency directory was installed from this
+exact lock. The former target in the other worktree was not modified. The new
+packet records the preserved path and lock hash in `PRIVATE-DEPENDENCIES.json`.
+This supersedes only the local installation status above, not historical evidence
+or certificate state.

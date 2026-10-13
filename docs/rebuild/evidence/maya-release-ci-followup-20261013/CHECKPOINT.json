@@ -1,0 +1,39 @@
+{
+  "candidate": "a6d9c12d7b738c7bd3db37d29276a8905d270598",
+  "date": "2026-10-13 10:37:21.514373+00:00",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "platformCI": "LOCAL_EQUIVALENT_PASS_NOT_HOSTED_CI",
+  "fullMutationCorpus": "NOT_RUN",
+  "targetedStagingMutations": {
+    "killed": 17,
+    "total": 17,
+    "controls": "GREEN_BEFORE_AND_AFTER"
+  },
+  "completeApplicableFBE2E": "NOT_RUN",
+  "mutationDeclarationPreflight": {
+    "status": "DRY-RUN",
+    "declarations": 545,
+    "batteries": 47,
+    "jobs": 68
+  },
+  "applicableUnqualifiedDuties": 163,
+  "globalStoppedDuties": 2,
+  "activation": {
+    "certificate_for_current_release": "NOT_ISSUED",
+    "fullContractCertified": false,
+    "production": "NOT_AUTHORIZED",
+    "handoff": "STOP",
+    "scheduleEditor": "NOT_USER_REACHABLE",
+    "governance": "single-operator",
+    "independentHumanReview": false,
+    "reviewerId": null
+  },
+  "qualification": "NOT_ISSUED",
+  "readyForReleaseAuthorization": false,
+  "ownerDatabaseOpenedOrCopied": false,
+  "savedKeysRead": false,
+  "productionEffects": 0,
+  "realProviderOrModelCalls": 0,
+  "iPhoneInstalled": false,
+  "schemaSourceChanged": false
+}

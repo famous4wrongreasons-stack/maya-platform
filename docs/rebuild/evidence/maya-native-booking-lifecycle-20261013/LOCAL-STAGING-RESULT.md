@@ -98,3 +98,10 @@ records test/evidence-harness repairs and fresh broad baseline plus synthetic
 native booking lifecycle results on `27c41025`. It preserves this implementation
 checkpoint and its actual mutation provenance. Neither packet is a full release
 certificate or permission for owner-data execution.
+
+The [next fresh follow-up](../maya-release-ci-followup-20261013/README.md) re-proves
+all 17 targeted staging counterfactuals on `a6d9c12d`, with green 241-unit and
+51-HTTP/binary controls before and after. It also records full local CI, current
+widgets/runtime, canonical packaging and the synthetic native lifecycle. The
+original implementation receipt above retains its own candidate and provenance;
+neither targeted packet is the complete release mutation programme.

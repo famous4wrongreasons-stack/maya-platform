@@ -1,0 +1,1213 @@
+[
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/backend-npm-ci.log",
+    "bytes": 1376,
+    "sha256": "5cb246192c04d1bb31f7f1db058d1dfe3e55530843ecb914aacb9fd5c5cd3a65",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/carrier-full.log",
+    "bytes": 33471,
+    "sha256": "d62e7e9448279302028d347076895ad098bb7317d0206d92eb6fd26adf3f756e",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/checkout.log",
+    "bytes": 95,
+    "sha256": "f39b41d6d28dbf408a7ef603e8d472751c6f2c26eb39d4fa75c6202ee4a9ba16",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/clone.log",
+    "bytes": 86,
+    "sha256": "abe9ba7a859b410e060bc878bb75ea710f35f80eba3cd9ccd89caccf2fc681b5",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/contract-types.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/contract.log",
+    "bytes": 6777,
+    "sha256": "bebe953a66851b7112f6a081047c0918731c0ad9a69715eb8b557352c8f916f8",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/create-db.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/dependency-audit.log",
+    "bytes": 366,
+    "sha256": "07734426b2b6084f979e8cfe7437651399dce9ef8be47eb6fbb94091d6648114",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/e2e.json",
+    "bytes": 1086,
+    "sha256": "656edace5f4f0ebe115a4fa369fc1f431524df97ae1a81837e25ee45f155770f",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/e2e.log",
+    "bytes": 248,
+    "sha256": "191b06b5c4ae3b455d910f50b3fca7a8354c03349ad41886394c0e46952a91a0",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/events-create-db.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/events-live.json",
+    "bytes": 3323,
+    "sha256": "96ab15dacca50db4da9980abfc0eca7e0c812539ee2340f1dbf07d6cb6d85443",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/events-live.log",
+    "bytes": 816,
+    "sha256": "2c5e0d5e579f547c2bd2d6d89f90f9f96928b370cb5b952fb6c4ce4c24a067fb",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/events-migrate.log",
+    "bytes": 14705,
+    "sha256": "a7b1b1a4b6c62b5fa9f369ea7e994a5b8d631ac5812df1c6eca82684fe88f980",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/executed-runner.mjs",
+    "bytes": 9888,
+    "sha256": "f28f1a41754ea5ac8f10ad885af84de7c10021ed17d3a65a678221a77888cf33",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/frontend-parse.log",
+    "bytes": 304,
+    "sha256": "0c479910b1adf24b78a6472ab90349377b397f2c94ec5396db78a635bb72eb74",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/full-build.log",
+    "bytes": 158,
+    "sha256": "b74e5c60033b62edf5aa47fcace858704866272bf6c05a53d7b76d4f3abdaf15",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/full-unit.json",
+    "bytes": 4967010,
+    "sha256": "52f81518f320daff5d011f8ffc00dca45a9e4719736948278516ac07afa029a1",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/full-unit.log",
+    "bytes": 1385465,
+    "sha256": "fb6bff2366ce4cc144158d7af2cd6bedd551ac8faaad272ed0cbbbc44736024e",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/http-smoke.log",
+    "bytes": 341,
+    "sha256": "eb8a8cc6b37bbf578fa6c9b806b5ae4eb1a8d49d950329c466118405c6ec0edd",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/ios-built-app-verify.log",
+    "bytes": 735,
+    "sha256": "2e767bd2dc5b413a9afbdadf916bfeef23a56c7397f96c58a855c58fab66b87a",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/ios-unsigned-build.log",
+    "bytes": 503812,
+    "sha256": "422a5709a9bcaf345c9b285a5dbeffa852806e8749f7fde4115e78951750fa7f",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/k1-dossier.log",
+    "bytes": 1304,
+    "sha256": "13cc78b7c621f558203f6afbe815cc2eb9ca6b43199005c892c040e6311cf52a",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/k3.log",
+    "bytes": 7984,
+    "sha256": "378e93addd6207e68ac6a6745263c79568d037efcf979f7c74dfd13075683401",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/legacy/compileall.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/legacy/dependencies.log",
+    "bytes": 23627,
+    "sha256": "23bfd41c442dd33408c24f225611322f73f35cb359f35893755ddeaf2aeea690",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/legacy/executed-runner.py",
+    "bytes": 3149,
+    "sha256": "629a8bb9495601f243bb63fccd79db6ae901e39fa2be0720157f8e8999e31ce4",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/legacy/manifest.json",
+    "bytes": 3144,
+    "sha256": "91568dd65236525b323b6ee98e8b0428cce2124d25d138cfa5c2b16ec11fc923",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/legacy/network-isolation.log",
+    "bytes": 32,
+    "sha256": "3045b54b8750a5cabd890ed5c0d33df7611e01e682579542d9aaa97ff21ad87b",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/legacy/unittest.log",
+    "bytes": 109083,
+    "sha256": "644b7fe8f3d931f713a106116d225d925e03d6535732528902c85fc83f2d691b",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/legacy/venv.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/lint.log",
+    "bytes": 2418,
+    "sha256": "ac42aec1b47fce7958a6fbaab653a26279a441700863586016e51d67dd19f04c",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/manifest.json",
+    "bytes": 19012,
+    "sha256": "e9600f294ace03fe4500b4915f5eab0dcc219579703423e18e3227e96dae5d87",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/maya-carrier-react-npm-ci.log",
+    "bytes": 27,
+    "sha256": "c571f5060ea67be56314eac28d17cf54e662c9e060d352edff87129394f5bb0e",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/maya-ios-carrier-npm-ci.log",
+    "bytes": 246,
+    "sha256": "24debf9f54c724ceacf38ca1930d52fa3ddd1d0aafeca8e007f399c17129aefd",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/migration-clean-replay.log",
+    "bytes": 14704,
+    "sha256": "42712a79e4a2ee1a384a916c7c03dc23d6f85142b7e2afa656b9a550a758c283",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/migration-idempotent-replay.log",
+    "bytes": 1141,
+    "sha256": "4906e84b777bf0d83c91271a85c204a7b9e795da5f5b96a3d4a307b228ad4207",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/operator-compiled.log",
+    "bytes": 2138,
+    "sha256": "0386f6d2b58ee6363f9e1c3fb8080b79c4e6763700d224452d79a7740fbe61b0",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/operator-tests.log",
+    "bytes": 4620,
+    "sha256": "f45b80c47d5c8462bffe4fd5c0df591ec369fd369432fbdbbb9f381ba1162eee",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/pg-init.log",
+    "bytes": 910,
+    "sha256": "89c6f42aa019f838452d08aa8493aeae7bec36ad676ff738362c5bb46bc5329f",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/pg-start.log",
+    "bytes": 52,
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/pg-stop.log",
+    "bytes": 56,
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/postgres.log",
+    "bytes": 2744,
+    "sha256": "ffec3cb3ad12b2b1cc1d0365f5a23f88009db21f61e371416591412f8c2e3f97",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/prepublication-tests.log",
+    "bytes": 1659,
+    "sha256": "fdf73f95261d1f0e55bdf64ee9698e5a0630f2487cf6889e32aff35f7c83de1a",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/prepublication.log",
+    "bytes": 78,
+    "sha256": "c9b82d22c11b498c44890c95a03a46c33f85f2697a0b04820b131a4cfd5108fb",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/prisma-generate.log",
+    "bytes": 318,
+    "sha256": "b15012c88778c6edaf9a686fb2f7d4bee871449cc642ae263ade279461856f04",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/prisma-validate.log",
+    "bytes": 142,
+    "sha256": "e1344514cb0e93026a245afd134e0c874287a64f7c5798cbda02eff700d2aa22",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/release-packaging-tests.log",
+    "bytes": 3390,
+    "sha256": "1b9ba4740cf0d84eeef3f568491f323b47f3269898d745e0bd3021b61f32e4a3",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/release-sync.log",
+    "bytes": 2882,
+    "sha256": "4a15b98aed6d513379d075f3a3f4dd08d1582950e61bd79d09b6e1e9cd3f6a59",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/runtime-artifact.log",
+    "bytes": 1010,
+    "sha256": "1b0abb348e438c52db3153d0d42e642fd68f9e030464da805f07bdcc70f55829",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/scarf-js-history-stanislavmosin.log",
+    "bytes": 32,
+    "sha256": "9f9c258b63955dce9e5683f45ee1545bc83579a41553729744397ae61aa802c8",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/seed.log",
+    "bytes": 656,
+    "sha256": "487b8c20ec283ee99b3c5c7398438db10062c2093be883874cf60b631014058a",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/typecheck-scripts.log",
+    "bytes": 113,
+    "sha256": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/typecheck.log",
+    "bytes": 103,
+    "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-dependency-counterfactuals-20261013.json",
+    "bytes": 350,
+    "sha256": "49e56d59a41aa9cdc0578ab2d3f4e3d904bf2703f4b1efa041e05eb4a0bd4e9b",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-dependency-link-preservation-a6d9c12d-20261013/receipt.json",
+    "bytes": 497,
+    "sha256": "d109053e1ff6f8d37784c03818f1e5e4e328e07343091ef2c3f719275bc3d838",
+    "committed": false,
+    "reason": "raw synthetic local receipt; summary and provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-followup-summary-a6d9c12d-20261013/FRESH-CI.json",
+    "bytes": 2133,
+    "sha256": "71acf4249c45cf59fb08d8e4236e85a6e6c58479f0b8b92706716bb2872e086c",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-followup-summary-a6d9c12d-20261013/MUTATION-DECLARATIONS.json",
+    "bytes": 210336,
+    "sha256": "84d501529c705309bd0ad85165db288d62b5762d441b5a7f11a8038981a6e614",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-followup-summary-a6d9c12d-20261013/MUTATION-PLAN.json",
+    "bytes": 7034,
+    "sha256": "3e6948b8d08e571b63cc09429fdfb7878dc7896069a9d80374f040b53a79fc64",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-followup-summary-a6d9c12d-20261013/MUTATION-PLAN.log",
+    "bytes": 3775,
+    "sha256": "e33aaa06729ffcc15cabf5c437b816c322fe136098ac8a383f09d45e7b841dd5",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-followup-summary-a6d9c12d-20261013/PACKAGING-HASHES.json",
+    "bytes": 4453,
+    "sha256": "b18475e66a3674795ab36caae482666dec62c9bcd0da936305f48504b481a1aa",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-followup-summary-a6d9c12d-20261013/RAW-MANIFEST.json",
+    "bytes": 16576,
+    "sha256": "02b5687428145bc8220b001b2e415ce3aee5b5c598e814ae972e2f0b3cba1b76",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-followup-summary-a6d9c12d-20261013/audit-consistency.log",
+    "bytes": 129,
+    "sha256": "088e2e9fdf3909d330a9a3630dc731fff135845f019ace32bb0c803a60e3ea8e",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-followup-summary-a6d9c12d-20261013/audit-self-test.log",
+    "bytes": 1481,
+    "sha256": "79bc1871bfe1450765327b3a9be06451f0d1ca30ee26a1be6b2884b95bf3b718",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-followup-summary-a6d9c12d-20261013/mutation-declarations.log",
+    "bytes": 210336,
+    "sha256": "84d501529c705309bd0ad85165db288d62b5762d441b5a7f11a8038981a6e614",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/backend-build.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/carrier-harness.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/createdb.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/evidence-verify.log",
+    "bytes": 728,
+    "sha256": "176190a69d422cde00e56565b4b2da62f2c994ec322c5e02c687eb544b610cce",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/executed-runner.mjs",
+    "bytes": 9145,
+    "sha256": "348898e88dc22fa6bbff94ddf95fffc15ef9c32ba6c215233649f1ff34d62923",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/full-binary.json",
+    "bytes": 3943,
+    "sha256": "3eb2aca9743073c8b23d6140a1a5a995bf14f7e3bdfba766f5ff8aad2425e327",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/full-binary.log",
+    "bytes": 3238,
+    "sha256": "a6c701b2063796b87f9a70248573aa66bc805c1610407c67bb3aaf076de1691a",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/full-http.json",
+    "bytes": 392825,
+    "sha256": "d68d1c7ddc784d26a0ef6cc80540e581eb8ee0a7a7a471b66a84d15e0e30ff91",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/full-http.log",
+    "bytes": 62146,
+    "sha256": "b9236c1af09f4d5b787f8473131b02118fe2f6dce0e756bdae45986a0a128260",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/http-bin.log",
+    "bytes": 4040,
+    "sha256": "917bba818b5ba5f435b89c78e7de3853e10907857e500a290fc82734d4f31a3e",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/initdb.log",
+    "bytes": 950,
+    "sha256": "709188878a158e0033b28a63983f41b14ac800416db160d203d2f80032fc74f3",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/legacy-createdb.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/legacy-migrations.log",
+    "bytes": 15601,
+    "sha256": "6f0e9b42172d221df4d8e0e981f92944df85766654a5b759c5cf175bcfb57f79",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/manifest.json",
+    "bytes": 1241,
+    "sha256": "4e3764a8d5d4b703729c69cb5351d5848af65956e4eb862df1ff3510e568a274",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/migrations.log",
+    "bytes": 14725,
+    "sha256": "2eee14208baa80a3f3ca3c2e48728da865bfbd65a11daa662ddabcc291968186",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/mutation-collector.log",
+    "bytes": 11283,
+    "sha256": "eec3f6af312e07a04d1debe2492b92fadd8319a4059f15ccaa44157588c7f4b2",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/pg-start.log",
+    "bytes": 52,
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/pg-stop.log",
+    "bytes": 56,
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/postgres.log",
+    "bytes": 106401,
+    "sha256": "f1c9baac5a9e05b33377529f35ec31d21b6c640e15dcc61d3e6731b292400e25",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/runtime-artifact.log",
+    "bytes": 1010,
+    "sha256": "1b0abb348e438c52db3153d0d42e642fd68f9e030464da805f07bdcc70f55829",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/runtime.log",
+    "bytes": 193218,
+    "sha256": "6cd7f353f54700c4c31115b23ac9251322b51c9db381a76d1b9d294fa59341f1",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/staging-http-binary-jest.json",
+    "bytes": 11600,
+    "sha256": "17713431d8ae42ca573f8ff25b3c7596e8321ea0e8bded84c5ba0ab5c8ed2ec3",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-widgets-a6d9c12d-20261013/staging-http-binary.log",
+    "bytes": 349,
+    "sha256": "fc66d0c09a9ae17ce015d45575decb5a4e3d920580b9adea8fc4f88c0f092420",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M1.json",
+    "bytes": 117424,
+    "sha256": "22611841ae4de352a2f4085d9bd061fc739c6694592f94111e2a11a7e9c9bd76",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M1.log",
+    "bytes": 1924,
+    "sha256": "13aa211177ba01dca2961272886ef18dccf4025d8787a49be972e79ef43414ea",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M10.log",
+    "bytes": 779,
+    "sha256": "246079dca6b9d17f0e21de45c7d5eea64edcdf4e39806a88abe3d7777c26944c",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M11.log",
+    "bytes": 779,
+    "sha256": "246079dca6b9d17f0e21de45c7d5eea64edcdf4e39806a88abe3d7777c26944c",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M12.log",
+    "bytes": 779,
+    "sha256": "246079dca6b9d17f0e21de45c7d5eea64edcdf4e39806a88abe3d7777c26944c",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M13.log",
+    "bytes": 779,
+    "sha256": "246079dca6b9d17f0e21de45c7d5eea64edcdf4e39806a88abe3d7777c26944c",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M14.log",
+    "bytes": 779,
+    "sha256": "246079dca6b9d17f0e21de45c7d5eea64edcdf4e39806a88abe3d7777c26944c",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M2.json",
+    "bytes": 117491,
+    "sha256": "bd50d6e8a855f2e211d1dc505c94b3b299d269cb1e87d54d00ca3e3a5230501b",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M2.log",
+    "bytes": 2104,
+    "sha256": "4666e2d179d674d9cdb6914dfa59fc31b9a1d07b3a9451d8eba5ba1d14225768",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M3.json",
+    "bytes": 117492,
+    "sha256": "3283c86b9bc950cd784b3c50055fb50aee131e39d1e1cafef3d42b5874755067",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M3.log",
+    "bytes": 2105,
+    "sha256": "bef8f918d5889138712a9d3a0dca87ec0afc78562ad7905c2b716946149d0627",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M4.json",
+    "bytes": 114576,
+    "sha256": "42666ca19bcaabc83e2bf8d446789ab84aa970e7711085746a1fbfbb027255d6",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M4.log",
+    "bytes": 1384,
+    "sha256": "45be998698a294e9928926eb4a027a4a30ee21ea323c405ba724208e61b575cf",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M5.json",
+    "bytes": 157737,
+    "sha256": "2dba5f8877c79e6f42b59c7580bc6239a796cc21ddda28a5523daa9c416c3803",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M5.log",
+    "bytes": 11856,
+    "sha256": "1dbc7780bc3cee7eb8bf586cb134e7c0b28bf964ed3e9f1f32afe9c0094a3dd5",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M6.json",
+    "bytes": 126343,
+    "sha256": "e7c75ec85dc772973563eaec6bef2b2d057a1c427a90487f8cf32af0eb550b68",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M6.log",
+    "bytes": 3616,
+    "sha256": "bdc1905ad7abd04886c41c9f71496ee1bcde5341b03383fe95295015fdda693b",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M7.json",
+    "bytes": 114522,
+    "sha256": "3c08a92f0e0f84d1cfa4458e3583ff0426f7b8c626ed9caf180a3d7129a6dbdc",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M7.log",
+    "bytes": 1355,
+    "sha256": "c6481afff6b2b405c579cd2543f154eee3a40f0cc29884581ef9a97c7e009266",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M8.json",
+    "bytes": 115524,
+    "sha256": "7fcf587f924f28e62dc1fc8b959c94a3c69bd29d3f8b8931a3e54e82bb7bf8da",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M8.log",
+    "bytes": 1711,
+    "sha256": "6a6fe449547de1148744e22ef3808094884e0842a86c1e6c2311af3ff18af5e8",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M9.json",
+    "bytes": 120100,
+    "sha256": "8478cd615289cd3384489d05f446bc5b862d31cb1d83911c14b2379d17514a12",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M9.log",
+    "bytes": 2357,
+    "sha256": "d1759692c99a0d55927c368f0f179d495eac66c1994767d1476f39db7f206432",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/PU-M9.log",
+    "bytes": 831,
+    "sha256": "9448298fdccd4d1f71b9785a22f3a9f865b3a23166b73ee210fbca713395178a",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/SO-M6.json",
+    "bytes": 119471,
+    "sha256": "7aa745314233651d57a1280d91903cad11b2c316eae76449a6e3459f9a6b6e4c",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/SO-M6.log",
+    "bytes": 2762,
+    "sha256": "56fd157fc7ed9d361e32976ea63164c5855cf16f49b672b13f0672127827cc8b",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/SO-M7.log",
+    "bytes": 831,
+    "sha256": "9448298fdccd4d1f71b9785a22f3a9f865b3a23166b73ee210fbca713395178a",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/baseline-live.log",
+    "bytes": 237,
+    "sha256": "7669499dfe0d8ceb5e2f380fae76459e9a90112fbaf6c2e91ceaedbc2753c23a",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/baseline-unit.json",
+    "bytes": 111477,
+    "sha256": "928df8cacd38f008dc526e78aa931ece12f17b6676db2bf879e31c0e772ed795",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/baseline-unit.log",
+    "bytes": 700,
+    "sha256": "02d30ea5ad0617898d9ad685d5f148f4286e5349ed30e6b3a7817d4b254f96d7",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/restored-live.log",
+    "bytes": 237,
+    "sha256": "1b59605a6c5823210e4492cffb3a8f3e892efcec6cdcda4c9d02964384b32b21",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/restored-unit.json",
+    "bytes": 111475,
+    "sha256": "3647080b4915af83d44ff27bc9d75d8a59cea22567ebc1cede83ff38ffb47827",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/restored-unit.log",
+    "bytes": 700,
+    "sha256": "6d84567e3b69e02f52555fd64749e93bec2b1831b2d92790ccb548c3f5fdb944",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/summary.json",
+    "bytes": 12436,
+    "sha256": "080c6497bba3011d97e8c76c03a4887227db1d10c527e592c63e7e83e73f0440",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-native-followup-a6d9c12d-20261013/booking-followup-observations.json",
+    "bytes": 15399,
+    "sha256": "ce73c4217e7fdeeb84ec9cb0b1636af7aca2693d53b628f7f89a3371fc5a6488",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-native-followup-a6d9c12d-20261013/browser-jest.json",
+    "bytes": 1473,
+    "sha256": "bdc4eddb81ff6cdc058baef77a02cd575aafa438fb374e47cb7b3afb8d1769f1",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-native-followup-a6d9c12d-20261013/browser.log",
+    "bytes": 1374,
+    "sha256": "cf42cc56aee5b1e3dce7dab6d6bd6d8d1bdea98c0a3d41aeaaba0e8bd484868f",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-native-followup-a6d9c12d-20261013/createdb.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-native-followup-a6d9c12d-20261013/initdb.log",
+    "bytes": 890,
+    "sha256": "d94430187bfa8a2f9d824cc6be2cc8b8c944369a26b9f1c654ccdb1b3531aa03",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-native-followup-a6d9c12d-20261013/manifest.json",
+    "bytes": 1110,
+    "sha256": "f691a9230313a54589c8f4adc51351cd566f679583fdd35cb0c0d52331182fc8",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-native-followup-a6d9c12d-20261013/migrations.log",
+    "bytes": 14734,
+    "sha256": "7011bb46b587158ed3caecb7702e366f11da5c3a60a19697d873d660af7a59c3",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-native-followup-a6d9c12d-20261013/pg-start.log",
+    "bytes": 52,
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-native-followup-a6d9c12d-20261013/pg-stop.log",
+    "bytes": 56,
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-native-followup-a6d9c12d-20261013/postgres.log",
+    "bytes": 1246,
+    "sha256": "168baaf320e45e76494ce901a6b8d0d895d54b0ea46722bc427bb7b81ae89ecd",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-native-followup-a6d9c12d-20261013/react-web-build.log",
+    "bytes": 185,
+    "sha256": "5c03aa0a93d9095b6616d150300548fc387b51d9238000244b492a8a8ac6ad89",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-native-followup-a6d9c12d-20261013/source-hashes.json",
+    "bytes": 311479,
+    "sha256": "33ed30645347dc6c3b2e2c95895a157ca22478790287b3c4365c1643f57ab1dd",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-final-local-units-a6d9c12d-20261013/executed-runner.py",
+    "bytes": 2421,
+    "sha256": "76968327ed694decdb41454d9220aa297d80fd735dfbb72dcf52601722f964fa",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-final-local-units-a6d9c12d-20261013/manifest.json",
+    "bytes": 1463,
+    "sha256": "55b805bf325ee82186f5c5829efa49ac856e604dcd4377e88451a94b78383453",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-final-local-units-a6d9c12d-20261013/native-lifecycle.log",
+    "bytes": 158,
+    "sha256": "4ee7beb50b74c01ff2538ee3f386f3b5a5aa49f8f024271bc6085019d415c271",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-final-local-units-a6d9c12d-20261013/targeted-staging-mutations.log",
+    "bytes": 252,
+    "sha256": "dc5d4bfce789a936fb8f1619cafbbf96e9f742418ea650fb77067103777ec570",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-final-local-units-a6d9c12d-20261013/typecheck-widgets-live.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/backend-npm-ci.log",
+    "bytes": 1585,
+    "sha256": "fbc11fedd2201378a9baa0e23b8a5c852e7495cfeb8fb1dad9423ce134e3bfef",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/checkout.log",
+    "bytes": 84,
+    "sha256": "e8f17ebd2663bd6a9418a025b1c7b6b70af4309d936dea5f88a3f2a9c9a86a54",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/clone.log",
+    "bytes": 83,
+    "sha256": "27d91d795cd592e7f17fd0854cddbc3eb9de9786260befdb222a33ffed2104bb",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/dependency-audit-after.json",
+    "bytes": 366,
+    "sha256": "07734426b2b6084f979e8cfe7437651399dce9ef8be47eb6fbb94091d6648114",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/dependency-audit.log",
+    "bytes": 5981,
+    "sha256": "07633b998a6cfe3527125695774a081df1683f9c282865885e6e7474fb45de95",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/dependency-lock-diff.json",
+    "bytes": 3138,
+    "sha256": "299d5733c0b81174cd26b8af1601be4cf91324fbb5374c5f10ab635b4050f012",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/executed-runner.mjs",
+    "bytes": 9265,
+    "sha256": "f0fc1c4914b79e083f0369722734ed209311e9508f997aec9f19e64acf78246f",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/manifest.json",
+    "bytes": 2111,
+    "sha256": "3ccb877cab387c7f10ddff370ac14c7aba2563f751b758c9bd72ba97e8caec87",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/package-metadata-ip-address_10.7.1.json",
+    "bytes": 185,
+    "sha256": "deb76cfd8aaa7a7aeda04038debf09556f86a00e08d4b415e9607aae61151de1",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/package-metadata-js-yaml_5.4.1.json",
+    "bytes": 194,
+    "sha256": "ab41d15024265f0c3c9e16b0581603cea22802f6c0b341817adb1ac6e725f3a0",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/package-metadata-proxy-addr_2.0.8.json",
+    "bytes": 262,
+    "sha256": "f127e4214fd6210c6bfbbdfc14616c271c3fc18b9ddd33fa7dfad5a061dde01b",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/package-metadata-sharp_0.35.5.json",
+    "bytes": 294,
+    "sha256": "f844d372d98d567440f88601c8db548377df0b091a0721312a30699490be19fb",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/post-audit-diagnostic-overlay.json",
+    "bytes": 273,
+    "sha256": "4d6e7f46173d3e95672c233cbe798dfb9585c90602cc9fba4f264084a9575d01",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/scarf-js-history-stanislavmosin.log",
+    "bytes": 32,
+    "sha256": "be4f9ef077d0dc33be6acd7b811ed6ec6cbe8df50c19bf4fd55900f2f2580bfa",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-e7aac44b-20261013/targeted-dependency-install.log",
+    "bytes": 26,
+    "sha256": "43811c95a580ac32b4de4862251e256c7d27ac819bd55ed964baab80d6c50fb6",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013/backend-npm-ci.log",
+    "bytes": 1584,
+    "sha256": "5fb652742eeed04b06a87a9cba64a6f558e7b94ea4062c3249d1183da63f8aea",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013/checkout.log",
+    "bytes": 95,
+    "sha256": "f39b41d6d28dbf408a7ef603e8d472751c6f2c26eb39d4fa75c6202ee4a9ba16",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013/clone.log",
+    "bytes": 83,
+    "sha256": "4cae558cd931dc52d8d8414305fff144ac3829c13da390a41796128e8b7d6716",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013/dependency-audit.log",
+    "bytes": 366,
+    "sha256": "07734426b2b6084f979e8cfe7437651399dce9ef8be47eb6fbb94091d6648114",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013/executed-runner.mjs",
+    "bytes": 9826,
+    "sha256": "c2da140326d88c2f4caf97b660352a455080db20f8c586981cb50df89709d45a",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013/manifest.json",
+    "bytes": 3068,
+    "sha256": "65a62e99916dd364148bbd0bd4c0aad302f8964bceca37ac8e8de9c96b209a18",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013/maya-carrier-react-npm-ci.log",
+    "bytes": 24,
+    "sha256": "a65e2ebbeefa7468ed9eaa3606113dc79f8a4566de46ff05b3577f611f8013f8",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013/maya-ios-carrier-npm-ci.log",
+    "bytes": 243,
+    "sha256": "5d482fad522ae45e9f6ad4cd0d79f9abf04d3ce6ea981a132a2a17f2f56a4a68",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013/scarf-js-history-stanislavmosin.log",
+    "bytes": 32,
+    "sha256": "6fd2e15a8a74299495f6e00b96cf5726fe65000abcdeeae44e2f6417ee0d607d",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-ci-packaging-a6d9c12d-20261013-02/release-payload-snapshot/manifest.json",
+    "bytes": 4958,
+    "sha256": "84daa54d3d577aa394238e1c107dbc087459658be48807e332b6558cd90baabd",
+    "committed": false,
+    "reason": "raw synthetic local receipt; safe aggregate/provenance retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/PU-M9/manifest.json",
+    "bytes": 741,
+    "sha256": "a36294daa956c3964c7af8f1c6b9e98ac14a821a2f367ffe3683a7f1af5df27c",
+    "committed": false,
+    "reason": "synthetic mutant cluster disposition; aggregate retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M12/manifest.json",
+    "bytes": 666,
+    "sha256": "c04c9d1b9b7c79873946b61f0f3cc459cbddeb4fc0d6b0a912278ee693022733",
+    "committed": false,
+    "reason": "synthetic mutant cluster disposition; aggregate retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M14/manifest.json",
+    "bytes": 666,
+    "sha256": "181b09631643f93026696ec3ce8873c21c7aff19def13a1c254329a49856c119",
+    "committed": false,
+    "reason": "synthetic mutant cluster disposition; aggregate retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M13/manifest.json",
+    "bytes": 666,
+    "sha256": "53af0024bc64fd5a32c0d47b2c35b62c149555fd052fae1f2aaeeb621b493397",
+    "committed": false,
+    "reason": "synthetic mutant cluster disposition; aggregate retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/baseline-live/manifest.json",
+    "bytes": 767,
+    "sha256": "df1140a99617cb200c5582d684225ce199ca5a268a7143253553f0d2556fe5e7",
+    "committed": false,
+    "reason": "synthetic mutant cluster disposition; aggregate retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/SO-M7/manifest.json",
+    "bytes": 741,
+    "sha256": "3738e6d8b025d7566ac1d4f03a60fc9468801b0b1050e7a5b56897c7986acd1e",
+    "committed": false,
+    "reason": "synthetic mutant cluster disposition; aggregate retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/restored-live/manifest.json",
+    "bytes": 767,
+    "sha256": "ce05896d5e44ca53751a85ed98b5bae6f8c6f5c545f6983edfd7dfa7c1a46660",
+    "committed": false,
+    "reason": "synthetic mutant cluster disposition; aggregate retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M11/manifest.json",
+    "bytes": 666,
+    "sha256": "7098956f92048bc879b97d673d8fb3c6686aee2fa79b30216ef252a0cf6764e9",
+    "committed": false,
+    "reason": "synthetic mutant cluster disposition; aggregate retained"
+  },
+  {
+    "path": "/private/tmp/maya-staging-mutations-a6d9c12d-20261013/LSO-M10/manifest.json",
+    "bytes": 666,
+    "sha256": "441c47e8cbb51aa6c9c3bcf63cbd8f90d74f466028708f617a7febd66c445983",
+    "committed": false,
+    "reason": "synthetic mutant cluster disposition; aggregate retained"
+  }
+]
