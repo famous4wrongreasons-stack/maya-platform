@@ -19,6 +19,7 @@
     "src/net/crm-setup.ts",
     "src/net/endpoint.ts",
     "src/net/goods-photo.ts",
+    "src/net/ideas.ts",
     "src/net/onboarding.ts",
     "src/net/own-tasks.ts",
     "src/net/personal.ts",
@@ -36,6 +37,7 @@
     "src/shell/deeplink.ts",
     "src/shell/dom-port.ts",
     "src/shell/goods-photo.ts",
+    "src/shell/ideas.ts",
     "src/shell/intents.ts",
     "src/shell/local-crm-setup.ts",
     "src/shell/own-tasks.ts",
@@ -75,7 +77,7 @@
       },
       {
         "path": "src/net/client.ts",
-        "sha256": "6a2424cad18764f8efe37d220f9cc5d3db4fe2df5edd2c3fea950d6b98bc8145"
+        "sha256": "22d63377befe06eba1fa05fd7dc9c5c69d24145ba79f880300469e9ec0c44bed"
       },
       {
         "path": "src/net/crm-setup.ts",
@@ -88,6 +90,10 @@
       {
         "path": "src/net/goods-photo.ts",
         "sha256": "bda7cd1cfcb27edeedcb377afb04b4a7c70620a53921e9a4d7c04c0b7fab0e71"
+      },
+      {
+        "path": "src/net/ideas.ts",
+        "sha256": "e709ce4348fd8916854c7392d1b74e83a287d090eaba60542bcc3896c113dc87"
       },
       {
         "path": "src/net/onboarding.ts",
@@ -111,7 +117,7 @@
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "66f2ea10c02bb22ad44ab56933ab866aee14549d6ed272c01ffa70b44ca353ba"
+        "sha256": "fbd19b6620a79d1532afbdc952796efa39bc8a823fecf73deb868b7913415681"
       },
       {
         "path": "src/net/workspace-reads.ts",
@@ -154,6 +160,10 @@
         "sha256": "d2d33047c51629a3428b3555a66948f5366e0d30cd3a5fa93094657e5817e717"
       },
       {
+        "path": "src/shell/ideas.ts",
+        "sha256": "4cc14896e3f8d84aa0c34c6b9e01460eed2fa89c8e57fb8d869ccfab8b71e6ad"
+      },
+      {
         "path": "src/shell/intents.ts",
         "sha256": "daea70ec6a8a8870d3bbf905e5497c0652a6144143757cfba76a10dfe005461d"
       },
@@ -171,7 +181,7 @@
       },
       {
         "path": "src/shell/ports.ts",
-        "sha256": "8de3df474acc808f193a8dc607677e956bc1dfaa994230629355ba767c9c796f"
+        "sha256": "54448af48546846e3d95a2cc6398d1bb9d1a92347cdd1af3b136be42a72ee996"
       },
       {
         "path": "src/shell/privacy.ts",
@@ -179,7 +189,7 @@
       },
       {
         "path": "src/shell/shell.ts",
-        "sha256": "9a02900a9fab0ef7826be9a1cb8326f5a78171309ce3bf892d167578b9769732"
+        "sha256": "89e3d89c1ff31b59ed51b793cb4f0596ea1e4b0ed1d7bc4c4150e397f2dff76f"
       },
       {
         "path": "src/shell/view.ts",
@@ -195,8 +205,8 @@
       }
     ]
   },
-  "bytes": 669482,
-  "digest": "bbd3021f3d31a042d138d04307a1ef8670882570f63604639aa15060bb0a2afa",
+  "bytes": 680443,
+  "digest": "0e19174fea2266c7651579613e4f78a394b3666483dfaae157bb38b43bb64065",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -204,8 +214,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "3958fbf7aa90503f6bac1606434fb22879141a37b8276c5b9d7f06c1f5aaa8cb",
-    "modulePath": "m/3958fbf7aa90503f/",
+    "digest": "2a0970d7b4566895da07de7e080f25f8cf2cb29a76359b07eed0c8ad896c0969",
+    "modulePath": "m/2a0970d7b4566895/",
     "files": [
       {
         "path": "entry/main.js",
@@ -264,8 +274,8 @@
       },
       {
         "path": "src/net/client.js",
-        "sha256": "7af148c3f73c6e66b0c31a4d934aa75c36529da0f58eddaf9d91354ad82e423f",
-        "bytes": 44544
+        "sha256": "f474f4b13b6f4459c497fd7308a61e2071656728cad5265d3e5b25e2384ac1c9",
+        "bytes": 44816
       },
       {
         "path": "src/net/crm-setup.js",
@@ -281,6 +291,11 @@
         "path": "src/net/goods-photo.js",
         "sha256": "b740a795e2ce6d3dff90bc9abba749e79e550e9b871707bffe88b8befadf2d1c",
         "bytes": 9843
+      },
+      {
+        "path": "src/net/ideas.js",
+        "sha256": "caff8b367868e1ed1333343997339f7099b54f701821d482c8c911fcc8e06f8f",
+        "bytes": 2657
       },
       {
         "path": "src/net/onboarding.js",
@@ -368,6 +383,11 @@
         "bytes": 10296
       },
       {
+        "path": "src/shell/ideas.js",
+        "sha256": "ff6a41c082101a2b56a249d5b8033b0502c94a41250950a227a049b900efa57b",
+        "bytes": 5111
+      },
+      {
         "path": "src/shell/intents.js",
         "sha256": "31312baab50916abe60494549a93b7d54d3429f450f84967efede07784f0ae92",
         "bytes": 49929
@@ -399,8 +419,8 @@
       },
       {
         "path": "src/shell/shell.js",
-        "sha256": "d0fb8ee5fef149f08050908b28fbba7c0056c1e414bbb16f3cb5bdae79fcedcf",
-        "bytes": 10529
+        "sha256": "b0e0481efb454c4ed2d5f8a4f9d5d8bf58add8f8ef07d3abe080bb9aac781881",
+        "bytes": 10751
       },
       {
         "path": "src/shell/view.js",
@@ -433,7 +453,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "19523a1813c83d124cc353ea6e7e2de5de46b578135c6d11b1fa1324d5c5ee78",
+      "sha256": "edd5beba2f064b0c1aa90d184ae1b9e3e5bfbf578f1e347acbc16cdc604fd049",
       "bytes": 1344
     },
     "assets": [

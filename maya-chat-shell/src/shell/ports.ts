@@ -329,7 +329,7 @@ export interface ShellView {
   readonly primary: PrimaryRoute;
   readonly fullscreen: FullscreenView | null;
   /** Fixed host workspace view, not a WidgetContract route or a server target. */
-  readonly workspace?: 'tasks' | 'feed' | 'library';
+  readonly workspace?: 'tasks' | 'feed' | 'library' | 'ideas';
 }
 
 export interface WidgetPort {

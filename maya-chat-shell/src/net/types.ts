@@ -19,6 +19,18 @@ export interface ReportSummary { readonly key: string; readonly type: 'daily_rep
 export interface ReportsSnapshot { readonly rows: readonly ReportSummary[]; }
 export interface ReportSnapshot extends ReportSummary { readonly timezone: string; readonly body: string; }
 export type WorkspaceReadFailure = { readonly reason: 'forbidden' | 'unavailable' | 'invalid_response' | 'aborted' } | { readonly reason: 'rate_limited'; readonly retryAfterSec: number };
+export interface IdeaRead {
+  readonly key: string; readonly revision: number; readonly digest: string | null;
+  readonly kind: 'OBSERVED_VALUE' | 'POLICY_SIGNAL' | 'PREDICTION' | 'SCENARIO' | 'RANKING';
+  readonly scope: 'client' | 'appointment' | 'staff' | 'tenant' | 'branch' | 'cohort';
+  readonly asOf: string; readonly expiresAt: string; readonly from: string; readonly to: string; readonly timezone: string;
+  readonly current: boolean; readonly available: boolean;
+  readonly coverage: 'COMPLETE' | 'PARTIAL' | 'UNAVAILABLE' | 'NOT_MEASURED';
+  readonly qualification: 'VERIFIED' | 'SOURCE_LABELLED' | 'UNQUALIFIED';
+  readonly message: string;
+}
+export interface IdeasSnapshot { readonly rows: readonly IdeaRead[]; readonly possiblyCapped: boolean; }
+export interface IdeasTransport { ideas(signal: AbortSignal): Promise<Outcome<IdeasSnapshot, WorkspaceReadFailure>>; }
 export interface WorkspaceReadTransport {
   feed(signal: AbortSignal): Promise<Outcome<FeedSnapshot, WorkspaceReadFailure>>;
   reports(signal: AbortSignal): Promise<Outcome<ReportsSnapshot, WorkspaceReadFailure>>;

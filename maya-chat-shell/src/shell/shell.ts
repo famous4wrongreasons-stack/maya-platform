@@ -49,7 +49,7 @@ export interface ShellState {
   /** At most ONE fullscreen surface. Two was the old bug; one is a type, not a convention. */
   readonly fullscreen: FullscreenView | null;
   readonly opener: DetailOpener | null;
-  readonly workspace?: 'tasks' | 'feed' | 'library';
+  readonly workspace?: 'tasks' | 'feed' | 'library' | 'ideas';
 }
 
 export const initialState = (): ShellState => ({
@@ -124,6 +124,7 @@ export interface ShellController extends ShellChrome {
   openTasks(): void;
   openFeed(): void;
   openLibrary(): void;
+  openIdeas(): void;
   presentDetail(envelope: WidgetEnvelope, opener: DetailOpener): PresentOutcome;
   connect(source: DetailSource): Cancel;
   dispose(): void;
@@ -224,6 +225,11 @@ export const createShell = (deps: ShellDeps): ShellController => {
       return () => void listeners.delete(listener);
     },
     state: () => state,
+    openIdeas() {
+      if (!signedIn || state.workspace === 'ideas') return;
+      closeDetail();
+      set({ ...navigateState(state, 'shell.root'), workspace: 'ideas' });
+    },
     openFeed() {
       if (!signedIn || state.workspace === 'feed') return;
       closeDetail();

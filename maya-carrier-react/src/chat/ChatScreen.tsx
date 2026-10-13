@@ -20,8 +20,9 @@ import type {
   ConversationView,
   TimelineItemView,
 } from '../../../maya-chat-shell/src/shell/ports.ts';
-import { workspaceReads, ownTasks, conversation, goodsPhoto, privacy, session, telegramLink, voice, widgets } from '../runtime/compose.ts';
+import { ideas, workspaceReads, ownTasks, conversation, goodsPhoto, privacy, session, telegramLink, voice, widgets } from '../runtime/compose.ts';
 import { usePortView } from '../runtime/useView.ts';
+import { IdeasPanel } from './IdeasPanel.tsx';
 import { WorkspaceReadsPanel } from './WorkspaceReadsPanel.tsx';
 import { OwnTasksPanel } from './OwnTasksPanel.tsx';
 import { ReceiptRefresh } from '../widgets/ReceiptRefresh.tsx';
@@ -383,6 +384,8 @@ export function ChatScreen({
   const workspaceOpen = companion && shellView.workspace !== undefined;
   const tasksOpen = companion && shellView.workspace === 'tasks';
   const readsOpen = companion && (shellView.workspace === 'feed' || shellView.workspace === 'library');
+  const ideasOpen = companion && shellView.workspace === 'ideas';
+  const ideasView = usePortView(ideas);
   const readsView = usePortView(workspaceReads);
   const tasksView = usePortView(ownTasks);
   const voiceView = usePortView(voice);
@@ -402,6 +405,9 @@ export function ChatScreen({
   const localEpochRef = useRef(privacyView.localEpoch);
   const workspaceReturnScroll = useRef(0);
   const workspaceWasOpen = useRef(false);
+  const ideasReturnScroll = useRef(0);
+  const ideasWasOpen = useRef(false);
+  const ideasDetailOpen = ideasOpen && (ideasView.detail !== null || ideasView.reading);
   const reportReturnScroll = useRef(0);
   const reportWasOpen = useRef(false);
   const reportOpen = readsOpen && readsView.detail !== null;
@@ -423,6 +429,15 @@ export function ChatScreen({
     }
     reportWasOpen.current = reportOpen;
   }, [reportOpen, readsOpen, shellView.workspace]);
+
+  useLayoutEffect(() => {
+    const lane = laneRef.current;
+    if (lane && ideasOpen) {
+      if (ideasDetailOpen) lane.scrollTop = 0;
+      else if (ideasWasOpen.current) lane.scrollTop = ideasReturnScroll.current;
+    }
+    ideasWasOpen.current = ideasDetailOpen;
+  }, [ideasDetailOpen, ideasOpen]);
 
   // Freeze/sign-out invalidates local drafts and DOM selection before the next paint.
   // The epoch is only a clearing signal; the runtime owns erasure and its result.
@@ -549,6 +564,7 @@ export function ChatScreen({
           tenantName={sessionView.signedIn ? sessionView.display.tenantName : null}
           privacyOpen={privacyOpen} openPrivacy={() => widgets.navigate('shell.privacy')}
           openPhoto={() => { widgets.navigate('shell.root'); goodsPhoto.open(); }}
+          openIdeas={() => { if (!workspaceOpen) workspaceReturnScroll.current = laneRef.current?.scrollTop ?? 0; voice.cancel(); ideas.open(); }}
           openTasks={() => { if (!workspaceOpen) workspaceReturnScroll.current = laneRef.current?.scrollTop ?? 0; voice.cancel(); ownTasks.open(); }}
           openFeed={() => { if (!workspaceOpen) workspaceReturnScroll.current = laneRef.current?.scrollTop ?? 0; voice.cancel(); workspaceReads.openFeed(); }}
           openLibrary={() => { if (!workspaceOpen) workspaceReturnScroll.current = laneRef.current?.scrollTop ?? 0; voice.cancel(); workspaceReads.openLibrary(); }} photoEnabled={view.composer.enabled && !view.inFlight}
@@ -657,7 +673,7 @@ export function ChatScreen({
           onScroll={onLaneScroll}
           role={privacyOpen || workspaceOpen ? 'region' : 'log'}
           aria-live={privacyOpen || workspaceOpen ? 'off' : 'polite'}
-          aria-label={privacyOpen ? 'Приватность' : tasksOpen ? 'Мои задачи' : readsOpen ? readsView.workspace === 'feed' ? 'Лента' : 'Библиотека' : 'Сообщения'}
+          aria-label={privacyOpen ? 'Приватность' : ideasOpen ? 'Идеи' : tasksOpen ? 'Мои задачи' : readsOpen ? readsView.workspace === 'feed' ? 'Лента' : 'Библиотека' : 'Сообщения'}
           style={{
             flex: 1,
             minHeight: 0,
@@ -670,7 +686,7 @@ export function ChatScreen({
               : `calc(env(safe-area-inset-top, 0px) + 84px) 18px calc(env(safe-area-inset-bottom, 0px) + ${composerHeight + 62}px)`,
           }}
         >
-          {readsOpen ? <WorkspaceReadsPanel key={shellView.workspace} view={readsView} port={{ ...workspaceReads, read: key => { reportReturnScroll.current = laneRef.current?.scrollTop ?? 0; return workspaceReads.read(key); } }} close={() => { workspaceReads.close(); window.requestAnimationFrame(focusComposer); }} /> : tasksOpen ? <OwnTasksPanel view={tasksView} port={ownTasks} close={() => { ownTasks.close(); window.requestAnimationFrame(focusComposer); }} /> : privacyOpen ? (
+          {ideasOpen ? <IdeasPanel view={ideasView} port={{ ...ideas, read: key => { ideasReturnScroll.current = laneRef.current?.scrollTop ?? 0; return ideas.read(key); } }} close={() => { ideas.close(); window.requestAnimationFrame(focusComposer); }} /> : readsOpen ? <WorkspaceReadsPanel key={shellView.workspace} view={readsView} port={{ ...workspaceReads, read: key => { reportReturnScroll.current = laneRef.current?.scrollTop ?? 0; return workspaceReads.read(key); } }} close={() => { workspaceReads.close(); window.requestAnimationFrame(focusComposer); }} /> : tasksOpen ? <OwnTasksPanel view={tasksView} port={ownTasks} close={() => { ownTasks.close(); window.requestAnimationFrame(focusComposer); }} /> : privacyOpen ? (
             <>
             <TelegramLinkPanel view={telegramLinkView} t={t} start={() => void telegramLink.start()} cancel={() => telegramLink.cancel()} />
             <PrivacyPanel

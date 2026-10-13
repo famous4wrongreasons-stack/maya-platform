@@ -17,6 +17,7 @@
 // `completeTelegram` would read null in the other, and every login would fail as
 // `callback_unsolicited`. The shell composes at module scope and so does this.
 
+import { createIdeas } from '../../../maya-chat-shell/src/shell/ideas.ts';
 import { createWorkspaceReads } from '../../../maya-chat-shell/src/shell/workspace-reads.ts';
 import { createOwnTasks } from '../../../maya-chat-shell/src/shell/own-tasks.ts';
 import { createLocalCrmSetup } from '../../../maya-chat-shell/src/shell/local-crm-setup.ts';
@@ -214,6 +215,7 @@ export const widgets = runtime.widgetPort;
 export const localCrmSetup = createLocalCrmSetup({ enabled: localCrmSetupEnabled, transport: net.transport, session, newAbort, newId: () => crypto.randomUUID(),
   pending: createCrmPendingLocation({ href: () => window.location.href, replace: relative => window.history.replaceState(null, '', relative) }),
 });
+export const ideas = createIdeas({ transport: net.transport, session, shell: runtime.shell, scheduler, newAbort });
 export const workspaceReads = createWorkspaceReads({ transport: net.transport, session, shell: runtime.shell, scheduler, newAbort });
 export const ownTasks = createOwnTasks({ transport: net.transport, session, shell: runtime.shell, scheduler, newAbort, newId: () => crypto.randomUUID() });
 export const personalBooking = createPersonalBooking({ transport: net.transport, widgets, session, newAbort });
@@ -230,6 +232,7 @@ export const dispose = (): void => {
   personalBooking.dispose();
   ownTasks.dispose();
   workspaceReads.dispose();
+  ideas.dispose();
   voiceMachine.dispose();
   runtime.dispose();
 };

@@ -6,9 +6,10 @@ type ButtonRef = HTMLButtonElement | null;
 type HeaderRef = HTMLElement | null;
 
 /** Local chrome over existing destinations. It invents no route or business permission. */
-export function CompanionHeader({ tenantName, privacyOpen, openPrivacy, openPhoto, openTasks, openFeed, openLibrary, photoEnabled, state, event, greet }: {
+export function CompanionHeader({ tenantName, privacyOpen, openPrivacy, openPhoto, openTasks, openFeed, openLibrary, openIdeas, photoEnabled, state, event, greet }: {
   readonly tenantName: string | null; readonly privacyOpen: boolean;
   readonly openPrivacy: () => void; readonly openPhoto: () => void;
+  readonly openIdeas: () => void;
   readonly openTasks: () => void; readonly openFeed: () => void; readonly openLibrary: () => void;
   readonly photoEnabled: boolean;
   readonly state: CompanionState; readonly event: number; readonly greet: () => void;
@@ -61,6 +62,7 @@ export function CompanionHeader({ tenantName, privacyOpen, openPrivacy, openPhot
       <p className="companion-menu-business">{tenantName ?? 'Ваш разговор'}</p>
       <button type="button" className="companion-menu-row" onClick={() => { setMenu(false); openFeed(); }}>Лента <span aria-hidden="true">↗</span></button>
       <button type="button" className="companion-menu-row" onClick={() => { setMenu(false); openLibrary(); }}>Библиотека <span aria-hidden="true">↗</span></button>
+      <button type="button" className="companion-menu-row" onClick={() => { setMenu(false); openIdeas(); }}>Идеи <span aria-hidden="true">↗</span></button>
       <button type="button" className="companion-menu-row" onClick={() => { setMenu(false); openTasks(); }}>Мои задачи <span aria-hidden="true">↗</span></button>
       <button type="button" className="companion-menu-row" onClick={() => { setMenu(false); openPrivacy(); }}>Приватность и данные <span aria-hidden="true">↗</span></button>
       <button type="button" className="companion-menu-row" disabled={!photoEnabled} onClick={() => { setMenu(false); openPhoto(); }}>Товар по фото накладной <span aria-hidden="true">+</span></button>

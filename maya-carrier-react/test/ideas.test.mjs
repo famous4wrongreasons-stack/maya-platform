@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { IdeasPanel } from './.bundle.mjs';
+const row={key:'PRIVATE_RESULT',digest:'PRIVATE_DIGEST',revision:1,kind:'OBSERVED_VALUE',scope:'tenant',available:true,current:true,message:'<script>test</script>',coverage:'PARTIAL',qualification:'SOURCE_LABELLED',asOf:'2026-10-14T08:00:00.000Z',expiresAt:'2099-10-15T08:00:00.000Z',from:'2026-10-01T00:00:00.000Z',to:'2026-10-14T08:00:00.000Z',timezone:'Europe/Moscow'};
+const forbidden=()=>{throw Error('inert render');};
+const render=patch=>renderToStaticMarkup(createElement(IdeasPanel,{view:{phase:'ready',rows:[row],detail:null,reading:false,possiblyCapped:false,notice:'',retryAt:null,...patch},port:{refresh:forbidden,read:forbidden,back:forbidden},close:forbidden}));
+test('Ideas reference content is informational and inert; no fake plan/task/contact button or private locator',()=>{const html=render({});assert.ok(html.includes('Готовые рекомендации и планы действий пока не подключены'));assert.ok(html.includes('Часть данных отсутствует'));assert.ok(html.includes('&lt;script&gt;'));assert.ok(html.includes('последних 25'));assert.ok(!/PRIVATE|<script|href=|Добавить в задачи|Отправить|Обсудить с/.test(html));});
+test('Ideas detail includes bounds, UTC times, original timezone and qualification without numerical inference',()=>{const html=render({detail:row});for(const phrase of ['Сведения с отметкой источника','Europe/Moscow','08:00 UTC','Срок просмотра','не даёт разрешения'])assert.ok(html.includes(phrase),phrase);assert.ok(!html.includes('PRIVATE'));assert.ok(render({detail:{...row,available:false,current:false}}).includes('Сейчас недоступен'));});
+test('Ideas failure/loading do not masquerade as empty success; refresh is disabled by rate limit',()=>{for(const phase of ['failed','loading']){const html=render({phase,rows:[],notice:'Недоступно'});assert.ok(!html.includes('Пока нет доступных'));}assert.ok(render({retryAt:123}).includes('disabled="">Обновить расчёты'));assert.ok(render({rows:[],possiblyCapped:true}).includes('Это часть списка.'));});

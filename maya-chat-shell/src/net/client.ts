@@ -12,6 +12,8 @@
 
 import { projectPersonalBranches, projectPersonalChoices, projectPersonalSlots, projectPersonalPreview, projectPersonalResults } from './personal.ts';
 import { projectFeed, projectReports, projectReport, reportKey } from './workspace-reads.ts';
+import { projectIdeas } from './ideas.ts';
+import type { IdeasSnapshot } from './types.ts';
 import type { FeedSnapshot, ReportsSnapshot, ReportSummary, ReportSnapshot, WorkspaceReadFailure } from './types.ts';
 import { projectOwnTasks, taskBody, taskIdentity, projectTaskReceipt } from './own-tasks.ts';
 import type { OwnTasksSnapshot, OwnTasksFailure, TaskCommand, TaskReceipt, TaskFailure } from './types.ts';
@@ -74,6 +76,7 @@ import type {
 } from './types.ts';
 
 const PATHS = {
+  ideas: '/analytics/valuations',
   feed: '/inbox',
   reports: '/owner-reports',
   reportSnapshot: '/owner-reports/',
@@ -206,7 +209,7 @@ async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | 
   if (signal !== null) signal.addEventListener('abort', onAbort, { once: true });
   // A `search` term makes this a GET that carries the term in the query string, and a GET sends no
   // body and declares no content type — which also keeps it a simple request, with no preflight.
-  const reading = endpoint === 'feed' || endpoint === 'reports' || endpoint === 'reportSnapshot' || endpoint === 'ownTasks' || endpoint === 'crmSetupStatus' || endpoint === 'crmSetupOperation' || search !== null || endpoint === 'conversation' || endpoint === 'personalBranches' || endpoint === 'personalServices' || endpoint === 'personalStaff' || endpoint === 'personalSlots' || endpoint === 'personalResults';
+  const reading = endpoint === 'ideas' || endpoint === 'feed' || endpoint === 'reports' || endpoint === 'reportSnapshot' || endpoint === 'ownTasks' || endpoint === 'crmSetupStatus' || endpoint === 'crmSetupOperation' || search !== null || endpoint === 'conversation' || endpoint === 'personalBranches' || endpoint === 'personalServices' || endpoint === 'personalStaff' || endpoint === 'personalSlots' || endpoint === 'personalResults';
   const auth: Readonly<Record<string, string>> = bearer === null ? {} : { Authorization: 'Bearer ' + bearer };
   const personal = endpoint === 'personalPreview' || endpoint === 'personalResults' || endpoint === 'personalCreate';
   const context = personal ? { 'X-Maya-Authority-Context': 'personal_client' } : {};
@@ -554,7 +557,7 @@ const unlessAborted = <T>(work: Promise<T>, signal: AbortSignal): Promise<T | nu
 };
 
 /** 401 → refresh once → retry once (§1.4). A second 401 ends the session; it never loops. */
-async function authorizedExchange(auth: Authorizer, endpoint: 'taskCreate' | 'taskComplete' | 'feed' | 'reports' | 'reportSnapshot' | 'ownTasks' | 'telegramLinkStart' | 'telegramLinkComplete' | 'crmSetupStatus' | 'crmSetupStage' | 'crmSetupActivate' | 'crmSetupOperation' | 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate' | 'goodsPhotoPreview' | 'goodsPhotoSearch' | 'goodsPhotoItem' | 'goodsPhotoReview', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = '', idempotencyKey: string = '', crmLocator: CrmOperationLocator | null = null, reportRunId: string = ''): Promise<AuthorizedExchange> {
+async function authorizedExchange(auth: Authorizer, endpoint: 'ideas' | 'taskCreate' | 'taskComplete' | 'feed' | 'reports' | 'reportSnapshot' | 'ownTasks' | 'telegramLinkStart' | 'telegramLinkComplete' | 'crmSetupStatus' | 'crmSetupStage' | 'crmSetupActivate' | 'crmSetupOperation' | 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate' | 'goodsPhotoPreview' | 'goodsPhotoSearch' | 'goodsPhotoItem' | 'goodsPhotoReview', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = '', idempotencyKey: string = '', crmLocator: CrmOperationLocator | null = null, reportRunId: string = ''): Promise<AuthorizedExchange> {
   const first = await unlessAborted(auth.authorize(), signal);
   if (first === null) return { kind: 'aborted' };
   if (first.kind !== 'bearer') return first;
@@ -716,6 +719,9 @@ const workspaceReadOutcome = <T>(ex: AuthorizedExchange, project: (raw: unknown)
 /** The two authenticated calls of P1, shaped as `shell/ports.ts` `Transport`. */
 export function createTransport(auth: Authorizer, timeouts: Timeouts = { requestMs: REQUEST_TIMEOUT_MS, transcribeMs: TRANSCRIBE_TIMEOUT_MS }) {
   return {
+    async ideas(signal: AbortSignal): Promise<Outcome<IdeasSnapshot, WorkspaceReadFailure>> {
+      return workspaceReadOutcome(await authorizedExchange(auth, 'ideas', {}, signal, timeouts.requestMs), projectIdeas);
+    },
     async feed(signal: AbortSignal): Promise<Outcome<FeedSnapshot, WorkspaceReadFailure>> {
       return workspaceReadOutcome(await authorizedExchange(auth, 'feed', {}, signal, timeouts.requestMs), projectFeed);
     },
