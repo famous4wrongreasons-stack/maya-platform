@@ -1081,9 +1081,10 @@ describe('widgets-live harness', () => {
         let accepted: Awaited<ReturnType<typeof bootHttp>> | undefined;
         try {
           process.env.WIDGETS_EVIDENCE = mode === 'environment' ? '1' : '0';
-          const writer = new EvidenceWriter({
-            WIDGETS_EVIDENCE: mode === 'writer' ? '1' : '0',
-          });
+          const writer =
+            mode === 'environment'
+              ? undefined
+              : new EvidenceWriter({ WIDGETS_EVIDENCE: '1' });
           let failure: unknown;
           try {
             accepted = await bootHttp(writer, hook);
@@ -1102,7 +1103,7 @@ describe('widgets-live harness', () => {
       },
     );
 
-    it.each(['canonical', 'diagnostic'])(
+    it.each(['canonical', 'diagnostic', 'diagnostic-with-ambient-capture'])(
       '%s HTTP boot preserves its capture boundary after a late evidence flag change',
       async (mode) => {
         const dir = fs.mkdtempSync(
@@ -1112,10 +1113,11 @@ describe('widgets-live harness', () => {
         const env = { WIDGETS_EVIDENCE: '0', WIDGETS_EVIDENCE_DIR: dir };
         let http: HttpHarness | undefined;
         try {
-          process.env.WIDGETS_EVIDENCE = '0';
+          process.env.WIDGETS_EVIDENCE =
+            mode === 'diagnostic-with-ambient-capture' ? '1' : '0';
           http = await bootHttp(
             new EvidenceWriter(env),
-            mode === 'diagnostic' ? () => {} : undefined,
+            mode === 'canonical' ? undefined : () => {},
           );
           env.WIDGETS_EVIDENCE = '1';
           process.env.WIDGETS_EVIDENCE = '1';

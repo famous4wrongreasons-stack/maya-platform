@@ -110,7 +110,7 @@ export async function bootHttp(
   assertProofDatabase(process.env);
   assertNoEnvFiles();
   if (beforeInit) {
-    if (evidence.enabled || process.env.WIDGETS_EVIDENCE === '1')
+    if (evidence.enabled)
       throw new Error('diagnostic_http_hook_cannot_capture_release_evidence');
     // A diagnostic middleware hook may affect ingress. It never acquires
     // certification capture, even if the caller enables its writer later.

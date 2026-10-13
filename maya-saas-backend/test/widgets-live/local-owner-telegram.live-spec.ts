@@ -16,6 +16,7 @@ import { CalendarSource, UserRole } from '../../src/common/domain.enums';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import { bootHttp, type HttpHarness } from './support/http-bootstrap';
 import { Fixtures } from './support/fixtures';
+import { EvidenceWriter } from './support/evidence';
 import {
   resetLoopbackOauthPreflight,
   resetLoopbackOauthCompletionPreflight,
@@ -253,7 +254,9 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
           providerUserId: subject,
         },
       });
-    http = await bootHttp(undefined, async (app) => {
+    // This synthetic local-session middleware is diagnostic, never clause evidence.
+    const diagnostic = new EvidenceWriter(Object.freeze({}));
+    http = await bootHttp(diagnostic, async (app) => {
       // Match the retained stage-0 environment; a generic test default would
       // hide the real finder refusal observed after a successful owner link.
       app.get(ConfigService).set('PWA_TENANT_INSTALL_ENABLED', 'false');
