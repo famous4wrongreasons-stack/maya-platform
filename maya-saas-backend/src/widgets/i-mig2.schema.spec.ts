@@ -72,6 +72,8 @@ describe('I-MIG2 migration-2 fold', () => {
     // Separate website owner checkpoint b3fdbfe1a70ef1bb3232f1a3895a89c32e811f64.
     // These existing bytes are pinned, not a wildcard allowance for new migrations.
     // The widget baseline stays 99; this test never changes or applies website SQL.
+    // 2026-10-13: owner separately approved the exact forward parent-replacement
+    // correction. Its hash is pinned too; no generic new-migration allowance.
     const publicBookingOwnerMigrations: Readonly<Record<string, string>> = {
       '20261005160000_public_booking_guest':
         'e02cd1b34c3c1a70e2c038e77e800926776aaa5b837a78dfe646c59a52366a42',
@@ -81,6 +83,8 @@ describe('I-MIG2 migration-2 fold', () => {
         '8c7fab5a9bef40d719d2c7bb164609bbfafb072402fbee046552f4bfa9cc6766',
       '20261005160300_public_booking_utc_clock':
         '678d2accbbef88a17b3f766bd39aa41143fb872ae7d7d0d8d75beaa4d7edca52',
+      '20261013120000_public_booking_restrict_parent_replacement':
+        'd9acc1fcb012c4bb4cf53497ce2900802e437612634108639a1c2964e231c538',
     };
     for (const [name, digest] of Object.entries(publicBookingOwnerMigrations)) {
       expect(dirs.filter((entry) => entry === name)).toEqual([name]);
