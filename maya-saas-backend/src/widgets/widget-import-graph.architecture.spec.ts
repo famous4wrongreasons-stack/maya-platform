@@ -85,6 +85,10 @@ interface Allowed {
 
 /** Non-widget modules any widget file may import. Closed: a module not listed here is refused. */
 const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
+  'tenants/salon-timezone.ts': {
+    why: '8bd701e5: pure timezone validation for the canonical owned appointment preview; no identity or booking authority.',
+    only: ['owner-ports/booking-preview.adapter.ts'],
+  },
   'common/booking-requested-slot.ts': {
     why: 'Pure source-shape and instant-formatting presentation helper; no imports, DI, owner reads or execution authority.',
     only: ['booking/booking-selector.presenter.ts'],
@@ -263,6 +267,10 @@ const PACKAGES: Readonly<Record<string, Allowed>> = {
   },
   'class-validator': { why: 'DTO validation' },
   'node:crypto': { why: 'hashes, digests and random tokens' },
+  'node:util': {
+    why: '8bd701e5: deep equality of the canonical owned appointment reread after display lookup; no provider access.',
+    only: ['owner-ports/booking-preview.adapter.ts'],
+  },
 };
 
 /** Non-widget modules only the boundary files may import: owner services and adapters. */
@@ -422,10 +430,11 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
     ],
   },
   'crm/client-appointment-read.service.ts': {
-    why: 'U11b canonical Client appointment read owner',
+    why: 'U11b canonical Client appointment read owner; 8bd701e5 uses its owned display data and then rereads the existing operation owner.',
     only: [
       'owner-ports/noun-client-appointment-read.adapter.ts',
       'owner-ports/personal-schedule.adapter.ts',
+      'owner-ports/booking-preview.adapter.ts',
     ],
   },
   'marketing/canonical-bulk.service.ts': {
@@ -1381,6 +1390,30 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
     const PORTS_IMPORT = "import { Module } from '@nestjs/common';";
 
     const mutants: ReadonlyArray<readonly [string, RuleId, () => Overlay]> = [
+      [
+        'booking preview equality helper imported by another widget adapter',
+        'D6-CLOSED',
+        () => ({
+          [`${W}/owner-ports/foreign-preview.adapter.ts`]:
+            "import { isDeepStrictEqual } from 'node:util';\nexport const compare = isDeepStrictEqual;\n",
+        }),
+      ],
+      [
+        'booking preview timezone helper imported by another widget adapter',
+        'D6-CLOSED',
+        () => ({
+          [`${W}/owner-ports/foreign-preview.adapter.ts`]:
+            "import { isUsableTimezone } from '../../tenants/salon-timezone';\nexport const valid = isUsableTimezone;\n",
+        }),
+      ],
+      [
+        'owned appointment display reader imported by another widget adapter',
+        'D6-CLOSED',
+        () => ({
+          [`${W}/owner-ports/foreign-preview.adapter.ts`]:
+            "import { ClientAppointmentReadService } from '../../crm/client-appointment-read.service';\nexport type Owner = ClientAppointmentReadService;\n",
+        }),
+      ],
       [
         'a gate file imports an owner service',
         'D6-SERVICE',
