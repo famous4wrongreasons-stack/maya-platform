@@ -1,0 +1,37 @@
+{
+  "qualification": "SYNTHETIC_LIFECYCLE_NOT_REAL_PROVIDER_ACCEPTANCE",
+  "candidate": "27c410255783feac7a5044f6331eabf1fb25a164",
+  "passedTests": 1,
+  "failedTests": 0,
+  "checkpointNames": [
+    "initial-slots",
+    "selected-17",
+    "create-preview",
+    "create-commit",
+    "own-before-reschedule",
+    "reschedule-preview",
+    "reschedule-commit",
+    "own-before-cancel",
+    "cancel-preview",
+    "cancel-commit",
+    "reload"
+  ],
+  "exactlyOneProviderRecord": true,
+  "testProviderEffects": {
+    "create": 1,
+    "reschedule": 1,
+    "cancel": 1
+  },
+  "finalTestRecordCanceled": true,
+  "concurrentConsumedIntentRefusals": 9,
+  "realModelCalls": 0,
+  "realProviderCalls": 0,
+  "sourceBinding": "COMMITTED_SOURCE_BYTES",
+  "sourceSha256": "9ef21fbdba0fdd6e6a3257754503d0d1a32fa6429af88431746e4570ffcd1158",
+  "relocatedHelper": "test/widgets-diagnostics/support/booking-followup-native.ts",
+  "relocatedHelperSha256": "0b989eab693175057e988c46fae106a9614c582d1268f2faeaa0179f67850ff1",
+  "sourcesUnchanged": true,
+  "ownedClusterStopped": true,
+  "ownedClusterPidAbsent": true,
+  "ownedBrowserClosed": true
+}

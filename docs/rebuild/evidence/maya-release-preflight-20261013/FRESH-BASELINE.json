@@ -1,0 +1,130 @@
+{
+  "qualification": "CURRENT_COMMITTED_CANDIDATE_BASELINE_NOT_FULL_RELEASE_CERTIFICATION",
+  "candidate": "27c410255783feac7a5044f6331eabf1fb25a164",
+  "nodeVersion": "v22.23.3",
+  "completedStages": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "backend-build",
+    "staging-http-binary",
+    "legacy-createdb",
+    "legacy-migrations",
+    "runtime-artifact",
+    "carrier-harness",
+    "typecheck",
+    "typecheck-scripts",
+    "typecheck-widgets-live",
+    "lint",
+    "contract-types",
+    "contract",
+    "k3",
+    "owner-chat-probe",
+    "full-unit",
+    "full-http",
+    "full-binary",
+    "http-bin",
+    "mutation-collector",
+    "runtime",
+    "carrier",
+    "pg-stop"
+  ],
+  "results": {
+    "staging-http-binary-jest": {
+      "numPassedTests": 17,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 2,
+      "numTotalTestSuites": 2,
+      "numRuntimeErrorTestSuites": 0
+    },
+    "owner-chat-probe": {
+      "numPassedTests": 3,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 1,
+      "numTotalTestSuites": 1,
+      "numRuntimeErrorTestSuites": 0
+    },
+    "full-unit": {
+      "numPassedTests": 9815,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 724,
+      "numTotalTestSuites": 724,
+      "numRuntimeErrorTestSuites": 0
+    },
+    "full-http": {
+      "numPassedTests": 687,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 59,
+      "numTotalTestSuites": 59,
+      "numRuntimeErrorTestSuites": 0
+    },
+    "full-binary": {
+      "numPassedTests": 4,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 4,
+      "numTotalTestSuites": 4,
+      "numRuntimeErrorTestSuites": 0
+    },
+    "mutation-collector": {
+      "tests": 60,
+      "pass": 60,
+      "fail": 0,
+      "skipped": 0
+    },
+    "runtime": {
+      "tests": 770,
+      "pass": 763,
+      "fail": 0,
+      "skipped": 7
+    },
+    "carrier": {
+      "tests": 164,
+      "pass": 164,
+      "fail": 0,
+      "skipped": 0
+    },
+    "http-bin": {
+      "contract": "maya.widgets-intent-http-proof/2",
+      "cases": 21,
+      "status": "PASS",
+      "failed": 0,
+      "binary": {
+        "health": 200
+      },
+      "mint_provenance": {
+        "captured": 47,
+        "malformed": 0
+      }
+    },
+    "clause-verifier": {
+      "contract": "maya.widgets-evidence-verify/1",
+      "lines": 35,
+      "claims": 31,
+      "captured_mints": {
+        "HTTP": 325,
+        "BIN": 47
+      },
+      "refused_mints": 0,
+      "records_before_teardown": 657,
+      "harness_files_scanned": 40,
+      "violations": []
+    }
+  },
+  "ownedClusterStopped": true,
+  "ownedClusterPidAbsent": true,
+  "realProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "fullMutationCorpus": "NOT_RUN_IN_THIS_PASS",
+  "completePlatformCI": "NOT_RUN_IN_THIS_PASS",
+  "fullFBE2E": "NOT_RUN_IN_THIS_PASS",
+  "ownerDatabaseOpenedOrCopied": false,
+  "savedKeysRead": false,
+  "productionEffects": false
+}

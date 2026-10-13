@@ -1,0 +1,209 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "495a4b92a65a37996be93682eb91617085efc315",
+  "status": "AS-DECLARED",
+  "steps": [
+    "unit"
+  ],
+  "restrictions": {
+    "live_tests": null,
+    "live_filter": null,
+    "unit_tests": "allowlist-startup.assert.spec|seal-verifier.service.spec|commit-booking.adapter.spec|widget-release-policy.spec|personal-schedule.adapter.spec|widget-release-production.spec|thread-page.service.spec|noun-resolution.owners.provider.spec|gate7.spec|effect-router.service.spec|gate6.spec|effect-router.architecture.spec|chat-read.trigger.spec|erasure.job.spec"
+  },
+  "startedAt": "2026-10-13T07:49:38.776Z",
+  "finishedAt": "2026-10-13T07:52:40.613Z",
+  "qualification": "TARGETED_DECLARATION_DIAGNOSTIC_NOT_FULL_MUTATION_CERTIFICATION",
+  "uncommittedAtExecution": "Mutation declaration repairs later committed as 4ee85cfc; target source was 495a4b92. Do not relabel as final-HEAD corpus.",
+  "mutants": [
+    {
+      "battery": "gate13.json",
+      "id": "M13-2b",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "B15/B28"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gate13.json",
+      "id": "M13-20",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G13-P07"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-24",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N9a"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gate7.json",
+      "id": "M7-25",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "G7-N9b"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gateAR.json",
+      "id": "AR-M4",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "AR1-RUNNING"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gateBS.json",
+      "id": "BS-M01",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "BS-REVOKED"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gateP-allowlist.json",
+      "id": "AL-M1",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "AL-2"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gateP-mint.json",
+      "id": "MINT-M18",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "decodes only the recognized opaque booking slot"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gateP-rt6.json",
+      "id": "RT6-M2",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "RT6-ATOMIC-1"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gateP-rt6.json",
+      "id": "RT6-M4",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "RT6-RETRY-1"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gateP-rt6.json",
+      "id": "RT6-M5",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "RT6-ATOMIC-1"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gateP-rt6.json",
+      "id": "RT6-M6",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "RT6-SCOPE-1"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gatePI-contract.json",
+      "id": "PI-M06",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "PROFILE-CACHE"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gatePU.json",
+      "id": "PU-M3",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "PU-ALLOWLIST"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gatePU.json",
+      "id": "PU-M7",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "PU-BYTES"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M06",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L21"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M07",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L21"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M08",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L21"
+      ],
+      "vacuous": []
+    },
+    {
+      "battery": "gateWR.json",
+      "id": "WR-M17",
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "WR-L11"
+      ],
+      "vacuous": []
+    }
+  ]
+}

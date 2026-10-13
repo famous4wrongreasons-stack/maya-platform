@@ -1,0 +1,1349 @@
+{
+  "qualification": "LOCAL_RAW_ARTIFACT_INDEX_NOT_RELEASE_ADMISSION",
+  "artifacts": [
+    {
+      "localPath": "/private/tmp/maya-27c41025-audit-check-20261013.log",
+      "bytes": 129,
+      "sha256": "088e2e9fdf3909d330a9a3630dc731fff135845f019ace32bb0c803a60e3ea8e",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-27c41025-audit-preparation-20261013.log",
+      "bytes": 87,
+      "sha256": "626295c3b7730ecf8c96a1a2a4d36c65e6c44548f7f4afdfc1d2b3507a21a07e",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-27c41025-audit-preparation-tests-20261013.log",
+      "bytes": 1553,
+      "sha256": "f48f59a2401479b8959d409f9a4f52d0d715bd557db9aedbd5e13e087d6d0d83",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-27c41025-audit-selftest-20261013.log",
+      "bytes": 1481,
+      "sha256": "79bc1871bfe1450765327b3a9be06451f0d1ca30ee26a1be6b2884b95bf3b718",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-27c41025-clause-verification-20261013.log",
+      "bytes": 792,
+      "sha256": "8db7fbdf8ee242559c3d31898a3fa85f32ea89a55d7ef685f107270aca0406a7",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-27c41025-mutation-preflight-20261013.json",
+      "bytes": 210336,
+      "sha256": "b92793531dbc7abf20d698f846fec61fc561f85b3d5f390037e5a06cd7a87027",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-27c41025-mutation-preflight-20261013.log",
+      "bytes": 967,
+      "sha256": "52c836ad6e111ebe0552dd5417975d8d1f91cf03221c12b9bf45f4304f46e893",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-27c41025-mutation-preflight-final-20261013.log",
+      "bytes": 210336,
+      "sha256": "b92793531dbc7abf20d698f846fec61fc561f85b3d5f390037e5a06cd7a87027",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-27c41025-proof-guards-20261013.log",
+      "bytes": 1002,
+      "sha256": "b8560f7e0514e2ee863e51f9bae2db429d920a57eec57d678846e9b0fe5919a1",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-80a0d97d-mutation-preflight-20261013.json",
+      "bytes": 210336,
+      "sha256": "e8ca5792032e99be7c7749c88b5409f270133ed79d3cfc40adda1bc46b13d530",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-80a0d97d-mutation-preflight-20261013.log",
+      "bytes": 210336,
+      "sha256": "e8ca5792032e99be7c7749c88b5409f270133ed79d3cfc40adda1bc46b13d530",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-anchor-proof-20261013-01.json",
+      "bytes": 21252,
+      "sha256": "285fd252a1919692cd6d4d69ea068804b678f905fd4d46082ef890d0a687e57a",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-anchor-proof-20261013-01.log",
+      "bytes": 21252,
+      "sha256": "285fd252a1919692cd6d4d69ea068804b678f905fd4d46082ef890d0a687e57a",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-binding-after-20261013.log",
+      "bytes": 547,
+      "sha256": "57ae0d965fdf5aa525299dd97a53a83c2cec092ecec8a5d709995a39a1b28b77",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-binding-after-prepared-20261013.log",
+      "bytes": 544,
+      "sha256": "a9b5b7d6f79f6a72deae60c8ab43247ad89e66d1bb84b29a724cf03ca9c45f8c",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-binding-before-20261013.log",
+      "bytes": 2080,
+      "sha256": "bb11047d35d665041176b0aac2c3692507ced274d6a74199de8e154ca7f0ad95",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-cert-anchor-preflight-final.json",
+      "bytes": 210336,
+      "sha256": "01f4bb4f2b2c299eaae85215ca8a8c84935a393b6f5ba5c1aaa3855366610e87",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-cert-collector-tests-final.log",
+      "bytes": 4624,
+      "sha256": "8afddd81857c50d8f39cfc6effb6b5365d286f93d55378ff98e49a9691b8a224",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-cert-fixture-lint-final-20261013.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-cert-fixture-types-20261013.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-cert-fixture-unit-final-20261013.json",
+      "bytes": 21668,
+      "sha256": "9f758196b770a5dd6a6618557d5d1aa44f7350b1b55c9590c51b5de9d9bde7e2",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-collect-baseline-20261013.py",
+      "bytes": 2586,
+      "sha256": "b939f5e5aa78e2f449e78a2f2b5e37067ddf1beb6d7390ff4fe495d03c2d9000",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/backend-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/carrier-harness.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/carrier.log",
+      "bytes": 33500,
+      "sha256": "d05e9e351d1b48e9001cf9d11cdd439345bfa881d284364bb151f53b6af0982f",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/clauses/database-before-teardown.jsonl",
+      "bytes": 100538,
+      "sha256": "cf5210c76a3865b047b4c387b115deffdfe65468c6260f43ce22eecf654d4bc0",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/clauses/evidence-manifest.jsonl",
+      "bytes": 16790,
+      "sha256": "2e2f130899be55397a53a750292ae03017d685fa3ad146f9409943774a68a12a",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/clauses/mint-provenance.jsonl",
+      "bytes": 160476,
+      "sha256": "9973a123329367a64d7396e6f53845bbd912de106d5c43fd0bc95a7c02a59ddc",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/contract-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/contract.log",
+      "bytes": 6777,
+      "sha256": "bebe953a66851b7112f6a081047c0918731c0ad9a69715eb8b557352c8f916f8",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/executed-runner.mjs",
+      "bytes": 9920,
+      "sha256": "46dcc4f61e8ad9afd7ce940880b73ed06aa1eaaf288df590ca0e17d54621c985",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/full-binary.json",
+      "bytes": 4039,
+      "sha256": "fdeadce9d90b6507b3ed93cc2fee3b9f6f73427dbd0d9423b45e466ad3b1d3ac",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/full-binary.log",
+      "bytes": 3272,
+      "sha256": "5cb20585cc9a966f20c19528d4fd19d89e543baea94224a6e06f99e51a84b38c",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/full-http.json",
+      "bytes": 394245,
+      "sha256": "2485b41d878914e06952c45b779b62c7249ae3e1696a6bf6ff83adb76036de7d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/full-http.log",
+      "bytes": 62453,
+      "sha256": "a34c5272a106d8ae617d965bc2b00c8a06d7497e74b2507d1afdc4f3d901ba3c",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/full-unit.json",
+      "bytes": 4986770,
+      "sha256": "1fd4e26ab8a6b4e879e0d4292583adc0b8ef5b309e2c7328a37997c0f199ce58",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/full-unit.log",
+      "bytes": 1386778,
+      "sha256": "e530b386fe422d213b17cf4ae20cb06a1bda426dd64a5a7186710e5807b38ace",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/http-bin.log",
+      "bytes": 4055,
+      "sha256": "954520856a9b23514a4048853889e8f690f8c8f2b8c91d025599b4f8755b7533",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/initdb.log",
+      "bytes": 950,
+      "sha256": "08ab42cb4500d4a58b069a83fe99cc5157976b8969601b6440f9cae0fa558994",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/k3.log",
+      "bytes": 7984,
+      "sha256": "378e93addd6207e68ac6a6745263c79568d037efcf979f7c74dfd13075683401",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/legacy-createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/legacy-migrations.log",
+      "bytes": 14733,
+      "sha256": "63e405457bf39a333749501bb0c01bda5767f07e085bbaadbf4d1d2ba6d21737",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/lint.log",
+      "bytes": 2634,
+      "sha256": "48c07e1803081a66b24b4b1f487deb3937c9dec1f082d5d467c0d0e57644c715",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/manifest.json",
+      "bytes": 1386,
+      "sha256": "c8c0a250a66b621c7b0958f9c5d66dd000a33e30b37d21085082661e276dd480",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/migrations.log",
+      "bytes": 14725,
+      "sha256": "e8722af38f186b3ff36e653e55f1decce74eba9159c54e4f9fe002de557daac5",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/mutation-collector.log",
+      "bytes": 11288,
+      "sha256": "5bbfe8b4f03ffb939401191ac6b16f92d6f7616f600dd5be1c50a0f6b6dea804",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/owner-chat-probe.json",
+      "bytes": 2410,
+      "sha256": "2b80ea0e7e4fdfd70302996eac54db270ca69423d9e818363b6b1857698a7cee",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/owner-chat-probe.log",
+      "bytes": 1139,
+      "sha256": "2d6126223eead553ff86c883c445f21b37dc6a563f2757274820bc70cc7f935c",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/postgres.log",
+      "bytes": 102863,
+      "sha256": "8aa62c82480e76680353e11740caefc26e8d8ea56d4e4e3be5bdb5af442ce9ba",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/runtime-artifact.log",
+      "bytes": 1010,
+      "sha256": "1b0abb348e438c52db3153d0d42e642fd68f9e030464da805f07bdcc70f55829",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/runtime.log",
+      "bytes": 193245,
+      "sha256": "abdfe3475e6de6f0bf3a1120177f40bea7a9d9264ce42fc90033941ca4dd5664",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/staging-http-binary-jest.json",
+      "bytes": 11648,
+      "sha256": "d65c874c0b523f3154fede74e4e35b51d8944dad73305296e283369cda604cc6",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/staging-http-binary.log",
+      "bytes": 408,
+      "sha256": "3dc3fd00d49f6350546cdb55345620dc78fe7deecc49646110cb543f4dba4656",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/typecheck-scripts.log",
+      "bytes": 113,
+      "sha256": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/typecheck-widgets-live.log",
+      "bytes": 128,
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-27c41025-node22-20261013/typecheck.log",
+      "bytes": 103,
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/backend-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/carrier-harness.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/clauses/database-before-teardown.jsonl",
+      "bytes": 91079,
+      "sha256": "50fbeffde0590e54e58f7477aae6bc974abf5f3c8ee158c5041101e8d0dc4bc0",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/clauses/evidence-manifest.jsonl",
+      "bytes": 9485,
+      "sha256": "ab6eec8fca4af3d6476327eed6dcc95796b0fe69484373c29abdaf3ae7bc6f49",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/clauses/mint-provenance.jsonl",
+      "bytes": 140138,
+      "sha256": "b6388cba6e811becc10bc1b4717f2dd1ed6e5e0f25c21eb46f403331f852cb31",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/contract-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/contract.log",
+      "bytes": 6777,
+      "sha256": "bebe953a66851b7112f6a081047c0918731c0ad9a69715eb8b557352c8f916f8",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/executed-runner.mjs",
+      "bytes": 9920,
+      "sha256": "46dcc4f61e8ad9afd7ce940880b73ed06aa1eaaf288df590ca0e17d54621c985",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/full-http.json",
+      "bytes": 432620,
+      "sha256": "302f99090cd52eef0e7f7ab13e5024ba23e526ec4b89939f1e270f287f433bbc",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/full-http.log",
+      "bytes": 89478,
+      "sha256": "c4bf0a06b2c87948d90cf855aa1883c817e2321671ef52a8ea2bbf90cd378548",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/full-unit.json",
+      "bytes": 4987500,
+      "sha256": "306d5606f34e699b97a759f9098a2aa2eb4d2b02c79f0328c3d040018cfd3869",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/full-unit.log",
+      "bytes": 1386778,
+      "sha256": "a497b6a08bfc62063d44eb04ea41c4adebfa326f61203eae7c3929f2ab66eb39",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/initdb.log",
+      "bytes": 950,
+      "sha256": "10c62bf63b6deca99c7aeaceceb2dacec55b7d4574e9cc8902d95a8574eb256d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/k3.log",
+      "bytes": 7984,
+      "sha256": "378e93addd6207e68ac6a6745263c79568d037efcf979f7c74dfd13075683401",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/legacy-createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/legacy-migrations.log",
+      "bytes": 14733,
+      "sha256": "09f36fe1ba1720eb4d338eb339927252d71d37e5f9d9d0ae9800568a62e4164f",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/lint.log",
+      "bytes": 2634,
+      "sha256": "48c07e1803081a66b24b4b1f487deb3937c9dec1f082d5d467c0d0e57644c715",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/manifest.json",
+      "bytes": 1278,
+      "sha256": "bdc8a050d3fa95cf8e19c820a401a4059b2665753a32ba1e54c2db1bed52fc54",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/migrations.log",
+      "bytes": 14725,
+      "sha256": "8f5e2cb93c4c324b73d46ee7a9a6ee0322504533b76453d3f8aea7bb75c39c83",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/owner-chat-probe.json",
+      "bytes": 2410,
+      "sha256": "78e88c5106b48e85798b87d0440f4be083aa220170d09e70c216d84af4c7c90a",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/owner-chat-probe.log",
+      "bytes": 1124,
+      "sha256": "1f60d11682c7ad9c30d688291f0f957dcf98419e2366c26a3563a571a950c7aa",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/postgres.log",
+      "bytes": 105268,
+      "sha256": "43cee927fd2a612f5387a738406d7df152abddac92c11be15ff89d043242b669",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/runtime-artifact.log",
+      "bytes": 1010,
+      "sha256": "1b0abb348e438c52db3153d0d42e642fd68f9e030464da805f07bdcc70f55829",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/staging-http-binary-jest.json",
+      "bytes": 11648,
+      "sha256": "1f15f558e259d0b68a81bc1d2f29a4395a29f8c8d0c3eb4fcc69980dd0a381f1",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/staging-http-binary.log",
+      "bytes": 392,
+      "sha256": "03f43c20186fdadfa2f8ab9d17fffaf1b31a0d958637b67ff4abbe298994d6eb",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/typecheck-scripts.log",
+      "bytes": 113,
+      "sha256": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/typecheck-widgets-live.log",
+      "bytes": 128,
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-5e15fd97-node22-20261013/typecheck.log",
+      "bytes": 103,
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/backend-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/carrier-harness.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/clauses/database-before-teardown.jsonl",
+      "bytes": 91079,
+      "sha256": "c3b2f1f59118aab825c66b1abbdc9decfd9c99eeedbfb9e91bcce53d4c7cb6d2",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/clauses/evidence-manifest.jsonl",
+      "bytes": 9485,
+      "sha256": "403a43aa7b4fb594897bfb848f6f00e47b44a8ebe9059067cbd5674f46e68819",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/clauses/mint-provenance.jsonl",
+      "bytes": 140138,
+      "sha256": "e0f84c37cb0362dafdca1f79bd3020bd0a1b7a1fb7e2ccf3b90cc2e3b5818c2b",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/contract-types.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/contract.log",
+      "bytes": 6777,
+      "sha256": "bebe953a66851b7112f6a081047c0918731c0ad9a69715eb8b557352c8f916f8",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/executed-runner.mjs",
+      "bytes": 9920,
+      "sha256": "46dcc4f61e8ad9afd7ce940880b73ed06aa1eaaf288df590ca0e17d54621c985",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/full-http.json",
+      "bytes": 422319,
+      "sha256": "7b16a60464385a9ffb6135f07f695a94fe145d13681b4931dd2151ebdbdd6be4",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/full-http.log",
+      "bytes": 103047,
+      "sha256": "2f795b17ef43a08d23c3fb3e516dd6c9e0afe00429eff30a3eba58e39f78b438",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/full-unit.json",
+      "bytes": 4985576,
+      "sha256": "905a34adc0ab1853c551d936a80a0cfa0213994e270d240b223e53fb775ec58a",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/full-unit.log",
+      "bytes": 1386795,
+      "sha256": "13682aec33be6213087caa9801f0ab383531e90f2c1fdacb99ff320754cf5d14",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/initdb.log",
+      "bytes": 950,
+      "sha256": "3069941604b665c30d9bf8af8668b318b82957f90a14790257347ccb19266bb4",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/k3.log",
+      "bytes": 7984,
+      "sha256": "378e93addd6207e68ac6a6745263c79568d037efcf979f7c74dfd13075683401",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/legacy-createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/legacy-migrations.log",
+      "bytes": 14733,
+      "sha256": "282285b78b792174e415a4f561a9157db037250414478d6e85ae4aa3e6d78c16",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/lint.log",
+      "bytes": 2634,
+      "sha256": "48c07e1803081a66b24b4b1f487deb3937c9dec1f082d5d467c0d0e57644c715",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/manifest.json",
+      "bytes": 1278,
+      "sha256": "02eda5668dd40402e032407a7f614163c204afa76c9713dba8c69e3e11d89351",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/migrations.log",
+      "bytes": 14725,
+      "sha256": "04a9769b15455daafa46a5d35ff7b15f22d78ffb74eb69e8aec19188ff754dd8",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/owner-chat-probe.json",
+      "bytes": 2410,
+      "sha256": "1f54e776e00ad4c8db7b2fe8b6f7fd03bf32456bd4f492fe343e5dc2795733f2",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/owner-chat-probe.log",
+      "bytes": 1139,
+      "sha256": "ed07a36b8407039d5f5ab6c37bbb0d7af945cd45f403743865997937b191b34e",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/postgres.log",
+      "bytes": 107090,
+      "sha256": "7ce4a61e12546f7f197fdc9c2f913ccf08b89cc13de91934efab4f85ba1d5605",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/runtime-artifact.log",
+      "bytes": 1010,
+      "sha256": "1b0abb348e438c52db3153d0d42e642fd68f9e030464da805f07bdcc70f55829",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/staging-http-binary-jest.json",
+      "bytes": 11648,
+      "sha256": "120eb14add019004970c0d4d3eef7625203e2330f12e3c3159b64a2fb92a4ada",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/staging-http-binary.log",
+      "bytes": 408,
+      "sha256": "1ca4ed9e643e2469077034dd38d926a5d4d06a3faf2ddab06b028b4434dee1ea",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/typecheck-scripts.log",
+      "bytes": 113,
+      "sha256": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/typecheck-widgets-live.log",
+      "bytes": 128,
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-80a0d97d-node22-20261013/typecheck.log",
+      "bytes": 103,
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-c09f07be-20261013/full-unit.json",
+      "bytes": 4982666,
+      "sha256": "27d397e3b9daf294f752577559f0bf314804036273f15e65cbbbd3e2916ae917",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-c09f07be-20261013/full-unit.log",
+      "bytes": 1324375,
+      "sha256": "4b1818dc59d676658e433fb859b9d3bfbea7b90f4e168e9bf8b1ed5ecf11817c",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-c09f07be-20261013/manifest.json",
+      "bytes": 1134,
+      "sha256": "112c5fad4de2946130eff44f47e3ae5d7c5b2280b4f9a4e2b10fd91615f161e9",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-current-baseline-node22-20261013.mjs",
+      "bytes": 9920,
+      "sha256": "46dcc4f61e8ad9afd7ce940880b73ed06aa1eaaf288df590ca0e17d54621c985",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-d6-lint-20261013.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-d6-reconciled-20261013.json",
+      "bytes": 28264,
+      "sha256": "78fe49c0e0930bd0346c56160cde11c9ded5bdc7e1fbd777091351dcf9b2edd8",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-lint-20261013.log",
+      "bytes": 12852,
+      "sha256": "07244b35d1d926c99059907b182884dbb14329ec49e232cbe63b689fd7aba621",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-lint-final-20261013.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013-01/backend-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013-01/clauses/database-before-teardown.jsonl",
+      "bytes": 947,
+      "sha256": "bd99a5ccc11be07ff6266d577c06ff983eae6dcc8f404f5d2a30dc2e3ae5cfc2",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013-01/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013-01/http-repair.json",
+      "bytes": 90466,
+      "sha256": "c34a1d4297d35025ef3d7a807fbd46264294911831be37b7d0ca2457b6481301",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013-01/http-repair.log",
+      "bytes": 4406,
+      "sha256": "7a4323382b6d134a81d5e7211650892d0d8d320c58c1e7bd1f35a042d71a46f2",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013-01/initdb.log",
+      "bytes": 950,
+      "sha256": "109960819d01f95814a5f5a68af3be677ca4b5180db7d5fd4b36e34233fdee5e",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013-01/manifest.json",
+      "bytes": 1285,
+      "sha256": "9d938c066ea216eba1c8aebe258e0ed7085c379b38bf3b075d713721680f1d37",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013-01/migrations.log",
+      "bytes": 14734,
+      "sha256": "4bb3569f71e338599e6d7ccb1936a09283b11bc0fbf0599dced9c92110d57fc1",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013-01/owner-chat-probe.json",
+      "bytes": 2410,
+      "sha256": "3f50bb8a2a36e481f48e6ce29a9cfd8e382bb0b3aa172bf1562d4ad1da5661da",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013-01/owner-chat-probe.log",
+      "bytes": 1139,
+      "sha256": "850096a6dc05a14b402c5b375f8df9716f8cb11770ad7e4bf72b8c3797b2b573",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013-01/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013-01/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013-01/postgres.log",
+      "bytes": 1246,
+      "sha256": "c04351757fa742bb339f65d914f02e64771f081dbca0b4d5f11de925f7e0fbd7",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013-01/types.log",
+      "bytes": 128,
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-diagnostic-boundary-targeted-20261013.mjs",
+      "bytes": 8011,
+      "sha256": "101a0dc0cb829f40dd21c6592ec2f70d73f34bd61a94b67717997c16a4d40593",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-gate4-crash-repro-20261013.json",
+      "bytes": 7566,
+      "sha256": "ea0e430dc60622be3a38d62dc5af737b5ec751cfcdfe781da6ffbe2da6713fd9",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/backend-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/clauses/database-before-teardown.jsonl",
+      "bytes": 947,
+      "sha256": "e1bf91432ae329fd456d809a14aab9bfe1f4b732f1d88c49f42d44dc223f8001",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/clauses/mint-provenance.jsonl",
+      "bytes": 5688,
+      "sha256": "ccca9817e9ee03b27b9884d04cf09324fe613676f367e8ec2756abec615dbcf7",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/fixture-unit.json",
+      "bytes": 30672,
+      "sha256": "e90d469e78d351d047d3bf00ff8c60d49f8feb1aa645ca8ffa9d968d8f0e0f1b",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/fixture-unit.log",
+      "bytes": 5529,
+      "sha256": "709f0019d716cbe720119616f0651b98ecb2b9a6c71a28de922ce37ea8ec05f9",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/http-repair.json",
+      "bytes": 118159,
+      "sha256": "31d841a938cb87d16f5c1e27724a6808393f73035e4430ecba5ba3c14fb92bde",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/http-repair.log",
+      "bytes": 8374,
+      "sha256": "ad03a9096c2928195c727859bae291d30659347119f81612adb9af0b2c4e355a",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/initdb.log",
+      "bytes": 950,
+      "sha256": "9dee8ec368973f4d0cf271e0e09f729932c2d1e36f6894d6adbe812ed1aa3032",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/manifest.json",
+      "bytes": 1970,
+      "sha256": "1ace0486ee022ad77a5a614c9b008a16e8b959a08d34757d2b5e9bd2ab4c5dcb",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/migrations.log",
+      "bytes": 14726,
+      "sha256": "a6850c3190fc0d8a9f78a24a353048aa7896246549f300b302e18185da56a85a",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/postgres.log",
+      "bytes": 1246,
+      "sha256": "313bf61b26904b58e3cfb76f6760592b3490ae8c790b29a1399ac886d380a57d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-01/types.log",
+      "bytes": 128,
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/backend-build.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/clauses/database-before-teardown.jsonl",
+      "bytes": 947,
+      "sha256": "773e3be7c728016bc759c7c66e160053d358aa76e3392bcddac848ef727e0ec7",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/clauses/mint-provenance.jsonl",
+      "bytes": 5688,
+      "sha256": "cab8baf6260308498c4e5a8f07e0cd2592e1e38379b3a61773ff87f35dbecc0b",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/fixture-unit.json",
+      "bytes": 30672,
+      "sha256": "457aa14c84ca37836b4c049e463e8e4dee413df70df9173a2f8cc9a9bf0281af",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/fixture-unit.log",
+      "bytes": 5558,
+      "sha256": "40edfa6e2b5f8ced22e599338708f4a921ded5c9293b08c993fb91418d1d2b9b",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/http-repair.json",
+      "bytes": 93841,
+      "sha256": "464bdbbda33a40038978a61fb563a71cff92273509dfe9c7b0818da8fa3a01da",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/http-repair.log",
+      "bytes": 3504,
+      "sha256": "368b9919fdea852303eadffb2b6cc540fc77559b2d06534c533e0227b5255035",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/initdb.log",
+      "bytes": 950,
+      "sha256": "7bc03cc43474f37bf03fd34f0a47dd071c24cde99c08da44ec1faaa37fef6a3c",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/manifest.json",
+      "bytes": 2071,
+      "sha256": "00dcd488f38e874ba532f6ff2fb38974e72b74a8bbc0caffedec8eef66e23159",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/migrations.log",
+      "bytes": 14726,
+      "sha256": "7d3859b68f0201ddfbe19dd4c6b9490646d867c4d0cc7e65c8c7ad6e88e8626d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/owner-chat-probe.json",
+      "bytes": 2410,
+      "sha256": "c0c5ac903ae442879c6eb16fbba66fce86681d915a1c88d18e12d12f2201e0ca",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/owner-chat-probe.log",
+      "bytes": 1123,
+      "sha256": "95b7ffbc3f6918330cef23b2216ac68f626b2ef69c6b6b00e33fd220983cb3fb",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/postgres.log",
+      "bytes": 4086,
+      "sha256": "211dd0d0bdfd7d93888044192f9455a4b4987ecf20dbd8b30148fff9e6de50e8",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-http-repair-targeted-20261013-02/types.log",
+      "bytes": 128,
+      "sha256": "e490822f47738f84e604e512046afdd01c4a7d75cd7ea8dc1bfd3a4bfc923019",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-native-followup-27c41025-20261013/booking-followup-observations.json",
+      "bytes": 15399,
+      "sha256": "4cc8df7af1c3d070ba9dedd88137186ec3f7e3ae8f0a37abe61ed9175af5496f",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-native-followup-27c41025-20261013/browser-jest.json",
+      "bytes": 1497,
+      "sha256": "d0ca94150e298cd2454eb3a9f3afa0e6b4af3dbe30f5ae0869844132b89f721d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-native-followup-27c41025-20261013/browser.log",
+      "bytes": 1399,
+      "sha256": "987a1e4b9d9ffb3f1a0575b6c0840ab4a01b9af9c8309754cee993f435eeda38",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-native-followup-27c41025-20261013/createdb.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-native-followup-27c41025-20261013/initdb.log",
+      "bytes": 962,
+      "sha256": "4e8d482ce6e813b75a019ca69c96b43dade5c4b7f092110deb1653bfa630dd44",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-native-followup-27c41025-20261013/manifest.json",
+      "bytes": 1146,
+      "sha256": "5e6e348da8c419705f4df5691c3cb3ba9bb04662edf7e57c5c4ce9a955b6c590",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-native-followup-27c41025-20261013/migrations.log",
+      "bytes": 14734,
+      "sha256": "c84ec84c29ffb9ea79505084ca59c9bdb8cc84dfdf10723bb105c0ea561c6e28",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-native-followup-27c41025-20261013/pg-start.log",
+      "bytes": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-native-followup-27c41025-20261013/pg-stop.log",
+      "bytes": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-native-followup-27c41025-20261013/postgres.log",
+      "bytes": 1246,
+      "sha256": "6a706f340d130c14ad318ce62db684752b97416218b3f9d22cba013a6261082c",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-native-followup-27c41025-20261013/react-web-build.log",
+      "bytes": 185,
+      "sha256": "c5976e6f8150b4a6fea65c8e05477cf3a6f6450f321e41dd66af59160a9a3289",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-native-followup-27c41025-20261013/source-hashes.json",
+      "bytes": 311367,
+      "sha256": "a31549e40849db0cc3d9d7c62d08cac8bf9e846ade1df9078307f865695e2112",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-owner-chat-certification-20261013-01/manifest.json",
+      "bytes": 554,
+      "sha256": "ad6bf70bfd27fd8cb37e5bb0ce7a8d9445f663000eec1a30a3af9269e89912a4",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-transform-after-20261013.log",
+      "bytes": 1402,
+      "sha256": "c4034433ecc5041faf47fcda492080408f84595c461f19b02124c05355f8e070",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    },
+    {
+      "localPath": "/private/tmp/maya-transform-before-20261013.log",
+      "bytes": 2817,
+      "sha256": "05e5559269d40eac12f95f6c90db6ce769e90bd32beb4435e4c7ce1ae51b397b",
+      "committedRaw": false,
+      "reason": "Raw local diagnostic evidence; aggregates and provenance are archived instead."
+    }
+  ]
+}

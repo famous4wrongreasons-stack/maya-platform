@@ -90,3 +90,11 @@ message, deploy, iPhone installation or C10 work occurred.
 
 Later documentation-only commits do not change the tested backend/test bytes.
 They do not create or renew a certificate for any different SHA.
+
+## Subsequent local preflight
+
+The [2026-10-13 preflight continuation](../maya-release-preflight-20261013/README.md)
+records test/evidence-harness repairs and fresh broad baseline plus synthetic
+native booking lifecycle results on `27c41025`. It preserves this implementation
+checkpoint and its actual mutation provenance. Neither packet is a full release
+certificate or permission for owner-data execution.
