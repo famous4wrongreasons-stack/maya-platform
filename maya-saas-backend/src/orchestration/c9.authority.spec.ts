@@ -26,9 +26,9 @@ describe('C9 current principal retains ordinary full-trial lifecycle', () => {
       source: 'auth_session',
     };
     const tx = {
-      tenant: { findUnique: jest.fn(async () => tenant) },
-      $queryRaw: jest.fn(async () => [membership]),
-      staff: { findMany: jest.fn(async () => []) },
+      tenant: { findUnique: jest.fn(() => Promise.resolve(tenant)) },
+      $queryRaw: jest.fn(() => Promise.resolve([membership])),
+      staff: { findMany: jest.fn(() => Promise.resolve([])) },
     };
     const channels = { resolve: jest.fn() };
     const authority = new C9Authority(

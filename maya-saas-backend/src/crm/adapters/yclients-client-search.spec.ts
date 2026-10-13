@@ -35,9 +35,14 @@ describe('YCLIENTS client search source outcomes', () => {
     expect(await f.read('  Иван  ')).toEqual([]);
     expect(f.fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = f.fetchMock.mock.calls[0];
-    expect(String(url)).toBe('http://127.0.0.1:9/company/123/clients/search');
+    expect(url instanceof URL ? url.href : url).toBe(
+      'http://127.0.0.1:9/company/123/clients/search',
+    );
     expect(init?.method).toBe('POST');
-    expect(JSON.parse(String(init?.body))).toEqual({
+    const encoded = init?.body;
+    if (typeof encoded !== 'string')
+      throw new Error('Expected JSON request body');
+    expect(JSON.parse(encoded)).toEqual({
       fields: [
         'id',
         'name',

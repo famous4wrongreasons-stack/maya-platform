@@ -8,6 +8,15 @@ import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import * as bcrypt from 'bcrypt';
 import request from 'supertest';
+import type {
+  Request,
+  Response as ExpressResponse,
+  NextFunction,
+} from 'express';
+import type {
+  AiCoreModelInput,
+  AiCoreModelDecision,
+} from '../../src/ai-tools/ai-core.types';
 import { bootFixtureContext, type FixtureContext } from './support/bootstrap';
 import { bootHttp, type HttpHarness } from './support/http-bootstrap';
 import { AiCoreService } from '../../src/ai-tools/ai-core.service';
@@ -17,23 +26,88 @@ import { ActionEngineRuntimeService } from '../../src/action-engine/action-engin
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { AuthService } from '../../src/auth/auth.service';
 import { assertProofDatabase } from './support/proof-db-guard';
+interface OwnerChatScope {
+  stateDirectory: string;
+  initialManifestSha256: string;
+  privateStateSha256: string;
+  restartReceiptPath: string;
+  restartReceiptSha256: string;
+  tenantId: string;
+  userId: string;
+  branchId: string;
+  tenantSlug: string;
+  companyId: string;
+}
+interface InstalledOwnerChat {
+  fetch: typeof fetch;
+  stop(): void;
+  allowProvider(request: unknown): Promise<boolean>;
+}
+interface OwnerChatRuntimeModule {
+  installOwnerChat(
+    this: void,
+    input: {
+      app: HttpHarness['app'];
+      prisma: PrismaService;
+      require(file: string): Record<string, unknown>;
+      backend: string;
+      launch: {
+        manifest: {
+          ownerScope: OwnerChatScope;
+          limits: { model: string; outputPerAttempt: number };
+        };
+        admission: { expiresAt: number };
+        assertCurrent(): void;
+      };
+      providerFetch: typeof fetch;
+    },
+  ): Promise<InstalledOwnerChat>;
+}
+interface OwnerChatPolicyModule {
+  OWNER_CHAT_QUESTIONS: readonly string[];
+  OWNER_CHAT_TOOLS: readonly string[];
+  ownerChatIngress(
+    this: void,
+    method: string,
+    path: string,
+    headers: Request['headers'],
+    body: unknown,
+    origin: string,
+    scope: OwnerChatScope,
+  ): string | null;
+}
+interface ReadTransportModule {
+  createReadTransport(
+    this: void,
+    native: typeof fetch,
+    company: () => Promise<string>,
+    clock: () => number,
+    trace: () => void,
+    options: { allowOwnerChat(request: unknown): Promise<boolean> },
+  ): {
+    fetch: typeof fetch;
+    run(request: Request, response: ExpressResponse, next: NextFunction): void;
+  };
+}
 const requireNative = createRequire(__filename);
 const { installOwnerChat } = requireNative(
   path.resolve('scripts/local-owner-chat-runtime.mjs'),
-);
+) as OwnerChatRuntimeModule;
 const { ownerChatIngress, OWNER_CHAT_QUESTIONS, OWNER_CHAT_TOOLS } =
-  requireNative(path.resolve('scripts/local-owner-chat-policy.mjs'));
+  requireNative(
+    path.resolve('scripts/local-owner-chat-policy.mjs'),
+  ) as OwnerChatPolicyModule;
 const { createReadTransport } = requireNative(
   path.resolve('scripts/local-yclients-read-transport.mjs'),
-);
+) as ReadTransportModule;
 
 describe('owner catalog local qualification boundary — synthetic HTTP', () => {
   let db: FixtureContext,
     http: HttpHarness,
-    scope: any,
+    scope: OwnerChatScope,
     token: string,
     foreignToken: string,
-    installed: any;
+    installed: InstalledOwnerChat;
   let originalFetch: typeof fetch, originalPartner: string | undefined;
   let modelCalls = 0,
     providerCalls = 0;
@@ -141,7 +215,9 @@ describe('owner catalog local qualification boundary — synthetic HTTP', () => 
     originalFetch = globalThis.fetch;
     originalPartner = process.env.YCLIENTS_PARTNER_TOKEN;
     process.env.YCLIENTS_PARTNER_TOKEN = 'SYNTHETIC_PARTNER_NOT_REAL_321';
-    const native = async (raw: unknown) => {
+    const native: typeof fetch = (raw) => {
+      if (typeof raw !== 'string' && !(raw instanceof URL))
+        throw new Error('Unexpected synthetic request shape');
       providerCalls++;
       const url = new URL(String(raw));
       providerPaths.push(url.pathname);
@@ -180,11 +256,13 @@ describe('owner catalog local qualification boundary — synthetic HTTP', () => 
           timezone_name: 'Europe/Moscow',
         };
       else throw Error('unplanned_synthetic_provider_route');
-      return new Response(JSON.stringify({ success: true, data, meta: {} }), {
-        status: 200,
-      });
+      return Promise.resolve(
+        new Response(JSON.stringify({ success: true, data, meta: {} }), {
+          status: 200,
+        }),
+      );
     };
-    const map: any = {
+    const map = {
       ConfigService,
       ForbiddenException,
       AiCoreService,
@@ -215,7 +293,7 @@ describe('owner catalog local qualification boundary — synthetic HTTP', () => 
     http = await bootHttp(undefined, async (app) => {
       const guard = createReadTransport(
         native,
-        async () => scope.companyId,
+        () => Promise.resolve(scope.companyId),
         Date.now,
         () => {},
         { allowOwnerChat: (req: unknown) => installed.allowProvider(req) },
@@ -229,7 +307,7 @@ describe('owner catalog local qualification boundary — synthetic HTTP', () => 
         providerFetch: guard.fetch,
       });
       globalThis.fetch = installed.fetch;
-      app.use((req: any, res: any, next: any) => {
+      app.use((req: Request, res: ExpressResponse, next: NextFunction) => {
         const reason = ownerChatIngress(
           req.method,
           req.originalUrl,
@@ -243,9 +321,12 @@ describe('owner catalog local qualification boundary — synthetic HTTP', () => 
       });
       const model = app.get(AiCoreModelService);
       const parser = model as unknown as {
-        validatePlanningResponse(text: string, input: any): any;
+        validatePlanningResponse(
+          text: string,
+          input: AiCoreModelInput,
+        ): Pick<AiCoreModelDecision, 'toolCall' | 'semanticPlan'>;
       };
-      jest.spyOn(model, 'decide').mockImplementation(async (input) => {
+      jest.spyOn(model, 'decide').mockImplementation((input) => {
         modelCalls++;
         expect(
           input.tools.every((t) => OWNER_CHAT_TOOLS.includes(t.name)),
@@ -254,14 +335,14 @@ describe('owner catalog local qualification boundary — synthetic HTTP', () => 
           input.messages.filter((m) => m.role === 'user').at(-1)?.content ?? '';
         const index = OWNER_CHAT_QUESTIONS.indexOf(userText);
         if (input.toolResults.length)
-          return {
+          return Promise.resolve({
             reply: 'Synthetic source-qualified reply.',
             toolCall: null,
             semanticPlan: input.conversationPlan,
             provider: 'deepseek' as const,
             model: 'SCRIPTED_NOT_LIVE',
             usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-          };
+          });
         expect(index).toBeGreaterThanOrEqual(0);
         const names = [
           'catalog.services.read',
@@ -295,13 +376,13 @@ describe('owner catalog local qualification boundary — synthetic HTTP', () => 
           }),
           input,
         );
-        return {
+        return Promise.resolve({
           ...parsed,
           reply: 'Проверяю данные.',
           provider: 'deepseek' as const,
           model: 'SCRIPTED_NOT_LIVE',
           usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
-        };
+        });
       });
     });
     token = await http.login(tenant.slug, owner.email, password);
@@ -350,12 +431,17 @@ describe('owner catalog local qualification boundary — synthetic HTTP', () => 
         .post('/api/ai/chat')
         .set('authorization', 'Bearer ' + token)
         .send(body(i));
+      const response = res.body as {
+        error?: { code?: unknown };
+        message?: unknown;
+        reply?: unknown;
+      };
       observations.push({
         question: i + 1,
         status: res.status,
-        error: res.body?.error?.code ?? null,
-        message: res.body?.message ?? null,
-        reply: res.body?.reply ?? null,
+        error: response?.error?.code ?? null,
+        message: response?.message ?? null,
+        reply: response?.reply ?? null,
       });
       expect(res.status).toBe(201);
     }
