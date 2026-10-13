@@ -1,0 +1,12 @@
+PASS src/package5-wave1/operational-tasks.read.spec.ts
+PASS src/owner-reports/companion-retained-reads.http.spec.ts
+PASS src/package5-wave1/operational-work.http.spec.ts
+PASS src/inbox/inbox.service.spec.ts
+PASS src/package5-wave1/package5-wave1-canonical-cutover.service.spec.ts
+PASS src/owner-reports/owner-report.contract.spec.ts
+
+Test Suites: 6 passed, 6 total
+Tests:       80 passed, 80 total
+Snapshots:   0 total
+Time:        1.545 s, estimated 2 s
+Ran all test suites matching src/owner-reports/companion-retained-reads.http.spec.ts|src/inbox/inbox.service.spec.ts|src/owner-reports/owner-report.contract.spec.ts|src/package5-wave1/operational-work.http.spec.ts|src/package5-wave1/package5-wave1-canonical-cutover.service.spec.ts|src/package5-wave1/operational-tasks.read.spec.ts.

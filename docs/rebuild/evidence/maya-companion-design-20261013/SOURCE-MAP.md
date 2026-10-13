@@ -39,3 +39,11 @@ implementation at `ccd38792e3772f65165a9b2f0a7706e1151b145d`:
 [Feed/Library checkpoint](../../MAYA-COMPANION-FEED-LIBRARY-CHECKPOINT-20261013.md).
 This does not close the separate Save, generic media, model-context discussion,
 Ideas or task-command owner gaps. Earlier checkpoint receipts remain historical.
+
+## Task actions checkpoint (2026-10-13)
+
+Кандидат `88fa811644b59211d484a47816e44b604e4f1387` подключил ручное создание задачи самому себе без срока и
+завершение через существующую A23/Inbox binding. Read-only этап выше остаётся
+историческим. Date selection, assignment, undo и Ideas-to-task не включены.
+См. [checkpoint](../../MAYA-COMPANION-TASK-ACTIONS-CHECKPOINT-20261013.md) и
+[source review](../maya-companion-task-actions-20261013/IDEAS-SOURCE-REVIEW.md).
