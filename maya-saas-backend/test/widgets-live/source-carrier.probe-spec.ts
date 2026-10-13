@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
+import { localCalendarDate } from '../../src/owner-reports/owner-reports.time';
 import { applyWidgetsLiveEnvironment } from './support/environment';
 import { bootFixtureContext } from './support/bootstrap';
 import { bootHttp, fixturesForHttp } from './support/http-bootstrap';
@@ -13,7 +14,7 @@ const object = (v: unknown): Record<string, unknown> => {
   assert(v !== null && typeof v === 'object' && !Array.isArray(v));
   return v as Record<string, unknown>;
 };
-async function main() {
+async function main(mode: 'personal' | 'journal') {
   applyWidgetsLiveEnvironment();
   const db = await bootFixtureContext();
   const http = await bootHttp();
@@ -21,93 +22,118 @@ async function main() {
   const observations: unknown[] = [];
   try {
     const baseUrl = await http.listenLoopback();
-    for (const mode of ['personal', 'journal'] as const) {
-      const tenant = await fx.tenant(
-        'Approved source carrier probe',
-        CalendarSource.INTERNAL,
+    const tenant = await fx.tenant(
+      'Approved source carrier probe',
+      CalendarSource.INTERNAL,
+    );
+    const user = await fx.user(
+      tenant,
+      mode === 'personal' ? UserRole.CLIENT : UserRole.TENANT_OWNER,
+    );
+    const bookingSource =
+      mode === 'personal'
+        ? await fx.binView().bookingSource(tenant, user)
+        : null;
+    for (const feature of [
+      'widgets.runtime',
+      'ai.consultant',
+      'ai.owner',
+      'booking',
+      'booking.customer_app',
+      'crm.integration',
+    ] as const)
+      await fx.grantFeature(tenant, feature);
+    const accessToken = await http.login(
+      tenant.slug,
+      user.email,
+      user.password,
+    );
+    const initial = await http.executeTool(
+      accessToken,
+      mode === 'personal' ? 'catalog.services.read' : 'operations.journal.read',
+      {
+        arguments: mode === 'personal' ? {} : { date: '2026-09-24' },
+        surface: 'web',
+      },
+      randomUUID(),
+    );
+    assert.equal(initial.status, 201);
+    const envelope = object(
+      object(object(initial.body).resolution).receipt,
+    ).envelope;
+    const observed = await new Promise<unknown>((resolve, reject) => {
+      const child = spawn(
+        process.execPath,
+        [
+          path.resolve(
+            'test/widgets-live/support/shell-approved-source-probe.mjs',
+          ),
+        ],
+        { stdio: ['pipe', 'pipe', 'pipe'] },
       );
-      const user = await fx.user(
-        tenant,
-        mode === 'personal' ? UserRole.CLIENT : UserRole.TENANT_OWNER,
-      );
-      if (mode === 'personal') await fx.binView().bookingSource(tenant, user);
-      for (const feature of [
-        'widgets.runtime',
-        'ai.consultant',
-        'ai.owner',
-        'booking',
-        'booking.customer_app',
-        'crm.integration',
-      ] as const)
-        await fx.grantFeature(tenant, feature);
-      const accessToken = await http.login(
-        tenant.slug,
-        user.email,
-        user.password,
-      );
-      const initial = await http.executeTool(
-        accessToken,
-        mode === 'personal'
-          ? 'catalog.services.read'
-          : 'operations.journal.read',
-        {
-          arguments: mode === 'personal' ? {} : { date: '2026-09-24' },
-          surface: 'web',
-        },
-        randomUUID(),
-      );
-      assert.equal(initial.status, 201);
-      const envelope = object(
-        object(object(initial.body).resolution).receipt,
-      ).envelope;
-      const observed = await new Promise<unknown>((resolve, reject) => {
-        const child = spawn(
-          process.execPath,
-          [
-            path.resolve(
-              'test/widgets-live/support/shell-approved-source-probe.mjs',
-            ),
-          ],
-          { stdio: ['pipe', 'pipe', 'pipe'] },
-        );
-        let stdout = '',
-          stderr = '';
-        child.stdout.on('data', (v: Buffer) => {
-          stdout += v.toString();
-        });
-        child.stderr.on('data', (v: Buffer) => {
-          stderr += v.toString();
-        });
-        child.once('error', reject);
-        child.once('close', (code) =>
-          code === 0
-            ? resolve(JSON.parse(stdout) as unknown)
-            : reject(new Error(`carrier probe ${mode}: ${stderr}`)),
-        );
-        child.stdin.end(
-          JSON.stringify({
-            mode,
-            baseUrl,
-            accessToken,
-            tenantName: tenant.slug,
-            envelope,
-          }),
-        );
+      let stdout = '',
+        stderr = '';
+      child.stdout.on('data', (v: Buffer) => {
+        stdout += v.toString();
       });
-      if (mode === 'personal') {
-        const state = await fx.binView().bookingProofState(tenant);
-        assert.equal(state.appointments.length, 1);
-        if (object(observed).createRescheduleCancel === true) {
-          assert.equal(state.appointments[0].status, 'canceled');
-          assert.equal(state.executions.length, 3);
+      child.stderr.on('data', (v: Buffer) => {
+        stderr += v.toString();
+      });
+      child.once('error', reject);
+      child.once('close', (code) => {
+        try {
+          const result = object(JSON.parse(stdout) as unknown);
+          const message =
+            typeof result.error === 'string'
+              ? result.error
+              : stderr || 'missing success';
+          assert.equal(code, 0, `carrier probe ${mode}: ${message}`);
+          assert.equal(result.pass, true, `carrier probe ${mode}: ${message}`);
+          resolve(result);
+        } catch (error) {
+          reject(
+            error instanceof Error
+              ? error
+              : new Error('Invalid carrier observation'),
+          );
         }
+      });
+      child.stdin.end(
+        JSON.stringify({
+          mode,
+          baseUrl,
+          accessToken,
+          tenantName: tenant.slug,
+          envelope,
+          // An explicit synthetic test-driver READ after the real date question;
+          // never an automatic date inferred by the shell or a model proof.
+          availabilityRequest:
+            bookingSource === null
+              ? null
+              : {
+                  date: localCalendarDate(
+                    'Europe/Moscow',
+                    new Date(Date.now() + 2 * 86_400_000),
+                  ),
+                  staff_id: bookingSource.staffId,
+                  service_ids: [bookingSource.serviceId],
+                },
+        }),
+      );
+    });
+    if (mode === 'personal') {
+      const state = await fx.binView().bookingProofState(tenant);
+      assert.equal(state.appointments.length, 1);
+      if (object(observed).createRescheduleCancel === true) {
+        assert.equal(state.appointments[0].status, 'canceled');
+        assert.equal(state.executions.length, 3);
       }
-      observations.push(observed);
     }
+    observations.push(observed);
     const out = process.env.GITHUB_SOURCE_PROBE_OUT;
     if (!out) throw new Error('explicit report path required');
     fs.writeFileSync(
-      out,
+      `${out}.${mode}.json`,
       JSON.stringify(
         {
           contract: 'maya.approved-source-carrier-observation/1',
@@ -131,8 +157,8 @@ async function main() {
     await db.close();
   }
 }
-it(
-  'FBE2E approved production sources through the unchanged carrier',
+it.each(['personal', 'journal'] as const)(
+  'FBE2E approved %s production source through the unchanged carrier',
   main,
   120_000,
 );

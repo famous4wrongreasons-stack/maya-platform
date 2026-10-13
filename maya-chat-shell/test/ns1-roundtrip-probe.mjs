@@ -75,8 +75,17 @@ const LOGIN_OK = {
 const intentReply = (over) => ({ contract: 'maya.widget.intent/1', outcome: 'terminate', code: null, next_envelope: null, resolved_widget: null, receipt_outcome: 'ACCEPTED', ...over });
 
 const served = [];
+let startup = true;
 route = async (req) => {
   if (req.url === '/api/auth/login') return json(201, LOGIN_OK);
+  if (startup && req.url === '/api/ai/conversation') return json(200, {
+    contract: 'maya.conversation-history/1', conversationId: null,
+    truncated: false, interrupted: false, turns: [],
+  });
+  if (startup && req.url === '/api/widgets/resolve') {
+    assert.deepEqual(req.body, { thread_page: { limit: 20 } });
+    return json(200, { contract: 'maya.widget.resolve/1', tenant_bound: true, widgets: [] });
+  }
   if (req.url === '/api/widgets/intent') {
     const leg = req.body.widget_id === detailEnvelope.widget_id ? 'return' : 'open';
     const body = leg === 'return'
@@ -105,6 +114,18 @@ const runtime = createShellRuntime({
   submission: createLiveSubmission(net.transport),
   newId: () => 'nonce-probe-000001',
 });
+
+// Current login restores conversation text and one bounded receipt page. Finish and
+// assert that independent startup before measuring NAVIGATE; a read during the
+// roundtrip must still fail. Owners: b56965f9 (history), 59d6e46c (receipt read).
+await new Promise((resolve) => setImmediate(resolve));
+assert.equal(runtime.conversation.view().composer.enabled, true);
+assert.deepEqual(wire.map((r) => r.url), [
+  '/api/auth/login', '/api/ai/conversation', '/api/widgets/resolve',
+]);
+startup = false;
+const roundtripStart = wire.length;
+const roundtripWire = () => wire.slice(roundtripStart);
 
 // ── the roundtrip ──────────────────────────────────────────────────────────────────────────────
 const steps = [];
@@ -137,7 +158,7 @@ const projected = projectWidgetIntent(leg.body);
 step('6. runtime projection', projected?.resolved_widget == null ? 'DROPS resolved_widget' : 'PRESERVES resolved_widget', 'PRESERVES resolved_widget');
 // The discriminator between a return and an ordinary acknowledgement: the return path answers from
 // `resolved_widget` and stops, while an acknowledgement goes on to reread the thread page.
-const reread = wire.some((r) => r.url === '/api/widgets/resolve');
+const reread = roundtripWire().some((r) => r.url === '/api/widgets/resolve');
 step('7. parent restored through the return path', returning.outcome === 'dismissed' && !reread ? 'RETURNED' : reread ? 'NOT TAKEN (fell through to the thread-page reread)' : `NOT TAKEN (${returning.sentence ?? returning.reason ?? returning.outcome})`, 'RETURNED');
 step('8. fullscreen detail after return', runtime.shell.view().fullscreen === null ? 'CLOSED' : 'STILL OPEN', 'CLOSED');
 const after = widgetItem(itemId).result.textEquivalent.headline;
@@ -146,8 +167,8 @@ step('10. timeline widget items', items().filter((i) => i.kind === 'widget').len
 step('11. detail entry released', (await runtime.widgets.activate(detailItemId, 'intent:i1')).reason ?? 'still live', 'unknown_item');
 step('12. focus owner released', runtime.shell.state().opener, null);
 step('13. history: one push, one back', `${history.pushes}/${history.backs}`, '1/1');
-step('14. submissions sent', wire.filter((r) => r.url === '/api/widgets/intent').length, 2);
-step('15. no chat or reread traffic', wire.filter((r) => r.url !== '/api/widgets/intent' && r.url !== '/api/auth/login').length, 0);
+step('14. submissions sent', roundtripWire().filter((r) => r.url === '/api/widgets/intent').length, 2);
+step('15. no chat or reread traffic', roundtripWire().filter((r) => r.url !== '/api/widgets/intent').length, 0);
 
 runtime.dispose();
 

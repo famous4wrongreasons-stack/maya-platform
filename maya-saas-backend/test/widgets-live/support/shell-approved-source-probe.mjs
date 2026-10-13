@@ -206,7 +206,7 @@ try {
     assert.equal(result.next_envelope.kind,'SCHEDULE');
     assert.equal(result.next_envelope.body.range.from.slice(0,10),'2026-09-24');
     process.stdout.write(JSON.stringify({
-      mode:input.mode,backendDetail:true,fullscreen:runtime.shell.view().fullscreen,refs,counters:runtime.widgets.counters(),
+      mode:input.mode,pass:true,backendDetail:true,fullscreen:runtime.shell.view().fullscreen,refs,counters:runtime.widgets.counters(),
       diagnostic: {
         initialEnvelope: snapshot(envelope),
         exchanges,
@@ -224,7 +224,25 @@ try {
         : kind==='slot' ? `slot:${envelope.body.groups[0].slots[0].slot_ref}`
         : `option:${envelope.body.options[0].option_id}`;
       const result = await activate(itemId,ref);
-      if (kind!=='commit') { envelope=result.next_envelope; }
+      if (kind==='staff') {
+        assert.equal(result.receipt_outcome,'ACCEPTED');
+        assert.equal(result.next_envelope,null);
+        assert.equal(result.owner_decision.kind,'booking_selection_pending');
+        assert.equal(result.owner_decision.next,'date');
+        assert.equal(result.owner_decision.reply,'На какую дату проверить время у выбранного мастера?');
+        assert.equal(runtime.widgets.lockSources().length,0);
+        // The driver supplies an explicit date, as in the canonical BOOK-1…6
+        // proof. The runtime must never choose a day or auto-request a slot.
+        const availability=await post(input.baseUrl,input.accessToken,'/api/ai/tools/booking.availability.read/execute',{
+          surface:'web',arguments:object(input.availabilityRequest,'explicit availability request'),
+        });
+        assert.equal(availability.status,201);
+        envelope=availability.body.resolution.receipt.envelope;
+        assert.equal(envelope.kind,'TIME_SLOT_SELECTOR');
+        assert.equal(envelope.provenance.source_capability,'booking.availability.read');
+        itemId=load(envelope);
+      }
+      else if (kind!=='commit') { envelope=result.next_envelope; }
       else assert.equal(result.owner_decision.state,'SUCCEEDED');
     }
     for (const operation of ['reschedule','cancel']) {
@@ -232,7 +250,14 @@ try {
       assert.equal(response.status,201);
       envelope=response.body.resolution.receipt.envelope;
       itemId=load(envelope);
-      const ref = operation==='reschedule' ? `intent:${envelope.body.detail_intent}` : `entry:${envelope.body.entries[0].entry_ref}`;
+      const entry=envelope.body.entries[0];
+      const move=envelope.intents.find(i=>i.intent_ref===entry.move_intent);
+      if (operation==='reschedule') {
+        assert.equal(move?.capability?.key,'appointments.own.reschedule');
+      }
+      const ref = operation==='reschedule' ? `intent:${entry.move_intent}` : `entry:${entry.entry_ref}`;
+      const currentRender=resultOf(envelope,new Date().toISOString());
+      assert(currentRender.readingOrder.includes(ref),`Canonical ${operation} control ${ref} is not rendered; drawn controls: ${currentRender.readingOrder.join(', ')}`);
       const proposal=await activate(itemId,ref);
       assert.equal(proposal.next_envelope.body.confirmation_subject,operation);
       const confirmation=proposal.next_envelope;
@@ -240,8 +265,9 @@ try {
       const committed=await activate(itemId,`intent:${intent(confirmation,'COMMIT').intent_ref}`);
       assert.equal(committed.owner_decision.state,'SUCCEEDED');
     }
-    process.stdout.write(JSON.stringify({mode:input.mode,createRescheduleCancel:true,refs,counters:runtime.widgets.counters()}));
+    process.stdout.write(JSON.stringify({mode:input.mode,pass:true,createRescheduleCancel:true,explicitDateRead:true,refs,counters:runtime.widgets.counters()}));
   }
 } catch (error) {
   process.stdout.write(JSON.stringify({mode:input.mode,pass:false,error:String(error),counters:runtime.widgets.counters()}));
+  process.exitCode=1;
 } finally { offShell(); unmountDrawer(); runtime.dispose(); }
