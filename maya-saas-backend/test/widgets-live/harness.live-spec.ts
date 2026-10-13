@@ -1063,8 +1063,80 @@ describe('widgets-live harness', () => {
       expect(http).toMatch(
         /createNestApplication<NestExpressApplication>\(\{\s*bodyParser: false,\s*\}\)/,
       );
-      expect(http).toMatch(/configureHttpApp\(app\);\s*await app\.init\(\);/);
+      const statements = ts
+        .createPrinter({ removeComments: true })
+        .printFile(
+          ts.createSourceFile('http.ts', http, ts.ScriptTarget.Latest, true),
+        );
+      expect(statements).toMatch(
+        /configureHttpApp\(app\);\s*await beforeInit\?\.\(app\);\s*await app\.init\(\);/,
+      );
     });
+
+    it.each(['writer', 'environment'])(
+      'diagnostic HTTP hook refuses %s evidence capture before invoking the hook',
+      async (mode) => {
+        const previous = process.env.WIDGETS_EVIDENCE;
+        const hook = jest.fn();
+        let accepted: Awaited<ReturnType<typeof bootHttp>> | undefined;
+        try {
+          process.env.WIDGETS_EVIDENCE = mode === 'environment' ? '1' : '0';
+          const writer = new EvidenceWriter({
+            WIDGETS_EVIDENCE: mode === 'writer' ? '1' : '0',
+          });
+          let failure: unknown;
+          try {
+            accepted = await bootHttp(writer, hook);
+          } catch (error) {
+            failure = error;
+          }
+          expect(failure).toEqual(
+            new Error('diagnostic_http_hook_cannot_capture_release_evidence'),
+          );
+          expect(hook).not.toHaveBeenCalled();
+        } finally {
+          await accepted?.close();
+          if (previous === undefined) delete process.env.WIDGETS_EVIDENCE;
+          else process.env.WIDGETS_EVIDENCE = previous;
+        }
+      },
+    );
+
+    it.each(['canonical', 'diagnostic'])(
+      '%s HTTP boot preserves its capture boundary after a late evidence flag change',
+      async (mode) => {
+        const dir = fs.mkdtempSync(
+          path.join(os.tmpdir(), 'widgets-late-capture-'),
+        );
+        const previous = process.env.WIDGETS_EVIDENCE;
+        const env = { WIDGETS_EVIDENCE: '0', WIDGETS_EVIDENCE_DIR: dir };
+        let http: HttpHarness | undefined;
+        try {
+          process.env.WIDGETS_EVIDENCE = '0';
+          http = await bootHttp(
+            new EvidenceWriter(env),
+            mode === 'diagnostic' ? () => {} : undefined,
+          );
+          env.WIDGETS_EVIDENCE = '1';
+          process.env.WIDGETS_EVIDENCE = '1';
+          Logger.log(
+            JSON.stringify(mintLine('late-capture')),
+            WIDGET_MINT_PROVENANCE_CONTEXT,
+          );
+          expect(http.refusedMintProvenance()).toBe(1);
+          // Non-vacuous: the same real sink writes the refusal for canonical boot,
+          // whereas a diagnostic boot never gains capture from a later flag change.
+          expect(fs.readdirSync(dir)).toEqual(
+            mode === 'canonical' ? ['mint-provenance.jsonl'] : [],
+          );
+        } finally {
+          await http?.close();
+          if (previous === undefined) delete process.env.WIDGETS_EVIDENCE;
+          else process.env.WIDGETS_EVIDENCE = previous;
+          fs.rmSync(dir, { recursive: true, force: true });
+        }
+      },
+    );
   });
 
   describe('evidence manifest', () => {
@@ -1712,6 +1784,45 @@ describe('widgets-live harness', () => {
       expect(verified.report.violations).toEqual([]);
       expect(verified.status).toBe(0);
     });
+
+    it.each(
+      [
+        ['booking-followup-native.ts', 'V-OVERRIDE'],
+        ['service-price-chat-process.ts', 'V-MODEL-STUB'],
+        ['core-full-offline-fixtures.spec.ts', 'V-OVERRIDE'],
+      ].flatMap(([file, rule]) =>
+        ['direct', 'nested'].map((mode) => ({ file, rule, mode })),
+      ),
+    )(
+      'HAR-13 refuses actual diagnostic $file through a $mode clause import',
+      ({ file, rule, mode }) => {
+        expect(verifyScenario(cleanPair()).status).toBe(0);
+        const scenario = cleanPair();
+        const diagnostic = `test/widgets-diagnostics/support/${file}`;
+        scenario.files[diagnostic] = fs.readFileSync(
+          path.join(BACKEND, diagnostic),
+          'utf8',
+        );
+        if (mode === 'direct')
+          spec(scenario, `import '../widgets-diagnostics/support/${file}';`);
+        else {
+          spec(scenario, "import './helpers/diagnostic';");
+          scenario.files['test/widgets-live/helpers/diagnostic.ts'] =
+            `import '../../widgets-diagnostics/support/${file}';`;
+        }
+        const verified = verifyScenario(scenario);
+        expect(verified.status).toBe(1);
+        expect(verified.report.violations).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              test_id: 'P-1',
+              rule,
+              reason: expect.stringContaining(diagnostic) as string,
+            }),
+          ]),
+        );
+      },
+    );
 
     const successorPair = (): Scenario => {
       const sc = cleanPair();

@@ -430,7 +430,9 @@ const FIXTURE_WRITES = [
 /** Relative imports of one file, resolved to files under the source root (outside `support/` and `src/`). */
 const importsOf = (relative, text) => {
   const found = [];
-  for (const m of text.matchAll(/(?:\bfrom\s*|\brequire\s*\(\s*|\bimport\s*\(\s*)['"](\.{1,2}\/[^'"]+)['"]/g)) {
+  // Side-effect imports execute the same helper as a named import. They must
+  // participate in the transitive claim scan, including diagnostic fixtures.
+  for (const m of text.matchAll(/(?:\bfrom\s*|\brequire\s*\(\s*|\bimport\s*(?:\(\s*)?)['"](\.{1,2}\/[^'"]+)['"]/g)) {
     const base = path.posix.normalize(path.posix.join(path.posix.dirname(relative), m[1]));
     const candidate = [base, `${base}.ts`, `${base}.js`, `${base}/index.ts`].find((c) => readSource(c) !== null);
     if (candidate && !candidate.startsWith(`${SUPPORT_DIR}/`) && !candidate.startsWith('src/')) found.push(candidate);

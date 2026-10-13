@@ -506,7 +506,10 @@ describe('Owner service price [HTTP] [PostgreSQL] [synthetic YCLIENTS HTTP]', ()
     });
     return new Promise((resolveTurn, reject) => {
       const child = fork(
-        resolve(__dirname, 'support/service-price-chat-process.ts'),
+        resolve(
+          __dirname,
+          '../widgets-diagnostics/support/service-price-chat-process.ts',
+        ),
         [],
         {
           env,

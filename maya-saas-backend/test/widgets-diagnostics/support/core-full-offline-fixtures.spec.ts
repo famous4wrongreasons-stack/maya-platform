@@ -8,14 +8,19 @@ import {
   coreFullOfflineExternalFacts,
   coreFullOfflineRecipe,
   CORE_FULL_OFFLINE_STAFF_SERVICE_TURNS,
-} from './core-full-offline-fixtures';
-import type { FixtureContext } from './bootstrap';
-import type { CandidateSource, CorpusCase } from './current-candidate-sources';
-import { assertProofDatabase } from './proof-db-guard';
+} from '../../widgets-live/support/core-full-offline-fixtures';
+import type { FixtureContext } from '../../widgets-live/support/bootstrap';
+import type {
+  CandidateSource,
+  CorpusCase,
+} from '../../widgets-live/support/current-candidate-sources';
+import { assertProofDatabase } from '../../widgets-live/support/proof-db-guard';
 
 // Exercise setup against finite in-memory delegates. The actual proof DB guard
 // has its own tests; no URL is read and no connection is opened by this suite.
-jest.mock('./proof-db-guard', () => ({ assertProofDatabase: jest.fn() }));
+jest.mock('../../widgets-live/support/proof-db-guard', () => ({
+  assertProofDatabase: jest.fn(),
+}));
 
 const dataset = (file: string) =>
   JSON.parse(

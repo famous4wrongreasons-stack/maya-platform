@@ -5,7 +5,10 @@ import { AiCoreModelService } from '../../../src/ai-tools/ai-core-model.service'
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import request from 'supertest';
-import { assertNoEnvFiles, applyWidgetsLiveEnvironment } from './environment';
+import {
+  assertNoEnvFiles,
+  applyWidgetsLiveEnvironment,
+} from '../../widgets-live/support/environment';
 import type { AiCoreModelInput } from '../../../src/ai-tools/ai-core.types';
 
 type Input = {

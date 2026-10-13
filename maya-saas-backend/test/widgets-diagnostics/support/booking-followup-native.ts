@@ -10,11 +10,11 @@ import {
 } from '../../../src/common/domain.enums';
 import { CrmAdapterFactory } from '../../../src/crm/crm-adapter.factory';
 import { YclientsCRMAdapter } from '../../../src/crm/adapters/yclients-crm.adapter';
-import type { FixtureContext } from './bootstrap';
-import type { HttpHarness } from './http-bootstrap';
-import type { Fixtures } from './fixtures';
-import type { CandidateSource } from './current-candidate-sources';
-import { assertProofDatabase } from './proof-db-guard';
+import type { FixtureContext } from '../../widgets-live/support/bootstrap';
+import type { HttpHarness } from '../../widgets-live/support/http-bootstrap';
+import type { Fixtures } from '../../widgets-live/support/fixtures';
+import type { CandidateSource } from '../../widgets-live/support/current-candidate-sources';
+import { assertProofDatabase } from '../../widgets-live/support/proof-db-guard';
 
 type ProviderRow = {
   record_id: number;

@@ -17,7 +17,7 @@ import {
   bindCandidateSource,
   type CandidateSource,
 } from './support/current-candidate-sources';
-import { bindNativeFollowup } from './support/booking-followup-native';
+import { bindNativeFollowup } from '../widgets-diagnostics/support/booking-followup-native';
 import type { Fixtures } from './support/fixtures';
 import { assertProofDatabase } from './support/proof-db-guard';
 

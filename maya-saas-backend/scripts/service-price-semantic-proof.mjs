@@ -48,7 +48,7 @@ const files = [
   'maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts',
   'maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts',
   'maya-saas-backend/src/crm/crm.service.ts',
-  'maya-saas-backend/test/widgets-live/support/service-price-chat-process.ts',
+  'maya-saas-backend/test/widgets-diagnostics/support/service-price-chat-process.ts',
   'maya-saas-backend/test/widgets-live/service-price.live-spec.ts',
   'maya-carrier-react/test/service-price-http-fixture.test.mjs',
 ];

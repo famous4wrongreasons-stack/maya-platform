@@ -109,6 +109,13 @@ export async function bootHttp(
 ): Promise<HttpHarness> {
   assertProofDatabase(process.env);
   assertNoEnvFiles();
+  if (beforeInit) {
+    if (evidence.enabled || process.env.WIDGETS_EVIDENCE === '1')
+      throw new Error('diagnostic_http_hook_cannot_capture_release_evidence');
+    // A diagnostic middleware hook may affect ingress. It never acquires
+    // certification capture, even if the caller enables its writer later.
+    evidence = new EvidenceWriter(Object.freeze({}));
+  }
   const recorder = new WriteRecorder();
   let moduleRef: TestingModule;
   try {
