@@ -17,9 +17,11 @@ import {
   bindCandidateSource,
   type CandidateSource,
 } from './support/current-candidate-sources';
+import { bindNativeFollowup } from './support/booking-followup-native';
 import type { Fixtures } from './support/fixtures';
 import { assertProofDatabase } from './support/proof-db-guard';
 
+const nativeFollowup = process.env.JEST_BOOKING_NATIVE_FOLLOWUP === '1';
 const output = process.env.JEST_BOOKING_CONFIRMATION_OUTPUT!;
 if (!output)
   throw new Error(
@@ -34,11 +36,12 @@ if (
 const hash = (value: string) =>
   createHash('sha256').update(value).digest('hex');
 
-describe('Exact17:00 current React → canonical create/reschedule/cancel [SCRIPTED SEMANTICS / SYNTHETIC INTERNAL CRM]', () => {
+describe(`Exact17:00 current React → canonical create/reschedule/cancel [SCRIPTED SEMANTICS / ${nativeFollowup ? 'SYNTHETIC NATIVE YCLIENTS' : 'SYNTHETIC INTERNAL CRM'}]`, () => {
   let db: FixtureContext,
     http: HttpHarness,
     fx: Fixtures,
     source: CandidateSource;
+  let native: Awaited<ReturnType<typeof bindNativeFollowup>> | undefined;
   let modelDecisions = 0,
     externalCalls = 0,
     childClosed = false;
@@ -56,16 +59,6 @@ describe('Exact17:00 current React → canonical create/reschedule/cancel [SCRIP
     const config = http.app.get(ConfigService);
     config.set('EMAIL_LOGIN_ENABLED', 'true');
     config.set('EMAIL_AUTH_PROVIDER', 'debug');
-    jest.spyOn(globalThis, 'fetch').mockImplementation(() => {
-      externalCalls++;
-      throw new Error('No external/model fetch admitted');
-    });
-    jest
-      .spyOn(http.app.get(CrmAdapterFactory), 'create')
-      .mockImplementation(() => {
-        externalCalls++;
-        throw new Error('External provider forbidden');
-      });
     source = await bindCandidateSource(
       db,
       http,
@@ -87,6 +80,19 @@ describe('Exact17:00 current React → canonical create/reschedule/cancel [SCRIP
       where: { tenantId: source.tenant.id },
       data: { branchId: source.branchId },
     });
+    if (nativeFollowup) native = await bindNativeFollowup(db, http, fx, source);
+    else {
+      jest.spyOn(globalThis, 'fetch').mockImplementation(() => {
+        externalCalls++;
+        throw new Error('No external/model fetch admitted');
+      });
+      jest
+        .spyOn(http.app.get(CrmAdapterFactory), 'create')
+        .mockImplementation(() => {
+          externalCalls++;
+          throw new Error('External provider forbidden');
+        });
+    }
     jest
       .spyOn(http.app.get(AiCoreModelService), 'decide')
       .mockImplementation((input) => {
@@ -148,6 +154,13 @@ describe('Exact17:00 current React → canonical create/reschedule/cancel [SCRIP
   });
   afterAll(async () => {
     observations.checkpoints = checkpoints;
+    if (native)
+      observations.nativeProvider = {
+        transport: 'FINITE_SYNTHETIC_NATIVE_YCLIENTS',
+        requests: native.requests,
+        forbidden: native.forbidden,
+        ledger: await native.ledger(),
+      };
     observations.modelDecisions = modelDecisions;
     observations.externalCalls = externalCalls;
     observations.browserChildClosed = childClosed;
@@ -175,18 +188,39 @@ describe('Exact17:00 current React → canonical create/reschedule/cancel [SCRIP
         },
       }),
     ).toBe(1);
-    const staff = await db.prisma.internalProvider.findFirstOrThrow({
-      where: { tenantId: source.tenant.id, displayName: 'Артём' },
-    });
-    const service = await db.prisma.internalService.findFirstOrThrow({
-      where: { tenantId: source.tenant.id, name: 'Мужская стрижка' },
-    });
+    const staff = nativeFollowup
+      ? { id: '71', displayName: 'Артём' }
+      : await db.prisma.internalProvider.findFirstOrThrow({
+          where: { tenantId: source.tenant.id, displayName: 'Артём' },
+        });
+    const service = nativeFollowup
+      ? { id: '81', name: 'Мужская стрижка' }
+      : await db.prisma.internalService.findFirstOrThrow({
+          where: { tenantId: source.tenant.id, name: 'Мужская стрижка' },
+        });
+    const sourceBranch = nativeFollowup
+      ? (
+          (
+            await db.prisma.crmIntegration.findUniqueOrThrow({
+              where: { tenantId: source.tenant.id },
+            })
+          ).settingsJson as { branchBinding: { branchId: string } }
+        ).branchBinding.branchId
+      : (
+          await db.prisma.internalProvider.findUniqueOrThrow({
+            where: { id: staff.id },
+          })
+        ).branchId;
+    expect(sourceBranch).toBe(source.branchId);
     observations.fixture = {
       verifiedClient: true,
       serviceName: service.name,
       staffName: staff.displayName,
       start: source.startsAt,
-      branchBound: staff.branchId === source.branchId,
+      branchBound: sourceBranch === source.branchId,
+      calendar: nativeFollowup
+        ? 'NATIVE_YCLIENTS_SYNTHETIC_TRANSPORT'
+        : 'INTERNAL',
     };
     const stages = [
       'initial-slots',
@@ -242,6 +276,7 @@ describe('Exact17:00 current React → canonical create/reschedule/cancel [SCRIP
                 output,
                 email: source.user.email,
                 start: source.startsAt,
+                nativeSyntheticYclients: nativeFollowup,
               });
               return;
             }
@@ -253,7 +288,12 @@ describe('Exact17:00 current React → canonical create/reschedule/cancel [SCRIP
               where,
             });
             const executions = await db.prisma.actionExecution.findMany({
-              where,
+              where: {
+                ...where,
+                ...(native
+                  ? { capability: { in: native.bookingCapabilities } }
+                  : {}),
+              },
               orderBy: { createdAt: 'asc' },
             });
             const expectedExecutions =
@@ -270,6 +310,8 @@ describe('Exact17:00 current React → canonical create/reschedule/cancel [SCRIP
               appointmentId ??= row.id;
               expect(row.id).toBe(appointmentId);
               expect(row.mayaClientId).toBe(client.id);
+              expect(row.branchId).toBe(source.branchId);
+              if (native) expect(row.crmExternalId).toBe('5001');
               expect(row.staffExternalId).toBe(staff.id);
               expect(row.serviceIds).toEqual([service.id]);
               expect(row.startAt.toISOString()).toBe(
@@ -326,7 +368,9 @@ describe('Exact17:00 current React → canonical create/reschedule/cancel [SCRIP
               ].slice(0, expectedExecutions),
             );
             expect(externalCalls).toBe(0);
+            const providerState = await native?.checkpoint(index);
             checkpoints.push({
+              ...(providerState ? { providerState } : {}),
               name: message.name,
               receiptOutcome: message.receiptOutcome,
               appointment: appointments[0]

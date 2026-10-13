@@ -1,5 +1,5 @@
 // One explicit local UI acceptance: real React/auth/owners, scripted semantics,
-// synthetic internal calendar. Never consumes a model permit or provider key.
+// synthetic internal calendar or native YCLIENTS transport. Never consumes a model permit or provider key.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -32,7 +32,7 @@ async function main() {
   const start = receive('start'); process.send({ type: 'ready' });
   const input = await start, output = path.join(input.output, 'current-react');
   fs.mkdirSync(output, { mode: 0o700 });
-  const report = { contract: 'maya.exact-booking-followup-browser/1', status: 'running', realReactAndAuth: true, scriptedModel: true, syntheticInternalCalendar: true, realModelCalls: 0, realProviderCalls: 0, steps: [], blocked: [] };
+  const report = { contract: 'maya.exact-booking-followup-browser/1', status: 'running', realReactAndAuth: true, scriptedModel: true, syntheticInternalCalendar: input.nativeSyntheticYclients !== true, nativeSyntheticYclients: input.nativeSyntheticYclients === true, realModelCalls: 0, realProviderCalls: 0, steps: [], blocked: [] };
   const save = () => fs.writeFileSync(path.join(output, 'browser.json'), JSON.stringify(report, null, 2) + '\n', { mode: 0o600 });
   let browser, chrome, profile, dev, page, guard, closing;
   const cleanup = () => closing ??= (async () => {

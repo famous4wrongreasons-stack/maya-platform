@@ -9,7 +9,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const { values } = parseArgs({ options: { run: { type: 'boolean' }, output: { type: 'string' }, 'browser-only': {type: 'boolean', default: false}, 'exact-followup': { type: 'boolean', default: false } } });
+const { values } = parseArgs({ options: { run: { type: 'boolean' }, output: { type: 'string' }, 'browser-only': {type: 'boolean', default: false}, 'exact-followup': { type: 'boolean', default: false }, 'native-followup': { type: 'boolean', default: false } } });
+if (values['native-followup']) assert.equal(values['exact-followup'], true, 'Native lifecycle requires exact-followup');
 assert.equal(values.run, true, 'Explicit --run and parent heavy-slot authorization required');
 assert.ok(values.output && path.isAbsolute(values.output) && !fs.existsSync(values.output), 'New absolute output required');
 for (const name of ['.env', '.env.local']) assert.equal(fs.existsSync(path.join(backend, name)), false);
@@ -23,7 +24,7 @@ await new Promise((resolve) => portServer.close(resolve));
 const database = 'maya_widget_gate_proof_bookingconfirmation_' + randomBytes(6).toString('hex');
 const env = { DATABASE_URL: `postgresql://booking_confirmation_proof@127.0.0.1:${port}/${database}`, NODE_ENV: 'test', NODE_OPTIONS: '--max-old-space-size=3072', LANG: 'C', TZ: 'UTC' };
 for (const key of ['PATH', 'HOME', 'TMPDIR']) if (process.env[key]) env[key] = process.env[key];
-const manifest = { kind: 'booking-confirmation-http-react-local-proof', browserOnly: values['browser-only'], cluster, database, port, status: 'running', completed: [], syntheticModel: true, syntheticInternalCatalog: true, syntheticLocalProvider: true, externalProviderAcceptance: false, realModelAcceptance: false, certificate: 'NOT_ISSUED', resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, jestWorkers: 1, browserCount: 1 } };
+const manifest = { kind: 'booking-confirmation-http-react-local-proof', browserOnly: values['browser-only'], cluster, database, port, status: 'running', completed: [], syntheticModel: true, syntheticInternalCatalog: !values['native-followup'], nativeSyntheticYclients: values['native-followup'], syntheticLocalProvider: true, externalProviderAcceptance: false, realModelAcceptance: false, certificate: 'NOT_ISSUED', resources: { nodeHeapMb: 3072, pgSharedBuffersMb: 64, jestWorkers: 1, browserCount: 1 } };
 let sourceHashes;
 let sourceScopes;
 const readSourceHashes = scopes => {
@@ -88,7 +89,7 @@ async function run(name, command, args, extra = {}, cwd = backend) {
 }
 const pg = (name) => path.join(pgBin, name), pgArgs = ['-D', cluster, '-w', '-t', '30'];
 const probeName = values['exact-followup'] ? 'booking-followup-react' : 'booking-confirmation-react';
-const probe = () => run('browser', process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--testRegex', probeName + '\\.probe-spec\\.ts$', '--runInBand', '--runTestsByPath', 'test/widgets-live/' + probeName + '.probe-spec.ts', '--json', '--outputFile=' + path.join(values.output, 'browser-jest.json')], { JEST_BOOKING_CONFIRMATION_OUTPUT: values.output });
+const probe = () => run('browser', process.execPath, ['node_modules/jest/bin/jest.js', '--config', 'test/jest-widgets-live.json', '--testRegex', probeName + '\\.probe-spec\\.ts$', '--runInBand', '--runTestsByPath', 'test/widgets-live/' + probeName + '.probe-spec.ts', '--json', '--outputFile=' + path.join(values.output, 'browser-jest.json')], { JEST_BOOKING_CONFIRMATION_OUTPUT: values.output, ...(values['native-followup'] ? { JEST_BOOKING_NATIVE_FOLLOWUP: '1' } : {}) });
 let startAttempted = false;
 save();
 try {
