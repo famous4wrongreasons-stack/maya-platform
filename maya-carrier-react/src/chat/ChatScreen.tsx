@@ -411,9 +411,6 @@ export function ChatScreen({
   const ideasReturnScroll = useRef(0);
   const ideasWasOpen = useRef(false);
   const ideasDetailOpen = ideasOpen && (ideasView.detail !== null || ideasView.reading);
-  const reportReturnScroll = useRef(0);
-  const reportWasOpen = useRef(false);
-  const reportOpen = readsOpen && readsView.detail !== null;
 
   useLayoutEffect(() => {
     const lane = laneRef.current;
@@ -423,15 +420,6 @@ export function ChatScreen({
     }
     workspaceWasOpen.current = workspaceOpen;
   }, [workspaceOpen, shellView.workspace]);
-
-  useLayoutEffect(() => {
-    const lane = laneRef.current;
-    if (lane && readsOpen && shellView.workspace === 'library') {
-      if (reportOpen) lane.scrollTop = 0;
-      else if (reportWasOpen.current) lane.scrollTop = reportReturnScroll.current;
-    }
-    reportWasOpen.current = reportOpen;
-  }, [reportOpen, readsOpen, shellView.workspace]);
 
   useLayoutEffect(() => {
     const lane = laneRef.current;
@@ -725,7 +713,7 @@ export function ChatScreen({
               : `calc(env(safe-area-inset-top, 0px) + 84px) 18px calc(env(safe-area-inset-bottom, 0px) + ${composerHeight + 62}px)`,
           }}
         >
-          {ideasOpen ? <IdeasPanel view={ideasView} port={{ ...ideas, read: key => { ideasReturnScroll.current = laneRef.current?.scrollTop ?? 0; return ideas.read(key); } }} close={() => { ideas.close(); window.requestAnimationFrame(focusComposer); }} /> : readsOpen ? <WorkspaceReadsPanel key={shellView.workspace} view={readsView} port={{ ...workspaceReads, read: key => { reportReturnScroll.current = laneRef.current?.scrollTop ?? 0; return workspaceReads.read(key); } }} close={() => { workspaceReads.close(); window.requestAnimationFrame(focusComposer); }} /> : tasksOpen ? <OwnTasksPanel view={tasksView} port={ownTasks} close={() => { ownTasks.close(); window.requestAnimationFrame(focusComposer); }} /> : privacyOpen ? (
+          {ideasOpen ? <IdeasPanel view={ideasView} port={{ ...ideas, read: key => { ideasReturnScroll.current = laneRef.current?.scrollTop ?? 0; return ideas.read(key); } }} close={() => { ideas.close(); window.requestAnimationFrame(focusComposer); }} /> : readsOpen ? <WorkspaceReadsPanel key={shellView.workspace} view={readsView} port={workspaceReads} close={() => { workspaceReads.close(); window.requestAnimationFrame(focusComposer); }} /> : tasksOpen ? <OwnTasksPanel view={tasksView} port={ownTasks} close={() => { ownTasks.close(); window.requestAnimationFrame(focusComposer); }} /> : privacyOpen ? (
             <>
             <TelegramLinkPanel view={telegramLinkView} t={t} start={() => void telegramLink.start()} cancel={() => telegramLink.cancel()} />
             <PrivacyPanel

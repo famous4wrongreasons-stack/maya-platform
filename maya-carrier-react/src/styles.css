@@ -237,7 +237,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .companion-read-meta { display:block; font-size:12px; line-height:1.6; color:#65696f; }
 .companion-feed-dot { display:inline-block; height:6px; width:6px; margin-right:6px; border-radius:50%; background:#adb1b7; vertical-align:middle; }
 .companion-feed-dot.is-unread { background:#1686ef; }
-.companion-feed-list h2,.companion-report-reader h2 { font-size:18px; font-weight:600; line-height:1.4; margin:10px 0; }
+.companion-feed-list h2 { font-size:18px; font-weight:600; line-height:1.4; margin:10px 0; }
 .companion-feed-body,.companion-report-body { font-size:14px; line-height:1.65; white-space:pre-wrap; overflow-wrap:anywhere; }
 .companion-feed-body { color:#65696f; }
 .companion-library-tools { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; }
@@ -253,7 +253,19 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .companion-report-list.is-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
 .companion-report-list.is-grid button { flex-direction:column; align-items:flex-start; }
 .companion-read-back { border:0; background:transparent; padding:12px 0; min-height:44px; font:inherit; font-size:14px; color:#0068ed; cursor:pointer; }
-.companion-report-reader { padding-top:12px; }
+/* Owner document reference: a retained report above the unchanged library. */
+.companion-report-sheet { position:fixed; inset:auto 0; top:calc(var(--maya-viewport-top, 0px) + var(--maya-viewport-height, 100dvh)); transform:translateY(-100%); width:min(100%,560px); max-width:100%; height:81%; height:calc(var(--maya-viewport-height, 100dvh) * .81); max-height:calc(var(--maya-viewport-height, 100dvh) - 24px); margin:0 auto; padding:0; border:0; border-radius:22px 22px 0 0; background:#fff; color:#191a1b; box-shadow:0 -16px 48px rgb(0 0 0 /20%); overflow:hidden; }
+.companion-report-sheet[open] { display:flex; flex-direction:column; }
+.companion-report-sheet::backdrop { background:rgb(0 0 0 /34%); }
+.companion-report-handle { flex:none; height:30px; display:grid; place-items:center; }
+.companion-report-handle span { width:42px; height:5px; border-radius:999px; background:#c9c9c4; }
+.companion-report-heading { flex:none; max-height:45%; overflow:auto; display:grid; grid-template-columns:minmax(0,1fr) 44px; gap:4px 10px; align-items:start; padding:0 18px 14px; border-bottom:1px solid #e6e7e9; }
+.companion-report-heading h2 { margin:0; padding:8px 0; font-size:18px; line-height:1.35; font-weight:650; overflow-wrap:anywhere; }
+.companion-report-heading p { grid-column:1 / -1; margin:0; overflow-wrap:anywhere; }
+.companion-report-reader { min-height:0; overflow:auto; overscroll-behavior:contain; padding:8px 18px calc(24px + env(safe-area-inset-bottom, 0px)); }
+.companion-report-reader .companion-read-back { text-align:left; }
+.companion-report-sheet :focus-visible { outline:2px solid #0068ed; outline-offset:2px; }
+.companion-report-heading h2:focus { outline:none; }
 @media (max-width:359px) { .companion-report-list.is-grid { grid-template-columns:minmax(0,1fr); } }
 
 /* Canonical personal A23 task form, using Companion surfaces and existing type. */

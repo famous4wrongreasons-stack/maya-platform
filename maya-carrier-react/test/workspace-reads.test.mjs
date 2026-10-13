@@ -33,3 +33,13 @@ test('only unread feed rows offer explicit acknowledgement; pending blocks both 
  assert.ok(render({unreadOnly:true}).includes('В этой части ленты нет непрочитанных'));
  assert.ok(render({notice:'Не удалось подтвердить отметку.',possiblyCapped:true}).includes('Не удалось подтвердить отметку. Показана часть ленты'));
 });
+
+test('report sheet is labelled, inert on render and driven only by canonical detail',()=>{
+ const row={key:'private-run',title:'Сохранённый отчёт',type:'daily_report',period:'2026-10-12'};
+ const html=render({workspace:'library',reports:[row],detail:{phase:'loading',title:row.title}});
+ assert.match(html,/<dialog[^>]*aria-modal="true"[^>]*aria-labelledby="[^"]+"[^>]*aria-busy="true"/);
+ assert.doesNotMatch(html,/<dialog[^>]* open|companion-report-body|private-run/);
+ assert.match(html,/companion-report-list/);assert.match(html,/Открываю отчёт…/);
+ assert.match(html,/aria-label="Закрыть отчёт"/);assert.match(html,/← К списку отчётов/);
+ assert.doesNotMatch(render({workspace:'library',reports:[row]}),/companion-report-heading|companion-report-body/);
+});

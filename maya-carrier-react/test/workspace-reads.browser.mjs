@@ -30,6 +30,7 @@ const markNetwork=[];
 let browser, page, origin, mode='normal', pending=null, markMode='normal', marked=false, pendingMark=null;
 const reportId='20000000-0000-4000-8000-000000000001', otherId='20000000-0000-4000-8000-000000000002';
 const summary={runId:reportId,reportType:'daily_report',periodLocalDate:'2026-10-12',title:'Итоги дня: всё важное рядом'};
+const longTitle=('Итоги дня: '+ 'очень подробный сохранённый отчёт '.repeat(6)).slice(0,160);
 const reportBody={contract:'maya.owner-report-snapshot/1',...summary,timezone:'Europe/Moscow',content:{title:summary.title,bodyText:'Это сохранённый отчёт для учебного салона.\n\nДень завершён. Команда подготовила расписание на завтра и проверила остатки материалов.\n\nЭто искусственные данные: они не относятся к реальному салону. <script>Никакого исполнения</script>',payload:{private:'MUST NOT REACH DOM'},deepLink:'https://blocked.invalid'}};
 const feedBody=()=>({items:mode==='empty'?[]:Array.from({length:mode==='cap'?50:2},(_,i)=>({id:'feed-'+i,type:'owner_alert',title:i===0?'Расписание на завтра готово':'Итоги дня уже в библиотеке',body_text:i===0?'Команда завершила подготовку. Время мастеров сверено — можно спокойно планировать следующий день.':'Сохранённый обзор доступен получателям отчёта. Это учебный пример, без данных салона.',created_at:'2026-10-13T09:00:00.000Z',read_at:i===0&&!marked?null:'2026-10-13T10:00:00.000Z',payload:{private:'MUST NOT REACH DOM'},deep_link:'https://blocked.invalid'}))});
 const json=(res,value,status=200)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
@@ -53,11 +54,13 @@ const server=http.createServer(async(req,res)=>{
       if(mode==='malformed')return json(res,{items:[{}]});
       return json(res,feedBody());
     }
-    if(req.url==='/api/owner-reports')return json(res,{reports:mode==='empty'?[]:mode==='long'? [...Array.from({length:20},(_,i)=>({...summary,runId:'30000000-0000-4000-8000-'+String(i+1).padStart(12,'0'),title:'Сохранённый отчёт '+i})),summary]:[summary,{...summary,runId:otherId,title:'Анализ недели'}]});
+    if(req.url==='/api/owner-reports')return json(res,{reports:mode==='empty'?[]:mode==='long-title'?[{...summary,title:longTitle}]:mode==='long'? [...Array.from({length:20},(_,i)=>({...summary,runId:'30000000-0000-4000-8000-'+String(i+1).padStart(12,'0'),title:'Сохранённый отчёт '+i})),summary]:[summary,{...summary,runId:otherId,title:'Анализ недели'}]});
     if(req.url==='/api/owner-reports/'+reportId+'/snapshot'){
       if(mode==='delayed'){pending=res;return;}
       if(mode==='denied')return json(res,{},403);
       if(mode==='substituted')return json(res,{...reportBody,runId:otherId});
+      if(mode==='long-title')return json(res,{...reportBody,content:{...reportBody.content,title:longTitle}});
+      if(mode==='long-body')return json(res,{...reportBody,content:{...reportBody.content,bodyText:Array.from({length:40},(_,i)=>'Учебный раздел '+(i+1)+'. '+reportBody.content.bodyText).join('\n\n')}});
       return json(res,reportBody);
     }
     if(req.url==='/api/widgets/resolve')return json(res,{contract:'maya.widget.resolve/1',tenant_bound:true,widgets:[]});
@@ -77,7 +80,7 @@ const screenshot=async name=>{
   const {data}=await page.send('Page.captureScreenshot',{format:'png'});
   fs.writeFileSync(path.join(out,name+'.png'),Buffer.from(data,'base64'));report.screenshots.push(name+'.png');
 };
-const size=async(width,height)=>page.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
+const size=async(width,height)=>{await page.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});await page.eval('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');};
 try {
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));origin='http://127.0.0.1:'+server.address().port;
   browser=await Browser.launch('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',[
@@ -128,31 +131,66 @@ try {
   }
   await size(393,852);await readReport();
   await check("document.querySelector('.companion-report-body')?.textContent.includes('День завершён')",'exact snapshot opens as retained report');
-  await check("document.querySelector('.companion-report-reader').textContent.includes('Europe/Moscow') && document.querySelector('.companion-report-reader').textContent.includes('12.10.2026')",'canonical local period/timezone preserved');
+  await check("document.querySelector('.companion-report-sheet').textContent.includes('Europe/Moscow') && document.querySelector('.companion-report-sheet').textContent.includes('12.10.2026')",'canonical local period/timezone preserved');
   await check("!document.querySelector('.companion-report-reader script,.companion-report-reader a') && !document.body.textContent.includes('MUST NOT REACH DOM')",'plain text, no payload link or executable HTML');
-  await screenshot('report-393');
-  await page.eval(`document.querySelectorAll('.companion-reads h2,.companion-reads p,.companion-reads button').forEach(el=>{el.dataset.previousFontSize=el.style.fontSize;el.style.fontSize=(parseFloat(getComputedStyle(el).fontSize)*2)+'px'})`);
-  await check("document.querySelector('.maya-chat-lane').scrollWidth<=document.querySelector('.maya-chat-lane').clientWidth",'reader wraps at 200 percent text');await screenshot('report-large-text');
+  await check("document.querySelector('.companion-report-sheet').matches(':modal') && document.querySelectorAll('.companion-report-list li').length===2",'native modal keeps underlying library mounted');
+  await check("document.activeElement===document.querySelector('.companion-report-heading h2')",'sheet heading receives focus');
+  await page.focus("document.querySelector('#maya-reads-heading')");
+  await check("document.activeElement===document.querySelector('.companion-report-heading h2')",'background library cannot take modal focus');
+  await page.focus("document.querySelector('.companion-navigation button')");
+  await check("document.activeElement===document.querySelector('.companion-report-heading h2')",'background navigation cannot take modal focus');
+  await page.press('Tab');await check("document.activeElement.getAttribute('aria-label')==='Закрыть отчёт'",'Tab enters close control');
+  await page.press('Tab',{shift:true});await check("document.activeElement.textContent==='← К списку отчётов'",'reverse Tab wraps inside sheet');
+  await page.press('Tab');await check("document.activeElement.getAttribute('aria-label')==='Закрыть отчёт'",'forward Tab wraps inside sheet');
+  for(const [width,height] of [[393,852],[320,740],[427,952],[1280,900],[393,400]]){
+    await size(width,height);
+    await check("(()=>{const d=document.querySelector('.companion-report-sheet'),r=d.getBoundingClientRect();return r.x>=0 && r.right<=innerWidth && r.top>=0 && r.bottom<=innerHeight+1 && d.scrollWidth<=d.clientWidth && document.querySelector('.companion-report-reader').scrollWidth<=document.querySelector('.companion-report-reader').clientWidth})()",'sheet fits visible viewport '+width+'x'+height);
+    await screenshot('report-'+width+'x'+height);
+  }
+  await size(393,852);
+  await page.eval(`document.querySelectorAll('.companion-report-sheet h2,.companion-report-sheet p,.companion-report-sheet button').forEach(el=>{el.dataset.previousFontSize=el.style.fontSize;el.style.fontSize=(parseFloat(getComputedStyle(el).fontSize)*2)+'px'})`);
+  await check("document.querySelector('.companion-report-reader').scrollWidth<=document.querySelector('.companion-report-reader').clientWidth && document.querySelector('.companion-report-reader').clientHeight>=44",'reader wraps at 200 percent text');await screenshot('report-large-text');
   await page.eval(`document.querySelectorAll('[data-previous-font-size]').forEach(el=>{el.style.fontSize=el.dataset.previousFontSize;delete el.dataset.previousFontSize})`);
-  await page.focus("document.querySelector('#maya-reads-heading')");await page.press('Escape');await loadedLibrary();
+  await page.press('Escape');await loadedLibrary();
+  await check("!document.querySelector('.companion-report-sheet').open && document.activeElement.closest('.companion-report-list') && document.activeElement.textContent.includes('Итоги дня')",'Escape closes canonical detail and restores exact opener');
   await check("document.querySelector('.companion-library-tools button[aria-pressed=true]').textContent==='Сетка'",'back preserves library view');
   await page.focus("document.querySelector('#maya-reads-heading')");await page.press('Escape');
   await check(`!document.querySelector('.companion-reads') && document.activeElement===${composer} && ${composer}.value==='Черновик — сохранить'`,'Escape returns chat focus/draft');
   await check("document.querySelectorAll('[data-chat-message]').length===2",'no report insertion or timeline duplication');
   mode='long';await open('Библиотека');await check("document.querySelectorAll('.companion-report-list li').length===21",'long library loaded');
-  await page.eval("document.querySelector('.maya-chat-lane').scrollTop=1000");await readReport();
-  await check("!!document.querySelector('.companion-report-body') && document.querySelector('.maya-chat-lane').scrollTop===0",'report starts at heading from scrolled library');
-  await click('← К списку отчётов');await check("document.querySelectorAll('.companion-report-list li').length===21 && document.querySelector('.maya-chat-lane').scrollTop>0",'back restores library scroll');await close();
+  await page.eval("[...document.querySelectorAll('.companion-report-list button')].find(b=>b.textContent.includes('Итоги дня')).scrollIntoView({block:'center'})");
+  const libraryScroll=await page.eval("document.querySelector('.maya-chat-lane').scrollTop");report.libraryScrollBeforeSheet=libraryScroll;assert.ok(libraryScroll>0);
+  await readReport();
+  await check(`!!document.querySelector('.companion-report-body') && document.querySelector('.maya-chat-lane').scrollTop===${libraryScroll} && document.querySelector('.companion-report-reader').scrollTop===0`,'sheet starts at top without moving scrolled library');
+  await click('← К списку отчётов');await check(`!document.querySelector('.companion-report-sheet').open && document.querySelectorAll('.companion-report-list li').length===21 && document.querySelector('.maya-chat-lane').scrollTop===${libraryScroll} && !!document.activeElement.closest('.companion-report-list')`,'back restores exact list item and unchanged library scroll');
+  mode='long-body';await readReport();await check("document.querySelector('.companion-report-body')?.textContent.includes('Учебный раздел 40')",'long canonical text loaded');
+  await page.focus("document.querySelector('.companion-report-heading button')");await page.press('Tab');
+  await check("document.activeElement===document.querySelector('.companion-report-reader')",'report body is reachable for keyboard scrolling');
+  await page.send('Input.dispatchKeyEvent',{type:'rawKeyDown',key:'PageDown',code:'PageDown',windowsVirtualKeyCode:34});
+  await page.send('Input.dispatchKeyEvent',{type:'keyUp',key:'PageDown',code:'PageDown',windowsVirtualKeyCode:34});
+  await check("document.querySelector('.companion-report-reader').scrollTop>0",'PageDown scrolls long report through native keyboard event');
+  await check(`document.querySelector('.companion-report-reader').scrollTop>0 && document.querySelector('.maya-chat-lane').scrollTop===${libraryScroll}`,'long report scroll is independent of library');await screenshot('report-long-scroll');
+  await click('Закрыть отчёт');await check(`!document.querySelector('.companion-report-sheet').open && document.querySelector('.maya-chat-lane').scrollTop===${libraryScroll}`,'visible close preserves library position');
+  mode='normal';await readReport();await check("!!document.querySelector('.companion-report-body') && document.querySelector('.companion-report-reader').scrollTop===0",'reopened report begins at top with no stale scroll');await click('Закрыть отчёт');
+  mode='long-title';await click('Обновить список');await check("document.querySelectorAll('.companion-report-list li').length===1",'maximum-length title fixture loaded');await readReport();
+  await size(320,740);
+  await page.eval(`document.querySelectorAll('.companion-report-sheet h2,.companion-report-sheet p,.companion-report-sheet button').forEach(el=>{el.dataset.previousFontSize=el.style.fontSize;el.style.fontSize=(parseFloat(getComputedStyle(el).fontSize)*2)+'px'})`);
+  await check("document.querySelector('.companion-report-heading h2').textContent.length===160 && document.querySelector('.companion-report-reader').clientHeight>=44 && document.querySelector('.companion-report-sheet').scrollWidth<=320 && document.querySelector('.companion-report-heading').scrollWidth<=document.querySelector('.companion-report-heading').clientWidth",'maximum canonical title leaves body reachable at 320 and 200 percent text');
+  await screenshot('report-long-title-320-large-text');
+  await click('Закрыть отчёт');await check("!document.querySelector('.companion-report-sheet').open",'close remains reachable with maximum title and enlarged text');await size(393,852);await close();
   mode='denied';await open('Лента');await check("document.querySelector('.companion-tasks-status').textContent.includes('недоступны') && !document.querySelector('.companion-feed-list li,.companion-tasks-empty')",'feed denial distinct from empty');await screenshot('feed-denied');
   mode='malformed';await click('Обновить список');await check("document.querySelector('.companion-tasks-status').textContent.includes('Не удалось проверить')",'malformed feed refused');
   mode='cap';await click('Обновить список');await check("document.querySelectorAll('.companion-feed-list li').length===50 && document.querySelector('.companion-tasks-status').textContent.includes('50 последних')",'feed cap explicit');
   await page.eval("document.querySelector('.maya-chat-lane').scrollTop=900");
   mode='normal';await open('Библиотека');await loadedLibrary();await check("document.querySelector('.maya-chat-lane').scrollTop===0",'workspace switch resets scroll');
   mode='substituted';await readReport();await check("document.querySelector('.companion-tasks-status').textContent.includes('Не удалось проверить') && !document.querySelector('.companion-report-body,.companion-report-list li')",'substituted snapshot clears cached titles');
+  await check("!document.querySelector('.companion-report-sheet').open && document.activeElement.id==='maya-reads-heading'",'substitution closes modal and focuses refusal');
   mode='normal';await click('Обновить список');await loadedLibrary();mode='denied';await readReport();await check("document.querySelector('.companion-tasks-status').textContent.includes('недоступны') && !document.querySelector('.companion-report-body,.companion-report-list li')",'authority denial clears library');
+  await check("!document.querySelector('.companion-report-sheet').open && document.activeElement.id==='maya-reads-heading'",'denial closes modal without retaining report');
   mode='normal';await click('Обновить список');await loadedLibrary();mode='delayed';await readReport();await check("document.querySelector('.companion-report-reader [role=status]').textContent==='Открываю отчёт…'",'pending detail visible');
+  await check("document.querySelector('.companion-report-sheet').matches(':modal') && document.querySelector('.companion-report-sheet').getAttribute('aria-busy')==='true' && !document.querySelector('.companion-report-body')",'loading sheet shows no previous body');
   await click('← К списку отчётов');await loadedLibrary();if(pending){json(pending,reportBody);pending=null;}
-  await check("!document.querySelector('.companion-report-body')",'late report cannot reopen reader');
+  await check("!document.querySelector('.companion-report-body') && !document.querySelector('.companion-report-sheet').open",'late report cannot reopen reader');
   mode='empty';await click('Обновить список');await check("document.querySelector('.companion-tasks-empty h2').textContent.includes('В этой части библиотеки')",'bounded empty library honest');await screenshot('library-empty');
   await close();await open('Лента');await check("document.querySelector('.companion-tasks-empty h2').textContent==='В этой части ленты пока пусто'",'successful feed empty distinct');
 
@@ -204,7 +242,7 @@ try {
   report.checks.push('zero unexpected API/network/CSP/JS errors');report.status='PASS';
 } catch(error) {
   report.status='FAIL';report.failure=error.message;report.syntheticWire=wire;report.markNetwork=markNetwork;
-  if(page){await screenshot('failure').catch(()=>{});report.exceptions=page.exceptions;report.issues=page.issues;}
+  if(page){await screenshot('failure').catch(()=>{});report.exceptions=page.exceptions;report.issues=page.issues;report.failureLayout=await page.eval("({laneScroll:document.querySelector('.maya-chat-lane')?.scrollTop,sheetOpen:document.querySelector('.companion-report-sheet')?.open,activeTag:document.activeElement.tagName,activeText:document.activeElement.textContent,activeClass:document.activeElement.className,libraryCount:document.querySelectorAll('.companion-report-list li').length})");}
   process.exitCode=1;
 } finally {
   if(browser)await browser.close();
