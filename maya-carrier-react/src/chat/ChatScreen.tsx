@@ -20,8 +20,9 @@ import type {
   ConversationView,
   TimelineItemView,
 } from '../../../maya-chat-shell/src/shell/ports.ts';
-import { ownTasks, conversation, goodsPhoto, privacy, session, telegramLink, voice, widgets } from '../runtime/compose.ts';
+import { workspaceReads, ownTasks, conversation, goodsPhoto, privacy, session, telegramLink, voice, widgets } from '../runtime/compose.ts';
 import { usePortView } from '../runtime/useView.ts';
+import { WorkspaceReadsPanel } from './WorkspaceReadsPanel.tsx';
 import { OwnTasksPanel } from './OwnTasksPanel.tsx';
 import { ReceiptRefresh } from '../widgets/ReceiptRefresh.tsx';
 import { WidgetCard } from '../widgets/WidgetCard.tsx';
@@ -379,7 +380,10 @@ export function ChatScreen({
   const goodsPhotoView = usePortView(goodsPhoto);
   const shellView = usePortView(widgets);
   const privacyOpen = shellView.primary === 'shell.privacy';
+  const workspaceOpen = companion && shellView.workspace !== undefined;
   const tasksOpen = companion && shellView.workspace === 'tasks';
+  const readsOpen = companion && (shellView.workspace === 'feed' || shellView.workspace === 'library');
+  const readsView = usePortView(workspaceReads);
   const tasksView = usePortView(ownTasks);
   const voiceView = usePortView(voice);
   const sessionView = usePortView(session);
@@ -396,17 +400,29 @@ export function ChatScreen({
   const newestUserRef = useRef<ItemId>(null);
   const awaitingRef = useRef<{ itemId: string; text: string } | null>(null);
   const localEpochRef = useRef(privacyView.localEpoch);
-  const taskReturnScroll = useRef(0);
-  const tasksWasOpen = useRef(false);
+  const workspaceReturnScroll = useRef(0);
+  const workspaceWasOpen = useRef(false);
+  const reportReturnScroll = useRef(0);
+  const reportWasOpen = useRef(false);
+  const reportOpen = readsOpen && readsView.detail !== null;
 
   useLayoutEffect(() => {
     const lane = laneRef.current;
     if (lane) {
-      if (tasksOpen) lane.scrollTop = 0;
-      else if (tasksWasOpen.current) lane.scrollTop = taskReturnScroll.current;
+      if (workspaceOpen) lane.scrollTop = 0;
+      else if (workspaceWasOpen.current) lane.scrollTop = workspaceReturnScroll.current;
     }
-    tasksWasOpen.current = tasksOpen;
-  }, [tasksOpen]);
+    workspaceWasOpen.current = workspaceOpen;
+  }, [workspaceOpen, shellView.workspace]);
+
+  useLayoutEffect(() => {
+    const lane = laneRef.current;
+    if (lane && readsOpen && shellView.workspace === 'library') {
+      if (reportOpen) lane.scrollTop = 0;
+      else if (reportWasOpen.current) lane.scrollTop = reportReturnScroll.current;
+    }
+    reportWasOpen.current = reportOpen;
+  }, [reportOpen, readsOpen, shellView.workspace]);
 
   // Freeze/sign-out invalidates local drafts and DOM selection before the next paint.
   // The epoch is only a clearing signal; the runtime owns erasure and its result.
@@ -482,13 +498,13 @@ export function ChatScreen({
   // if they had scrolled up.
   useLayoutEffect(() => {
     const lane = laneRef.current;
-    if (lane === null || tasksOpen) return;
+    if (lane === null || workspaceOpen) return;
     let newest: ItemId = null;
     for (const item of view.items) if (item.kind === 'user') newest = item.id;
     const ownTurn = newest !== null && newest !== newestUserRef.current;
     newestUserRef.current = newest;
     if (ownTurn || stickRef.current) lane.scrollTop = lane.scrollHeight;
-  }, [view, tasksOpen]);
+  }, [view, workspaceOpen]);
 
   // dom/timeline.ts captures the focused element before it redraws and restores it after. React
   // reconciliation will not: when the element holding focus is removed — a retry button becoming a
@@ -505,9 +521,9 @@ export function ChatScreen({
 
   const onLaneScroll = useCallback(() => {
     const lane = laneRef.current;
-    if (lane === null || tasksOpen) return;
+    if (lane === null || workspaceOpen) return;
     stickRef.current = lane.scrollHeight - lane.scrollTop - lane.clientHeight <= STICK_TO_END_PX;
-  }, [tasksOpen]);
+  }, [workspaceOpen]);
 
   return (
     <div className={companion ? 'maya-companion-chat' : undefined} style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: t.bg }}>
@@ -533,7 +549,9 @@ export function ChatScreen({
           tenantName={sessionView.signedIn ? sessionView.display.tenantName : null}
           privacyOpen={privacyOpen} openPrivacy={() => widgets.navigate('shell.privacy')}
           openPhoto={() => { widgets.navigate('shell.root'); goodsPhoto.open(); }}
-          openTasks={() => { taskReturnScroll.current = laneRef.current?.scrollTop ?? 0; voice.cancel(); ownTasks.open(); }} photoEnabled={view.composer.enabled && !view.inFlight}
+          openTasks={() => { if (!workspaceOpen) workspaceReturnScroll.current = laneRef.current?.scrollTop ?? 0; voice.cancel(); ownTasks.open(); }}
+          openFeed={() => { if (!workspaceOpen) workspaceReturnScroll.current = laneRef.current?.scrollTop ?? 0; voice.cancel(); workspaceReads.openFeed(); }}
+          openLibrary={() => { if (!workspaceOpen) workspaceReturnScroll.current = laneRef.current?.scrollTop ?? 0; voice.cancel(); workspaceReads.openLibrary(); }} photoEnabled={view.composer.enabled && !view.inFlight}
           state={mascot.state} event={mascot.event} greet={mascot.greet}
         /> : (
         <div
@@ -637,9 +655,9 @@ export function ChatScreen({
           ref={laneRef}
           tabIndex={privacyOpen ? -1 : undefined}
           onScroll={onLaneScroll}
-          role={privacyOpen || tasksOpen ? 'region' : 'log'}
-          aria-live={privacyOpen || tasksOpen ? 'off' : 'polite'}
-          aria-label={privacyOpen ? 'Приватность' : tasksOpen ? 'Мои задачи' : 'Сообщения'}
+          role={privacyOpen || workspaceOpen ? 'region' : 'log'}
+          aria-live={privacyOpen || workspaceOpen ? 'off' : 'polite'}
+          aria-label={privacyOpen ? 'Приватность' : tasksOpen ? 'Мои задачи' : readsOpen ? readsView.workspace === 'feed' ? 'Лента' : 'Библиотека' : 'Сообщения'}
           style={{
             flex: 1,
             minHeight: 0,
@@ -648,11 +666,11 @@ export function ChatScreen({
             overscrollBehavior: 'contain',
             WebkitOverflowScrolling: 'touch',
             padding: companion
-              ? `calc(var(--maya-chat-header-height, 150px) + 8px) 14px calc(env(safe-area-inset-bottom, 0px) + ${tasksOpen ? 16 : composerHeight + 62}px)`
+              ? `calc(var(--maya-chat-header-height, 150px) + 8px) 14px calc(env(safe-area-inset-bottom, 0px) + ${workspaceOpen ? 16 : composerHeight + 62}px)`
               : `calc(env(safe-area-inset-top, 0px) + 84px) 18px calc(env(safe-area-inset-bottom, 0px) + ${composerHeight + 62}px)`,
           }}
         >
-          {tasksOpen ? <OwnTasksPanel view={tasksView} port={ownTasks} close={() => { ownTasks.close(); window.requestAnimationFrame(focusComposer); }} /> : privacyOpen ? (
+          {readsOpen ? <WorkspaceReadsPanel key={shellView.workspace} view={readsView} port={{ ...workspaceReads, read: key => { reportReturnScroll.current = laneRef.current?.scrollTop ?? 0; return workspaceReads.read(key); } }} close={() => { workspaceReads.close(); window.requestAnimationFrame(focusComposer); }} /> : tasksOpen ? <OwnTasksPanel view={tasksView} port={ownTasks} close={() => { ownTasks.close(); window.requestAnimationFrame(focusComposer); }} /> : privacyOpen ? (
             <>
             <TelegramLinkPanel view={telegramLinkView} t={t} start={() => void telegramLink.start()} cancel={() => telegramLink.cancel()} />
             <PrivacyPanel
@@ -722,14 +740,14 @@ export function ChatScreen({
         </p>
 
         {/* app.html:21759-21762 — the footer overlays the lane; only the pill takes pointer events. */}
-        <div hidden={tasksOpen}
+        <div hidden={workspaceOpen}
           style={{
             position: 'absolute',
             left: 0,
             right: 0,
             bottom: 0,
             zIndex: 5,
-            display: tasksOpen ? 'none' : 'flex',
+            display: workspaceOpen ? 'none' : 'flex',
             flexDirection: 'column',
             pointerEvents: 'none',
           }}

@@ -1,6 +1,7 @@
 import { API_BASE } from './endpoint.ts';
 
 const PATHS = {
+  feed: '/inbox', reports: '/owner-reports', reportSnapshot: '/owner-reports/',
   ownTasks: '/operational-work',
   trialActivation: '/onboarding/trial-activations',
   trialSignup: '/onboarding/trial',

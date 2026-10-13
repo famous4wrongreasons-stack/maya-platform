@@ -13,6 +13,17 @@
 import type { HistorisedWidget, WidgetEnvelope, WidgetIntentSubmission } from '../contract.ts';
 
 /** Current-user task display only; key is a React key, never a command locator. */
+export interface FeedRow { readonly key: string; readonly type: string; readonly title: string; readonly body: string; readonly createdAt: string; readonly unread: boolean; }
+export interface FeedSnapshot { readonly rows: readonly FeedRow[]; readonly possiblyCapped: boolean; }
+export interface ReportSummary { readonly key: string; readonly type: 'daily_report' | 'morning_owner' | 'morning_staff'; readonly period: string; readonly title: string; }
+export interface ReportsSnapshot { readonly rows: readonly ReportSummary[]; }
+export interface ReportSnapshot extends ReportSummary { readonly timezone: string; readonly body: string; }
+export type WorkspaceReadFailure = { readonly reason: 'forbidden' | 'unavailable' | 'invalid_response' | 'aborted' } | { readonly reason: 'rate_limited'; readonly retryAfterSec: number };
+export interface WorkspaceReadTransport {
+  feed(signal: AbortSignal): Promise<Outcome<FeedSnapshot, WorkspaceReadFailure>>;
+  reports(signal: AbortSignal): Promise<Outcome<ReportsSnapshot, WorkspaceReadFailure>>;
+  report(selected: ReportSummary, signal: AbortSignal): Promise<Outcome<ReportSnapshot, WorkspaceReadFailure>>;
+}
 export interface OwnTask { readonly key: string; readonly title: string; readonly detail: string; readonly dueAt: string | null; readonly completed: boolean; }
 export interface OwnTasksSnapshot { readonly rows: readonly OwnTask[]; readonly possiblyCapped: boolean; }
 export type OwnTasksFailure = { readonly reason: 'forbidden' | 'unavailable' | 'invalid_response' | 'aborted' } | { readonly reason: 'rate_limited'; readonly retryAfterSec: number };

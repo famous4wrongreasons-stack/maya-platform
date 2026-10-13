@@ -25,6 +25,7 @@
     "src/net/project.ts",
     "src/net/session.ts",
     "src/net/types.ts",
+    "src/net/workspace-reads.ts",
     "src/renderer/cells.ts",
     "src/renderer/kinds.ts",
     "src/renderer/nodes.ts",
@@ -44,6 +45,7 @@
     "src/shell/shell.ts",
     "src/shell/view.ts",
     "src/shell/voice-state.ts",
+    "src/shell/workspace-reads.ts",
     "src/voice/capture.ts",
     "src/voice/wav.ts"
   ],
@@ -73,7 +75,7 @@
       },
       {
         "path": "src/net/client.ts",
-        "sha256": "d06860a6e86adb9c749dba0703ee51ccf25502a53d35987aec05b431ff90cb98"
+        "sha256": "d1258ef8415217ef02ccd2b54026667fe00947a4abc6b51e3cbf795748426065"
       },
       {
         "path": "src/net/crm-setup.ts",
@@ -109,7 +111,11 @@
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "3ac3ba8b590dd7d4c74d63dd488d9015130c4de06d82aeb2791dc55aadc539f8"
+        "sha256": "1ccc7dc7f4313e095936f2987dae84150f36fec403895139957563c81ad6921d"
+      },
+      {
+        "path": "src/net/workspace-reads.ts",
+        "sha256": "e7438b3887e3f857b459585c598fa6e173bf05dd187b7822c470c52407e61143"
       },
       {
         "path": "src/renderer/cells.ts",
@@ -165,7 +171,7 @@
       },
       {
         "path": "src/shell/ports.ts",
-        "sha256": "3883bd05bf29bf4b798c18cfd751b53c9357ea0b3da9518e1ad1ec2e5469aa66"
+        "sha256": "8de3df474acc808f193a8dc607677e956bc1dfaa994230629355ba767c9c796f"
       },
       {
         "path": "src/shell/privacy.ts",
@@ -173,7 +179,7 @@
       },
       {
         "path": "src/shell/shell.ts",
-        "sha256": "6e2cdbe5110b06217f64114c7128e38496aa6a2c7e2a57e5e0cdef6658b3f7a2"
+        "sha256": "9a02900a9fab0ef7826be9a1cb8326f5a78171309ce3bf892d167578b9769732"
       },
       {
         "path": "src/shell/view.ts",
@@ -182,11 +188,15 @@
       {
         "path": "src/shell/voice-state.ts",
         "sha256": "b3f9a871c60ae31b099980f01f3c19ea66e1ad4ecdda1d70ab684baeb2fa0960"
+      },
+      {
+        "path": "src/shell/workspace-reads.ts",
+        "sha256": "cd339f9c0ce692186b7e10aebd4ba11c8680dbdda6405979a1fa5575fe14142f"
       }
     ]
   },
-  "bytes": 645834,
-  "digest": "f40591d951560bc35dd551b650c530eff99b0c5663141036881bec78f4320756",
+  "bytes": 660364,
+  "digest": "4ea9391b4a828331b99ba81e5cdb7bbdea804aaa470ddb78bf4856186a017e18",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -194,8 +204,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "c075bbfefd337392aa1ef59fcb8c46b4899fb82a84d2d7002bbf6cb860539445",
-    "modulePath": "m/c075bbfefd337392/",
+    "digest": "2e355f0804bcc009bdd55d0a58ac5395c008ac24e9ef4b0591c66d6bf63ee7ba",
+    "modulePath": "m/2e355f0804bcc009/",
     "files": [
       {
         "path": "entry/main.js",
@@ -254,8 +264,8 @@
       },
       {
         "path": "src/net/client.js",
-        "sha256": "1596352cd68335f2d97ee73f67b99e868c5e9d983dbdfc65c92618bccd9138fe",
-        "bytes": 41421
+        "sha256": "107a78ceec6023043e4ae00f1f694755dc947deebc65b358c5b2d01e4ffe2870",
+        "bytes": 43499
       },
       {
         "path": "src/net/crm-setup.js",
@@ -301,6 +311,11 @@
         "path": "src/net/types.js",
         "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
         "bytes": 11
+      },
+      {
+        "path": "src/net/workspace-reads.js",
+        "sha256": "35b3d0c319d4d36f87c08108a2c2bf6d18498f03c8fce5450a7bf5f397de26f8",
+        "bytes": 2437
       },
       {
         "path": "src/renderer/cells.js",
@@ -384,8 +399,8 @@
       },
       {
         "path": "src/shell/shell.js",
-        "sha256": "78b13e36c953c9ea9e676916dc2a30a2155f5cb4c8bf92d8ef5e73c96c699505",
-        "bytes": 10082
+        "sha256": "d0fb8ee5fef149f08050908b28fbba7c0056c1e414bbb16f3cb5bdae79fcedcf",
+        "bytes": 10529
       },
       {
         "path": "src/shell/view.js",
@@ -396,6 +411,11 @@
         "path": "src/shell/voice-state.js",
         "sha256": "a9c7201012bf7d655c24836dbb69a6aaaf9096cc134c2fff4e3b4dfe6d9d6425",
         "bytes": 11655
+      },
+      {
+        "path": "src/shell/workspace-reads.js",
+        "sha256": "d76ed1aad65cc6c91b22cba1fd5d55efc7c00e299347b2f0f252aab196bc8864",
+        "bytes": 6005
       },
       {
         "path": "src/voice/capture.js",
@@ -413,7 +433,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "96845cfe5b1d2fe63dfec4e67a6820bc2e08b79c066703ea4d064e48e8cf32ce",
+      "sha256": "ff07e14a62d250f41025a1c5b7d9f840fca09c93220ab05b67a025db9f42780d",
       "bytes": 1344
     },
     "assets": [

@@ -184,8 +184,8 @@ test('history erasure ratchet: only the exact UUID-guarded encoded suffix is adm
     const check = (id, text, direction) => runFixture(ts, contract, { id, direction, row: 'net', files: files().set('src/net/client.ts', text), expect: new Set(), probes: false, typecheck: null }, shared);
     assert.deepEqual(check('privacy-admit', source, 'admit').refusals, []);
     for (const [id, before, after] of [
-      ['suffix', '/erasure` : PATHS[endpoint]', '/export` : PATHS[endpoint]'],
-      ['literal-space', '/erasure` : PATHS[endpoint]', '/era sure` : PATHS[endpoint]'],
+      ['suffix', '/erasure` : endpoint', '/export` : endpoint'],
+      ['literal-space', '/erasure` : endpoint', '/era sure` : endpoint'],
       ['prefix', "historyErasure: '/privacy/conversations'", "historyErasure: '/privacy/admin'"],
       ['encoding', '${encodeURIComponent(erasureConversationId)}/erasure', '${erasureConversationId}/erasure'],
       ['uuid-guard', "if (endpoint === 'historyErasure' && (erasureConversationId.length", "if (endpoint === 'chat' && (erasureConversationId.length"],

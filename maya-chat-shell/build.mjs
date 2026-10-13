@@ -215,6 +215,7 @@ const TOKEN_PROPERTIES = new Set([
  * the hand-off and lands it.
  */
 export const P1_PATHS = [
+  '/inbox', '/owner-reports', '/owner-reports/',
   '/operational-work',
   '/auth/email/start',
   '/auth/email/verify',
@@ -749,8 +750,12 @@ export function runGates(ts, program, ctx) {
     }
 
     const checkValue = (value, at, exempt) => {
+      // Only the current-user retained Inbox READ path is restored for Companion.
+      // The old Inbox tool/command surface and every other literal location remain refused.
+      const retainedFeed = value === '/inbox' && exempt && rel === 'src/net/client.ts' &&
+        ts.isPropertyAssignment(at.parent) && ts.isIdentifier(at.parent.name) && at.parent.name.text === 'feed';
       for (const bad of RETIRED_VALUES)
-        if (value.toLowerCase().includes(bad.toLowerCase())) refuse('literal-ban', at, bad, `retired value "${bad}" (N-2)`);
+        if (!(bad === '/inbox' && retainedFeed) && value.toLowerCase().includes(bad.toLowerCase())) refuse('literal-ban', at, bad, `retired value "${bad}" (N-2)`);
       if (!exempt)
         for (const frag of ROUTE_FRAGMENTS)
           if (value.includes(frag)) refuse('literal-ban', at, frag, `"${frag}" outside API_BASE (net/endpoint.ts) and PATHS (net/client.ts) (N-1)`);
@@ -1085,9 +1090,9 @@ export function runGates(ts, program, ctx) {
         return ts.isCallExpression(e) && ts.isIdentifier(e.expression) && e.expression.text === 'encodeURIComponent' && e.arguments.length === 1;
       });
     };
-    // The sole dynamic path is the privacy owner's exact conversation-erasure route. Keep
+    // Only privacy erasure and retained-report snapshot admit dynamic paths. Keep
     // its UUID guard and authored prefix/suffix closed; this does not admit generic URL builders.
-    const declaredErasurePath = (n) => {
+    const declaredOwnerPath = (n) => {
       if (!ts.isIdentifier(n)) return false;
       const declarations = checker.getSymbolAtLocation(n)?.declarations ?? [];
       if (declarations.length !== 1) return false;
@@ -1095,9 +1100,10 @@ export function runGates(ts, program, ctx) {
       if (!ts.isVariableDeclaration(d) || !d.initializer || !ts.isVariableDeclarationList(d.parent) || (d.parent.flags & ts.NodeFlags.Const) === 0) return false;
       const owner = d.parent.parent.parent?.parent;
       if (!owner || !ts.isFunctionDeclaration(owner) || owner.name?.text !== 'exchange' || owner.getSourceFile() !== sf) return false;
-      const expectedPath = "endpoint==='historyErasure'?`${PATHS.historyErasure}/${encodeURIComponent(erasureConversationId)}/erasure`:PATHS[endpoint]";
+      const expectedPath = "endpoint==='historyErasure'?`${PATHS.historyErasure}/${encodeURIComponent(erasureConversationId)}/erasure`:endpoint==='reportSnapshot'?`${PATHS.reportSnapshot}${encodeURIComponent(reportRunId)}/snapshot`:PATHS[endpoint]";
       const expectedGuard = "if(endpoint==='historyErasure'&&(erasureConversationId.length!==36||!/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(erasureConversationId)))return{kind:'aborted'};";
-      const expected = ts.createSourceFile('privacy-path.ts', `const path = ${expectedPath};\n${expectedGuard}`, ts.ScriptTarget.Latest, true);
+      const reportGuard = "if(endpoint==='reportSnapshot'&&(reportRunId.length!==36||!/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(reportRunId)))return{kind:'aborted'};";
+      const expected = ts.createSourceFile('privacy-report-path.ts', `const path = ${expectedPath};\n${expectedGuard}\n${reportGuard}`, ts.ScriptTarget.Latest, true);
       const printer = ts.createPrinter({ removeComments: true });
       const syntax = (node) => printer.printNode(ts.EmitHint.Unspecified, node, node.getSourceFile());
       if (syntax(skipOuter(ts, d.initializer)) !== syntax(expected.statements[0].declarationList.declarations[0].initializer)) return false;
@@ -1105,8 +1111,12 @@ export function runGates(ts, program, ctx) {
       if (!prefix || !ts.isStringLiteral(prefix.initializer) || prefix.initializer.text !== '/privacy/conversations') return false;
       const guard = owner.body?.statements[0];
       if (!guard || !ts.isIfStatement(guard) || syntax(guard) !== syntax(expected.statements[1])) return false;
-      // Both referenced strings must be these parameters, never mutable local aliases.
-      for (const name of ['endpoint', 'erasureConversationId']) {
+      const reportPrefix = obj?.properties.find((p) => ts.isPropertyAssignment(p) && ts.isIdentifier(p.name) && p.name.text === 'reportSnapshot');
+      if (!reportPrefix || !ts.isStringLiteral(reportPrefix.initializer) || reportPrefix.initializer.text !== '/owner-reports/') return false;
+      const secondGuard = owner.body?.statements[1];
+      if (!secondGuard || syntax(secondGuard) !== syntax(expected.statements[2])) return false;
+      // All referenced strings must be these parameters, never mutable local aliases.
+      for (const name of ['endpoint', 'erasureConversationId', 'reportRunId']) {
         const parameter = owner.parameters.find((p) => ts.isIdentifier(p.name) && p.name.text === name);
         if (!parameter) return false;
         const symbol = checker.getSymbolAtLocation(parameter.name);
@@ -1144,9 +1154,9 @@ export function runGates(ts, program, ctx) {
         const shapeOk = ((ts.isPropertyAccessExpression(r) || ts.isElementAccessExpression(r)) && ts.isIdentifier(r.expression) && r.expression.text === 'PATHS') || ts.isIdentifier(r);
         const type = checker.getTypeAtLocation(r);
         const parts = type.isUnion() ? type.types : [type];
-        ok = shapeOk && parts.length > 0 && (parts.every((t) => t.isStringLiteral() && allow.has(t.value)) || declaredErasurePath(r));
+        ok = shapeOk && parts.length > 0 && (parts.every((t) => t.isStringLiteral() && allow.has(t.value)) || declaredOwnerPath(r));
       }
-      if (!ok) out.push(refusal('fetch-shape', 'src/net/client.ts', lineOf(call), 'fetch', 'the fetch URL must use allowlisted path literals or the exact UUID-guarded history-erasure path, optionally + a declared encoded query (N-1)'));
+      if (!ok) out.push(refusal('fetch-shape', 'src/net/client.ts', lineOf(call), 'fetch', 'the fetch URL must use allowlisted path literals or the exact UUID-guarded privacy/report paths, optionally + a declared encoded query (N-1)'));
     }
   }
   if (present.has('src/net/endpoint.ts')) {
