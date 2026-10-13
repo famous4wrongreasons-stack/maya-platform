@@ -465,11 +465,27 @@ export function ChatScreen({
   useLayoutEffect(() => {
     const input = composerRef.current;
     if (!input) return;
-    input.style.height = '0px';
-    const height = Math.max(50, Math.min(138, input.scrollHeight));
-    input.style.height = `${height}px`;
-    setComposerHeight(height);
-  }, [draft]);
+    const measure = () => {
+      if (input.clientWidth === 0) return; // A workspace hides, but does not replace, the draft.
+      input.style.height = '0px';
+      const height = Math.max(50, Math.min(138, input.scrollHeight));
+      input.style.height = `${height}px`;
+      setComposerHeight(height);
+    };
+    measure();
+    if (!companion) return;
+    // Placeholder and draft can wrap on rotation without a keystroke. Observe width only:
+    // reacting to our own height write would create a ResizeObserver feedback loop.
+    let width = -1;
+    const observer = new ResizeObserver(entries => {
+      const next = entries[0]?.contentRect.width ?? 0;
+      if (next <= 0 || next === width) return;
+      width = next;
+      measure();
+    });
+    observer.observe(input);
+    return () => observer.disconnect();
+  }, [draft, companion]);
 
   const canSend = view.composer.enabled && !view.inFlight && hasDraft;
 

@@ -305,7 +305,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 @media (forced-colors:active) { .companion-navigation { border-color:ButtonText; } .companion-navigation button[aria-current=page] { outline:2px solid Highlight; outline-offset:-2px; } }
 /*
 Phosphor Icons — regular/bold paths from the owner-supplied design.
-Upstream: https://github.com/phosphor-icons/react/blob/master/LICENSE
 MIT License
 
 Copyright (c) 2020 Phosphor Icons

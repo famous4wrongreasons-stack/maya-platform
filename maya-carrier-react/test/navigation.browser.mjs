@@ -103,10 +103,14 @@ try {
     await size(width,height);
     await check(`(() => {const n=${nav}.getBoundingClientRect(),c=document.querySelector('.maya-composer-pill').getBoundingClientRect();return n.left>=0&&n.right<=innerWidth&&n.bottom<=innerHeight&&c.bottom<=n.top&&[...${nav}.querySelectorAll('button')].every(b=>{const r=b.getBoundingClientRect();return r.width>=44&&r.height>=44})})()`,'navigation/composer fit and touch targets at '+width);
     await check(`document.documentElement.scrollWidth<=innerWidth`,'no horizontal overflow at '+width);
+    await check(`${composer}.scrollHeight<=${composer}.clientHeight`,'empty composer fully displays wrapped placeholder at '+width);
     await screenshot('navigation-chat-'+width);
   }
   await size(393,852);await page.fill(composer,'Черновик остаётся здесь');
   await check(`getComputedStyle(${nav}).display!=='none'`,'desktop text entry keeps navigation available');
+  await size(320,740);
+  await check(`${composer}.value==='Черновик остаётся здесь' && ${composer}.scrollHeight<=${composer}.clientHeight && document.querySelector('.maya-composer-pill').getBoundingClientRect().bottom<=${nav}.getBoundingClientRect().top`,'resizing preserves and fully displays wrapped draft above navigation');
+  await size(393,852);
   for(const [label,path,heading] of [['Лента','/api/inbox','Лента'],['Идеи','/api/analytics/valuations','Идеи'],['Задачи','/api/operational-work','Мои задачи'],['Файлы','/api/owner-reports','Библиотека']]) {
     const before=reads().length;await choose(label);await selected(label);
     await check(`document.querySelector('.maya-chat-lane').getAttribute('aria-label')===${JSON.stringify(heading)} && document.querySelector('.maya-chat-composer-dock').hidden`,'existing '+label+' surface opens without composer overlay');
