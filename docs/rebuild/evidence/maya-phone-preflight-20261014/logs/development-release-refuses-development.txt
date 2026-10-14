@@ -1,0 +1,3 @@
+RELEASE PACKAGING REFUSED: development API payload is forbidden outside Debug
+
+'Release' !== 'Debug'

@@ -1,0 +1,59 @@
+gate: PASS (46 source files, 0 refusals)
+typecheck: PASS (46 carrier files + 35 runtime modules, contract 201 exports, 5.9.3)
+verified React AChat -> dist/web/m/WNCBX52R/main.js (8 files)
+gate: PASS (46 source files, 0 refusals)
+typecheck: PASS (46 carrier files + 35 runtime modules, contract 201 exports, 5.9.3)
+capacitor proof: PASS (one endpoint string differs; index.html differs only in digest path and connect-src; styles.css identical; no other origin in the artefact)
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: payload file set differs from the canonical React build
++ actual - expected
+
+  [
+    'icons/maya-192.png',
+    'icons/maya-512-maskable.png',
+    'icons/maya-512.png',
+    'icons/maya-apple-180.png',
+    'index.html',
++   'm/38c5421ac52aadff/main.js',
+-   'm/1dbf60983b434308/main.js',
+    'manifest.webmanifest',
+    'styles.css'
+  ]
+
+    at assertFiles (file:///private/tmp/maya-phone-preflight-20261014-02/candidate/maya-carrier-react/tools/payload-files.mjs:25:10)
+    at assertTree (file:///private/tmp/maya-phone-preflight-20261014-02/candidate/maya-carrier-react/tools/payload-files.mjs:31:3)
+    at file:///private/tmp/maya-phone-preflight-20261014-02/candidate/maya-carrier-react/build.mjs:244:37
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: [
+    'icons/maya-192.png',
+    'icons/maya-512-maskable.png',
+    'icons/maya-512.png',
+    'icons/maya-apple-180.png',
+    'index.html',
+    'm/38c5421ac52aadff/main.js',
+    'manifest.webmanifest',
+    'styles.css'
+  ],
+  expected: [
+    'icons/maya-192.png',
+    'icons/maya-512-maskable.png',
+    'icons/maya-512.png',
+    'icons/maya-apple-180.png',
+    'index.html',
+    'm/1dbf60983b434308/main.js',
+    'manifest.webmanifest',
+    'styles.css'
+  ],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.23.3
+RELEASE PACKAGING REFUSED: release command failed: build.mjs
+
+1 !== 0

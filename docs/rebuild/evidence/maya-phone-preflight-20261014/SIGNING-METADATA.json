@@ -1,0 +1,29 @@
+{
+  "checkedAt": "2026-10-14T13:27:59.082054+00:00",
+  "publicSigningIdentityQueryExit": 0,
+  "developmentIdentitiesPresent": true,
+  "matchingLocalProfiles": [
+    {
+      "bundleMatch": "exact",
+      "expired": false,
+      "expiresAt": "2026-10-20T10:07:58",
+      "development": true,
+      "hasProvisionedDevices": true,
+      "associatedDomains": false
+    }
+  ],
+  "privateKeyExported": false,
+  "signingAttempted": false,
+  "provisioningUpdateAttempted": false,
+  "deviceSpecificProfileMatch": [
+    {
+      "exactBundle": true,
+      "includesConnectedPhone": true,
+      "matchingSigningIdentity": true
+    }
+  ],
+  "paired": true,
+  "developerMode": "enabled",
+  "deviceFamily": "iPhone 17 Pro Max",
+  "rawDeviceIdentifiersArchived": false
+}

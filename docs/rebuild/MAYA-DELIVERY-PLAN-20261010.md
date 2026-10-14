@@ -1,5 +1,16 @@
 # План завершения MAYA — 10 октября 2026
 
+**14 октября, подготовка первого прогона на iPhone — `1df1079a`: PACKAGING PASS.**
+Текущий Companion собран в unsigned Simulator и iphoneos App.app; canonical
+React payload и PWA/Capacitor parity проверены. Отдельный Debug API target тоже
+прошёл native build; неверный endpoint и development target в Release отказаны.
+Подключённый телефон и действующий exact-bundle Debug profile совместимы по
+публичным метаданным. Signing/install, доступный телефону HTTPS-стенд и живой
+прогон ещё не выполнены. Дальнейший приоритет — этот путь до первого полезного
+device smoke, без расширения необязательных функций прототипа. 545 mutations
+прошли только declaration dry-run; certificate остаётся NOT_ISSUED.
+[Точный остаток, границы и действия владельца](MAYA-PHONE-FIRST-CHECK-20261014.md).
+
 **13 октября, локальный staging single-operator AR-1 — `98761bc6`: IMPLEMENTATION PASS.**
 После принятия Option A добавлен отдельный staging-контракт в существующем AR-1:
 свои trust/tenant allowlist, точный сертификат/сборка/профиль, настоящий global

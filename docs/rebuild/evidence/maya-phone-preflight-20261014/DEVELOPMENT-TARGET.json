@@ -1,0 +1,192 @@
+{
+  "candidate": "1df1079a1d210cc4d176894c75b67585fb138348",
+  "target": "https://maya-phone-proof.invalid:3443/api",
+  "hostContacted": false,
+  "install": false,
+  "status": "PASS",
+  "steps": [
+    {
+      "name": "sync-development",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 29.44,
+      "args": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "maya-carrier-react/tools/release.mjs",
+        "sync",
+        "--development-api=https://maya-phone-proof.invalid:3443/api"
+      ],
+      "environment": {}
+    },
+    {
+      "name": "wrong-default-target",
+      "exit": 1,
+      "expected": 1,
+      "seconds": 11.33,
+      "args": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "maya-carrier-react/tools/release.mjs",
+        "verify-native",
+        "--xcode"
+      ],
+      "environment": {
+        "CONFIGURATION": "Debug"
+      }
+    },
+    {
+      "name": "wrong-endpoint",
+      "exit": 1,
+      "expected": 1,
+      "seconds": 11.61,
+      "args": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "maya-carrier-react/tools/release.mjs",
+        "verify-native",
+        "--xcode"
+      ],
+      "environment": {
+        "CONFIGURATION": "Debug",
+        "MAYA_DEVELOPMENT_API": "https://other-phone-proof.invalid:3443/api"
+      }
+    },
+    {
+      "name": "release-refuses-development",
+      "exit": 1,
+      "expected": 1,
+      "seconds": 0.04,
+      "args": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "maya-carrier-react/tools/release.mjs",
+        "verify-native",
+        "--xcode"
+      ],
+      "environment": {
+        "CONFIGURATION": "Release",
+        "MAYA_DEVELOPMENT_API": "https://maya-phone-proof.invalid:3443/api"
+      }
+    },
+    {
+      "name": "exact-debug-target",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 11.63,
+      "args": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "maya-carrier-react/tools/release.mjs",
+        "verify-native",
+        "--xcode"
+      ],
+      "environment": {
+        "CONFIGURATION": "Debug",
+        "MAYA_DEVELOPMENT_API": "https://maya-phone-proof.invalid:3443/api"
+      }
+    },
+    {
+      "name": "unsigned-device-development-build",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 13.01,
+      "args": [
+        "/usr/bin/xcodebuild",
+        "-project",
+        "maya-ios-carrier/ios/App/App.xcodeproj",
+        "-scheme",
+        "App",
+        "-configuration",
+        "Debug",
+        "-sdk",
+        "iphoneos",
+        "-destination",
+        "generic/platform=iOS",
+        "-derivedDataPath",
+        "/private/tmp/maya-phone-preflight-20261014-02/ios-development-build",
+        "CODE_SIGNING_ALLOWED=NO",
+        "MAYA_DEVELOPMENT_API=https://maya-phone-proof.invalid:3443/api",
+        "build"
+      ],
+      "environment": {}
+    },
+    {
+      "name": "development-app-verify",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 11.49,
+      "args": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "maya-carrier-react/tools/release.mjs",
+        "verify-app",
+        "/private/tmp/maya-phone-preflight-20261014-02/ios-development-build/Build/Products/Debug-iphoneos/App.app",
+        "--development-api=https://maya-phone-proof.invalid:3443/api"
+      ],
+      "environment": {}
+    },
+    {
+      "name": "mutation-declaration-dry-run",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.23,
+      "args": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "scripts/widgets-mutation-battery.mjs",
+        "--dry-run",
+        "--out",
+        "/private/tmp/maya-phone-preflight-20261014-02/development-target/mutation-declarations.json"
+      ],
+      "environment": {}
+    }
+  ],
+  "payloadHashes": [
+    {
+      "file": "cordova.js",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "cordova_plugins.js",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "icons/maya-192.png",
+      "size": 1970,
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+    },
+    {
+      "file": "icons/maya-512-maskable.png",
+      "size": 4476,
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+    },
+    {
+      "file": "icons/maya-512.png",
+      "size": 5951,
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+    },
+    {
+      "file": "icons/maya-apple-180.png",
+      "size": 1977,
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+    },
+    {
+      "file": "index.html",
+      "size": 888,
+      "sha256": "83a2b4ead01e67d32ef19f0e10007f8deaec9ab46f4fa48237fc0acc5fb0a671"
+    },
+    {
+      "file": "m/38c5421ac52aadff/main.js",
+      "size": 1812000,
+      "sha256": "38c5421ac52aadff3fbfbace792a5bc265ab89bdf0eda9dfa864e07454a1a500"
+    },
+    {
+      "file": "manifest.webmanifest",
+      "size": 670,
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+    },
+    {
+      "file": "styles.css",
+      "size": 1514076,
+      "sha256": "c2c54360fdd398952e7ed92137cd50d1945f5b60d62b3d957e574d17b01a3e29"
+    }
+  ],
+  "cloneUnchanged": true,
+  "finishedAt": "2026-10-14T13:37:56.110830+00:00"
+}

@@ -194,9 +194,10 @@ If iOS has jetsammed MAYA during the Safari detour, the in-memory record is gone
 be trusted any more. The app opens at its first screen and the person starts again. Accepting a
 callback in that state is exactly the attack the record exists to stop.
 
-### 🔴 This target cannot be signed by a personal team
+### Release signing and the personal-team Debug path
 
-Associated Domains is not available to free Apple IDs. Measured 2026-09-29:
+The Release configuration requires Associated Domains. Historical measurement on
+2026-09-29, before the separate Debug path was available:
 
 ```
 error: Cannot create a iOS App Development provisioning profile for "ru.mayaos.app".
@@ -204,13 +205,23 @@ Personal development teams, including "Stanislav Mosin", do not support the
 Associated Domains capability.
 ```
 
-Xcode reached Apple and was refused, so this is not a missing login — team `YCL5U4L56W` is a personal
-team. Building this target needs an **Apple Developer Program membership** for that Apple ID, and the
-Associated Domains capability enabled on the `ru.mayaos.app` App ID. Everything else is in place and
-builds the moment that is true.
+That refusal applies to signing a configuration with Associated Domains. It is
+not a reason to block the current development-only Debug configuration described
+above: Debug does not request that entitlement and has its own explicitly guarded
+callback transport. Release still needs a team/profile with the required capability;
+a successful unsigned build or Debug profile does not prove Release signing.
 
 ## Signing
 
-`CODE_SIGN_STYLE = Automatic` and `DEVELOPMENT_TEAM` is deliberately **unset** in the committed
-project: a team is an account-level choice and does not belong in version control where it would
-follow every clone. Select it once in Xcode — Signing & Capabilities — and Xcode stores it locally.
+`CODE_SIGN_STYLE = Automatic`. The current committed project contains
+`DEVELOPMENT_TEAM = YCL5U4L56W` for Debug; Release leaves it unset. This records
+the existing project state, not a new grant of signing or platform authority.
+Before installation, verify the selected team's actual signing identity and an
+unexpired provisioning profile for `ru.mayaos.app` and the exact target device.
+Do not assume a cached profile proves a successful signing operation or working
+network access. No build should silently provision an account or select a different
+API target to make installation succeed.
+
+The [2026-10-14 phone preflight](../docs/rebuild/MAYA-PHONE-FIRST-CHECK-20261014.md)
+records fresh unsigned device/simulator packaging and the remaining installation
+and server boundary. It is not installation approval or a release certificate.

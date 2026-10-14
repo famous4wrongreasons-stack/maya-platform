@@ -1,0 +1,315 @@
+{
+  "candidate": "1df1079a1d210cc4d176894c75b67585fb138348",
+  "startedAt": "2026-10-14T13:27:28.184682+00:00",
+  "kind": "unsigned iOS packaging preflight, no runtime execution",
+  "steps": [
+    {
+      "name": "clone",
+      "args": [
+        "git",
+        "clone",
+        "--shared",
+        "--no-checkout",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010",
+        "/private/tmp/maya-phone-preflight-20261014-01/candidate"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.24,
+      "log": "clone.log"
+    },
+    {
+      "name": "checkout",
+      "args": [
+        "git",
+        "checkout",
+        "--detach",
+        "1df1079a1d210cc4d176894c75b67585fb138348"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 2.99,
+      "log": "checkout.log"
+    },
+    {
+      "name": "ios-dependencies",
+      "args": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 5.8,
+      "log": "ios-dependencies.log"
+    },
+    {
+      "name": "canonical-sync",
+      "args": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "maya-carrier-react/tools/release.mjs",
+        "sync"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 28.61,
+      "log": "canonical-sync.log"
+    },
+    {
+      "name": "packaging-tests",
+      "args": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "--test",
+        "test/release.test.mjs"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 33.41,
+      "log": "packaging-tests.log"
+    },
+    {
+      "name": "simulator-build",
+      "args": [
+        "/usr/bin/xcodebuild",
+        "-project",
+        "maya-ios-carrier/ios/App/App.xcodeproj",
+        "-scheme",
+        "App",
+        "-configuration",
+        "Debug",
+        "-sdk",
+        "iphonesimulator",
+        "-destination",
+        "generic/platform=iOS Simulator",
+        "-derivedDataPath",
+        "/private/tmp/maya-phone-preflight-20261014-01/ios-build",
+        "CODE_SIGNING_ALLOWED=NO",
+        "build"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 23.66,
+      "log": "simulator-build.log"
+    },
+    {
+      "name": "simulator-app-verify",
+      "args": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "maya-carrier-react/tools/release.mjs",
+        "verify-app",
+        "/private/tmp/maya-phone-preflight-20261014-01/ios-build/Build/Products/Debug-iphonesimulator/App.app"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 11.58,
+      "log": "simulator-app-verify.log"
+    },
+    {
+      "name": "device-architecture-build",
+      "args": [
+        "/usr/bin/xcodebuild",
+        "-project",
+        "maya-ios-carrier/ios/App/App.xcodeproj",
+        "-scheme",
+        "App",
+        "-configuration",
+        "Debug",
+        "-sdk",
+        "iphoneos",
+        "-destination",
+        "generic/platform=iOS",
+        "-derivedDataPath",
+        "/private/tmp/maya-phone-preflight-20261014-01/ios-build",
+        "CODE_SIGNING_ALLOWED=NO",
+        "build"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 9.24,
+      "log": "device-architecture-build.log"
+    },
+    {
+      "name": "device-app-verify",
+      "args": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "maya-carrier-react/tools/release.mjs",
+        "verify-app",
+        "/private/tmp/maya-phone-preflight-20261014-01/ios-build/Build/Products/Debug-iphoneos/App.app"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 11.59,
+      "log": "device-app-verify.log"
+    }
+  ],
+  "realProviderEffects": 0,
+  "databaseAccess": false,
+  "keychainSecretsRead": false,
+  "install": false,
+  "certificate": "NOT_ISSUED",
+  "status": "FAIL",
+  "payloadHashes": [
+    {
+      "surface": "web",
+      "file": "icons/maya-192.png",
+      "size": 1970,
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+    },
+    {
+      "surface": "web",
+      "file": "icons/maya-512-maskable.png",
+      "size": 4476,
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+    },
+    {
+      "surface": "web",
+      "file": "icons/maya-512.png",
+      "size": 5951,
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+    },
+    {
+      "surface": "web",
+      "file": "icons/maya-apple-180.png",
+      "size": 1977,
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+    },
+    {
+      "surface": "web",
+      "file": "index.html",
+      "size": 842,
+      "sha256": "3472ff5c83ecae878f349e1108066394d00a7f47ed609bf5e4bc9558e0f7e622"
+    },
+    {
+      "surface": "web",
+      "file": "m/WNCBX52R/main.js",
+      "size": 1811963,
+      "sha256": "76b5d6807d2005af56140f986ea0cb5d60db2721e3655d4159e1769d83bc6386"
+    },
+    {
+      "surface": "web",
+      "file": "manifest.webmanifest",
+      "size": 670,
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+    },
+    {
+      "surface": "web",
+      "file": "styles.css",
+      "size": 1514076,
+      "sha256": "c2c54360fdd398952e7ed92137cd50d1945f5b60d62b3d957e574d17b01a3e29"
+    },
+    {
+      "surface": "capacitor",
+      "file": "icons/maya-192.png",
+      "size": 1970,
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+    },
+    {
+      "surface": "capacitor",
+      "file": "icons/maya-512-maskable.png",
+      "size": 4476,
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+    },
+    {
+      "surface": "capacitor",
+      "file": "icons/maya-512.png",
+      "size": 5951,
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+    },
+    {
+      "surface": "capacitor",
+      "file": "icons/maya-apple-180.png",
+      "size": 1977,
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+    },
+    {
+      "surface": "capacitor",
+      "file": "index.html",
+      "size": 868,
+      "sha256": "b6538eb0e7ac9a653cb63ed23b3e872f063e456519caa10936e9aea5f12040a5"
+    },
+    {
+      "surface": "capacitor",
+      "file": "m/c741d2454d37fa62/main.js",
+      "size": 1811980,
+      "sha256": "c741d2454d37fa623dbff56b0e7c01b9c99ff9698e2c08c8d8b9680af6944ec5"
+    },
+    {
+      "surface": "capacitor",
+      "file": "manifest.webmanifest",
+      "size": 670,
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+    },
+    {
+      "surface": "capacitor",
+      "file": "styles.css",
+      "size": 1514076,
+      "sha256": "c2c54360fdd398952e7ed92137cd50d1945f5b60d62b3d957e574d17b01a3e29"
+    },
+    {
+      "surface": "device-app",
+      "file": "cordova.js",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "surface": "device-app",
+      "file": "cordova_plugins.js",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "surface": "device-app",
+      "file": "icons/maya-192.png",
+      "size": 1970,
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+    },
+    {
+      "surface": "device-app",
+      "file": "icons/maya-512-maskable.png",
+      "size": 4476,
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+    },
+    {
+      "surface": "device-app",
+      "file": "icons/maya-512.png",
+      "size": 5951,
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+    },
+    {
+      "surface": "device-app",
+      "file": "icons/maya-apple-180.png",
+      "size": 1977,
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+    },
+    {
+      "surface": "device-app",
+      "file": "index.html",
+      "size": 868,
+      "sha256": "b6538eb0e7ac9a653cb63ed23b3e872f063e456519caa10936e9aea5f12040a5"
+    },
+    {
+      "surface": "device-app",
+      "file": "m/c741d2454d37fa62/main.js",
+      "size": 1811980,
+      "sha256": "c741d2454d37fa623dbff56b0e7c01b9c99ff9698e2c08c8d8b9680af6944ec5"
+    },
+    {
+      "surface": "device-app",
+      "file": "manifest.webmanifest",
+      "size": 670,
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+    },
+    {
+      "surface": "device-app",
+      "file": "styles.css",
+      "size": 1514076,
+      "sha256": "c2c54360fdd398952e7ed92137cd50d1945f5b60d62b3d957e574d17b01a3e29"
+    }
+  ],
+  "sourceUnchanged": true,
+  "cloneUnchanged": false,
+  "failure": "",
+  "finishedAt": "2026-10-14T13:29:35.679217+00:00"
+}

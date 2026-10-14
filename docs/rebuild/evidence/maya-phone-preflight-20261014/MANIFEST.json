@@ -1,0 +1,224 @@
+{
+  "candidate": "1df1079a1d210cc4d176894c75b67585fb138348",
+  "scope": "local unsigned phone packaging readiness, not release certification",
+  "copied": [
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/RESULT.json",
+      "archive": "PACKAGING.json",
+      "sourceSha256": "d179caa7056adca8cd97793874e0d33854f53fc7bc7692032dd99d4d5c1e224e",
+      "sourceSize": 8880,
+      "archiveSha256": "d179caa7056adca8cd97793874e0d33854f53fc7bc7692032dd99d4d5c1e224e",
+      "archiveSize": 8880
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/runner.py",
+      "archive": "packaging-runner.py",
+      "sourceSha256": "fad5effb6dc2470ffdf70e636836bc8737c7210e953d6d17ccd5b0535e5e83a7",
+      "sourceSize": 4362,
+      "archiveSha256": "e9bedd272a02b9d6f9550deaa3d576e6b32676c8cd25d54a6f1f39d92988c7ba",
+      "archiveSize": 4361
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/MUTATION-PLAN.json",
+      "archive": "MUTATION-PLAN.json",
+      "sourceSha256": "26be8e1d20c112ae92056bfa4c0d79771096d55bc9381304d75c938b964dd5c0",
+      "sourceSize": 196,
+      "archiveSha256": "26be8e1d20c112ae92056bfa4c0d79771096d55bc9381304d75c938b964dd5c0",
+      "archiveSize": 196
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/development-target/RESULT.json",
+      "archive": "DEVELOPMENT-TARGET.json",
+      "sourceSha256": "5a5cf8e01fbdd975f2e27012efcc375c692c8c9fac432f0547ee24b2a8c20472",
+      "sourceSize": 5577,
+      "archiveSha256": "5a5cf8e01fbdd975f2e27012efcc375c692c8c9fac432f0547ee24b2a8c20472",
+      "archiveSize": 5577
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/development-target/runner.py",
+      "archive": "development-runner.py",
+      "sourceSha256": "5c8dbf1d1f7ab165937982def5fd4c25fd116b7220f42bdfb744f7aaba12eee1",
+      "sourceSize": 3361,
+      "archiveSha256": "38203fba40b7e74fad01eb7f54365a719eb646afb3eca526225a8182613330bb",
+      "archiveSize": 3360
+    },
+    {
+      "source": "/private/tmp/maya-phone-signing-metadata-20261014.json",
+      "archive": "SIGNING-METADATA.json",
+      "sourceSha256": "e88783045412377b10806883f1e6e8ac4f1a4504681842e8ccbeb7fa5cafcb35",
+      "sourceSize": 754,
+      "archiveSha256": "e88783045412377b10806883f1e6e8ac4f1a4504681842e8ccbeb7fa5cafcb35",
+      "archiveSize": 754
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-01/RESULT.json",
+      "archive": "attempt1/RESULT.json",
+      "sourceSha256": "93428bf01dd83d862798d70edf4f07da44aefbfc2a2219c0dbba81d4774cbe31",
+      "sourceSize": 8898,
+      "archiveSha256": "93428bf01dd83d862798d70edf4f07da44aefbfc2a2219c0dbba81d4774cbe31",
+      "archiveSize": 8898
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-01/HARNESS-FAILURE.json",
+      "archive": "attempt1/HARNESS-FAILURE.json",
+      "sourceSha256": "c2ce9bced9586c03ae2e668381fd784ff11e648b0104efa2e1e342e50a4cc697",
+      "sourceSize": 499,
+      "archiveSha256": "c2ce9bced9586c03ae2e668381fd784ff11e648b0104efa2e1e342e50a4cc697",
+      "archiveSize": 499
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/canonical-sync.log",
+      "archive": "logs/packaging-canonical-sync.txt",
+      "sourceSha256": "ec6c1fd75051e11578e72a4533bf7a209e66a746d2e44e72649f6ad8abbdd6ab",
+      "sourceSize": 2796,
+      "archiveSha256": "ec6c1fd75051e11578e72a4533bf7a209e66a746d2e44e72649f6ad8abbdd6ab",
+      "archiveSize": 2796
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/checkout.log",
+      "archive": "logs/packaging-checkout.txt",
+      "sourceSha256": "2ada65af18e7ff648bb6cc992b320db4aa72245d0b51f77c82aef778fce01bd5",
+      "sourceSize": 84,
+      "archiveSha256": "2ada65af18e7ff648bb6cc992b320db4aa72245d0b51f77c82aef778fce01bd5",
+      "archiveSize": 84
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/clone.log",
+      "archive": "logs/packaging-clone.txt",
+      "sourceSha256": "024e0326fa4c9972adf11eaffd1226a659aecd0a5c4db7565dc939d26aa1c00a",
+      "sourceSize": 80,
+      "archiveSha256": "024e0326fa4c9972adf11eaffd1226a659aecd0a5c4db7565dc939d26aa1c00a",
+      "archiveSize": 80
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/device-app-verify.log",
+      "archive": "logs/packaging-device-app-verify.txt",
+      "sourceSha256": "9b655c97d6f63becb569bc7503714941fd4965704bc362ada0f3598a718679fd",
+      "sourceSize": 735,
+      "archiveSha256": "9b655c97d6f63becb569bc7503714941fd4965704bc362ada0f3598a718679fd",
+      "archiveSize": 735
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/ios-dependencies.log",
+      "archive": "logs/packaging-ios-dependencies.txt",
+      "sourceSha256": "db76419331176e62b45afce278ea270647d11295662714b5660d05aa41ac8d1d",
+      "sourceSize": 451,
+      "archiveSha256": "db76419331176e62b45afce278ea270647d11295662714b5660d05aa41ac8d1d",
+      "archiveSize": 451
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/packaging-tests.log",
+      "archive": "logs/packaging-packaging-tests.txt",
+      "sourceSha256": "5defc55812f18a15125c01cfa696052984f6af1989ce914604cc255ce50acc4f",
+      "sourceSize": 3307,
+      "archiveSha256": "5defc55812f18a15125c01cfa696052984f6af1989ce914604cc255ce50acc4f",
+      "archiveSize": 3307
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/simulator-app-verify.log",
+      "archive": "logs/packaging-simulator-app-verify.txt",
+      "sourceSha256": "9b655c97d6f63becb569bc7503714941fd4965704bc362ada0f3598a718679fd",
+      "sourceSize": 735,
+      "archiveSha256": "9b655c97d6f63becb569bc7503714941fd4965704bc362ada0f3598a718679fd",
+      "archiveSize": 735
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/development-target/development-app-verify.log",
+      "archive": "logs/development-development-app-verify.txt",
+      "sourceSha256": "3ed0af518c5d6190d52e2e88acf14c774da26e64278a49e9f6a3e7c27a768ea2",
+      "sourceSize": 756,
+      "archiveSha256": "3ed0af518c5d6190d52e2e88acf14c774da26e64278a49e9f6a3e7c27a768ea2",
+      "archiveSize": 756
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/development-target/exact-debug-target.log",
+      "archive": "logs/development-exact-debug-target.txt",
+      "sourceSha256": "53dbd68dabe699f3e6c59f7580117fd3301d19136c11fb785df609ab31f5ae78",
+      "sourceSize": 759,
+      "archiveSha256": "53dbd68dabe699f3e6c59f7580117fd3301d19136c11fb785df609ab31f5ae78",
+      "archiveSize": 759
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/development-target/release-refuses-development.log",
+      "archive": "logs/development-release-refuses-development.txt",
+      "sourceSha256": "ec96cfb7e016bda9723ac981b390591196826e3966a55948b73ea02260257652",
+      "sourceSize": 102,
+      "archiveSha256": "0c4fbc75a2e98a7b556d8ae7df60264ac60ee88fafdf14fcb06bdd481711b29f",
+      "archiveSize": 101
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/development-target/sync-development.log",
+      "archive": "logs/development-sync-development.txt",
+      "sourceSha256": "cbf837d034f2d3d93cc84795f6e9dd8034c20bdf8e351b415ea4b5a834ad1199",
+      "sourceSize": 2818,
+      "archiveSha256": "cbf837d034f2d3d93cc84795f6e9dd8034c20bdf8e351b415ea4b5a834ad1199",
+      "archiveSize": 2818
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/development-target/wrong-default-target.log",
+      "archive": "logs/development-wrong-default-target.txt",
+      "sourceSha256": "412dbabdcc2f4191b7d28cbfa4058b163a294d54b512e4eb954e28ac04ea8a1e",
+      "sourceSize": 2031,
+      "archiveSha256": "5ecfe565ec566939fde19ad8386bfd35549c537a1fdf7cc6a7114f84592e4710",
+      "archiveSize": 2030
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/development-target/wrong-endpoint.log",
+      "archive": "logs/development-wrong-endpoint.txt",
+      "sourceSha256": "6bc7fcde395af32b023d9d40eef9325ce2cbd59cb98e117c3c0e22e618c53065",
+      "sourceSize": 2031,
+      "archiveSha256": "8738d4087d572fb5762810e6124b454c2ec9ad35afb55b6a6dfc32419ad7f55c",
+      "archiveSize": 2030
+    }
+  ],
+  "notCommitted": [
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/device-architecture-build.log",
+      "sha256": "a53fafb02f31c58fac8321e8d82d886bd72b88508d616aaac2604b262a55d42d",
+      "size": 301965,
+      "reason": "Large raw synthetic build/declaration log; exact result and hash retained. No source/customer data imported."
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/simulator-build.log",
+      "sha256": "73fc062cb29c2a07a1812752e4e185bba69f459c4017e00e88e05c4b7fac1c7f",
+      "size": 488580,
+      "reason": "Large raw synthetic build/declaration log; exact result and hash retained. No source/customer data imported."
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/development-target/mutation-declaration-dry-run.log",
+      "sha256": "b41bc5b6268af932aa4e38a7d3048ae42f0ee373d827846abe8d981f56f781b0",
+      "size": 210330,
+      "reason": "Large raw synthetic build/declaration log; exact result and hash retained. No source/customer data imported."
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/development-target/unsigned-device-development-build.log",
+      "sha256": "80dddf5f196d45c5ec72c45dbfea618ec4403ae6907e751e2b861685fb687c99",
+      "size": 317059,
+      "reason": "Large raw synthetic build/declaration log; exact result and hash retained. No source/customer data imported."
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/development-target/mutation-declarations.json",
+      "sha256": "b41bc5b6268af932aa4e38a7d3048ae42f0ee373d827846abe8d981f56f781b0",
+      "size": 210330,
+      "reason": "545 declaration dry-run; not executed kills. Counts and source SHA retained in MUTATION-PLAN.json."
+    },
+    {
+      "source": "/private/tmp/maya-phone-device-details-20261014.json",
+      "sha256": "abc039ac17bd38bed59773f58e881e082cc6259b46e3c6ca566d64e7fcbd49a7",
+      "size": 4495,
+      "reason": "Hardware identifiers: raw metadata deliberately not committed. Device/profile match booleans retained."
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/ios-build/Build/Products/Debug-iphoneos/App.app",
+      "reason": "Reproducible unsigned binary; no install. Actual bundled public resource hashes and verification receipts retained in PACKAGING/DEVELOPMENT-TARGET."
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/ios-build/Build/Products/Debug-iphonesimulator/App.app",
+      "reason": "Reproducible unsigned binary; no install. Actual bundled public resource hashes and verification receipts retained in PACKAGING/DEVELOPMENT-TARGET."
+    },
+    {
+      "source": "/private/tmp/maya-phone-preflight-20261014-02/ios-development-build/Build/Products/Debug-iphoneos/App.app",
+      "reason": "Reproducible unsigned binary; no install. Actual bundled public resource hashes and verification receipts retained in PACKAGING/DEVELOPMENT-TARGET."
+    }
+  ]
+}
