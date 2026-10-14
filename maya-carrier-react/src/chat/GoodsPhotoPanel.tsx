@@ -46,11 +46,12 @@ function Field({ label, value, change, disabled, placeholder, t }: {
 }
 
 /** Local attachment/review controls. Business approval remains the canonical chat widget. */
-export function GoodsPhotoPanel({ view, port, disabled, t }: {
+export function GoodsPhotoPanel({ view, port, disabled, t, withinSheet = false }: {
   readonly view: GoodsPhotoView;
   readonly port: GoodsPhotoPort;
   readonly disabled: boolean;
   readonly t: Tokens;
+  readonly withinSheet?: boolean;
 }) {
   if (view.phase === 'closed') return <button type="button" disabled={disabled} onClick={() => port.open()}
     style={{ padding: '10px 0', border: 0, background: 'transparent', color: t.ink, font: 'inherit', fontSize: 14, textDecoration: 'underline', cursor: 'pointer' }}>Товар по фото накладной</button>;
@@ -62,8 +63,8 @@ export function GoodsPhotoPanel({ view, port, disabled, t }: {
     ...(item.saleUnitId === null || item.saleUnitLabel === null ? [] : [{ id: item.saleUnitId, label: item.saleUnitLabel }]),
     ...(item.writeOffUnitId === null || item.writeOffUnitLabel === null ? [] : [{ id: item.writeOffUnitId, label: item.writeOffUnitLabel }]),
   ].filter((unit, index, available) => available.findIndex(candidate => candidate.id === unit.id) === index);
-  return <section aria-label="Товар по фото накладной" style={{ color: t.ink, margin: '20px 0', maxWidth: 620, fontSize: 15, lineHeight: '23px' }}>
-    <h2 style={{ margin: '0 0 12px', fontSize: 20, lineHeight: '27px' }}>Товар по фото накладной</h2>
+  return <section aria-label="Товар по фото накладной" style={{ color: t.ink, margin: withinSheet ? 0 : '20px 0', maxWidth: 620, fontSize: 15, lineHeight: '23px' }}>
+    {withinSheet ? null : <h2 style={{ margin: '0 0 12px', fontSize: 20, lineHeight: '27px' }}>Товар по фото накладной</h2>}
     <p>Выберите одну строку, найдите существующий товар и проверьте поля. Приход потребует отдельного подтверждения в чате.</p>
     {view.phase === 'photo' ? <GoodsPhotoPicker disabled={locked} select={photo => void port.upload(photo)} t={t} /> : null}
     <p role="status" aria-live="polite" style={{ margin: '12px 0' }}>{view.busy === 'upload' ? 'Извлекаю предварительные строки…'

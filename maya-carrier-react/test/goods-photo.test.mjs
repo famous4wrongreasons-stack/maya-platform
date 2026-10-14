@@ -12,6 +12,8 @@ let m;
 try {
   const bundle = path.join(scratch, 'presentation.mjs');
   await esbuild.build({ stdin: { contents: `export { GoodsPhotoPanel } from '../src/chat/GoodsPhotoPanel.tsx';
+    export { GoodsPhotoSheet } from '../src/chat/GoodsPhotoSheet.tsx';
+    export { createElement } from 'react';
     export { GoodsPhotoPicker } from '../src/chat/GoodsPhotoPicker.tsx';
     export { tokens } from '../src/identity/tokens.ts'; export { renderToStaticMarkup } from 'react-dom/server';`, resolveDir: here, loader: 'tsx' },
     bundle: true, format: 'esm', platform: 'node', target: 'node22', jsx: 'automatic', outfile: bundle, logLevel: 'warning',
@@ -151,4 +153,24 @@ test('unsupported table explains the exact five-header scope without inventing e
     ),
     false,
   );
+});
+
+
+test('photo sheet is passive, has one labelled dialog and preserves unknown-operation lock', () => {
+  const calls=[];const port=Object.fromEntries(['upload','abort','review','open'].map(name=>[name,()=>calls.push(name)]));
+  const view={phase:'uncertain',busy:null,localEpoch:0,failure:'unknown',lines:[line],selectedLine:1,query:'',matches:[],mayHaveMore:false,item,review:{...review,priceKind:'receipt_purchase_unit'},reviewStatus:null};
+  const tree=parse(m.renderToStaticMarkup(m.createElement(m.GoodsPhotoSheet,{view,port,disabled:false,t:m.tokens(false),focusFallback:()=>calls.push('focus')})));
+  const dialogs=findAll(tree,e=>e.tag==='dialog');assert.equal(dialogs.length,1);
+  assert.equal(dialogs[0].attrs['aria-modal'],'true');
+  assert.equal(findAll(tree,e=>e.tag==='h2').length,1);
+  assert.match(textOf(tree),/повторная отправка отключена/);
+  assert.equal(findAll(tree,e=>e.tag==='input').every(e=>e.attrs.disabled!==undefined),true);
+  const enabled=findAll(tree,e=>e.tag==='button'&&e.attrs.disabled===undefined);
+  assert.equal(enabled.length,2,'only the two existing abort/close affordances remain');
+  assert.deepEqual(calls,[]);
+});
+test('closed photo sheet retains no file picker or extracted content', () => {
+  const root=parse(m.renderToStaticMarkup(m.createElement(m.GoodsPhotoSheet,{view:{phase:'closed',lines:[line]},port:{},disabled:false,t:m.tokens(false),focusFallback:()=>{}})));
+  assert.equal(findAll(root,e=>e.tag==='input').length,0);
+  assert.doesNotMatch(textOf(root),/Тестовый товар|Предварительные строки/);
 });

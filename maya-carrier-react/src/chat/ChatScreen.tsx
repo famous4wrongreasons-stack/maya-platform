@@ -49,6 +49,7 @@ import { ReplyText } from '../reply-link.tsx';
 import { TelegramLinkPanel } from './TelegramLinkPanel.tsx';
 import { PrivacyPanel } from './PrivacyPanel.tsx';
 import { GoodsPhotoPanel } from './GoodsPhotoPanel.tsx';
+import { GoodsPhotoSheet } from './GoodsPhotoSheet.tsx';
 import { CompanionHeader } from './CompanionHeader.tsx';
 import { CompanionNavigation, type CompanionSection } from './CompanionNavigation.tsx';
 import { VoiceSheet } from './VoiceSheet.tsx';
@@ -756,7 +757,7 @@ export function ChatScreen({
               {view.items.map((item) => (
                 <Row key={item.id} item={item} t={t} now={now} focusComposer={focusComposer} />
               ))}
-              {companion && goodsPhotoView.phase === 'closed' ? null : <GoodsPhotoPanel view={goodsPhotoView} port={goodsPhoto} disabled={!view.composer.enabled || view.inFlight} t={t} />}
+              {companion ? null : <GoodsPhotoPanel view={goodsPhotoView} port={goodsPhoto} disabled={!view.composer.enabled || view.inFlight} t={t} />}
             </>
           )}
         </div>
@@ -1110,6 +1111,8 @@ export function ChatScreen({
 
       {/* The detail sheet lives beside the conversation, not inside its scroller. */}
       <FullscreenDetail t={t} focusFallback={focusComposer} />
+      {companion ? <GoodsPhotoSheet view={goodsPhotoView} port={goodsPhoto} disabled={!view.composer.enabled || view.inFlight} t={t}
+        focusFallback={() => laneRef.current?.focus({ preventScroll: true })} /> : null}
     </div>
   );
 }

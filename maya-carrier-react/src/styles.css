@@ -277,6 +277,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .companion-voice-cancel { background:#f1f2f3; color:#191a1b; }
 .companion-voice-sheet :focus-visible { outline:2px solid #0068ed; outline-offset:2px; }
 .companion-voice-heading h2:focus { outline:none; }
+.companion-photo-sheet { position:fixed; inset:auto 0; top:calc(var(--maya-viewport-top,0px) + var(--maya-viewport-height,100dvh)); transform:translateY(-100%); width:min(100%,560px); max-width:100%; max-height:calc(var(--maya-viewport-height,100dvh) - 24px); margin:0 auto; box-sizing:border-box; padding:0 18px calc(24px + env(safe-area-inset-bottom,0px)); border:0; border-radius:22px 22px 0 0; background:#fff; color:#191a1b; overflow:auto; box-shadow:0 -16px 48px rgb(0 0 0 /20%); }
+.companion-photo-sheet::backdrop { background:rgb(0 0 0 /34%); }
+.companion-photo-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.companion-photo-heading h2 { margin:0; min-width:0; font-size:18px; font-weight:650; line-height:1.4; }
+.companion-photo-caption { margin:4px 0 16px; color:#727780; font-size:13px; line-height:1.5; }
+.companion-photo-body { min-width:0; overflow-wrap:anywhere; }
+.companion-photo-body input,.companion-photo-body button { min-height:44px; max-width:100%; min-width:0; box-sizing:border-box; }
+.companion-photo-body input[type=file] { width:100%; padding:8px 0; }
+.companion-photo-body button { white-space:normal; overflow-wrap:anywhere; }
+.companion-photo-sheet :focus-visible { outline:2px solid #0068ed; outline-offset:2px; }
+.companion-photo-heading h2:focus { outline:none; }
 
 /* Owner's static introduction, using the same finite mascot and visible viewport owner. */
 .companion-about-sheet { position:fixed; inset:auto 0; top:calc(var(--maya-viewport-top,0px) + var(--maya-viewport-height,100dvh)); transform:translateY(-100%); width:min(100%,560px); max-width:100%; max-height:calc(var(--maya-viewport-height,100dvh) - 24px); margin:0 auto; box-sizing:border-box; padding:0 18px calc(24px + env(safe-area-inset-bottom,0px)); border:0; border-radius:22px 22px 0 0; background:#fff; color:#191a1b; overflow:auto; box-shadow:0 -16px 48px rgb(0 0 0 /20%); }
