@@ -1,0 +1,118 @@
+TAP version 13
+# Subtest: RPK positive: complete real React PWA and native payload parity
+ok 1 - RPK positive: complete real React PWA and native payload parity
+  ---
+  duration_ms: 4.367583
+  type: 'test'
+  ...
+# Subtest: RPK explicit development API preserves production default and refuses unsafe shapes
+ok 2 - RPK explicit development API preserves production default and refuses unsafe shapes
+  ---
+  duration_ms: 0.981834
+  type: 'test'
+  ...
+# Subtest: RPK old/alternate native payload refused: ../maya-chat-shell/dist/capacitor
+ok 3 - RPK old/alternate native payload refused: ../maya-chat-shell/dist/capacitor
+  ---
+  duration_ms: 0.109666
+  type: 'test'
+  ...
+# Subtest: RPK old/alternate native payload refused: ../maya-chat-shell/dist/web
+ok 4 - RPK old/alternate native payload refused: ../maya-chat-shell/dist/web
+  ---
+  duration_ms: 0.103708
+  type: 'test'
+  ...
+# Subtest: RPK old/alternate native payload refused: www
+ok 5 - RPK old/alternate native payload refused: www
+  ---
+  duration_ms: 0.053875
+  type: 'test'
+  ...
+# Subtest: RPK old/alternate native payload refused: ../maya-carrier-react/dist/web
+ok 6 - RPK old/alternate native payload refused: ../maya-carrier-react/dist/web
+  ---
+  duration_ms: 0.117791
+  type: 'test'
+  ...
+# Subtest: RPK remote server override refuses
+ok 7 - RPK remote server override refuses
+  ---
+  duration_ms: 0.224625
+  type: 'test'
+  ...
+# Subtest: RPK legacy shell replacing native www refuses even if supplied with an inventory
+ok 8 - RPK legacy shell replacing native www refuses even if supplied with an inventory
+  ---
+  duration_ms: 2.341541
+  type: 'test'
+  ...
+# Subtest: RPK missing manifest refuses
+ok 9 - RPK missing manifest refuses
+  ---
+  duration_ms: 0.242916
+  type: 'test'
+  ...
+# Subtest: RPK altered icon refuses
+ok 10 - RPK altered icon refuses
+  ---
+  duration_ms: 0.282334
+  type: 'test'
+  ...
+# Subtest: RPK extra script refuses
+ok 11 - RPK extra script refuses
+  ---
+  duration_ms: 0.271583
+  type: 'test'
+  ...
+# Subtest: RPK altered main refuses
+ok 12 - RPK altered main refuses
+  ---
+  duration_ms: 0.279916
+  type: 'test'
+  ...
+# Subtest: RPK only empty generated bridge placeholders admitted
+ok 13 - RPK only empty generated bridge placeholders admitted
+  ---
+  duration_ms: 0.333958
+  type: 'test'
+  ...
+# Subtest: RPK endpoint/CSS/identity divergence refuses
+ok 14 - RPK endpoint/CSS/identity divergence refuses
+  ---
+  duration_ms: 10.578792
+  type: 'test'
+  ...
+# Subtest: RPK symlink payload refuses
+ok 15 - RPK symlink payload refuses
+  ---
+  duration_ms: 1.722917
+  type: 'test'
+  ...
+# Subtest: RPK Xcode and sync are bound to the same refusing release entry
+ok 16 - RPK Xcode and sync are bound to the same refusing release entry
+  ---
+  duration_ms: 0.160542
+  type: 'test'
+  ...
+# Subtest: RPK verifier rebuilds expected bytes, refuses a swapped artifact, does not repair it
+ok 17 - RPK verifier rebuilds expected bytes, refuses a swapped artifact, does not repair it
+  ---
+  duration_ms: 32726.58825
+  type: 'test'
+  ...
+# Subtest: RPK refuses keyboard-overlay and outer-scroll regressions
+ok 18 - RPK refuses keyboard-overlay and outer-scroll regressions
+  ---
+  duration_ms: 0.308375
+  type: 'test'
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 32789.197042

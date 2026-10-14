@@ -143,3 +143,15 @@ assignment, undo or new writer was added. This supersedes only presentation and
 focus handling of the task-actions checkpoint. See
 `../../MAYA-COMPANION-TASK-SHEET-CHECKPOINT-20261014.md` and
 `../maya-companion-task-sheet-20261014/README.md` for fresh scoped evidence.
+
+## Voice sheet checkpoint (2026-10-14)
+
+`b34e3513801a55a98489603c60e798453d2f03dd` presents the existing voice state machine in the owner's bottom
+sheet. Actual gesture arm/send, 20-second held state, cancellation, exact Cell
+refusal and the single conversation writer stay with their existing owners.
+Native modal focus and background/late-response cancellation are checked through
+emitted React/runtime with synthetic audio APIs and loopback HTTP. No demo
+transcript, microphone, provider, capture engine or second writer was added.
+This supersedes only voice presentation, not real-device/provider acceptance.
+See `../../MAYA-COMPANION-VOICE-SHEET-CHECKPOINT-20261014.md` and
+`../maya-companion-voice-sheet-20261014/README.md` for fresh scoped evidence.
