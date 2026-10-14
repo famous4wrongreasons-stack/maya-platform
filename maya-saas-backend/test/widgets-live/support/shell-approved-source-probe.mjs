@@ -221,7 +221,12 @@ try {
       assert.equal(rendered.mode, 'structured');
       const html = companionMarkup({id:'synthetic-schedule',result:rendered,display:'live',pending:null,sentence:null});
       assert(html.includes('companion-schedule'));
-      assert(html.includes('Учебная стрижка'));
+      // Current internal day owner deliberately emits services: [] (operations-
+      // analytics.service.ts getDayOperations). Preserve its generic title;
+      // do not turn a catalogue fixture into invented historical visit content.
+      assert(source.body.entries.every(entry=>entry.title.label==='Запись'));
+      assert(html.includes('Запись'));
+      assert(!html.includes('Учебная стрижка'));
       assert(html.includes('Учебный мастер'));
       assert(!html.includes('SYNTHETIC-PRIVATE-NOTE-NOT-FOR-RENDER'));
       for (const label of input.expectedJournal) {
@@ -230,7 +235,7 @@ try {
       }
       for (const ref of rendered.readingOrder) assert(html.includes(`data-ref="${ref}"`));
       assert(!html.includes('Заполнить окно'));
-      scheduleChecks.push({stage,mode:rendered.mode,entries:source.body.entries.length,labels:input.expectedJournal,refs:rendered.readingOrder,privateNoteAbsent:true,gaps:0});
+      scheduleChecks.push({stage,mode:rendered.mode,entries:source.body.entries.length,labels:input.expectedJournal,refs:rendered.readingOrder,privateNoteAbsent:true,serviceNamesSupplied:false,genericSourceTitlePreserved:true,gaps:0});
     }
     process.stdout.write(JSON.stringify({
       mode:input.mode,pass:true,backendDetail:true,scheduleChecks,fullscreen:runtime.shell.view().fullscreen,refs,counters:runtime.widgets.counters(),
