@@ -654,3 +654,25 @@ test('an envelope whose structured drawing would not match its sealed order is d
   assert.equal(broken.mode, 'prose');
   assert.deepEqual([...broken.readingOrder], envelopeOf('kind-choice').presentation.a11y.reading_order.map(keyOf));
 });
+
+// Real journal emission represents its shared NAVIGATE by entry refs, not an
+// additional intent ref. This unit tests that projection; HTTP/PG proves emission.
+test('SCHEDULE shared detail uses sealed entry controls without an extra unsealed button', () => {
+  const input = inputOf('kind-schedule', { mutate: view => {
+    for(const entry of view.body.entries) entry.detail_intent = 'i1';
+    view.presentation.a11y.reading_order = view.presentation.a11y.reading_order.filter(ref => keyOf(ref)!=='intent:i1');
+    delete view.presentation.a11y.accessible_names['intent:i1'];
+  }});
+  const result = render(input);
+  assert.equal(result.mode, 'structured');
+  assert.deepEqual(result.readingOrder,input.view.presentation.a11y.reading_order.map(keyOf));
+  assert(!nodesOfType(result,'action').some(node=>node.ref==='intent:i1'));
+  assert.equal(nodesOfType(result,'choice').length,3);
+  assert(nodesOfType(result,'choice').every(node=>node.selects==='i1'));
+  // Do not relax the global order or integrity rule to obtain structured layout.
+  const reversed = structuredClone(input);
+  [reversed.view.presentation.a11y.reading_order[0],reversed.view.presentation.a11y.reading_order[1]] =
+    [reversed.view.presentation.a11y.reading_order[1],reversed.view.presentation.a11y.reading_order[0]];
+  assert.equal(render(reversed).mode,'prose');
+  assert.equal(render({...input,verdict:'body_mismatch'}).mode,'frozen_prose');
+});

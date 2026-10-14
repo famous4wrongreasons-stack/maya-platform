@@ -136,7 +136,7 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
           reject(
             error instanceof Error
               ? error
-              : new Error('Invalid carrier observation'),
+              : new Error(String(error)),
           );
         }
       });

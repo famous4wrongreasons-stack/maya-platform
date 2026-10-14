@@ -317,7 +317,10 @@ const structured = (d: Draw, kind: WidgetKind): RenderNode[] => {
       return [
         hinted(d, lanes, null),
         ...(b.gaps.length === 0 ? [] : [para(b.gaps.map((g) => measureLeaf(g.recoverable)))]),
-        ...actions(d, [b.detail_intent]),
+        // The server may represent this shared detail intent through entry refs
+        // only. Do not add an unsealed second control and force the whole day to
+        // prose. The final exact-order check still covers every retained control.
+        ...actions(d, [b.detail_intent]).filter((action) => d.order.has(action.ref)),
       ];
     }
     case 'CLIENT_LIST': {

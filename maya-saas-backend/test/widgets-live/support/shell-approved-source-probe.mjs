@@ -202,7 +202,14 @@ try {
   let itemId = load(envelope);
   if (input.mode === 'journal') {
     const beforeItems = runtime.conversation.view().items.map(({ id, kind }) => ({ id, kind }));
-    const result = await activate(itemId, `intent:${envelope.body.detail_intent}`);
+    // A populated journal exposes detail via its sealed entry control; an empty
+    // day has the standalone intent. Activate what the real drawer actually draws.
+    const initialResult = resultOf(envelope, new Date().toISOString());
+    const detailRef = input.expectedJournal?.length
+      ? `entry:${envelope.body.entries[0].entry_ref}`
+      : `intent:${envelope.body.detail_intent}`;
+    assert(initialResult.readingOrder.includes(detailRef));
+    const result = await activate(itemId, detailRef);
     assert.equal(result.next_envelope.kind,'SCHEDULE');
     assert.equal(result.next_envelope.body.range.from.slice(0,10),'2026-09-24');
     const scheduleChecks = [];
