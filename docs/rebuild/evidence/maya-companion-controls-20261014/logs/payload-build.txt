@@ -1,0 +1,24 @@
+digest 75b81a8c5b80c4c5f10b16da7a5bcae502cc08c2675a903d96538984a226f745
+web d6c78989aa5d32f6a06578b9950e92a16791085839c24cd3a9cb941f22dbd3d7 (web; 46 modules; styles.css present; index.html present; 5 pwa assets)
+contract: #contract -> 281 declarations in os.tmpdir(); 201 exports (+1 pending name) in the collision set
+baseline: 0 live entries (build-baseline/routes.json absent, build-baseline/renderer.json absent); 0 refused sites admitted by it
+pwa: manifest.webmanifest id /maya-chat-shell/, start_url ./, standalone portrait; 3 manifest icons + 1 apple-touch icon; no service worker
+serving: do NOT serve this tree at or under /app/ — the retired PWA's service worker is still live at /app/service-worker.js (max-age=604800) and its scope is /app/; a shell served there would be controlled by a worker this build never wrote. Check a path with: node build.mjs --serve-path=<the path this tree will be served from>
+entry: present
+net/client.ts: present
+built 49 sources -> dist/web/m/d6c78989aa5d32f6/
+gate: PASS (41 source files, 0 refusals)
+typecheck: PASS (41 carrier files + 35 runtime modules, contract 201 exports, 5.9.3)
+built React AChat -> dist/web/m/RDU6K6FE/main.js (8 files)
+gate: PASS (41 source files, 0 refusals)
+typecheck: PASS (41 carrier files + 35 runtime modules, contract 201 exports, 5.9.3)
+capacitor proof: PASS (one endpoint string differs; index.html differs only in digest path and connect-src; styles.css identical; no other origin in the artefact)
+built React AChat -> dist/capacitor/m/8d22d723e83c235e/main.js (8 files)
+gate: PASS (41 source files, 0 refusals)
+typecheck: PASS (41 carrier files + 35 runtime modules, contract 201 exports, 5.9.3)
+verified React AChat -> dist/web/m/RDU6K6FE/main.js (8 files)
+gate: PASS (41 source files, 0 refusals)
+typecheck: PASS (41 carrier files + 35 runtime modules, contract 201 exports, 5.9.3)
+capacitor proof: PASS (one endpoint string differs; index.html differs only in digest path and connect-src; styles.css identical; no other origin in the artefact)
+verified React AChat -> dist/capacitor/m/8d22d723e83c235e/main.js (8 files)
+{"status":"PASS","owner":"React AChat","mode":"build","files":8,"apiMode":"production","apiBase":"https://mayaos.ru/api","profileAuthority":"server only","nativeVerified":false}

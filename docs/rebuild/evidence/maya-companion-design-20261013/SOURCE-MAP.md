@@ -115,3 +115,18 @@ new writer or permission was added. This supersedes only the inline-reader
 presentation in the earlier Library checkpoint. See
 `../../MAYA-COMPANION-REPORT-SHEET-CHECKPOINT-20261014.md` and
 `../maya-companion-report-sheet-20261014/README.md` for fresh scoped evidence.
+
+## Drawer and library view controls checkpoint (2026-10-14)
+
+`79fad41b5cdc293d1ec19e3fe7d3dcc923bf2c58` presents the five existing destinations in the owner's drawer,
+with current state projected from ShellView and explicit Privacy/photo handling.
+Choosing the current destination is inert; returning to Chat uses the existing
+root route. Library layout/order move into the owner's native bottom sheet,
+calling only the existing presentation preferences. No new read, writer,
+preference persistence, authority or fake profile/recents/search was added.
+Existing admitted navigation icons are reused; a before-fail/after-pass proof
+protects against CSS shorthand hiding those images. This supersedes only the
+drawer/inline-preferences presentation at the previous checkpoint. See
+`../../MAYA-COMPANION-CONTROLS-CHECKPOINT-20261014.md` and
+`../maya-companion-controls-20261014/README.md` for fresh scoped evidence.
+The separate source/policy gaps above remain open.
