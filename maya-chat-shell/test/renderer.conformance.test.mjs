@@ -677,3 +677,67 @@ for (const detailIntent of ['i1', 'i3']) test('SCHEDULE shared detail keeps seal
   assert.equal(render(reversed).mode,'prose');
   assert.equal(render({...input,verdict:'body_mismatch'}).mode,'frozen_prose');
 });
+
+const scheduleGrid = result => nodesOfType(result, 'block').find(node => node.roleHint === 'grid');
+const interleavedSchedule = () => inputOf('kind-schedule', { mutate: view => {
+  view.body.entries[1].lane_id = 'l-anna';
+  view.body.entries[2].lane_id = 'l-ilya';
+}});
+
+test('SCHEDULE interleaved lanes preserve entry order, labels and exact control ownership', () => {
+  const input = interleavedSchedule();
+  const before = structuredClone(input);
+  const result = render(input);
+  assert.equal(result.mode, 'structured');
+  assert.deepEqual(result.readingOrder, input.view.presentation.a11y.reading_order.map(keyOf));
+  const groups = scheduleGrid(result).children;
+  assert.deepEqual(groups.map(group => group.label), ['Илья', 'Анна', 'Илья']);
+  assert.deepEqual(groups.map(group => group.children.filter(n => n.t === 'choice').map(n => [n.ref, n.selects])), [
+    [['entry:e-1', 'i2']], [['entry:e-2', 'i2']], [['entry:e-3', null]],
+  ]);
+  assert.deepEqual(nodesOfType(result, 'action').map(n => n.ref), ['intent:i1', 'intent:i2', 'intent:i3']);
+  assert.deepEqual(input, before, 'presentation cannot rewrite the sealed input');
+});
+
+test('SCHEDULE lane declarations do not sort entries or merge distinct lanes with equal labels', () => {
+  const input = interleavedSchedule();
+  input.view.body.lanes[1].label = structuredClone(input.view.body.lanes[0].label);
+  input.view.body.lanes.reverse();
+  const result = render(input);
+  assert.equal(result.mode, 'structured');
+  assert.deepEqual(scheduleGrid(result).children.map(group => group.label), ['Илья', 'Илья', 'Илья']);
+  assert.deepEqual(nodesOfType(result, 'choice').map(n => n.ref), ['entry:e-1', 'entry:e-2', 'entry:e-3']);
+});
+
+test('SCHEDULE keeps declared empty lanes without inventing entries or free windows', () => {
+  const input = interleavedSchedule();
+  const empty = structuredClone(input.view.body.lanes[0]);
+  empty.lane_id = 'empty-lane';
+  empty.label.value = empty.label.label = 'Мастер без записей';
+  input.view.body.lanes.unshift(empty);
+  const result = render(input);
+  assert.equal(result.mode, 'structured');
+  const groups = scheduleGrid(result).children;
+  assert.deepEqual(groups.map(group => group.label), ['Илья', 'Анна', 'Илья', 'Мастер без записей']);
+  assert.equal(groups.at(-1).children.filter(n => n.t === 'choice').length, 0);
+  assert.equal(nodesOfType(result, 'choice').length, 3);
+  assert.deepEqual(result.readingOrder, input.view.presentation.a11y.reading_order.map(keyOf));
+});
+
+for (const fault of ['unknown-lane', 'duplicate-lane', 'different-reading-order'])
+  test('SCHEDULE interleaved source refuses ambiguous or reordered structure: ' + fault, () => {
+    const input = interleavedSchedule();
+    if (fault === 'unknown-lane') input.view.body.entries[1].lane_id = 'not-declared';
+    if (fault === 'duplicate-lane') input.view.body.lanes.push(structuredClone(input.view.body.lanes[0]));
+    if (fault === 'different-reading-order') input.view.presentation.a11y.reading_order.reverse();
+    const result = render(input);
+    assert.equal(result.mode, 'prose');
+    assert.deepEqual(result.readingOrder, input.view.presentation.a11y.reading_order.map(keyOf));
+  });
+
+test('SCHEDULE interleaving cannot bypass integrity or TEXT_ONLY tier', () => {
+  const input = interleavedSchedule();
+  assert.equal(render({...input, verdict:'body_mismatch'}).mode, 'frozen_prose');
+  input.view.render.render_tier = 'TEXT_ONLY';
+  assert.equal(render(input).mode, 'prose');
+});

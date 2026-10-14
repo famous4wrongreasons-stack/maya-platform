@@ -33,6 +33,9 @@ const envelope=JSON.parse(fs.readFileSync(path.join(root,'../maya-chat-shell/dev
 // Synthetic subtitle for layout; source-carrier.probe-spec.ts separately checks real emission.
 envelope.body.entries[0].subtitle={...envelope.body.entries[0].title,
   value:'2026-09-18 · 10:00–11:00 · Europe/Moscow',label:'2026-09-18 · 10:00–11:00 · Europe/Moscow'};
+// Chronological entries interleave masters; presentation must not collect them by master.
+envelope.body.entries[1].lane_id='l-anna';
+envelope.body.entries[2].lane_id='l-ilya';
 envelope.integrity.body_hash=bodyHash(envelope);
 const detail=structuredClone(envelope);detail.widget_id='01M2Q9G7M0AAAAAAAAAAAAAAAA';detail.correlation.parent_widget_id=envelope.widget_id;detail.intents[0].target={class:'w',ref:'w.journal.parent'};detail.integrity.body_hash=bodyHash(detail);
 const json=(res,value,status=200)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
@@ -62,6 +65,14 @@ const button=text=>`Array.from(document.querySelectorAll('button')).find(b=>(b.g
 const composer=`document.querySelector('textarea[aria-disabled]')`;
 const check=async(expression,name)=>{assert.ok(await page.waitFor(expression),name);report.checks.push(name);};
 const click=async(name)=>assert.ok(await page.click(button(name)),name);
+const checkSchedule=async(rootSelector,stage)=>{
+  const expected=envelope.body.entries.map(entry=>({ref:'entry:'+entry.entry_ref,
+    staff:envelope.body.lanes.find(lane=>lane.lane_id===entry.lane_id).label.label}));
+  await check(`(() => {const root=document.querySelector(${JSON.stringify(rootSelector)}),grid=root?.querySelector('.hint--grid');if(!grid)return false;return JSON.stringify([...grid.children].flatMap(group=>[...group.querySelectorAll('[data-ref]')].map(entry=>({ref:entry.dataset.ref,staff:group.getAttribute('aria-label')}))))===${JSON.stringify(JSON.stringify(expected))}})()`,stage+' interleaved masters retain server entry order and labels');
+  const order=envelope.presentation.a11y.reading_order.map(ref=>ref.k+':'+ref.id);
+  await check(`JSON.stringify([...document.querySelector(${JSON.stringify(rootSelector)}).querySelectorAll('[data-ref]')].map(el=>el.dataset.ref))===${JSON.stringify(JSON.stringify(order))}`,stage+' DOM controls exactly match sealed reading order without duplication');
+};
+
 const screenshot=async name=>{
   const {data}=await page.send('Page.captureScreenshot',{format:'png'});
   fs.writeFileSync(path.join(out,name+'.png'),Buffer.from(data,'base64'));report.screenshots.push(name+'.png');
@@ -111,6 +122,7 @@ try {
   json(pending.res,{request_id:pending.data.requestId,reply:'Вот учебное расписание. Подробности можно открыть в карточке.',action_status:null,user_turn:{turnId:'10000000-0000-4000-8000-000000000004',conversationId:cid},resolution:{matched:true,receipt:{widget_id:envelope.widget_id,envelope_seal:envelope.integrity.envelope_seal,envelope},dismiss_widget_id:null}},201);pending=null;
   await check(`!!${intentButton} && ${composer}.value===${JSON.stringify(question)}`,'server envelope draws canonical schedule without erasing the unrelated draft');
   await check("!document.querySelector('dialog.fullscreen[open]')",'receipt alone does not infer fullscreen from kind or text');
+  await checkSchedule('.maya-chat-lane .companion-schedule','inline card');
   await screenshot('schedule-card-393');
   await page.click(intentButton);
   await check("document.querySelector('.fullscreen-progress')!==null",'canonical NAVIGATE opens PROGRESS');
@@ -118,6 +130,12 @@ try {
   await check("document.querySelector('dialog.fullscreen[open]') && !document.querySelector('.fullscreen-progress')",'server-bound detail resolves PROGRESS into fullscreen');
   const messageCount=await page.eval("document.querySelectorAll('.maya-chat-lane [data-chat-message]').length");
   await check("!!document.querySelector('dialog[open] .companion-schedule')",'structured schedule gets dedicated visual treatment');
+  await checkSchedule('dialog[open] .companion-schedule','fullscreen detail');
+  await page.focus("document.querySelector('dialog[open] [data-ref=\"entry:e-1\"]')");
+  await page.press('Tab');
+  await check("document.activeElement?.dataset.ref==='entry:e-2'",'keyboard moves to the next chronological entry across masters');
+  await page.press('Tab');
+  await check("document.activeElement?.dataset.ref==='entry:e-3'",'keyboard returns to repeated master without regrouping');
   for(const [width,height] of [[320,740],[393,852],[1280,900]]) {
     await size(width,height);
     await page.eval('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
@@ -141,6 +159,7 @@ try {
   await check(`!document.querySelector('dialog.fullscreen[open]') && document.activeElement===${intentButton}`,'Escape uses existing close owner and restores actual widget opener');
   assert.equal(await page.eval("document.querySelectorAll('.maya-chat-lane [data-chat-message]').length"),messageCount);
   report.checks.push('opening/closing detail creates no timeline duplication');
+  await checkSchedule('.maya-chat-lane .companion-schedule','returned parent');
   // A substituted principal in an otherwise valid response cannot acquire fullscreen.
   await page.click(intentButton);await check("document.querySelector('.fullscreen-progress')!==null",'substitution probe awaits canonical detail response');
   const foreign=structuredClone(detail);foreign.integrity.principal_proof_hash='b'.repeat(64);foreign.integrity.body_hash=bodyHash(foreign);

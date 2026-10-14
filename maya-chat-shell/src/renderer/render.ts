@@ -292,24 +292,38 @@ const structured = (d: Draw, kind: WidgetKind): RenderNode[] => {
     }
     case 'SCHEDULE': {
       if (!('lanes' in b)) return unreadable(kind);
-      // Lane = row header; each entry is a control inside its lane, in the order the entries are sealed.
-      const lanes = b.lanes.map((lane) =>
+      // Keep entry order from the sealed body. Group only consecutive entries of
+      // the same lane: collecting all of one lane would reorder A/B/A into A/A/B.
+      // Repeated headers copy the same server label, never a locally composed name.
+      const byId = new Map(b.lanes.map((lane) => [lane.lane_id, lane]));
+      if (byId.size !== b.lanes.length) return unreadable(kind);
+      const runs: Array<{ lane: typeof b.lanes[number]; entries: typeof b.entries }> = [];
+      const used = new Set<string>();
+      for (const entry of b.entries) {
+        const lane = byId.get(entry.lane_id);
+        if (lane === undefined) return unreadable(kind);
+        const previous = runs.at(-1);
+        if (previous?.lane.lane_id === lane.lane_id) previous.entries.push(entry);
+        else runs.push({ lane, entries: [entry] });
+        used.add(lane.lane_id);
+      }
+      // Retain declared empty lanes as labels only; absence is not availability.
+      for (const lane of b.lanes) if (!used.has(lane.lane_id)) runs.push({ lane, entries: [] });
+      const lanes = runs.map(({ lane, entries }) =>
         block(
           'group',
           [
             cellLeaf(lane.label),
-            ...b.entries
-              .filter((e) => e.lane_id === lane.lane_id)
-              .map((e): ChoiceNode => {
-                const ref: InteractiveRefKey = `entry:${e.entry_ref}`;
-                return {
-                  t: 'choice',
-                  ref,
-                  name: nameOf(d, ref),
-                  selects: emitted(d, e.detail_intent),
-                  children: [cellLeaf(e.title), ...optional(e.subtitle, cellLeaf), cellLeaf(e.state)],
-                };
-              }),
+            ...entries.map((e): ChoiceNode => {
+              const ref: InteractiveRefKey = `entry:${e.entry_ref}`;
+              return {
+                t: 'choice',
+                ref,
+                name: nameOf(d, ref),
+                selects: emitted(d, e.detail_intent),
+                children: [cellLeaf(e.title), ...optional(e.subtitle, cellLeaf), cellLeaf(e.state)],
+              };
+            }),
           ],
           lane.label.label,
         ),
