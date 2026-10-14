@@ -863,27 +863,32 @@ export class OperationsAnalyticsService {
                 status: true,
                 totalPriceKopecks: true,
                 currency: true,
+                serviceIds: true,
               },
               orderBy: { startAt: 'asc' },
             })
-            .then((items) => ({
-              appointments: items.map((item) => ({
-                ...item,
-                services: [],
-                staffName: null as string | null,
-                durationMinutes:
-                  item.endAt instanceof Date
-                    ? Math.max(
-                        0,
-                        Math.round(
-                          (item.endAt.getTime() - item.startAt.getTime()) /
-                            60_000,
-                        ),
-                      )
-                    : 0,
-              })),
-              read: null,
-            })),
+            .then((items) => {
+              const serviceIdsByAppointment = new Map<string, unknown>();
+              const appointments = items.map(({ serviceIds, ...item }) => {
+                serviceIdsByAppointment.set(item.id, serviceIds);
+                return {
+                  ...item,
+                  services: [],
+                  staffName: null as string | null,
+                  durationMinutes:
+                    item.endAt instanceof Date
+                      ? Math.max(
+                          0,
+                          Math.round(
+                            (item.endAt.getTime() - item.startAt.getTime()) /
+                              60_000,
+                          ),
+                        )
+                      : 0,
+                };
+              });
+              return { appointments, serviceIdsByAppointment, read: null };
+            }),
       /**
        * 🔴 Присутствие — из зеркала главы 3 и только оттуда. Поле `attendance`
        * в ответе журнала описывает то же событие, но живёт по своим правилам
@@ -928,6 +933,17 @@ export class OperationsAnalyticsService {
         source,
       );
 
+    // The internal journal already resolves names through InternalService. Only
+    // labels belong here: today's catalogue prices are not historical facts.
+    // Enrich records AFTER aggregation; money and service breakdowns stay intact.
+    const journalServices =
+      'serviceIdsByAppointment' in read
+        ? await this.internalJournalServiceNames(
+            scopedTenantId,
+            read.serviceIdsByAppointment,
+          )
+        : null;
+
     return {
       date,
       timezone,
@@ -940,7 +956,12 @@ export class OperationsAnalyticsService {
       completeness: overview.completeness,
       attendance: overview.attendance,
       /** Записи дня — тот же прочитанный набор, окно уже применено. */
-      records: appointments,
+      records: journalServices
+        ? appointments.map((appointment) => ({
+            ...appointment,
+            services: journalServices.get(appointment.id) ?? [],
+          }))
+        : appointments,
       /**
        * Смены мастеров из того же ответа провайдера. Рабочим временем и
        * утилизацией этот слой не владеет — он лишь не заставляет потребителя
@@ -1138,6 +1159,39 @@ export class OperationsAnalyticsService {
       ...appointment,
       staffName: names.get(appointment.staffExternalId) ?? null,
     }));
+  }
+
+  /** Current labels for stored internal service IDs; never prices or booking eligibility. */
+  private async internalJournalServiceNames(
+    tenantId: string,
+    serviceIdsByAppointment: ReadonlyMap<string, unknown>,
+  ): Promise<Map<string, Array<{ id: string; name: string }>>> {
+    const storedIds = new Map(
+      [...serviceIdsByAppointment].map(([appointmentId, value]) => [
+        appointmentId,
+        Array.isArray(value)
+          ? value.filter(
+              (id): id is string => typeof id === 'string' && id !== '',
+            )
+          : [],
+      ]),
+    );
+    const ids = [...new Set([...storedIds.values()].flat())];
+    if (ids.length === 0) return new Map();
+    const services = await this.prisma.internalService.findMany({
+      where: { tenantId, id: { in: ids } },
+      select: { id: true, name: true },
+    });
+    const names = new Map(services.map((service) => [service.id, service]));
+    return new Map(
+      [...storedIds].map(([appointmentId, serviceIds]) => [
+        appointmentId,
+        serviceIds.flatMap((id) => {
+          const service = names.get(id);
+          return service ? [service] : [];
+        }),
+      ]),
+    );
   }
 
   /**

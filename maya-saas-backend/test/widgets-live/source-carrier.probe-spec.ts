@@ -45,6 +45,8 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
       await fx.grantFeature(tenant, feature);
     // Fixture data only, inside the harness's owned synthetic tenant. No CRM IO.
     const expectedJournal: string[] = [];
+    const expectedJournalTitles: string[] = [];
+    let journalBefore: unknown = null;
     if (mode === 'journal-populated') {
       const service = await db.prisma.internalService.create({
         data: {
@@ -61,7 +63,36 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
           active: true,
         },
       });
-      for (const hour of [7, 9]) {
+      const inactive = await db.prisma.internalService.create({
+        data: {
+          tenantId: tenant.id,
+          name: 'Архивная учебная услуга',
+          price: 9900,
+          durationMinutes: 30,
+          active: false,
+        },
+      });
+      const otherTenant = await fx.tenant(
+        'Foreign journal catalogue',
+        CalendarSource.INTERNAL,
+      );
+      const foreign = await db.prisma.internalService.create({
+        data: {
+          tenantId: otherTenant.id,
+          name: 'FOREIGN-SERVICE-NOT-FOR-RENDER',
+          price: 9900,
+          durationMinutes: 30,
+        },
+      });
+      for (const [hour, serviceIds, title] of [
+        [7, [service.id], 'Учебная стрижка'],
+        [
+          9,
+          [inactive.id, service.id],
+          'Архивная учебная услуга, Учебная стрижка',
+        ],
+        [11, [foreign.id, 'deleted-synthetic-service'], 'Запись'],
+      ] as const) {
         const startAt = new Date(
           `2026-09-24T${String(hour).padStart(2, '0')}:00:00Z`,
         );
@@ -71,19 +102,25 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
             tenantId: tenant.id,
             source: 'internal',
             staffExternalId: provider.id,
-            serviceIds: [service.id],
+            serviceIds: [...serviceIds],
             startAt,
             endAt,
             blockedStartAt: startAt,
             blockedEndAt: endAt,
             status: 'confirmed',
+            totalPriceKopecks: 12345,
             notes: 'SYNTHETIC-PRIVATE-NOTE-NOT-FOR-RENDER',
           },
         });
         expectedJournal.push(
           `2026-09-24 · ${hour + 3}:00–${hour + 4}:00 · Europe/Moscow`,
         );
+        expectedJournalTitles.push(title);
       }
+      journalBefore = await db.prisma.appointment.findMany({
+        where: { tenantId: tenant.id },
+        orderBy: { id: 'asc' },
+      });
     }
     const accessToken = await http.login(
       tenant.slug,
@@ -133,17 +170,14 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
           assert.equal(result.pass, true, `carrier probe ${mode}: ${message}`);
           resolve(result);
         } catch (error) {
-          reject(
-            error instanceof Error
-              ? error
-              : new Error(String(error)),
-          );
+          reject(error instanceof Error ? error : new Error(String(error)));
         }
       });
       child.stdin.end(
         JSON.stringify({
           mode: mode === 'personal' ? 'personal' : 'journal',
           expectedJournal,
+          expectedJournalTitles,
           baseUrl,
           accessToken,
           tenantName: tenant.slug,
@@ -176,7 +210,7 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
       const state = await fx.binView().bookingProofState(tenant);
       assert.equal(
         state.appointments.length,
-        2,
+        3,
         'read/detail cannot create bookings',
       );
       assert.equal(
@@ -185,6 +219,14 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
         'read/detail cannot dispatch an action',
       );
       assert.equal(state.memberships[0].role, UserRole.TENANT_OWNER);
+      assert.deepEqual(
+        await db.prisma.appointment.findMany({
+          where: { tenantId: tenant.id },
+          orderBy: { id: 'asc' },
+        }),
+        journalBefore,
+        'journal and detail reads must not alter stored visits',
+      );
     }
     observations.push(observed);
     const out = process.env.GITHUB_SOURCE_PROBE_OUT;

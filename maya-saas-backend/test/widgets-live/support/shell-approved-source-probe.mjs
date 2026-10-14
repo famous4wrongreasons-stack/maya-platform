@@ -221,12 +221,13 @@ try {
       assert.equal(rendered.mode, 'structured');
       const html = companionMarkup({id:'synthetic-schedule',result:rendered,display:'live',pending:null,sentence:null});
       assert(html.includes('companion-schedule'));
-      // Current internal day owner deliberately emits services: [] (operations-
-      // analytics.service.ts getDayOperations). Preserve its generic title;
-      // do not turn a catalogue fixture into invented historical visit content.
-      assert(source.body.entries.every(entry=>entry.title.label==='Запись'));
+      // Labels arrive sealed from the real journal owner, including an inactive
+      // service. Foreign/deleted IDs stay unnamed; prices are not label evidence.
+      assert.deepEqual(source.body.entries.map(entry=>entry.title.label), input.expectedJournalTitles);
+      for (const title of input.expectedJournalTitles) assert(html.includes(title));
       assert(html.includes('Запись'));
-      assert(!html.includes('Учебная стрижка'));
+      assert(html.includes('Учебная стрижка'));
+      assert(!html.includes('FOREIGN-SERVICE-NOT-FOR-RENDER'));
       assert(html.includes('Учебный мастер'));
       assert(!html.includes('SYNTHETIC-PRIVATE-NOTE-NOT-FOR-RENDER'));
       for (const label of input.expectedJournal) {
@@ -235,7 +236,7 @@ try {
       }
       for (const ref of rendered.readingOrder) assert(html.includes(`data-ref="${ref}"`));
       assert(!html.includes('Заполнить окно'));
-      scheduleChecks.push({stage,mode:rendered.mode,entries:source.body.entries.length,labels:input.expectedJournal,refs:rendered.readingOrder,privateNoteAbsent:true,serviceNamesSupplied:false,genericSourceTitlePreserved:true,gaps:0});
+      scheduleChecks.push({stage,mode:rendered.mode,entries:source.body.entries.length,labels:input.expectedJournal,titles:input.expectedJournalTitles,refs:rendered.readingOrder,privateNoteAbsent:true,serviceNamesSupplied:true,foreignServiceAbsent:true,unresolvedServiceFallbackPreserved:true,gaps:0});
     }
     process.stdout.write(JSON.stringify({
       mode:input.mode,pass:true,backendDetail:true,scheduleChecks,fullscreen:runtime.shell.view().fullscreen,refs,counters:runtime.widgets.counters(),
