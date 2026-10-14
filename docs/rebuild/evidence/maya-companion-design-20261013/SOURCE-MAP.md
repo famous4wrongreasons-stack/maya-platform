@@ -237,3 +237,18 @@ This is scoped local acceptance, not release certification. Aggregated free-wind
 cards and alternating-master actual-source evidence remain open. Current branch
 binding is present in code; older absence-of-mapping reports are historical.
 See [checkpoint](../../MAYA-JOURNAL-SERVICE-NAMES-CHECKPOINT-20261014.md).
+
+
+## 2026-10-14 — interleaved masters in the journal
+
+Candidate `9208d779df7f8c0d94f696e2011db66c43bfadee` closes the alternating-master
+actual-source gap. Runtime groups only consecutive entries, preserving the sealed
+A/B/A/C order and repeating the existing server label. Unknown/duplicate lanes,
+H7, reading order and TEXT_ONLY refusals remain fail-closed. Backend product code,
+carrier CSS/semantics, identities and action owners are unchanged.
+Actual HTTP/PG source proves four scenarios, including three interleaved masters;
+separate Chrome proof covers order, focus, detail return and refusal. Fresh runtime
+846 PASS + 7 SKIP, carrier 196 PASS, browser 348 PASS, NS-1 16 PASS, packaging/parity,
+types/ratchets and targeted old-grouping mutation PASS. No real effects or full
+release certification. Aggregated free windows without a service remain unresolved.
+See [checkpoint](../../MAYA-SCHEDULE-MULTILANE-CHECKPOINT-20261014.md).

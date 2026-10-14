@@ -1,0 +1,24 @@
+{
+  "candidate": "9208d779df7f8c0d94f696e2011db66c43bfadee",
+  "status": "PASS",
+  "mutation": "restore grouping all appointments of each master before next master",
+  "results": [
+    {
+      "stage": "baseline",
+      "exit": 0,
+      "log": "baseline.log"
+    },
+    {
+      "stage": "mutant",
+      "exit": 1,
+      "log": "mutant.log"
+    },
+    {
+      "stage": "restored",
+      "exit": 0,
+      "log": "restored.log"
+    }
+  ],
+  "sourceRestoredSha256": "c5f7fffabb87f09ab5b6b69fd2df41ff35e762d955b5e0aefe51f99b541c5bf6",
+  "realEffects": 0
+}

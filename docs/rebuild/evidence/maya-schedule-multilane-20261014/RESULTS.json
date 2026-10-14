@@ -1,0 +1,305 @@
+{
+  "candidate": "9208d779df7f8c0d94f696e2011db66c43bfadee",
+  "fullReleaseCertification": false,
+  "actualBackendHttpPg": true,
+  "actualRuntimeReactProjection": true,
+  "browserOverThisBackend": false,
+  "syntheticDatabaseOnly": true,
+  "realModel": false,
+  "externalProvider": false,
+  "clusterStopped": true,
+  "sourceScenarios": {
+    "journal": {
+      "pass": true,
+      "backendDetail": true,
+      "scheduleChecks": [],
+      "fullscreenPhase": "open",
+      "timelineUnchanged": true
+    },
+    "journal-populated": {
+      "pass": true,
+      "backendDetail": true,
+      "scheduleChecks": [
+        {
+          "stage": "initial",
+          "mode": "structured",
+          "entries": 4,
+          "labels": [
+            "2026-09-24 · 10:00–11:00 · Europe/Moscow",
+            "2026-09-24 · 12:00–13:00 · Europe/Moscow",
+            "2026-09-24 · 14:00–15:00 · Europe/Moscow",
+            "2026-09-24 · 16:00–17:00 · Europe/Moscow"
+          ],
+          "titles": [
+            "Учебная стрижка",
+            "Архивная учебная услуга, Учебная стрижка",
+            "Запись",
+            "Запись"
+          ],
+          "drawnEntryStaff": [
+            {
+              "ref": "entry:journal-entry-1",
+              "staff": "Учебный мастер"
+            },
+            {
+              "ref": "entry:journal-entry-2",
+              "staff": "Учебный мастер"
+            },
+            {
+              "ref": "entry:journal-entry-3",
+              "staff": "Учебный мастер"
+            },
+            {
+              "ref": "entry:journal-entry-4",
+              "staff": "Учебный мастер"
+            }
+          ],
+          "refs": [
+            "entry:journal-entry-1",
+            "entry:journal-entry-2",
+            "entry:journal-entry-3",
+            "entry:journal-entry-4",
+            "intent:i2",
+            "intent:i3"
+          ],
+          "privateNoteAbsent": true,
+          "serviceNamesSupplied": true,
+          "foreignServiceAbsent": true,
+          "unresolvedServiceFallbackPreserved": true,
+          "gaps": 0
+        },
+        {
+          "stage": "detail",
+          "mode": "structured",
+          "entries": 4,
+          "labels": [
+            "2026-09-24 · 10:00–11:00 · Europe/Moscow",
+            "2026-09-24 · 12:00–13:00 · Europe/Moscow",
+            "2026-09-24 · 14:00–15:00 · Europe/Moscow",
+            "2026-09-24 · 16:00–17:00 · Europe/Moscow"
+          ],
+          "titles": [
+            "Учебная стрижка",
+            "Архивная учебная услуга, Учебная стрижка",
+            "Запись",
+            "Запись"
+          ],
+          "drawnEntryStaff": [
+            {
+              "ref": "entry:journal-entry-1",
+              "staff": "Учебный мастер"
+            },
+            {
+              "ref": "entry:journal-entry-2",
+              "staff": "Учебный мастер"
+            },
+            {
+              "ref": "entry:journal-entry-3",
+              "staff": "Учебный мастер"
+            },
+            {
+              "ref": "entry:journal-entry-4",
+              "staff": "Учебный мастер"
+            }
+          ],
+          "refs": [
+            "entry:journal-entry-1",
+            "entry:journal-entry-2",
+            "entry:journal-entry-3",
+            "entry:journal-entry-4",
+            "intent:i2",
+            "intent:i3",
+            "intent:i4"
+          ],
+          "privateNoteAbsent": true,
+          "serviceNamesSupplied": true,
+          "foreignServiceAbsent": true,
+          "unresolvedServiceFallbackPreserved": true,
+          "gaps": 0
+        }
+      ],
+      "fullscreenPhase": "open",
+      "timelineUnchanged": true
+    },
+    "journal-multilane": {
+      "pass": true,
+      "backendDetail": true,
+      "scheduleChecks": [
+        {
+          "stage": "initial",
+          "mode": "structured",
+          "entries": 4,
+          "labels": [
+            "2026-09-24 · 10:00–11:00 · Europe/Moscow",
+            "2026-09-24 · 12:00–13:00 · Europe/Moscow",
+            "2026-09-24 · 14:00–15:00 · Europe/Moscow",
+            "2026-09-24 · 16:00–17:00 · Europe/Moscow"
+          ],
+          "titles": [
+            "Учебная стрижка",
+            "Архивная учебная услуга, Учебная стрижка",
+            "Запись",
+            "Запись"
+          ],
+          "drawnEntryStaff": [
+            {
+              "ref": "entry:journal-entry-1",
+              "staff": "Учебный мастер"
+            },
+            {
+              "ref": "entry:journal-entry-2",
+              "staff": "Второй учебный мастер"
+            },
+            {
+              "ref": "entry:journal-entry-3",
+              "staff": "Учебный мастер"
+            },
+            {
+              "ref": "entry:journal-entry-4",
+              "staff": "Третий учебный мастер"
+            }
+          ],
+          "refs": [
+            "entry:journal-entry-1",
+            "entry:journal-entry-2",
+            "entry:journal-entry-3",
+            "entry:journal-entry-4",
+            "intent:i2",
+            "intent:i3"
+          ],
+          "privateNoteAbsent": true,
+          "serviceNamesSupplied": true,
+          "foreignServiceAbsent": true,
+          "unresolvedServiceFallbackPreserved": true,
+          "gaps": 0
+        },
+        {
+          "stage": "detail",
+          "mode": "structured",
+          "entries": 4,
+          "labels": [
+            "2026-09-24 · 10:00–11:00 · Europe/Moscow",
+            "2026-09-24 · 12:00–13:00 · Europe/Moscow",
+            "2026-09-24 · 14:00–15:00 · Europe/Moscow",
+            "2026-09-24 · 16:00–17:00 · Europe/Moscow"
+          ],
+          "titles": [
+            "Учебная стрижка",
+            "Архивная учебная услуга, Учебная стрижка",
+            "Запись",
+            "Запись"
+          ],
+          "drawnEntryStaff": [
+            {
+              "ref": "entry:journal-entry-1",
+              "staff": "Учебный мастер"
+            },
+            {
+              "ref": "entry:journal-entry-2",
+              "staff": "Второй учебный мастер"
+            },
+            {
+              "ref": "entry:journal-entry-3",
+              "staff": "Учебный мастер"
+            },
+            {
+              "ref": "entry:journal-entry-4",
+              "staff": "Третий учебный мастер"
+            }
+          ],
+          "refs": [
+            "entry:journal-entry-1",
+            "entry:journal-entry-2",
+            "entry:journal-entry-3",
+            "entry:journal-entry-4",
+            "intent:i2",
+            "intent:i3",
+            "intent:i4"
+          ],
+          "privateNoteAbsent": true,
+          "serviceNamesSupplied": true,
+          "foreignServiceAbsent": true,
+          "unresolvedServiceFallbackPreserved": true,
+          "gaps": 0
+        }
+      ],
+      "fullscreenPhase": "open",
+      "timelineUnchanged": true
+    },
+    "personal": {
+      "pass": true,
+      "createRescheduleCancel": true
+    }
+  },
+  "counts": {
+    "runtime": {
+      "tests": 853,
+      "pass": 846,
+      "fail": 0,
+      "skipped": 7
+    },
+    "carrier": {
+      "tests": 196,
+      "pass": 196,
+      "fail": 0,
+      "skipped": 0
+    },
+    "packaging-tests": {
+      "tests": 18,
+      "pass": 18,
+      "fail": 0,
+      "skipped": 0
+    },
+    "actual-source": {
+      "numPassedTests": 4,
+      "numFailedTests": 0,
+      "numPendingTests": 0
+    }
+  },
+  "browserCounts": {
+    "chat-browser": 35,
+    "navigation-browser": 207,
+    "voice-browser": 56,
+    "schedule-browser": 50
+  },
+  "effects": {
+    "production": 0,
+    "retainedSalonDatabase": 0,
+    "keychain": 0,
+    "realOtp": 0,
+    "realYclients": 0,
+    "realModel": 0,
+    "iosInstall": 0,
+    "push": 0,
+    "merge": 0
+  },
+  "mutation": {
+    "baseline": {
+      "tests": 7,
+      "pass": 7,
+      "fail": 0,
+      "skipped": 0
+    },
+    "mutant": {
+      "tests": 7,
+      "pass": 4,
+      "fail": 3,
+      "skipped": 0
+    },
+    "restored": {
+      "tests": 7,
+      "pass": 7,
+      "fail": 0,
+      "skipped": 0
+    }
+  },
+  "beforeFix": {
+    "candidate": "2588b9e6bb113ba32f9fd1e456e3564ff0943dfa",
+    "sourceResult": "FAIL as expected: initial mode prose for lane-1/lane-2/lane-1/lane-3",
+    "unit": {
+      "pass": 4,
+      "fail": 3
+    },
+    "supersededBy": "9208d779df7f8c0d94f696e2011db66c43bfadee"
+  }
+}

@@ -1,0 +1,52 @@
+TAP version 13
+# Subtest: SCHEDULE interleaved lanes preserve entry order, labels and exact control ownership
+ok 1 - SCHEDULE interleaved lanes preserve entry order, labels and exact control ownership
+  ---
+  duration_ms: 11.008292
+  type: 'test'
+  ...
+# Subtest: SCHEDULE lane declarations do not sort entries or merge distinct lanes with equal labels
+ok 2 - SCHEDULE lane declarations do not sort entries or merge distinct lanes with equal labels
+  ---
+  duration_ms: 1.96175
+  type: 'test'
+  ...
+# Subtest: SCHEDULE keeps declared empty lanes without inventing entries or free windows
+ok 3 - SCHEDULE keeps declared empty lanes without inventing entries or free windows
+  ---
+  duration_ms: 1.782208
+  type: 'test'
+  ...
+# Subtest: SCHEDULE interleaved source refuses ambiguous or reordered structure: unknown-lane
+ok 4 - SCHEDULE interleaved source refuses ambiguous or reordered structure: unknown-lane
+  ---
+  duration_ms: 3.249667
+  type: 'test'
+  ...
+# Subtest: SCHEDULE interleaved source refuses ambiguous or reordered structure: duplicate-lane
+ok 5 - SCHEDULE interleaved source refuses ambiguous or reordered structure: duplicate-lane
+  ---
+  duration_ms: 0.894375
+  type: 'test'
+  ...
+# Subtest: SCHEDULE interleaved source refuses ambiguous or reordered structure: different-reading-order
+ok 6 - SCHEDULE interleaved source refuses ambiguous or reordered structure: different-reading-order
+  ---
+  duration_ms: 0.566042
+  type: 'test'
+  ...
+# Subtest: SCHEDULE interleaving cannot bypass integrity or TEXT_ONLY tier
+ok 7 - SCHEDULE interleaving cannot bypass integrity or TEXT_ONLY tier
+  ---
+  duration_ms: 1.868791
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 112.127334

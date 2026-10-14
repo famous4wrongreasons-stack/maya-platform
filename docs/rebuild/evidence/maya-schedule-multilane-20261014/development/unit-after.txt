@@ -1,0 +1,64 @@
+TAP version 13
+# Subtest: SCHEDULE shared detail keeps sealed controls in order: i1
+ok 1 - SCHEDULE shared detail keeps sealed controls in order: i1
+  ---
+  duration_ms: 8.983875
+  type: 'test'
+  ...
+# Subtest: SCHEDULE shared detail keeps sealed controls in order: i3
+ok 2 - SCHEDULE shared detail keeps sealed controls in order: i3
+  ---
+  duration_ms: 1.810916
+  type: 'test'
+  ...
+# Subtest: SCHEDULE interleaved lanes preserve entry order, labels and exact control ownership
+ok 3 - SCHEDULE interleaved lanes preserve entry order, labels and exact control ownership
+  ---
+  duration_ms: 1.745375
+  type: 'test'
+  ...
+# Subtest: SCHEDULE lane declarations do not sort entries or merge distinct lanes with equal labels
+ok 4 - SCHEDULE lane declarations do not sort entries or merge distinct lanes with equal labels
+  ---
+  duration_ms: 0.679292
+  type: 'test'
+  ...
+# Subtest: SCHEDULE keeps declared empty lanes without inventing entries or free windows
+ok 5 - SCHEDULE keeps declared empty lanes without inventing entries or free windows
+  ---
+  duration_ms: 0.62875
+  type: 'test'
+  ...
+# Subtest: SCHEDULE interleaved source refuses ambiguous or reordered structure: unknown-lane
+ok 6 - SCHEDULE interleaved source refuses ambiguous or reordered structure: unknown-lane
+  ---
+  duration_ms: 0.4605
+  type: 'test'
+  ...
+# Subtest: SCHEDULE interleaved source refuses ambiguous or reordered structure: duplicate-lane
+ok 7 - SCHEDULE interleaved source refuses ambiguous or reordered structure: duplicate-lane
+  ---
+  duration_ms: 0.482083
+  type: 'test'
+  ...
+# Subtest: SCHEDULE interleaved source refuses ambiguous or reordered structure: different-reading-order
+ok 8 - SCHEDULE interleaved source refuses ambiguous or reordered structure: different-reading-order
+  ---
+  duration_ms: 0.422083
+  type: 'test'
+  ...
+# Subtest: SCHEDULE interleaving cannot bypass integrity or TEXT_ONLY tier
+ok 9 - SCHEDULE interleaving cannot bypass integrity or TEXT_ONLY tier
+  ---
+  duration_ms: 0.617292
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 84.943875

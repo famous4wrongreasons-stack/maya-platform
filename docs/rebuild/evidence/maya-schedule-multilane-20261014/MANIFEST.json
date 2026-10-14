@@ -1,0 +1,803 @@
+{
+  "candidate": "9208d779df7f8c0d94f696e2011db66c43bfadee",
+  "scope": "local synthetic scoped proofs; NOT release certification",
+  "artifacts": [
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-20261014/summary.json",
+      "archive": "summary.json",
+      "sourceSha256": "dedc6a0ff6df9a5d300de43f2271d299d541c70d95e0d4334769bf7e58a28631",
+      "archiveSha256": "dedc6a0ff6df9a5d300de43f2271d299d541c70d95e0d4334769bf7e58a28631",
+      "sourceSize": 8298,
+      "archiveSize": 8298,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-run.py",
+      "archive": "runner.py",
+      "sourceSha256": "464649deea6f4009f3aa2dda34304e2d7a9bd763e6f773b8987a5e087f2d4bec",
+      "archiveSha256": "464649deea6f4009f3aa2dda34304e2d7a9bd763e6f773b8987a5e087f2d4bec",
+      "sourceSize": 3636,
+      "archiveSize": 3636,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-20261014/runtime.txt",
+      "archive": "logs/runtime.txt",
+      "sourceSha256": "cb03c757f4a2e6249986b7411c66ff35c8adb3a4c56b578d31f9768153616cb2",
+      "archiveSha256": "cb03c757f4a2e6249986b7411c66ff35c8adb3a4c56b578d31f9768153616cb2",
+      "sourceSize": 213005,
+      "archiveSize": 213005,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-20261014/payload-build.txt",
+      "archive": "logs/payload-build.txt",
+      "sourceSha256": "43fa1dcd40d139019613144205a7a15ab26b778c9c50b7da090327de5fc55e15",
+      "archiveSha256": "43fa1dcd40d139019613144205a7a15ab26b778c9c50b7da090327de5fc55e15",
+      "sourceSize": 2288,
+      "archiveSize": 2288,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-20261014/runtime-reproducible.txt",
+      "archive": "logs/runtime-reproducible.txt",
+      "sourceSha256": "99024fee4724cee4cf7461ec00b94613680149ffacc086119d11c872c7c47d67",
+      "archiveSha256": "99024fee4724cee4cf7461ec00b94613680149ffacc086119d11c872c7c47d67",
+      "sourceSize": 1150,
+      "archiveSize": 1150,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-20261014/carrier.txt",
+      "archive": "logs/carrier.txt",
+      "sourceSha256": "baca28404d308ca406d7f74ef0e416759876b0889382e3ceac759adf73bbc692",
+      "archiveSha256": "baca28404d308ca406d7f74ef0e416759876b0889382e3ceac759adf73bbc692",
+      "sourceSize": 41481,
+      "archiveSize": 41481,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-20261014/runtime-ratchets.txt",
+      "archive": "logs/runtime-ratchets.txt",
+      "sourceSha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "archiveSha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "sourceSize": 12458,
+      "archiveSize": 12458,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-20261014/carrier-ratchets.txt",
+      "archive": "logs/carrier-ratchets.txt",
+      "sourceSha256": "9c9dd5d2e95815e834abf4fb37f14e912fa39892a46a54fa8263132617a98256",
+      "archiveSha256": "5a71a6ba5543f81d2dd72deccde61b8e8eb59d504be4e1f898f21d8f38c19236",
+      "sourceSize": 7864,
+      "archiveSize": 7861,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-20261014/packaging-parity.txt",
+      "archive": "logs/packaging-parity.txt",
+      "sourceSha256": "4878912a5a66c0afe4d1004527d4b32af193851abebf5a94d44e87b24eadd049",
+      "archiveSha256": "4878912a5a66c0afe4d1004527d4b32af193851abebf5a94d44e87b24eadd049",
+      "sourceSize": 732,
+      "archiveSize": 732,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-20261014/packaging-tests.txt",
+      "archive": "logs/packaging-tests.txt",
+      "sourceSha256": "1ecab443d7af7191f3ceccc6566cfbc40b3f7bd7e223a10c96be90f80d336602",
+      "archiveSha256": "1ecab443d7af7191f3ceccc6566cfbc40b3f7bd7e223a10c96be90f80d336602",
+      "sourceSize": 3309,
+      "archiveSize": 3309,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-20261014/chat-browser.txt",
+      "archive": "logs/chat-browser.txt",
+      "sourceSha256": "e0d1ae10dab175d83525cb2a3c6428b42e705fd5a0f3812c183177a2125c05cf",
+      "archiveSha256": "e0d1ae10dab175d83525cb2a3c6428b42e705fd5a0f3812c183177a2125c05cf",
+      "sourceSize": 106,
+      "archiveSize": 106,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-chat-browser-20261014/receipt.json",
+      "archive": "browsers/chat-browser.json",
+      "sourceSha256": "855176ae0de9d05c9069983bd3bdcae2c9e07987242caf23245dfef11375b32a",
+      "archiveSha256": "855176ae0de9d05c9069983bd3bdcae2c9e07987242caf23245dfef11375b32a",
+      "sourceSize": 2953,
+      "archiveSize": 2953,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-20261014/navigation-browser.txt",
+      "archive": "logs/navigation-browser.txt",
+      "sourceSha256": "08c2bcf99f479f7111a1e13891f47c753ab03fbee746d29bbe3a89f1a622b701",
+      "archiveSha256": "08c2bcf99f479f7111a1e13891f47c753ab03fbee746d29bbe3a89f1a622b701",
+      "sourceSize": 113,
+      "archiveSize": 113,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/receipt.json",
+      "archive": "browsers/navigation-browser.json",
+      "sourceSha256": "6d373bbbe6c6a2f6697289bb6d49db5aa6228b5ea3f3b622f962a8d0a4b249f7",
+      "archiveSha256": "6d373bbbe6c6a2f6697289bb6d49db5aa6228b5ea3f3b622f962a8d0a4b249f7",
+      "sourceSize": 12566,
+      "archiveSize": 12566,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-20261014/voice-browser.txt",
+      "archive": "logs/voice-browser.txt",
+      "sourceSha256": "29c232e8951d99d367d67543a2d01e61d774ccd8eea4024eefe7c1b822f238e4",
+      "archiveSha256": "29c232e8951d99d367d67543a2d01e61d774ccd8eea4024eefe7c1b822f238e4",
+      "sourceSize": 107,
+      "archiveSize": 107,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-voice-browser-20261014/receipt.json",
+      "archive": "browsers/voice-browser.json",
+      "sourceSha256": "ac43f33ab648a37061cefd4d738122a9d69ec241537f48f4233853bc99ed4479",
+      "archiveSha256": "ac43f33ab648a37061cefd4d738122a9d69ec241537f48f4233853bc99ed4479",
+      "sourceSize": 4348,
+      "archiveSize": 4348,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-20261014/schedule-browser.txt",
+      "archive": "logs/schedule-browser.txt",
+      "sourceSha256": "7d365365e60a418a01bbb5a2b49623afeee63506022fcdaf0bf9e15e89c0293f",
+      "archiveSha256": "7d365365e60a418a01bbb5a2b49623afeee63506022fcdaf0bf9e15e89c0293f",
+      "sourceSize": 110,
+      "archiveSize": 110,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-schedule-browser-20261014/receipt.json",
+      "archive": "browsers/schedule-browser.json",
+      "sourceSha256": "b5bbea50b48ed816e3ff3b6e48afcc3fc6c6836aa22a660b12397390ec25f561",
+      "archiveSha256": "b5bbea50b48ed816e3ff3b6e48afcc3fc6c6836aa22a660b12397390ec25f561",
+      "sourceSize": 4461,
+      "archiveSize": 4461,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-schedule-browser-20261014/schedule-rows-text-200.png",
+      "archive": "screenshots/schedule-rows-text-200.png",
+      "sourceSha256": "84a576f37345b5b5ad325eb0f29bcde48f7c5f905183b75cf45534e308519bd2",
+      "archiveSha256": "84a576f37345b5b5ad325eb0f29bcde48f7c5f905183b75cf45534e308519bd2",
+      "sourceSize": 55416,
+      "archiveSize": 55416,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-schedule-browser-20261014/schedule-rows-1280.png",
+      "archive": "screenshots/schedule-rows-1280.png",
+      "sourceSha256": "494b7641604a90dd8c826479a96ee37a744730606fe00b33a299906f4e8a35e6",
+      "archiveSha256": "494b7641604a90dd8c826479a96ee37a744730606fe00b33a299906f4e8a35e6",
+      "sourceSize": 95821,
+      "archiveSize": 95821,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-schedule-browser-20261014/schedule-rows-320.png",
+      "archive": "screenshots/schedule-rows-320.png",
+      "sourceSha256": "e8cc0db3d37f9d9726b49e2ea6a6372f4ae37a46b74a86a5b988fc312758bcdd",
+      "archiveSha256": "e8cc0db3d37f9d9726b49e2ea6a6372f4ae37a46b74a86a5b988fc312758bcdd",
+      "sourceSize": 47981,
+      "archiveSize": 47981,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-schedule-browser-20261014/schedule-card-393.png",
+      "archive": "screenshots/schedule-card-393.png",
+      "sourceSha256": "528cdbcba0403dfa1e417748fa2748c86654fa822f0e0d32704354be7dae8035",
+      "archiveSha256": "528cdbcba0403dfa1e417748fa2748c86654fa822f0e0d32704354be7dae8035",
+      "sourceSize": 54846,
+      "archiveSize": 54846,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-schedule-browser-20261014/schedule-rows-393.png",
+      "archive": "screenshots/schedule-rows-393.png",
+      "sourceSha256": "c58c716f512840f686cff72021c59ba68cd1a54c87123fa43c338adad7e8359a",
+      "archiveSha256": "c58c716f512840f686cff72021c59ba68cd1a54c87123fa43c338adad7e8359a",
+      "sourceSize": 55461,
+      "archiveSize": 55461,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-20261014/ns1-roundtrip.txt",
+      "archive": "logs/ns1-roundtrip.txt",
+      "sourceSha256": "9fd777832b3ae3f76e75fa85d605c0cfb88f5f27b2fa0641601dfe16d6039dc5",
+      "archiveSha256": "9fd777832b3ae3f76e75fa85d605c0cfb88f5f27b2fa0641601dfe16d6039dc5",
+      "sourceSize": 1150,
+      "archiveSize": 1150,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/manifest.json",
+      "archive": "source/manifest.json",
+      "sourceSha256": "c0a7e3c20e03607ace705213f55cfdb1b5bdc438f85809ae602a06c9a9a9aadc",
+      "archiveSha256": "c0a7e3c20e03607ace705213f55cfdb1b5bdc438f85809ae602a06c9a9a9aadc",
+      "sourceSize": 12132,
+      "archiveSize": 12132,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/runner.mjs",
+      "archive": "source/runner.mjs",
+      "sourceSha256": "5c7627b91021d85d37bdfd9ec8af3ac03cac6f7078f0d8f0a4aba0337e50ba43",
+      "archiveSha256": "5c7627b91021d85d37bdfd9ec8af3ac03cac6f7078f0d8f0a4aba0337e50ba43",
+      "sourceSize": 6779,
+      "archiveSize": 6779,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/source-carrier.log",
+      "archive": "source/source-carrier.txt",
+      "sourceSha256": "d8868191c70727a8f17c073434191adadac1d6165b8d421254709c27b54b5309",
+      "archiveSha256": "d8868191c70727a8f17c073434191adadac1d6165b8d421254709c27b54b5309",
+      "sourceSize": 3673,
+      "archiveSize": 3673,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/network-fence.log",
+      "archive": "source/network-fence.txt",
+      "sourceSha256": "2f362c95a59e89184faa8a01fc9acd517b39419875ffc3022479d4701a6df9da",
+      "archiveSha256": "2f362c95a59e89184faa8a01fc9acd517b39419875ffc3022479d4701a6df9da",
+      "sourceSize": 34,
+      "archiveSize": 34,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/backend-types.log",
+      "archive": "source/backend-types.txt",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archiveSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "sourceSize": 0,
+      "archiveSize": 1,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/live-types.log",
+      "archive": "source/live-types.txt",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archiveSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "sourceSize": 0,
+      "archiveSize": 1,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/scoped-lint.log",
+      "archive": "source/scoped-lint.txt",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archiveSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "sourceSize": 0,
+      "archiveSize": 1,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/runtime-build.log",
+      "archive": "source/runtime-build.txt",
+      "sourceSha256": "21280e6c1c81afb91f8960431d1d7e780b33f70fbf045899ccbf607784fc4b7d",
+      "archiveSha256": "21280e6c1c81afb91f8960431d1d7e780b33f70fbf045899ccbf607784fc4b7d",
+      "sourceSize": 1010,
+      "archiveSize": 1010,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/carrier-harness.log",
+      "archive": "source/carrier-harness.txt",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archiveSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "sourceSize": 0,
+      "archiveSize": 1,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/test-only-migrations.log",
+      "archive": "source/test-only-migrations.txt",
+      "sourceSha256": "e2ea9db9197cc6d97660563f59f5a8a85b4e5f32000b96039a5492f549d32775",
+      "archiveSha256": "e2ea9db9197cc6d97660563f59f5a8a85b4e5f32000b96039a5492f549d32775",
+      "sourceSize": 14887,
+      "archiveSize": 14887,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/pg-stop.log",
+      "archive": "source/pg-stop.txt",
+      "sourceSha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "archiveSha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "sourceSize": 56,
+      "archiveSize": 56,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-mutation-final01-20261014/receipt.json",
+      "archive": "mutations/receipt.json",
+      "sourceSha256": "cf107e0d07ad513ba6e3d42168ce131b4d0832625368fe7a30bd71813232cee6",
+      "archiveSha256": "cf107e0d07ad513ba6e3d42168ce131b4d0832625368fe7a30bd71813232cee6",
+      "sourceSize": 551,
+      "archiveSize": 551,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-mutation-final01-20261014/baseline.log",
+      "archive": "mutations/baseline.txt",
+      "sourceSha256": "c55898fe8a09309bde4f25951f9f44fe2d875a9ae6fe211a4288706aa0880d8e",
+      "archiveSha256": "c55898fe8a09309bde4f25951f9f44fe2d875a9ae6fe211a4288706aa0880d8e",
+      "sourceSize": 1756,
+      "archiveSize": 1756,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-mutation-final01-20261014/mutant.log",
+      "archive": "mutations/mutant.txt",
+      "sourceSha256": "645357a55680295a2f5c4c01b1e7f57c05cf6872fdca3075e7e37bdb0f2f75f1",
+      "archiveSha256": "a0fd80146182a4285c4e2404203ebf86f13e4ad87635b6a90cbd2f63b20fb6f7",
+      "sourceSize": 4530,
+      "archiveSize": 4506,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-mutation-final01-20261014/restored.log",
+      "archive": "mutations/restored.txt",
+      "sourceSha256": "197a97018e8e2268bb6536a20689ae84f6ea221049502b97891fd883985bcbfd",
+      "archiveSha256": "197a97018e8e2268bb6536a20689ae84f6ea221049502b97891fd883985bcbfd",
+      "sourceSize": 1755,
+      "archiveSize": 1755,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-mutation-final01-20261014.py",
+      "archive": "mutations/runner.py",
+      "sourceSha256": "baffda53aba18551bcb821b20cc186ac8047bfacc4169aed698228e55ca97e74",
+      "archiveSha256": "baffda53aba18551bcb821b20cc186ac8047bfacc4169aed698228e55ca97e74",
+      "sourceSize": 2103,
+      "archiveSize": 2103,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-before-20261014/manifest.json",
+      "archive": "development/manifest.json",
+      "sourceSha256": "a3f6ad2eeba2d05707ccf24622c36679c90e8f030d29f828862cf491629bd330",
+      "archiveSha256": "a3f6ad2eeba2d05707ccf24622c36679c90e8f030d29f828862cf491629bd330",
+      "sourceSize": 9924,
+      "archiveSize": 9924,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-before-20261014/runner.mjs",
+      "archive": "development/runner.mjs",
+      "sourceSha256": "070c0f7a2d9ad63b464753a5842a8dc112bc45e4e61f522a0810da50772bd855",
+      "archiveSha256": "070c0f7a2d9ad63b464753a5842a8dc112bc45e4e61f522a0810da50772bd855",
+      "sourceSize": 6421,
+      "archiveSize": 6421,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-before-20261014/source-carrier.log",
+      "archive": "development/source-carrier.txt",
+      "sourceSha256": "659a82f6458483f67e67d242e842270abda7dca9affcc1072010d1ee7c29fa14",
+      "archiveSha256": "659a82f6458483f67e67d242e842270abda7dca9affcc1072010d1ee7c29fa14",
+      "sourceSize": 2533,
+      "archiveSize": 2533,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-before-20261014/network-fence.log",
+      "archive": "development/network-fence.txt",
+      "sourceSha256": "2f362c95a59e89184faa8a01fc9acd517b39419875ffc3022479d4701a6df9da",
+      "archiveSha256": "2f362c95a59e89184faa8a01fc9acd517b39419875ffc3022479d4701a6df9da",
+      "sourceSize": 34,
+      "archiveSize": 34,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-before-20261014/pg-stop.log",
+      "archive": "development/pg-stop.txt",
+      "sourceSha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "archiveSha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "sourceSize": 56,
+      "archiveSize": 56,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-multilane-unit-before-20261014.txt",
+      "archive": "development/unit-before.txt",
+      "sourceSha256": "1af0a026da0549d329d0bdff2475a80e5111ccb9bea86b34800635dfde1875ff",
+      "archiveSha256": "8215211b4c060772ed8ae55be526ab2f5f8f10425dde9b07604c9872afa4293b",
+      "sourceSize": 4600,
+      "archiveSize": 4576,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-multilane-unit-after-20261014.txt",
+      "archive": "development/unit-after.txt",
+      "sourceSha256": "9b3103a77cce154bf2dc408d3ff662313aa54180a455adfdb652eec5378d901a",
+      "archiveSha256": "9b3103a77cce154bf2dc408d3ff662313aa54180a455adfdb652eec5378d901a",
+      "sourceSize": 2122,
+      "archiveSize": 2122,
+      "sensitiveData": false
+    }
+  ],
+  "omitted": [
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-chat-browser-20261014/chat-320.png",
+      "sha256": "10018484116f038a78650171146ca3d444110743e240da3f67084e4d4cead7e5",
+      "size": 48421,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-chat-browser-20261014/failure-393.png",
+      "sha256": "b771fd68e1529833bec8bf0238f8f1adfb69614691ea09f147a4768e2f431552",
+      "size": 69409,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-chat-browser-20261014/large-text-393.png",
+      "sha256": "28fa1a3deace1499286aec6f6956950f88666e94e4abf9c88750035ef016b11c",
+      "size": 68951,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-chat-browser-20261014/chat-427.png",
+      "sha256": "154d6e1851cbdb52fac5150c4466ef1d8158f0eddc22fb2b4c71a0b6c713a74d",
+      "size": 50228,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-chat-browser-20261014/menu-393.png",
+      "sha256": "e2acebb61794f7a4c4b57b4de14400fad5a89cf778c7ca13013f51befc5f3fcc",
+      "size": 50418,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-chat-browser-20261014/chat-393.png",
+      "sha256": "139c420a234c54a7fd016910b8aa77d701aec2b7cdfa4b38e1286a4c577ed2f1",
+      "size": 49496,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-chat-browser-20261014/thinking-393.png",
+      "sha256": "be875209540b4f964fe0057435b496aa940e105f6b68064149a57ae407e94881",
+      "size": 54746,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-chat-browser-20261014/chat-1280.png",
+      "sha256": "178cabce172b7597fdd611e14926b21fe75a651f87a57167b0a054dbb81574cc",
+      "size": 56461,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-chat-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-chat-browser-20261014/keyboard-height-393.png",
+      "sha256": "b3fa65ac1ed16321d9e1f5fa74caf44fcad094fabb0e7b830c6f377531ff03f1",
+      "size": 41483,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/navigation-ideas.png",
+      "sha256": "bea4e9ba86e0791bb6c080283052552a8b950b901e5b4cf6c89812be8c72c1f2",
+      "size": 67090,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/navigation-chat-427.png",
+      "sha256": "758bbd484b897c20e05d729feb837d82de0ab371721fc9946b6d304e0d7f7fa2",
+      "size": 50348,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/navigation-tasks.png",
+      "sha256": "b6568ff4ef0babfca7902a42d4ed86ee758270d4294e576a178b42099fe04560",
+      "size": 57684,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/drawer-320.png",
+      "sha256": "e7b4a1275dbfa201db0db99da7eb1d0fcc24621033a385900588970a3031035b",
+      "size": 42588,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/navigation-chat-393.png",
+      "sha256": "72107875da0432f28968949bfd307250da7a0ae02c53eb672068be6cbbc09f89",
+      "size": 49707,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/drawer-1280.png",
+      "sha256": "d82f231124e47cac397dc17d77983e2cf689a00ff040f00725de4ce1217ad4d5",
+      "size": 109468,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/navigation-library.png",
+      "sha256": "e62e2a550916d38963f40ef68ce4750abe6d92cba6b1d5368785cc9722b9342d",
+      "size": 57140,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/drawer-393.png",
+      "sha256": "f7d619611a5c8675f1a8ce129fd4258ebdf0bcd65a100a58a88e2a76768ccb26",
+      "size": 51581,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/navigation-chat-320.png",
+      "sha256": "b49b9a8c280c291dd2ff689edaf3bd3d4b0c3dfb9f95bc8cab48c7b2ac2f6ad6",
+      "size": 48556,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/navigation-chat-1280.png",
+      "sha256": "3d6f8346c01fad82ed22ae50a7766da543ed3050132065764c22aeb139ac132d",
+      "size": 56525,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/navigation-keyboard-height.png",
+      "sha256": "f4f4c6f7761c07bc018da4decaed35bf8298d0a9468f9b5771207b21cfd49dde",
+      "size": 34074,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/about-large-text.png",
+      "sha256": "802542f90dd82b89866e17ae19bdd194a8186469dc0e38c3b921c2790b7d18f2",
+      "size": 34315,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/drawer-large-text.png",
+      "sha256": "a91b53c0c9a126c90d12e371e4b7ecf5b0a31561bf4056d2eedfcb71ce0b2fa0",
+      "size": 43251,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/about-motion-off.png",
+      "sha256": "8f204a6302a9aceee40bee000f4b47b15677df2314f602eac7901fd955b416b2",
+      "size": 69422,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/drawer-427.png",
+      "sha256": "232afff2723ebc470f5713fd00c9913d0dac6ea6b486dc021756375a026a2a39",
+      "size": 55684,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/settings-large-text.png",
+      "sha256": "4b9fe72a7e4dd8ac33787bad2c3f197eebf97302f880139dbd40c30eff14023f",
+      "size": 28728,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/navigation-large-text.png",
+      "sha256": "bb9b08c286487b4867b31a3b28ad9ae22a236e44a198a13b6386908d13430f6f",
+      "size": 65725,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/settings-427.png",
+      "sha256": "cb09b14698c410d3c7f7f37d4469e4dec9c8928c94b9b66e7c6e35bd1dabced9",
+      "size": 76069,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/settings-393.png",
+      "sha256": "76178d68e0c62711f196b9322031f73a464518e638eef76e0048e89318a65114",
+      "size": 63896,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/navigation-feed-end.png",
+      "sha256": "02910ee6659719c7e44b4563c4f22ed4901b5500407730a776c2c03e9c3ef289",
+      "size": 64356,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/about-320.png",
+      "sha256": "8fed30536f550830b296e33cab82337a16785175a8a2cf549cf8628820c52b7d",
+      "size": 54977,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/settings-1280.png",
+      "sha256": "5c49106f00c115c9bc0dd750e69769d8f7a7c62ddd6de035fb18495a3d4042da",
+      "size": 91676,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/settings-320.png",
+      "sha256": "e58f504e4805010d9e67d0a76ed000b43e6efa06aa02b227019399684c0a6b3f",
+      "size": 53634,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/about-393.png",
+      "sha256": "9bd70e3b4195a99c6decd7fb928465d4c4ef27afb90a937e409877cda660df3a",
+      "size": 70877,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/about-1280.png",
+      "sha256": "ca32cecf18d0ad0991bbb9d2837d2eb07a784c6c8a14d9ab19779e3d9b30c093",
+      "size": 86964,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/navigation-feed.png",
+      "sha256": "e81b9a66f6a76a7edddafe6296896d2a32bf5461ca03baaec32d6333e4abc198",
+      "size": 72858,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-navigation-browser-20261014/about-427.png",
+      "sha256": "2176178217dc5bb00b14f0145acf7cac30815ebb77eef3e7c1711fb7e46b9ac2",
+      "size": 70186,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-voice-browser-20261014/voice-return-chat.png",
+      "sha256": "0b1182cbcff9a535b608fc6ad7de0927462f77ea59ba18c4294a77e56982597f",
+      "size": 55378,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-voice-browser-20261014/voice-listening-427.png",
+      "sha256": "9136f4e7994694700d527ee301ee33aa0e1c1b545ea65fbbe327a7c624b369b7",
+      "size": 55100,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-voice-browser-20261014/voice-encoding.png",
+      "sha256": "cd364fff20f56c023f6daa3d08decf5283c673103b765f7fffb738bfef1093ca",
+      "size": 52459,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-voice-browser-20261014/voice-listening-393.png",
+      "sha256": "40812b703dbd919fb3446c4cfa9a17af5a81657194c90b97719cc91406ce41e0",
+      "size": 54754,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-voice-browser-20261014/voice-large-text-320.png",
+      "sha256": "8ff93b8ad421e0df0f5b58ce30aa4062ed46d30b355db20fe0a283fb580095c6",
+      "size": 33261,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-voice-browser-20261014/voice-listening-320.png",
+      "sha256": "47c9103283603aba0415e2ff3e115fc3ae41a9c14e5b6c2da05458651b6acf3a",
+      "size": 44868,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-voice-browser-20261014/voice-arming.png",
+      "sha256": "06b711faac2bae5fc21c2b0fe5e07b755b27bccb362f18b620daf0ec196979ed",
+      "size": 50741,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-voice-browser-20261014/voice-transcribing.png",
+      "sha256": "7864cefe9623c7a033ad055e20e4d780d6d5c24103ce9216743ec73e0de23a4e",
+      "size": 49498,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-voice-browser-20261014/voice-unavailable.png",
+      "sha256": "eb475a3681a970b9b0c8cdac0ddeec8edc605a89aa6a19c2cd50108c13a58a25",
+      "size": 58906,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-voice-browser-20261014/voice-not-recognized.png",
+      "sha256": "572e57dca617a9a8550a4b38b718e94be4f950aeccb3a338cbdba7e8644fe3b8",
+      "size": 50809,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-voice-browser-20261014/voice-listening-1280.png",
+      "sha256": "05810960b7a9e002b161a8210542f056ea3708cc8152fba146a42cdd0655616e",
+      "size": 71664,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-voice-browser-20261014/voice-held.png",
+      "sha256": "e76535210dfd5fefeeba878dcbccc862dfcb4a488a918dd75ab86609aa089b56",
+      "size": 58305,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-voice-browser-20261014/voice-too-short.png",
+      "sha256": "125ce2df72132564df3704a750c9ad9aa24a3201c92cf6754dfb3da26ff28e6a",
+      "size": 50939,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-schedule-browser-20261014/schedule-header-427.png",
+      "sha256": "e74f483fd7d2d02b8cbcb6f5c2024d8dc310b97410b4a84f7e1397838acf074c",
+      "size": 72365,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-schedule-browser-20261014/schedule-header-393.png",
+      "sha256": "2edcc1576852d151ad9152cefa3d1e755e93df55790a96312c44c0e21bf85dae",
+      "size": 66527,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-schedule-browser-20261014/schedule-header-1280.png",
+      "sha256": "897428f1534bdeaf8cf18a2eef2fe4e1e40e7f6e558ebf06149fde16be8643ea",
+      "size": 82496,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-schedule-browser-20261014/schedule-header-320.png",
+      "sha256": "37ad5cc68beee3771e7e3affd2ac70ca304bdd6c6b0ea1e13c9ce4c0286ccce5",
+      "size": 55876,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-schedule-browser-20261014/schedule-detail-393.png",
+      "sha256": "3fa4c760446ea37374a59f8a0f327e48cefbdf96dbe42d4fbb2ce6b0c37a9678",
+      "size": 57083,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-multilane-final01-schedule-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "unchanged surfaces or alternate scroll state; complete receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/source-observation.journal.json",
+      "sha256": "06417c8ea8499db46e2c823ac00fdecb4ca8665fa6b4ffb7165bd8d0375d848f",
+      "size": 56740,
+      "reason": "selected observations archived; raw synthetic envelopes and auth-related receipts retained locally"
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/source-observation.journal-populated.json",
+      "sha256": "f581be994a60ee080ae07c6092c729dc3d38bae821ee464ca2f44098af541d1d",
+      "size": 97869,
+      "reason": "selected observations archived; raw synthetic envelopes and auth-related receipts retained locally"
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/source-observation.journal-multilane.json",
+      "sha256": "6a3dae084ee11b08946dff21420c28b730191819f9a154733720c6a744ebdd8f",
+      "size": 105573,
+      "reason": "selected observations archived; raw synthetic envelopes and auth-related receipts retained locally"
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/source-observation.personal.json",
+      "sha256": "62b76372a971c8e62c888440da62360227c967d3f64af464341d2e022e14c864",
+      "size": 688,
+      "reason": "selected observations archived; raw synthetic envelopes and auth-related receipts retained locally"
+    },
+    {
+      "source": "/private/tmp/maya-schedule-multilane-final01-20261014/source-carrier-jest.json",
+      "sha256": "45023b318314dcf17bcd313864afd7519eda1efeea892786291200fb73bd59ef",
+      "size": 2342,
+      "reason": "safe counts and full readable test log archived instead of raw Jest diagnostics"
+    }
+  ]
+}
