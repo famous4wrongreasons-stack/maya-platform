@@ -85,7 +85,7 @@ test('all 40 sealed widget fixtures keep identical non-style markup under the ne
   for (const fixture of index.fixtures) {
     const result = resultOf(JSON.parse(fs.readFileSync(path.join(fixtures, fixture.file))), index.now);
     const item = { id:'w-'+fixture.id, result, display:'live', pending:null, sentence:null };
-    const semantics = html => html.replace(/ style="[^"]*"/g, '');
+    const semantics = html => html.replace(/ style="[^"]*"/g, '').replace(/ companion-schedule(?=")/g, '');
     assert.equal(semantics(companionMarkup(item)), semantics(markupOf(item)), fixture.id);
   }
 });
@@ -103,4 +103,18 @@ test('drawer projects canonical selection including privacy, with no reads or in
   assert.equal((html.match(/role="switch"/g)||[]).length,1);
   assert.match(html,/Управление уведомлениями пока недоступно здесь/);
  }
+});
+
+test('schedule treatment is limited to structured sealed SCHEDULE; prose/refusal stays unchanged', () => {
+  const fixtures = path.join(root, '../maya-chat-shell/dev/fixtures/envelopes');
+  const index = JSON.parse(fs.readFileSync(path.join(fixtures, 'index.json')));
+  const f = index.fixtures.find(f=>f.id==='kind-schedule');
+  const result = resultOf(JSON.parse(fs.readFileSync(path.join(fixtures,f.file))), index.now);
+  for(const mode of ['structured','prose','frozen_prose']) {
+    const item={id:'s',result:{...result,mode},display:'live',pending:null,sentence:null};
+    const markup=companionMarkup(item);
+    assert.equal(markup.includes('companion-schedule'),mode==='structured');
+    assert.doesNotMatch(markup,/Заполнить окно|24 записи|3 свободных окна/);
+    assert.equal(markup.replace(/ style="[^"]*"/g,'').replace(/ companion-schedule(?=")/g,''),markupOf(item).replace(/ style="[^"]*"/g,''));
+  }
 });

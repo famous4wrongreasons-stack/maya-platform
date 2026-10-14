@@ -14,7 +14,7 @@ const object = (v: unknown): Record<string, unknown> => {
   assert(v !== null && typeof v === 'object' && !Array.isArray(v));
   return v as Record<string, unknown>;
 };
-async function main(mode: 'personal' | 'journal') {
+async function main(mode: 'personal' | 'journal' | 'journal-populated') {
   applyWidgetsLiveEnvironment();
   const db = await bootFixtureContext();
   const http = await bootHttp();
@@ -43,6 +43,48 @@ async function main(mode: 'personal' | 'journal') {
       'crm.integration',
     ] as const)
       await fx.grantFeature(tenant, feature);
+    // Fixture data only, inside the harness's owned synthetic tenant. No CRM IO.
+    const expectedJournal: string[] = [];
+    if (mode === 'journal-populated') {
+      const service = await db.prisma.internalService.create({
+        data: {
+          tenantId: tenant.id,
+          name: 'Учебная стрижка',
+          price: 1500,
+          durationMinutes: 60,
+        },
+      });
+      const provider = await db.prisma.internalProvider.create({
+        data: {
+          tenantId: tenant.id,
+          displayName: 'Учебный мастер',
+          active: true,
+        },
+      });
+      for (const hour of [7, 9]) {
+        const startAt = new Date(
+          `2026-09-24T${String(hour).padStart(2, '0')}:00:00Z`,
+        );
+        const endAt = new Date(startAt.getTime() + 3600000);
+        await db.prisma.appointment.create({
+          data: {
+            tenantId: tenant.id,
+            source: 'internal',
+            staffExternalId: provider.id,
+            serviceIds: [service.id],
+            startAt,
+            endAt,
+            blockedStartAt: startAt,
+            blockedEndAt: endAt,
+            status: 'confirmed',
+            notes: 'SYNTHETIC-PRIVATE-NOTE-NOT-FOR-RENDER',
+          },
+        });
+        expectedJournal.push(
+          `2026-09-24 · ${hour + 3}:00–${hour + 4}:00 · Europe/Moscow`,
+        );
+      }
+    }
     const accessToken = await http.login(
       tenant.slug,
       user.email,
@@ -100,7 +142,8 @@ async function main(mode: 'personal' | 'journal') {
       });
       child.stdin.end(
         JSON.stringify({
-          mode,
+          mode: mode === 'personal' ? 'personal' : 'journal',
+          expectedJournal,
           baseUrl,
           accessToken,
           tenantName: tenant.slug,
@@ -128,6 +171,20 @@ async function main(mode: 'personal' | 'journal') {
         assert.equal(state.appointments[0].status, 'canceled');
         assert.equal(state.executions.length, 3);
       }
+    }
+    if (mode === 'journal-populated') {
+      const state = await fx.binView().bookingProofState(tenant);
+      assert.equal(
+        state.appointments.length,
+        2,
+        'read/detail cannot create bookings',
+      );
+      assert.equal(
+        state.executions.length,
+        0,
+        'read/detail cannot dispatch an action',
+      );
+      assert.equal(state.memberships[0].role, UserRole.TENANT_OWNER);
     }
     observations.push(observed);
     const out = process.env.GITHUB_SOURCE_PROBE_OUT;
@@ -157,7 +214,7 @@ async function main(mode: 'personal' | 'journal') {
     await db.close();
   }
 }
-it.each(['personal', 'journal'] as const)(
+it.each(['personal', 'journal', 'journal-populated'] as const)(
   'FBE2E approved %s production source through the unchanged carrier',
   main,
   120_000,

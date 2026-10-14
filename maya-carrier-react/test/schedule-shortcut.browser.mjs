@@ -30,6 +30,10 @@ const wire=[];
 let pending=null, browser, page, origin, fault=false, failOnce=true, detailPending=null, turnSequence=4;
 const envelope=JSON.parse(fs.readFileSync(path.join(root,'../maya-chat-shell/dev/fixtures/envelopes/h7/invariant/kind-schedule.json')));
 // Existing renderer corpus, never a claim that this fixture is an NS-1 backend emission.
+// Synthetic subtitle for layout; source-carrier.probe-spec.ts separately checks real emission.
+envelope.body.entries[0].subtitle={...envelope.body.entries[0].title,
+  value:'2026-09-18 · 10:00–11:00 · Europe/Moscow',label:'2026-09-18 · 10:00–11:00 · Europe/Moscow'};
+envelope.integrity.body_hash=bodyHash(envelope);
 const detail=structuredClone(envelope);detail.widget_id='01M2Q9G7M0AAAAAAAAAAAAAAAA';detail.correlation.parent_widget_id=envelope.widget_id;detail.intents[0].target={class:'w',ref:'w.journal.parent'};detail.integrity.body_hash=bodyHash(detail);
 const json=(res,value,status=200)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
 const server=http.createServer(async(req,res)=>{
@@ -113,6 +117,25 @@ try {
   assert.ok(detailPending);json(detailPending.res,{contract:'maya.widget.intent/1',outcome:'terminate',code:null,next_envelope:detail,resolved_widget:null,receipt_outcome:'ACCEPTED'});detailPending=null;
   await check("document.querySelector('dialog.fullscreen[open]') && !document.querySelector('.fullscreen-progress')",'server-bound detail resolves PROGRESS into fullscreen');
   const messageCount=await page.eval("document.querySelectorAll('.maya-chat-lane [data-chat-message]').length");
+  await check("!!document.querySelector('dialog[open] .companion-schedule')",'structured schedule gets dedicated visual treatment');
+  for(const [width,height] of [[320,740],[393,852],[1280,900]]) {
+    await size(width,height);
+    await page.eval('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
+    await check(`(() => {const d=document.querySelector('dialog[open]'),b=d.querySelector('.fullscreen-body');return d.scrollWidth<=d.clientWidth && b.scrollWidth<=b.clientWidth && b.clientHeight>=44 && [...d.querySelectorAll('[data-ref]')].every(e=>e.getBoundingClientRect().height>=44)})()`,'schedule rows fit; targets at least 44px at '+width);
+    await screenshot('schedule-rows-'+width);
+  }
+  await size(320,740);
+  await page.eval(`(() => {[...document.querySelectorAll('dialog[open] h2,dialog[open] h3,dialog[open] p,dialog[open] button,dialog[open] .leaf')].map(el=>[el,parseFloat(getComputedStyle(el).fontSize)]).forEach(([el,size])=>{el.dataset.originalSize=el.style.fontSize;el.style.fontSize=(size*2)+'px'});return true})()`);
+  await check(`(() => {const d=document.querySelector('dialog[open]'),b=d.querySelector('.fullscreen-body');return d.scrollWidth<=d.clientWidth && b.scrollWidth<=b.clientWidth && b.clientHeight>=44})()`,'schedule 320px / enlarged text does not overflow');
+  await screenshot('schedule-rows-text-200');
+  await page.eval(`(() => {document.querySelectorAll('[data-original-size]').forEach(el=>{el.style.fontSize=el.dataset.originalSize;delete el.dataset.originalSize});return true})()`);
+  await page.focus("document.querySelector('dialog[open] .fullscreen-close')");
+  await page.press('Tab',{shift:true});
+  await check("document.activeElement===Array.from(document.querySelectorAll('dialog[open] .fullscreen-close,dialog[open] [data-ref]')).at(-1)",'schedule backward focus wraps within existing dialog');
+  await page.press('Tab');
+  await check("document.activeElement===document.querySelector('dialog[open] .fullscreen-close')",'schedule forward focus returns to close');
+  await size(393,852);
+  await page.eval('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))');
   await screenshot('schedule-detail-393');
   await page.press('Escape');
   await check(`!document.querySelector('dialog.fullscreen[open]') && document.activeElement===${intentButton}`,'Escape uses existing close owner and restores actual widget opener');

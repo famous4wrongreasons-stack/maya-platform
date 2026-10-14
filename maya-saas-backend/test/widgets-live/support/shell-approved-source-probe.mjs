@@ -6,7 +6,7 @@ import { mountRuntimeDrawer } from './mounted-runtime-drawer.mjs';
 
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { resultOf, markupOf } from '../../../../maya-carrier-react/test/.bundle.mjs';
+import { resultOf, markupOf, companionMarkup } from '../../../../maya-carrier-react/test/.bundle.mjs';
 import { render } from '../../../../maya-chat-shell/src/renderer/render.ts';
 import {
   projectWidgetIntent,
@@ -205,8 +205,28 @@ try {
     const result = await activate(itemId, `intent:${envelope.body.detail_intent}`);
     assert.equal(result.next_envelope.kind,'SCHEDULE');
     assert.equal(result.next_envelope.body.range.from.slice(0,10),'2026-09-24');
+    const scheduleChecks = [];
+    for (const [stage, source] of [['initial', envelope], ['detail', result.next_envelope]]) {
+      if (!input.expectedJournal?.length) continue;
+      assert.equal(source.body.entries.length, input.expectedJournal.length);
+      assert.deepEqual(source.body.gaps, []);
+      const rendered = resultOf(source, new Date().toISOString());
+      assert.equal(rendered.mode, 'structured');
+      const html = companionMarkup({id:'synthetic-schedule',result:rendered,display:'live',pending:null,sentence:null});
+      assert(html.includes('companion-schedule'));
+      assert(html.includes('Учебная стрижка'));
+      assert(html.includes('Учебный мастер'));
+      assert(!html.includes('SYNTHETIC-PRIVATE-NOTE-NOT-FOR-RENDER'));
+      for (const label of input.expectedJournal) {
+        assert(source.body.entries.some(entry=>entry.subtitle.label === label));
+        assert(html.includes(label), `missing server time at ${stage}`);
+      }
+      for (const ref of rendered.readingOrder) assert(html.includes(`data-ref="${ref}"`));
+      assert(!html.includes('Заполнить окно'));
+      scheduleChecks.push({stage,mode:rendered.mode,entries:source.body.entries.length,labels:input.expectedJournal,refs:rendered.readingOrder,privateNoteAbsent:true,gaps:0});
+    }
     process.stdout.write(JSON.stringify({
-      mode:input.mode,pass:true,backendDetail:true,fullscreen:runtime.shell.view().fullscreen,refs,counters:runtime.widgets.counters(),
+      mode:input.mode,pass:true,backendDetail:true,scheduleChecks,fullscreen:runtime.shell.view().fullscreen,refs,counters:runtime.widgets.counters(),
       diagnostic: {
         initialEnvelope: snapshot(envelope),
         exchanges,

@@ -52,6 +52,8 @@ export function WidgetCard({
     if (item.display === 'live') rendered?.(item.id);
   }, [item, rendered]);
   const c = widgetTheme(t);
+  // A visual treatment of the sealed result, never a route/authority inference.
+  const schedule = t.name === 'companion' && result.kind === 'SCHEDULE' && result.mode === 'structured';
   const cardRef = useRef<ElementOrNone>(null);
   const seenResultRef = useRef<ResultOrNone>(null);
   const spokeAtRef = useRef(0);
@@ -137,7 +139,7 @@ export function WidgetCard({
           result.mode.replace('_', '-') +
           (result.motion === 'none' ? ' widget--still' : '') +
           ' widget--' +
-          item.display
+          item.display + (schedule ? ' companion-schedule' : '')
         }
         aria-label={result.label === '' ? undefined : result.label}
         aria-describedby={result.description === '' ? undefined : describedBy}
@@ -155,7 +157,7 @@ export function WidgetCard({
           borderRadius: variant === 'sheet' ? 0 : 20,
           border: variant === 'sheet' ? '0' : '1px solid ' + c.line,
           padding: 18,
-          background: variant === 'sheet' ? 'transparent' : c.surf,
+          background: variant === 'sheet' ? 'transparent' : schedule ? c.bg2 : c.surf,
           opacity: item.display === 'stale' ? 0.62 : 1,
         }}
       >
@@ -168,6 +170,7 @@ export function WidgetCard({
         {nodes.map((node, i) =>
           drawNode(node, 'block', String(i), {
             c,
+            schedule,
             names: new Map(Object.entries(result.accessibleNames)),
             pending: item.pending,
             activate: (ref) => activate(item.id, ref),

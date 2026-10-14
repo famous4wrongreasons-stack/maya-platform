@@ -65,4 +65,41 @@ describe('P-JOURNAL-PROJECTION journal schedule presenter', () => {
       presentJournalSchedule(ownerResult(), fact, '2026-09-24'),
     );
   });
+  it.each([
+    ['Europe/Moscow', '10:00', '11:00'],
+    ['America/New_York', '01:30', '01:45'],
+    ['Pacific/Kiritimati', '23:30', '00:15'],
+  ])(
+    'mints source wall times verbatim in %s without timezone/duration inference',
+    (timezone, from, to) => {
+      const source = ownerResult();
+      source.timezone = timezone;
+      source.appointments[0].time = from;
+      source.appointments[0].end_time = to;
+      const body = presentJournalSchedule(source, fact, source.date)!;
+      expect(body.entries[0].subtitle).toEqual({
+        ...body.entries[0].title,
+        value: `${source.date} · ${from}–${to} · ${timezone}`,
+        label: `${source.date} · ${from}–${to} · ${timezone}`,
+      });
+      expect(body.entries[0].state.label).toBe('recorded');
+      expect(body.entries[0].detail_intent).toBe('i1');
+      expect(body.entries[0].move_intent).toBeNull();
+      expect(body.entries[0].move_targets).toBeNull();
+      expect(body.gaps).toEqual([]);
+    },
+  );
+
+  it('empty or canceled journal rows never acquire availability or attendance', () => {
+    const source = ownerResult();
+    source.appointments[0].status = 'canceled';
+    const body = presentJournalSchedule(source, fact, source.date)!;
+    expect(body.entries[0].state.value).toBe('BLOCKED');
+    expect(body.entries[0].state.label).toBe('canceled');
+    expect(body.gaps).toEqual([]);
+    source.appointments = [];
+    const empty = presentJournalSchedule(source, fact, source.date)!;
+    expect(empty.entries).toEqual([]);
+    expect(empty.gaps).toEqual([]);
+  });
 });

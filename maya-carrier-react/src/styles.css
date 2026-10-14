@@ -463,3 +463,9 @@ SOFTWARE.
 .companion-personal-booking .personal-change { min-height:44px; border:0; padding:10px 0; color:#0054c2; background:transparent; }
 .companion-personal-booking .personal-confirm { width:100%; margin-top:18px; border:0; border-radius:26px; background:#0068ed; color:#fff; text-align:center; font-weight:600; }
 @media (max-width:359px) { .companion-personal-booking .personal-slots { grid-template-columns:minmax(0,1fr); } }
+
+/* Sealed schedule labels, in source order. No inferred slots or client clock. */
+.companion-schedule .widget-choice > .leaf:first-child { font-weight:550; }
+.companion-schedule .widget-choice > .leaf ~ .leaf { font-size:12px; line-height:1.5; }
+.companion-schedule .widget-block--group > .widget-leaf-line { font-weight:600; padding:8px 0 4px; }
+.companion-schedule .widget-choice:focus-visible { outline:2px solid #0068ed; outline-offset:2px; }

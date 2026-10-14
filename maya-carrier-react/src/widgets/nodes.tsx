@@ -38,6 +38,7 @@ export type Place = 'block' | 'inline' | 'list';
 
 export interface DrawCtx {
   readonly c: WidgetTheme;
+  readonly schedule: boolean;
   readonly names: ReadonlyMap<string, string>;
   readonly pending: InteractiveRefKey | null;
   readonly activate: (ref: InteractiveRefKey) => void;
@@ -58,22 +59,26 @@ const nameOf = (name: string, visible: string): string | undefined =>
  * The wrap matters. A choice carries an arbitrary number of server leaves, and the owner's own row
  * was flex because it had exactly two; without wrapping, four leaves squeeze into slivers.
  */
-const optionRow = (c: WidgetTheme) => ({
+const optionRow = (c: WidgetTheme, schedule: boolean) => ({
   width: '100%',
   minHeight: 46,
-  borderRadius: 14,
-  border: '1px solid ' + c.line2,
-  background: c.bg2,
+  borderRadius: schedule ? 0 : 14,
+  border: schedule ? '0' : '1px solid ' + c.line2,
+  borderTop: schedule ? '1px solid ' + c.line : undefined,
+  background: schedule ? 'transparent' : c.bg2,
   color: c.ink,
-  padding: '10px 13px',
+  padding: schedule ? '16px 0' : '10px 13px',
   display: 'flex',
+  flexDirection: schedule ? 'column' as const : undefined,
+  minWidth: schedule ? 0 : undefined,
+  boxSizing: schedule ? 'border-box' as const : undefined,
   flexWrap: 'wrap' as const,
   alignItems: 'baseline',
   gap: '4px 8px',
   textAlign: 'start' as const,
   cursor: 'pointer',
   font: 'inherit',
-  fontSize: 12.5,
+  fontSize: schedule ? 14 : 12.5,
   lineHeight: 1.45,
   overflowWrap: 'break-word' as const,
 });
@@ -183,7 +188,7 @@ function Choice({ node, ctx, k }: { readonly node: ChoiceNode; readonly ctx: Dra
         aria-label={node.name === '' ? undefined : node.name}
         aria-disabled={ctx.pending === node.ref ? 'true' : undefined}
         onClick={() => ctx.activate(node.ref)}
-        style={{ ...optionRow(c) }}
+        style={{ ...optionRow(c, ctx.schedule) }}
       >
         {inner}
       </button>
@@ -199,7 +204,7 @@ function Choice({ node, ctx, k }: { readonly node: ChoiceNode; readonly ctx: Dra
       data-ref={node.ref}
       aria-label={node.name === '' ? undefined : node.name}
       style={{
-        ...optionRow(c),
+        ...optionRow(c, ctx.schedule),
         cursor: 'default',
         minHeight: 44,
         background: 'transparent',
@@ -399,7 +404,7 @@ function Block({ node, place, ctx, k }: { readonly node: BlockNode; readonly pla
         className={className + (node.roleHint === null ? '' : ' hint--' + node.roleHint)}
         role="group"
         aria-label={label}
-        style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}
+        style={{ display: 'flex', flexWrap: 'wrap', gap: 8, flexDirection: ctx.schedule ? 'column' : undefined, width: ctx.schedule ? '100%' : undefined, minWidth: ctx.schedule ? 0 : undefined }}
       >
         {children}
       </div>

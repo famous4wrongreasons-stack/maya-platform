@@ -102,13 +102,17 @@ export const presentJournalSchedule = (
       : [];
     const status = text(appointment.status) ?? 'recorded';
     const title = services.length > 0 ? services.join(', ') : 'Запись';
+    // Mint the visible time before sealing: the carrier only copies labels.
+    // Preserve the owner's local wall times and timezone, without deriving
+    // duration, attendance or free windows. Status remains the separate state cell.
+    const when = `${date} · ${from}–${to} · ${timezone}`;
     return [
       {
         entry_ref: `journal-entry-${index + 1}`,
         lane_id: laneByName.get(staffName) ?? 'lane-1',
         bucket_span: [bucket, bucket] as [string, string],
         title: cell(title, title, fact),
-        subtitle: cell(status, status, fact),
+        subtitle: cell(when, when, fact),
         state: cell(
           status === 'canceled' ? ('BLOCKED' as const) : ('BOOKED' as const),
           status,
