@@ -1,0 +1,27 @@
+{
+  "candidate": "a6e49b9b2420363e37b5ca8cb940b79c8c6f6b9f",
+  "results": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0
+  },
+  "networkFence": "external connect EPERM, loopback permitted",
+  "clusterStopped": true,
+  "productionEffects": 0,
+  "retainedDatabaseAccess": false,
+  "journal": {
+    "pass": true,
+    "mode": "journal",
+    "fullscreenPhase": "open",
+    "renderMode": "prose",
+    "label": "Расписание · 1 мастер",
+    "emptyDayFixture": true
+  },
+  "personal": {
+    "pass": true,
+    "mode": "personal",
+    "createRescheduleCancel": true,
+    "internalCalendarOnly": true
+  },
+  "scope": "real AppModule/HTTP/PG/renderer/runtime/React drawer with synthetic identities and internal calendar; not real model/provider or complete new-entry browser-to-backend proof"
+}

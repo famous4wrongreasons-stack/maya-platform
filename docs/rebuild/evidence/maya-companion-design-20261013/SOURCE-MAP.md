@@ -182,3 +182,20 @@ See `../../MAYA-COMPANION-SETTINGS-CHECKPOINT-20261014.md` and
 `../maya-companion-settings-20261014/README.md` for fresh scoped evidence.
 This supersedes only the missing Settings presentation, not notification delivery
 acceptance, device acceptance or release certification.
+
+## 2026-10-14 — schedule shortcut, scoped acceptance
+
+Product `a6e49b9b2420363e37b5ca8cb940b79c8c6f6b9f` adds the reference calendar button as the visible question
+«Покажи расписание на сегодня» through the existing conversation writer. It does
+not mint/open a calendar directly. The composer draft is preserved even when equal
+to that question; pending, retry, expiry and canonical detail bindings remain owned
+by the runtime. Privacy remains in the existing menu.
+
+Fresh results: runtime 828 PASS + 7 SKIP; carrier 194 PASS; four emitted-browser
+suites 333 PASS; NS-1 16 PASS; packaging 18 PASS, PWA/Capacitor parity PASS.
+Independent current-backend source proof 2 PASS on new synthetic PG, stopped.
+No actual model/provider/owner DB involved; not full release certification.
+
+Direct header-to-detail, prototype free-window rows and booking shortcuts remain
+open. Current journal source yields sealed prose; blank journal space is not
+availability authority. See [checkpoint](../../MAYA-COMPANION-SCHEDULE-CHECKPOINT-20261014.md).
