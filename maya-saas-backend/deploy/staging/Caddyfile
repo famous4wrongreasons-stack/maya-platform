@@ -1,29 +1,33 @@
 {$STAGING_HOST} {
   encode zstd gzip
 
-  log {
-    output stdout
-    format json
-  }
+  # No request/access log: OAuth query values must not enter a gateway receipt.
 
   @api path /api/*
   handle @api {
     reverse_proxy backend:3000
   }
 
-  @pwaIcons path /icon-*.png /apple-touch-icon.png /manifest.json
-  handle @pwaIcons {
-    root * /srv/pwa-icons
-    header Cache-Control "public, max-age=300, stale-while-revalidate=3600"
+  @oauthCallback path /oauth-callback.html
+  handle @oauthCallback {
+    root * /srv/maya-callback
+    header {
+      -Server
+      Cache-Control "no-store"
+      Referrer-Policy "no-referrer"
+      X-Content-Type-Options "nosniff"
+      X-Frame-Options "DENY"
+    }
     file_server
   }
 
   handle {
     root * /srv/maya
-    try_files {path} /app.html
+    try_files {path} /index.html
     header {
       -Server
-      Referrer-Policy "strict-origin-when-cross-origin"
+      Cache-Control "no-store"
+      Referrer-Policy "no-referrer"
       X-Content-Type-Options "nosniff"
       X-Frame-Options "DENY"
       Permissions-Policy "camera=(self), microphone=(self), geolocation=(self)"

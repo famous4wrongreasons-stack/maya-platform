@@ -37,10 +37,10 @@ replace_env STAGING_HOST "$HOST"
 replace_env POSTGRES_PASSWORD "$DB_PASSWORD"
 replace_env DATABASE_URL "postgresql://maya_staging:${DB_PASSWORD}@postgres:5432/maya_staging?schema=public"
 replace_env CORS_ALLOWED_ORIGINS "https://${HOST},capacitor://localhost"
-replace_env PWA_PUBLIC_APP_URL "https://${HOST}/app.html"
+replace_env PWA_PUBLIC_APP_URL "https://${HOST}/"
 replace_env PWA_PUBLIC_API_URL "https://${HOST}/api"
 replace_env TENANT_BASE_DOMAIN "$HOST"
-replace_env YOOKASSA_RETURN_URL "https://${HOST}/app.html"
+replace_env YOOKASSA_RETURN_URL "https://${HOST}/"
 
 for key in \
   JWT_SECRET \

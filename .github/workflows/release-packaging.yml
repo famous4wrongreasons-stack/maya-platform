@@ -26,6 +26,9 @@ jobs:
         working-directory: maya-ios-carrier
       - run: npm test && npm run test:release
         working-directory: maya-carrier-react
+      - name: Refuse retired staging carrier before deployment
+        run: node --test scripts/staging-carrier-preflight.test.mjs
+        working-directory: maya-saas-backend
       - run: node --test scripts/widget-release-operator.test.cjs
         working-directory: maya-saas-backend
       - run: npx prisma generate && npm run build

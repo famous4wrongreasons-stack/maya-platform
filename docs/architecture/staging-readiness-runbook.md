@@ -35,6 +35,47 @@ validation or production configuration validation.
 
 ## Gate 1: Private staging foundation
 
+### Current React carrier packaging (2026-10-14)
+
+The staging gateway now selects `maya-carrier-react/dist/web`, including its
+canonical manifest, icons and OAuth callback. The old website mount, separate
+legacy icon overlay and `app.html` fallback are not admitted. PWA and native
+payloads still have one owner: `maya-carrier-react/tools/release.mjs`.
+
+`staging-up.sh` first checks the finite gateway configuration, then builds and
+verifies the canonical React payload and PWA/Capacitor equivalence before any
+Docker command. The configuration check pins the tested Caddyfile; a routing
+change requires a reviewed pin update and a fresh transport proof. It is not an
+AR-1 certificate or authorization to start a server. Raw request/access logging
+is omitted so OAuth query values cannot enter gateway receipts.
+
+Local preparation requires locked dependencies in both `maya-saas-backend` and
+`maya-carrier-react`. The packaging check is also blocking in
+`.github/workflows/release-packaging.yml`.
+
+An isolated loopback transport proof can be run with an explicitly provided
+Caddy binary and fresh scratch directory:
+
+```bash
+node scripts/staging-carrier-https-proof.mjs \
+  --caddy=/absolute/path/to/caddy \
+  --out=/private/tmp/maya-staging-https-unique-run
+```
+
+This runs actual Caddy TLS/static/proxy routing against a synthetic HTTP upstream.
+It trusts an ephemeral certificate only for the proof's individual HTTPS requests,
+never in the system/phone trust store; the owned temporary key is removed after
+the run. It does not prove real backend authentication, tenant isolation, a public
+endpoint, Docker deployment or iPhone acceptance.
+
+For the first phone check, no reachable HTTPS hostname has yet been assigned.
+The Mac currently has no Docker installation. Do not interpret this packaging
+correction as a ready staging environment, tunnel authorization or permission
+to expose a retained local salon session. Choose the isolated endpoint/runtime,
+qualify the real backend with synthetic data and only then request the bounded
+network/device step. Build the native Debug payload with that exact HTTPS
+`--development-api`; the default native production URL is not a test target.
+
 Prepare an environment that is not connected to existing production traffic:
 
 1. Create a dedicated staging PostgreSQL database with backups enabled.

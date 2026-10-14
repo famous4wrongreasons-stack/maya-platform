@@ -65,8 +65,8 @@ services:
       - "443:443/udp"
     volumes:
       - ./deploy/staging/Caddyfile:/etc/caddy/Caddyfile:ro
-      - "../сайт и приложение:/srv/maya:ro"
-      - "../сайт и приложение/pwa-assets/for-app:/srv/pwa-icons:ro"
+      - "../maya-carrier-react/dist/web:/srv/maya:ro"
+      - "./deploy/platform/beget-edge/oauth-callback.html:/srv/maya-callback/oauth-callback.html:ro"
       - staging_caddy_data:/data
       - staging_caddy_config:/config
     networks:

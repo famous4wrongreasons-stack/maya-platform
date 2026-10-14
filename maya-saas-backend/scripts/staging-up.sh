@@ -14,6 +14,11 @@ if [[ ! -x node_modules/.bin/ts-node ]]; then
   exit 69
 fi
 
+# Validate the selector before touching build outputs, then reconstruct and verify
+# the same React payload owner used by PWA and Capacitor. Never use the old shell.
+node scripts/staging-carrier-preflight.mjs --configuration-only
+node ../maya-carrier-react/tools/release.mjs build
+node scripts/staging-carrier-preflight.mjs
 npm run release:preflight -- --env .env.staging --skip-db
 docker compose --env-file .env.staging -f compose.staging.yml up -d --build
 docker compose --env-file .env.staging -f compose.staging.yml exec -T backend \
