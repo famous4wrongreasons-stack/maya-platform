@@ -26,7 +26,7 @@ const turns=[
   {id:'10000000-0000-4000-8000-000000000003',role:'assistant',text:'Привет! Давай посмотрим, что тебя интересует. Можем обсудить услуги или вернуться к истории визитов.',createdAt:'2026-10-13T09:00:01.000Z',completed:true},
 ];
 const wire=[];
-let pending=null, browser, page, origin, feedMode='normal', feedPending=null;
+let pending=null, browser, page, origin, feedMode='normal', feedPending=null, feedArrived=null;
 const json=(res,value,status=200)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
 const server=http.createServer(async(req,res)=>{
   let body='';for await(const chunk of req)body+=chunk;
@@ -36,7 +36,7 @@ const server=http.createServer(async(req,res)=>{
     if(req.url==='/api/ai/conversation')return json(res,{contract:'maya.conversation-history/1',conversationId:cid,truncated:false,interrupted:false,turns});
     if(req.url==='/api/widgets/resolve')return json(res,{contract:'maya.widget.resolve/1',tenant_bound:true,widgets:[]});
     if(req.url==='/api/inbox') {
-      if(feedMode==='delayed'){feedPending=res;return;}
+      if(feedMode==='delayed'){feedPending=res;feedArrived?.();feedArrived=null;return;}
       if(feedMode==='denied')return json(res,{},403);
       if(feedMode==='expired')return json(res,{},401);
       return json(res,{items:Array.from({length:8},(_,i)=>({id:'feed-'+i,type:'owner_alert',title:'Учебное уведомление '+(i+1),body_text:'Сохранённое уведомление. Это искусственный пример, без данных салона.',created_at:'2026-10-13T09:00:00.000Z',read_at:null}))});
@@ -136,6 +136,46 @@ try {
   await click('Открыть меню');await click('Движения Maya');await page.press('Escape');
   assert.equal(wire.length,beforeAbout);report.checks.push('About open/greet/layout/close/settings cause no API or conversation request');
 
+  const settings="document.querySelector('.companion-settings-sheet')";
+  const settingsMotion=settings+".querySelector('[role=switch]')";
+  const beforeSettings=wire.length;
+  await click('Открыть меню');await page.focus(button('Настройки'));await page.press('Enter');
+  await check(`${settings}.matches(':modal') && !document.querySelector('.companion-menu').open && document.activeElement.id==='maya-settings-title'`,'Settings replaces drawer with native modal and heading focus');
+  await check(`${settings}.querySelector('.companion-settings-profile .companion-settings-label').textContent==='Тестовый пользователь' && ${settings}.querySelector('.companion-settings-profile p').textContent==='Учебный салон'`,'Settings displays authenticated session names, not prototype identity or role');
+  await check(`${settings}.querySelectorAll('[role=switch]').length===1 && ${settings}.textContent.includes('Управление уведомлениями пока недоступно здесь.')`,'Settings has no invented notification toggle or saved delivery state');
+  assert.equal(await page.focus(navButton('Лента')),false);report.checks.push('Settings blocks background navigation');
+  await page.press('Tab');await check(`document.activeElement.getAttribute('aria-label')==='Закрыть настройки'`,'Settings heading Tab reaches first control');
+  await page.press('Tab',{shift:true});await check(`document.activeElement===${settingsMotion}`,'Settings reverse Tab stays in modal');
+  await page.press('Tab');await check(`document.activeElement.getAttribute('aria-label')==='Закрыть настройки'`,'Settings forward Tab stays in modal');
+  for(const [width,height] of [[393,852],[320,740],[427,952],[1280,900]]) {
+    await size(width,height);
+    await check(`(() => {const s=${settings},r=s.getBoundingClientRect();return s.scrollWidth<=s.clientWidth&&r.bottom<=innerHeight+1&&r.width<=560&&[...s.querySelectorAll('button')].every(b=>b.getBoundingClientRect().height>=44)})()`,'Settings fits viewport and targets at '+width);
+    await screenshot('settings-'+width);
+  }
+  await size(320,440);
+  await page.eval("document.querySelectorAll('.companion-settings-sheet h2,.companion-settings-sheet p,.companion-settings-sheet .companion-settings-label,.companion-settings-sheet button').forEach(e=>{e.dataset.oldFont=e.style.fontSize;e.style.fontSize=parseFloat(getComputedStyle(e).fontSize)*2+'px'})");
+  await check(`${settings}.scrollWidth<=${settings}.clientWidth && ${settings}.clientHeight<innerHeight`,'Settings 200 percent text stays within short viewport');
+  await page.focus(`${settings}.querySelector('h2')`);await page.press('Tab');await page.press('Tab');
+  await check(`document.activeElement===${settingsMotion} && document.activeElement.getBoundingClientRect().bottom<=innerHeight`,'Settings large-text motion control is keyboard reachable');
+  await screenshot('settings-large-text');
+  await page.eval("document.querySelectorAll('[data-old-font]').forEach(e=>{e.style.fontSize=e.dataset.oldFont;delete e.dataset.oldFont})");await size(393,852);
+  await page.eval(`(() => {window.settingsOriginalLabels=[...${settings}.querySelectorAll('.companion-settings-label,.companion-settings-profile p')].map(e=>e.textContent);for(const e of ${settings}.querySelectorAll('.companion-settings-label,.companion-settings-profile p'))e.textContent='ОченьДлинноеУчебноеИмяБезПробелов'.repeat(5);return true})()`);
+  await size(320,740);
+  await check(`${settings}.scrollWidth<=${settings}.clientWidth`,'Settings wraps long display names without horizontal overflow');
+  await page.eval(`[...${settings}.querySelectorAll('.companion-settings-label,.companion-settings-profile p')].forEach((e,i)=>e.textContent=window.settingsOriginalLabels[i])`);await size(393,852);
+  assert.ok(await page.click(settingsMotion));
+  await check(`${settingsMotion}.getAttribute('aria-checked')==='false' && document.querySelector('.companion-header .companion').dataset.motion==='off'`,'Settings motion changes existing header owner');
+  await page.press('Escape');
+  await check(`!${settings}.open && document.activeElement.getAttribute('aria-label')==='Открыть меню'`,'Settings Escape restores visible drawer opener');
+  await click('Открыть меню');await check(`${button('Движения Maya')}.getAttribute('aria-pressed')==='false'`,'drawer shortcut shares Settings motion state');
+  await click('Настройки');await check(`${settingsMotion}.getAttribute('aria-checked')==='false'`,'Settings reopening preserves session preference');
+  assert.ok(await page.click(settingsMotion));
+  await page.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+  await check(`${settingsMotion}.getAttribute('aria-checked')==='true' && [...document.querySelectorAll('.companion-header .companion *')].every(e=>getComputedStyle(e).animationName==='none')`,'system reduced motion wins over Settings enabled preference');
+  await page.send('Emulation.setEmulatedMedia',{features:[]});await click('Закрыть настройки');
+  await check(`!${settings}.open && document.activeElement.getAttribute('aria-label')==='Открыть меню'`,'Settings close button restores visible opener');
+  assert.equal(wire.length,beforeSettings);report.checks.push('Settings open/toggle/close has no request, write or authority operation');
+
   await choose('Чат');assert.equal(reads().length,0);report.checks.push('active chat selection is inert');
   for(const [width,height] of [[393,852],[320,740],[427,952],[1280,900]]) {
     await size(width,height);
@@ -160,6 +200,8 @@ try {
     const beforeIntroduction=wire.length;await click('О Maya');await check(`${about}.open`,'About opens over '+label);await click('Закрыть окно о Maya');
     await check(`!${about}.open && document.activeElement.getAttribute('aria-label')==='О Maya'`,'About close restores workspace header');await selected(label);
     assert.equal(wire.length,beforeIntroduction);report.checks.push('About preserves '+label+' without reread or write');
+    await click('Открыть меню');await click('Настройки');await check(`${settings}.open`,'Settings opens over '+label);await page.press('Escape');await selected(label);
+    assert.equal(wire.length,beforeIntroduction);report.checks.push('Settings preserves '+label+' without reread or write');
 
   }
   const beforeAboutReturn=wire.length;await click('О Maya');await click('Давай поговорим');await selected('Чат');
@@ -253,8 +295,17 @@ try {
   report.checks.push('switching does not create a second turn or history writer');
   assert.deepEqual(wire.filter(x=>x.method!=='GET').map(x=>x.path),['/api/auth/login','/api/widgets/resolve','/api/ai/chat']);
   report.checks.push('navigation performs no acknowledgement/task/provider writes');
-  feedMode='expired';await choose('Лента');
+  let feedDeadline;
+  const expiryRead=new Promise((resolve,reject)=>{
+    feedDeadline=setTimeout(()=>reject(Error('Synthetic expiry read did not arrive')),8000);
+    feedArrived=()=>{clearTimeout(feedDeadline);resolve();};
+  });
+  feedMode='delayed';await choose('Лента');await expiryRead;
+  await check("document.querySelector('.companion-tasks-status').textContent==='Загружаю…'",'existing workspace read awaits session-expiry response');
+  assert.ok(feedPending);await click('Открыть меню');await click('Настройки');await check(`${settings}.open`,'Settings stays open while existing workspace read is pending');
+  feedMode='expired';json(feedPending,{},401);feedPending=null;
   await check(`!${nav} && !document.querySelector('[data-chat-message]')`,'session revocation removes navigation and retained workspace presentation');
+  await check(`!${settings} && !document.querySelector('.companion-settings-profile')`,'session revocation removes Settings identity with the carrier');
   assert.equal(reads().every(x=>x.method==='GET'&&x.body===null),true);
   assert.deepEqual(report.unexpected,[]);assert.equal(report.externalRequests,0);assert.deepEqual(page.exceptions,[]);
   assert.equal(page.issues.filter(i=>i.code==='ContentSecurityPolicyIssue').length,0);

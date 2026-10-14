@@ -596,6 +596,7 @@ export function ChatScreen({
           current={privacyOpen ? 'privacy' : navigationVisible ? shellView.workspace ?? 'chat' : null}
           openChat={() => chooseSection('chat')}
           tenantName={sessionView.signedIn ? sessionView.display.tenantName : null}
+          userName={sessionView.signedIn ? sessionView.display.userName : null}
           privacyOpen={privacyOpen} openPrivacy={() => widgets.navigate('shell.privacy')}
           openPhoto={() => { widgets.navigate('shell.root'); goodsPhoto.open(); }}
           openIdeas={() => openWorkspace('ideas')}

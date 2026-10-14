@@ -93,10 +93,14 @@ test('all 40 sealed widget fixtures keep identical non-style markup under the ne
 test('drawer projects canonical selection including privacy, with no reads or invented recent conversations',()=>{
  const inert=()=>{throw Error('Passive menu called an operation');};
  for(const current of ['chat','feed','ideas','tasks','library','privacy',null]) {
-  const html=renderToStaticMarkup(createElement(CompanionHeader,{current,tenantName:'<Учебный салон>',privacyOpen:current==='privacy',openChat:inert,openPrivacy:inert,openPhoto:inert,openTasks:inert,openFeed:inert,openLibrary:inert,openIdeas:inert,photoEnabled:false,state:'idle',event:0,greet:inert}));
+  const html=renderToStaticMarkup(createElement(CompanionHeader,{current,userName:current===null?null:'<Пользователь>',tenantName:'<Учебный салон>',privacyOpen:current==='privacy',openChat:inert,openPrivacy:inert,openPhoto:inert,openTasks:inert,openFeed:inert,openLibrary:inert,openIdeas:inert,photoEnabled:false,state:'idle',event:0,greet:inert}));
   assert.equal((html.match(/aria-current="page"/g)||[]).length,current===null?0:1);
   assert.match(html,/Главный чат/);assert.match(html,/&lt;Учебный салон&gt;/);
   assert.doesNotMatch(html,/Недавние разговоры|Поиск разговоров|Стас|Мужская эстетика/);
   assert.match(html,/<dialog[^>]*aria-modal="true"/);assert.doesNotMatch(html,/<dialog[^>]* open/);
+  assert.match(html,current===null?/Ваш аккаунт/:/&lt;Пользователь&gt;/);
+  assert.doesNotMatch(html,/<Пользователь>|Владелец|platform_owner|TENANT_OWNER/);
+  assert.equal((html.match(/role="switch"/g)||[]).length,1);
+  assert.match(html,/Управление уведомлениями пока недоступно здесь/);
  }
 });

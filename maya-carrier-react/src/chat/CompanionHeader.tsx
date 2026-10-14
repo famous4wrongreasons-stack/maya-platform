@@ -2,15 +2,17 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { CompanionSection } from './CompanionNavigation.tsx';
 import { MayaCompanion, type CompanionState } from '../identity/MayaCompanion.tsx';
 import { AboutMayaSheet } from './AboutMayaSheet.tsx';
+import { SettingsSheet } from './SettingsSheet.tsx';
 
 type DialogRef = HTMLDialogElement | null;
 type ButtonRef = HTMLButtonElement | null;
 type HeaderRef = HTMLElement | null;
 
 /** Local chrome over existing destinations. It invents no route or business permission. */
-export function CompanionHeader({ tenantName, current, openChat, privacyOpen, openPrivacy, openPhoto, openTasks, openFeed, openLibrary, openIdeas, photoEnabled, state, event, greet }: {
+export function CompanionHeader({ userName, tenantName, current, openChat, privacyOpen, openPrivacy, openPhoto, openTasks, openFeed, openLibrary, openIdeas, photoEnabled, state, event, greet }: {
   readonly current: CompanionSection | 'privacy' | null; readonly openChat: () => void;
   readonly tenantName: string | null; readonly privacyOpen: boolean;
+  readonly userName: string | null;
   readonly openPrivacy: () => void; readonly openPhoto: () => void;
   readonly openIdeas: () => void;
   readonly openTasks: () => void; readonly openFeed: () => void; readonly openLibrary: () => void;
@@ -19,6 +21,7 @@ export function CompanionHeader({ tenantName, current, openChat, privacyOpen, op
 }) {
   const [menu, setMenu] = useState(false);
   const [about, setAbout] = useState(false);
+  const [settings, setSettings] = useState(false);
   const [moving, setMoving] = useState(true);
   const dialog = useRef<DialogRef>(null);
   const opener = useRef<ButtonRef>(null);
@@ -80,11 +83,14 @@ export function CompanionHeader({ tenantName, current, openChat, privacyOpen, op
       <p className="companion-menu-section">Инструменты</p>
       <button type="button" className="companion-menu-row" aria-current={current === 'privacy' ? 'page' : undefined} onClick={() => { setMenu(false); openPrivacy(); }}>Приватность и данные <span aria-hidden="true">↗</span></button>
       <button type="button" className="companion-menu-row" disabled={!photoEnabled} onClick={() => { setMenu(false); openPhoto(); }}>Товар по фото накладной <span aria-hidden="true">+</span></button>
+      <button type="button" className="companion-menu-row" aria-haspopup="dialog" onClick={() => { setMenu(false); setSettings(true); }}>Настройки</button>
       <button type="button" className="companion-menu-row" aria-label="Движения Maya" aria-pressed={moving} onClick={() => setMoving(value => !value)}>
         Движения Maya <span>{moving ? 'Вкл.' : 'Выкл.'}</span>
       </button>
       <p className="companion-menu-note">Настройка движения действует в этом сеансе. Системное уменьшение движения имеет приоритет.</p>
     </dialog>
+    <SettingsSheet open={settings} close={() => setSettings(false)} returnFocus={() => opener.current?.focus({ preventScroll: true })}
+      userName={userName} tenantName={tenantName} moving={moving} toggleMoving={() => setMoving(value => !value)} />
     <AboutMayaSheet open={about} close={() => setAbout(false)} chatEnabled={current !== null}
       openChat={() => { if (current !== 'chat') openChat(); }}
       state={state} event={event} moving={moving} greet={greet} />
