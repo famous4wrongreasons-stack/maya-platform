@@ -155,3 +155,14 @@ transcript, microphone, provider, capture engine or second writer was added.
 This supersedes only voice presentation, not real-device/provider acceptance.
 See `../../MAYA-COMPANION-VOICE-SHEET-CHECKPOINT-20261014.md` and
 `../maya-companion-voice-sheet-20261014/README.md` for fresh scoped evidence.
+
+## About Maya checkpoint (2026-10-14)
+
+`1da26ad9a24d91bd809f236d0b54c9e9635c2695` adds the owner's static introduction sheet, opened by the header
+character. It uses the existing finite mascot, greeting/context adapter, motion
+preference and canonical chat return. Opening/greeting/closing have no requests;
+chat history/draft and current workspace remain intact. Photo surface close
+ownership is not bypassed by a local root transition. No demo facts, AI request,
+new asset, route, notification control or business authority was added.
+See `../../MAYA-COMPANION-ABOUT-CHECKPOINT-20261014.md` and
+`../maya-companion-about-20261014/README.md` for fresh scoped evidence.

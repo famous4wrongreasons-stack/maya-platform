@@ -1,0 +1,117 @@
+{
+  "candidate": "95ce9154a726705569fb85ad54da1c0e25d3da29",
+  "dirtySource": true,
+  "contract": "maya.companion.navigation-ui/1",
+  "realBackend": false,
+  "realProviders": false,
+  "realKeys": false,
+  "payload": {
+    "icons/maya-192.png": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
+    "icons/maya-512-maskable.png": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
+    "icons/maya-512.png": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
+    "icons/maya-apple-180.png": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
+    "index.html": "1815fe37eb43f95dafe47657adaad794e95ffad173b24b7aea893c862b57b7c2",
+    "m/TJKB3PDL/main.js": "b60c48586fc71022b7eedb2703a2e5314ce36623c1ee997ddcccebda0e935b5c",
+    "manifest.webmanifest": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
+    "styles.css": "2f513989e546e31f121ba2ae6b95c605e593cbe115de38ec615710f240507c08"
+  },
+  "checks": [
+    "real emitted sign-in",
+    "history restored through canonical runtime",
+    "five real workspaces in navigation landmark",
+    "current section is Чат",
+    "mounting navigation does not preload business data",
+    "keyboard opens About as native modal with heading focus",
+    "About reuses the admitted mascot and actual greeting"
+  ],
+  "screenshots": [
+    "signin-393.png",
+    "failure.png"
+  ],
+  "externalRequests": 0,
+  "unexpected": [],
+  "status": "FAIL",
+  "failure": "Runtime.evaluate: Object reference chain is too long",
+  "wire": [
+    {
+      "path": "/api/auth/login",
+      "method": "POST"
+    },
+    {
+      "path": "/api/ai/conversation",
+      "method": "GET"
+    },
+    {
+      "path": "/api/widgets/resolve",
+      "method": "POST"
+    }
+  ],
+  "navigationProbe": [
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Maya",
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "geometry": {
+    "active": "<h2 id=\"maya-about-title\" tabindex=\"-1\">Привет, я Maya</h2>",
+    "app": {
+      "x": 0,
+      "y": 0,
+      "width": 393,
+      "height": 852,
+      "top": 0,
+      "right": 393,
+      "bottom": 852,
+      "left": 0
+    },
+    "nav": {
+      "x": 16,
+      "y": 778,
+      "width": 361,
+      "height": 66,
+      "top": 778,
+      "right": 377,
+      "bottom": 844,
+      "left": 16
+    },
+    "editing": "maya-companion-chat",
+    "space": "74px",
+    "pointer": false
+  },
+  "exceptions": [],
+  "issues": [
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 43,
+          "violatingNodeAttribute": ""
+        }
+      }
+    },
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 45,
+          "violatingNodeAttribute": ""
+        }
+      }
+    },
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 47,
+          "violatingNodeAttribute": ""
+        }
+      }
+    }
+  ]
+}
