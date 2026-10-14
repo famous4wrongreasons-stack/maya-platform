@@ -94,7 +94,9 @@ const request = (route, { method = 'GET', body, token, origin = 'capacitor://loc
     res.on('error', reject); res.on('end', () => {
       const bytes = Buffer.concat(parts); let json;
       if (String(res.headers['content-type']).includes('application/json')) { try { json = JSON.parse(bytes); } catch {} }
-      report.requests.push({ method, route, status: res.statusCode, elapsedMs: Date.now() - started });
+      const errorCode = json?.error?.code ?? json?.message;
+      report.requests.push({ method, route, status: res.statusCode, elapsedMs: Date.now() - started,
+        ...(typeof errorCode === 'string' && /^[a-z][a-z0-9_]{2,100}$/.test(errorCode) ? { errorCode } : {}) });
       resolve({ status: res.statusCode, headers: res.headers, bytes, json });
     });
   });
@@ -222,11 +224,17 @@ try {
     for (const [route, projection] of [
       ['/api/ai/conversation', 'projectConversationHistory'], ['/api/inbox', 'projectFeed'],
       ['/api/owner-reports', 'projectReports'], ['/api/operational-work', 'projectOwnTasks'],
-      ['/api/analytics/valuations', 'projectIdeas'],
     ]) {
       const result = await request(route, { token });
       check('actual Companion projection ' + name + ': ' + route, result.status === 200 && !!projections[projection](result.json));
     }
+    // MeasurementReadService.member currently requires status=active. Preserve
+    // that contract: this proof's ordinary full trial must not be promoted by SQL.
+    const ideas = await request('/api/analytics/valuations', { token });
+    check('trial Ideas preserves exact current active-only refusal ' + name,
+      ideas.status === 403 && ideas.json?.message === 'measurement_membership_revoked');
+    report.ideas = { status: 'UNAVAILABLE_FOR_TRIAL', owner: 'MeasurementReadService.member',
+      code: 'measurement_membership_revoked', successfulReadProven: false, authorityChanged: false };
     check('tenant owner is not platform authority ' + name, (await request('/api/health/metrics', { token })).status === 403);
   }
   const [a, b] = accounts;
@@ -256,10 +264,10 @@ try {
   check('revoked access token refused', (await request('/api/branches', { token: renewed.json.access_token })).status === 401);
   check('revoked refresh token refused', [401, 403].includes((await request('/api/auth/refresh', { method: 'POST', body: { refreshToken: renewed.json.refresh_token } })).status));
   // Read-only counts from this owned synthetic database; never issue an entitlement.
-  const sql = 'SELECT json_build_object(\'tenants\',(SELECT count(*) FROM "Tenant"),\'widgetGrants\',(SELECT count(*) FROM "TenantEntitlement" WHERE "featureKey"=\'widgets.runtime\'),\'crmIntegrations\',(SELECT count(*) FROM "CrmIntegration"));';
+  const sql = 'SELECT json_build_object(\'syntheticTrials\',(SELECT count(*) FROM "Tenant" WHERE "status"=\'trial\' AND "trialFullAccess"=true),\'bootstrapTenants\',(SELECT count(*) FROM "Tenant" WHERE "id"=\'maya-os-bootstrap-tenant-v1\'),\'widgetGrants\',(SELECT count(*) FROM "TenantEntitlement" WHERE "featureKey"=\'widgets.runtime\'),\'crmIntegrations\',(SELECT count(*) FROM "CrmIntegration"));';
   const dbCounts = command(path.join(values['pg-bin'], 'psql'), ['-h', '127.0.0.1', '-p', String(pgPort), '-U', 'maya_local_onboarding', '-d', database, '-At', '-v', 'ON_ERROR_STOP=1', '-c', sql], { ...minimal, PGPASSFILE: path.join(out, 'pgpass') });
   report.databaseCounts = JSON.parse(dbCounts);
-  check('two synthetic tenants with no widget grants or CRM credentials', report.databaseCounts.tenants === 2 && report.databaseCounts.widgetGrants === 0 && report.databaseCounts.crmIntegrations === 0);
+  check('two synthetic trials plus canonical bootstrap; no widget grants or CRM credentials', report.databaseCounts.syntheticTrials === 2 && report.databaseCounts.bootstrapTenants === 1 && report.databaseCounts.widgetGrants === 0 && report.databaseCounts.crmIntegrations === 0);
   assert.deepEqual(sourceBinding(extensions), source, 'committed sources changed during proof');
   report.status = 'PASS';
 } catch (error) {
