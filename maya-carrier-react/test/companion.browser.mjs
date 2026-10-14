@@ -143,7 +143,7 @@ try {
   const requests=wire.filter(x=>x.path==='/api/ai/chat');assert.equal(requests[1].body.requestId,requests[2].body.requestId);finish();
   await check(`document.querySelectorAll('[data-chat-message]').length===6`,'retry creates no duplicate message');
   report.checks.push('retry preserves request identity');
-  await click('Приватность и данные');await check(`!!document.querySelector('[aria-label="Приватность"]')`,'existing privacy route remains reachable');
+  await click('Открыть меню');await click('Приватность и данные');await check(`!!document.querySelector('[aria-label="Приватность"]')`,'existing privacy route remains reachable');
   assert.deepEqual(report.unexpected,[]);assert.equal(report.externalRequests,0);
   assert.deepEqual(page.exceptions,[]);
   assert.equal(page.issues.filter(i=>i.code==='ContentSecurityPolicyIssue').length,0);

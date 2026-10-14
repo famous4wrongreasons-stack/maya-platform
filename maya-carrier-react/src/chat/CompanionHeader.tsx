@@ -9,9 +9,10 @@ type ButtonRef = HTMLButtonElement | null;
 type HeaderRef = HTMLElement | null;
 
 /** Local chrome over existing destinations. It invents no route or business permission. */
-export function CompanionHeader({ userName, tenantName, current, openChat, privacyOpen, openPrivacy, openPhoto, openTasks, openFeed, openLibrary, openIdeas, photoEnabled, state, event, greet }: {
+export function CompanionHeader({ userName, tenantName, current, openChat, askSchedule, scheduleEnabled, openPrivacy, openPhoto, openTasks, openFeed, openLibrary, openIdeas, photoEnabled, state, event, greet }: {
   readonly current: CompanionSection | 'privacy' | null; readonly openChat: () => void;
-  readonly tenantName: string | null; readonly privacyOpen: boolean;
+  readonly tenantName: string | null;
+  readonly askSchedule: () => void; readonly scheduleEnabled: boolean;
   readonly userName: string | null;
   readonly openPrivacy: () => void; readonly openPhoto: () => void;
   readonly openIdeas: () => void;
@@ -51,8 +52,8 @@ export function CompanionHeader({ userName, tenantName, current, openChat, priva
         <MayaCompanion state={state} event={event} moving={moving} />
         <span className="companion-caption">Maya</span>
       </button>
-      <button type="button" className="companion-circle" aria-label="Приватность и данные" title="Приватность и данные"
-        aria-pressed={privacyOpen} onClick={openPrivacy}><span className="companion-privacy-icon" aria-hidden="true" /></button>
+      <button type="button" className="companion-circle" aria-label="Спросить Maya о расписании на сегодня" title="Спросить Maya о расписании на сегодня"
+        disabled={!scheduleEnabled} onClick={askSchedule}><span className="companion-calendar-icon" aria-hidden="true" /></button>
       <p className="companion-business">{tenantName ?? 'Разговор с Maya'}</p>
     </header>
     <dialog ref={dialog} className="companion-menu" aria-label="Меню Maya" aria-modal="true"
@@ -81,7 +82,7 @@ export function CompanionHeader({ userName, tenantName, current, openChat, priva
         <span className={'companion-navigation-icon companion-navigation-' + section.key} aria-hidden="true" />{section.label}
       </button>)}
       <p className="companion-menu-section">Инструменты</p>
-      <button type="button" className="companion-menu-row" aria-current={current === 'privacy' ? 'page' : undefined} onClick={() => { setMenu(false); openPrivacy(); }}>Приватность и данные <span aria-hidden="true">↗</span></button>
+      <button type="button" className="companion-menu-row" aria-label="Приватность и данные" aria-current={current === 'privacy' ? 'page' : undefined} onClick={() => { setMenu(false); openPrivacy(); }}>Приватность и данные <span aria-hidden="true">↗</span></button>
       <button type="button" className="companion-menu-row" disabled={!photoEnabled} onClick={() => { setMenu(false); openPhoto(); }}>Товар по фото накладной <span aria-hidden="true">+</span></button>
       <button type="button" className="companion-menu-row" aria-haspopup="dialog" onClick={() => { setMenu(false); setSettings(true); }}>Настройки</button>
       <button type="button" className="companion-menu-row" aria-label="Движения Maya" aria-pressed={moving} onClick={() => setMoving(value => !value)}>

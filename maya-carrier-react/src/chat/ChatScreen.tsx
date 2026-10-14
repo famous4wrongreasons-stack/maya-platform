@@ -568,6 +568,18 @@ export function ChatScreen({
     // Returning to the conversation need not summon the mobile keyboard.
     window.requestAnimationFrame(() => laneRef.current?.focus({ preventScroll: true }));
   };
+  const scheduleEnabled = navigationVisible && view.composer.enabled && !view.inFlight && voiceView.state === 'idle' && !voiceSheetOpen;
+  const askSchedule = () => {
+    if (!scheduleEnabled) return;
+    // A visible user question through the sole conversation writer. The server owns date,
+    // source, permissions and any NAVIGATE detail; this shortcut cannot mint a calendar.
+    const outcome = conversation.submitUserTurn('Покажи расписание на сегодня', { modality: 'typed' });
+    if (!outcome.accepted) { setRefused(outcome.refusal); return; }
+    setRefused(null);
+    // Do not claim awaitingRef: this turn did not originate in the composer's draft, even
+    // when that draft happens to contain exactly the same question.
+    chooseSection('chat');
+  };
 
   return (
     <div className={companion ? 'maya-companion-chat' + (editing ? ' is-editing' : '') : undefined}
@@ -597,7 +609,7 @@ export function ChatScreen({
           openChat={() => chooseSection('chat')}
           tenantName={sessionView.signedIn ? sessionView.display.tenantName : null}
           userName={sessionView.signedIn ? sessionView.display.userName : null}
-          privacyOpen={privacyOpen} openPrivacy={() => widgets.navigate('shell.privacy')}
+          askSchedule={askSchedule} scheduleEnabled={scheduleEnabled} openPrivacy={() => widgets.navigate('shell.privacy')}
           openPhoto={() => { widgets.navigate('shell.root'); goodsPhoto.open(); }}
           openIdeas={() => openWorkspace('ideas')}
           openTasks={() => openWorkspace('tasks')}

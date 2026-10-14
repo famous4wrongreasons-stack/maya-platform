@@ -264,6 +264,7 @@ try {
   await click('Открыть меню');await check("document.querySelector('.companion-menu').open",'menu opened for existing photo surface');
   assert.ok(await page.click("[...document.querySelectorAll('.companion-menu-row')].find(b=>b.textContent.startsWith('Товар по фото накладной'))"));
   await check(`!${nav} && !!${button('Закрыть и очистить поля фото')}`,'photo surface retains its own controls without navigation');
+  await check(`${button('Спросить Maya о расписании на сегодня')}.disabled`,'schedule shortcut cannot interrupt photo close ownership');
   await click('Открыть меню');
   await check(`${menuChoice('Главный чат')}.disabled && !document.querySelector('.companion-menu [aria-current=page]')`,'photo surface retains its own close authority without false current chat');
   await page.press('Escape');await click('О Maya');
@@ -272,10 +273,10 @@ try {
   await check(`document.activeElement.getAttribute('aria-label')==='Закрыть окно о Maya'`,'About focus trap skips disabled chat return');
   const beforeBlockedReturn=wire.length;await page.eval(`${about}.querySelector('.companion-about-chat').click()`);await check(`${about}.open && !!${button('Закрыть и очистить поля фото')}`,'disabled About return leaves underlying photo surface intact');assert.equal(wire.length,beforeBlockedReturn);
   await page.press('Escape');await click('Закрыть и очистить поля фото');await selected('Чат');
-  await click('Приватность и данные');
+  await click('Открыть меню');await click('Приватность и данные');
   await check(`!${nav} && !!document.querySelector('[aria-label="Приватность"]')`,'privacy retains its own return/confirmation controls');
   await click('Назад к разговору');await selected('Чат');
-  await click('Приватность и данные');await click('Открыть меню');
+  await click('Открыть меню');await click('Приватность и данные');await click('Открыть меню');
   await check("document.querySelector('.companion-menu [aria-current=page]').textContent.startsWith('Приватность и данные')",'privacy has its own current marker rather than a false chat marker');
   assert.ok(await page.click(menuChoice('Главный чат')));await selected('Чат');
   await check(`${composer}.value==='Черновик остаётся здесь' && document.activeElement===document.querySelector('.maya-chat-lane')`,'drawer returns from privacy through canonical root with draft intact');
