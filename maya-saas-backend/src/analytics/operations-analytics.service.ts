@@ -876,7 +876,7 @@ export class OperationsAnalyticsService {
                   // merely because its string ID happens to match our catalogue.
                   serviceIdsByAppointment.set(
                     item.id,
-                    source === CalendarSource.INTERNAL ? serviceIds : [],
+                    source === 'internal' ? serviceIds : [],
                   );
                   return {
                     ...item,
