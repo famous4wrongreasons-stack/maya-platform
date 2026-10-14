@@ -1,0 +1,34 @@
+widgets-live: proof database maya_widget_gate_proof_companion_schedule on 127.0.0.1:57886 (local)
+[31m[Nest] 23680  - [39m10/14/2026, 8:59:49 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 23680  - [39m10/14/2026, 8:59:49 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 23680  - [39m10/14/2026, 8:59:51 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 23680  - [39m10/14/2026, 8:59:51 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+(node:23680) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[31m[Nest] 23680  - [39m10/14/2026, 8:59:52 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+[31m[Nest] 23680  - [39m10/14/2026, 8:59:52 AM [31m  ERROR[39m [38;5;3m[CrmAdapterFactory] [39m[31mYCLIENTS_PARTNER_TOKEN не задан: подключение YClients и Altegio будет отклоняться для ВСЕХ салонов. Внутренний календарь при этом работает.[39m
+FAIL test/widgets-live/source-carrier.probe-spec.ts (9.153 s)
+  ✓ FBE2E approved personal production source through the unchanged carrier (1700 ms)
+  ✓ FBE2E approved journal production source through the unchanged carrier (606 ms)
+  ✕ FBE2E approved journal-populated production source through the unchanged carrier (494 ms)
+
+  ● FBE2E approved journal-populated production source through the unchanged carrier
+
+    Invalid carrier observation
+
+      137 |             error instanceof Error
+      138 |               ? error
+    > 139 |               : new Error('Invalid carrier observation'),
+          |                 ^
+      140 |           );
+      141 |         }
+      142 |       });
+
+      at ChildProcess.<anonymous> (widgets-live/source-carrier.probe-spec.ts:139:17)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 2 passed, 3 total
+Snapshots:   0 total
+Time:        9.173 s
+Ran all test suites.
+Test results written to: ../../source-carrier-jest.json

@@ -1,0 +1,11 @@
+PASS src/widgets/composition/journal-schedule.presenter.spec.ts
+PASS src/widgets/projection/projector-fences.architecture.spec.ts
+PASS src/widgets/emission/emitter.spec.ts
+PASS src/ai-tools/employee-journal-read.spec.ts
+
+Test Suites: 4 passed, 4 total
+Tests:       149 passed, 149 total
+Snapshots:   0 total
+Time:        2.431 s
+Ran all test suites within paths "src/widgets/composition/journal-schedule.presenter.spec.ts", "src/widgets/projection/projector-fences.architecture.spec.ts", "src/widgets/emission/emitter.spec.ts", "src/ai-tools/employee-journal-read.spec.ts".
+Test results written to: ../../backend-source-regressions.json

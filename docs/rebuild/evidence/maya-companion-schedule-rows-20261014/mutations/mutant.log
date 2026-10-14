@@ -1,0 +1,64 @@
+TAP version 13
+# Subtest: SCHEDULE shared detail keeps sealed controls in order: i1
+not ok 1 - SCHEDULE shared detail keeps sealed controls in order: i1
+  ---
+  duration_ms: 9.21425
+  type: 'test'
+  location: '/private/tmp/maya-companion-schedule-order-mutation-final05-20261014/candidate/maya-chat-shell/test/renderer.conformance.test.mjs:660:42'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+
+    + 'prose'
+    - 'structured'
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'structured'
+  actual: 'prose'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///private/tmp/maya-companion-schedule-order-mutation-final05-20261014/candidate/maya-chat-shell/test/renderer.conformance.test.mjs:668:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+# Subtest: SCHEDULE shared detail keeps sealed controls in order: i3
+not ok 2 - SCHEDULE shared detail keeps sealed controls in order: i3
+  ---
+  duration_ms: 1.976333
+  type: 'test'
+  location: '/private/tmp/maya-companion-schedule-order-mutation-final05-20261014/candidate/maya-chat-shell/test/renderer.conformance.test.mjs:660:42'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+
+    + 'prose'
+    - 'structured'
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'structured'
+  actual: 'prose'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///private/tmp/maya-companion-schedule-order-mutation-final05-20261014/candidate/maya-chat-shell/test/renderer.conformance.test.mjs:668:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 0
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 85.452958

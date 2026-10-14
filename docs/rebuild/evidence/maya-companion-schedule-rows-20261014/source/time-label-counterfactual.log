@@ -1,0 +1,112 @@
+FAIL src/widgets/composition/journal-schedule.presenter.spec.ts
+  P-JOURNAL-PROJECTION journal schedule presenter
+    ✓ copies the authorized owner date, timezone and schedule facts into the certified body without PII (2 ms)
+    ✓ refuses a result for a different business date instead of reinterpreting it (1 ms)
+    ✓ is deterministic over the same authorized result and evidence
+    ✕ mints source wall times verbatim in Europe/Moscow without timezone/duration inference (2 ms)
+    ✕ mints source wall times verbatim in America/New_York without timezone/duration inference (1 ms)
+    ✕ mints source wall times verbatim in Pacific/Kiritimati without timezone/duration inference (1 ms)
+    ✓ empty or canceled journal rows never acquire availability or attendance
+
+  ● P-JOURNAL-PROJECTION journal schedule presenter › mints source wall times verbatim in Europe/Moscow without timezone/duration inference
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+    @@ -6,11 +6,11 @@
+            "dereferenceable_until": null,
+            "ref": "h_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          },
+        ],
+        "fact_ref": 0,
+    -   "label": "2026-09-24 · 10:00–11:00 · Europe/Moscow",
+    +   "label": "recorded",
+        "next_intent_ref": null,
+        "reason_code": null,
+        "state": "KNOWN",
+    -   "value": "2026-09-24 · 10:00–11:00 · Europe/Moscow",
+    +   "value": "recorded",
+      }
+
+      78 |       source.appointments[0].end_time = to;
+      79 |       const body = presentJournalSchedule(source, fact, source.date)!;
+    > 80 |       expect(body.entries[0].subtitle).toEqual({
+         |                                        ^
+      81 |         ...body.entries[0].title,
+      82 |         value: `${source.date} · ${from}–${to} · ${timezone}`,
+      83 |         label: `${source.date} · ${from}–${to} · ${timezone}`,
+
+      at widgets/composition/journal-schedule.presenter.spec.ts:80:40
+
+  ● P-JOURNAL-PROJECTION journal schedule presenter › mints source wall times verbatim in America/New_York without timezone/duration inference
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+    @@ -6,11 +6,11 @@
+            "dereferenceable_until": null,
+            "ref": "h_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          },
+        ],
+        "fact_ref": 0,
+    -   "label": "2026-09-24 · 01:30–01:45 · America/New_York",
+    +   "label": "recorded",
+        "next_intent_ref": null,
+        "reason_code": null,
+        "state": "KNOWN",
+    -   "value": "2026-09-24 · 01:30–01:45 · America/New_York",
+    +   "value": "recorded",
+      }
+
+      78 |       source.appointments[0].end_time = to;
+      79 |       const body = presentJournalSchedule(source, fact, source.date)!;
+    > 80 |       expect(body.entries[0].subtitle).toEqual({
+         |                                        ^
+      81 |         ...body.entries[0].title,
+      82 |         value: `${source.date} · ${from}–${to} · ${timezone}`,
+      83 |         label: `${source.date} · ${from}–${to} · ${timezone}`,
+
+      at widgets/composition/journal-schedule.presenter.spec.ts:80:40
+
+  ● P-JOURNAL-PROJECTION journal schedule presenter › mints source wall times verbatim in Pacific/Kiritimati without timezone/duration inference
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 2
+    + Received  + 2
+
+    @@ -6,11 +6,11 @@
+            "dereferenceable_until": null,
+            "ref": "h_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          },
+        ],
+        "fact_ref": 0,
+    -   "label": "2026-09-24 · 23:30–00:15 · Pacific/Kiritimati",
+    +   "label": "recorded",
+        "next_intent_ref": null,
+        "reason_code": null,
+        "state": "KNOWN",
+    -   "value": "2026-09-24 · 23:30–00:15 · Pacific/Kiritimati",
+    +   "value": "recorded",
+      }
+
+      78 |       source.appointments[0].end_time = to;
+      79 |       const body = presentJournalSchedule(source, fact, source.date)!;
+    > 80 |       expect(body.entries[0].subtitle).toEqual({
+         |                                        ^
+      81 |         ...body.entries[0].title,
+      82 |         value: `${source.date} · ${from}–${to} · ${timezone}`,
+      83 |         label: `${source.date} · ${from}–${to} · ${timezone}`,
+
+      at widgets/composition/journal-schedule.presenter.spec.ts:80:40
+
+Test Suites: 1 failed, 1 total
+Tests:       3 failed, 4 passed, 7 total
+Snapshots:   0 total
+Time:        0.258 s
+Ran all test suites matching src/widgets/composition/journal-schedule.presenter.spec.ts.
+Test results written to: ../../counterfactual.json
