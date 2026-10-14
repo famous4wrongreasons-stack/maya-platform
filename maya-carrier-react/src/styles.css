@@ -286,20 +286,25 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .companion-task-add:disabled { opacity: .5; cursor: default; }
 .companion-task-command { padding: 12px 0; overflow-wrap: anywhere; }
 .companion-task-command button { font: inherit; border-radius: 20px; padding: 12px; }
-.companion-task-dialog { width: min(480px, calc(100% - 24px)); max-height: calc(100dvh - 48px); box-sizing: border-box; margin: auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 28px; color: #1d2428; background: #fff; overflow: auto; }
-.companion-task-dialog::backdrop { background: rgb(15 23 30 / 32%); }
-.companion-task-fields { display: grid; gap: 16px; }
+.companion-task-dialog { position:fixed; inset:auto 0; top:calc(var(--maya-viewport-top, 0px) + var(--maya-viewport-height, 100dvh)); transform:translateY(-100%); width:min(100%,560px); max-width:100%; max-height:calc(var(--maya-viewport-height, 100dvh) - 24px); box-sizing:border-box; margin:0 auto; padding:0; border:0; border-radius:22px 22px 0 0; color:#191a1b; background:#fff; overflow:hidden; box-shadow:0 -16px 48px rgb(0 0 0 /20%); }
+.companion-task-dialog[open] { display:flex; flex-direction:column; }
+.companion-task-dialog::backdrop { background:rgb(0 0 0 /34%); }
+.companion-task-sheet-heading { flex:none; display:grid; grid-template-columns:minmax(0,1fr) 44px; gap:4px 10px; align-items:center; padding:0 18px 16px; }
+.companion-task-sheet-heading h2 { font-size:18px; line-height:1.35; font-weight:650; overflow-wrap:anywhere; }
+.companion-task-sheet-heading p { grid-column:1 / -1; color:#74777c; font-size:13px; line-height:1.5; }
+.companion-task-fields { min-height:0; overflow:auto; overscroll-behavior:contain; display:grid; gap:16px; padding:0 18px calc(24px + env(safe-area-inset-bottom, 0px)); }
 .companion-task-dialog h2, .companion-task-dialog p { margin: 0; }
-.companion-task-dialog label { display: grid; gap: 8px; font-size: 14px; }
+.companion-task-dialog label { display:grid; gap:8px; font-size:13px; font-weight:600; color:#65696f; }
 .companion-task-dialog input, .companion-task-dialog textarea { box-sizing: border-box; width: 100%; min-width: 0; border: 1px solid #cbd5df; border-radius: 14px; padding: 14px; color: inherit; background: #f8fafc; font: inherit; font-size: 16px; }
-.companion-task-dialog textarea { min-height: 120px; resize: vertical; }
+.companion-task-dialog input, .companion-task-dialog textarea { color:#191a1b; font-weight:400; }
+.companion-task-dialog textarea { min-height:104px; resize:vertical; }
+.companion-task-dialog .companion-task-add { background:#0068ed; color:#fff; width:100%; font-size:14px; }
+.companion-task-dialog .companion-task-add:disabled { background:#e4eaf0; color:#74777c; opacity:1; }
+.companion-task-dialog :focus-visible { outline:2px solid #0068ed; outline-offset:2px; }
 .companion-task-list button.companion-task-mark { flex-shrink: 0; min-width: 44px; min-height: 44px; cursor: pointer; border: 0; background: transparent; padding: 0; margin: -10px -10px 0; }
 .companion-task-list button.companion-task-mark:disabled { opacity: .5; cursor: default; }
 
 .companion-task-list button.companion-task-mark::after { content: ''; width: 21px; height: 21px; border: 1px solid #a8aeb5; border-radius: 6px; box-sizing: border-box; }
-@media (max-width: 600px) {
-  .companion-task-dialog { width: 100%; max-width: none; max-height: calc(100dvh - 48px); margin: auto 0 0; border-radius: 26px 26px 0 0; padding: 24px 18px calc(24px + env(safe-area-inset-bottom, 0px)); }
-}
 
 /* Ideas: owner's 03-ideas reference, honest retained-calculation content. */
 .companion-ideas { width:100%; max-width:720px; margin:0 auto; color:#202124; }

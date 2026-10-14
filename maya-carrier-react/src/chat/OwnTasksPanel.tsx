@@ -8,9 +8,16 @@ export function OwnTasksPanel({ view, port, close }: { readonly view: OwnTasksVi
   const heading = useRef<HeadingRef>(null), add = useRef<HTMLButtonElement>(null), dialog = useRef<HTMLDialogElement>(null), titleInput = useRef<HTMLInputElement>(null);
   const [creating, setCreating] = useState(false), [title, setTitle] = useState(''), [detail, setDetail] = useState('');
   const busy = view.command?.phase === 'pending' || view.command?.phase === 'unknown';
-  const closeForm = () => { setCreating(false); setTitle(''); setDetail(''); window.requestAnimationFrame(() => add.current?.focus()); };
+  const closeForm = () => {
+    setCreating(false); setTitle(''); setDetail('');
+    window.requestAnimationFrame(() => {
+      const target = add.current;
+      if (target?.isConnected && !target.disabled) target.focus({ preventScroll: true });
+      else heading.current?.focus({ preventScroll: true });
+    });
+  };
   useEffect(() => { if (creating) { dialog.current?.showModal(); titleInput.current?.focus(); } else dialog.current?.close(); }, [creating]);
-  useEffect(() => { if (view.command?.phase === 'confirmed') closeForm(); }, [view.command]);
+  useEffect(() => { if (creating && view.command?.phase === 'confirmed') closeForm(); }, [view.command]);
   const commandNotice = view.command ? <div className="companion-task-command" role="status"><p>{view.command.message}</p>{view.command.phase === 'unknown' ? <button type="button" disabled={view.phase !== 'ready'} onClick={() => void port.retryCommand()}>Повторить ту же операцию</button> : null}</div> : null;
   useEffect(() => { const frame = window.requestAnimationFrame(() => heading.current?.focus({ preventScroll: true })); return () => window.cancelAnimationFrame(frame); }, []);
   return <section className="companion-tasks" aria-labelledby="maya-tasks-heading" aria-busy={view.phase === 'loading'}
@@ -18,10 +25,24 @@ export function OwnTasksPanel({ view, port, close }: { readonly view: OwnTasksVi
     <div className="companion-tasks-heading"><h2 ref={heading} id="maya-tasks-heading" tabIndex={-1}>Мои задачи</h2>
       <button type="button" className="companion-circle" aria-label="Вернуться к разговору" onClick={close}>×</button></div>
     {view.canCreate ? <button ref={add} type="button" className="companion-task-add" disabled={busy || view.phase !== 'ready'} onClick={() => setCreating(true)}>Новая задача +</button> : null}
-    {creating ? <dialog ref={dialog} className="companion-task-dialog" aria-labelledby="new-task-title" onCancel={event => { event.preventDefault(); event.stopPropagation(); closeForm(); }}>
+    {creating ? <dialog ref={dialog} className="companion-task-dialog" aria-modal="true" aria-labelledby="new-task-title" aria-describedby="new-task-scope"
+      onCancel={event => { event.preventDefault(); event.stopPropagation(); closeForm(); }}
+      onKeyDown={event => {
+        if (event.key === 'Escape') event.stopPropagation();
+        if (event.key !== 'Tab') return;
+        const controls = Array.from(dialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), textarea:not(:disabled)') ?? []);
+        const index = controls.indexOf(document.activeElement as HTMLElement);
+        if ((event.shiftKey && index <= 0) || (!event.shiftKey && (index < 0 || index === controls.length - 1))) {
+          event.preventDefault();
+          (event.shiftKey ? controls.at(-1) : controls.at(0))?.focus();
+        }
+      }}>
+      <div className="companion-report-handle" aria-hidden="true"><span /></div>
+      <header className="companion-task-sheet-heading">
+        <h2 id="new-task-title">Новая задача</h2><button type="button" className="companion-circle" aria-label="Закрыть новую задачу" onClick={closeForm}>×</button>
+        <p id="new-task-scope">Для вас · без срока</p>
+      </header>
       <div className="companion-task-fields">
-        <div className="companion-tasks-heading"><h2 id="new-task-title">Новая задача</h2><button type="button" className="companion-circle" aria-label="Закрыть новую задачу" onClick={closeForm}>×</button></div>
-        <p>Для вас · без срока</p>
         <label>Название<input ref={titleInput} id="maya-new-task-name" type="text" maxLength={160} required disabled={busy} value={title} onChange={event => setTitle(event.target.value)} placeholder="Например, подготовить расписание" /></label>
         <label>Что нужно сделать?<textarea id="maya-new-task-detail" maxLength={4000} required disabled={busy} value={detail} onChange={event => setDetail(event.target.value)} placeholder="Добавьте детали задачи" /></label>
         {commandNotice}

@@ -101,19 +101,53 @@ try {
   await check("!!document.querySelector('button[aria-label=\"Завершить: Проверить расписание на завтра\"]')",'server-declared completion visible');
   await click('Новая задача +');
   await check("document.querySelector('dialog.companion-task-dialog').open && document.activeElement===document.querySelector('.companion-task-dialog input')",'native dialog opens with focus');
+  await check("document.querySelector('.companion-task-dialog').matches(':modal') && document.querySelector('.companion-task-dialog').getAttribute('aria-describedby')==='new-task-scope' && document.querySelector('#new-task-scope').textContent==='Для вас · без срока'",'task sheet announces exact self-only no-deadline scope');
+  assert.equal(await page.focus("document.querySelector('.companion-navigation button')"),false);report.checks.push('task sheet keeps underlying navigation inert');
   await check(`${button('Создать задачу +')}.disabled`,'empty form cannot submit');
   await check("document.querySelector('.companion-task-dialog input').maxLength===160",'title uses actual executor maximum');
+  await check("document.querySelector('.companion-task-dialog textarea').maxLength===4000 && !document.querySelector('.companion-task-dialog select,.companion-task-dialog input[type=date]')",'description bound preserved without deadline or assignment authority');
+  await page.focus(button('Закрыть новую задачу'));await page.press('Tab',{shift:true});
+  await check("document.activeElement.id==='maya-new-task-detail'",'empty form reverse Tab skips disabled submit and wraps to description');
+  await page.press('Tab');await check("document.activeElement.getAttribute('aria-label')==='Закрыть новую задачу'",'empty form forward Tab stays inside sheet');
   await page.fill("document.querySelector('.companion-task-dialog input')",'Подготовить рабочую неделю');
   await page.fill("document.querySelector('.companion-task-dialog textarea')",'Сверить график и записать вопросы к планёрке.');
-  for(const [width,height] of [[393,852],[320,740],[427,952],[1280,900]]){await size(width,height);await check("document.documentElement.scrollWidth<=innerWidth && document.querySelector('.companion-task-dialog').scrollWidth<=document.querySelector('.companion-task-dialog').clientWidth",'task form no overflow '+width);if(width<600)await check("Math.abs(document.querySelector('.companion-task-dialog').getBoundingClientRect().width-innerWidth)<1 && document.querySelector('.companion-task-dialog').getBoundingClientRect().left===0",'mobile sheet fills viewport '+width);await screenshot('new-task-'+width);}
+  await page.focus(button('Создать задачу +'));await page.press('Tab');await check("document.activeElement.getAttribute('aria-label')==='Закрыть новую задачу'",'filled form forward Tab wraps from submit to close');
+  await page.press('Tab',{shift:true});await check(`document.activeElement===${button('Создать задачу +')}`,'filled form reverse Tab wraps to submit');
+  for(const [width,height] of [[393,852],[320,740],[427,952],[1280,900],[393,400]]){
+    await size(width,height);
+    await check("(()=>{const d=document.querySelector('.companion-task-dialog'),r=d.getBoundingClientRect(),f=document.querySelector('.companion-task-fields');return document.documentElement.scrollWidth<=innerWidth&&d.scrollWidth<=d.clientWidth&&f.scrollWidth<=f.clientWidth&&r.top>=0&&Math.abs(r.bottom-innerHeight)<1&&r.left>=0&&r.right<=innerWidth})()",'task sheet fits bottom of visible viewport '+width+'x'+height);
+    if(width<600)await check("Math.abs(document.querySelector('.companion-task-dialog').getBoundingClientRect().width-innerWidth)<1 && document.querySelector('.companion-task-dialog').getBoundingClientRect().left===0",'mobile sheet fills viewport '+width+'x'+height);
+    await screenshot('new-task-'+width+'x'+height);
+  }
+  await size(393,852);
+  await page.focus("document.querySelector('#maya-new-task-name')");
+  await page.eval("(()=>{Object.defineProperties(visualViewport,{height:{configurable:true,value:320},offsetTop:{configurable:true,value:38}});visualViewport.dispatchEvent(new Event('resize'));visualViewport.dispatchEvent(new Event('scroll'))})()");
+  await check("(()=>{const r=document.querySelector('.companion-task-dialog').getBoundingClientRect();return r.top>=38&&Math.abs(r.bottom-358)<1&&document.querySelector('.companion-task-fields').clientHeight>=44})()",'task sheet follows existing visible viewport height and offset above keyboard');
+  await page.press('Tab');await page.press('Tab');
+  await check(`(()=>{const b=${button('Создать задачу +')},r=b.getBoundingClientRect(),f=document.querySelector('.companion-task-fields').getBoundingClientRect();return document.activeElement===b&&r.top>=f.top&&r.bottom<=f.bottom+1})()`,'submit is keyboard reachable inside reduced visible viewport');
+  await screenshot('new-task-keyboard-viewport');
+  await page.eval("(()=>{delete visualViewport.height;delete visualViewport.offsetTop;visualViewport.dispatchEvent(new Event('resize'))})()");
+  await size(320,740);
+  await page.eval("document.querySelectorAll('.companion-task-dialog h2,.companion-task-dialog p,.companion-task-dialog label,.companion-task-dialog input,.companion-task-dialog textarea,.companion-task-dialog button').forEach(e=>{e.dataset.oldFont=e.style.fontSize;e.style.fontSize=parseFloat(getComputedStyle(e).fontSize)*2+'px'})");
+  await page.focus("document.querySelector('#maya-new-task-name')");
+  await check("document.querySelector('.companion-task-dialog').scrollWidth<=document.querySelector('.companion-task-dialog').clientWidth && document.querySelector('.companion-task-fields').scrollWidth<=document.querySelector('.companion-task-fields').clientWidth",'task sheet wraps at 200 percent text');await screenshot('new-task-large-text');
+  await page.focus(button('Создать задачу +'));await check(`(()=>{const r=${button('Создать задачу +')}.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight+1})()`,'large text submit remains reachable by keyboard');
+  await page.eval("document.querySelectorAll('[data-old-font]').forEach(e=>{e.style.fontSize=e.dataset.oldFont;delete e.dataset.oldFont})");
+  assert.equal(wire.filter(r=>r.method==='POST'&&r.path.startsWith('/api/operational-work')).length,0);report.checks.push('opening editing and changing viewport never sends a task command');
   await size(393,852);await page.press('Escape');
   await check(`!document.querySelector('dialog.companion-task-dialog') && document.activeElement===${button('Новая задача +')}`,'Escape closes only task form and returns focus');
   await click('Новая задача +');
+  await check("document.querySelector('#maya-new-task-name').value==='' && document.querySelector('#maya-new-task-detail').value===''",'closing unsubmitted draft clears only task form fields');
   await page.fill("document.querySelector('.companion-task-dialog input')",'Подготовить рабочую неделю');await page.fill("document.querySelector('.companion-task-dialog textarea')",'Сверить график и записать вопросы к планёрке.');
   writeMode='held';await click('Создать задачу +');
   await check(`${button('Создать задачу +')}.disabled && document.querySelectorAll('.companion-task-list li').length===1`,'pending disables double send and never inserts optimistic row');
+  await page.press('Tab');await check("document.activeElement.getAttribute('aria-label')==='Закрыть новую задачу'",'pending Tab skips disabled fields and submit');
+  await page.press('Tab',{shift:true});await check("document.activeElement.getAttribute('aria-label')==='Закрыть новую задачу'",'pending reverse Tab stays on available close');
+  await page.press('Escape');await check("!document.querySelector('.companion-task-dialog') && document.activeElement.id==='maya-tasks-heading' && document.querySelector('.companion-task-command').textContent.includes('Сохраняю')",'closing pending form restores heading when opener disabled and retains operation');
+  await page.focus(button('Вернуться к разговору'));
   assert.equal(wire.filter(r=>r.path==='/api/operational-work/create').length,1);assert.ok(held);writeMode='normal';json(held.res,held.value,201);held=null;
   await check("!document.querySelector('dialog.companion-task-dialog') && document.querySelectorAll('.companion-task-list li').length===2",'receipt then fresh list shows created task');
+  await check(`document.activeElement===${button('Вернуться к разговору')}`,'late confirmation never steals focus after user closed sheet');
   assert.equal(mutations,1);report.checks.push('one creation via existing DTO, no date/assignment picker');await screenshot('created-task');
   writeMode='lost';await click('Завершить: Подготовить рабочую неделю');
   await check("document.querySelector('.companion-task-command').textContent.includes('Результат пока не подтверждён')",'lost completion response stays uncertain');
@@ -128,6 +162,19 @@ try {
   await click('В работе · 1');writeMode='substitute';await click('Завершить: Проверить расписание на завтра');
   await check("document.querySelector('.companion-task-command').textContent.includes('Результат пока не подтверждён')",'foreign target receipt is refused as unconfirmed');writeMode='normal';await click('Повторить ту же операцию');
   await check("document.querySelector('.companion-task-command').textContent.includes('Задача завершена.')",'same operation resolves with correct target');
+  const beforeUnknown=mutations, beforeUnknownPosts=wire.filter(r=>r.path.endsWith('/create')).length;
+  await click('Новая задача +');
+  await check("document.querySelector('.companion-task-dialog').open",'previous confirmed command does not dismiss new draft');
+  await page.fill("document.querySelector('#maya-new-task-name')",'Проверить материалы');await page.fill("document.querySelector('#maya-new-task-detail')",'Подготовить список вопросов. Искусственная задача.');
+  writeMode='lost';await click('Создать задачу +');
+  await check("document.querySelector('.companion-task-dialog .companion-task-command').textContent.includes('Результат пока не подтверждён')",'lost create response remains in sheet without success claim');
+  await check(`${button('Создать задачу +')}.disabled && document.querySelector('#maya-new-task-name').disabled && document.querySelector('#maya-new-task-detail').disabled && !${button('Повторить ту же операцию')}.disabled`,'unknown create locks draft and exposes only same-operation retry');
+  await page.focus(button('Закрыть новую задачу'));await page.press('Tab',{shift:true});await check(`document.activeElement===${button('Повторить ту же операцию')}`,'unknown reverse Tab skips disabled fields and submit');
+  await page.press('Tab');await check("document.activeElement.getAttribute('aria-label')==='Закрыть новую задачу'",'unknown forward Tab wraps to close');await screenshot('new-task-unknown');
+  const unknownFirst=wire.filter(r=>r.path.endsWith('/create'))[beforeUnknownPosts];assert.equal(mutations,beforeUnknown+1);
+  writeMode='normal';await click('Повторить ту же операцию');
+  await check("!document.querySelector('.companion-task-dialog') && document.querySelector('.companion-task-command').textContent.includes('Задача создана.') && document.querySelectorAll('.companion-task-list li').length===1",'canonical retry receipt closes sheet and reread exposes one created row');
+  const unknownReplay=wire.filter(r=>r.path.endsWith('/create'))[beforeUnknownPosts+1];assert.equal(unknownReplay.key,unknownFirst.key);assert.deepEqual(unknownReplay.body,unknownFirst.body);assert.equal(mutations,beforeUnknown+1);report.checks.push('create retry preserves exact identity and body with one synthetic owner mutation');
   canCreate=false;taskRows=[{...taskRow('projection-pending',false),task_id:null,next_actions:[]}];await click('Обновить список');
   await check(`!${button('Новая задача +')} && !document.querySelector('.companion-task-list button')`,'staff/no binding receives no fabricated create/complete controls');
   await click('Вернуться к разговору');await check(`${composer}.value==='Черновик сохранён' && document.querySelectorAll('[data-chat-message]').length===2`,'chat draft and identity unchanged');
@@ -135,7 +182,7 @@ try {
   report.checks.push('zero provider/model requests, CSP and JS errors');report.status='PASS';
 } catch(error) {
   report.status='FAIL';report.failure=error.message;
-  if(page){await screenshot('failure').catch(()=>{});report.exceptions=page.exceptions;report.issues=page.issues;}
+  if(page){await screenshot('failure').catch(()=>{});report.geometry=await page.eval("(()=>{const d=document.querySelector('.companion-task-dialog'),f=document.querySelector('.companion-task-fields'),b=document.querySelector('.companion-task-dialog .companion-task-add');return {dialog:d?.getBoundingClientRect().toJSON(),fields:f?.getBoundingClientRect().toJSON(),submit:b?.getBoundingClientRect().toJSON(),scroll:f?.scrollTop,scrollHeight:f?.scrollHeight,active:document.activeElement?.id,viewportHeight:visualViewport.height,viewportTop:visualViewport.offsetTop}})()").catch(()=>null);report.exceptions=page.exceptions;report.issues=page.issues;}
   process.exitCode=1;
 } finally {
   if(browser)await browser.close();
