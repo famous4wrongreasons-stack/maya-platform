@@ -1,0 +1,605 @@
+{
+  "candidate": "064094e659817a5cd720b147f0239d502512bcce",
+  "kind": "scoped local evidence, not release certification",
+  "artifacts": [
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-20261014/summary.json",
+      "archive": "summary.json",
+      "originalSha256": "2c8694d12d8ab7672247519f7436ce832e4336d0dc913dff10561011a8e47e04",
+      "archivedSha256": "2c8694d12d8ab7672247519f7436ce832e4336d0dc913dff10561011a8e47e04",
+      "originalSize": 7233,
+      "archivedSize": 7233,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-run.py",
+      "archive": "runner.py",
+      "originalSha256": "4c5d9892ed9e874ee0be06c41302bed0d272ba897ac6f33cfe6144755346c3a5",
+      "archivedSha256": "4c5d9892ed9e874ee0be06c41302bed0d272ba897ac6f33cfe6144755346c3a5",
+      "originalSize": 3299,
+      "archivedSize": 3299,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-20261014/runtime.txt",
+      "archive": "logs/runtime.txt",
+      "originalSha256": "463daec324e57b2ec719291df68d6ea9d530254e67bcdd3880a06d1b3997d755",
+      "archivedSha256": "463daec324e57b2ec719291df68d6ea9d530254e67bcdd3880a06d1b3997d755",
+      "originalSize": 209005,
+      "archivedSize": 209005,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-20261014/payload-build.txt",
+      "archive": "logs/payload-build.txt",
+      "originalSha256": "46c9fdd901162f2c06d7791368b9ca778689cdb586899593b85aa51c443eae97",
+      "archivedSha256": "46c9fdd901162f2c06d7791368b9ca778689cdb586899593b85aa51c443eae97",
+      "originalSize": 2288,
+      "archivedSize": 2288,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-20261014/runtime-reproducible.txt",
+      "archive": "logs/runtime-reproducible.txt",
+      "originalSha256": "05dccd7ab28c623168203d86fdc0d3b4de189e2724c020d8f41dc51361c5b274",
+      "archivedSha256": "05dccd7ab28c623168203d86fdc0d3b4de189e2724c020d8f41dc51361c5b274",
+      "originalSize": 1150,
+      "archivedSize": 1150,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-20261014/carrier.txt",
+      "archive": "logs/carrier.txt",
+      "originalSha256": "2123eb8d03f295b85a0b28dbfbf9efaaa310899ef0665376a5b25f876eed132b",
+      "archivedSha256": "2123eb8d03f295b85a0b28dbfbf9efaaa310899ef0665376a5b25f876eed132b",
+      "originalSize": 41006,
+      "archivedSize": 41006,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-20261014/runtime-ratchets.txt",
+      "archive": "logs/runtime-ratchets.txt",
+      "originalSha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "archivedSha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "originalSize": 12458,
+      "archivedSize": 12458,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-20261014/carrier-ratchets.txt",
+      "archive": "logs/carrier-ratchets.txt",
+      "originalSha256": "9c9dd5d2e95815e834abf4fb37f14e912fa39892a46a54fa8263132617a98256",
+      "archivedSha256": "5a71a6ba5543f81d2dd72deccde61b8e8eb59d504be4e1f898f21d8f38c19236",
+      "originalSize": 7864,
+      "archivedSize": 7861,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-20261014/packaging-parity.txt",
+      "archive": "logs/packaging-parity.txt",
+      "originalSha256": "924eab7d41286b35e183a9d33c73a2ace31f3c2a6cd11214a32a55e9350d25d8",
+      "archivedSha256": "924eab7d41286b35e183a9d33c73a2ace31f3c2a6cd11214a32a55e9350d25d8",
+      "originalSize": 732,
+      "archivedSize": 732,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-20261014/packaging-tests.txt",
+      "archive": "logs/packaging-tests.txt",
+      "originalSha256": "b63883de5f4508b90b25bd7e536cab5f93cc76e761268b42db75b7e95f687eb0",
+      "archivedSha256": "b63883de5f4508b90b25bd7e536cab5f93cc76e761268b42db75b7e95f687eb0",
+      "originalSize": 3307,
+      "archivedSize": 3307,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-20261014/chat-browser.txt",
+      "archive": "logs/chat-browser.txt",
+      "originalSha256": "8aa9a2c1f6113272937ef781fc449a2b142e33a9fcca0efae649c53bc26469ae",
+      "archivedSha256": "8aa9a2c1f6113272937ef781fc449a2b142e33a9fcca0efae649c53bc26469ae",
+      "originalSize": 105,
+      "archivedSize": 105,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-chat-browser-20261014/receipt.json",
+      "archive": "browsers/chat-browser.json",
+      "originalSha256": "97eae6c89cc587ecc5033bf82e1d30c82b736158d90f377acc4758dd0533eab7",
+      "archivedSha256": "97eae6c89cc587ecc5033bf82e1d30c82b736158d90f377acc4758dd0533eab7",
+      "originalSize": 2953,
+      "archivedSize": 2953,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-20261014/navigation-browser.txt",
+      "archive": "logs/navigation-browser.txt",
+      "originalSha256": "64f250f734f30ca659d3fea7eb6908cfcca1408330067a3df69b95b594465703",
+      "archivedSha256": "64f250f734f30ca659d3fea7eb6908cfcca1408330067a3df69b95b594465703",
+      "originalSize": 112,
+      "archivedSize": 112,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/receipt.json",
+      "archive": "browsers/navigation-browser.json",
+      "originalSha256": "66e3c043f9265b902999d74fe0c49fad63ed88bd10ca26bc08aea5b87e16a4e2",
+      "archivedSha256": "66e3c043f9265b902999d74fe0c49fad63ed88bd10ca26bc08aea5b87e16a4e2",
+      "originalSize": 12502,
+      "archivedSize": 12502,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/settings-large-text.png",
+      "archive": "screenshots/settings-large-text.png",
+      "originalSha256": "1935909cea33f8880be56c5e692a757cabfc268436c64a0b40ead50f25bef3de",
+      "archivedSha256": "1935909cea33f8880be56c5e692a757cabfc268436c64a0b40ead50f25bef3de",
+      "originalSize": 28718,
+      "archivedSize": 28718,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/settings-427.png",
+      "archive": "screenshots/settings-427.png",
+      "originalSha256": "73108227f08fb381a7d348da5050593ffb67278c947fae4de6b15ebb0a95b878",
+      "archivedSha256": "73108227f08fb381a7d348da5050593ffb67278c947fae4de6b15ebb0a95b878",
+      "originalSize": 76392,
+      "archivedSize": 76392,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/settings-393.png",
+      "archive": "screenshots/settings-393.png",
+      "originalSha256": "a06b9fe53bbbfb0f24319baffea9069b29785f32a7525674447b335c2e1213df",
+      "archivedSha256": "a06b9fe53bbbfb0f24319baffea9069b29785f32a7525674447b335c2e1213df",
+      "originalSize": 64070,
+      "archivedSize": 64070,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/settings-1280.png",
+      "archive": "screenshots/settings-1280.png",
+      "originalSha256": "114de66c1214aa2babfc6fc66227df72d6ab6da92c6231094690226ed687bc7c",
+      "archivedSha256": "114de66c1214aa2babfc6fc66227df72d6ab6da92c6231094690226ed687bc7c",
+      "originalSize": 91731,
+      "archivedSize": 91731,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/settings-320.png",
+      "archive": "screenshots/settings-320.png",
+      "originalSha256": "54598b81439b4fd8051ef328146b6097c482a212798b77f7354f2e1d69323958",
+      "archivedSha256": "54598b81439b4fd8051ef328146b6097c482a212798b77f7354f2e1d69323958",
+      "originalSize": 53913,
+      "archivedSize": 53913,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-20261014/voice-browser.txt",
+      "archive": "logs/voice-browser.txt",
+      "originalSha256": "8dfc89a4d224dd685427c077fa79f17824909da76a69496354c00ca035de901e",
+      "archivedSha256": "8dfc89a4d224dd685427c077fa79f17824909da76a69496354c00ca035de901e",
+      "originalSize": 106,
+      "archivedSize": 106,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-voice-browser-20261014/receipt.json",
+      "archive": "browsers/voice-browser.json",
+      "originalSha256": "eec0bc0f34f560a2b3b7b21aa5941327a5c842e5d4234d4f7a35b2a0c58f9f93",
+      "archivedSha256": "eec0bc0f34f560a2b3b7b21aa5941327a5c842e5d4234d4f7a35b2a0c58f9f93",
+      "originalSize": 4348,
+      "archivedSize": 4348,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-dev01-20261014/receipt.json",
+      "archive": "development/dev01.json",
+      "originalSha256": "f78db4f2d304bcb0c17bc36a3afca69c2973b31c8ae7c8f37b783131a60be98a",
+      "archivedSha256": "f78db4f2d304bcb0c17bc36a3afca69c2973b31c8ae7c8f37b783131a60be98a",
+      "originalSize": 12302,
+      "archivedSize": 12302,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-dev02-20261014/receipt.json",
+      "archive": "development/dev02.json",
+      "originalSha256": "1704b9562a99c17c2d18422dbcd3b86d94fb1eb10e2b3ed9d7753bef5b2dd72f",
+      "archivedSha256": "1704b9562a99c17c2d18422dbcd3b86d94fb1eb10e2b3ed9d7753bef5b2dd72f",
+      "originalSize": 4427,
+      "archivedSize": 4427,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-dev03-20261014/receipt.json",
+      "archive": "development/dev03.json",
+      "originalSha256": "33c29e018e31d38c3c7d771975d444b82ec029f7e869b7a676b242aef82ed323",
+      "archivedSha256": "33c29e018e31d38c3c7d771975d444b82ec029f7e869b7a676b242aef82ed323",
+      "originalSize": 46524,
+      "archivedSize": 46524,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-dev04-20261014/receipt.json",
+      "archive": "development/dev04.json",
+      "originalSha256": "b218cbd67574ac9b9e3b7e04b8d8f4e8b59acc0ace8acee721cb75c513e51a06",
+      "archivedSha256": "b218cbd67574ac9b9e3b7e04b8d8f4e8b59acc0ace8acee721cb75c513e51a06",
+      "originalSize": 12501,
+      "archivedSize": 12501,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-build-dev01-20261014.txt",
+      "archive": "development/build-refusal.txt",
+      "originalSha256": "a13d0ecf37e9ca9a6372359a8382ae10876aaafd1098fdfb3cc04f18e2b43114",
+      "archivedSha256": "e2d2cab7ba3963174ce0161837d555572aefdbe2bc5208b125775a2cfd5be972",
+      "originalSize": 4355,
+      "archivedSize": 4354,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-unit-dev-20261014.txt",
+      "archive": "development/companion-unit.txt",
+      "originalSha256": "c828537fda4c00e5a3b58291da0753350bcd3e5c842dfd4ff9ed41bfda87cf7c",
+      "archivedSha256": "c828537fda4c00e5a3b58291da0753350bcd3e5c842dfd4ff9ed41bfda87cf7c",
+      "originalSize": 1989,
+      "archivedSize": 1989,
+      "sensitiveData": false
+    }
+  ],
+  "screenshotsNotCopied": [
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-chat-browser-20261014/chat-320.png",
+      "sha256": "93cf1f305fb11fdf48dc3bcf4a6fb2b9a385d5a9b0f2947a6d7bbbe20aeaa2a8",
+      "size": 48637,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-chat-browser-20261014/failure-393.png",
+      "sha256": "78ebb75318c7d17337412dd2a03260f9db99cf5acc3fe355a64b9edc22469f4c",
+      "size": 69634,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-chat-browser-20261014/large-text-393.png",
+      "sha256": "75d31b6640545911372c6a96b0efe14ea391530c54c8943c7ab0ea04f4866456",
+      "size": 69140,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-chat-browser-20261014/chat-427.png",
+      "sha256": "8d8a0deacf6658fc4fb1f1f57161c0aa599fb0ea497480506de20edab6fc6c59",
+      "size": 50447,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-chat-browser-20261014/menu-393.png",
+      "sha256": "4e8ee4763a2076f3e9c185f812e99059badedb9be5299c3b1372801e6565ff16",
+      "size": 50376,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-chat-browser-20261014/chat-393.png",
+      "sha256": "1637f1d9681c9c406d90792785920307a5ee1d179d7dccda324a728fd49034a7",
+      "size": 49716,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-chat-browser-20261014/thinking-393.png",
+      "sha256": "83cb53da17906a79727953dcf24344d11824a5fcf14742c293049b7424c0ea2f",
+      "size": 54470,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-chat-browser-20261014/chat-1280.png",
+      "sha256": "50ff6bdd57c51eb50c12cc2291777bb7587fce455a70457815c956f6a3166390",
+      "size": 56670,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-chat-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-chat-browser-20261014/keyboard-height-393.png",
+      "sha256": "e9bc954ecab4df286b114ba7a4d7df48776d004968f7ddebab54eef7f2aa5c24",
+      "size": 41661,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/navigation-ideas.png",
+      "sha256": "c90e941f58fd74222364398e64bed872f5b704fbb5164a2bcf63c3923c0c3779",
+      "size": 67321,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/navigation-chat-427.png",
+      "sha256": "70fe48ea1096027c71a3501aa7e8466a155c52433ea7f242e217ad147e3c729d",
+      "size": 50543,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/navigation-tasks.png",
+      "sha256": "f5d5dc52df83af50d61ed344254f4744703f1c2ddaa6de966fe16092f75e405c",
+      "size": 57854,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/drawer-320.png",
+      "sha256": "ed2221005bdf881b92fd83caf19e825ae1c5b607e37b13e232847527c0198c13",
+      "size": 42548,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/navigation-chat-393.png",
+      "sha256": "d5a8075c1a2f213cc1da6e982d57263f394a0119ee402fdf9aa85039677d2334",
+      "size": 49950,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/drawer-1280.png",
+      "sha256": "9ef02a10c9d08f2a9a998a3f652168080eca4cf411d2fedc36562d5f4a440e7f",
+      "size": 109456,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/navigation-library.png",
+      "sha256": "457ef893e8588aabc0379a8d1ee9948e12397cf515acfe870a3932aab5e58cfb",
+      "size": 57340,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/drawer-393.png",
+      "sha256": "ccdd0dd60a915c3cf66e2b65e975300fb936c4973748943bfd1e04779ef7b560",
+      "size": 51540,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/navigation-chat-320.png",
+      "sha256": "315714eed7c9b47f31a0bb64e59fe2eddc915ede61cf79417c22a2802c956c03",
+      "size": 48763,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/navigation-chat-1280.png",
+      "sha256": "53c5b57974370e3e1affa5b8076cc87acdbfe6bdc8c5dd6e26e810a7dfd1eeda",
+      "size": 56771,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/navigation-keyboard-height.png",
+      "sha256": "4d4cef54d6245af8e2e28551d31bc8f1ade45d9d79f8063b6d71efc8ef2d927b",
+      "size": 34255,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/about-large-text.png",
+      "sha256": "b9207b6a03ea8343c211aae47142e984f0d12b29b99d8a8948bc7971a17933ea",
+      "size": 34291,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/drawer-large-text.png",
+      "sha256": "d7befd1b08812a7be5dd18b0528a7b43c659de93383c044a587e49d172846454",
+      "size": 43184,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/about-motion-off.png",
+      "sha256": "a96d3cd930d3f16e18b0e2456c64fab3c66de698ab0e84323e5ea50d16f9b8e1",
+      "size": 69634,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/drawer-427.png",
+      "sha256": "3cd7a0c2aa8868a515776fe2081f925e9e7b2e09e8cbac0c037447d55cc85efc",
+      "size": 55633,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/navigation-large-text.png",
+      "sha256": "983bd778df77dce2e2b290de8765f874045b342654d834657d9f384eea050aae",
+      "size": 65961,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/navigation-feed-end.png",
+      "sha256": "12d24331e44ebc3b90bc809a9680f38207cddaaa5914f34f3192e5cb53958c93",
+      "size": 64539,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/about-320.png",
+      "sha256": "999b6ae95ea29e04789888e1b971588844f73fd9ea7341195d4fcead77a7c5e5",
+      "size": 55196,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/about-393.png",
+      "sha256": "8e8ed1a98aee716bafa751a2732f82afa0de04bb995e037195e5cfc2a48da2e9",
+      "size": 71099,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/about-1280.png",
+      "sha256": "504972711696a2d48cd21c788105bc5c8185823e134c552e36f0e7e8214f1e09",
+      "size": 87158,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/navigation-feed.png",
+      "sha256": "f167bc657ddd09c13086310e42a37cf64e1804f95d286b7321d11b1cc361f07f",
+      "size": 73055,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-navigation-browser-20261014/about-427.png",
+      "sha256": "eb75736919b47c61109ce6f66194b87d7a650123a167623ce014b627e625f687",
+      "size": 70427,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-voice-browser-20261014/voice-return-chat.png",
+      "sha256": "7cb748c4dd863d658f2239033ad6d5688c095293d730baa01e6f6507d7de1e16",
+      "size": 55518,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-voice-browser-20261014/voice-listening-427.png",
+      "sha256": "b83704cccb0e135034f5099faf52c6f113546045a645b045bba97078e0446b4f",
+      "size": 54807,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-voice-browser-20261014/voice-encoding.png",
+      "sha256": "2335be7631624613fbdd03bc8733f362d80dfc35583d873a2c532d198e34e8ef",
+      "size": 52156,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-voice-browser-20261014/voice-listening-393.png",
+      "sha256": "47322e9b80722fa3df3d2dadf5c84bce699a414dc972e93eed9a8ff7534e4296",
+      "size": 54474,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-voice-browser-20261014/voice-large-text-320.png",
+      "sha256": "7793bbe085a5c5c81064b198b4d7ae3e1522f3a4e2feda3abddd3a4a8d1d451e",
+      "size": 33299,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-voice-browser-20261014/voice-listening-320.png",
+      "sha256": "ec0051e663ce259e70ccdcd3b3e5b3d6531bd0a7566cf2b42a490f221e5b0d56",
+      "size": 44621,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-voice-browser-20261014/voice-arming.png",
+      "sha256": "5752e40fe2968adc0b6cedbe92a89924e51fafe52f51c25c1d7ca297cf04f6fe",
+      "size": 50442,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-voice-browser-20261014/voice-transcribing.png",
+      "sha256": "eea8ead1807c490c18494f41cf4b36138ac367f8c2e9d72d987839871560e290",
+      "size": 49243,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-voice-browser-20261014/voice-unavailable.png",
+      "sha256": "c34bb0300312bf70dded70132bf2fe94b968aaca1383a382efc2e2bfc2166f70",
+      "size": 58651,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-voice-browser-20261014/voice-not-recognized.png",
+      "sha256": "346b0a53bdfd054f84c40de7d971956d88e11bec3c2733d5122d4e43921dd441",
+      "size": 50489,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-voice-browser-20261014/voice-listening-1280.png",
+      "sha256": "02ebf00f323ce38b092ebb33d6e3a6abbf39d0e5176de401318a2281859a2bdf",
+      "size": 71279,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-voice-browser-20261014/voice-held.png",
+      "sha256": "a5bcf00aea8d5684fbb495d880d032c8eb33e1d17f151edeed1693bc2dd093da",
+      "size": 57969,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-settings-final01-voice-browser-20261014/voice-too-short.png",
+      "sha256": "e74ce0e9b47618bc80f782329c455da702da92266bb99f035363d13f5e98f37d",
+      "size": 50645,
+      "reason": "fresh existing-surface receipt archived; Settings screenshots retained",
+      "sensitiveData": false
+    }
+  ],
+  "references": [
+    {
+      "path": "/Users/stanislavmosin/Downloads/Maya_full_design_package/01_IMPLEMENTATION.txt",
+      "sha256": "8190b1f109140eaa34eda9765ba9a77602085b066481a5401f18c3b95e6d4e07",
+      "size": 20419,
+      "role": "owner visual reference; not execution authority"
+    },
+    {
+      "path": "/Users/stanislavmosin/Downloads/Maya_full_design_package/screens/11-settings.png",
+      "sha256": "ad626acbe3debde499b65949a346acec91dec57a38da127736d7e859de2c9f4d",
+      "size": 19024,
+      "role": "owner visual reference; not execution authority"
+    },
+    {
+      "path": "/Users/stanislavmosin/Downloads/Maya_full_design_package/prototype/src/Prototype.tsx",
+      "sha256": "4b9123c60121b6db549de158d5c9853f79b8c3cfbc1a6858173b5c2779d5650a",
+      "size": 34745,
+      "role": "owner visual reference; not execution authority"
+    },
+    {
+      "path": "/Users/stanislavmosin/Downloads/Maya_full_design_package/prototype/src/styles.css",
+      "sha256": "844c67b27cf5e38ba395153145d058c929c6479199d245cd046f3646badd719d",
+      "size": 14264,
+      "role": "owner visual reference; not execution authority"
+    },
+    {
+      "path": "/Users/stanislavmosin/Downloads/Maya_full_design_package/prototype/src/prototype.css",
+      "sha256": "0c9c92962dfa7e93bd23dcc6d04dc26287501b35e38f868ecc7b4326ed7211c9",
+      "size": 22217,
+      "role": "owner visual reference; not execution authority"
+    }
+  ]
+}

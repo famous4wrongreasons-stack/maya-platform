@@ -1,0 +1,58 @@
+TAP version 13
+# Subtest: navigation exposes five labelled destinations and one current page without invoking a port
+ok 1 - navigation exposes five labelled destinations and one current page without invoking a port
+  ---
+  duration_ms: 5.253042
+  type: 'test'
+  ...
+# Subtest: finite artwork admission accepts selected bytes and refuses every unrelated resource
+ok 2 - finite artwork admission accepts selected bytes and refuses every unrelated resource
+  ---
+  duration_ms: 18.84675
+  type: 'test'
+  ...
+# Subtest: modified, missing and symlink artwork are refused before packaging
+ok 3 - modified, missing and symlink artwork are refused before packaging
+  ---
+  duration_ms: 4.038834
+  type: 'test'
+  ...
+# Subtest: seven decorative poses preserve closed tags; no prototype executable or sinks
+ok 4 - seven decorative poses preserve closed tags; no prototype executable or sinks
+  ---
+  duration_ms: 11.339792
+  type: 'test'
+  ...
+# Subtest: actual state adapter never derives business success from text or queued/sent turn
+ok 5 - actual state adapter never derives business success from text or queued/sent turn
+  ---
+  duration_ms: 0.117625
+  type: 'test'
+  ...
+# Subtest: new shared theme has no role/authority fields or invented dark variant
+ok 6 - new shared theme has no role/authority fields or invented dark variant
+  ---
+  duration_ms: 0.078792
+  type: 'test'
+  ...
+# Subtest: all 40 sealed widget fixtures keep identical non-style markup under the new theme
+ok 7 - all 40 sealed widget fixtures keep identical non-style markup under the new theme
+  ---
+  duration_ms: 68.392541
+  type: 'test'
+  ...
+# Subtest: drawer projects canonical selection including privacy, with no reads or invented recent conversations
+ok 8 - drawer projects canonical selection including privacy, with no reads or invented recent conversations
+  ---
+  duration_ms: 5.987125
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 309.989875

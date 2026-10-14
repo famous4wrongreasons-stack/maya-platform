@@ -166,3 +166,19 @@ ownership is not bypassed by a local root transition. No demo facts, AI request,
 new asset, route, notification control or business authority was added.
 See `../../MAYA-COMPANION-ABOUT-CHECKPOINT-20261014.md` and
 `../maya-companion-about-20261014/README.md` for fresh scoped evidence.
+
+
+## Settings checkpoint (2026-10-14)
+
+`064094e659817a5cd720b147f0239d502512bcce` adds the owner's Settings sheet with current session display and
+the existing session-only motion preference. Drawer, header and About share the
+same motion owner; system reduced motion still wins. Names are escaped display
+text, not role/capability inputs. Native modal focus and session revocation are
+proved through emitted React/runtime. No new authority, persistence or request.
+The prototype's generic notification toggle remains unavailable in this surface:
+staff/client backend preferences have distinct owners and cannot be represented
+by a made-up delivery switch. Existing notification contracts are unchanged.
+See `../../MAYA-COMPANION-SETTINGS-CHECKPOINT-20261014.md` and
+`../maya-companion-settings-20261014/README.md` for fresh scoped evidence.
+This supersedes only the missing Settings presentation, not notification delivery
+acceptance, device acceptance or release certification.

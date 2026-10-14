@@ -1,0 +1,60 @@
+digest 75b81a8c5b80c4c5f10b16da7a5bcae502cc08c2675a903d96538984a226f745
+web d6c78989aa5d32f6a06578b9950e92a16791085839c24cd3a9cb941f22dbd3d7 (web; 46 modules; styles.css present; index.html present; 5 pwa assets)
+contract: #contract -> 281 declarations in os.tmpdir(); 201 exports (+1 pending name) in the collision set
+baseline: 0 live entries (build-baseline/routes.json absent, build-baseline/renderer.json absent); 0 refused sites admitted by it
+pwa: manifest.webmanifest id /maya-chat-shell/, start_url ./, standalone portrait; 3 manifest icons + 1 apple-touch icon; no service worker
+serving: do NOT serve this tree at or under /app/ — the retired PWA's service worker is still live at /app/service-worker.js (max-age=604800) and its scope is /app/; a shell served there would be controlled by a worker this build never wrote. Check a path with: node build.mjs --serve-path=<the path this tree will be served from>
+entry: present
+net/client.ts: present
+built 49 sources -> dist/web/m/d6c78989aa5d32f6/
+BUILD REFUSED — 4 refusal(s):
+  closed-tag-set             src/chat/SettingsSheet.tsx:42  strong  — <strong> is outside the closed set. The exclusions are a capability-denial list: img/video/audio/object/embed/iframe are outbound-request sinks, form navigates, svg/math carry their own script surface.
+  closed-tag-set             src/chat/SettingsSheet.tsx:46  strong  — <strong> is outside the closed set. The exclusions are a capability-denial list: img/video/audio/object/embed/iframe are outbound-request sinks, form navigates, svg/math carry their own script surface.
+  closed-tag-set             src/chat/SettingsSheet.tsx:56  strong  — <strong> is outside the closed set. The exclusions are a capability-denial list: img/video/audio/object/embed/iframe are outbound-request sinks, form navigates, svg/math carry their own script surface.
+  closed-tag-set             src/chat/SettingsSheet.tsx:60  strong  — <strong> is outside the closed set. The exclusions are a capability-denial list: img/video/audio/object/embed/iframe are outbound-request sinks, form navigates, svg/math carry their own script surface.
+file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/build.mjs:59
+  throw new R.CarrierRefused(refusals);
+        ^
+
+CarrierRefused: BUILD REFUSED — 4 refusal(s)
+    at report (file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/build.mjs:59:9)
+    at file:///Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react/build.mjs:103:1
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  refusals: [
+    {
+      rule: 'closed-tag-set',
+      file: 'src/chat/SettingsSheet.tsx',
+      line: 42,
+      name: 'strong',
+      message: '<strong> is outside the closed set. The exclusions are a capability-denial list: img/video/audio/object/embed/iframe are outbound-request sinks, form navigates, svg/math carry their own script surface.'
+    },
+    {
+      rule: 'closed-tag-set',
+      file: 'src/chat/SettingsSheet.tsx',
+      line: 46,
+      name: 'strong',
+      message: '<strong> is outside the closed set. The exclusions are a capability-denial list: img/video/audio/object/embed/iframe are outbound-request sinks, form navigates, svg/math carry their own script surface.'
+    },
+    {
+      rule: 'closed-tag-set',
+      file: 'src/chat/SettingsSheet.tsx',
+      line: 56,
+      name: 'strong',
+      message: '<strong> is outside the closed set. The exclusions are a capability-denial list: img/video/audio/object/embed/iframe are outbound-request sinks, form navigates, svg/math carry their own script surface.'
+    },
+    {
+      rule: 'closed-tag-set',
+      file: 'src/chat/SettingsSheet.tsx',
+      line: 60,
+      name: 'strong',
+      message: '<strong> is outside the closed set. The exclusions are a capability-denial list: img/video/audio/object/embed/iframe are outbound-request sinks, form navigates, svg/math carry their own script surface.'
+    }
+  ]
+}
+
+Node.js v22.23.3
+RELEASE PACKAGING REFUSED: release command failed: build.mjs
+
+1 !== 0
