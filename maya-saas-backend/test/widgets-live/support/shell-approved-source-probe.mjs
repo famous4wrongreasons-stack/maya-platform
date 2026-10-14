@@ -205,6 +205,12 @@ try {
     // A populated journal exposes detail via its sealed entry control; an empty
     // day has the standalone intent. Activate what the real drawer actually draws.
     const initialResult = resultOf(envelope, new Date().toISOString());
+    assert.equal(initialResult.mode, 'structured', JSON.stringify({
+      stage:'initial', mode:initialResult.mode,
+      sourceEntryLanes:envelope.body.entries.map(entry=>entry.lane_id),
+      sourceReadingOrder:envelope.presentation.a11y.reading_order,
+      drawnReadingOrder:initialResult.readingOrder,
+    }));
     const detailRef = input.expectedJournal?.length
       ? `entry:${envelope.body.entries[0].entry_ref}`
       : `intent:${envelope.body.detail_intent}`;
@@ -219,6 +225,10 @@ try {
       assert.deepEqual(source.body.gaps, []);
       const rendered = resultOf(source, new Date().toISOString());
       assert.equal(rendered.mode, 'structured');
+      const grid = rendered.nodes.find(node=>node.t==='block' && node.roleHint==='grid');
+      assert(grid);
+      const drawnEntryStaff=grid.children.flatMap(group=>group.children.filter(node=>node.t==='choice').map(node=>({ref:node.ref,staff:group.label})));
+      assert.deepEqual(drawnEntryStaff,source.body.entries.map((entry,index)=>({ref:`entry:${entry.entry_ref}`,staff:input.expectedJournalStaff[index]})));
       const html = companionMarkup({id:'synthetic-schedule',result:rendered,display:'live',pending:null,sentence:null});
       assert(html.includes('companion-schedule'));
       // Labels arrive sealed from the real journal owner, including an inactive
@@ -236,7 +246,7 @@ try {
       }
       for (const ref of rendered.readingOrder) assert(html.includes(`data-ref="${ref}"`));
       assert(!html.includes('Заполнить окно'));
-      scheduleChecks.push({stage,mode:rendered.mode,entries:source.body.entries.length,labels:input.expectedJournal,titles:input.expectedJournalTitles,refs:rendered.readingOrder,privateNoteAbsent:true,serviceNamesSupplied:true,foreignServiceAbsent:true,unresolvedServiceFallbackPreserved:true,gaps:0});
+      scheduleChecks.push({stage,mode:rendered.mode,entries:source.body.entries.length,labels:input.expectedJournal,titles:input.expectedJournalTitles,drawnEntryStaff,refs:rendered.readingOrder,privateNoteAbsent:true,serviceNamesSupplied:true,foreignServiceAbsent:true,unresolvedServiceFallbackPreserved:true,gaps:0});
     }
     process.stdout.write(JSON.stringify({
       mode:input.mode,pass:true,backendDetail:true,scheduleChecks,fullscreen:runtime.shell.view().fullscreen,refs,counters:runtime.widgets.counters(),

@@ -14,7 +14,9 @@ const object = (v: unknown): Record<string, unknown> => {
   assert(v !== null && typeof v === 'object' && !Array.isArray(v));
   return v as Record<string, unknown>;
 };
-async function main(mode: 'personal' | 'journal' | 'journal-populated') {
+async function main(
+  mode: 'personal' | 'journal' | 'journal-populated' | 'journal-multilane',
+) {
   applyWidgetsLiveEnvironment();
   const db = await bootFixtureContext();
   const http = await bootHttp();
@@ -46,8 +48,11 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
     // Fixture data only, inside the harness's owned synthetic tenant. No CRM IO.
     const expectedJournal: string[] = [];
     const expectedJournalTitles: string[] = [];
+    const expectedJournalStaff: string[] = [];
     let journalBefore: unknown = null;
-    if (mode === 'journal-populated') {
+    const populated =
+      mode === 'journal-populated' || mode === 'journal-multilane';
+    if (populated) {
       const service = await db.prisma.internalService.create({
         data: {
           tenantId: tenant.id,
@@ -63,6 +68,18 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
           active: true,
         },
       });
+      const providers = [provider];
+      if (mode === 'journal-multilane') {
+        for (const displayName of [
+          'Второй учебный мастер',
+          'Третий учебный мастер',
+        ])
+          providers.push(
+            await db.prisma.internalProvider.create({
+              data: { tenantId: tenant.id, displayName, active: true },
+            }),
+          );
+      }
       const inactive = await db.prisma.internalService.create({
         data: {
           tenantId: tenant.id,
@@ -95,6 +112,12 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
         [11, [foreign.id, 'deleted-synthetic-service'], 'Запись', 'internal'],
         [13, [service.id], 'Запись', 'external'],
       ] as const) {
+        const selectedProvider =
+          providers[
+            mode === 'journal-multilane'
+              ? [0, 1, 0, 2][expectedJournal.length]
+              : 0
+          ];
         const startAt = new Date(
           `2026-09-24T${String(hour).padStart(2, '0')}:00:00Z`,
         );
@@ -103,7 +126,7 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
           data: {
             tenantId: tenant.id,
             source,
-            staffExternalId: provider.id,
+            staffExternalId: selectedProvider.id,
             serviceIds: [...serviceIds],
             startAt,
             endAt,
@@ -118,6 +141,7 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
           `2026-09-24 · ${hour + 3}:00–${hour + 4}:00 · Europe/Moscow`,
         );
         expectedJournalTitles.push(title);
+        expectedJournalStaff.push(selectedProvider.displayName);
       }
       journalBefore = await db.prisma.appointment.findMany({
         where: { tenantId: tenant.id },
@@ -180,6 +204,7 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
           mode: mode === 'personal' ? 'personal' : 'journal',
           expectedJournal,
           expectedJournalTitles,
+          expectedJournalStaff,
           baseUrl,
           accessToken,
           tenantName: tenant.slug,
@@ -208,7 +233,7 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
         assert.equal(state.executions.length, 3);
       }
     }
-    if (mode === 'journal-populated') {
+    if (populated) {
       const state = await fx.binView().bookingProofState(tenant);
       assert.equal(
         state.appointments.length,
@@ -258,7 +283,12 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
     await db.close();
   }
 }
-it.each(['personal', 'journal', 'journal-populated'] as const)(
+it.each([
+  'personal',
+  'journal',
+  'journal-populated',
+  'journal-multilane',
+] as const)(
   'FBE2E approved %s production source through the unchanged carrier',
   main,
   120_000,
