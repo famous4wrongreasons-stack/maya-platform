@@ -4,6 +4,9 @@ coverage
 .git
 .gitignore
 .env
+.env.*
+!.env.example
+!.env.staging.example
 npm-debug.log
 ocr-assets
 .ocr-assets-stage-*

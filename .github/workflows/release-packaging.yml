@@ -33,6 +33,9 @@ jobs:
         working-directory: maya-saas-backend
       - run: npx prisma generate && npm run build
         working-directory: maya-saas-backend
+      - name: Private phone staging boundaries and Prisma image configuration
+        run: node --test scripts/phone-staging-plan.test.mjs
+        working-directory: maya-saas-backend
       - run: node --test scripts/widget-release-operator.compiled-test.cjs
         working-directory: maya-saas-backend
       - name: Unsigned local build, no device install or account provisioning
