@@ -1,0 +1,1190 @@
+
+> maya-carrier-react@0.0.0 test
+> node test/build-harness.mjs && node --test test/parity.test.mjs test/reply-link.test.mjs test/voice.test.mjs test/voice-sheet.test.mjs test/detail.test.mjs test/privacy.test.mjs test/goods-photo.test.mjs test/onboarding.test.mjs test/local-setup-entry.test.mjs test/local-setup-compose.test.mjs test/telegram-popup.test.mjs test/companion.test.mjs test/own-tasks.test.mjs test/workspace-reads.test.mjs test/ideas.test.mjs
+
+TAP version 13
+# Subtest: navigation exposes five labelled destinations and one current page without invoking a port
+ok 1 - navigation exposes five labelled destinations and one current page without invoking a port
+  ---
+  duration_ms: 5.941458
+  type: 'test'
+  ...
+# Subtest: finite artwork admission accepts selected bytes and refuses every unrelated resource
+ok 2 - finite artwork admission accepts selected bytes and refuses every unrelated resource
+  ---
+  duration_ms: 18.918083
+  type: 'test'
+  ...
+# Subtest: modified, missing and symlink artwork are refused before packaging
+ok 3 - modified, missing and symlink artwork are refused before packaging
+  ---
+  duration_ms: 3.620958
+  type: 'test'
+  ...
+# Subtest: seven decorative poses preserve closed tags; no prototype executable or sinks
+ok 4 - seven decorative poses preserve closed tags; no prototype executable or sinks
+  ---
+  duration_ms: 12.747584
+  type: 'test'
+  ...
+# Subtest: actual state adapter never derives business success from text or queued/sent turn
+ok 5 - actual state adapter never derives business success from text or queued/sent turn
+  ---
+  duration_ms: 0.141333
+  type: 'test'
+  ...
+# Subtest: new shared theme has no role/authority fields or invented dark variant
+ok 6 - new shared theme has no role/authority fields or invented dark variant
+  ---
+  duration_ms: 0.0825
+  type: 'test'
+  ...
+# Subtest: all 40 sealed widget fixtures keep identical non-style markup under the new theme
+ok 7 - all 40 sealed widget fixtures keep identical non-style markup under the new theme
+  ---
+  duration_ms: 73.796792
+  type: 'test'
+  ...
+# Subtest: drawer projects canonical selection including privacy, with no reads or invented recent conversations
+ok 8 - drawer projects canonical selection including privacy, with no reads or invented recent conversations
+  ---
+  duration_ms: 6.236292
+  type: 'test'
+  ...
+# Subtest: schedule treatment is limited to structured sealed SCHEDULE; prose/refusal stays unchanged
+ok 9 - schedule treatment is limited to structured sealed SCHEDULE; prose/refusal stays unchanged
+  ---
+  duration_ms: 3.802458
+  type: 'test'
+  ...
+# Subtest: closed: the dialog exists, is never marked open, and offers nothing
+ok 10 - closed: the dialog exists, is never marked open, and offers nothing
+  ---
+  duration_ms: 4.128584
+  type: 'test'
+  ...
+# Subtest: progress: «Открываю…» in the title and the body, aria-busy, and no controls yet
+ok 11 - progress: «Открываю…» in the title and the body, aria-busy, and no controls yet
+  ---
+  duration_ms: 1.602958
+  type: 'test'
+  ...
+# Subtest: open: the title is the sealed label, and the card is drawn WHOLE
+ok 12 - open: the title is the sealed label, and the card is drawn WHOLE
+  ---
+  duration_ms: 21.625
+  type: 'test'
+  ...
+# Subtest: open: the title falls back to the headline when the sealed label is empty
+ok 13 - open: the title falls back to the headline when the sealed label is empty
+  ---
+  duration_ms: 4.069
+  type: 'test'
+  ...
+# Subtest: the dialog is labelled by its own title
+ok 14 - the dialog is labelled by its own title
+  ---
+  duration_ms: 2.857875
+  type: 'test'
+  ...
+# Subtest: close is a real button, named, and first in the tab ring
+ok 15 - close is a real button, named, and first in the tab ring
+  ---
+  duration_ms: 4.095416
+  type: 'test'
+  ...
+# Subtest: every booking kind can be opened as a detail without losing a control
+ok 16 - every booking kind can be opened as a detail without losing a control
+  ---
+  duration_ms: 9.614583
+  type: 'test'
+  ...
+# Subtest: Companion surface preserves sealed detail titles, refs and route states
+ok 17 - Companion surface preserves sealed detail titles, refs and route states
+  ---
+  duration_ms: 69.206
+  type: 'test'
+  ...
+# Subtest: unconfigured recognition is explicit and rendering dispatches nothing
+ok 18 - unconfigured recognition is explicit and rendering dispatches nothing
+  ---
+  duration_ms: 5.079125
+  type: 'test'
+  ...
+# Subtest: high confidence or sale price cannot fill reviewed receipt values
+ok 19 - high confidence or sale price cannot fill reviewed receipt values
+  ---
+  duration_ms: 1.522209
+  type: 'test'
+  ...
+# Subtest: category cannot be selected as an existing item; selected item requires an explicit gesture
+ok 20 - category cannot be selected as an existing item; selected item requires an explicit gesture
+  ---
+  duration_ms: 0.481542
+  type: 'test'
+  ...
+# Subtest: a labeled write-off unit stays selectable when the same sale unit has no label
+ok 21 - a labeled write-off unit stays selectable when the same sale unit has no label
+  ---
+  duration_ms: 0.690292
+  type: 'test'
+  ...
+# Subtest: a unit with no catalog label is not inferred from OCR text or another identifier
+ok 22 - a unit with no catalog label is not inferred from OCR text or another identifier
+  ---
+  duration_ms: 0.68675
+  type: 'test'
+  ...
+# Subtest: uncertain preparation blocks repeat dispatch but permits clearing ephemeral fields
+ok 23 - uncertain preparation blocks repeat dispatch but permits clearing ephemeral fields
+  ---
+  duration_ms: 2.29875
+  type: 'test'
+  ...
+# Subtest: failed source is never shown as an empty successful search
+ok 24 - failed source is never shown as an empty successful search
+  ---
+  duration_ms: 0.370459
+  type: 'test'
+  ...
+# Subtest: known completed or held review has no preparation or correction controls
+ok 25 - known completed or held review has no preparation or correction controls
+  ---
+  duration_ms: 1.685416
+  type: 'test'
+  ...
+# Subtest: ambiguous total keeps both extracted fields separate without deriving a unit cost
+ok 26 - ambiguous total keeps both extracted fields separate without deriving a unit cost
+  ---
+  duration_ms: 0.486167
+  type: 'test'
+  ...
+# Subtest: picker clears DOM filename and FileList reference before passing a single file
+ok 27 - picker clears DOM filename and FileList reference before passing a single file
+  ---
+  duration_ms: 0.364209
+  type: 'test'
+  ...
+# Subtest: OCR busy and failed states describe extraction rather than YCLIENTS and never dispatch on render
+ok 28 - OCR busy and failed states describe extraction rather than YCLIENTS and never dispatch on render
+  ---
+  duration_ms: 1.325291
+  type: 'test'
+  ...
+# Subtest: unsupported table explains the exact five-header scope without inventing extraction or a retry
+ok 29 - unsupported table explains the exact five-header scope without inventing extraction or a retry
+  ---
+  duration_ms: 0.344834
+  type: 'test'
+  ...
+# Subtest: Ideas reference content is informational and inert; no fake plan/task/contact button or private locator
+ok 30 - Ideas reference content is informational and inert; no fake plan/task/contact button or private locator
+  ---
+  duration_ms: 21.568333
+  type: 'test'
+  ...
+# Subtest: Ideas detail includes bounds, UTC times, original timezone and qualification without numerical inference
+ok 31 - Ideas detail includes bounds, UTC times, original timezone and qualification without numerical inference
+  ---
+  duration_ms: 1.227917
+  type: 'test'
+  ...
+# Subtest: Ideas failure/loading do not masquerade as empty success; refresh is disabled by rate limit
+ok 32 - Ideas failure/loading do not masquerade as empty success; refresh is disabled by rate limit
+  ---
+  duration_ms: 1.033125
+  type: 'test'
+  ...
+# Subtest: Ideas values show exact kopecks without floating point truncation or currency mixing
+ok 33 - Ideas values show exact kopecks without floating point truncation or currency mixing
+  ---
+  duration_ms: 2.98325
+  type: 'test'
+  ...
+# Subtest: Ideas value meanings retain money proxy conditional and policy limitations
+ok 34 - Ideas value meanings retain money proxy conditional and policy limitations
+  ---
+  duration_ms: 4.247375
+  type: 'test'
+  ...
+# Subtest: Ideas invalid unsupported and unavailable values never render zero or stale scalar
+ok 35 - Ideas invalid unsupported and unavailable values never render zero or stale scalar
+  ---
+  duration_ms: 1.650375
+  type: 'test'
+  ...
+# Subtest: Ideas rule explanation preserves strict elapsed-day semantics coverage and literal false result
+ok 36 - Ideas rule explanation preserves strict elapsed-day semantics coverage and literal false result
+  ---
+  duration_ms: 0.595833
+  type: 'test'
+  ...
+# Subtest: Ideas rule explanation preserves inclusive calendar months timezone month end and bounded services
+ok 37 - Ideas rule explanation preserves inclusive calendar months timezone month end and bounded services
+  ---
+  duration_ms: 0.582208
+  type: 'test'
+  ...
+# Subtest: Ideas rule counts retain plural meaning and unavailable result cannot expose parameters
+ok 38 - Ideas rule counts retain plural meaning and unavailable result cannot expose parameters
+  ---
+  duration_ms: 5.925708
+  type: 'test'
+  ...
+# Subtest: Ideas rule list stays compact and keeps exact threshold; complete explanation is in detail
+ok 39 - Ideas rule list stays compact and keeps exact threshold; complete explanation is in detail
+  ---
+  duration_ms: 0.914458
+  type: 'test'
+  ...
+# Subtest: explicit setup never restores chat/history widgets on initial login or relogin; A17 reads remain explicit
+ok 40 - explicit setup never restores chat/history widgets on initial login or relogin; A17 reads remain explicit
+  ---
+  duration_ms: 5.278333
+  type: 'test'
+  ...
+# Subtest: setup with a restored signed-in session also skips history and widget restoration
+ok 41 - setup with a restored signed-in session also skips history and widget restoration
+  ---
+  duration_ms: 1.726
+  type: 'test'
+  ...
+# Subtest: ordinary chat restores saved text and bounded widgets once per login, including initial signed-in session
+ok 42 - ordinary chat restores saved text and bounded widgets once per login, including initial signed-in session
+  ---
+  duration_ms: 2.6685
+  type: 'test'
+  ...
+# Subtest: history omission requires the existing exact local opt-in; remote/unsupported/other query retains ordinary restore
+ok 43 - history omission requires the existing exact local opt-in; remote/unsupported/other query retains ordinary restore
+  ---
+  duration_ms: 3.372875
+  type: 'test'
+  ...
+# Subtest: explicit local entry immediately exposes password login, no unsupported finder or auth call
+ok 44 - explicit local entry immediately exposes password login, no unsupported finder or auth call
+  ---
+  duration_ms: 5.761917
+  type: 'test'
+  ...
+# Subtest: ordinary signed-out entry keeps the existing finder and manual alternate login choices
+ok 45 - ordinary signed-out entry keeps the existing finder and manual alternate login choices
+  ---
+  duration_ms: 1.187542
+  type: 'test'
+  ...
+# Subtest: remount of local signed-out presentation still starts password without an auth request
+ok 46 - remount of local signed-out presentation still starts password without an auth request
+  ---
+  duration_ms: 1.049833
+  type: 'test'
+  ...
+# Subtest: idle setup makes explicit branch loading discoverable without claiming no branches or requesting them
+ok 47 - idle setup makes explicit branch loading discoverable without claiming no branches or requesting them
+  ---
+  duration_ms: 1.796875
+  type: 'test'
+  ...
+# Subtest: loading is disabled; ready lists only returned branches and never grants write consent
+ok 48 - loading is disabled; ready lists only returned branches and never grants write consent
+  ---
+  duration_ms: 1.603167
+  type: 'test'
+  ...
+# Subtest: empty or refused branch read stays qualified; it cannot enable stage or activation
+ok 49 - empty or refused branch read stays qualified; it cannot enable stage or activation
+  ---
+  duration_ms: 2.287708
+  type: 'test'
+  ...
+# Subtest: unsaved connection and pending install explain both disabled activation controls without retry instructions
+ok 50 - unsaved connection and pending install explain both disabled activation controls without retry instructions
+  ---
+  duration_ms: 3.036375
+  type: 'test'
+  ...
+# Subtest: idle, busy and blocked activation help stays qualified to the displayed state
+ok 51 - idle, busy and blocked activation help stays qualified to the displayed state
+  ---
+  duration_ms: 3.732417
+  type: 'test'
+  ...
+# Subtest: ready activation removes blocked help but still requires separate unchecked consent
+ok 52 - ready activation removes blocked help but still requires separate unchecked consent
+  ---
+  duration_ms: 1.09225
+  type: 'test'
+  ...
+# Subtest: new business form requires explicit consent and chosen password; render makes zero requests
+ok 53 - new business form requires explicit consent and chosen password; render makes zero requests
+  ---
+  duration_ms: 39.051708
+  type: 'test'
+  ...
+# Subtest: ambiguous signup removes creation/confirmation affordances and offers only password recovery
+ok 54 - ambiguous signup removes creation/confirmation affordances and offers only password recovery
+  ---
+  duration_ms: 18.728917
+  type: 'test'
+  ...
+# Subtest: pending creation freezes fields/consent but preserves explicit cancel
+ok 55 - pending creation freezes fields/consent but preserves explicit cancel
+  ---
+  duration_ms: 19.456625
+  type: 'test'
+  ...
+# Subtest: only completed renders server-qualified success and never claims CRM/features enabled
+ok 56 - only completed renders server-qualified success and never claims CRM/features enabled
+  ---
+  duration_ms: 0.403792
+  type: 'test'
+  ...
+# Subtest: normal password login is reachable without email OTP and has no secret value in markup
+ok 57 - normal password login is reachable without email OTP and has no secret value in markup
+  ---
+  duration_ms: 0.616583
+  type: 'test'
+  ...
+# Subtest: finite failures never display raw server errors or turn refusal into success
+ok 58 - finite failures never display raw server errors or turn refusal into success
+  ---
+  duration_ms: 0.091375
+  type: 'test'
+  ...
+# Subtest: exact slug refusal is inline and editable with fresh consent, without password recovery claims
+ok 59 - exact slug refusal is inline and editable with fresh consent, without password recovery claims
+  ---
+  duration_ms: 21.975666
+  type: 'test'
+  ...
+# Subtest: inline errors identify the field, connect accessible help, and keep server text out
+ok 60 - inline errors identify the field, connect accessible help, and keep server text out
+  ---
+  duration_ms: 115.392625
+  type: 'test'
+  ...
+# Subtest: slug suggestions transliterate and remain valid and bounded without claiming availability
+ok 61 - slug suggestions transliterate and remain valid and bounded without claiming availability
+  ---
+  duration_ms: 0.699667
+  type: 'test'
+  ...
+# Subtest: timezone choices use valid IANA, current offset, broad coverage and explicit device choice
+ok 62 - timezone choices use valid IANA, current offset, broad coverage and explicit device choice
+  ---
+  duration_ms: 36.272625
+  type: 'test'
+  ...
+# Subtest: tasks render is inert, escapes all content, and exposes no command identity or control
+ok 63 - tasks render is inert, escapes all content, and exposes no command identity or control
+  ---
+  duration_ms: 22.937875
+  type: 'test'
+  ...
+# Subtest: loading, denied and capped-filter-empty states never claim an empty authoritative full list
+ok 64 - loading, denied and capped-filter-empty states never claim an empty authoritative full list
+  ---
+  duration_ms: 3.629792
+  type: 'test'
+  ...
+# Subtest: action controls need server capabilities; a pending command cannot be sent again
+ok 65 - action controls need server capabilities; a pending command cannot be sent again
+  ---
+  duration_ms: 0.712334
+  type: 'test'
+  ...
+# Subtest: the corpus is the 40 sealed envelopes
+ok 66 - the corpus is the 40 sealed envelopes
+  ---
+  duration_ms: 0.557542
+  type: 'test'
+  ...
+# Subtest: kind-choice — drawn
+ok 67 - kind-choice — drawn
+  ---
+  duration_ms: 17.325417
+  type: 'test'
+  ...
+# Subtest: kind-service-selector — drawn
+ok 68 - kind-service-selector — drawn
+  ---
+  duration_ms: 7.456292
+  type: 'test'
+  ...
+# Subtest: kind-staff-selector — drawn
+ok 69 - kind-staff-selector — drawn
+  ---
+  duration_ms: 2.249625
+  type: 'test'
+  ...
+# Subtest: kind-time-slot-selector — drawn
+ok 70 - kind-time-slot-selector — drawn
+  ---
+  duration_ms: 2.354666
+  type: 'test'
+  ...
+# Subtest: kind-booking-confirmation — drawn
+ok 71 - kind-booking-confirmation — drawn
+  ---
+  duration_ms: 2.107708
+  type: 'test'
+  ...
+# Subtest: kind-schedule — drawn
+ok 72 - kind-schedule — drawn
+  ---
+  duration_ms: 2.493917
+  type: 'test'
+  ...
+# Subtest: kind-client-list — drawn
+ok 73 - kind-client-list — drawn
+  ---
+  duration_ms: 2.086042
+  type: 'test'
+  ...
+# Subtest: kind-metric — drawn
+ok 74 - kind-metric — drawn
+  ---
+  duration_ms: 1.290375
+  type: 'test'
+  ...
+# Subtest: kind-chart — drawn
+ok 75 - kind-chart — drawn
+  ---
+  duration_ms: 2.762042
+  type: 'test'
+  ...
+# Subtest: kind-report — drawn
+ok 76 - kind-report — drawn
+  ---
+  duration_ms: 3.102959
+  type: 'test'
+  ...
+# Subtest: kind-strategy-options — drawn
+ok 77 - kind-strategy-options — drawn
+  ---
+  duration_ms: 1.250584
+  type: 'test'
+  ...
+# Subtest: kind-approval — drawn
+ok 78 - kind-approval — drawn
+  ---
+  duration_ms: 1.040125
+  type: 'test'
+  ...
+# Subtest: kind-progress — drawn
+ok 79 - kind-progress — drawn
+  ---
+  duration_ms: 0.965375
+  type: 'test'
+  ...
+# Subtest: kind-limitation-blocking — drawn
+ok 80 - kind-limitation-blocking — drawn
+  ---
+  duration_ms: 0.39375
+  type: 'test'
+  ...
+# Subtest: kind-source-status — drawn
+ok 81 - kind-source-status — drawn
+  ---
+  duration_ms: 1.096833
+  type: 'test'
+  ...
+# Subtest: kind-settings-draft — drawn
+ok 82 - kind-settings-draft — drawn
+  ---
+  duration_ms: 0.988917
+  type: 'test'
+  ...
+# Subtest: kind-form — drawn
+ok 83 - kind-form — drawn
+  ---
+  duration_ms: 1.5545
+  type: 'test'
+  ...
+# Subtest: kind-consent-state — drawn
+ok 84 - kind-consent-state — drawn
+  ---
+  duration_ms: 0.777208
+  type: 'test'
+  ...
+# Subtest: kind-identity-binding — drawn
+ok 85 - kind-identity-binding — drawn
+  ---
+  duration_ms: 0.870875
+  type: 'test'
+  ...
+# Subtest: kind-payment-handoff — drawn
+ok 86 - kind-payment-handoff — drawn
+  ---
+  duration_ms: 0.694
+  type: 'test'
+  ...
+# Subtest: kind-media-preview — drawn
+ok 87 - kind-media-preview — drawn
+  ---
+  duration_ms: 0.699541
+  type: 'test'
+  ...
+# Subtest: kind-artifact — drawn
+ok 88 - kind-artifact — drawn
+  ---
+  duration_ms: 0.913875
+  type: 'test'
+  ...
+# Subtest: limitation-non-blocking — drawn
+ok 89 - limitation-non-blocking — drawn
+  ---
+  duration_ms: 0.454666
+  type: 'test'
+  ...
+# Subtest: choice-text-only — drawn
+ok 90 - choice-text-only — drawn
+  ---
+  duration_ms: 1.037166
+  type: 'test'
+  ...
+# Subtest: booking-expired — drawn
+ok 91 - booking-expired — drawn
+  ---
+  duration_ms: 0.725666
+  type: 'test'
+  ...
+# Subtest: booking-tampered-body — drawn
+ok 92 - booking-tampered-body — drawn
+  ---
+  duration_ms: 0.603916
+  type: 'test'
+  ...
+# Subtest: booking-token-changed — drawn
+ok 93 - booking-token-changed — drawn
+  ---
+  duration_ms: 1.034833
+  type: 'test'
+  ...
+# Subtest: booking-receipt-pointers-changed — drawn
+ok 94 - booking-receipt-pointers-changed — drawn
+  ---
+  duration_ms: 1.414792
+  type: 'test'
+  ...
+# Subtest: booking-render-tier-changed — drawn
+ok 95 - booking-render-tier-changed — drawn
+  ---
+  duration_ms: 0.709959
+  type: 'test'
+  ...
+# Subtest: booking-cell-index-digest-changed — drawn
+ok 96 - booking-cell-index-digest-changed — drawn
+  ---
+  duration_ms: 0.677542
+  type: 'test'
+  ...
+# Subtest: booking-root-values-changed — drawn
+ok 97 - booking-root-values-changed — drawn
+  ---
+  duration_ms: 1.280416
+  type: 'test'
+  ...
+# Subtest: metric-class-i-target — drawn
+ok 98 - metric-class-i-target — drawn
+  ---
+  duration_ms: 0.924209
+  type: 'test'
+  ...
+# Subtest: metric-class-i-ref-tampered — drawn
+ok 99 - metric-class-i-ref-tampered — drawn
+  ---
+  duration_ms: 0.589792
+  type: 'test'
+  ...
+# Subtest: schedule-withheld-reduced — drawn
+ok 100 - schedule-withheld-reduced — drawn
+  ---
+  duration_ms: 1.298333
+  type: 'test'
+  ...
+# Subtest: slots-superseded-predecessor — drawn
+ok 101 - slots-superseded-predecessor — drawn
+  ---
+  duration_ms: 0.729917
+  type: 'test'
+  ...
+# Subtest: slots-superseded-successor — drawn
+ok 102 - slots-superseded-successor — drawn
+  ---
+  duration_ms: 1.4015
+  type: 'test'
+  ...
+# Subtest: approval-consumed — drawn
+ok 103 - approval-consumed — drawn
+  ---
+  duration_ms: 0.594584
+  type: 'test'
+  ...
+# Subtest: collation-lt-y-j — drawn
+ok 104 - collation-lt-y-j — drawn
+  ---
+  duration_ms: 1.334708
+  type: 'test'
+  ...
+# Subtest: collation-et-z-t — drawn
+ok 105 - collation-et-z-t — drawn
+  ---
+  duration_ms: 1.540875
+  type: 'test'
+  ...
+# Subtest: collation-digits-case — drawn
+ok 106 - collation-digits-case — drawn
+  ---
+  duration_ms: 1.329166
+  type: 'test'
+  ...
+# Subtest: kind-choice — collapsed draws one heading and nothing interactive
+ok 107 - kind-choice — collapsed draws one heading and nothing interactive
+  ---
+  duration_ms: 0.411125
+  type: 'test'
+  ...
+# Subtest: kind-choice — pending marks the card busy and the one ref disabled
+ok 108 - kind-choice — pending marks the card busy and the one ref disabled
+  ---
+  duration_ms: 0.699958
+  type: 'test'
+  ...
+# Subtest: kind-service-selector — collapsed draws one heading and nothing interactive
+ok 109 - kind-service-selector — collapsed draws one heading and nothing interactive
+  ---
+  duration_ms: 0.461917
+  type: 'test'
+  ...
+# Subtest: kind-service-selector — pending marks the card busy and the one ref disabled
+ok 110 - kind-service-selector — pending marks the card busy and the one ref disabled
+  ---
+  duration_ms: 1.027209
+  type: 'test'
+  ...
+# Subtest: kind-staff-selector — collapsed draws one heading and nothing interactive
+ok 111 - kind-staff-selector — collapsed draws one heading and nothing interactive
+  ---
+  duration_ms: 0.618459
+  type: 'test'
+  ...
+# Subtest: kind-staff-selector — pending marks the card busy and the one ref disabled
+ok 112 - kind-staff-selector — pending marks the card busy and the one ref disabled
+  ---
+  duration_ms: 1.001792
+  type: 'test'
+  ...
+# Subtest: kind-time-slot-selector — collapsed draws one heading and nothing interactive
+ok 113 - kind-time-slot-selector — collapsed draws one heading and nothing interactive
+  ---
+  duration_ms: 0.614541
+  type: 'test'
+  ...
+# Subtest: kind-time-slot-selector — pending marks the card busy and the one ref disabled
+ok 114 - kind-time-slot-selector — pending marks the card busy and the one ref disabled
+  ---
+  duration_ms: 1.277167
+  type: 'test'
+  ...
+# Subtest: kind-booking-confirmation — collapsed draws one heading and nothing interactive
+ok 115 - kind-booking-confirmation — collapsed draws one heading and nothing interactive
+  ---
+  duration_ms: 0.37925
+  type: 'test'
+  ...
+# Subtest: kind-booking-confirmation — pending marks the card busy and the one ref disabled
+ok 116 - kind-booking-confirmation — pending marks the card busy and the one ref disabled
+  ---
+  duration_ms: 1.146084
+  type: 'test'
+  ...
+# Subtest: kind-schedule — collapsed draws one heading and nothing interactive
+ok 117 - kind-schedule — collapsed draws one heading and nothing interactive
+  ---
+  duration_ms: 0.71125
+  type: 'test'
+  ...
+# Subtest: kind-schedule — pending marks the card busy and the one ref disabled
+ok 118 - kind-schedule — pending marks the card busy and the one ref disabled
+  ---
+  duration_ms: 0.976208
+  type: 'test'
+  ...
+# Subtest: M7 SERVICE_SELECTOR — kind-service-selector
+ok 119 - M7 SERVICE_SELECTOR — kind-service-selector
+  ---
+  duration_ms: 1.206584
+  type: 'test'
+  ...
+# Subtest: M7 STAFF_SELECTOR — kind-staff-selector
+ok 120 - M7 STAFF_SELECTOR — kind-staff-selector
+  ---
+  duration_ms: 0.805084
+  type: 'test'
+  ...
+# Subtest: M7 TIME_SLOT_SELECTOR — kind-time-slot-selector
+ok 121 - M7 TIME_SLOT_SELECTOR — kind-time-slot-selector
+  ---
+  duration_ms: 1.179
+  type: 'test'
+  ...
+# Subtest: M7 BOOKING_CONFIRMATION — kind-booking-confirmation
+ok 122 - M7 BOOKING_CONFIRMATION — kind-booking-confirmation
+  ---
+  duration_ms: 1.212209
+  type: 'test'
+  ...
+# Subtest: M7 BOOKING_CONFIRMATION — booking-expired
+ok 123 - M7 BOOKING_CONFIRMATION — booking-expired
+  ---
+  duration_ms: 0.585541
+  type: 'test'
+  ...
+# Subtest: M7 BOOKING_CONFIRMATION — booking-tampered-body
+ok 124 - M7 BOOKING_CONFIRMATION — booking-tampered-body
+  ---
+  duration_ms: 0.547208
+  type: 'test'
+  ...
+# Subtest: M7 BOOKING_CONFIRMATION — booking-token-changed
+ok 125 - M7 BOOKING_CONFIRMATION — booking-token-changed
+  ---
+  duration_ms: 1.134791
+  type: 'test'
+  ...
+# Subtest: M7 BOOKING_CONFIRMATION — booking-receipt-pointers-changed
+ok 126 - M7 BOOKING_CONFIRMATION — booking-receipt-pointers-changed
+  ---
+  duration_ms: 1.1285
+  type: 'test'
+  ...
+# Subtest: M7 BOOKING_CONFIRMATION — booking-render-tier-changed
+ok 127 - M7 BOOKING_CONFIRMATION — booking-render-tier-changed
+  ---
+  duration_ms: 0.817541
+  type: 'test'
+  ...
+# Subtest: M7 BOOKING_CONFIRMATION — booking-cell-index-digest-changed
+ok 128 - M7 BOOKING_CONFIRMATION — booking-cell-index-digest-changed
+  ---
+  duration_ms: 0.719833
+  type: 'test'
+  ...
+# Subtest: M7 BOOKING_CONFIRMATION — booking-root-values-changed
+ok 129 - M7 BOOKING_CONFIRMATION — booking-root-values-changed
+  ---
+  duration_ms: 1.06275
+  type: 'test'
+  ...
+# Subtest: M7 TIME_SLOT_SELECTOR — slots-superseded-predecessor
+ok 130 - M7 TIME_SLOT_SELECTOR — slots-superseded-predecessor
+  ---
+  duration_ms: 0.689916
+  type: 'test'
+  ...
+# Subtest: M7 TIME_SLOT_SELECTOR — slots-superseded-successor
+ok 131 - M7 TIME_SLOT_SELECTOR — slots-superseded-successor
+  ---
+  duration_ms: 1.226375
+  type: 'test'
+  ...
+# Subtest: M7 — no COMMIT survives a non-valid verdict, anywhere in the corpus
+ok 132 - M7 — no COMMIT survives a non-valid verdict, anywhere in the corpus
+  ---
+  duration_ms: 8.074667
+  type: 'test'
+  ...
+# Subtest: M7 — a superseded predecessor offers nothing at all
+ok 133 - M7 — a superseded predecessor offers nothing at all
+  ---
+  duration_ms: 0.870875
+  type: 'test'
+  ...
+# Subtest: M7 — a terminal card is drawn whole, marked terminal, and carries no control
+ok 134 - M7 — a terminal card is drawn whole, marked terminal, and carries no control
+  ---
+  duration_ms: 0.738583
+  type: 'test'
+  ...
+# Subtest: L27 React receipt control requires both runtime projection and callback
+ok 135 - L27 React receipt control requires both runtime projection and callback
+  ---
+  duration_ms: 1.477125
+  type: 'test'
+  ...
+# Subtest: L27 React receipt READ is separate chrome; spent article and result text remain unchanged
+ok 136 - L27 React receipt READ is separate chrome; spent article and result text remain unchanged
+  ---
+  duration_ms: 1.817084
+  type: 'test'
+  ...
+# Subtest: L27 React pending disables only the receipt READ; unavailable offers a neutral manual retry
+ok 137 - L27 React pending disables only the receipt READ; unavailable offers a neutral manual retry
+  ---
+  duration_ms: 1.124917
+  type: 'test'
+  ...
+# Subtest: the checker catches a drawer that is wrong
+ok 138 - the checker catches a drawer that is wrong
+  ---
+  duration_ms: 4.424083
+  type: 'test'
+  ...
+# Subtest: restored receipt uses identical READ chrome with no widget result or intent controls
+ok 139 - restored receipt uses identical READ chrome with no widget result or intent controls
+  ---
+  duration_ms: 1.54425
+  type: 'test'
+  ...
+# Subtest: privacy limits deletion to the current conversation and retains audit/business records
+ok 140 - privacy limits deletion to the current conversation and retains audit/business records
+  ---
+  duration_ms: 5.614875
+  type: 'test'
+  ...
+# Subtest: privacy requires a distinct explicit confirmation, carrying no target or event arguments
+ok 141 - privacy requires a distinct explicit confirmation, carrying no target or event arguments
+  ---
+  duration_ms: 1.543041
+  type: 'test'
+  ...
+# Subtest: uncertain permits only manual same-request retry even when no new target is available
+ok 142 - uncertain permits only manual same-request retry even when no new target is available
+  ---
+  duration_ms: 0.287459
+  type: 'test'
+  ...
+# Subtest: refusal never offers a new deletion or retry, and gives a sign-out exit
+ok 143 - refusal never offers a new deletion or retry, and gives a sign-out exit
+  ---
+  duration_ms: 1.295458
+  type: 'test'
+  ...
+# Subtest: only canonical completed declares deletion; every phase has an accessible status and no sinks
+ok 144 - only canonical completed declares deletion; every phase has an accessible status and no sinks
+  ---
+  duration_ms: 0.594125
+  type: 'test'
+  ...
+# Subtest: Telegram linking panel reports idle without claiming Client authority
+ok 145 - Telegram linking panel reports idle without claiming Client authority
+  ---
+  duration_ms: 0.2035
+  type: 'test'
+  ...
+# Subtest: Telegram linking panel reports starting without claiming Client authority
+ok 146 - Telegram linking panel reports starting without claiming Client authority
+  ---
+  duration_ms: 1.682792
+  type: 'test'
+  ...
+# Subtest: Telegram linking panel reports waiting without claiming Client authority
+ok 147 - Telegram linking panel reports waiting without claiming Client authority
+  ---
+  duration_ms: 0.197333
+  type: 'test'
+  ...
+# Subtest: Telegram linking panel reports finishing without claiming Client authority
+ok 148 - Telegram linking panel reports finishing without claiming Client authority
+  ---
+  duration_ms: 0.491417
+  type: 'test'
+  ...
+# Subtest: Telegram linking panel reports linked without claiming Client authority
+ok 149 - Telegram linking panel reports linked without claiming Client authority
+  ---
+  duration_ms: 0.695417
+  type: 'test'
+  ...
+# Subtest: Telegram linking panel reports failed without claiming Client authority
+ok 150 - Telegram linking panel reports failed without claiming Client authority
+  ---
+  duration_ms: 0.813625
+  type: 'test'
+  ...
+# Subtest: the corpus is not vacuous — it contains both admitted and refused candidates
+ok 151 - the corpus is not vacuous — it contains both admitted and refused candidates
+  ---
+  duration_ms: 2.017958
+  type: 'test'
+  ...
+# Subtest: isReplyHref agrees with the shell, candidate for candidate
+ok 152 - isReplyHref agrees with the shell, candidate for candidate
+  ---
+  duration_ms: 0.85475
+  type: 'test'
+  ...
+# Subtest: replySegments agrees with the shell, byte for byte
+ok 153 - replySegments agrees with the shell, byte for byte
+  ---
+  duration_ms: 1.12425
+  type: 'test'
+  ...
+# Subtest: the hostile-input fixture: three links, and the two dangerous schemes stay text
+ok 154 - the hostile-input fixture: three links, and the two dangerous schemes stay text
+  ---
+  duration_ms: 3.974542
+  type: 'test'
+  ...
+# Subtest: every anchor is rel=noopener noreferrer, and only https opens a new context
+ok 155 - every anchor is rel=noopener noreferrer, and only https opens a new context
+  ---
+  duration_ms: 1.017834
+  type: 'test'
+  ...
+# Subtest: a reply with no candidate produces no markup elements at all
+ok 156 - a reply with no candidate produces no markup elements at all
+  ---
+  duration_ms: 0.15225
+  type: 'test'
+  ...
+# Subtest: owned popup disowns opener before provider; callback is cleared/closed before delivery once
+ok 157 - owned popup disowns opener before provider; callback is cleared/closed before delivery once
+  ---
+  duration_ms: 2.208708
+  type: 'test'
+  ...
+# Subtest: non-callback location never delivered: https://foreign.example/oauth-callback.html\#oauth=telegram&state=te_synthetic_state&code=synthetic
+ok 158 - non-callback location never delivered: https://foreign.example/oauth-callback.html\#oauth=telegram&state=te_synthetic_state&code=synthetic
+  ---
+  duration_ms: 0.564
+  type: 'test'
+  ...
+# Subtest: non-callback location never delivered: https://mayaos.ru/other\#oauth=telegram&state=te_synthetic_state&code=synthetic
+ok 159 - non-callback location never delivered: https://mayaos.ru/other\#oauth=telegram&state=te_synthetic_state&code=synthetic
+  ---
+  duration_ms: 0.330584
+  type: 'test'
+  ...
+# Subtest: non-callback location never delivered: https://mayaos.ru/oauth-callback.html?query=not-cleared\#oauth=telegram&state=te_synthetic_state&code=synthetic
+ok 160 - non-callback location never delivered: https://mayaos.ru/oauth-callback.html?query=not-cleared\#oauth=telegram&state=te_synthetic_state&code=synthetic
+  ---
+  duration_ms: 0.353083
+  type: 'test'
+  ...
+# Subtest: non-callback location never delivered: https://mayaos.ru/oauth-callback.html
+ok 161 - non-callback location never delivered: https://mayaos.ru/oauth-callback.html
+  ---
+  duration_ms: 0.269083
+  type: 'test'
+  ...
+# Subtest: non-callback location never delivered: https://mayaos.ru/oauth-callback.html\#r=shell.root
+ok 162 - non-callback location never delivered: https://mayaos.ru/oauth-callback.html\#r=shell.root
+  ---
+  duration_ms: 0.158666
+  type: 'test'
+  ...
+# Subtest: blocked window returns null without a timer; close/pagehide/deadline cancel without delivery
+ok 163 - blocked window returns null without a timer; close/pagehide/deadline cancel without delivery
+  ---
+  duration_ms: 0.285584
+  type: 'test'
+  ...
+# Subtest: provider substitution refused: https://evil.example/auth
+ok 164 - provider substitution refused: https://evil.example/auth
+  ---
+  duration_ms: 0.219333
+  type: 'test'
+  ...
+# Subtest: provider substitution refused: https://oauth.telegram.org.evil.example/auth
+ok 165 - provider substitution refused: https://oauth.telegram.org.evil.example/auth
+  ---
+  duration_ms: 0.458666
+  type: 'test'
+  ...
+# Subtest: provider substitution refused: javascript:alert(1)
+ok 166 - provider substitution refused: javascript:alert(1)
+  ---
+  duration_ms: 0.549208
+  type: 'test'
+  ...
+# Subtest: provider substitution refused: http://oauth.telegram.org/auth
+ok 167 - provider substitution refused: http://oauth.telegram.org/auth
+  ---
+  duration_ms: 0.124084
+  type: 'test'
+  ...
+# Subtest: provider substitution refused: https://user:pass@oauth.telegram.org/auth
+ok 168 - provider substitution refused: https://user:pass@oauth.telegram.org/auth
+  ---
+  duration_ms: 0.044875
+  type: 'test'
+  ...
+# Subtest: provider substitution refused: https://oauth.telegram.org/auth?client_id=1&state=te_synthetic_state\#foreign
+ok 169 - provider substitution refused: https://oauth.telegram.org/auth?client_id=1&state=te_synthetic_state\#foreign
+  ---
+  duration_ms: 0.031084
+  type: 'test'
+  ...
+# Subtest: provider substitution refused: https://oauth.telegram.org/other
+ok 170 - provider substitution refused: https://oauth.telegram.org/other
+  ---
+  duration_ms: 0.022791
+  type: 'test'
+  ...
+# Subtest: callback malformed query erased and never forwarded: ?state=te_synthetic_state&state=te_other_state&code=x
+ok 171 - callback malformed query erased and never forwarded: ?state=te_synthetic_state&state=te_other_state&code=x
+  ---
+  duration_ms: 0.325625
+  type: 'test'
+  ...
+# Subtest: callback malformed query erased and never forwarded: ?state=te_synthetic_state&code=x&code=y
+ok 172 - callback malformed query erased and never forwarded: ?state=te_synthetic_state&code=x&code=y
+  ---
+  duration_ms: 0.231584
+  type: 'test'
+  ...
+# Subtest: callback malformed query erased and never forwarded: ?state=te_synthetic_state&code=x&error=denied
+ok 173 - callback malformed query erased and never forwarded: ?state=te_synthetic_state&code=x&error=denied
+  ---
+  duration_ms: 0.246667
+  type: 'test'
+  ...
+# Subtest: callback malformed query erased and never forwarded: ?state=te_synthetic_state
+ok 174 - callback malformed query erased and never forwarded: ?state=te_synthetic_state
+  ---
+  duration_ms: 0.188125
+  type: 'test'
+  ...
+# Subtest: callback malformed query erased and never forwarded: ?state=ya_synthetic_state&code=x
+ok 175 - callback malformed query erased and never forwarded: ?state=ya_synthetic_state&code=x
+  ---
+  duration_ms: 0.181166
+  type: 'test'
+  ...
+# Subtest: callback malformed query erased and never forwarded: ?state=te_synthetic_state&code=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ok 176 - callback malformed query erased and never forwarded: ?state=te_synthetic_state&code=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  ---
+  duration_ms: 0.278042
+  type: 'test'
+  ...
+# Subtest: decline is carried, but the callback page alone never installs a session or navigates to the app
+ok 177 - decline is carried, but the callback page alone never installs a session or navigates to the app
+  ---
+  duration_ms: 0.361125
+  type: 'test'
+  ...
+# Subtest: voice sheet is passive in every runtime state and keeps held distinct from listening
+ok 178 - voice sheet is passive in every runtime state and keeps held distinct from listening
+  ---
+  duration_ms: 9.997916
+  type: 'test'
+  ...
+# Subtest: unavailable preserves and escapes the exact runtime Cell label without exposing internal evidence
+ok 179 - unavailable preserves and escapes the exact runtime Cell label without exposing internal evidence
+  ---
+  duration_ms: 0.502334
+  type: 'test'
+  ...
+# Subtest: current conversation disable blocks every voice action and notice never claims success
+ok 180 - current conversation disable blocks every voice action and notice never claims success
+  ---
+  duration_ms: 0.766
+  type: 'test'
+  ...
+# Subtest: the encoder is byte-identical to the shell’s, over every corpus
+ok 181 - the encoder is byte-identical to the shell’s, over every corpus
+  ---
+  duration_ms: 7.157125
+  type: 'test'
+  ...
+# Subtest: the 44-byte RIFF header is the one the backend parses
+ok 182 - the 44-byte RIFF header is the one the backend parses
+  ---
+  duration_ms: 0.523167
+  type: 'test'
+  ...
+# Subtest: the wire form is a data URL, not bare base64
+ok 183 - the wire form is a data URL, not bare base64
+  ---
+  duration_ms: 0.15575
+  type: 'test'
+  ...
+# Subtest: base64 agrees with the platform encoder, including both remainders
+ok 184 - base64 agrees with the platform encoder, including both remainders
+  ---
+  duration_ms: 4.932708
+  type: 'test'
+  ...
+# Subtest: an insecure context is refused before any API is touched
+ok 185 - an insecure context is refused before any API is touched
+  ---
+  duration_ms: 0.404666
+  type: 'test'
+  ...
+# Subtest: a secure context with no capture APIs reports api_absent, not a crash
+ok 186 - a secure context with no capture APIs reports api_absent, not a crash
+  ---
+  duration_ms: 0.113
+  type: 'test'
+  ...
+# Subtest: arm refuses a forged proof, a replayed proof and a wrong gesture type
+ok 187 - arm refuses a forged proof, a replayed proof and a wrong gesture type
+  ---
+  duration_ms: 0.228209
+  type: 'test'
+  ...
+# Subtest: take spends from the same set as arm, so one gesture can never do both
+ok 188 - take spends from the same set as arm, so one gesture can never do both
+  ---
+  duration_ms: 0.099417
+  type: 'test'
+  ...
+# Subtest: the port answers safely with no session at all
+ok 189 - the port answers safely with no session at all
+  ---
+  duration_ms: 0.260625
+  type: 'test'
+  ...
+# Subtest: the negotiated formats and constraints are the shell’s
+ok 190 - the negotiated formats and constraints are the shell’s
+  ---
+  duration_ms: 0.293625
+  type: 'test'
+  ...
+# Subtest: feed is inert plain text with explicit UTC/read state; no links, save or implicit acknowledgment
+ok 191 - feed is inert plain text with explicit UTC/read state; no links, save or implicit acknowledgment
+  ---
+  duration_ms: 18.792375
+  type: 'test'
+  ...
+# Subtest: library always discloses pre-filter cap; report reader escapes body and never sends to model
+ok 192 - library always discloses pre-filter cap; report reader escapes body and never sends to model
+  ---
+  duration_ms: 2.265417
+  type: 'test'
+  ...
+# Subtest: denial/loading are not empty success; rate limit disables refresh and feed cap is disclosed
+ok 193 - denial/loading are not empty success; rate limit disables refresh and feed cap is disclosed
+  ---
+  duration_ms: 0.993208
+  type: 'test'
+  ...
+# Subtest: only unread feed rows offer explicit acknowledgement; pending blocks both write and refresh
+ok 194 - only unread feed rows offer explicit acknowledgement; pending blocks both write and refresh
+  ---
+  duration_ms: 1.899709
+  type: 'test'
+  ...
+# Subtest: report sheet is labelled, inert on render and driven only by canonical detail
+ok 195 - report sheet is labelled, inert on render and driven only by canonical detail
+  ---
+  duration_ms: 1.336791
+  type: 'test'
+  ...
+# Subtest: library view uses a labelled passive sheet with the current runtime preferences
+ok 196 - library view uses a labelled passive sheet with the current runtime preferences
+  ---
+  duration_ms: 0.916333
+  type: 'test'
+  ...
+1..196
+# tests 196
+# suites 0
+# pass 196
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 382.358166

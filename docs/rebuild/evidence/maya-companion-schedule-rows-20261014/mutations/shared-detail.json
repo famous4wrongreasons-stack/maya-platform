@@ -1,0 +1,24 @@
+{
+  "candidate": "8d54c4c5f7a76735143e71eab6e8711fd4f68153",
+  "status": "PASS",
+  "mutation": "restore duplicate unsealed SCHEDULE detail button",
+  "results": [
+    {
+      "stage": "baseline",
+      "exit": 0,
+      "log": "baseline.log"
+    },
+    {
+      "stage": "mutant",
+      "exit": 1,
+      "log": "mutant.log"
+    },
+    {
+      "stage": "restored",
+      "exit": 0,
+      "log": "restored.log"
+    }
+  ],
+  "sourceRestoredSha256": "69a4a878756c86d43d88e4dd7e85230b5795f5f15747553fc9a4c49640fe29e1",
+  "realEffects": 0
+}

@@ -1,0 +1,111 @@
+{
+  "candidate": "8d54c4c5f7a76735143e71eab6e8711fd4f68153",
+  "actualBackendHttpPg": true,
+  "actualRuntimeReactProjection": true,
+  "browserOverThisBackend": false,
+  "syntheticDatabaseOnly": true,
+  "realModel": false,
+  "externalProvider": false,
+  "clusterStopped": true,
+  "sourceScenarios": {
+    "journal": {
+      "pass": true,
+      "backendDetail": true,
+      "scheduleChecks": [],
+      "refs": [
+        {
+          "kind": "SCHEDULE",
+          "refCount": 3
+        }
+      ],
+      "fullscreenPhase": "open",
+      "timelineUnchanged": true
+    },
+    "journal-populated": {
+      "pass": true,
+      "backendDetail": true,
+      "scheduleChecks": [
+        {
+          "stage": "initial",
+          "mode": "structured",
+          "entries": 2,
+          "labels": [
+            "2026-09-24 · 10:00–11:00 · Europe/Moscow",
+            "2026-09-24 · 12:00–13:00 · Europe/Moscow"
+          ],
+          "refs": [
+            "entry:journal-entry-1",
+            "entry:journal-entry-2",
+            "intent:i2",
+            "intent:i3"
+          ],
+          "privateNoteAbsent": true,
+          "serviceNamesSupplied": false,
+          "genericSourceTitlePreserved": true,
+          "gaps": 0
+        },
+        {
+          "stage": "detail",
+          "mode": "structured",
+          "entries": 2,
+          "labels": [
+            "2026-09-24 · 10:00–11:00 · Europe/Moscow",
+            "2026-09-24 · 12:00–13:00 · Europe/Moscow"
+          ],
+          "refs": [
+            "entry:journal-entry-1",
+            "entry:journal-entry-2",
+            "intent:i2",
+            "intent:i3",
+            "intent:i4"
+          ],
+          "privateNoteAbsent": true,
+          "serviceNamesSupplied": false,
+          "genericSourceTitlePreserved": true,
+          "gaps": 0
+        }
+      ],
+      "refs": [
+        {
+          "kind": "SCHEDULE",
+          "refCount": 4
+        }
+      ],
+      "fullscreenPhase": "open",
+      "timelineUnchanged": true
+    },
+    "personal": {
+      "pass": true,
+      "createRescheduleCancel": true,
+      "refs": [
+        {
+          "kind": "SERVICE_SELECTOR",
+          "refCount": 3
+        },
+        {
+          "kind": "TIME_SLOT_SELECTOR",
+          "refCount": 5
+        },
+        {
+          "kind": "SCHEDULE",
+          "refCount": 4
+        },
+        {
+          "kind": "SCHEDULE",
+          "refCount": 4
+        }
+      ]
+    }
+  },
+  "backendRegressions": {
+    "numPassedTests": 149,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numPassedTestSuites": 4
+  },
+  "timeLabelCounterfactual": {
+    "refused": true,
+    "failed": 3,
+    "passed": 4
+  }
+}

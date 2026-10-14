@@ -1,0 +1,314 @@
+{
+  "contract": "maya.companion.schedule-rows-source-proof/1",
+  "head": "9612d10ef8115f85352f3fd50ecbebdc0dbde520",
+  "startedAt": "2026-10-14T09:10:15.021Z",
+  "status": "FAIL",
+  "steps": [
+    {
+      "name": "clone",
+      "command": [
+        "git",
+        "clone",
+        "--shared",
+        "--no-checkout",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014",
+      "startedAt": "2026-10-14T09:10:15.021Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:15.119Z",
+      "sha256": "99d30fe5e9c544becc288fd9238f1cf0be7deafa4f27aea86c49a213f27be058"
+    },
+    {
+      "name": "checkout",
+      "command": [
+        "git",
+        "checkout",
+        "--detach",
+        "9612d10ef8115f85352f3fd50ecbebdc0dbde520"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate",
+      "startedAt": "2026-10-14T09:10:15.121Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:18.352Z",
+      "sha256": "8e3f49cad5233539286f144a1ca5d69da820df7dfb05039c39a81b1d90b4782b"
+    },
+    {
+      "name": "backend-dependencies",
+      "command": [
+        "/bin/cp",
+        "-cR",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-saas-backend/node_modules",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate/maya-saas-backend/node_modules"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014",
+      "startedAt": "2026-10-14T09:10:18.353Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:26.731Z",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "carrier-dependencies",
+      "command": [
+        "/bin/cp",
+        "-cR",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate/maya-carrier-react/node_modules"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014",
+      "startedAt": "2026-10-14T09:10:26.732Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:26.782Z",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "pg-init",
+      "command": [
+        "/opt/homebrew/opt/postgresql@16/bin/initdb",
+        "-D",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/pgdata",
+        "--auth=trust",
+        "--username=widget_proof",
+        "--encoding=UTF8",
+        "--locale=C"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T09:10:26.938Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:27.335Z",
+      "sha256": "25e472e223464cf2e13cb8b105521cdbec5d053afbe8f282a2df4fe5b37ab0ce"
+    },
+    {
+      "name": "pg-start",
+      "command": [
+        "/opt/homebrew/opt/postgresql@16/bin/pg_ctl",
+        "-D",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/pgdata",
+        "-w",
+        "-t",
+        "30",
+        "-l",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/postgres.log",
+        "-o",
+        "-h 127.0.0.1 -p 59548 -k '' -c shared_buffers=64MB -c max_connections=30",
+        "start"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T09:10:27.336Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:27.463Z",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "name": "createdb",
+      "command": [
+        "/opt/homebrew/opt/postgresql@16/bin/createdb",
+        "--host=127.0.0.1",
+        "--port=59548",
+        "--username=widget_proof",
+        "maya_widget_gate_proof_companion_schedule"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T09:10:27.464Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:27.522Z",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "network-fence",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "-e",
+        "const net=require('node:net'),assert=require('node:assert/strict');const x=net.connect(443,'198.51.100.1');x.setTimeout(1500,()=>{throw Error('denial not immediate')});x.on('error',e=>{assert.equal(e.code,'EPERM');console.log('external connection refused EPERM')});"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T09:10:27.523Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:27.558Z",
+      "sha256": "2f362c95a59e89184faa8a01fc9acd517b39419875ffc3022479d4701a6df9da"
+    },
+    {
+      "name": "prisma-generate",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/prisma/build/index.js",
+        "generate"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T09:10:27.558Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:30.575Z",
+      "sha256": "fea9674b998550a1eda4d3c7ebfacc1d7fbfeb57e9323d5f493861a897f54ea7"
+    },
+    {
+      "name": "time-label-counterfactual",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/jest/bin/jest.js",
+        "src/widgets/composition/journal-schedule.presenter.spec.ts",
+        "--runInBand",
+        "--json",
+        "--outputFile=/private/tmp/maya-companion-schedule-rows-source-final04-20261014/counterfactual.json"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T09:10:30.576Z",
+      "exit": 1,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:31.799Z",
+      "sha256": "1992772acbd03e975b8853b770ab071cfb5300e6a8007a7f5ff008c5107e8a7a"
+    },
+    {
+      "name": "backend-source-regressions",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "src/widgets/composition/journal-schedule.presenter.spec.ts",
+        "src/widgets/projection/projector-fences.architecture.spec.ts",
+        "src/widgets/emission/emitter.spec.ts",
+        "src/ai-tools/employee-journal-read.spec.ts",
+        "--json",
+        "--outputFile=/private/tmp/maya-companion-schedule-rows-source-final04-20261014/backend-source-regressions.json"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T09:10:31.800Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:34.611Z",
+      "sha256": "0ae441527015c96fb70f20e760034af178f25510b30ff57aca2140607b86bcba"
+    },
+    {
+      "name": "test-only-migrations",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T09:10:34.611Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:35.637Z",
+      "sha256": "27b1d7c2bcb33d2333d769c6bae79e86bb3f4e0b1f66354ee5a973d27615ae65"
+    },
+    {
+      "name": "runtime-build",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "../maya-chat-shell/build.mjs"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T09:10:35.637Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:41.680Z",
+      "sha256": "8607f669ecd0036089244037180d456a74aecaea300f31d01ce510ff9ce07b44"
+    },
+    {
+      "name": "carrier-harness",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "test/build-harness.mjs"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate/maya-carrier-react",
+      "startedAt": "2026-10-14T09:10:41.681Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:42.188Z",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-carrier",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/jest/bin/jest.js",
+        "--config",
+        "test/jest-widgets-live.json",
+        "--testRegex",
+        "widgets-live/source-carrier\\.probe-spec\\.ts$",
+        "--runInBand",
+        "--json",
+        "--outputFile=/private/tmp/maya-companion-schedule-rows-source-final04-20261014/source-carrier-jest.json"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T09:10:42.189Z",
+      "exit": 1,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:51.915Z",
+      "sha256": "c260b1bcec215e365adc833253b3958f481694421c07e72ea9761861ca4ec1d4"
+    },
+    {
+      "name": "pg-stop",
+      "command": [
+        "/opt/homebrew/opt/postgresql@16/bin/pg_ctl",
+        "-D",
+        "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/pgdata",
+        "-w",
+        "-t",
+        "30",
+        "-m",
+        "fast",
+        "stop"
+      ],
+      "cwd": "/private/tmp/maya-companion-schedule-rows-source-final04-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T09:10:51.915Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T09:10:52.032Z",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    }
+  ],
+  "freshSyntheticDatabase": true,
+  "retainedDatabaseAccess": false,
+  "realProviderEffects": 0,
+  "certificate": "NOT_ISSUED",
+  "database": {
+    "host": "127.0.0.1",
+    "port": 59548,
+    "name": "maya_widget_gate_proof_companion_schedule"
+  },
+  "timeLabelCounterfactual": {
+    "refused": true,
+    "failed": 3,
+    "passed": 4
+  },
+  "failure": "source-carrier failed 1/null",
+  "clusterStopped": true,
+  "finishedAt": "2026-10-14T09:10:52.032Z"
+}

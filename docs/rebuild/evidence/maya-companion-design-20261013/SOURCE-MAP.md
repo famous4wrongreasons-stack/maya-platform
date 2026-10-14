@@ -213,3 +213,12 @@ not availability, and the header still asks via AChat before explicit NAVIGATE.
 The full populated schedule/time-grid and aggregated free-window shortcuts remain
 open. See `../../MAYA-COMPANION-PERSONAL-BOOKING-CHECKPOINT-20261014.md` and
 `../maya-companion-personal-booking-20261014/README.md`.
+
+## 2026-10-14 — populated schedule rows
+
+Candidate `8d54c4c5f7a76735143e71eab6e8711fd4f68153`: white structured SCHEDULE rows; server-minted
+local date/time/timezone subtitle; shared runtime preserves entry and parent-return
+sealed order. Actual internal HTTP/PG source: 2 entries survive initial/detail, no
+extra booking effects; source has generic «Запись» because its day owner currently
+omits service names. No inferred free windows. Browser fixtures and actual source
+proof remain separately identified. See [checkpoint](../../MAYA-COMPANION-SCHEDULE-ROWS-CHECKPOINT-20261014.md).
