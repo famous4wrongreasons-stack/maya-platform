@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { WorkspaceReadsPort, WorkspaceReadsView } from '../../../maya-chat-shell/src/shell/workspace-reads.ts';
 import { ReportSheet, reportLabel, reportPeriod } from './ReportSheet.tsx';
+import { LibraryViewMenu } from './LibraryViewMenu.tsx';
 type HeadingRef = HTMLHeadingElement | null;
 const date = (v: string) => new Intl.DateTimeFormat('ru-RU', { timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(v));
 
@@ -23,10 +24,7 @@ export function WorkspaceReadsPanel({ view, port, close }: { readonly view: Work
     {feed ? <div className="companion-task-filters" role="group" aria-label="Уведомления">
       <button type="button" aria-pressed={!view.unreadOnly} disabled={view.phase !== 'ready'} onClick={() => port.filterUnread(false)}>Все</button>
       <button type="button" aria-pressed={view.unreadOnly} disabled={view.phase !== 'ready'} onClick={() => port.filterUnread(true)}>Непрочитанные</button>
-    </div> : <div className="companion-library-tools">
-      <div role="group" aria-label="Вид отчётов"><button type="button" aria-pressed={view.layout === 'list'} onClick={() => port.layout('list')}>Список</button><button type="button" aria-pressed={view.layout === 'grid'} onClick={() => port.layout('grid')}>Сетка</button></div>
-      <div role="group" aria-label="Порядок отчётов"><button type="button" disabled={view.phase !== 'ready'} aria-pressed={view.order === 'recent'} onClick={() => port.order('recent')}>По дате</button><button type="button" disabled={view.phase !== 'ready'} aria-pressed={view.order === 'title'} onClick={() => port.order('title')}>По названию</button></div>
-    </div>}
+    </div> : <LibraryViewMenu view={view} port={port} />}
     <p role="status" className="companion-tasks-status">{view.phase === 'loading' ? 'Загружаю…' : view.phase === 'failed' ? view.notice : [view.notice, view.phase === 'ready' && feed && view.possiblyCapped ? 'Показана часть ленты: 50 последних уведомлений. Фильтр относится только к загруженным.' : ''].filter(Boolean).join(' ')}</p>
     {view.phase === 'ready' && (feed ? view.feed.length === 0 : view.reports.length === 0) ? <div className="companion-tasks-empty"><h2>{feed ? view.unreadOnly ? 'В этой части ленты нет непрочитанных' : 'В этой части ленты пока пусто' : 'В этой части библиотеки нет доступных отчётов'}</h2><p>{feed && view.unreadOnly ? 'Переключитесь на «Все», чтобы увидеть прочитанные уведомления.' : 'Здесь появятся сохранённые материалы, доступные вашему аккаунту.'}</p></div> : null}
     {feed ? <ul className="companion-feed-list">{view.feed.map(row => <li key={row.key}>

@@ -119,3 +119,5 @@ export { WorkspaceReadsPanel } from '../src/chat/WorkspaceReadsPanel.tsx';
 
 export { IdeasPanel } from '../src/chat/IdeasPanel.tsx';
 export { CompanionNavigation } from '../src/chat/CompanionNavigation.tsx';
+
+export { CompanionHeader } from '../src/chat/CompanionHeader.tsx';

@@ -588,6 +588,8 @@ export function ChatScreen({
         }}
       >
         {companion ? <CompanionHeader
+          current={privacyOpen ? 'privacy' : navigationVisible ? shellView.workspace ?? 'chat' : null}
+          openChat={() => chooseSection('chat')}
           tenantName={sessionView.signedIn ? sessionView.display.tenantName : null}
           privacyOpen={privacyOpen} openPrivacy={() => widgets.navigate('shell.privacy')}
           openPhoto={() => { widgets.navigate('shell.root'); goodsPhoto.open(); }}

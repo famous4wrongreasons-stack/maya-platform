@@ -43,3 +43,13 @@ test('report sheet is labelled, inert on render and driven only by canonical det
  assert.match(html,/aria-label="Закрыть отчёт"/);assert.match(html,/← К списку отчётов/);
  assert.doesNotMatch(render({workspace:'library',reports:[row]}),/companion-report-heading|companion-report-body/);
 });
+
+test('library view uses a labelled passive sheet with the current runtime preferences',()=>{
+ const html=render({workspace:'library',layout:'grid',order:'title'});
+ assert.match(html,/aria-label="Вид библиотеки" aria-haspopup="dialog"/);
+ assert.match(html,/<dialog[^>]*class="companion-library-menu"[^>]*aria-labelledby="maya-library-view-title"[^>]*aria-modal="true"/);
+ assert.match(html,/aria-label="Сетка" aria-pressed="true"/);
+ assert.match(html,/aria-label="По названию" aria-pressed="true"/);
+ assert.doesNotMatch(html,/<dialog[^>]* open/);
+ assert.match(render({workspace:'library',phase:'failed'}),/aria-label="По дате" disabled=""/);
+});

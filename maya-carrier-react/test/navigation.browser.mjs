@@ -120,6 +120,28 @@ try {
     await choose(label);assert.equal(reads().length,before+1);report.checks.push('active '+label+' does not refetch or reset');
     await screenshot('navigation-'+label.replace('Лента','feed').replace('Идеи','ideas').replace('Задачи','tasks').replace('Файлы','library'));
   }
+  const menuChoice=label=>`[...document.querySelectorAll('.companion-menu-destination')].find(b=>b.textContent.trim()===${JSON.stringify(label)})`;
+  for(const [label,navLabel,path] of [['Главный чат','Чат',null],['Лента','Лента','/api/inbox'],['Идеи','Идеи','/api/analytics/valuations'],['Мои задачи','Задачи','/api/operational-work'],['Библиотека','Файлы','/api/owner-reports']]) {
+    const before=reads().length;
+    await click('Открыть меню');await check("document.querySelector('.companion-menu').matches(':modal')",'drawer opens over current workspace');
+    assert.ok(await page.click(menuChoice(label)));await selected(navLabel);
+    await check("!document.querySelector('.companion-menu').open && !document.querySelector('.companion-reads[aria-busy=true],.companion-ideas[aria-busy=true],.companion-tasks[aria-busy=true]')",'drawer transition settles');
+    assert.equal(reads().length,before+(path?1:0));if(path)assert.equal(reads().at(-1).path,path);
+    report.checks.push('drawer '+label+' uses same canonical destination and exact read');
+    await click('Открыть меню');await check(`document.querySelectorAll('.companion-menu [aria-current=page]').length===1 && document.querySelector('.companion-menu [aria-current=page]').textContent.trim()===${JSON.stringify(label)}`,'drawer selection follows '+navLabel);
+    const retainedReads=reads().length;assert.ok(await page.click(menuChoice(label)));await check("!document.querySelector('.companion-menu').open",'active drawer destination closes menu');
+    assert.equal(reads().length,retainedReads);report.checks.push('active drawer '+label+' adds no read');
+  }
+  await click('Открыть меню');
+  await check("[...document.querySelectorAll('.companion-menu-destination .companion-navigation-icon')].length===5 && [...document.querySelectorAll('.companion-menu-destination .companion-navigation-icon')].every(e=>getComputedStyle(e).backgroundImage.startsWith('url(\"data:image/svg+xml,') && getComputedStyle(e).backgroundColor==='rgba(0, 0, 0, 0)')",'drawer preserves admitted icon images without opaque square backgrounds');
+  for(const [width,height] of [[393,852],[320,740],[427,952],[1280,900]]) {
+    await size(width,height);await check("(()=>{const d=document.querySelector('.companion-menu'),r=d.getBoundingClientRect();return r.left===0 && r.width<=Math.min(340,innerWidth*.83)+1 && d.scrollWidth<=d.clientWidth && [...d.querySelectorAll('button')].filter(b=>!b.disabled).every(b=>b.getBoundingClientRect().height>=44)})()",'drawer width and targets fit '+width);await screenshot('drawer-'+width);
+  }
+  await size(320,740);
+  await page.eval("document.querySelectorAll('.companion-menu h2,.companion-menu p,.companion-menu button').forEach(e=>{e.dataset.oldFont=e.style.fontSize;e.style.fontSize=parseFloat(getComputedStyle(e).fontSize)*2+'px'})");
+  await check("document.querySelector('.companion-menu').scrollWidth<=document.querySelector('.companion-menu').clientWidth",'drawer wraps at 200 percent text');await screenshot('drawer-large-text');
+  await page.eval("document.querySelectorAll('[data-old-font]').forEach(e=>{e.style.fontSize=e.dataset.oldFont;delete e.dataset.oldFont})");
+  await page.press('Escape');await size(393,852);
   await choose('Задачи');await check(`!!${button('Новая задача +')} && !${button('Новая задача +')}.disabled`,'canonical task permission exposes existing form');
   await click('Новая задача +');await check("document.querySelector('.companion-task-dialog').open",'existing task modal opens');
   assert.equal(await page.focus(navButton('Чат')),false);report.checks.push('modal makes background navigation inert');
@@ -150,14 +172,21 @@ try {
   await check(`getComputedStyle(${nav}).display!=='none' && ${nav}.getBoundingClientRect().height>=66`,'leaving text entry restores touch navigation');
   await page.send('Emulation.setTouchEmulationEnabled',{enabled:false});
   await click('Открыть меню');await check("document.querySelector('.companion-menu').open",'existing menu remains available');
+  await check("document.querySelector('.companion-menu [aria-current=page]').textContent.trim()==='Главный чат'",'drawer follows chat return without separate state');
   await page.press('Escape');await check("document.activeElement.getAttribute('aria-label')==='Открыть меню'",'menu restores opener');
   await click('Открыть меню');await check("document.querySelector('.companion-menu').open",'menu opened for existing photo surface');
   assert.ok(await page.click("[...document.querySelectorAll('.companion-menu-row')].find(b=>b.textContent.startsWith('Товар по фото накладной'))"));
   await check(`!${nav} && !!${button('Закрыть и очистить поля фото')}`,'photo surface retains its own controls without navigation');
-  await click('Закрыть и очистить поля фото');await selected('Чат');
+  await click('Открыть меню');
+  await check(`${menuChoice('Главный чат')}.disabled && !document.querySelector('.companion-menu [aria-current=page]')`,'photo surface retains its own close authority without false current chat');
+  await page.press('Escape');await click('Закрыть и очистить поля фото');await selected('Чат');
   await click('Приватность и данные');
   await check(`!${nav} && !!document.querySelector('[aria-label="Приватность"]')`,'privacy retains its own return/confirmation controls');
   await click('Назад к разговору');await selected('Чат');
+  await click('Приватность и данные');await click('Открыть меню');
+  await check("document.querySelector('.companion-menu [aria-current=page]').textContent.startsWith('Приватность и данные')",'privacy has its own current marker rather than a false chat marker');
+  assert.ok(await page.click(menuChoice('Главный чат')));await selected('Чат');
+  await check(`${composer}.value==='Черновик остаётся здесь' && document.activeElement===document.querySelector('.maya-chat-lane')`,'drawer returns from privacy through canonical root with draft intact');
   feedMode='delayed';await choose('Лента');await selected('Лента');await check("document.querySelector('.companion-tasks-status').textContent==='Загружаю…'",'delayed feed read begins');
   await choose('Задачи');await selected('Задачи');if(feedPending){json(feedPending,{items:[]});feedPending=null;}
   await check("!!document.querySelector('.companion-tasks') && !document.querySelector('.companion-reads')",'late read cannot replace newly selected section');

@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type { CompanionSection } from './CompanionNavigation.tsx';
 import { MayaCompanion, type CompanionState } from '../identity/MayaCompanion.tsx';
 
 type DialogRef = HTMLDialogElement | null;
@@ -6,7 +7,8 @@ type ButtonRef = HTMLButtonElement | null;
 type HeaderRef = HTMLElement | null;
 
 /** Local chrome over existing destinations. It invents no route or business permission. */
-export function CompanionHeader({ tenantName, privacyOpen, openPrivacy, openPhoto, openTasks, openFeed, openLibrary, openIdeas, photoEnabled, state, event, greet }: {
+export function CompanionHeader({ tenantName, current, openChat, privacyOpen, openPrivacy, openPhoto, openTasks, openFeed, openLibrary, openIdeas, photoEnabled, state, event, greet }: {
+  readonly current: CompanionSection | 'privacy' | null; readonly openChat: () => void;
   readonly tenantName: string | null; readonly privacyOpen: boolean;
   readonly openPrivacy: () => void; readonly openPhoto: () => void;
   readonly openIdeas: () => void;
@@ -51,7 +53,7 @@ export function CompanionHeader({ tenantName, privacyOpen, openPrivacy, openPhot
       onCancel={event => { event.preventDefault(); setMenu(false); }}
       onKeyDown={event => {
         if (event.key !== 'Tab') return;
-        const controls = dialog.current?.querySelectorAll('button');
+        const controls = dialog.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)');
         const first = controls?.[0], last = controls?.[controls.length - 1];
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
@@ -60,11 +62,20 @@ export function CompanionHeader({ tenantName, privacyOpen, openPrivacy, openPhot
         <button type="button" className="companion-circle" aria-label="Закрыть меню" onClick={() => setMenu(false)}>×</button></div>
       <h2>Maya</h2>
       <p className="companion-menu-business">{tenantName ?? 'Ваш разговор'}</p>
-      <button type="button" className="companion-menu-row" onClick={() => { setMenu(false); openFeed(); }}>Лента <span aria-hidden="true">↗</span></button>
-      <button type="button" className="companion-menu-row" onClick={() => { setMenu(false); openLibrary(); }}>Библиотека <span aria-hidden="true">↗</span></button>
-      <button type="button" className="companion-menu-row" onClick={() => { setMenu(false); openIdeas(); }}>Идеи <span aria-hidden="true">↗</span></button>
-      <button type="button" className="companion-menu-row" onClick={() => { setMenu(false); openTasks(); }}>Мои задачи <span aria-hidden="true">↗</span></button>
-      <button type="button" className="companion-menu-row" onClick={() => { setMenu(false); openPrivacy(); }}>Приватность и данные <span aria-hidden="true">↗</span></button>
+      <p className="companion-menu-section">Ваше пространство</p>
+      {([
+        { key: 'chat', label: 'Главный чат', open: openChat },
+        { key: 'feed', label: 'Лента', open: openFeed },
+        { key: 'ideas', label: 'Идеи', open: openIdeas },
+        { key: 'tasks', label: 'Мои задачи', open: openTasks },
+        { key: 'library', label: 'Библиотека', open: openLibrary },
+      ] as const).map(section => <button key={section.key} type="button" className="companion-menu-row companion-menu-destination"
+        aria-current={current === section.key ? 'page' : undefined} disabled={section.key === 'chat' && current === null}
+        onClick={() => { setMenu(false); if (current !== section.key) section.open(); }}>
+        <span className={'companion-navigation-icon companion-navigation-' + section.key} aria-hidden="true" />{section.label}
+      </button>)}
+      <p className="companion-menu-section">Инструменты</p>
+      <button type="button" className="companion-menu-row" aria-current={current === 'privacy' ? 'page' : undefined} onClick={() => { setMenu(false); openPrivacy(); }}>Приватность и данные <span aria-hidden="true">↗</span></button>
       <button type="button" className="companion-menu-row" disabled={!photoEnabled} onClick={() => { setMenu(false); openPhoto(); }}>Товар по фото накладной <span aria-hidden="true">+</span></button>
       <button type="button" className="companion-menu-row" aria-label="Движения Maya" aria-pressed={moving} onClick={() => setMoving(value => !value)}>
         Движения Maya <span>{moving ? 'Вкл.' : 'Выкл.'}</span>

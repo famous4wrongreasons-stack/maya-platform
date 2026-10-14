@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ARTWORK, artworkUrls, designStyles } from '../tools/design-assets.mjs';
 import { checkCss, scanJsx, scanNames } from '../tools/ratchets.mjs';
-import { CompanionNavigation, companionContext, MayaCompanion, companionTokens, companionMarkup, markupOf, resultOf } from './.bundle.mjs';
+import { CompanionHeader, CompanionNavigation, companionContext, MayaCompanion, companionTokens, companionMarkup, markupOf, resultOf } from './.bundle.mjs';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -88,4 +88,15 @@ test('all 40 sealed widget fixtures keep identical non-style markup under the ne
     const semantics = html => html.replace(/ style="[^"]*"/g, '');
     assert.equal(semantics(companionMarkup(item)), semantics(markupOf(item)), fixture.id);
   }
+});
+
+test('drawer projects canonical selection including privacy, with no reads or invented recent conversations',()=>{
+ const inert=()=>{throw Error('Passive menu called an operation');};
+ for(const current of ['chat','feed','ideas','tasks','library','privacy',null]) {
+  const html=renderToStaticMarkup(createElement(CompanionHeader,{current,tenantName:'<Учебный салон>',privacyOpen:current==='privacy',openChat:inert,openPrivacy:inert,openPhoto:inert,openTasks:inert,openFeed:inert,openLibrary:inert,openIdeas:inert,photoEnabled:false,state:'idle',event:0,greet:inert}));
+  assert.equal((html.match(/aria-current="page"/g)||[]).length,current===null?0:1);
+  assert.match(html,/Главный чат/);assert.match(html,/&lt;Учебный салон&gt;/);
+  assert.doesNotMatch(html,/Недавние разговоры|Поиск разговоров|Стас|Мужская эстетика/);
+  assert.match(html,/<dialog[^>]*aria-modal="true"/);assert.doesNotMatch(html,/<dialog[^>]* open/);
+ }
 });

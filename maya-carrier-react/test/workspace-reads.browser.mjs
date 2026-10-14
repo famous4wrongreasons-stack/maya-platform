@@ -123,9 +123,29 @@ try {
   }
   await size(393,852);await open('Библиотека');await loadedLibrary();
   await check("document.querySelector('.companion-tasks-scope').textContent.includes('последних 100')",'library discloses pre-filter source cap');
-  await screenshot('library-list-393');await click('По названию');
+  await screenshot('library-list-393');
+  const beforePreferences=reads().length;
+  await click('Вид библиотеки');
+  await check("document.querySelector('.companion-library-menu').matches(':modal') && document.activeElement.id==='maya-library-view-title'",'library settings open as native modal with heading focus');
+  assert.equal(await page.focus("document.querySelector('.companion-navigation button')"),false);report.checks.push('library settings make background navigation inert');
+  await page.press('Tab');await check("document.activeElement.getAttribute('aria-label')==='Закрыть вид библиотеки'",'settings first tab reaches close');
+  await page.press('Tab',{shift:true});await check("document.activeElement.textContent==='Готово'",'settings reverse tab wraps to Done');
+  await page.press('Tab');await check("document.activeElement.getAttribute('aria-label')==='Закрыть вид библиотеки'",'settings forward tab stays inside');
+  await click('По названию');
   await check("document.querySelector('.companion-report-title').textContent==='Анализ недели'",'local title ordering');
-  await click('Сетка');assert.equal(reads().length,2);report.checks.push('view/sort do not fetch');
+  await click('Сетка');assert.equal(reads().length,beforePreferences);report.checks.push('view/sort do not fetch');
+  await check("document.querySelector('.companion-library-menu [aria-label=\"Сетка\"]').getAttribute('aria-pressed')==='true' && document.querySelector('.companion-library-menu [aria-label=\"По названию\"]').getAttribute('aria-pressed')==='true'",'settings reflect exact runtime layout and order');
+  for(const [width,height] of [[393,852],[320,740],[427,952],[1280,900],[393,400]]) {
+    await size(width,height);await check("(()=>{const d=document.querySelector('.companion-library-menu'),r=d.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight+1&&d.scrollWidth<=d.clientWidth})()",'library settings fit '+width+'x'+height);await screenshot('library-settings-'+width+'x'+height);
+  }
+  await size(320,740);
+  await page.eval("document.querySelectorAll('.companion-library-menu h2,.companion-library-menu p,.companion-library-menu button').forEach(e=>{e.dataset.oldFont=e.style.fontSize;e.style.fontSize=parseFloat(getComputedStyle(e).fontSize)*2+'px'})");
+  await check("document.querySelector('.companion-library-menu').scrollWidth<=document.querySelector('.companion-library-menu').clientWidth",'library settings wrap at 200 percent text');await screenshot('library-settings-large-text');
+  await click('Готово');await check("!document.querySelector('.companion-library-menu').open && document.activeElement.getAttribute('aria-label')==='Вид библиотеки'",'Done closes preferences and restores opener');
+  await page.eval("document.querySelectorAll('[data-old-font]').forEach(e=>{e.style.fontSize=e.dataset.oldFont;delete e.dataset.oldFont})");
+  await click('Вид библиотеки');await check("document.querySelector('.companion-library-menu [aria-label=\"Сетка\"]').getAttribute('aria-pressed')==='true'",'reopening preserves chosen layout');
+  await page.press('Escape');await check("!!document.querySelector('.companion-reads') && !document.querySelector('.companion-library-menu').open && document.activeElement.getAttribute('aria-label')==='Вид библиотеки'",'settings Escape closes only sheet and keeps library');
+  assert.equal(reads().length,beforePreferences);report.checks.push('open close and reopen preferences have zero requests');
   for(const [width,height] of [[393,852],[320,740],[427,952],[1280,900]]){
     await size(width,height);await check("document.querySelector('.maya-chat-lane').scrollWidth<=document.querySelector('.maya-chat-lane').clientWidth",'library grid fits '+width);await screenshot('library-grid-'+width);
   }
@@ -153,7 +173,7 @@ try {
   await page.eval(`document.querySelectorAll('[data-previous-font-size]').forEach(el=>{el.style.fontSize=el.dataset.previousFontSize;delete el.dataset.previousFontSize})`);
   await page.press('Escape');await loadedLibrary();
   await check("!document.querySelector('.companion-report-sheet').open && document.activeElement.closest('.companion-report-list') && document.activeElement.textContent.includes('Итоги дня')",'Escape closes canonical detail and restores exact opener');
-  await check("document.querySelector('.companion-library-tools button[aria-pressed=true]').textContent==='Сетка'",'back preserves library view');
+  await check("document.querySelector('.companion-library-menu [aria-label=\"Сетка\"]').getAttribute('aria-pressed')==='true'",'back preserves library view');
   await page.focus("document.querySelector('#maya-reads-heading')");await page.press('Escape');
   await check(`!document.querySelector('.companion-reads') && document.activeElement===${composer} && ${composer}.value==='Черновик — сохранить'`,'Escape returns chat focus/draft');
   await check("document.querySelectorAll('[data-chat-message]').length===2",'no report insertion or timeline duplication');
