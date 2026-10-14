@@ -864,29 +864,37 @@ export class OperationsAnalyticsService {
                 totalPriceKopecks: true,
                 currency: true,
                 serviceIds: true,
+                source: true,
               },
               orderBy: { startAt: 'asc' },
             })
             .then((items) => {
               const serviceIdsByAppointment = new Map<string, unknown>();
-              const appointments = items.map(({ serviceIds, ...item }) => {
-                serviceIdsByAppointment.set(item.id, serviceIds);
-                return {
-                  ...item,
-                  services: [],
-                  staffName: null as string | null,
-                  durationMinutes:
-                    item.endAt instanceof Date
-                      ? Math.max(
-                          0,
-                          Math.round(
-                            (item.endAt.getTime() - item.startAt.getTime()) /
-                              60_000,
-                          ),
-                        )
-                      : 0,
-                };
-              });
+              const appointments = items.map(
+                ({ serviceIds, source, ...item }) => {
+                  // A retained provider row must not acquire an internal label
+                  // merely because its string ID happens to match our catalogue.
+                  serviceIdsByAppointment.set(
+                    item.id,
+                    source === CalendarSource.INTERNAL ? serviceIds : [],
+                  );
+                  return {
+                    ...item,
+                    services: [],
+                    staffName: null as string | null,
+                    durationMinutes:
+                      item.endAt instanceof Date
+                        ? Math.max(
+                            0,
+                            Math.round(
+                              (item.endAt.getTime() - item.startAt.getTime()) /
+                                60_000,
+                            ),
+                          )
+                        : 0,
+                  };
+                },
+              );
               return { appointments, serviceIdsByAppointment, read: null };
             }),
       /**

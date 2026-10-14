@@ -22,6 +22,7 @@ function fixture() {
     {
       id: 'visit-a',
       tenantId: 'tenant-a',
+      source: 'internal',
       clientId: null,
       branchId: null,
       staffExternalId: 'provider-a',
@@ -167,6 +168,7 @@ describe('internal day journal service labels', () => {
       select: { id: true, name: true },
     });
     expect(result.records[0]).not.toHaveProperty('serviceIds');
+    expect(result.records[0]).not.toHaveProperty('source');
     expect(result.records[0]).not.toHaveProperty('notes');
   });
 
@@ -198,6 +200,16 @@ describe('internal day journal service labels', () => {
     expect(JSON.stringify(result)).not.toContain(
       'FOREIGN-SERVICE-NOT-FOR-RENDER',
     );
+  });
+
+  it('does not relabel retained external records from the internal catalogue', async () => {
+    const f = fixture();
+    f.rows.push({ ...f.rows[0], id: 'retained-external', source: 'external' });
+    const result = await f.read();
+    expect(result.records).toHaveLength(2);
+    expect(result.records[0].services).toHaveLength(2);
+    expect(result.records[1].services).toEqual([]);
+    expect(result.records[1].totalPriceKopecks).toBe(12345);
   });
 
   it.each([null, {}, 'service-a', [], [null, 7, false, '', {}]])(

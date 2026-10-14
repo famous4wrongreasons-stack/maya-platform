@@ -84,14 +84,16 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
           durationMinutes: 30,
         },
       });
-      for (const [hour, serviceIds, title] of [
-        [7, [service.id], 'Учебная стрижка'],
+      for (const [hour, serviceIds, title, source] of [
+        [7, [service.id], 'Учебная стрижка', 'internal'],
         [
           9,
           [inactive.id, service.id],
           'Архивная учебная услуга, Учебная стрижка',
+          'internal',
         ],
-        [11, [foreign.id, 'deleted-synthetic-service'], 'Запись'],
+        [11, [foreign.id, 'deleted-synthetic-service'], 'Запись', 'internal'],
+        [13, [service.id], 'Запись', 'external'],
       ] as const) {
         const startAt = new Date(
           `2026-09-24T${String(hour).padStart(2, '0')}:00:00Z`,
@@ -100,7 +102,7 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
         await db.prisma.appointment.create({
           data: {
             tenantId: tenant.id,
-            source: 'internal',
+            source,
             staffExternalId: provider.id,
             serviceIds: [...serviceIds],
             startAt,
@@ -210,7 +212,7 @@ async function main(mode: 'personal' | 'journal' | 'journal-populated') {
       const state = await fx.binView().bookingProofState(tenant);
       assert.equal(
         state.appointments.length,
-        3,
+        4,
         'read/detail cannot create bookings',
       );
       assert.equal(
