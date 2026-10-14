@@ -1,0 +1,126 @@
+{
+  "candidate": "aa657bdd0c0a769788ecca17f05e8fd1effb60f0",
+  "dirtySource": true,
+  "contract": "maya.companion.task-actions-ui/1",
+  "realBackend": false,
+  "realProviders": false,
+  "realKeys": false,
+  "payload": {
+    "icons/maya-192.png": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
+    "icons/maya-512-maskable.png": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
+    "icons/maya-512.png": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
+    "icons/maya-apple-180.png": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
+    "index.html": "550be769aaa5ce8e22b885f8ec93a0d7f3689d6542e0eeb34011a789dcd2b0fb",
+    "m/5YMBLBTS/main.js": "6ca46ba2a390a79c822fdfd51c02e6cc765bcf099de98af2b8b152fe7c05611b",
+    "manifest.webmanifest": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
+    "styles.css": "d9b815ff11762fc9be25d83efe30018b1097a0adbb264049748cdc18c9725316"
+  },
+  "checks": [
+    "real emitted sign-in",
+    "history restored through canonical runtime",
+    "server-declared completion visible",
+    "native dialog opens with focus",
+    "task sheet announces exact self-only no-deadline scope",
+    "task sheet keeps underlying navigation inert",
+    "empty form cannot submit",
+    "title uses actual executor maximum",
+    "description bound preserved without deadline or assignment authority",
+    "empty form reverse Tab skips disabled submit and wraps to description",
+    "empty form forward Tab stays inside sheet",
+    "filled form forward Tab wraps from submit to close",
+    "filled form reverse Tab wraps to submit",
+    "task sheet fits bottom of visible viewport 393x852",
+    "mobile sheet fills viewport 393x852",
+    "task sheet fits bottom of visible viewport 320x740",
+    "mobile sheet fills viewport 320x740",
+    "task sheet fits bottom of visible viewport 427x952",
+    "mobile sheet fills viewport 427x952",
+    "task sheet fits bottom of visible viewport 1280x900",
+    "task sheet fits bottom of visible viewport 393x400",
+    "mobile sheet fills viewport 393x400",
+    "task sheet follows existing visible viewport height and offset above keyboard"
+  ],
+  "screenshots": [
+    "signin-393.png",
+    "new-task-393x852.png",
+    "new-task-320x740.png",
+    "new-task-427x952.png",
+    "new-task-1280x900.png",
+    "new-task-393x400.png",
+    "failure.png"
+  ],
+  "externalRequests": 0,
+  "unexpected": [],
+  "status": "FAIL",
+  "failure": "submit is keyboard reachable inside reduced visible viewport",
+  "geometry": {
+    "dialog": {
+      "x": 0,
+      "y": 62,
+      "width": 393,
+      "height": 296,
+      "top": 62,
+      "right": 393,
+      "bottom": 358,
+      "left": 0
+    },
+    "fields": {
+      "x": 0,
+      "y": 175.5,
+      "width": 393,
+      "height": 182.5,
+      "top": 175.5,
+      "right": 393,
+      "bottom": 358,
+      "left": 0
+    },
+    "submit": {
+      "x": 18,
+      "y": 407.5,
+      "width": 357,
+      "height": 48,
+      "top": 407.5,
+      "right": 375,
+      "bottom": 455.5,
+      "left": 18
+    },
+    "scroll": 0,
+    "scrollHeight": 304,
+    "active": "",
+    "viewportHeight": 320,
+    "viewportTop": 38
+  },
+  "exceptions": [],
+  "issues": [
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 43,
+          "violatingNodeAttribute": ""
+        }
+      }
+    },
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 45,
+          "violatingNodeAttribute": ""
+        }
+      }
+    },
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 47,
+          "violatingNodeAttribute": ""
+        }
+      }
+    }
+  ]
+}

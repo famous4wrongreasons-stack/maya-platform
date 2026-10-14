@@ -130,3 +130,16 @@ drawer/inline-preferences presentation at the previous checkpoint. See
 `../../MAYA-COMPANION-CONTROLS-CHECKPOINT-20261014.md` and
 `../maya-companion-controls-20261014/README.md` for fresh scoped evidence.
 The separate source/policy gaps above remain open.
+
+## Personal task sheet checkpoint (2026-10-14)
+
+`42bde026f9d0407f9eba2cfc5e8c18e829192526` aligns the already implemented A23 personal task form with the
+owner's lower sheet, existing visible viewport geometry and independently
+scrollable fields. Native modal focus, disabled-control Tab traversal and pending
+close preserve command ownership; late confirmation cannot steal focus after
+the form closes. Title/body bounds, current-user assignment, no deadline and
+same-identity retry remain with the existing runtime/A23 owner. No task date,
+assignment, undo or new writer was added. This supersedes only presentation and
+focus handling of the task-actions checkpoint. See
+`../../MAYA-COMPANION-TASK-SHEET-CHECKPOINT-20261014.md` and
+`../maya-companion-task-sheet-20261014/README.md` for fresh scoped evidence.
