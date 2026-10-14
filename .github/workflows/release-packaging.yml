@@ -34,7 +34,10 @@ jobs:
       - run: npx prisma generate && npm run build
         working-directory: maya-saas-backend
       - name: Private phone staging boundaries and Prisma image configuration
-        run: node --test scripts/phone-staging-plan.test.mjs
+        run: node --test scripts/phone-staging-plan.test.mjs scripts/phone-catalog-egress.test.mjs scripts/phone-owner-bootstrap-plan.test.mjs scripts/phone-catalog-plan.test.mjs
+        working-directory: maya-saas-backend
+      - name: Phone catalogue restriction mutations with green baseline and restored source
+        run: node scripts/phone-catalog-mutations.mjs
         working-directory: maya-saas-backend
       - run: node --test scripts/widget-release-operator.compiled-test.cjs
         working-directory: maya-saas-backend

@@ -149,3 +149,19 @@ untracked `maya-carrier-react/node_modules`: harness dependency symlink не
 Production, migration, grant, real OTP/YCLIENTS/model, установка/запуск на iPhone,
 новые ключи, push/merge: **0**. Чтение публичных signing/device metadata выполнено;
 секреты, сертификаты с private keys и raw device identifiers в archive не включены.
+
+## Обновление 15 октября: сборка подписана, подключение салона готовится
+
+Исторические unsigned результаты выше сохранены. Теперь для точного API
+`https://phone-test.mayaos.ru/api` выполнена **подписанная Debug iphoneos сборка**,
+strict codesign verify и canonical App.app/PWA/Capacitor parity: PASS.
+На телефон она ещё не установлена. Профиль действует до 20 октября 10:07:58 UTC.
+
+Отдельный Beget backend работает с новой тестовой базой. Закрытая форма обычной
+регистрации владельца доступна только через SSH с Mac; настоящая связь YCLIENTS
+ещё не создана. Подготовлен и проверен ограниченный путь чтения каталога салона:
+67 boundary tests, 6 scoped mutations и 31 Linux network test PASS. Полная
+release certification этим не заявляется. Настоящие ключи и база клиентов не
+переносились; DNS/публичный HTTPS ещё не открыты.
+
+[Актуальный выполненный объём и точные оставшиеся шаги](evidence/maya-beget-phone-preparation-20261014/README.md#15-october-continuation-real-catalogue-preparation-and-signed-ios).

@@ -1,0 +1,55 @@
+{
+  "contract": "maya.phone-catalog-preparation-result/1",
+  "recordedAt": "2026-10-14T23:02:42.537020+00:00",
+  "repositoryBase": "9a0a73b93e8767d0ce29135454d0c37cece0ec57",
+  "applicationSource": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "operationalSourceSha256": {
+    ".github/workflows/release-packaging.yml": "02affe090990accc579c25793a1018ec6b33a454b1acd6034e4e3a4dcb742200",
+    "maya-saas-backend/scripts/phone-catalog-egress.mjs": "878955ce8d44a52b41bf820109db72f0376877d76b459102ca82b75135d1882b",
+    "maya-saas-backend/scripts/phone-catalog-egress.test.mjs": "56ae21b21f373fd9b3c1e3a027322f97b9a73036c657a5124bc10f81929a74de",
+    "maya-saas-backend/scripts/phone-catalog-plan.mjs": "adbf843c3fe0ebaaadddee78dda12e00d9ba5c9e9e8604d8e437983a149ef786",
+    "maya-saas-backend/scripts/phone-catalog-plan.test.mjs": "55079ba00619b27cadacdf11960084639b6d31ae04b93afb2a6eda3c4884dbe7",
+    "maya-saas-backend/scripts/phone-owner-bootstrap-plan.mjs": "b766d885fe12861a68567ffa182c8be2b7aa60599308c1b0c948ef07b9b3ba2b",
+    "maya-saas-backend/scripts/phone-owner-bootstrap-plan.test.mjs": "108d2e8a7f9beef385dd34952f9d74a036e75149588aa788430060e2336893f6",
+    "maya-saas-backend/scripts/phone-catalog-mutations.mjs": "f13121091c12df625f38d57bf76ed558f270f5098e9c92404fb49fb0091f267a"
+  },
+  "localBoundaryTests": {
+    "pass": 67,
+    "fail": 0,
+    "logSha256": "af552cff651de87fdffca0568b3e6b2fbaa1b63343d2ba9ec5313dd02c263a89"
+  },
+  "networkMutations": {
+    "killed": 6,
+    "greenBaseline": true,
+    "greenRestored": true
+  },
+  "linuxNetworkTests": {
+    "pass": 31,
+    "network": "none",
+    "providerCalls": 0
+  },
+  "signedApp": "PASS",
+  "canonicalAppParity": "PASS",
+  "serverPrivateBootstrap": "PASS",
+  "ownerAccount": "WAITING_FOR_OWNER_FORM",
+  "yclientsConnection": "NOT_CREATED",
+  "testDNS": "NOT_CREATED",
+  "publicHTTPS": "NOT_PUBLISHED",
+  "providerCredentialTransfer": "NOT_PERFORMED",
+  "realYclientsCalls": 0,
+  "realModelCalls": 0,
+  "productionChanged": false,
+  "productionMigrationsApplied": 0,
+  "widgetGrants": 0,
+  "iphoneInstallation": false,
+  "certificate": "NOT_ISSUED",
+  "fullPlatformCI": "NOT_RUN",
+  "catalogueConfigurationPreflight": {
+    "status": "PASS",
+    "actualCompiledBackend": true,
+    "syntheticCredentialOnly": true,
+    "appliedMigrations": 106,
+    "pendingMigrations": 0,
+    "appliedNow": 0
+  }
+}

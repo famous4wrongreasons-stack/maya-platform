@@ -1,0 +1,412 @@
+TAP version 13
+# Subtest: scope rejects missing, widened, expired and unbounded configuration
+ok 1 - scope rejects missing, widened, expired and unbounded configuration
+  ---
+  duration_ms: 2.259583
+  type: 'test'
+  ...
+# Subtest: exact native catalogue request: /api/v1/companies?my=1
+ok 2 - exact native catalogue request: /api/v1/companies?my=1
+  ---
+  duration_ms: 24.830833
+  type: 'test'
+  ...
+# Subtest: exact native catalogue request: /api/v1/company/777001
+ok 3 - exact native catalogue request: /api/v1/company/777001
+  ---
+  duration_ms: 5.296917
+  type: 'test'
+  ...
+# Subtest: exact native catalogue request: /api/v1/book_services/777001
+ok 4 - exact native catalogue request: /api/v1/book_services/777001
+  ---
+  duration_ms: 3.557167
+  type: 'test'
+  ...
+# Subtest: exact native catalogue request: /api/v1/services/777001
+ok 5 - exact native catalogue request: /api/v1/services/777001
+  ---
+  duration_ms: 4.40325
+  type: 'test'
+  ...
+# Subtest: exact native catalogue request: /api/v1/service_categories/777001
+ok 6 - exact native catalogue request: /api/v1/service_categories/777001
+  ---
+  duration_ms: 5.05025
+  type: 'test'
+  ...
+# Subtest: exact native catalogue request: /api/v1/company/777001/staff
+ok 7 - exact native catalogue request: /api/v1/company/777001/staff
+  ---
+  duration_ms: 2.249083
+  type: 'test'
+  ...
+# Subtest: exact native catalogue request: /api/v1/staff/777001
+ok 8 - exact native catalogue request: /api/v1/staff/777001
+  ---
+  duration_ms: 2.461042
+  type: 'test'
+  ...
+# Subtest: never send provider POST
+ok 9 - never send provider POST
+  ---
+  duration_ms: 4.444209
+  type: 'test'
+  ...
+# Subtest: never send provider PUT
+ok 10 - never send provider PUT
+  ---
+  duration_ms: 5.423167
+  type: 'test'
+  ...
+# Subtest: never send provider PATCH
+ok 11 - never send provider PATCH
+  ---
+  duration_ms: 3.004875
+  type: 'test'
+  ...
+# Subtest: never send provider DELETE
+ok 12 - never send provider DELETE
+  ---
+  duration_ms: 2.262708
+  type: 'test'
+  ...
+# Subtest: never send provider HEAD
+ok 13 - never send provider HEAD
+  ---
+  duration_ms: 2.417708
+  type: 'test'
+  ...
+# Subtest: never send provider OPTIONS
+ok 14 - never send provider OPTIONS
+  ---
+  duration_ms: 1.462125
+  type: 'test'
+  ...
+# Subtest: refuse unlisted target before fetch: /api/v1/records/777001
+ok 15 - refuse unlisted target before fetch: /api/v1/records/777001
+  ---
+  duration_ms: 2.056792
+  type: 'test'
+  ...
+# Subtest: refuse unlisted target before fetch: /api/v1/clients/777001
+ok 16 - refuse unlisted target before fetch: /api/v1/clients/777001
+  ---
+  duration_ms: 1.820834
+  type: 'test'
+  ...
+# Subtest: refuse unlisted target before fetch: /api/v1/auth
+ok 17 - refuse unlisted target before fetch: /api/v1/auth
+  ---
+  duration_ms: 2.623458
+  type: 'test'
+  ...
+# Subtest: refuse unlisted target before fetch: /api/v1/services/777002
+ok 18 - refuse unlisted target before fetch: /api/v1/services/777002
+  ---
+  duration_ms: 2.832833
+  type: 'test'
+  ...
+# Subtest: refuse unlisted target before fetch: /api/v1/services/777001?foo=1
+ok 19 - refuse unlisted target before fetch: /api/v1/services/777001?foo=1
+  ---
+  duration_ms: 2.040125
+  type: 'test'
+  ...
+# Subtest: refuse unlisted target before fetch: /api/v1/companies?my=0
+ok 20 - refuse unlisted target before fetch: /api/v1/companies?my=0
+  ---
+  duration_ms: 1.947292
+  type: 'test'
+  ...
+# Subtest: refuse unlisted target before fetch: /api/v1//services/777001
+ok 21 - refuse unlisted target before fetch: /api/v1//services/777001
+  ---
+  duration_ms: 2.43075
+  type: 'test'
+  ...
+# Subtest: refuse unlisted target before fetch: /api/v1/../v1/services/777001
+ok 22 - refuse unlisted target before fetch: /api/v1/../v1/services/777001
+  ---
+  duration_ms: 3.715167
+  type: 'test'
+  ...
+# Subtest: refuse unlisted target before fetch: /api/v1/services/%37%37%37%30%30%31
+ok 23 - refuse unlisted target before fetch: /api/v1/services/%37%37%37%30%30%31
+  ---
+  duration_ms: 1.936709
+  type: 'test'
+  ...
+# Subtest: refuse unlisted target before fetch: https://evil.invalid/api/v1/services/777001
+ok 24 - refuse unlisted target before fetch: https://evil.invalid/api/v1/services/777001
+  ---
+  duration_ms: 2.493458
+  type: 'test'
+  ...
+# Subtest: refuse unlisted target before fetch: //evil.invalid/api/v1/services/777001
+ok 25 - refuse unlisted target before fetch: //evil.invalid/api/v1/services/777001
+  ---
+  duration_ms: 2.447042
+  type: 'test'
+  ...
+# Subtest: missing credentials, foreign Accept and GET bodies are refused
+ok 26 - missing credentials, foreign Accept and GET bodies are refused
+  ---
+  duration_ms: 5.733
+  type: 'test'
+  ...
+# Subtest: HTTP redirects and provider errors never propagate bodies/locations/secrets
+ok 27 - HTTP redirects and provider errors never propagate bodies/locations/secrets
+  ---
+  duration_ms: 5.770958
+  type: 'test'
+  ...
+# Subtest: oversized or non-JSON response is refused before delivery
+ok 28 - oversized or non-JSON response is refused before delivery
+  ---
+  duration_ms: 6.984292
+  type: 'test'
+  ...
+# Subtest: expiry and revocation refuse additional calls and discard late success
+ok 29 - expiry and revocation refuse additional calls and discard late success
+  ---
+  duration_ms: 15.853291
+  type: 'test'
+  ...
+# Subtest: concurrent calls cannot exceed the exact finite budget
+ok 30 - concurrent calls cannot exceed the exact finite budget
+  ---
+  duration_ms: 7.854875
+  type: 'test'
+  ...
+# Subtest: revoke aborts outstanding fetch
+ok 31 - revoke aborts outstanding fetch
+  ---
+  duration_ms: 1.495791
+  type: 'test'
+  ...
+# Subtest: catalog egress is the only new outbound service; backend and DB remain internal
+ok 32 - catalog egress is the only new outbound service; backend and DB remain internal
+  ---
+  duration_ms: 6.730084
+  type: 'test'
+  ...
+# Subtest: private ordinary owner bootstrap retains closed provider network and auth owners
+ok 33 - private ordinary owner bootstrap retains closed provider network and auth owners
+  ---
+  duration_ms: 3.594375
+  type: 'test'
+  ...
+# Subtest: refuse bootstrap public port
+ok 34 - refuse bootstrap public port
+  ---
+  duration_ms: 5.098459
+  type: 'test'
+  ...
+# Subtest: refuse bootstrap external backend network
+ok 35 - refuse bootstrap external backend network
+  ---
+  duration_ms: 2.358542
+  type: 'test'
+  ...
+# Subtest: refuse bootstrap credential
+ok 36 - refuse bootstrap credential
+  ---
+  duration_ms: 2.86175
+  type: 'test'
+  ...
+# Subtest: refuse bootstrap source
+ok 37 - refuse bootstrap source
+  ---
+  duration_ms: 2.383958
+  type: 'test'
+  ...
+# Subtest: refuse bootstrap auth substitute
+ok 38 - refuse bootstrap auth substitute
+  ---
+  duration_ms: 2.287166
+  type: 'test'
+  ...
+# Subtest: refuse bootstrap wildcard CORS
+ok 39 - refuse bootstrap wildcard CORS
+  ---
+  duration_ms: 2.716541
+  type: 'test'
+  ...
+# Subtest: refuse bootstrap remote DB
+ok 40 - refuse bootstrap remote DB
+  ---
+  duration_ms: 1.482834
+  type: 'test'
+  ...
+# Subtest: finite private plan retains canonical staging owner with no build/start/grant
+ok 41 - finite private plan retains canonical staging owner with no build/start/grant
+  ---
+  duration_ms: 6.126042
+  type: 'test'
+  ...
+# Subtest: refuses public listener
+ok 42 - refuses public listener
+  ---
+  duration_ms: 5.325667
+  type: 'test'
+  ...
+# Subtest: refuses public DB
+ok 43 - refuses public DB
+  ---
+  duration_ms: 2.305708
+  type: 'test'
+  ...
+# Subtest: refuses outbound backend
+ok 44 - refuses outbound backend
+  ---
+  duration_ms: 2.163542
+  type: 'test'
+  ...
+# Subtest: refuses non-internal private network
+ok 45 - refuses non-internal private network
+  ---
+  duration_ms: 1.757083
+  type: 'test'
+  ...
+# Subtest: refuses unlimited memory
+ok 46 - refuses unlimited memory
+  ---
+  duration_ms: 1.735167
+  type: 'test'
+  ...
+# Subtest: refuses unlimited swap
+ok 47 - refuses unlimited swap
+  ---
+  duration_ms: 3.05
+  type: 'test'
+  ...
+# Subtest: refuses implicit build
+ok 48 - refuses implicit build
+  ---
+  duration_ms: 1.632292
+  type: 'test'
+  ...
+# Subtest: refuses seed
+ok 49 - refuses seed
+  ---
+  duration_ms: 1.635083
+  type: 'test'
+  ...
+# Subtest: refuses old shell
+ok 50 - refuses old shell
+  ---
+  duration_ms: 2.508041
+  type: 'test'
+  ...
+# Subtest: refuses mutable backend tag
+ok 51 - refuses mutable backend tag
+  ---
+  duration_ms: 1.878166
+  type: 'test'
+  ...
+# Subtest: refuses retained DB environment
+ok 52 - refuses retained DB environment
+  ---
+  duration_ms: 1.52075
+  type: 'test'
+  ...
+# Subtest: refuses changed gateway command
+ok 53 - refuses changed gateway command
+  ---
+  duration_ms: 1.125458
+  type: 'test'
+  ...
+# Subtest: refuses enabled provider
+ok 54 - refuses enabled provider
+  ---
+  duration_ms: 1.03
+  type: 'test'
+  ...
+# Subtest: refuses automatic reminders
+ok 55 - refuses automatic reminders
+  ---
+  duration_ms: 1.934416
+  type: 'test'
+  ...
+# Subtest: refuses certificate claim
+ok 56 - refuses certificate claim
+  ---
+  duration_ms: 1.314834
+  type: 'test'
+  ...
+# Subtest: refuses release grant
+ok 57 - refuses release grant
+  ---
+  duration_ms: 1.091917
+  type: 'test'
+  ...
+# Subtest: refuses different host
+ok 58 - refuses different host
+  ---
+  duration_ms: 0.943667
+  type: 'test'
+  ...
+# Subtest: accepts synthetic-only exact runtime environment, with no secrets emitted
+ok 59 - accepts synthetic-only exact runtime environment, with no secrets emitted
+  ---
+  duration_ms: 1.550083
+  type: 'test'
+  ...
+# Subtest: runtime environment refuses provider secret
+ok 60 - runtime environment refuses provider secret
+  ---
+  duration_ms: 1.18275
+  type: 'test'
+  ...
+# Subtest: runtime environment refuses production DB host
+ok 61 - runtime environment refuses production DB host
+  ---
+  duration_ms: 0.68625
+  type: 'test'
+  ...
+# Subtest: runtime environment refuses salon database
+ok 62 - runtime environment refuses salon database
+  ---
+  duration_ms: 0.581125
+  type: 'test'
+  ...
+# Subtest: runtime environment refuses foreign CORS
+ok 63 - runtime environment refuses foreign CORS
+  ---
+  duration_ms: 1.194084
+  type: 'test'
+  ...
+# Subtest: runtime environment refuses stage0 launcher
+ok 64 - runtime environment refuses stage0 launcher
+  ---
+  duration_ms: 1.29775
+  type: 'test'
+  ...
+# Subtest: runtime environment refuses shared key
+ok 65 - runtime environment refuses shared key
+  ---
+  duration_ms: 0.810833
+  type: 'test'
+  ...
+# Subtest: runtime environment refuses provider enabled
+ok 66 - runtime environment refuses provider enabled
+  ---
+  duration_ms: 0.501375
+  type: 'test'
+  ...
+# Subtest: actual Prisma CLI: missing runner config fails before DB; restored config reaches synthetic connection
+ok 67 - actual Prisma CLI: missing runner config fails before DB; restored config reaches synthetic connection
+  ---
+  duration_ms: 1290.841333
+  type: 'test'
+  ...
+1..67
+# tests 67
+# suites 0
+# pass 67
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1409.982

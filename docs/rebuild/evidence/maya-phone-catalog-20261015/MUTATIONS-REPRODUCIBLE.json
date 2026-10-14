@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "sourceSha256": "878955ce8d44a52b41bf820109db72f0376877d76b459102ca82b75135d1882b",
+  "greenBaseline": true,
+  "greenRestored": true,
+  "mutantsKilled": 6,
+  "realProviderCalls": 0,
+  "results": [
+    {
+      "name": "baseline",
+      "exit": 0,
+      "expected": true
+    },
+    {
+      "name": "method",
+      "exit": 1,
+      "expected": true
+    },
+    {
+      "name": "expiry",
+      "exit": 1,
+      "expected": true
+    },
+    {
+      "name": "budget",
+      "exit": 1,
+      "expected": true
+    },
+    {
+      "name": "redirect",
+      "exit": 1,
+      "expected": true
+    },
+    {
+      "name": "revocation",
+      "exit": 1,
+      "expected": true
+    },
+    {
+      "name": "body",
+      "exit": 1,
+      "expected": true
+    },
+    {
+      "name": "restored",
+      "exit": 0,
+      "expected": true
+    }
+  ]
+}

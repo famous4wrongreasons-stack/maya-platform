@@ -1,0 +1,19 @@
+{
+  "exit": 0,
+  "status": "PASS",
+  "result": {
+    "ok": true,
+    "environment": "production",
+    "config": "safe",
+    "local_migrations": 106,
+    "database": {
+      "status": "ready",
+      "applied_migrations": 106,
+      "pending_migrations": 0
+    }
+  },
+  "realProviderCalls": 0,
+  "syntheticCredentialOnly": true,
+  "runningBackendConfigurationChanged": false,
+  "migrationsApplied": 0
+}

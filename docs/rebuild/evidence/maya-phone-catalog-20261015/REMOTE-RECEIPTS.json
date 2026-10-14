@@ -1,0 +1,74 @@
+{
+  "collectedAt": "2026-10-14T22:59:27.748619+00:00",
+  "receipts": {
+    "OWNER-BOOTSTRAP-CURRENT.json": {
+      "sha256": "269820d22264caaa85de797c0e9139f4e25f7399fbe4e7021929063c692ddf5e",
+      "result": {
+        "health": {
+          "status": "ready",
+          "service": "maya-saas-backend",
+          "checks": {
+            "database": "ready"
+          },
+          "timestamp": "2026-10-14T22:54:20.847Z"
+        },
+        "htmlBytes": 842,
+        "tcpListeners": [
+          "0.0.0.0:22",
+          "127.0.0.1:9080",
+          "127.0.0.53%lo:53",
+          "[::]:22"
+        ],
+        "botUnchanged": true,
+        "status": "PASS"
+      }
+    },
+    "OWNER-BOOTSTRAP-FAILED.json": {
+      "sha256": "b90a1e5b2dc5ff2888ae11db3e78c187d6b1131171ed10948eee3184e2d16f15",
+      "result": {
+        "status": "FAIL",
+        "ownedStackStopped": true,
+        "phase": "private-owner-bootstrap",
+        "botUnchanged": true
+      }
+    },
+    "OWNER-BOOTSTRAP-HTTP.json": {
+      "sha256": "21071a3145b7806a0c1f5964b2c0dfbf248399a8c8ef3357d1843f86c2f696f0",
+      "result": {
+        "status": "FAIL",
+        "phase": "http-ready",
+        "errorType": "URLError",
+        "connectionError": "[Errno 111] Connection refused"
+      }
+    },
+    "catalog-20261015/RESULT-TAP.json": {
+      "sha256": "d4293f8cb4ea7ffc7a0e525dfc1548b473bf6cb049af6bb3026a84de7e0006fc",
+      "result": {
+        "status": "PASS",
+        "exit": 0,
+        "tests": 31,
+        "realProviderCalls": 0,
+        "network": "none",
+        "files": {
+          "phone-catalog-egress.mjs": "878955ce8d44a52b41bf820109db72f0376877d76b459102ca82b75135d1882b",
+          "phone-catalog-egress.test.mjs": "56ae21b21f373fd9b3c1e3a027322f97b9a73036c657a5124bc10f81929a74de"
+        }
+      }
+    },
+    "catalog-20261015/RESULT.json": {
+      "sha256": "1d9ba317ac2689638d25075c2d395ff847934c5e05133c6afd4964c924e13edc",
+      "result": {
+        "status": "FAIL",
+        "exit": 0,
+        "tests": 31,
+        "realProviderCalls": 0,
+        "network": "none",
+        "files": {
+          "phone-catalog-egress.mjs": "878955ce8d44a52b41bf820109db72f0376877d76b459102ca82b75135d1882b",
+          "phone-catalog-egress.test.mjs": "56ae21b21f373fd9b3c1e3a027322f97b9a73036c657a5124bc10f81929a74de"
+        }
+      }
+    }
+  },
+  "privateBootstrapRunning": true
+}

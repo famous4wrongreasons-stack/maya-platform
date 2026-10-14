@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "codeSource": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "repositoryHead": "9a0a73b93e8767d0ce29135454d0c37cece0ec57",
+  "checkedAt": "2026-10-14T23:00:08.574887+00:00",
+  "bundleId": "ru.mayaos.app",
+  "configuration": "Debug-iphoneos",
+  "apiBase": "https://phone-test.mayaos.ru/api",
+  "codesignStrictExit": 0,
+  "cdhash": "3763062b705dde86adaba42a022228e6f96fa5d9",
+  "bundleTreeSha256": "bf5cbc65d3e84ed08be9c63f7c71c96cd7a01e552a432e057520f340432658b8",
+  "bundleFileCount": 36,
+  "provisioningExpiresAt": "2026-10-20T10:07:58Z",
+  "developmentProvisioning": true,
+  "provisionedDeviceCount": 1,
+  "parityReceiptSha256": "4b2c88cc32d6b407008e3a45ec9d645454e1feaca2bc7d004eb83ed208186b0a",
+  "installed": false,
+  "deviceSmoke": false,
+  "publicEndpointReady": false,
+  "executableMtime": "2026-10-14T22:45:27.008089+00:00"
+}

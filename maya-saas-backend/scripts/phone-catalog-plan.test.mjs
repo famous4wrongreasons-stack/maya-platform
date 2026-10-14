@@ -1,0 +1,23 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { privatePhonePlan } from './phone-staging-plan.mjs';
+import { phoneCatalogPlan } from './phone-catalog-plan.mjs';
+const compose = fs.readFileSync(new URL('../compose.staging.yml', import.meta.url), 'utf8');
+const caddy = fs.readFileSync(new URL('../deploy/staging/Caddyfile', import.meta.url));
+test('catalog egress is the only new outbound service; backend and DB remain internal', () => {
+  const original = privatePhonePlan('a'.repeat(40), compose, caddy), plan = phoneCatalogPlan(original, compose, caddy);
+  assert.equal(plan.environment.SELF_SERVE_TRIAL_SIGNUP, 'false');
+  assert.equal(plan.environment.AI_CORE_PROVIDER, 'safe');
+  assert.equal(plan.widgetGrant, false);
+  assert.equal(plan.productionRelease, false);
+  assert.equal(plan.publicAdmission, false);
+  for (const name of plan.compose.services.backend.networks) assert.equal(plan.compose.networks[name].internal, true);
+  assert.deepEqual(plan.compose.services.postgres, original.compose.services.postgres);
+  const egress = plan.compose.services['catalog-egress'];
+  assert.equal(egress.ports, undefined); assert.equal(egress.env_file, undefined);
+  assert.equal(egress.environment, undefined); assert.equal(egress.restart, 'no');
+  assert.ok(egress.volumes.every(v => v.endsWith(':ro')));
+  assert.ok(egress.volumes.every(v => !/\.env|docker\.sock/.test(v)));
+  assert.equal(plan.compose.services.backend.ports, undefined);
+});

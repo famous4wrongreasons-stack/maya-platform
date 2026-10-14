@@ -1,5 +1,9 @@
 # Private Beget phone staging preparation — 2026-10-14
 
+This document retains the original preparation chronology. The latest executed
+state is the 15 October catalogue preparation section at the end; earlier
+unsigned/stopped statements describe their original checkpoints.
+
 ## Scope and authority
 
 Owner selected the existing Beget server and then said «готовь» after successful
@@ -203,3 +207,96 @@ no signature or device installation is claimed. No iPhone was changed.
 No Maya production deploy/migration/grant, real provider call or salon-data transfer
 occurred. This private qualification is not release certification or real booking
 acceptance. HANDOFF and existing identity/Action Engine/AR-1 boundaries remain.
+
+## 15 October continuation: real catalogue preparation and signed iOS
+
+Owner instruction: «подключай yclients и готовь приложение к установке на телефон».
+The next selected data source is the real salon catalogue through canonical A17,
+not a copy of the retained local database. This preparation does not authorize
+customer/journal transfer, booking, messages, model expenses or iPhone installation.
+
+Application source remains `7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3`; backend
+`src`/Prisma, runtime, React and native sources are byte-identical to that commit.
+The new changes are operational scripts, their tests, packaging CI and evidence.
+[Exact preparation receipt](../maya-phone-catalog-20261015/RESULT.json) pins their
+file hashes. This is not a new release certificate or full Platform CI result.
+
+- **Signed Debug iphoneos build PASS.** Existing development signing was used;
+  no private key was created/exported. Strict codesign verification and canonical
+  verification of the actual App.app passed. Eight React payload files retain
+  the PWA/Capacitor endpoint-substitution contract. Exact target:
+  `https://phone-test.mayaos.ru/api`. See
+  [IOS-SIGNED.json](../maya-phone-catalog-20261015/IOS-SIGNED.json) and
+  [parity log](../maya-phone-catalog-20261015/signed-app-parity.txt).
+  Provisioning expires 20 October 2026 10:07:58 UTC. No phone install or device
+  smoke occurred; `ru.mayaos.app` may replace the existing app when later installed.
+- **Private ordinary owner onboarding is available.** The exact existing
+  gateway is published only on server loopback `127.0.0.1:9080`, reached through
+  an SSH forward on Mac loopback `127.0.0.1:56152`. The owner creates their own
+  account/password in the existing form; no role write, fabricated session or
+  retained DB copy. Bootstrap signup must be closed before public publication.
+  Backend/Postgres remain on their internal network; HTTPS/native CORS settings
+  remain unchanged. The private form uses its actual same-origin relative API.
+  Current readiness and unchanged SMM proof are in
+  [REMOTE-RECEIPTS.json](../maya-phone-catalog-20261015/REMOTE-RECEIPTS.json).
+- **Catalogue network restriction prepared, not activated.** The finite
+  `phone-catalog-egress.mjs` reuses the existing catalogue GET allowlist and
+  preserves raw provider responses for the canonical adapter. It fixes the
+  official HTTPS upstream, selected company, expiry, finite attempt budget,
+  response size and concurrency. Writes, customer/journal endpoints, foreign
+  company, redirects, request bodies and unlisted paths fail before forwarding.
+  It is not a new CRM writer, authority provider or AR-1 grant. There is no
+  access/body log. The attempt counter is process-local: `restart: no`; restarting
+  or issuing another scope is a new operator step, not an automatic renewal.
+- **67 local boundary tests PASS**, **6 scoped mutations killed**, with both
+  green baseline and restored source. The committed mutation runner is
+  `node scripts/phone-catalog-mutations.mjs`; both tests and mutations are blocking
+  steps in the existing release-packaging workflow. Fresh Linux execution of
+  all 31 relay tests in the actual amd64 image, Docker `--network none`: PASS.
+  These synthetic results do not claim a real provider connection.
+- **Compiled configuration preflight PASS** for closed signup and the proposed
+  internal catalogue address, with a deliberately synthetic partner credential.
+  The separate one-shot process used the existing internal test database:
+  106 applied migrations, zero pending, zero applied by this check. The running
+  owner form/configuration was not changed. See
+  [CONFIG-PREFLIGHT.json](../maya-phone-catalog-20261015/CONFIG-PREFLIGHT.json).
+
+### Failed preparation attempts preserved
+
+The initial private bootstrap tried to add a loopback HTTP CORS origin; normal
+production validation correctly refused it. The correction preserved the
+original HTTPS/native CORS values and used same-origin SSH access instead.
+Next, a gateway attached only to an internal Docker network could not expose
+its host loopback port. Restoring its original gateway-only edge network fixed
+that; backend and PostgreSQL were never given an edge interface. The failed
+receipts remain in the collection, and the corrected readiness/listener proof
+is separate. No auth/CORS guard was weakened.
+
+The first Linux test collector expected TAP but Node selected a different
+reporter: process exit was 0 but the collector reported FAIL. A fresh complete
+run with explicit `--test-reporter=tap` passed. Both receipts are retained.
+
+### Remaining before connection and device handoff
+
+1. Complete ordinary owner registration in the private form. At receipt time
+   this is pending; no real CRM integration has been created.
+2. Complete exact credential-destination authorization and the canonical A17
+   connect/activate flow. Keychain's existing local-admission helper is not a
+   remote-export grant. The partner token belongs in the exact server-private
+   environment; user_token must enter through canonical encrypted credential
+   storage. No credentials have been copied in this pass. Team import may carry
+   staff contact fields from the management source; do not describe this as a
+   customer/journal import or publish its raw response in evidence.
+3. Close signup, qualify the exact catalogue configuration, and perform the
+   prepared test DNS/HTTPS publication with owner confirmation. Public 80/443
+   and test DNS are not yet configured. The compiled backend retains no direct
+   Internet access; only the bounded relay receives its catalogue requests.
+4. Verify the real connection and resulting service/staff counts without raw
+   credentials/PII in receipts, then perform public TLS/native CORS and signed
+   payload checks. Model/voice/booking are not claimed by catalogue connection.
+5. Installation and iPhone smoke remain a distinct owner-authorized step.
+
+At this checkpoint: real YCLIENTS/model calls **0**, customer DB transfers **0**,
+production deploy/migration/grants **0**, iPhone installs **0**. The separate
+Beget preparation and private gateway were changed; do not call the server
+unchanged. `CERTIFICATE: NOT_ISSUED` and HANDOFF STOP remain.
