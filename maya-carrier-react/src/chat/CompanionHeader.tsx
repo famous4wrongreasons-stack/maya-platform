@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { CompanionSection } from './CompanionNavigation.tsx';
 import { MayaCompanion, type CompanionState } from '../identity/MayaCompanion.tsx';
+import { AboutMayaSheet } from './AboutMayaSheet.tsx';
 
 type DialogRef = HTMLDialogElement | null;
 type ButtonRef = HTMLButtonElement | null;
@@ -17,6 +18,7 @@ export function CompanionHeader({ tenantName, current, openChat, privacyOpen, op
   readonly state: CompanionState; readonly event: number; readonly greet: () => void;
 }) {
   const [menu, setMenu] = useState(false);
+  const [about, setAbout] = useState(false);
   const [moving, setMoving] = useState(true);
   const dialog = useRef<DialogRef>(null);
   const opener = useRef<ButtonRef>(null);
@@ -41,7 +43,8 @@ export function CompanionHeader({ tenantName, current, openChat, privacyOpen, op
     <header ref={header} className="companion-header">
       <button ref={opener} type="button" className="companion-circle" aria-label="Открыть меню" aria-haspopup="dialog"
         onClick={() => setMenu(true)}><span className="companion-menu-icon" aria-hidden="true">☰</span></button>
-      <button type="button" className="companion-identity" aria-label="Поздороваться с Maya" onClick={greet}>
+      <button type="button" className="companion-identity" aria-label="О Maya" aria-haspopup="dialog"
+        onClick={() => { setAbout(true); greet(); }}>
         <MayaCompanion state={state} event={event} moving={moving} />
         <span className="companion-caption">Maya</span>
       </button>
@@ -82,5 +85,8 @@ export function CompanionHeader({ tenantName, current, openChat, privacyOpen, op
       </button>
       <p className="companion-menu-note">Настройка движения действует в этом сеансе. Системное уменьшение движения имеет приоритет.</p>
     </dialog>
+    <AboutMayaSheet open={about} close={() => setAbout(false)} chatEnabled={current !== null}
+      openChat={() => { if (current !== 'chat') openChat(); }}
+      state={state} event={event} moving={moving} greet={greet} />
   </>;
 }

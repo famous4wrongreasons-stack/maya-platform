@@ -275,6 +275,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .companion-voice-cancel { background:#f1f2f3; color:#191a1b; }
 .companion-voice-sheet :focus-visible { outline:2px solid #0068ed; outline-offset:2px; }
 .companion-voice-heading h2:focus { outline:none; }
+
+/* Owner's static introduction, using the same finite mascot and visible viewport owner. */
+.companion-about-sheet { position:fixed; inset:auto 0; top:calc(var(--maya-viewport-top,0px) + var(--maya-viewport-height,100dvh)); transform:translateY(-100%); width:min(100%,560px); max-width:100%; max-height:calc(var(--maya-viewport-height,100dvh) - 24px); margin:0 auto; box-sizing:border-box; padding:0 18px calc(24px + env(safe-area-inset-bottom,0px)); border:0; border-radius:22px 22px 0 0; background:#fff; color:#191a1b; overflow:auto; box-shadow:0 -16px 48px rgb(0 0 0 /20%); }
+.companion-about-sheet::backdrop { background:rgb(0 0 0 /34%); }
+.companion-about-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.companion-about-heading h2 { margin:0; font-size:18px; font-weight:650; line-height:1.4; }
+.companion-about-body { padding-top:22px; text-align:center; }
+.companion-about-greet { display:flex; flex-direction:column; align-items:center; margin:0 auto; padding:0; border:0; background:none; color:inherit; font:inherit; cursor:pointer; }
+.companion-about-greet .companion { width:135px; height:135px; }
+.companion-about-greet .companion-stage { left:3.970588px; transform:scale(.397058824); }
+.companion-about-body h3 { white-space:pre-line; font-size:22px; line-height:1.25; letter-spacing:-.5px; margin:20px 0 12px; }
+.companion-about-body p { font-size:14px; line-height:1.6; color:#65696f; margin:0 auto 22px; max-width:380px; }
+.companion-about-chat { width:100%; min-height:48px; padding:12px 16px; border:0; border-radius:26px; background:#0068ed; color:#fff; font:inherit; font-size:14px; line-height:1.4; cursor:pointer; }
+.companion-about-chat:disabled { background:#e4eaf0; color:#74777c; cursor:default; }
+.companion-about-sheet :focus-visible { outline:2px solid #0068ed; outline-offset:3px; }
+.companion-about-heading h2:focus { outline:none; }
 .companion-report-list li { border-bottom:1px solid #e6e7e9; min-width:0; }
 .companion-report-list button { display:flex; width:100%; align-items:center; gap:12px; border:0; padding:22px 0; background:transparent; color:#191a1b; font:inherit; text-align:left; cursor:pointer; overflow-wrap:anywhere; }
 .companion-report-info { min-width:0; flex:1; }
