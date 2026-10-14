@@ -431,3 +431,35 @@ SOFTWARE.
 .companion-navigation [aria-current=page] .companion-navigation-tasks { background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cpath%20fill%3D%22%23191a1b%22%20d%3D%22M79.51,144.49a12,12,0,1,1,17-17L112,143l47.51-47.52a12,12,0,0,1,17,17l-56,56a12,12,0,0,1-17,0ZM228,48V208a20,20,0,0,1-20,20H48a20,20,0,0,1-20-20V48A20,20,0,0,1,48,28H208A20,20,0,0,1,228,48Zm-24,4H52V204H204Z%22%2F%3E%3C%2Fsvg%3E"); }
 .companion-navigation-library { background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cpath%20fill%3D%22%23191a1b%22%20d%3D%22M71.59,61.47a8,8,0,0,0-15.18,0l-40,120A8,8,0,0,0,24,192h80a8,8,0,0,0,7.59-10.53ZM35.1,176,64,89.3,92.9,176ZM208,76a52,52,0,1,0-52,52A52.06,52.06,0,0,0,208,76Zm-88,0a36,36,0,1,1,36,36A36,36,0,0,1,120,76Zm104,68H136a8,8,0,0,0-8,8v56a8,8,0,0,0,8,8h88a8,8,0,0,0,8-8V152A8,8,0,0,0,224,144Zm-8,56H144V160h72Z%22%2F%3E%3C%2Fsvg%3E"); }
 .companion-navigation [aria-current=page] .companion-navigation-library { background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20256%20256%22%3E%3Cpath%20fill%3D%22%23191a1b%22%20d%3D%22M71.49,60.55a12,12,0,0,0-23,0l-36,120A12,12,0,0,0,24,196H96a12,12,0,0,0,11.49-15.45ZM40.13,172,60,105.76,79.87,172ZM212,74a54,54,0,1,0-54,54A54.06,54.06,0,0,0,212,74Zm-84,0a30,30,0,1,1,30,30A30,30,0,0,1,128,74Zm96,70H136a12,12,0,0,0-12,12v52a12,12,0,0,0,12,12h88a12,12,0,0,0,12-12V156A12,12,0,0,0,224,144Zm-12,52H148V168h64Z%22%2F%3E%3C%2Fsvg%3E"); }
+
+/* Existing server-owned detail route, in the owner's Companion bottom-sheet surface.
+   The dialog is still opened/closed solely by ShellView.fullscreen. */
+.companion-detail-sheet { position:fixed; inset:auto 0; top:calc(var(--maya-viewport-top, 0px) + var(--maya-viewport-height, 100dvh)); transform:translateY(-100%); width:min(100%,560px); max-width:100%; height:calc(var(--maya-viewport-height, 100dvh) * .81); max-height:calc(var(--maya-viewport-height, 100dvh) - 24px); box-sizing:border-box; margin:0 auto; padding:0; border:0; border-radius:22px 22px 0 0; background:#fff; color:#191a1b; box-shadow:0 -16px 48px rgb(0 0 0 /20%); overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif; }
+.companion-detail-sheet[open] { display:flex; flex-direction:column; }
+.companion-detail-sheet::backdrop { background:rgb(0 0 0 /34%); }
+.companion-detail-sheet .fullscreen-bar { flex:none; max-height:40%; overflow:auto; display:flex; align-items:start; gap:12px; padding:0 18px 12px; border-bottom:1px solid #e6e7e9; }
+.companion-detail-sheet .fullscreen-title { flex:1; min-width:0; margin:0; padding:8px 0; font-size:18px; line-height:1.35; font-weight:650; overflow-wrap:anywhere; }
+.companion-detail-sheet .fullscreen-close { flex:none; min-height:44px; max-width:42%; padding:10px 12px; border:1px solid #c9cdd1; border-radius:24px; color:#191a1b; background:transparent; font:inherit; font-size:13px; overflow-wrap:anywhere; cursor:pointer; }
+.companion-detail-sheet .fullscreen-body { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; padding:4px 4px calc(24px + env(safe-area-inset-bottom, 0px)); }
+.companion-detail-sheet .fullscreen-progress { margin:0; padding:18px; font-size:14px; line-height:1.5; color:#65696f; }
+.companion-detail-sheet :focus-visible { outline:2px solid #0068ed; outline-offset:2px; }
+/* Personal availability is supplied by the existing personalBooking port. These
+   styles neither derive free slots from journal gaps nor add booking authority. */
+.companion-personal-booking { padding:18px 14px; color:#191a1b; font-size:15px; line-height:1.5; overflow-wrap:anywhere; }
+.companion-personal-booking h2 { margin:0 0 10px; font-size:20px; line-height:1.35; font-weight:650; }
+.companion-personal-booking h3 { margin:24px 0 10px; font-size:15px; font-weight:650; }
+.companion-personal-booking p { margin:12px 0; }
+.companion-personal-booking .personal-notice { margin:0 0 20px; font-size:13px; color:#65696f; }
+.companion-personal-booking button { box-sizing:border-box; min-height:44px; max-width:100%; margin:4px 4px 4px 0; padding:12px 16px; border:1px solid #c9cdd1; border-radius:16px; background:#fff; color:#191a1b; font:inherit; font-size:14px; text-align:left; overflow-wrap:anywhere; cursor:pointer; }
+.companion-personal-booking button[aria-pressed=true] { background:#edf4fc; border-color:#0068ed; box-shadow:inset 0 0 0 1px #0068ed; color:#0054c2; }
+.companion-personal-booking button:disabled { opacity:.5; cursor:default; }
+.companion-personal-booking label { display:block; margin:24px 0 12px; font-size:13px; color:#65696f; }
+.companion-personal-booking input { display:block; box-sizing:border-box; width:100%; min-width:0; min-height:48px; margin:8px 0; padding:12px 14px; border:1px solid #c9cdd1; border-radius:14px; background:#f8fafc; color:#191a1b; font:inherit; font-size:16px; }
+.companion-personal-booking .personal-slots { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:18px 0 0; padding-top:14px; border-top:1px solid #e6e7e9; }
+.companion-personal-booking .personal-slots button { width:100%; margin:0; }
+.companion-personal-booking .personal-preview { padding-top:4px; }
+.companion-personal-booking .personal-preview h3 { margin-top:0; }
+.companion-personal-booking .personal-preview p { padding-bottom:12px; border-bottom:1px solid #e6e7e9; }
+.companion-personal-booking .personal-change { min-height:44px; border:0; padding:10px 0; color:#0054c2; background:transparent; }
+.companion-personal-booking .personal-confirm { width:100%; margin-top:18px; border:0; border-radius:26px; background:#0068ed; color:#fff; text-align:center; font-weight:600; }
+@media (max-width:359px) { .companion-personal-booking .personal-slots { grid-template-columns:minmax(0,1fr); } }

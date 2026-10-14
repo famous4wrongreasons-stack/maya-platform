@@ -57,6 +57,7 @@ export function DetailSheet({
   readonly focusFallback: () => void;
 }) {
   const c = widgetTheme(t);
+  const companion = t.name === 'companion';
   const dialogRef = useRef<DialogOrNone>(null);
   const openerRef = useRef<OpenerOrNone>(null);
   const titleId = useId();
@@ -147,7 +148,7 @@ export function DetailSheet({
   return (
     <dialog
       ref={dialogRef}
-      className="fullscreen"
+      className={companion ? 'fullscreen companion-detail-sheet' : 'fullscreen'}
       aria-modal="true"
       aria-labelledby={titleId}
       aria-busy={view !== null && view.phase === 'progress' ? 'true' : undefined}
@@ -158,27 +159,28 @@ export function DetailSheet({
         close();
       }}
       style={{
-        width: 'min(100%, 560px)',
-        maxWidth: '100%',
-        maxHeight: '100%',
-        height: '100%',
-        margin: 0,
-        marginInlineStart: 'auto',
-        padding: 0,
-        border: '0',
-        background: t.bg,
-        color: t.ink,
-        overflow: 'hidden',
+        width: companion ? undefined : 'min(100%, 560px)',
+        maxWidth: companion ? undefined : '100%',
+        maxHeight: companion ? undefined : '100%',
+        height: companion ? undefined : '100%',
+        margin: companion ? undefined : 0,
+        marginInlineStart: companion ? undefined : 'auto',
+        padding: companion ? undefined : 0,
+        border: companion ? undefined : '0',
+        background: companion ? undefined : t.bg,
+        color: companion ? undefined : t.ink,
+        overflow: companion ? undefined : 'hidden',
       }}
     >
+      {companion ? <div className="companion-report-handle" aria-hidden="true"><span /></div> : null}
       <header
         className="fullscreen-bar"
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          padding: 'calc(env(safe-area-inset-top, 0px) + 14px) 18px 12px',
-          borderBottom: '1px solid ' + c.line,
+          display: companion ? undefined : 'flex',
+          alignItems: companion ? undefined : 'center',
+          gap: companion ? undefined : 12,
+          padding: companion ? undefined : 'calc(env(safe-area-inset-top, 0px) + 14px) 18px 12px',
+          borderBottom: companion ? undefined : '1px solid ' + c.line,
         }}
       >
         <h2
@@ -186,15 +188,15 @@ export function DetailSheet({
           className="fullscreen-title"
           tabIndex={-1}
           style={{
-            flex: 1,
-            minWidth: 0,
-            margin: 0,
-            fontFamily: READING,
-            fontWeight: 500,
-            fontSize: 17,
-            lineHeight: 1.3,
-            letterSpacing: '-0.01em',
-            color: t.ink,
+            flex: companion ? undefined : 1,
+            minWidth: companion ? undefined : 0,
+            margin: companion ? undefined : 0,
+            fontFamily: companion ? undefined : READING,
+            fontWeight: companion ? undefined : 500,
+            fontSize: companion ? undefined : 17,
+            lineHeight: companion ? undefined : 1.3,
+            letterSpacing: companion ? undefined : '-0.01em',
+            color: companion ? undefined : t.ink,
           }}
         >
           {title}
@@ -204,16 +206,16 @@ export function DetailSheet({
           className="fullscreen-close"
           onClick={close}
           style={{
-            flexShrink: 0,
-            minHeight: 44,
-            padding: '10px 14px',
-            borderRadius: 999,
-            border: '1px solid ' + c.line2,
-            background: 'transparent',
-            color: t.ink,
-            fontFamily: READING,
-            fontSize: 12.5,
-            cursor: 'pointer',
+            flexShrink: companion ? undefined : 0,
+            minHeight: companion ? undefined : 44,
+            padding: companion ? undefined : '10px 14px',
+            borderRadius: companion ? undefined : 999,
+            border: companion ? undefined : '1px solid ' + c.line2,
+            background: companion ? undefined : 'transparent',
+            color: companion ? undefined : t.ink,
+            fontFamily: companion ? undefined : READING,
+            fontSize: companion ? undefined : 12.5,
+            cursor: companion ? undefined : 'pointer',
           }}
         >
           Закрыть окно
@@ -223,16 +225,22 @@ export function DetailSheet({
       <div
         className="fullscreen-body"
         style={{
-          height: 'calc(100% - 64px)',
-          overflow: 'auto',
-          overscrollBehavior: 'contain',
-          padding: '4px 4px calc(env(safe-area-inset-bottom, 0px) + 24px)',
+          height: companion ? undefined : 'calc(100% - 64px)',
+          overflow: companion ? undefined : 'auto',
+          overscrollBehavior: companion ? undefined : 'contain',
+          padding: companion ? undefined : '4px 4px calc(env(safe-area-inset-bottom, 0px) + 24px)',
         }}
       >
         {view === null ? null : view.phase === 'progress' ? (
           <p
             className="fullscreen-progress"
-            style={{ margin: 0, padding: 18, fontFamily: READING, fontSize: 13.5, color: c.muted }}
+            style={{
+              margin: companion ? undefined : 0,
+              padding: companion ? undefined : 18,
+              fontFamily: companion ? undefined : READING,
+              fontSize: companion ? undefined : 13.5,
+              color: companion ? undefined : c.muted,
+            }}
           >
             {OPENING}
           </p>

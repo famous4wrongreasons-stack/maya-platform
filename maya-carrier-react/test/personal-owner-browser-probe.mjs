@@ -184,6 +184,38 @@ async function main() {
       })]);
     } finally { clearTimeout(connectTimer); }
     report.chrome = await browser.version();
+    // Current emitted carrier over real HTTP/PG; layout grants no authority.
+    async function checkPersonalPresentation(page, phase) {
+      report.presentationChecks ??= [];
+      for (const [width, height] of [[320,740], [393,852], [1280,900]]) {
+        await page.send('Emulation.setDeviceMetricsOverride', {width,height,deviceScaleFactor:1,mobile:false});
+        assert.ok(await page.waitFor(`(() => {
+          const d=document.querySelector('dialog.companion-detail-sheet[open]');
+          const b=d?.querySelector('.fullscreen-body'), p=d?.querySelector('.companion-personal-booking');
+          if(!d || !b || !p || !d.matches(':modal'))return false;
+          const r=d.getBoundingClientRect();
+          return r.x>=0 && r.right<=innerWidth+1 && r.top>=0 && r.bottom<=innerHeight+1 &&
+            d.scrollWidth<=d.clientWidth && b.scrollWidth<=b.clientWidth && b.clientHeight>=44 &&
+            Array.from(p.querySelectorAll('button,input')).every(el=>el.getBoundingClientRect().height>=44);
+        })()`), 'Companion personal '+phase+' fits '+width);
+        report.presentationChecks.push(phase+' viewport '+width+' + 44px controls');
+        await page.eval("document.querySelector('.fullscreen-body').scrollTop=0");
+        await capture(page,'companion-'+phase+'-'+width);
+      }
+      await page.send('Emulation.setDeviceMetricsOverride',{width:320,height:740,deviceScaleFactor:1,mobile:false});
+      await page.eval(`(() => {document.querySelectorAll('dialog[open] h2,dialog[open] h3,dialog[open] p,dialog[open] button,dialog[open] label,dialog[open] input').forEach(el=>{el.dataset.originalSize=el.style.fontSize;el.style.fontSize=(parseFloat(getComputedStyle(el).fontSize)*2)+'px'});return true})()`);
+      assert.ok(await page.waitFor(`(() => {const d=document.querySelector('dialog[open]'),b=d.querySelector('.fullscreen-body');return d.scrollWidth<=d.clientWidth && b.scrollWidth<=b.clientWidth && b.clientHeight>=44})()`), '200 percent personal '+phase);
+      report.presentationChecks.push(phase+' 320px / 200 percent text');
+      await capture(page,'companion-'+phase+'-large-text');
+      await page.eval(`(() => {document.querySelectorAll('[data-original-size]').forEach(el=>{el.style.fontSize=el.dataset.originalSize;delete el.dataset.originalSize});return true})()`);
+      const first="document.querySelector('dialog[open] .fullscreen-close')";
+      const last="Array.from(document.querySelectorAll('dialog[open] .fullscreen-close,dialog[open] [data-ref],dialog[open] [data-personal-control]')).filter(el=>!el.disabled&&!el.hidden).at(-1)";
+      await page.focus(first);await page.press('Tab', {shift:true});
+      assert.ok(await page.waitFor('document.activeElement===('+last+')'),'reverse focus ring '+phase);
+      await page.press('Tab');assert.ok(await page.waitFor('document.activeElement===('+first+')'),'forward focus ring '+phase);
+      report.presentationChecks.push(phase+' keyboard focus ring');
+      await page.send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});
+    }
     async function clickRef(page, ref) {
       const view = await page.eval('Q.all("button[data-ref]").filter(Q.visible).map(el => ({ref:el.dataset.ref,name:Q.name(el)}))');
       assert.ok(view.some(button => button.ref === ref), 'Server-selected control must be visibly rendered');
@@ -262,6 +294,7 @@ async function main() {
       const branch = branches.find(item => item.id === scenario.branchId);
       assert.ok(branch, 'Current server branch must include the synthetic salon branch');
       assert.equal(branch.timezone, 'Europe/Moscow');
+      if (scenario.key === 'success') await checkPersonalPresentation(page, 'choices');
       await clickPersonalChoice(page, `${branch.name} · ${branch.timezone}`);
       await clickPersonalChoice(page, scenario.serviceName); await clickPersonalChoice(page, scenario.staffName);
       assert.equal(await page.fill('Q.all("input[data-personal-control]").find(Q.visible)', scenario.date), true);
@@ -272,6 +305,7 @@ async function main() {
       const slot = JSON.parse(await page.responseBody(slotsRequest.requestId))[0]; assert.ok(slot);
       assert.equal(slot.branch_id, branch.id);
       const label = new Intl.DateTimeFormat('ru', { timeZone: branch.timezone, dateStyle: 'short', timeStyle: 'short' }).format(new Date(slot.start)) + ` (${branch.timezone})`;
+      if (scenario.key === 'success') await checkPersonalPresentation(page, 'slots');
       await clickNamed(page, label);
       if (scenario.key === 'incomplete') {
         const refused = await until(() => page.apiRequests('/personal-client/appointments/preview').find(r => r.finishedAt), 'incomplete facts preview refusal');
@@ -284,6 +318,7 @@ async function main() {
         continue;
       }
       assert.ok(await page.waitFor('!!Q.byName("button", /^Подтвердить личную запись$/)'));
+      if (scenario.key === 'success') await checkPersonalPresentation(page, 'preview');
       await capture(page, scenario.key + '-preview');
       await checkpoint(scenario.key + '-preview', { selectedStart: slot.start });
       const createsBefore = page.apiRequests('/personal-client/appointments').filter(r => new URL(r.url).pathname === '/api/personal-client/appointments').length;

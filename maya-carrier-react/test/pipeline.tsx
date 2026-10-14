@@ -95,11 +95,11 @@ export { createCapture, MIME_CANDIDATES, CAPTURE_CONSTRAINTS } from '../src/voic
 
 // The fullscreen detail sheet, rendered without any port.
 import { DetailSheet } from '../src/widgets/DetailSheet.tsx';
-export function detailMarkup(view: unknown, dark = true): string {
+export function detailMarkup(view: unknown, dark = true, companion = false): string {
   return renderToStaticMarkup(
     <DetailSheet
       view={view as never}
-      t={tokens(dark)}
+      t={companion ? companionTokens() : tokens(dark)}
       activate={() => undefined}
       close={() => undefined}
       focusFallback={() => undefined}

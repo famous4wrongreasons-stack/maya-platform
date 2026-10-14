@@ -102,3 +102,21 @@ test('every booking kind can be opened as a detail without losing a control', ()
     assert.deepEqual(facts.refs, [...result.readingOrder], id);
   }
 });
+
+
+test('Companion surface preserves sealed detail titles, refs and route states', () => {
+  const views = [null, { phase: 'progress', itemId: 'w1' }, ...INDEX.fixtures.map(f => ({
+    phase: 'open', itemId: f.id, result: resultOf(f.id),
+  }))];
+  for (const view of views) {
+    const old = read(M.detailMarkup(view)), fresh = read(M.detailMarkup(view, false, true));
+    assert.match(fresh.dialog.attrs.class, /companion-detail-sheet/);
+    assert.equal(fresh.titleText, old.titleText);
+    assert.deepEqual(fresh.refs, old.refs);
+    assert.equal(fresh.dialog.attrs['aria-busy'], old.dialog.attrs['aria-busy']);
+    assert.equal(fresh.dialog.attrs['aria-labelledby'], fresh.title.attrs.id);
+    assert.equal(textOf(fresh.close), 'Закрыть окно');
+    assert.equal(fresh.sinks.length, 0);
+    assert.ok(!('open' in fresh.dialog.attrs), 'style does not acquire dialog ownership');
+  }
+});
