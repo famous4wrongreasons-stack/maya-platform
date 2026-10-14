@@ -1,0 +1,22 @@
+[
+  {
+    "path": "INITIAL-FAILURE.json",
+    "bytes": 6284,
+    "sha256": "cf824e71d0a635b48598eb69beb847905999dfdf9b0b31f1bc66dc60a0d2f7c5"
+  },
+  {
+    "path": "LOCAL-ARTIFACTS.json",
+    "bytes": 12817,
+    "sha256": "9fffaa7f2fcc4caff711ed5f41e2fb126e565e5f68c1db82e7dd17276f102c65"
+  },
+  {
+    "path": "README.md",
+    "bytes": 7092,
+    "sha256": "423f575913168015caebfe9bc285d9647723176de3b47dc9140610b7b1405e2c"
+  },
+  {
+    "path": "RESULT.json",
+    "bytes": 557802,
+    "sha256": "00307a0cd4192e5aa8da5f5be7ab4ab016988e4043509481392112686f8085a2"
+  }
+]

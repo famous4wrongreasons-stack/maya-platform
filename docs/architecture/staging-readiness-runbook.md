@@ -68,12 +68,23 @@ never in the system/phone trust store; the owned temporary key is removed after
 the run. It does not prove real backend authentication, tenant isolation, a public
 endpoint, Docker deployment or iPhone acceptance.
 
+A subsequent real-binary proof is available as `scripts/phone-backend-proof.mjs`.
+It reuses the existing owned-cluster preparation helpers but starts normal
+compiled `main.js`, not the finite stage-0 launcher. It creates only synthetic
+trial accounts through normal HTTP, validates actual runtime projections through
+the same gateway and tests tenant/session isolation. Production configuration
+validation is enabled; this remains a local test environment. A per-process
+macOS network sandbox permits only its own DB connection and API listener.
+The fresh 50-check result and the explicitly unavailable trial Ideas section are
+recorded in [the phone backend packet](../rebuild/evidence/maya-phone-backend-20261014/README.md).
+No retained salon session is exposed and the proof stops all owned processes.
+
 For the first phone check, no reachable HTTPS hostname has yet been assigned.
 The Mac currently has no Docker installation. Do not interpret this packaging
 correction as a ready staging environment, tunnel authorization or permission
-to expose a retained local salon session. Choose the isolated endpoint/runtime,
-qualify the real backend with synthetic data and only then request the bounded
-network/device step. Build the native Debug payload with that exact HTTPS
+to expose a retained local salon session. Real-backend loopback qualification is
+now available; select the exact network location and request the bounded
+network/device step before exposing it. Build the native Debug payload with that exact HTTPS
 `--development-api`; the default native production URL is not a test target.
 
 Prepare an environment that is not connected to existing production traffic:

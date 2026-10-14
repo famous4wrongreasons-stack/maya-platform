@@ -1,0 +1,248 @@
+{
+  "contract": "maya.phone-backend-isolated-proof/1",
+  "candidate": "ada15e500a761dc83c7728e6872487c4de1f6005",
+  "status": "FAIL",
+  "checks": [
+    "kernel outbound refusal: 192.0.2.1",
+    "kernel outbound refusal: 127.0.0.1",
+    "actual compiled backend ready on fresh migrated database",
+    "real backend reachable through canonical loopback HTTPS gateway",
+    "untrusted TLS refused without bypass",
+    "health reports exact source SHA and database ready",
+    "gateway current payload: icons/maya-192.png",
+    "gateway current payload: icons/maya-512-maskable.png",
+    "gateway current payload: icons/maya-512.png",
+    "gateway current payload: icons/maya-apple-180.png",
+    "gateway current payload: index.html",
+    "gateway current payload: m/JFJCTFTP/main.js",
+    "gateway current payload: manifest.webmanifest",
+    "gateway current payload: styles.css",
+    "canonical OAuth return bytes",
+    "actual native CORS preflight",
+    "foreign browser origin receives no CORS permission",
+    "anonymous protected request refused",
+    "ordinary trial activation a",
+    "ordinary trial creation without fixture SQL a",
+    "password login projects into existing runtime a",
+    "one canonical own branch a",
+    "actual Companion projection a: /api/ai/conversation",
+    "actual Companion projection a: /api/inbox",
+    "actual Companion projection a: /api/owner-reports",
+    "actual Companion projection a: /api/operational-work"
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "route": "/api/health",
+      "status": 200,
+      "elapsedMs": 10
+    },
+    {
+      "method": "GET",
+      "route": "/api/health",
+      "status": 200,
+      "elapsedMs": 3
+    },
+    {
+      "method": "GET",
+      "route": "/api/health/ready",
+      "status": 200,
+      "elapsedMs": 4
+    },
+    {
+      "method": "GET",
+      "route": "/icons/maya-192.png",
+      "status": 200,
+      "elapsedMs": 5
+    },
+    {
+      "method": "GET",
+      "route": "/icons/maya-512-maskable.png",
+      "status": 200,
+      "elapsedMs": 3
+    },
+    {
+      "method": "GET",
+      "route": "/icons/maya-512.png",
+      "status": 200,
+      "elapsedMs": 3
+    },
+    {
+      "method": "GET",
+      "route": "/icons/maya-apple-180.png",
+      "status": 200,
+      "elapsedMs": 3
+    },
+    {
+      "method": "GET",
+      "route": "/index.html",
+      "status": 200,
+      "elapsedMs": 2
+    },
+    {
+      "method": "GET",
+      "route": "/m/JFJCTFTP/main.js",
+      "status": 200,
+      "elapsedMs": 4
+    },
+    {
+      "method": "GET",
+      "route": "/manifest.webmanifest",
+      "status": 200,
+      "elapsedMs": 3
+    },
+    {
+      "method": "GET",
+      "route": "/styles.css",
+      "status": 200,
+      "elapsedMs": 3
+    },
+    {
+      "method": "GET",
+      "route": "/oauth-callback.html",
+      "status": 200,
+      "elapsedMs": 4
+    },
+    {
+      "method": "OPTIONS",
+      "route": "/api/auth/login",
+      "status": 204,
+      "elapsedMs": 2
+    },
+    {
+      "method": "GET",
+      "route": "/api/health",
+      "status": 200,
+      "elapsedMs": 3
+    },
+    {
+      "method": "GET",
+      "route": "/api/branches",
+      "status": 401,
+      "elapsedMs": 5
+    },
+    {
+      "method": "POST",
+      "route": "/api/onboarding/trial-activations",
+      "status": 201,
+      "elapsedMs": 29
+    },
+    {
+      "method": "POST",
+      "route": "/api/onboarding/trial",
+      "status": 201,
+      "elapsedMs": 109
+    },
+    {
+      "method": "POST",
+      "route": "/api/auth/login",
+      "status": 201,
+      "elapsedMs": 69
+    },
+    {
+      "method": "GET",
+      "route": "/api/branches",
+      "status": 200,
+      "elapsedMs": 8
+    },
+    {
+      "method": "GET",
+      "route": "/api/ai/conversation",
+      "status": 200,
+      "elapsedMs": 11
+    },
+    {
+      "method": "GET",
+      "route": "/api/inbox",
+      "status": 200,
+      "elapsedMs": 6
+    },
+    {
+      "method": "GET",
+      "route": "/api/owner-reports",
+      "status": 200,
+      "elapsedMs": 7
+    },
+    {
+      "method": "GET",
+      "route": "/api/operational-work",
+      "status": 200,
+      "elapsedMs": 6
+    },
+    {
+      "method": "GET",
+      "route": "/api/analytics/valuations",
+      "status": 403,
+      "elapsedMs": 7
+    }
+  ],
+  "stages": [
+    {
+      "name": "backend-build",
+      "elapsedMs": 12334
+    },
+    {
+      "name": "react-build",
+      "elapsedMs": 28749
+    },
+    {
+      "name": "initdb",
+      "elapsedMs": 445
+    },
+    {
+      "name": "pg-start",
+      "elapsedMs": 130
+    },
+    {
+      "name": "createdb",
+      "elapsedMs": 118
+    },
+    {
+      "name": "migrations",
+      "elapsedMs": 3514
+    }
+  ],
+  "actualCompiledMain": true,
+  "syntheticFreshDatabase": true,
+  "productionEnvironmentValidation": true,
+  "productionDeployment": false,
+  "publicListener": false,
+  "deviceInstallation": false,
+  "retainedSalonDatabaseAccess": false,
+  "providerCredentialsLoaded": false,
+  "externalProviders": false,
+  "widgetGrantIssued": false,
+  "releaseCertification": false,
+  "caddySha256": "0d746e47f39d9706883b3633bf419feb25973e6caaa8eabbf5b44421d59e3973",
+  "startedAt": "2026-10-14T17:56:11.527Z",
+  "preflight": {
+    "status": "PASS",
+    "scope": "selector-and-payload",
+    "owner": "React AChat",
+    "caddySha256": "1eaf825be97da242af3ce54ce1ebe2fc2dfeb0c63c667601967b9e18e6d2e4b9",
+    "deploymentPerformed": false
+  },
+  "projectorsSha256": "81f861f2680d81b7850b1f6cfa30e3121b51fe3893feaa88bd8b0a25edb18785",
+  "binarySha256": "3caede16a0ba37d968aee8d0ae5b39c726ba545e1894d29dc944d2751c34898f",
+  "backendStartupMs": 1027,
+  "failure": "actual Companion projection a: /api/analytics/valuations",
+  "processes": [
+    {
+      "owner": "caddy",
+      "code": 0,
+      "signal": null
+    },
+    {
+      "owner": "backend",
+      "code": null,
+      "signal": "SIGTERM"
+    }
+  ],
+  "databaseStopped": true,
+  "listenersClosed": true,
+  "ephemeralCredentialFilesRemoved": true,
+  "finishedAt": "2026-10-14T17:57:09.530Z",
+  "projectionNotice": "Source-file manifest omitted from this repository-safe projection; original is unchanged at the source path/hash below.",
+  "originalPath": "/private/tmp/maya-phone-backend-20261014-01/RESULT.json",
+  "originalSha256": "2cb47d0e1097e6b9cb9daef21ddf6e374646d81fa8b311d84b8edd6a28df1c54"
+}

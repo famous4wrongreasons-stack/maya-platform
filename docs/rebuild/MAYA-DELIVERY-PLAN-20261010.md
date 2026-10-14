@@ -1,5 +1,17 @@
 # План завершения MAYA — 10 октября 2026
 
+**14 октября, isolated actual backend → HTTPS — `87c0d377`: 50 scoped PASS.**
+Настоящий compiled main запущен с production config validation на новой
+синтетической PostgreSQL. Обычные trial/signup/login, четыре Companion read
+проекции, сохранённый безопасный turn, tenant isolation, refresh/logout и отзыв
+токенов прошли через canonical Caddy HTTPS. Native CORS проверен. Внешние
+соединения backend запрещены сетевой sandbox; реальные provider keys не загружались.
+«Идеи» для trial недоступны по существующему active-only Measurement контракту;
+это не успешное чтение и права не расширены. Процессы/БД остановлены. До телефона
+остались reachable HTTPS адрес/доверие, exact Debug signing/install и device smoke.
+Product source, production, AR-1/grants и iPhone не менялись; certificate не выдан.
+[Результат, исходный отказ и оставшиеся шаги](evidence/maya-phone-backend-20261014/README.md).
+
 **14 октября, устранён stale staging payload — `5b6b3b19`: scoped PASS.**
 Существующий staging теперь выбирает React AChat и отдельный canonical OAuth
 callback. Старый shell отказывается до Docker/DB. На committed SHA: 17 selector,

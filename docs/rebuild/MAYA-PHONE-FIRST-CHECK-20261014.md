@@ -1,11 +1,23 @@
 # MAYA: путь до первой проверки на iPhone — 14 октября 2026
 
-**Следующее выполненное уточнение — staging packaging, `5b6b3b19`.**
+**Следующий участок выполнен — настоящий backend на отдельной базе, `87c0d377`.**
+50 свежих scoped checkpoints PASS: compiled main с production config validation,
+чистый replay миграций, обычная регистрация двух trial-салонов и парольный вход,
+HTTPS/native CORS, текущие runtime-проекции четырёх read surfaces, изоляция
+разговоров, refresh/logout/revocation. Исходящий доступ backend ограничен ядром
+до его собственной PostgreSQL; реальные ключи и база салона не использовались.
+«Идеи» в обычном trial дают точный существующий 403: Measurement owner требует
+active tenant. Это ограничение сохранено, успешное чтение Ideas не заявляется.
+Все процессы остановлены. Ещё нужны адрес, доступный телефону, доверенный TLS,
+подписание/установка и сам device smoke.
+[Свежий backend proof и точные границы](evidence/maya-phone-backend-20261014/README.md).
+
+**Предыдущий выполненный участок — staging packaging, `5b6b3b19`.**
 У существующего staging исправлен выбор старой оболочки на canonical React;
 страница OAuth return подключена отдельно от её существующего владельца.
 17 selector checks, 18 packaging tests, 21 callback regressions и 23 actual
 loopback HTTPS checkpoints PASS на чистом committed SHA. Product/native bytes
-не менялись. Публичный endpoint и isolated real backend ещё не запущены:
+не менялись. На этом предыдущем checkpoint публичный endpoint и isolated real backend ещё не были запущены:
 это закрытие ошибки упаковки, не доступность сервера с телефона.
 [Свежие receipts и точные границы](evidence/maya-staging-carrier-20261014/README.md).
 

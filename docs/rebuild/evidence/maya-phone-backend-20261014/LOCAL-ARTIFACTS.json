@@ -1,0 +1,290 @@
+[
+  {
+    "name": "RESULT.json",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/RESULT.json",
+    "sha256": "2cb47d0e1097e6b9cb9daef21ddf6e374646d81fa8b311d84b8edd6a28df1c54",
+    "size": 553576,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "backend-build.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/backend-build.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "backend.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/backend.log",
+    "sha256": "7326f3972a28f3c0daca5ba1edacb380ffb9fa490f7fd3a81044a113635d03a6",
+    "size": 86671,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "caddy.json",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/caddy.json",
+    "sha256": "b0dd03a28ad6b5638c29d8e595e910b56a55babb5ab7330b2bc47866f7f29218",
+    "size": 2228,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "caddy.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/caddy.log",
+    "sha256": "9d41e7da5ba9b82ab8832a269bf7b5b9c5dd6210e23b528eaae8db75ac5c0f49",
+    "size": 2022,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "createdb.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "initdb.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/initdb.log",
+    "sha256": "2b097e1e1e69fa2218b2f464ee5577cc0aa073b95866de251f7f242b689940c3",
+    "size": 886,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "localhost.crt",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/localhost.crt",
+    "sha256": "cbaaa4531a91eb7406b5e3507a644e92aee26447f7c70cb63e5b45c0d5b33b8c",
+    "size": 1086,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "migrations.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/migrations.log",
+    "sha256": "ab1e42f2cb26e7572aaf41c23c4e95c89b53920fa8cd004427556958e2096d3e",
+    "size": 15002,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "pg-start.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "pg-stop.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "postgres.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/postgres.log",
+    "sha256": "b38e776ab0f686c01991158bb008703824ec3450ceeaadcccf2f3bf981d8b986",
+    "size": 1234,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "prisma.config.mjs",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/prisma.config.mjs",
+    "sha256": "0938e4e6957e98e29a55a5c249ef430adc4d97513b4ba625857e6a74dba302d6",
+    "size": 349,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "projectors.mjs",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/projectors.mjs",
+    "sha256": "81f861f2680d81b7850b1f6cfa30e3121b51fe3893feaa88bd8b0a25edb18785",
+    "size": 17558,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "react-build.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/react-build.log",
+    "sha256": "4bd8f36090e2b844303ed8675b8dd59953f923a63195403e555b4c705548ab6a",
+    "size": 2288,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "test-cert.cnf",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-01/test-cert.cnf",
+    "sha256": "4ba4054f3e43a2676a878c082b482fd545917f95819a777fd957b246ee5e9343",
+    "size": 231,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "RESULT.json",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/RESULT.json",
+    "sha256": "00307a0cd4192e5aa8da5f5be7ab4ab016988e4043509481392112686f8085a2",
+    "size": 557802,
+    "committed": true,
+    "reason": "Final safe result archived",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "backend-build.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/backend-build.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "backend.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/backend.log",
+    "sha256": "703d7a740183435720903ecd3803bdbefd641bb0af3286e9576aa8000eefb266",
+    "size": 87154,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "caddy.json",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/caddy.json",
+    "sha256": "0aa939515ac6843f1b75d12da45e7f2f3da1688062ccf6e3d124169d3d7b239e",
+    "size": 2228,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "caddy.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/caddy.log",
+    "sha256": "22cb574ef23444bbbd1946cb67b87b15ba514fbc191ce68fd5a99b548a11e9bb",
+    "size": 2023,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "createdb.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "initdb.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/initdb.log",
+    "sha256": "b2685f170a5d8bda70f5a0849938513ce26118eccce437cd2413bf80731e9fb4",
+    "size": 886,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "localhost.crt",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/localhost.crt",
+    "sha256": "cdff41e6eb13467e48ff2fd54a0321d229b2c8ab89a92f597e8958c3841969fc",
+    "size": 1086,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "migrations.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/migrations.log",
+    "sha256": "095bce99342bb460f2065df209e01bb7bc816055bfe2d5612352563e068f5c60",
+    "size": 15002,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "pg-start.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "pg-stop.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "postgres.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/postgres.log",
+    "sha256": "d67830f1bcb50a02b127a2f06fdbf64d1e280803842c9eb2527243a3dddd6410",
+    "size": 1246,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "prisma.config.mjs",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/prisma.config.mjs",
+    "sha256": "0938e4e6957e98e29a55a5c249ef430adc4d97513b4ba625857e6a74dba302d6",
+    "size": 349,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "projectors.mjs",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/projectors.mjs",
+    "sha256": "81f861f2680d81b7850b1f6cfa30e3121b51fe3893feaa88bd8b0a25edb18785",
+    "size": 17558,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "react-build.log",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/react-build.log",
+    "sha256": "4bd8f36090e2b844303ed8675b8dd59953f923a63195403e555b4c705548ab6a",
+    "size": 2288,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  },
+  {
+    "name": "test-cert.cnf",
+    "originalLocalPath": "/private/tmp/maya-phone-backend-20261014-02/test-cert.cnf",
+    "sha256": "4ba4054f3e43a2676a878c082b482fd545917f95819a777fd957b246ee5e9343",
+    "size": 231,
+    "committed": false,
+    "reason": "Local synthetic diagnostic/build artifact; final aggregate result and initial failure preserved",
+    "realCredentialsOrCustomerData": false
+  }
+]
