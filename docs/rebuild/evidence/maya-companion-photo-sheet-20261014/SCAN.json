@@ -1,0 +1,47 @@
+{
+  "scope": "new code plus documentation/copied text; not historical repository audit",
+  "candidate": "bdba69cdf583ac8970cec699a60a0cd6aa33e376",
+  "filesChecked": 52,
+  "manifestHashes": "PASS",
+  "highConfidenceSecretScan": "PASS",
+  "piiPatternScan": "PASS",
+  "syntheticScreenshotsOnly": true,
+  "reviewedFalsePositives": [
+    {
+      "file": "docs/rebuild/evidence/maya-companion-photo-sheet-20261014/logs/carrier.txt",
+      "line": 1020,
+      "pattern": "email-like substring in synthetic URL",
+      "source": "maya-carrier-react/test/telegram-popup.test.mjs:65",
+      "classification": "intentional fake URL credentials in provider-substitution refusal test; not an email or real credential"
+    },
+    {
+      "file": "docs/rebuild/evidence/maya-companion-photo-sheet-20261014/logs/carrier.txt",
+      "line": 1021,
+      "pattern": "email-like substring in synthetic URL",
+      "source": "maya-carrier-react/test/telegram-popup.test.mjs:65",
+      "classification": "intentional fake URL credentials in provider-substitution refusal test; not an email or real credential"
+    },
+    {
+      "file": "maya-carrier-react/test/goods-photo-sheet.browser.mjs",
+      "line": 66,
+      "pattern": "reserved .invalid email fixture",
+      "source": "maya-carrier-react/test/goods-photo-sheet.browser.mjs:66",
+      "classification": "synthetic browser login on an isolated intercepted API; no real user or address"
+    },
+    {
+      "file": "maya-carrier-react/test/navigation.browser.mjs",
+      "line": 87,
+      "pattern": "reserved .invalid email fixture",
+      "source": "maya-carrier-react/test/navigation.browser.mjs:87",
+      "classification": "synthetic browser login on an isolated intercepted API; no real user or address"
+    },
+    {
+      "file": "maya-carrier-react/test/schedule-shortcut.browser.mjs",
+      "line": 101,
+      "pattern": "reserved .invalid email fixture",
+      "source": "maya-carrier-react/test/schedule-shortcut.browser.mjs:101",
+      "classification": "synthetic browser login on an isolated intercepted API; no real user or address"
+    }
+  ],
+  "unresolvedFindings": []
+}

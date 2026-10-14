@@ -1,0 +1,34 @@
+{
+  "candidate": "bdba69cdf583ac8970cec699a60a0cd6aa33e376",
+  "status": "PASS",
+  "mutation": "remove canonical abort from native dialog Escape cancellation",
+  "results": [
+    {
+      "stage": "baseline",
+      "exit": 0,
+      "status": "PASS",
+      "checks": 38,
+      "failure": null,
+      "browserReceipt": "/private/tmp/maya-companion-photo-mutation-final02-baseline-20261014/receipt.json"
+    },
+    {
+      "stage": "mutant",
+      "exit": 1,
+      "status": "FAIL",
+      "checks": 11,
+      "failure": "Escape clears ephemeral picker and returns to actual plus opener",
+      "browserReceipt": "/private/tmp/maya-companion-photo-mutation-final02-mutant-20261014/receipt.json"
+    },
+    {
+      "stage": "restored",
+      "exit": 0,
+      "status": "PASS",
+      "checks": 38,
+      "failure": null,
+      "browserReceipt": "/private/tmp/maya-companion-photo-mutation-final02-restored-20261014/receipt.json"
+    }
+  ],
+  "sourceRestoredSha256": "14f54d36073ea168753020bdf496012eb9c66da21a89d5216f0a23f05417a2e9",
+  "realEffects": 0,
+  "finishedAt": "2026-10-14T11:49:58.229582+00:00"
+}

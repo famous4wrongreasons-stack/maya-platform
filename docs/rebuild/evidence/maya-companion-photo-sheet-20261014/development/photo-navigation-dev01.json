@@ -1,0 +1,1856 @@
+{
+  "candidate": "32bbed680b6c50319b52e74a0404aaef0f992d2e",
+  "dirtySource": true,
+  "contract": "maya.companion.navigation-ui/1",
+  "realBackend": false,
+  "realProviders": false,
+  "realKeys": false,
+  "payload": {
+    "icons/maya-192.png": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
+    "icons/maya-512-maskable.png": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
+    "icons/maya-512.png": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
+    "icons/maya-apple-180.png": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
+    "index.html": "e88dd49b7a3e4f56df91395487f20bd08d6e87efe828279d39088c81d2c0dcbc",
+    "m/NBPHJQHE/main.js": "2be4065302083ac2223d06cca34cd9adde58c002af34125ec1fc311fc42abb04",
+    "manifest.webmanifest": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
+    "styles.css": "96aa3d2561a109acaf51631b10b4aae66136543753748d51f159e9dbfd706de4"
+  },
+  "checks": [
+    "real emitted sign-in",
+    "history restored through canonical runtime",
+    "five real workspaces in navigation landmark",
+    "current section is Чат",
+    "mounting navigation does not preload business data",
+    "keyboard opens About as native modal with heading focus",
+    "About reuses the admitted mascot and actual greeting",
+    "repeated greeting restarts the existing finite cue",
+    "greeting returns to actual idle context",
+    "About makes background navigation inert",
+    "About forward Tab stays in modal",
+    "About reverse Tab stays in modal",
+    "About fits viewport and targets at 393",
+    "About uses enlarged existing artwork at 393",
+    "About fits viewport and targets at 320",
+    "About uses enlarged existing artwork at 320",
+    "About fits viewport and targets at 427",
+    "About uses enlarged existing artwork at 427",
+    "About fits viewport and targets at 1280",
+    "About uses enlarged existing artwork at 1280",
+    "About 200 percent text stays within short viewport",
+    "About large-text CTA is reachable by keyboard",
+    "About honors system reduced motion",
+    "About pauses when hidden",
+    "About Escape restores opener and unmounts hidden mascot",
+    "About shares existing session motion preference",
+    "About chat CTA closes inertly in existing chat",
+    "About open/greet/layout/close/settings cause no API or conversation request",
+    "Settings replaces drawer with native modal and heading focus",
+    "Settings displays authenticated session names, not prototype identity or role",
+    "Settings has no invented notification toggle or saved delivery state",
+    "Settings blocks background navigation",
+    "Settings heading Tab reaches first control",
+    "Settings reverse Tab stays in modal",
+    "Settings forward Tab stays in modal",
+    "Settings fits viewport and targets at 393",
+    "Settings fits viewport and targets at 320",
+    "Settings fits viewport and targets at 427",
+    "Settings fits viewport and targets at 1280",
+    "Settings 200 percent text stays within short viewport",
+    "Settings large-text motion control is keyboard reachable",
+    "Settings wraps long display names without horizontal overflow",
+    "Settings motion changes existing header owner",
+    "Settings Escape restores visible drawer opener",
+    "drawer shortcut shares Settings motion state",
+    "Settings reopening preserves session preference",
+    "system reduced motion wins over Settings enabled preference",
+    "Settings close button restores visible opener",
+    "Settings open/toggle/close has no request, write or authority operation",
+    "active chat selection is inert",
+    "navigation/composer fit and touch targets at 393",
+    "no horizontal overflow at 393",
+    "empty composer fully displays wrapped placeholder at 393",
+    "navigation/composer fit and touch targets at 320",
+    "no horizontal overflow at 320",
+    "empty composer fully displays wrapped placeholder at 320",
+    "navigation/composer fit and touch targets at 427",
+    "no horizontal overflow at 427",
+    "empty composer fully displays wrapped placeholder at 427",
+    "navigation/composer fit and touch targets at 1280",
+    "no horizontal overflow at 1280",
+    "empty composer fully displays wrapped placeholder at 1280",
+    "desktop text entry keeps navigation available",
+    "resizing preserves and fully displays wrapped draft above navigation",
+    "current section is Лента",
+    "existing Лента surface opens without composer overlay",
+    "settled Лента read",
+    "Лента delegates one exact existing read",
+    "active Лента does not refetch or reset",
+    "About opens over Лента",
+    "About close restores workspace header",
+    "current section is Лента",
+    "About preserves Лента without reread or write",
+    "Settings opens over Лента",
+    "current section is Лента",
+    "Settings preserves Лента without reread or write",
+    "current section is Идеи",
+    "existing Идеи surface opens without composer overlay",
+    "settled Идеи read",
+    "Идеи delegates one exact existing read",
+    "active Идеи does not refetch or reset",
+    "About opens over Идеи",
+    "About close restores workspace header",
+    "current section is Идеи",
+    "About preserves Идеи without reread or write",
+    "Settings opens over Идеи",
+    "current section is Идеи",
+    "Settings preserves Идеи without reread or write",
+    "current section is Задачи",
+    "existing Задачи surface opens without composer overlay",
+    "settled Задачи read",
+    "Задачи delegates one exact existing read",
+    "active Задачи does not refetch or reset",
+    "About opens over Задачи",
+    "About close restores workspace header",
+    "current section is Задачи",
+    "About preserves Задачи without reread or write",
+    "Settings opens over Задачи",
+    "current section is Задачи",
+    "Settings preserves Задачи without reread or write",
+    "current section is Файлы",
+    "existing Файлы surface opens without composer overlay",
+    "settled Файлы read",
+    "Файлы delegates one exact existing read",
+    "active Файлы does not refetch or reset",
+    "About opens over Файлы",
+    "About close restores workspace header",
+    "current section is Файлы",
+    "About preserves Файлы without reread or write",
+    "Settings opens over Файлы",
+    "current section is Файлы",
+    "Settings preserves Файлы without reread or write",
+    "current section is Чат",
+    "About returns from workspace through canonical root with draft/history intact",
+    "About chat return adds no turn, history request or workspace read",
+    "drawer opens over current workspace",
+    "current section is Чат",
+    "drawer transition settles",
+    "drawer Главный чат uses same canonical destination and exact read",
+    "drawer selection follows Чат",
+    "active drawer destination closes menu",
+    "active drawer Главный чат adds no read",
+    "drawer opens over current workspace",
+    "current section is Лента",
+    "drawer transition settles",
+    "drawer Лента uses same canonical destination and exact read",
+    "drawer selection follows Лента",
+    "active drawer destination closes menu",
+    "active drawer Лента adds no read",
+    "drawer opens over current workspace",
+    "current section is Идеи",
+    "drawer transition settles",
+    "drawer Идеи uses same canonical destination and exact read",
+    "drawer selection follows Идеи",
+    "active drawer destination closes menu",
+    "active drawer Идеи adds no read",
+    "drawer opens over current workspace",
+    "current section is Задачи",
+    "drawer transition settles",
+    "drawer Мои задачи uses same canonical destination and exact read",
+    "drawer selection follows Задачи",
+    "active drawer destination closes menu",
+    "active drawer Мои задачи adds no read",
+    "drawer opens over current workspace",
+    "current section is Файлы",
+    "drawer transition settles",
+    "drawer Библиотека uses same canonical destination and exact read",
+    "drawer selection follows Файлы",
+    "active drawer destination closes menu",
+    "active drawer Библиотека adds no read",
+    "drawer preserves admitted icon images without opaque square backgrounds",
+    "drawer width and targets fit 393",
+    "drawer width and targets fit 320",
+    "drawer width and targets fit 427",
+    "drawer width and targets fit 1280",
+    "drawer wraps at 200 percent text",
+    "canonical task permission exposes existing form",
+    "existing task modal opens",
+    "modal makes background navigation inert",
+    "Escape closes task form without a write",
+    "current section is Задачи",
+    "current section is Чат",
+    "chat return preserves draft/history and focuses lane without summoning keyboard",
+    "current section is Лента",
+    "keyboard navigation reaches existing workspace heading",
+    "long feed loaded",
+    "last workspace controls scroll above navigation",
+    "200 percent navigation text grows measured reserve and wraps",
+    "enlarged navigation still clears last controls",
+    "chat return focus completed before touch input",
+    "touch text entry hides navigation and releases reserved space",
+    "short editing viewport retains usable composer and draft",
+    "leaving text entry restores touch navigation",
+    "existing menu remains available",
+    "drawer follows chat return without separate state",
+    "menu restores opener",
+    "menu opened for existing photo surface",
+    "photo surface retains its own controls without navigation",
+    "schedule shortcut cannot interrupt photo close ownership",
+    "photo owner is a native modal and owns initial focus",
+    "inert background menu cannot bypass photo close ownership",
+    "inert About cannot cover the photo owner",
+    "current section is Чат"
+  ],
+  "screenshots": [
+    "signin-393.png",
+    "about-393.png",
+    "about-320.png",
+    "about-427.png",
+    "about-1280.png",
+    "about-large-text.png",
+    "about-motion-off.png",
+    "settings-393.png",
+    "settings-320.png",
+    "settings-427.png",
+    "settings-1280.png",
+    "settings-large-text.png",
+    "navigation-chat-393.png",
+    "navigation-chat-320.png",
+    "navigation-chat-427.png",
+    "navigation-chat-1280.png",
+    "navigation-feed.png",
+    "navigation-ideas.png",
+    "navigation-tasks.png",
+    "navigation-library.png",
+    "drawer-393.png",
+    "drawer-320.png",
+    "drawer-427.png",
+    "drawer-1280.png",
+    "drawer-large-text.png",
+    "navigation-feed-end.png",
+    "navigation-large-text.png",
+    "navigation-keyboard-height.png",
+    "failure.png"
+  ],
+  "externalRequests": 0,
+  "unexpected": [],
+  "lastClick": {
+    "text": "Чат",
+    "before": {
+      "x": 22,
+      "y": 784,
+      "width": 67.390625,
+      "height": 54,
+      "viewport": 393,
+      "pointer": false,
+      "hit": "<span class=\"companion-navigation-icon companion-navigation-chat\" aria-hidden=\"true\"></span>"
+    }
+  },
+  "status": "FAIL",
+  "failure": "photo close cleans its owner and falls back from a hidden drawer opener to chat",
+  "wire": [
+    {
+      "path": "/api/auth/login",
+      "method": "POST"
+    },
+    {
+      "path": "/api/ai/conversation",
+      "method": "GET"
+    },
+    {
+      "path": "/api/widgets/resolve",
+      "method": "POST"
+    },
+    {
+      "path": "/api/inbox",
+      "method": "GET"
+    },
+    {
+      "path": "/api/analytics/valuations",
+      "method": "GET"
+    },
+    {
+      "path": "/api/operational-work",
+      "method": "GET"
+    },
+    {
+      "path": "/api/owner-reports",
+      "method": "GET"
+    },
+    {
+      "path": "/api/inbox",
+      "method": "GET"
+    },
+    {
+      "path": "/api/analytics/valuations",
+      "method": "GET"
+    },
+    {
+      "path": "/api/operational-work",
+      "method": "GET"
+    },
+    {
+      "path": "/api/owner-reports",
+      "method": "GET"
+    },
+    {
+      "path": "/api/operational-work",
+      "method": "GET"
+    },
+    {
+      "path": "/api/inbox",
+      "method": "GET"
+    }
+  ],
+  "navigationProbe": [
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Maya",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 543
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 543
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 543
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Движения Maya Вкл.",
+      "x": 163,
+      "y": 704
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Движения Maya Вкл.",
+      "x": 163,
+      "y": 704
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Движения Maya Вкл.",
+      "x": 163,
+      "y": 704
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Давай поговорим",
+      "x": 196,
+      "y": 804
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Давай поговорим",
+      "x": 196,
+      "y": 804
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Давай поговорим",
+      "x": 196,
+      "y": 804
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Движения Maya Выкл.",
+      "x": 163,
+      "y": 704
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Движения Maya Выкл.",
+      "x": 163,
+      "y": 704
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Движения Maya Выкл.",
+      "x": 163,
+      "y": 704
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "✧Движения Maya",
+      "x": 196,
+      "y": 558
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "✧Движения Maya",
+      "x": 196,
+      "y": 558
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "✧Движения Maya",
+      "x": 196,
+      "y": 558
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "✧Движения Maya",
+      "x": 196,
+      "y": 558
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "✧Движения Maya",
+      "x": 196,
+      "y": 558
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "✧Движения Maya",
+      "x": 196,
+      "y": 558
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 341
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 341
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 341
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 55,
+      "y": 811
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 55,
+      "y": 811
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 55,
+      "y": 811
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 126,
+      "y": 811
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 126,
+      "y": 811
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 126,
+      "y": 811
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 126,
+      "y": 811
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 126,
+      "y": 811
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 126,
+      "y": 811
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 417
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 417
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 417
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 811
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 811
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 811
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 811
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 811
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 811
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 417
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 417
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 417
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 266,
+      "y": 811
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 266,
+      "y": 811
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 266,
+      "y": 811
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 266,
+      "y": 811
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 266,
+      "y": 811
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 266,
+      "y": 811
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 417
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 417
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 417
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 337,
+      "y": 811
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 337,
+      "y": 811
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 337,
+      "y": 811
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 337,
+      "y": 811
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 337,
+      "y": 811
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 337,
+      "y": 811
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 417
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 417
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "×",
+      "x": 353,
+      "y": 417
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Настройки",
+      "x": 163,
+      "y": 648
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Давай поговорим",
+      "x": 196,
+      "y": 804
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Давай поговорим",
+      "x": 196,
+      "y": 804
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Давай поговорим",
+      "x": 196,
+      "y": 804
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Главный чат",
+      "x": 163,
+      "y": 242
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Главный чат",
+      "x": 163,
+      "y": 242
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Главный чат",
+      "x": 163,
+      "y": 242
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Главный чат",
+      "x": 163,
+      "y": 242
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Главный чат",
+      "x": 163,
+      "y": 242
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Главный чат",
+      "x": 163,
+      "y": 242
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Лента",
+      "x": 163,
+      "y": 302
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Лента",
+      "x": 163,
+      "y": 302
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Лента",
+      "x": 163,
+      "y": 302
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Лента",
+      "x": 163,
+      "y": 302
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Лента",
+      "x": 163,
+      "y": 302
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Лента",
+      "x": 163,
+      "y": 302
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Идеи",
+      "x": 163,
+      "y": 362
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Идеи",
+      "x": 163,
+      "y": 362
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Идеи",
+      "x": 163,
+      "y": 362
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Идеи",
+      "x": 163,
+      "y": 362
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Идеи",
+      "x": 163,
+      "y": 362
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Идеи",
+      "x": 163,
+      "y": 362
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Мои задачи",
+      "x": 163,
+      "y": 422
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Мои задачи",
+      "x": 163,
+      "y": 422
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Мои задачи",
+      "x": 163,
+      "y": 422
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Мои задачи",
+      "x": 163,
+      "y": 422
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Мои задачи",
+      "x": 163,
+      "y": 422
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Мои задачи",
+      "x": 163,
+      "y": 422
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Библиотека",
+      "x": 163,
+      "y": 435
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Библиотека",
+      "x": 163,
+      "y": 435
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Библиотека",
+      "x": 163,
+      "y": 435
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Библиотека",
+      "x": 163,
+      "y": 435
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Библиотека",
+      "x": 163,
+      "y": 435
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Библиотека",
+      "x": 163,
+      "y": 435
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 266,
+      "y": 811
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 266,
+      "y": 811
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 266,
+      "y": 811
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Новая задача +",
+      "x": 96,
+      "y": 230
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Новая задача +",
+      "x": 96,
+      "y": 230
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Новая задача +",
+      "x": 96,
+      "y": 230
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 55,
+      "y": 811
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 55,
+      "y": 811
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 55,
+      "y": 811
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Лента",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "",
+      "x": 55,
+      "y": 811
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "",
+      "x": 55,
+      "y": 811
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "",
+      "x": 55,
+      "y": 811
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "SPAN",
+      "text": "☰",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "BUTTON",
+      "text": "Товар по фото накладной +",
+      "x": 163,
+      "y": 592
+    },
+    {
+      "type": "mouseup",
+      "target": "BUTTON",
+      "text": "Товар по фото накладной +",
+      "x": 163,
+      "y": 592
+    },
+    {
+      "type": "click",
+      "target": "BUTTON",
+      "text": "Товар по фото накладной +",
+      "x": 163,
+      "y": 592
+    },
+    {
+      "type": "mousedown",
+      "target": "DIALOG",
+      "text": "Добавить в разговор×Фото накладной или заказ-нарядаВыберите ",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mouseup",
+      "target": "DIALOG",
+      "text": "Добавить в разговор×Фото накладной или заказ-нарядаВыберите ",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "click",
+      "target": "DIALOG",
+      "text": "Добавить в разговор×Фото накладной или заказ-нарядаВыберите ",
+      "x": 40,
+      "y": 40
+    },
+    {
+      "type": "mousedown",
+      "target": "DIALOG",
+      "text": "Добавить в разговор×Фото накладной или заказ-нарядаВыберите ",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "mouseup",
+      "target": "DIALOG",
+      "text": "Добавить в разговор×Фото накладной или заказ-нарядаВыберите ",
+      "x": 196,
+      "y": 62
+    },
+    {
+      "type": "click",
+      "target": "DIALOG",
+      "text": "Добавить в разговор×Фото накладной или заказ-нарядаВыберите ",
+      "x": 196,
+      "y": 62
+    }
+  ],
+  "geometry": {
+    "active": "<button type=\"button\" class=\"companion-circle\" aria-label=\"Открыть меню\" aria-haspopup=\"dialog\"><span class=\"companion-menu-icon\" aria-hidden=\"true\">☰</span></button>",
+    "app": {
+      "x": 0,
+      "y": 0,
+      "width": 393,
+      "height": 852,
+      "top": 0,
+      "right": 393,
+      "bottom": 852,
+      "left": 0
+    },
+    "nav": {
+      "x": 16,
+      "y": 778,
+      "width": 361,
+      "height": 66,
+      "top": 778,
+      "right": 377,
+      "bottom": 844,
+      "left": 16
+    },
+    "editing": "maya-companion-chat",
+    "space": "74px",
+    "pointer": false
+  },
+  "exceptions": [],
+  "issues": [
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 43,
+          "violatingNodeAttribute": ""
+        }
+      }
+    },
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 45,
+          "violatingNodeAttribute": ""
+        }
+      }
+    },
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 47,
+          "violatingNodeAttribute": ""
+        }
+      }
+    }
+  ]
+}

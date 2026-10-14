@@ -252,3 +252,19 @@ separate Chrome proof covers order, focus, detail return and refusal. Fresh runt
 types/ratchets and targeted old-grouping mutation PASS. No real effects or full
 release certification. Aggregated free windows without a service remain unresolved.
 See [checkpoint](../../MAYA-SCHEDULE-MULTILANE-CHECKPOINT-20261014.md).
+
+## 2026-10-14 — invoice photo sheet
+
+Product `b3c9ad3fc33960ab2e83296b3d32e376e087269c`, final tested candidate
+`bdba69cdf583ac8970cec699a60a0cd6aa33e376`, presents the existing GoodsPhoto owner
+in the reference bottom sheet. Native modal focus, cancellation/late-response
+refusal, ephemeral field cleanup, explicit purchase-price verification and
+uncertain-operation no-replay behavior are proved through emitted React/runtime.
+The final test-only commit fixes a loopback request-arrival race in the schedule
+harness; product runtime/backend contracts are unchanged.
+Fresh runtime 846 PASS + 7 SKIP, carrier 198 PASS, browser 386 PASS, NS-1 16 PASS,
+packaging 18 PASS, parity/ratchets and targeted Escape mutation PASS.
+This supersedes only the inline GoodsPhoto presentation. Generic media/file
+storage, prototype demo actions, real OCR/provider acceptance and full release
+certification remain outside this unit. See
+[checkpoint](../../MAYA-COMPANION-PHOTO-SHEET-CHECKPOINT-20261014.md).

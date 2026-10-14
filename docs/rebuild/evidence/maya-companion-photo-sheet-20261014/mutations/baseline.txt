@@ -1,0 +1,1 @@
+{"status":"PASS","checks":38,"out":"/private/tmp/maya-companion-photo-mutation-final02-baseline-20261014"}

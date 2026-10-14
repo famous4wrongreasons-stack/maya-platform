@@ -1,0 +1,1 @@
+{"status":"FAIL","checks":11,"failure":"Escape clears ephemeral picker and returns to actual plus opener","out":"/private/tmp/maya-companion-photo-mutation-final02-mutant-20261014"}

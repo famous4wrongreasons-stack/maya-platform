@@ -1,0 +1,88 @@
+{
+  "candidate": "bdba69cdf583ac8970cec699a60a0cd6aa33e376",
+  "fullReleaseCertification": false,
+  "actualBackend": false,
+  "actualEmittedRuntimeReact": true,
+  "syntheticApiOnly": true,
+  "realOcr": false,
+  "realDocuments": false,
+  "counts": {
+    "runtime": {
+      "tests": 853,
+      "pass": 846,
+      "fail": 0,
+      "skipped": 7
+    },
+    "carrier": {
+      "tests": 198,
+      "pass": 198,
+      "fail": 0,
+      "skipped": 0
+    },
+    "packaging-tests": {
+      "tests": 18,
+      "pass": 18,
+      "fail": 0,
+      "skipped": 0
+    }
+  },
+  "browserCounts": {
+    "chat-browser": 35,
+    "navigation-browser": 207,
+    "voice-browser": 56,
+    "schedule-browser": 50,
+    "photo-browser": 38
+  },
+  "effects": {
+    "production": 0,
+    "retainedSalonDatabase": 0,
+    "keychain": 0,
+    "realOtp": 0,
+    "realYclients": 0,
+    "realModel": 0,
+    "iosInstall": 0,
+    "push": 0,
+    "merge": 0
+  },
+  "mutation": [
+    {
+      "stage": "baseline",
+      "exit": 0,
+      "status": "PASS",
+      "checks": 38,
+      "failure": null,
+      "browserReceipt": "/private/tmp/maya-companion-photo-mutation-final02-baseline-20261014/receipt.json"
+    },
+    {
+      "stage": "mutant",
+      "exit": 1,
+      "status": "FAIL",
+      "checks": 11,
+      "failure": "Escape clears ephemeral picker and returns to actual plus opener",
+      "browserReceipt": "/private/tmp/maya-companion-photo-mutation-final02-mutant-20261014/receipt.json"
+    },
+    {
+      "stage": "restored",
+      "exit": 0,
+      "status": "PASS",
+      "checks": 38,
+      "failure": null,
+      "browserReceipt": "/private/tmp/maya-companion-photo-mutation-final02-restored-20261014/receipt.json"
+    }
+  ],
+  "developmentFailures": [
+    {
+      "stage": "photo-dev01",
+      "result": "test read pending response before loopback request arrival; wait added to test only"
+    },
+    {
+      "stage": "photo-navigation-dev01",
+      "result": "incorrect expected fallback; actual focus returns to visible menu opener; assertion corrected, product unchanged"
+    },
+    {
+      "candidate": "b3c9ad3fc33960ab2e83296b3d32e376e087269c",
+      "stage": "first final schedule browser",
+      "result": "48 checks then null pending.res; DOM pending does not imply server receipt; test-only wait commit bdba69cd preserves existing 8s timeout"
+    }
+  ]
+}

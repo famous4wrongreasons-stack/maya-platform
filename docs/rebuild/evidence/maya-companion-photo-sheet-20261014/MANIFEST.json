@@ -1,0 +1,812 @@
+{
+  "candidate": "bdba69cdf583ac8970cec699a60a0cd6aa33e376",
+  "scope": "local synthetic scoped proofs; NOT release certification",
+  "artifacts": [
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/summary.json",
+      "archive": "summary.json",
+      "sourceSha256": "0944e322799c70dc23d0fee043e304ef5127b5db825405a8e0203255c6854e4d",
+      "archiveSha256": "0944e322799c70dc23d0fee043e304ef5127b5db825405a8e0203255c6854e4d",
+      "sourceSize": 8870,
+      "archiveSize": 8870,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-run.py",
+      "archive": "runner.py",
+      "sourceSha256": "3bb9c33f96605ac9da79d54116026c57c31687f5dba700ec55b66ad835d723a9",
+      "archiveSha256": "3bb9c33f96605ac9da79d54116026c57c31687f5dba700ec55b66ad835d723a9",
+      "sourceSize": 3838,
+      "archiveSize": 3838,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/runtime.txt",
+      "archive": "logs/runtime.txt",
+      "sourceSha256": "e0e287de82df2e88c15f40fcb3e0c0b9f6dc1130c8c433c7b0ac6978756dd81f",
+      "archiveSha256": "e0e287de82df2e88c15f40fcb3e0c0b9f6dc1130c8c433c7b0ac6978756dd81f",
+      "sourceSize": 213024,
+      "archiveSize": 213024,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/payload-build.txt",
+      "archive": "logs/payload-build.txt",
+      "sourceSha256": "fb736a5033d8319559902aa5fb84427060a5853a6cfddfdf1ede73d0590aa9fb",
+      "archiveSha256": "fb736a5033d8319559902aa5fb84427060a5853a6cfddfdf1ede73d0590aa9fb",
+      "sourceSize": 2288,
+      "archiveSize": 2288,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/runtime-reproducible.txt",
+      "archive": "logs/runtime-reproducible.txt",
+      "sourceSha256": "99024fee4724cee4cf7461ec00b94613680149ffacc086119d11c872c7c47d67",
+      "archiveSha256": "99024fee4724cee4cf7461ec00b94613680149ffacc086119d11c872c7c47d67",
+      "sourceSize": 1150,
+      "archiveSize": 1150,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/carrier.txt",
+      "archive": "logs/carrier.txt",
+      "sourceSha256": "10e70f8208dd9c0131b21b8b80911cd1bd954f68e15386296a077069bf767eb9",
+      "archiveSha256": "10e70f8208dd9c0131b21b8b80911cd1bd954f68e15386296a077069bf767eb9",
+      "sourceSize": 41924,
+      "archiveSize": 41924,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/runtime-ratchets.txt",
+      "archive": "logs/runtime-ratchets.txt",
+      "sourceSha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "archiveSha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "sourceSize": 12458,
+      "archiveSize": 12458,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/carrier-ratchets.txt",
+      "archive": "logs/carrier-ratchets.txt",
+      "sourceSha256": "9c9dd5d2e95815e834abf4fb37f14e912fa39892a46a54fa8263132617a98256",
+      "archiveSha256": "5a71a6ba5543f81d2dd72deccde61b8e8eb59d504be4e1f898f21d8f38c19236",
+      "sourceSize": 7864,
+      "archiveSize": 7861,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/packaging-parity.txt",
+      "archive": "logs/packaging-parity.txt",
+      "sourceSha256": "d0416729d4d287bdaf201425d399e9a32178d41a7aebfea65bee4fd44851934a",
+      "archiveSha256": "d0416729d4d287bdaf201425d399e9a32178d41a7aebfea65bee4fd44851934a",
+      "sourceSize": 732,
+      "archiveSize": 732,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/packaging-tests.txt",
+      "archive": "logs/packaging-tests.txt",
+      "sourceSha256": "5d4bb35f5809a98d389977e60790ed34b9e1802055656fb2d9a1cf51ddbae774",
+      "archiveSha256": "5d4bb35f5809a98d389977e60790ed34b9e1802055656fb2d9a1cf51ddbae774",
+      "sourceSize": 3309,
+      "archiveSize": 3309,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/chat-browser.txt",
+      "archive": "logs/chat-browser.txt",
+      "sourceSha256": "c5f1ad183dd997dd42ad81b9ff57ee4e857b8739269d35b9230c9ada97c3c158",
+      "archiveSha256": "c5f1ad183dd997dd42ad81b9ff57ee4e857b8739269d35b9230c9ada97c3c158",
+      "sourceSize": 108,
+      "archiveSize": 108,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-chat-browser-20261014/receipt.json",
+      "archive": "browsers/chat-browser.json",
+      "sourceSha256": "5b80ba397165ea3d1daa20a659a5422ed9aca115ac08329c79fdde6f78c9a133",
+      "archiveSha256": "5b80ba397165ea3d1daa20a659a5422ed9aca115ac08329c79fdde6f78c9a133",
+      "sourceSize": 2953,
+      "archiveSize": 2953,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/navigation-browser.txt",
+      "archive": "logs/navigation-browser.txt",
+      "sourceSha256": "215c5ff8c24c141acc37874a72503e2902170c982f58477ff7619583e1589423",
+      "archiveSha256": "215c5ff8c24c141acc37874a72503e2902170c982f58477ff7619583e1589423",
+      "sourceSize": 115,
+      "archiveSize": 115,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/receipt.json",
+      "archive": "browsers/navigation-browser.json",
+      "sourceSha256": "f4fe8878ea3c71636558413da966f81d9cb8bf04de10ef1db5dd181a2891e063",
+      "archiveSha256": "f4fe8878ea3c71636558413da966f81d9cb8bf04de10ef1db5dd181a2891e063",
+      "sourceSize": 12564,
+      "archiveSize": 12564,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/voice-browser.txt",
+      "archive": "logs/voice-browser.txt",
+      "sourceSha256": "7974cc9249537e3d5c1c18691fef4561cb331bf0603f04d24714545665f88269",
+      "archiveSha256": "7974cc9249537e3d5c1c18691fef4561cb331bf0603f04d24714545665f88269",
+      "sourceSize": 109,
+      "archiveSize": 109,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-voice-browser-20261014/receipt.json",
+      "archive": "browsers/voice-browser.json",
+      "sourceSha256": "3b6cea64b6814c3a736c2dc2eacdd2b28c124c934e0971705623a344d2924a09",
+      "archiveSha256": "3b6cea64b6814c3a736c2dc2eacdd2b28c124c934e0971705623a344d2924a09",
+      "sourceSize": 4348,
+      "archiveSize": 4348,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/schedule-browser.txt",
+      "archive": "logs/schedule-browser.txt",
+      "sourceSha256": "6c98a3ecfb34c16335d5171da6e28ad98530d7b4573780a1e2149851915f316f",
+      "archiveSha256": "6c98a3ecfb34c16335d5171da6e28ad98530d7b4573780a1e2149851915f316f",
+      "sourceSize": 112,
+      "archiveSize": 112,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-schedule-browser-20261014/receipt.json",
+      "archive": "browsers/schedule-browser.json",
+      "sourceSha256": "804f5c50a97b14c8a1db2365152fe51224653f8db0862bd5c2dcf147af91568c",
+      "archiveSha256": "804f5c50a97b14c8a1db2365152fe51224653f8db0862bd5c2dcf147af91568c",
+      "sourceSize": 4461,
+      "archiveSize": 4461,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/ns1-roundtrip.txt",
+      "archive": "logs/ns1-roundtrip.txt",
+      "sourceSha256": "9fd777832b3ae3f76e75fa85d605c0cfb88f5f27b2fa0641601dfe16d6039dc5",
+      "archiveSha256": "9fd777832b3ae3f76e75fa85d605c0cfb88f5f27b2fa0641601dfe16d6039dc5",
+      "sourceSize": 1150,
+      "archiveSize": 1150,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-20261014/photo-browser.txt",
+      "archive": "logs/photo-browser.txt",
+      "sourceSha256": "335cc84a568206e5f4089200cc7fb6b4c1c943a0cc7c3e0f71ef95a9655884f1",
+      "archiveSha256": "335cc84a568206e5f4089200cc7fb6b4c1c943a0cc7c3e0f71ef95a9655884f1",
+      "sourceSize": 109,
+      "archiveSize": 109,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-photo-browser-20261014/receipt.json",
+      "archive": "browsers/photo-browser.json",
+      "sourceSha256": "f923fa7405b71c2ef8e06430515bec6a2eee882190207b318830de9f6e0f60e2",
+      "archiveSha256": "f923fa7405b71c2ef8e06430515bec6a2eee882190207b318830de9f6e0f60e2",
+      "sourceSize": 3359,
+      "archiveSize": 3359,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-photo-browser-20261014/photo-320.png",
+      "archive": "screenshots/photo-320.png",
+      "sourceSha256": "e8e32bd193faa7c25bcde589b4fe7de852ab4f6c415ca9b4e3ea30513d325497",
+      "archiveSha256": "e8e32bd193faa7c25bcde589b4fe7de852ab4f6c415ca9b4e3ea30513d325497",
+      "sourceSize": 58787,
+      "archiveSize": 58787,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-photo-browser-20261014/photo-393.png",
+      "archive": "screenshots/photo-393.png",
+      "sourceSha256": "1a5390ceb2d1479cbe4679fad3f78356c980eeebcbe68ef18b486d73cfe2db7b",
+      "archiveSha256": "1a5390ceb2d1479cbe4679fad3f78356c980eeebcbe68ef18b486d73cfe2db7b",
+      "sourceSize": 62971,
+      "archiveSize": 62971,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-photo-browser-20261014/photo-1280.png",
+      "archive": "screenshots/photo-1280.png",
+      "sourceSha256": "98a894a14da26dbfb3df29e144c4df141f61fd64245fa1beafde79dff26b8e36",
+      "archiveSha256": "98a894a14da26dbfb3df29e144c4df141f61fd64245fa1beafde79dff26b8e36",
+      "sourceSize": 79476,
+      "archiveSize": 79476,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-photo-browser-20261014/photo-review-large-text.png",
+      "archive": "screenshots/photo-review-large-text.png",
+      "sourceSha256": "dd3d726195be888c6141dc3db6aebb4b7cf96c0f7566aab0d697f384e94d9dfa",
+      "archiveSha256": "dd3d726195be888c6141dc3db6aebb4b7cf96c0f7566aab0d697f384e94d9dfa",
+      "sourceSize": 40427,
+      "archiveSize": 40427,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-photo-browser-20261014/photo-review.png",
+      "archive": "screenshots/photo-review.png",
+      "sourceSha256": "2df91f55da6308314e50ae0656c08ebf44560bf89baed358dcc25cb16796e86e",
+      "archiveSha256": "2df91f55da6308314e50ae0656c08ebf44560bf89baed358dcc25cb16796e86e",
+      "sourceSize": 57846,
+      "archiveSize": 57846,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-mutation-final02-20261014/receipt.json",
+      "archive": "mutations/receipt.json",
+      "sourceSha256": "0e656abef707e377db0a42dcb11cc980aea9ec5b8d2472e46a739ebc4f951efa",
+      "archiveSha256": "0e656abef707e377db0a42dcb11cc980aea9ec5b8d2472e46a739ebc4f951efa",
+      "sourceSize": 1100,
+      "archiveSize": 1100,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-photo-sheet-mutation-final02-20261014.py",
+      "archive": "mutations/runner.py",
+      "sourceSha256": "f677c50d37bf1b1df878bd0c257dfef7f98b58e7d554e8824a40b15b6e3f6bb7",
+      "archiveSha256": "f677c50d37bf1b1df878bd0c257dfef7f98b58e7d554e8824a40b15b6e3f6bb7",
+      "sourceSize": 2806,
+      "archiveSize": 2806,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-mutation-final02-20261014/baseline.txt",
+      "archive": "mutations/baseline.txt",
+      "sourceSha256": "4677589e5bc7838f2ee99f662be9c3414649b1e2c0f9d0f52d41860df68474c4",
+      "archiveSha256": "4677589e5bc7838f2ee99f662be9c3414649b1e2c0f9d0f52d41860df68474c4",
+      "sourceSize": 107,
+      "archiveSize": 107,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-mutation-final02-20261014/baseline-build.txt",
+      "archive": "mutations/baseline-build.txt",
+      "sourceSha256": "8d439b5cb4e92c7cf2f4c0707c21a92195e2d8c4e320b9085b6ee1a8eca3e32b",
+      "archiveSha256": "8d439b5cb4e92c7cf2f4c0707c21a92195e2d8c4e320b9085b6ee1a8eca3e32b",
+      "sourceSize": 185,
+      "archiveSize": 185,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-mutation-final02-baseline-20261014/receipt.json",
+      "archive": "mutations/baseline-browser.json",
+      "sourceSha256": "b4f893f4f33a8681dea548fd37b3e45645de86e2a134744a3e3e5b7ac327137a",
+      "archiveSha256": "b4f893f4f33a8681dea548fd37b3e45645de86e2a134744a3e3e5b7ac327137a",
+      "sourceSize": 3359,
+      "archiveSize": 3359,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-mutation-final02-20261014/mutant.txt",
+      "archive": "mutations/mutant.txt",
+      "sourceSha256": "5fe6e6602b32b2b8652b2a9429a5cedceec4efcc87b28478a455aa9b19520eae",
+      "archiveSha256": "5fe6e6602b32b2b8652b2a9429a5cedceec4efcc87b28478a455aa9b19520eae",
+      "sourceSize": 182,
+      "archiveSize": 182,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-mutation-final02-20261014/mutant-build.txt",
+      "archive": "mutations/mutant-build.txt",
+      "sourceSha256": "20fd7767af3e2121faf3e9098e8b210c18558936d08f99917977de24650e0d41",
+      "archiveSha256": "20fd7767af3e2121faf3e9098e8b210c18558936d08f99917977de24650e0d41",
+      "sourceSize": 185,
+      "archiveSize": 185,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-mutation-final02-mutant-20261014/receipt.json",
+      "archive": "mutations/mutant-browser.json",
+      "sourceSha256": "fdb4121ca6237c3cfddab55c47989547a4e0aa4c59eef38310b5ee6de458ce2e",
+      "archiveSha256": "fdb4121ca6237c3cfddab55c47989547a4e0aa4c59eef38310b5ee6de458ce2e",
+      "sourceSize": 1889,
+      "archiveSize": 1889,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-mutation-final02-20261014/restored.txt",
+      "archive": "mutations/restored.txt",
+      "sourceSha256": "7c87f6fc3dcbba392731573f960f0a2ff6b7d1da00b1f2b11a3716114c53adb3",
+      "archiveSha256": "7c87f6fc3dcbba392731573f960f0a2ff6b7d1da00b1f2b11a3716114c53adb3",
+      "sourceSize": 107,
+      "archiveSize": 107,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-mutation-final02-20261014/restored-build.txt",
+      "archive": "mutations/restored-build.txt",
+      "sourceSha256": "8d439b5cb4e92c7cf2f4c0707c21a92195e2d8c4e320b9085b6ee1a8eca3e32b",
+      "archiveSha256": "8d439b5cb4e92c7cf2f4c0707c21a92195e2d8c4e320b9085b6ee1a8eca3e32b",
+      "sourceSize": 185,
+      "archiveSize": 185,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-mutation-final02-restored-20261014/receipt.json",
+      "archive": "mutations/restored-browser.json",
+      "sourceSha256": "b4f893f4f33a8681dea548fd37b3e45645de86e2a134744a3e3e5b7ac327137a",
+      "archiveSha256": "b4f893f4f33a8681dea548fd37b3e45645de86e2a134744a3e3e5b7ac327137a",
+      "sourceSize": 3359,
+      "archiveSize": 3359,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-dev01-20261014/receipt.json",
+      "archive": "development/photo-dev01.json",
+      "sourceSha256": "ebe5b1c21d0bc8f3c480d9177926b982a08fc27cc65c643f16e44b079ca4ce37",
+      "archiveSha256": "ebe5b1c21d0bc8f3c480d9177926b982a08fc27cc65c643f16e44b079ca4ce37",
+      "sourceSize": 2220,
+      "archiveSize": 2220,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-dev02-20261014/receipt.json",
+      "archive": "development/photo-dev02.json",
+      "sourceSha256": "a01be4b4aa5e8f99c19e321c9d6fe8a6d0d040e4fcaff723359519a3900eb063",
+      "archiveSha256": "a01be4b4aa5e8f99c19e321c9d6fe8a6d0d040e4fcaff723359519a3900eb063",
+      "sourceSize": 3358,
+      "archiveSize": 3358,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-navigation-dev01-20261014/receipt.json",
+      "archive": "development/photo-navigation-dev01.json",
+      "sourceSha256": "3fbb0bbcbcb76a5c624d24a05776d5cd45098546624d6ed1d917a5c14796addc",
+      "archiveSha256": "3fbb0bbcbcb76a5c624d24a05776d5cd45098546624d6ed1d917a5c14796addc",
+      "sourceSize": 39776,
+      "archiveSize": 39776,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-navigation-dev02-20261014/receipt.json",
+      "archive": "development/photo-navigation-dev02.json",
+      "sourceSha256": "6cb2f58e4aca547101c5d8b47b22bb113c56d059324004447db4b7db3c87bc00",
+      "archiveSha256": "6cb2f58e4aca547101c5d8b47b22bb113c56d059324004447db4b7db3c87bc00",
+      "sourceSize": 12563,
+      "archiveSize": 12563,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final01-20261014/summary.json",
+      "archive": "development/first-final-summary.json",
+      "sourceSha256": "f787da47bcf10e31a75b83970eda8e79bb46544a0b45521fd632e49cf5a860d8",
+      "archiveSha256": "f787da47bcf10e31a75b83970eda8e79bb46544a0b45521fd632e49cf5a860d8",
+      "sourceSize": 7805,
+      "archiveSize": 7805,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final01-20261014/schedule-browser.txt",
+      "archive": "development/first-final-schedule.txt",
+      "sourceSha256": "039b44484f35ac3218a4900776692df561017a118d0b72d1b46f50405251e16b",
+      "archiveSha256": "039b44484f35ac3218a4900776692df561017a118d0b72d1b46f50405251e16b",
+      "sourceSize": 171,
+      "archiveSize": 171,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final01-schedule-browser-20261014/receipt.json",
+      "archive": "development/first-final-schedule-browser.json",
+      "sourceSha256": "53afffcc0030d1a22794f58b645add9b16194b5b809dafae58a75f3c03f941fb",
+      "archiveSha256": "53afffcc0030d1a22794f58b645add9b16194b5b809dafae58a75f3c03f941fb",
+      "sourceSize": 5195,
+      "archiveSize": 5195,
+      "sensitiveData": false
+    }
+  ],
+  "omitted": [
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-chat-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-chat-browser-20261014/chat-393.png",
+      "sha256": "0e61bcbb08e7f3d1c175fb5bf41d50dc43274d49b467f7f493e28b4bc28d8ded",
+      "size": 49515,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-chat-browser-20261014/chat-320.png",
+      "sha256": "0493eec045d1b286c3e27fd4c59b8c529e2625e3e2b5e9dad65c37449577a792",
+      "size": 48426,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-chat-browser-20261014/chat-427.png",
+      "sha256": "15ce0299c707afee32cace286362f8a9e95a1c5a8a9c86ff468f8c8aac3cfeb5",
+      "size": 50223,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-chat-browser-20261014/chat-1280.png",
+      "sha256": "5ae75bfa5dfab5519e8054f6d2f8c8fe12fef56355307df6373d68f0e940a31e",
+      "size": 56453,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-chat-browser-20261014/large-text-393.png",
+      "sha256": "b06665a501bec9dcc6d67a9b619b6e7d8c9774c766349267e4a3c980d6273f2a",
+      "size": 68943,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-chat-browser-20261014/keyboard-height-393.png",
+      "sha256": "b3fa65ac1ed16321d9e1f5fa74caf44fcad094fabb0e7b830c6f377531ff03f1",
+      "size": 41483,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-chat-browser-20261014/menu-393.png",
+      "sha256": "e2acebb61794f7a4c4b57b4de14400fad5a89cf778c7ca13013f51befc5f3fcc",
+      "size": 50418,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-chat-browser-20261014/thinking-393.png",
+      "sha256": "71be4a750decf5ab4ffaaf9aa4a6cc18f41dcc39d0f6b64e0bcb5efa3c627339",
+      "size": 54767,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-chat-browser-20261014/failure-393.png",
+      "sha256": "0195aee3fa7ce426212a7ba26514aafceb49ce38aeb88c6779b61c1ab33e6939",
+      "size": 69408,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/about-393.png",
+      "sha256": "d8cdcb25aab510de9195af54fd418d3e4e3f85f5dc0ea047c61e061bc9b1ce6e",
+      "size": 70868,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/about-320.png",
+      "sha256": "7e0b3702ff02a424a07b2271cfee8bbfe21687b0053018e2915f5fad601ebb98",
+      "size": 54946,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/about-427.png",
+      "sha256": "d8cc7dee448c22100fe04899caee573f140791e2d8c96a9f842b960074642c88",
+      "size": 70186,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/about-1280.png",
+      "sha256": "f749577cc9daf9b5679c43079efa68cf48f1c48c769eb4594836dd5b606d8a8b",
+      "size": 86977,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/about-large-text.png",
+      "sha256": "802542f90dd82b89866e17ae19bdd194a8186469dc0e38c3b921c2790b7d18f2",
+      "size": 34315,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/about-motion-off.png",
+      "sha256": "8f204a6302a9aceee40bee000f4b47b15677df2314f602eac7901fd955b416b2",
+      "size": 69422,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/settings-393.png",
+      "sha256": "b040896815e190734955351d177f11d666e9c9f2d7a5c33eac4670cc9484c621",
+      "size": 63927,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/settings-320.png",
+      "sha256": "fdffc31fa94a3b11b91df4e982ad425c0a11162c8f8b1f182da6ff68823c4225",
+      "size": 53659,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/settings-427.png",
+      "sha256": "3ee106e5cb83c98dc89f4a993fc5b7a43976c151486399f7d924a7cf5a039913",
+      "size": 76153,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/settings-1280.png",
+      "sha256": "2935bede4090fb0d8bc0b5c38e90d4876e658990b4fb21c08866641e3d3d371c",
+      "size": 91611,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/settings-large-text.png",
+      "sha256": "4b9fe72a7e4dd8ac33787bad2c3f197eebf97302f880139dbd40c30eff14023f",
+      "size": 28728,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/navigation-chat-393.png",
+      "sha256": "328503c6fc5b918a43c0ae48cd88818e7c9139d5d5f27358a437babf99847ae0",
+      "size": 49732,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/navigation-chat-320.png",
+      "sha256": "e3e567ac19f5974b45deeb96d6668a6f931d9df3fc95b1d33f72e8513197b707",
+      "size": 48565,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/navigation-chat-427.png",
+      "sha256": "761575d51e32e822b1c9d9cfec04483fe1e579c2c3a34362be72019eba8ffa52",
+      "size": 50323,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/navigation-chat-1280.png",
+      "sha256": "ccd1787d0772bd95804a33f043b311239367bc6c257494cf8828009d8fe0ff28",
+      "size": 56632,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/navigation-feed.png",
+      "sha256": "e81b9a66f6a76a7edddafe6296896d2a32bf5461ca03baaec32d6333e4abc198",
+      "size": 72858,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/navigation-ideas.png",
+      "sha256": "bea4e9ba86e0791bb6c080283052552a8b950b901e5b4cf6c89812be8c72c1f2",
+      "size": 67090,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/navigation-tasks.png",
+      "sha256": "b6568ff4ef0babfca7902a42d4ed86ee758270d4294e576a178b42099fe04560",
+      "size": 57684,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/navigation-library.png",
+      "sha256": "abf89aa3cd9a790f00a47330fe4432ef42cd13e5275497e433dc9fb6edc1e074",
+      "size": 57133,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/drawer-393.png",
+      "sha256": "f7d619611a5c8675f1a8ce129fd4258ebdf0bcd65a100a58a88e2a76768ccb26",
+      "size": 51581,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/drawer-320.png",
+      "sha256": "e7b4a1275dbfa201db0db99da7eb1d0fcc24621033a385900588970a3031035b",
+      "size": 42588,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/drawer-427.png",
+      "sha256": "232afff2723ebc470f5713fd00c9913d0dac6ea6b486dc021756375a026a2a39",
+      "size": 55684,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/drawer-1280.png",
+      "sha256": "bc685016330d4a0bc9f0b60d8a7771cc8afec2ccd2f65c2a58749c828dcbefa2",
+      "size": 109480,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/drawer-large-text.png",
+      "sha256": "a91b53c0c9a126c90d12e371e4b7ecf5b0a31561bf4056d2eedfcb71ce0b2fa0",
+      "size": 43251,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/navigation-feed-end.png",
+      "sha256": "02910ee6659719c7e44b4563c4f22ed4901b5500407730a776c2c03e9c3ef289",
+      "size": 64356,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/navigation-large-text.png",
+      "sha256": "b95d495faea237a72ba8bc286157dbed942183dd72a5dfd9115e1fc456beeb84",
+      "size": 65727,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-navigation-browser-20261014/navigation-keyboard-height.png",
+      "sha256": "f4f4c6f7761c07bc018da4decaed35bf8298d0a9468f9b5771207b21cfd49dde",
+      "size": 34074,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-voice-browser-20261014/voice-listening-393.png",
+      "sha256": "40812b703dbd919fb3446c4cfa9a17af5a81657194c90b97719cc91406ce41e0",
+      "size": 54754,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-voice-browser-20261014/voice-listening-320.png",
+      "sha256": "c0cd03ae44376cc2b97d3c7d44acee36c71a04b2baac586bdc645264a2944bd2",
+      "size": 44887,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-voice-browser-20261014/voice-listening-427.png",
+      "sha256": "e4e0d5484bfcfb628a17f1580b951233feffb46d3ff3ec30c81082389af317ef",
+      "size": 55093,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-voice-browser-20261014/voice-listening-1280.png",
+      "sha256": "7108b3e128ec4b83b93943b372b3340d6d6cfd136fac8f54b9b1d2a3e483f2d1",
+      "size": 71669,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-voice-browser-20261014/voice-large-text-320.png",
+      "sha256": "8ff93b8ad421e0df0f5b58ce30aa4062ed46d30b355db20fe0a283fb580095c6",
+      "size": 33261,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-voice-browser-20261014/voice-arming.png",
+      "sha256": "06b711faac2bae5fc21c2b0fe5e07b755b27bccb362f18b620daf0ec196979ed",
+      "size": 50741,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-voice-browser-20261014/voice-held.png",
+      "sha256": "e76535210dfd5fefeeba878dcbccc862dfcb4a488a918dd75ab86609aa089b56",
+      "size": 58305,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-voice-browser-20261014/voice-encoding.png",
+      "sha256": "813af3d4d3589c5f062d9652460e4cf23a9940008880031901858ee60c6086a9",
+      "size": 52440,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-voice-browser-20261014/voice-too-short.png",
+      "sha256": "55d4296d79e59cfcd30ad23ffb7fae70cae9fc7aaaa51470cd719fdb2ba7b27e",
+      "size": 50983,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-voice-browser-20261014/voice-transcribing.png",
+      "sha256": "31f3eb2b63a47fc4eea5abf9aca51a367df93f4177460b185635548bb77f2217",
+      "size": 49503,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-voice-browser-20261014/voice-not-recognized.png",
+      "sha256": "2f5f015cd94728b2e34b9d10752f2ea2aa3b9906ef01b735c57790c8fc9c7a8e",
+      "size": 50758,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-voice-browser-20261014/voice-return-chat.png",
+      "sha256": "dfa3b30a02933860c43392709ef22b5eab7b1558ca9fd20fe5122af704ec336a",
+      "size": 55306,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-voice-browser-20261014/voice-unavailable.png",
+      "sha256": "5b3e51f22ad5148451d8d36fa094e7112c1ce636d976b3a2c92ac374446d2d4b",
+      "size": 58879,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-schedule-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-schedule-browser-20261014/schedule-card-393.png",
+      "sha256": "88a6f310897495f2ad73caab8b8f3a87987fa0f926acd8dec2c294ceeb13794a",
+      "size": 54845,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-schedule-browser-20261014/schedule-rows-320.png",
+      "sha256": "1875f53096aac6072a1ed3e7ca701cb1e745320e31d192b9a804bc30627b1bf5",
+      "size": 48016,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-schedule-browser-20261014/schedule-rows-393.png",
+      "sha256": "3beb95587f3694289706ba8dbd7f3abc575bf054b0a4ceb6c37d798d42b98234",
+      "size": 55486,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-schedule-browser-20261014/schedule-rows-1280.png",
+      "sha256": "494b7641604a90dd8c826479a96ee37a744730606fe00b33a299906f4e8a35e6",
+      "size": 95821,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-schedule-browser-20261014/schedule-rows-text-200.png",
+      "sha256": "b1326a41ead35f553491170a550e16705e58d734def4cf281303dcf362f36f13",
+      "size": 55482,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-schedule-browser-20261014/schedule-detail-393.png",
+      "sha256": "809c8aea7cd054f46be39a06512bd36fbd867d5722c6c4d1d95724266c80e248",
+      "size": 57083,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-schedule-browser-20261014/schedule-header-320.png",
+      "sha256": "37ad5cc68beee3771e7e3affd2ac70ca304bdd6c6b0ea1e13c9ce4c0286ccce5",
+      "size": 55876,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-schedule-browser-20261014/schedule-header-393.png",
+      "sha256": "2edcc1576852d151ad9152cefa3d1e755e93df55790a96312c44c0e21bf85dae",
+      "size": 66527,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-schedule-browser-20261014/schedule-header-427.png",
+      "sha256": "45022565e217a06a05d664d9de2485085bfb9f272398a95ffa6fc73853af7cd7",
+      "size": 72335,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-schedule-browser-20261014/schedule-header-1280.png",
+      "sha256": "897428f1534bdeaf8cf18a2eef2fe4e1e40e7f6e558ebf06149fde16be8643ea",
+      "size": 82496,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-photo-browser-20261014/photo-427.png",
+      "sha256": "8a855778d02de134ecfbe40b957b110863d42fa8a2a5a70640848fcabca048a4",
+      "size": 62917,
+      "reason": "unchanged surfaces or alternate viewport; receipt retained"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-photo-browser-20261014/rejected.txt",
+      "sha256": "de47c9b27eb8d300dbb5f2c353e632c393262cf06340c4fa7f1b40c4cbd36f90",
+      "size": 20,
+      "reason": "synthetic local byte fixture only; not a real document or OCR acceptance proof"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-photo-browser-20261014/too-large.png",
+      "sha256": "e9a099c75ef837c28bc91683bee127e463fa0ee10c11fd816f8d2d428c0d610e",
+      "size": 2097153,
+      "reason": "synthetic local byte fixture only; not a real document or OCR acceptance proof"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-photo-browser-20261014/late.png",
+      "sha256": "df79318095b5d776a44103b1a7b1c419c09e981bc75bd6ff8d2d39d411482bd1",
+      "size": 16,
+      "reason": "synthetic local byte fixture only; not a real document or OCR acceptance proof"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-photo-browser-20261014/invoice.png",
+      "sha256": "df79318095b5d776a44103b1a7b1c419c09e981bc75bd6ff8d2d39d411482bd1",
+      "size": 16,
+      "reason": "synthetic local byte fixture only; not a real document or OCR acceptance proof"
+    },
+    {
+      "source": "/private/tmp/maya-companion-photo-sheet-final02-photo-browser-20261014/expired.png",
+      "sha256": "df79318095b5d776a44103b1a7b1c419c09e981bc75bd6ff8d2d39d411482bd1",
+      "size": 16,
+      "reason": "synthetic local byte fixture only; not a real document or OCR acceptance proof"
+    }
+  ]
+}
