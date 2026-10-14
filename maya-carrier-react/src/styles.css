@@ -258,6 +258,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .companion-library-menu-done { width:100%; min-height:48px; border:0; border-radius:26px; padding:12px; color:#fff; background:#0068ed; font:inherit; font-size:14px; cursor:pointer; }
 .companion-library-menu :focus-visible { outline:2px solid #0068ed; outline-offset:2px; }
 .companion-library-menu h2:focus { outline:none; }
+
+/* Owner voice sheet, driven by the existing voice state and visible viewport. */
+.companion-voice-sheet { position:fixed; inset:auto 0; top:calc(var(--maya-viewport-top,0px) + var(--maya-viewport-height,100dvh)); transform:translateY(-100%); width:min(100%,560px); max-width:100%; max-height:calc(var(--maya-viewport-height,100dvh) - 24px); margin:0 auto; box-sizing:border-box; padding:0 18px calc(24px + env(safe-area-inset-bottom,0px)); border:0; border-radius:22px 22px 0 0; background:#fff; color:#191a1b; overflow:auto; box-shadow:0 -16px 48px rgb(0 0 0 /20%); }
+.companion-voice-sheet::backdrop { background:rgb(0 0 0 /34%); }
+.companion-voice-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.companion-voice-heading h2 { margin:0; font-size:18px; font-weight:650; line-height:1.4; }
+.companion-voice-body { display:flex; flex-direction:column; align-items:center; gap:16px; padding-top:24px; text-align:center; }
+.companion-voice-body .companion-voice-symbol { color:#738daa; transform:scale(2); margin:8px 0 23px; flex-shrink:0; }
+.companion-voice-status { margin:0; font-size:18px; line-height:1.4; font-weight:600; overflow-wrap:anywhere; }
+.companion-voice-time { margin:0; font-size:22px; line-height:1.4; font-variant-numeric:tabular-nums; }
+.companion-voice-explanation { margin:0; color:#74777c; font-size:13px; line-height:1.5; }
+.companion-voice-body button { width:100%; min-height:48px; padding:12px 16px; border:0; border-radius:26px; font:inherit; font-size:14px; line-height:1.4; cursor:pointer; }
+.companion-voice-send { background:#0068ed; color:#fff; }
+.companion-voice-send:disabled { background:#e4eaf0; color:#74777c; cursor:default; }
+.companion-voice-cancel { background:#f1f2f3; color:#191a1b; }
+.companion-voice-sheet :focus-visible { outline:2px solid #0068ed; outline-offset:2px; }
+.companion-voice-heading h2:focus { outline:none; }
 .companion-report-list li { border-bottom:1px solid #e6e7e9; min-width:0; }
 .companion-report-list button { display:flex; width:100%; align-items:center; gap:12px; border:0; padding:22px 0; background:transparent; color:#191a1b; font:inherit; text-align:left; cursor:pointer; overflow-wrap:anywhere; }
 .companion-report-info { min-width:0; flex:1; }

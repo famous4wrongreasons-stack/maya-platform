@@ -121,3 +121,4 @@ export { IdeasPanel } from '../src/chat/IdeasPanel.tsx';
 export { CompanionNavigation } from '../src/chat/CompanionNavigation.tsx';
 
 export { CompanionHeader } from '../src/chat/CompanionHeader.tsx';
+export { VoiceSheet } from '../src/chat/VoiceSheet.tsx';

@@ -51,6 +51,7 @@ import { PrivacyPanel } from './PrivacyPanel.tsx';
 import { GoodsPhotoPanel } from './GoodsPhotoPanel.tsx';
 import { CompanionHeader } from './CompanionHeader.tsx';
 import { CompanionNavigation, type CompanionSection } from './CompanionNavigation.tsx';
+import { VoiceSheet } from './VoiceSheet.tsx';
 import { useCompanion } from '../identity/MayaCompanion.tsx';
 
 /** The reading face MAYA's own words are set in (app.html:21307). */
@@ -391,6 +392,10 @@ export function ChatScreen({
   const readsView = usePortView(workspaceReads);
   const tasksView = usePortView(ownTasks);
   const voiceView = usePortView(voice);
+  const [voiceSheetOpen, setVoiceSheetOpen] = useState(false);
+  useEffect(() => {
+    if (voiceView.state === 'idle' && voiceView.notice === null) setVoiceSheetOpen(false);
+  }, [voiceView.state, voiceView.notice]);
   const sessionView = usePortView(session);
   const navigationVisible = companion && shellView.primary === 'shell.root' && shellView.fullscreen === null && goodsPhotoView.phase === 'closed';
   const mascot = useCompanion(view, draft, voiceView);
@@ -783,6 +788,9 @@ export function ChatScreen({
         <p className="vh" role="status">
           {voiceStatusSentence(voiceView)}
         </p>
+        {companion ? <VoiceSheet open={voiceSheetOpen} view={voiceView} enabled={view.composer.enabled && !view.inFlight} port={voice}
+          close={() => { voice.cancel(); setVoiceSheetOpen(false); }}
+          focusFallback={() => laneRef.current?.focus({ preventScroll: true })} /> : null}
 
         {/* app.html:21759-21762 — the footer overlays the lane; only the pill takes pointer events. */}
         <div className="maya-chat-composer-dock" hidden={workspaceOpen}
@@ -1028,6 +1036,7 @@ export function ChatScreen({
                       type: 'click' as const,
                       timeStamp: native.timeStamp,
                     };
+                    if (companion) setVoiceSheetOpen(true);
                     if (voiceView.state === 'idle') voice.arm(proof);
                     else voice.send(proof);
                   }}
