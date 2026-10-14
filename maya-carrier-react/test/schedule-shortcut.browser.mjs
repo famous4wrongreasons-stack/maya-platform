@@ -64,6 +64,8 @@ const server=http.createServer(async(req,res)=>{
 const button=text=>`Array.from(document.querySelectorAll('button')).find(b=>(b.getAttribute('aria-label')||b.textContent.trim())===${JSON.stringify(text)})`;
 const composer=`document.querySelector('textarea[aria-disabled]')`;
 const check=async(expression,name)=>{assert.ok(await page.waitFor(expression),name);report.checks.push(name);};
+// Pending UI is synchronous; loopback delivery is not. Wait for the request itself before responding.
+const requestReceived=async read=>{const end=Date.now()+8000;while(!read()&&Date.now()<end)await new Promise(resolve=>setTimeout(resolve,20));assert.ok(read(),'synthetic server received the expected request');};
 const click=async(name)=>assert.ok(await page.click(button(name)),name);
 const checkSchedule=async(rootSelector,stage)=>{
   const expected=envelope.body.entries.map(entry=>({ref:'entry:'+entry.entry_ref,
@@ -114,7 +116,7 @@ try {
   await check(`!document.querySelector('dialog.fullscreen[open]') && ${composer}.value===${JSON.stringify(question)}`,'request does not fabricate fullscreen or consume equal draft');
   await page.eval(`(() => {${schedule}.click();${schedule}.click();return true})()`);
   await check("document.querySelectorAll('[data-chat-message]').length===3",'exactly one visible user turn while pending');
-  assert.equal(chats().length,1);assert.equal(chats()[0].body.messages.at(-1).content,question);
+  await requestReceived(()=>pending);assert.equal(chats().length,1);assert.equal(chats()[0].body.messages.at(-1).content,question);
   assert.equal(chats()[0].body.conversationId,cid);
   assert.ok(chats()[0].body.requestId);
   assert.ok(!JSON.stringify(chats()[0].body).match(/operations\.journal|fs\.calendar|tenant_id|client_id|capability|timezone/));
@@ -126,7 +128,7 @@ try {
   await screenshot('schedule-card-393');
   await page.click(intentButton);
   await check("document.querySelector('.fullscreen-progress')!==null",'canonical NAVIGATE opens PROGRESS');
-  assert.ok(detailPending);json(detailPending.res,{contract:'maya.widget.intent/1',outcome:'terminate',code:null,next_envelope:detail,resolved_widget:null,receipt_outcome:'ACCEPTED'});detailPending=null;
+  await requestReceived(()=>detailPending);json(detailPending.res,{contract:'maya.widget.intent/1',outcome:'terminate',code:null,next_envelope:detail,resolved_widget:null,receipt_outcome:'ACCEPTED'});detailPending=null;
   await check("document.querySelector('dialog.fullscreen[open]') && !document.querySelector('.fullscreen-progress')",'server-bound detail resolves PROGRESS into fullscreen');
   const messageCount=await page.eval("document.querySelectorAll('.maya-chat-lane [data-chat-message]').length");
   await check("!!document.querySelector('dialog[open] .companion-schedule')",'structured schedule gets dedicated visual treatment');
@@ -163,13 +165,13 @@ try {
   // A substituted principal in an otherwise valid response cannot acquire fullscreen.
   await page.click(intentButton);await check("document.querySelector('.fullscreen-progress')!==null",'substitution probe awaits canonical detail response');
   const foreign=structuredClone(detail);foreign.integrity.principal_proof_hash='b'.repeat(64);foreign.integrity.body_hash=bodyHash(foreign);
-  assert.ok(detailPending);json(detailPending.res,{contract:'maya.widget.intent/1',outcome:'terminate',code:null,next_envelope:foreign,resolved_widget:null,receipt_outcome:'ACCEPTED'});detailPending=null;
+  await requestReceived(()=>detailPending);json(detailPending.res,{contract:'maya.widget.intent/1',outcome:'terminate',code:null,next_envelope:foreign,resolved_widget:null,receipt_outcome:'ACCEPTED'});detailPending=null;
   await check("!document.querySelector('dialog.fullscreen[open]')",'foreign principal detail is refused without fullscreen');
   assert.equal(await page.eval("document.querySelectorAll('.maya-chat-lane [data-chat-message]').length"),messageCount);
   report.checks.push('substituted detail cannot pollute timeline');
   // A backend refusal remains a refusal. No local calendar fallback.
   await page.click(intentButton);await check("document.querySelector('.fullscreen-progress')!==null",'second explicit detail request awaits server');
-  assert.ok(detailPending);json(detailPending.res,{contract:'maya.widget.intent/1',outcome:'terminate',code:'AUTHORITY_DENIED',next_envelope:null,resolved_widget:null,receipt_outcome:'REFUSED',reason_text:'Расписание сейчас недоступно.'});detailPending=null;
+  await requestReceived(()=>detailPending);json(detailPending.res,{contract:'maya.widget.intent/1',outcome:'terminate',code:'AUTHORITY_DENIED',next_envelope:null,resolved_widget:null,receipt_outcome:'REFUSED',reason_text:'Расписание сейчас недоступно.'});detailPending=null;
   await check("!document.querySelector('dialog.fullscreen[open]')",'denied detail leaves no fabricated calendar');
   // Shortcut failure/retry is the ordinary conversation policy, without altering its draft.
   fault=true;await page.click(schedule);
@@ -177,14 +179,14 @@ try {
   await check(`${composer}.value===${JSON.stringify(question)}`,'failed shortcut preserves original draft');
   const failedId=chats().at(-1).body.requestId;await click('Повторить отправку');
   await check("!!document.querySelector('[data-maya-thinking-dock]')",'retry is pending');
-  assert.equal(chats().at(-1).body.requestId,failedId);finish();
+  await requestReceived(()=>pending);assert.equal(chats().at(-1).body.requestId,failedId);finish();
   await check(`!document.querySelector('[data-maya-thinking-dock]') && ${composer}.value===${JSON.stringify(question)}`,'successful retry still preserves equal unrelated draft');
   report.checks.push('same-operation retry retains request identity and does not clear a shortcut-unowned draft');
   // From an existing workspace, the same explicit question returns to chat once.
   await click('Файлы');await check("!!document.querySelector('.companion-reads')",'existing workspace opened');
   const beforeWorkspace=chats().length;await page.click(schedule);
   await check("!document.querySelector('.companion-reads') && !!document.querySelector('[data-maya-thinking-dock]')",'shortcut returns to chat through canonical root');
-  assert.equal(chats().length,beforeWorkspace+1);finish();
+  await requestReceived(()=>pending);assert.equal(chats().length,beforeWorkspace+1);finish();
   await check(`!document.querySelector('[data-maya-thinking-dock]') && ${composer}.value===${JSON.stringify(question)}`,'workspace shortcut also keeps draft');
   for(const [width,height] of [[320,740],[393,852],[427,952],[1280,900]]) {
     await size(width,height);
@@ -196,7 +198,7 @@ try {
   const beforePrivacy=chats().length;await page.eval(`${schedule}.click()`);assert.equal(chats().length,beforePrivacy);
   await click('Назад к разговору');
   await page.click(schedule);await check("!!document.querySelector('[data-maya-thinking-dock]')",'final shortcut pending before session revocation');
-  json(pending.res,{},401);pending=null;
+  await requestReceived(()=>pending);json(pending.res,{},401);pending=null;
   await check(`!${schedule} && !document.querySelector('[data-chat-message]')`,'expired session clears shortcut and retained content');
   assert.equal(wire.filter(x=>x.path==='/api/ai/conversation').length,1);
   assert.equal(wire.filter(x=>x.path==='/api/widgets/intent').length,3);
