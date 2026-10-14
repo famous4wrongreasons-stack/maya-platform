@@ -1,0 +1,26 @@
+{
+  "scope": "new code plus documentation/copied text; not historical repository audit",
+  "candidate": "26cd94b4ace838dc1cc692c0d8b521c6d7435fb5",
+  "filesChecked": 37,
+  "manifestHashes": "PASS",
+  "highConfidenceSecretScan": "PASS",
+  "piiPatternScan": "PASS",
+  "syntheticScreenshotsOnly": true,
+  "reviewedFalsePositives": [
+    {
+      "file": "docs/rebuild/evidence/maya-companion-personal-booking-20261014/logs/carrier.txt",
+      "line": 1002,
+      "pattern": "email-like substring in synthetic URL",
+      "source": "maya-carrier-react/test/telegram-popup.test.mjs:65",
+      "classification": "intentional fake URL credentials in provider-substitution refusal test; not an email or real credential"
+    },
+    {
+      "file": "docs/rebuild/evidence/maya-companion-personal-booking-20261014/logs/carrier.txt",
+      "line": 1003,
+      "pattern": "email-like substring in synthetic URL",
+      "source": "maya-carrier-react/test/telegram-popup.test.mjs:65",
+      "classification": "intentional fake URL credentials in provider-substitution refusal test; not an email or real credential"
+    }
+  ],
+  "unresolvedFindings": []
+}

@@ -1,0 +1,1 @@
+{"status":"PASS","checks":35,"out":"/private/tmp/maya-companion-booking-final02-schedule-browser-20261014"}

@@ -199,3 +199,17 @@ No actual model/provider/owner DB involved; not full release certification.
 Direct header-to-detail, prototype free-window rows and booking shortcuts remain
 open. Current journal source yields sealed prose; blank journal space is not
 availability authority. See [checkpoint](../../MAYA-COMPANION-SCHEDULE-CHECKPOINT-20261014.md).
+
+
+## Personal booking and canonical detail sheet checkpoint (2026-10-14)
+
+`26cd94b4ace838dc1cc692c0d8b521c6d7435fb5` presents the existing personal booking form and server-owned fullscreen
+route in the Companion bottom-sheet surface. Branch/service/staff/date/availability,
+preview, exact confirmation and result owners remain unchanged. Fresh actual
+AppModule/HTTP/PG/React proof covers success, missing/changed facts, revoked context,
+UNKNOWN and application/database restart, with scripted model and owned provider.
+This closes presentation of the existing personal path only. Journal gaps are
+not availability, and the header still asks via AChat before explicit NAVIGATE.
+The full populated schedule/time-grid and aggregated free-window shortcuts remain
+open. See `../../MAYA-COMPANION-PERSONAL-BOOKING-CHECKPOINT-20261014.md` and
+`../maya-companion-personal-booking-20261014/README.md`.

@@ -1,0 +1,216 @@
+{
+  "contract": "maya.companion.booking.scoped-checks/1",
+  "candidate": "610f98ec8f6440a07df8e0f537f77df55fc8684f",
+  "startedAt": "2026-10-14T07:51:16Z",
+  "node": "v22.23.3",
+  "scrubbedEnvironment": true,
+  "cleanAtStart": true,
+  "fullReleaseCertification": false,
+  "realProviders": false,
+  "realDatabase": false,
+  "checks": [
+    {
+      "name": "runtime",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-chat-shell",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "--test",
+        "conformance.test.mjs",
+        "test/approval-presentation.test.mjs",
+        "test/booking-outcome.test.mjs",
+        "test/brand.test.mjs",
+        "test/build.selftest.test.mjs",
+        "test/conversation.test.mjs",
+        "test/deeplink.test.mjs",
+        "test/development-integration.test.mjs",
+        "test/dom.test.mjs",
+        "test/goods-photo-net.test.mjs",
+        "test/goods-photo.test.mjs",
+        "test/goods-receipt-outcome.test.mjs",
+        "test/history-erasure-net.test.mjs",
+        "test/ideas.test.mjs",
+        "test/integrity.parity.test.mjs",
+        "test/intents.test.mjs",
+        "test/k15-census.test.mjs",
+        "test/local-api.history.test.mjs",
+        "test/local-crm-setup.test.mjs",
+        "test/net.test.mjs",
+        "test/onboarding.test.mjs",
+        "test/own-tasks.test.mjs",
+        "test/personal-booking.test.mjs",
+        "test/privacy.test.mjs",
+        "test/renderer.conformance.test.mjs",
+        "test/routes.conformance.test.mjs",
+        "test/serve.test.mjs",
+        "test/service-price-outcome.test.mjs",
+        "test/shell.test.mjs",
+        "test/task-actions.test.mjs",
+        "test/view.tokenfree.test.mjs",
+        "test/voice.test.mjs",
+        "test/workspace-reads.test.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 47.593,
+      "log": "runtime.txt",
+      "sha256": "8345db0f31146f37d1dadc8d795af7a07c5060db17742b17d32ba838d11db2f4"
+    },
+    {
+      "name": "payload-build",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "tools/release.mjs",
+        "build"
+      ],
+      "exitCode": 0,
+      "seconds": 27.518,
+      "log": "payload-build.txt",
+      "sha256": "931145c9177b977ccec0e360b6bfc3a41656a4a3ff37192edbb3d31d6642c1e4"
+    },
+    {
+      "name": "runtime-reproducible",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-chat-shell",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "build.mjs",
+        "--check"
+      ],
+      "exitCode": 0,
+      "seconds": 5.694,
+      "log": "runtime-reproducible.txt",
+      "sha256": "05dccd7ab28c623168203d86fdc0d3b4de189e2724c020d8f41dc51361c5b274"
+    },
+    {
+      "name": "carrier",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/npm",
+        "test"
+      ],
+      "exitCode": 0,
+      "seconds": 0.6,
+      "log": "carrier.txt",
+      "sha256": "62f2541e60d1b0673f263a45b540f181e47f7e90c49a53cf098ca6977ea445b1"
+    },
+    {
+      "name": "runtime-ratchets",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-chat-shell",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "build.mjs",
+        "--self-test"
+      ],
+      "exitCode": 0,
+      "seconds": 6.252,
+      "log": "runtime-ratchets.txt",
+      "sha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a"
+    },
+    {
+      "name": "carrier-ratchets",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "build.mjs",
+        "--self-test"
+      ],
+      "exitCode": 0,
+      "seconds": 0.268,
+      "log": "carrier-ratchets.txt",
+      "sha256": "9c9dd5d2e95815e834abf4fb37f14e912fa39892a46a54fa8263132617a98256"
+    },
+    {
+      "name": "packaging-parity",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "tools/release.mjs",
+        "verify"
+      ],
+      "exitCode": 0,
+      "seconds": 10.79,
+      "log": "packaging-parity.txt",
+      "sha256": "eeea2db32a3003d274406ef17bb71d89bcafc0c31d5d6326925f9777cf519ed5"
+    },
+    {
+      "name": "packaging-tests",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "--test",
+        "test/release.test.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 32.223,
+      "log": "packaging-tests.txt",
+      "sha256": "ed0af9d85c0c0f02d03e9d6ebb82d240f20032634494d2a896b1cce1bb5c2c67"
+    },
+    {
+      "name": "chat-browser",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "test/companion.browser.mjs",
+        "/private/tmp/maya-companion-booking-final01-chat-browser-20261014"
+      ],
+      "exitCode": 0,
+      "seconds": 15.69,
+      "log": "chat-browser.txt",
+      "sha256": "e09d07a0ea433d0e073545298725b45208e37b7d91b4822e920904c09aa0b945"
+    },
+    {
+      "name": "navigation-browser",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "test/navigation.browser.mjs",
+        "/private/tmp/maya-companion-booking-final01-navigation-browser-20261014"
+      ],
+      "exitCode": 0,
+      "seconds": 15.583,
+      "log": "navigation-browser.txt",
+      "sha256": "6d850718245eba22fa93785c5d512feb1a59c222c4be5c825feb13a4cdb72720"
+    },
+    {
+      "name": "voice-browser",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "test/voice-sheet.browser.mjs",
+        "/private/tmp/maya-companion-booking-final01-voice-browser-20261014"
+      ],
+      "exitCode": 0,
+      "seconds": 45.463,
+      "log": "voice-browser.txt",
+      "sha256": "3bb6f7562c0fbe294c069cea1c4c7cf32c371ba868ab35ed4e17d97d93079ae8"
+    },
+    {
+      "name": "schedule-browser",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-carrier-react",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "test/schedule-shortcut.browser.mjs",
+        "/private/tmp/maya-companion-booking-final01-schedule-browser-20261014"
+      ],
+      "exitCode": 0,
+      "seconds": 15.569,
+      "log": "schedule-browser.txt",
+      "sha256": "75369d89510a7a0c9990778144f15f29494d2c2c35984ed9e186cbb56a10a2c1"
+    },
+    {
+      "name": "ns1-roundtrip",
+      "cwd": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-chat-shell",
+      "command": [
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "test/ns1-roundtrip-probe.mjs"
+      ],
+      "exitCode": 0,
+      "seconds": 0.143,
+      "log": "ns1-roundtrip.txt",
+      "sha256": "9fd777832b3ae3f76e75fa85d605c0cfb88f5f27b2fa0641601dfe16d6039dc5"
+    }
+  ],
+  "unchangedCandidate": true,
+  "cleanAtEnd": true,
+  "status": "PASS",
+  "finishedAt": "2026-10-14T07:54:59Z"
+}

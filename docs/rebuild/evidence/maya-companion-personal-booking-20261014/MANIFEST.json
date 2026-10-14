@@ -1,0 +1,940 @@
+{
+  "candidate": "26cd94b4ace838dc1cc692c0d8b521c6d7435fb5",
+  "kind": "scoped local acceptance; NOT release certification",
+  "artifacts": [
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-20261014/summary.json",
+      "archive": "summary.json",
+      "originalSha256": "83900915950e7ed5fd7a9ee1c24077859b121254c8aa9df11a958abf9878ff65",
+      "archivedSha256": "83900915950e7ed5fd7a9ee1c24077859b121254c8aa9df11a958abf9878ff65",
+      "originalSize": 8281,
+      "archivedSize": 8281,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-run.py",
+      "archive": "runner.py",
+      "originalSha256": "f8eb7fb3797e19feee6a84bcc2ecc9aa21e4d70aa6db448af8ac54ed44b60493",
+      "archivedSha256": "f8eb7fb3797e19feee6a84bcc2ecc9aa21e4d70aa6db448af8ac54ed44b60493",
+      "originalSize": 3619,
+      "archivedSize": 3619,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-20261014/runtime.txt",
+      "archive": "logs/runtime.txt",
+      "originalSha256": "db3bbfa37f4ea4c6da0581ac3e667475f57964e3fa0c63284a322c4e05e2db51",
+      "archivedSha256": "db3bbfa37f4ea4c6da0581ac3e667475f57964e3fa0c63284a322c4e05e2db51",
+      "originalSize": 209007,
+      "archivedSize": 209007,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-20261014/payload-build.txt",
+      "archive": "logs/payload-build.txt",
+      "originalSha256": "931145c9177b977ccec0e360b6bfc3a41656a4a3ff37192edbb3d31d6642c1e4",
+      "archivedSha256": "931145c9177b977ccec0e360b6bfc3a41656a4a3ff37192edbb3d31d6642c1e4",
+      "originalSize": 2288,
+      "archivedSize": 2288,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-20261014/runtime-reproducible.txt",
+      "archive": "logs/runtime-reproducible.txt",
+      "originalSha256": "05dccd7ab28c623168203d86fdc0d3b4de189e2724c020d8f41dc51361c5b274",
+      "archivedSha256": "05dccd7ab28c623168203d86fdc0d3b4de189e2724c020d8f41dc51361c5b274",
+      "originalSize": 1150,
+      "archivedSize": 1150,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-20261014/carrier.txt",
+      "archive": "logs/carrier.txt",
+      "originalSha256": "4299eba7621f25e99bec1c4e8dc667c2a80d2246e73ed9d4341d8ef491cf9968",
+      "archivedSha256": "4299eba7621f25e99bec1c4e8dc667c2a80d2246e73ed9d4341d8ef491cf9968",
+      "originalSize": 41214,
+      "archivedSize": 41214,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-20261014/runtime-ratchets.txt",
+      "archive": "logs/runtime-ratchets.txt",
+      "originalSha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "archivedSha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "originalSize": 12458,
+      "archivedSize": 12458,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-20261014/carrier-ratchets.txt",
+      "archive": "logs/carrier-ratchets.txt",
+      "originalSha256": "9c9dd5d2e95815e834abf4fb37f14e912fa39892a46a54fa8263132617a98256",
+      "archivedSha256": "5a71a6ba5543f81d2dd72deccde61b8e8eb59d504be4e1f898f21d8f38c19236",
+      "originalSize": 7864,
+      "archivedSize": 7861,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-20261014/packaging-parity.txt",
+      "archive": "logs/packaging-parity.txt",
+      "originalSha256": "eeea2db32a3003d274406ef17bb71d89bcafc0c31d5d6326925f9777cf519ed5",
+      "archivedSha256": "eeea2db32a3003d274406ef17bb71d89bcafc0c31d5d6326925f9777cf519ed5",
+      "originalSize": 732,
+      "archivedSize": 732,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-20261014/packaging-tests.txt",
+      "archive": "logs/packaging-tests.txt",
+      "originalSha256": "af2eae274c0d7bad21df6dbf45225bcbe4c97243364480f7eea5d5645b174c47",
+      "archivedSha256": "af2eae274c0d7bad21df6dbf45225bcbe4c97243364480f7eea5d5645b174c47",
+      "originalSize": 3302,
+      "archivedSize": 3302,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-20261014/chat-browser.txt",
+      "archive": "logs/chat-browser.txt",
+      "originalSha256": "5c178eb2845be3617a4a9cdf324861a856bddf03c68585f163e84c9a957b519b",
+      "archivedSha256": "5c178eb2845be3617a4a9cdf324861a856bddf03c68585f163e84c9a957b519b",
+      "originalSize": 104,
+      "archivedSize": 104,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-chat-browser-20261014/receipt.json",
+      "archive": "browsers/chat-browser.json",
+      "originalSha256": "fe0ec6f1eebc2a5f03f9469352cc2fa1d8de5ae49b9d58c53d36587275cdaea6",
+      "archivedSha256": "fe0ec6f1eebc2a5f03f9469352cc2fa1d8de5ae49b9d58c53d36587275cdaea6",
+      "originalSize": 2953,
+      "archivedSize": 2953,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-20261014/navigation-browser.txt",
+      "archive": "logs/navigation-browser.txt",
+      "originalSha256": "89acd27646baf8c9caf6c8afdadf53e50bf7844afe500521d1fef8b2aa9fde03",
+      "archivedSha256": "89acd27646baf8c9caf6c8afdadf53e50bf7844afe500521d1fef8b2aa9fde03",
+      "originalSize": 111,
+      "archivedSize": 111,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/receipt.json",
+      "archive": "browsers/navigation-browser.json",
+      "originalSha256": "fdbccc010c761e3c45c64e4d721d7d35e91c1930e9c4c428981eb8b80afc81c8",
+      "archivedSha256": "fdbccc010c761e3c45c64e4d721d7d35e91c1930e9c4c428981eb8b80afc81c8",
+      "originalSize": 12566,
+      "archivedSize": 12566,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-20261014/voice-browser.txt",
+      "archive": "logs/voice-browser.txt",
+      "originalSha256": "29231eb07c63b4c0e6852cb124493ab03c21ccebce0f5e2d98f4ac8c6a67e183",
+      "archivedSha256": "29231eb07c63b4c0e6852cb124493ab03c21ccebce0f5e2d98f4ac8c6a67e183",
+      "originalSize": 105,
+      "archivedSize": 105,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-voice-browser-20261014/receipt.json",
+      "archive": "browsers/voice-browser.json",
+      "originalSha256": "b8a9ba4ed2c71d40487555262a4f63eaaee2c8e56e15399d1ba66183c33d3951",
+      "archivedSha256": "b8a9ba4ed2c71d40487555262a4f63eaaee2c8e56e15399d1ba66183c33d3951",
+      "originalSize": 4348,
+      "archivedSize": 4348,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-20261014/schedule-browser.txt",
+      "archive": "logs/schedule-browser.txt",
+      "originalSha256": "a2e4cc3001cf2cc9563698664bf8acf6de87d32d786826cec57a8fa68ea606de",
+      "archivedSha256": "a2e4cc3001cf2cc9563698664bf8acf6de87d32d786826cec57a8fa68ea606de",
+      "originalSize": 108,
+      "archivedSize": 108,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-schedule-browser-20261014/receipt.json",
+      "archive": "browsers/schedule-browser.json",
+      "originalSha256": "ee67227584c682e00436eea3826379087b2be5e1708d1ebfa02508c0482d0f14",
+      "archivedSha256": "ee67227584c682e00436eea3826379087b2be5e1708d1ebfa02508c0482d0f14",
+      "originalSize": 3311,
+      "archivedSize": 3311,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-schedule-browser-20261014/schedule-detail-393.png",
+      "archive": "screenshots/schedule-detail-393.png",
+      "originalSha256": "e657f9e6fa2407c14592df95be293157806cdb189d5ce16f109bc24b56a7cb6e",
+      "archivedSha256": "e657f9e6fa2407c14592df95be293157806cdb189d5ce16f109bc24b56a7cb6e",
+      "originalSize": 56247,
+      "archivedSize": 56247,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-20261014/ns1-roundtrip.txt",
+      "archive": "logs/ns1-roundtrip.txt",
+      "originalSha256": "9fd777832b3ae3f76e75fa85d605c0cfb88f5f27b2fa0641601dfe16d6039dc5",
+      "archivedSha256": "9fd777832b3ae3f76e75fa85d605c0cfb88f5f27b2fa0641601dfe16d6039dc5",
+      "originalSize": 1150,
+      "archivedSize": 1150,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/manifest.json",
+      "archive": "personal-http/manifest.json",
+      "originalSha256": "f1e2084aa3037974b876f0f154b932f7ad27735c31801b361fdca8d4de2031d7",
+      "archivedSha256": "f1e2084aa3037974b876f0f154b932f7ad27735c31801b361fdca8d4de2031d7",
+      "originalSize": 5921,
+      "archivedSize": 5921,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/runner.mjs",
+      "archive": "personal-http/runner.mjs",
+      "originalSha256": "b9587ce69895b00dbffb80e6ad1e4ec7129db5dae0c40411e9088c3e20a3450e",
+      "archivedSha256": "b9587ce69895b00dbffb80e6ad1e4ec7129db5dae0c40411e9088c3e20a3450e",
+      "originalSize": 5142,
+      "archivedSize": 5142,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/companion-choices-393.png",
+      "archive": "screenshots/companion-choices-393.png",
+      "originalSha256": "b7f3fa37d170b78658436797e4744364adc167b44cc1a942aa774ba4eb920c72",
+      "archivedSha256": "b7f3fa37d170b78658436797e4744364adc167b44cc1a942aa774ba4eb920c72",
+      "originalSize": 59734,
+      "archivedSize": 59734,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/companion-preview-393.png",
+      "archive": "screenshots/companion-preview-393.png",
+      "originalSha256": "f00db71343f34866a8808405a57ae542eeb438bf41afdf5a7917c07abca7bfa4",
+      "archivedSha256": "f00db71343f34866a8808405a57ae542eeb438bf41afdf5a7917c07abca7bfa4",
+      "originalSize": 65309,
+      "archivedSize": 65309,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/companion-preview-large-text.png",
+      "archive": "screenshots/companion-preview-large-text.png",
+      "originalSha256": "0fb99401e808e54c9339bedfbfc1e42c7e6b90a0277c077b139b3f2342fd4265",
+      "archivedSha256": "0fb99401e808e54c9339bedfbfc1e42c7e6b90a0277c077b139b3f2342fd4265",
+      "originalSize": 56858,
+      "archivedSize": 56858,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/companion-slots-393.png",
+      "archive": "screenshots/companion-slots-393.png",
+      "originalSha256": "3ab3483c66356592783f13508df2c0313d9975a5a443ebf18ad3835bd110f320",
+      "archivedSha256": "3ab3483c66356592783f13508df2c0313d9975a5a443ebf18ad3835bd110f320",
+      "originalSize": 61503,
+      "archivedSize": 61503,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/success-result.png",
+      "archive": "screenshots/success-result.png",
+      "originalSha256": "d89b4e162f2c31c4f1f172ceeff53fd97eae7f498fa5981f735cf87aff1aa726",
+      "archivedSha256": "d89b4e162f2c31c4f1f172ceeff53fd97eae7f498fa5981f735cf87aff1aa726",
+      "originalSize": 88196,
+      "archivedSize": 88196,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/resume-browser/output/playwright/unknown-restart.png",
+      "archive": "screenshots/unknown-restart.png",
+      "originalSha256": "dce1f0d5639f1058bed1ff42f7db9c03a2ddf5416c9fedc6c9316a27deb771ff",
+      "archivedSha256": "dce1f0d5639f1058bed1ff42f7db9c03a2ddf5416c9fedc6c9316a27deb771ff",
+      "originalSize": 129071,
+      "archivedSize": 129071,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final01-20261014/manifest.json",
+      "archive": "development/http-final01-manifest.json",
+      "originalSha256": "0cacf97c3c39af291969eed58456bb56c882449660ee62b99204ed2f561ed0b8",
+      "archivedSha256": "0cacf97c3c39af291969eed58456bb56c882449660ee62b99204ed2f561ed0b8",
+      "originalSize": 5155,
+      "archivedSize": 5155,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final01-20261014/personal-proof/manifest.json",
+      "archive": "development/http-final01-proof-manifest.json",
+      "originalSha256": "3fcc0d1ad63fd49d308efde08e9a68e06892087142142a5868b6f054b52c2009",
+      "archivedSha256": "3fcc0d1ad63fd49d308efde08e9a68e06892087142142a5868b6f054b52c2009",
+      "originalSize": 822,
+      "archivedSize": 822,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final02-20261014/manifest.json",
+      "archive": "development/http-final02-manifest.json",
+      "originalSha256": "bfe03cea2acd89c5434e86a3a84b7b234e2ef4e860348dee8a66e8a66331a011",
+      "archivedSha256": "bfe03cea2acd89c5434e86a3a84b7b234e2ef4e860348dee8a66e8a66331a011",
+      "originalSize": 5027,
+      "archivedSize": 5027,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final02-20261014/personal-proof/manifest.json",
+      "archive": "development/http-final02-proof-manifest.json",
+      "originalSha256": "cfaedb1858f8f089e5e24aab8d13d1653239f6377caab0e487d1a496d054c60e",
+      "archivedSha256": "cfaedb1858f8f089e5e24aab8d13d1653239f6377caab0e487d1a496d054c60e",
+      "originalSize": 822,
+      "archivedSize": 822,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final01-20261014/summary.json",
+      "archive": "development/previous-scoped-summary.json",
+      "originalSha256": "8b10b0f2dcbf41fba05d36e00d2fe5038c151e7b6a914587b084a938181c8e90",
+      "archivedSha256": "8b10b0f2dcbf41fba05d36e00d2fe5038c151e7b6a914587b084a938181c8e90",
+      "originalSize": 8278,
+      "archivedSize": 8278,
+      "sensitiveData": false
+    }
+  ],
+  "notCopied": [
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-chat-browser-20261014/chat-320.png",
+      "sha256": "524c5dda635762b7ab9e1b906b3644d937d01275a249acafd82f66e34b3ff052",
+      "size": 48418,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-chat-browser-20261014/failure-393.png",
+      "sha256": "b771fd68e1529833bec8bf0238f8f1adfb69614691ea09f147a4768e2f431552",
+      "size": 69409,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-chat-browser-20261014/large-text-393.png",
+      "sha256": "689a13615055a5856f14a80c2eb516d51617d46523fcfbca03d0055b61c04a8b",
+      "size": 68921,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-chat-browser-20261014/chat-427.png",
+      "sha256": "acfc0224dd02137de9a30d00691b63a3856a5f1c0e24b1776b08cd48f33c8252",
+      "size": 50215,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-chat-browser-20261014/menu-393.png",
+      "sha256": "e2acebb61794f7a4c4b57b4de14400fad5a89cf778c7ca13013f51befc5f3fcc",
+      "size": 50418,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-chat-browser-20261014/chat-393.png",
+      "sha256": "0e61bcbb08e7f3d1c175fb5bf41d50dc43274d49b467f7f493e28b4bc28d8ded",
+      "size": 49515,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-chat-browser-20261014/thinking-393.png",
+      "sha256": "5a9e9932434b27fdff61125fe2d88dfac7821ecd8cab6e1bba63b92ff3e6378a",
+      "size": 54743,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-chat-browser-20261014/chat-1280.png",
+      "sha256": "4a1c930bb4ae693e663675fe11889d20a8f086f5ecabfd3f28999265377f633e",
+      "size": 56461,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-chat-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-chat-browser-20261014/keyboard-height-393.png",
+      "sha256": "b3fa65ac1ed16321d9e1f5fa74caf44fcad094fabb0e7b830c6f377531ff03f1",
+      "size": 41483,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/navigation-ideas.png",
+      "sha256": "4f816ee77f76f3644acce0d447c01440beb1df842684585984dc812ff7c0be5c",
+      "size": 67100,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/navigation-chat-427.png",
+      "sha256": "761575d51e32e822b1c9d9cfec04483fe1e579c2c3a34362be72019eba8ffa52",
+      "size": 50323,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/navigation-tasks.png",
+      "sha256": "5d9bbef06f4246bb6793aa4b8278140ff3520afa71d80dfeb7fd26e17e2af41b",
+      "size": 57682,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/drawer-320.png",
+      "sha256": "e7b4a1275dbfa201db0db99da7eb1d0fcc24621033a385900588970a3031035b",
+      "size": 42588,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/navigation-chat-393.png",
+      "sha256": "328503c6fc5b918a43c0ae48cd88818e7c9139d5d5f27358a437babf99847ae0",
+      "size": 49732,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/drawer-1280.png",
+      "sha256": "bc685016330d4a0bc9f0b60d8a7771cc8afec2ccd2f65c2a58749c828dcbefa2",
+      "size": 109480,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/navigation-library.png",
+      "sha256": "abf89aa3cd9a790f00a47330fe4432ef42cd13e5275497e433dc9fb6edc1e074",
+      "size": 57133,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/drawer-393.png",
+      "sha256": "f7d619611a5c8675f1a8ce129fd4258ebdf0bcd65a100a58a88e2a76768ccb26",
+      "size": 51581,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/navigation-chat-320.png",
+      "sha256": "e3e567ac19f5974b45deeb96d6668a6f931d9df3fc95b1d33f72e8513197b707",
+      "size": 48565,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/navigation-chat-1280.png",
+      "sha256": "ccd1787d0772bd95804a33f043b311239367bc6c257494cf8828009d8fe0ff28",
+      "size": 56632,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/navigation-keyboard-height.png",
+      "sha256": "f4f4c6f7761c07bc018da4decaed35bf8298d0a9468f9b5771207b21cfd49dde",
+      "size": 34074,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/about-large-text.png",
+      "sha256": "802542f90dd82b89866e17ae19bdd194a8186469dc0e38c3b921c2790b7d18f2",
+      "size": 34315,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/drawer-large-text.png",
+      "sha256": "a91b53c0c9a126c90d12e371e4b7ecf5b0a31561bf4056d2eedfcb71ce0b2fa0",
+      "size": 43251,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/about-motion-off.png",
+      "sha256": "8f204a6302a9aceee40bee000f4b47b15677df2314f602eac7901fd955b416b2",
+      "size": 69422,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/drawer-427.png",
+      "sha256": "232afff2723ebc470f5713fd00c9913d0dac6ea6b486dc021756375a026a2a39",
+      "size": 55684,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/settings-large-text.png",
+      "sha256": "4b9fe72a7e4dd8ac33787bad2c3f197eebf97302f880139dbd40c30eff14023f",
+      "size": 28728,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/navigation-large-text.png",
+      "sha256": "162eea961703a787e90a298dd4d2e95b5395c1d64535f226924e9811f34270c2",
+      "size": 65742,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/settings-427.png",
+      "sha256": "cb09b14698c410d3c7f7f37d4469e4dec9c8928c94b9b66e7c6e35bd1dabced9",
+      "size": 76069,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/settings-393.png",
+      "sha256": "76178d68e0c62711f196b9322031f73a464518e638eef76e0048e89318a65114",
+      "size": 63896,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/navigation-feed-end.png",
+      "sha256": "bf6618811bdd8f280a315746fd2d9b3829098c9b5b095ce17f243dcc58cd1779",
+      "size": 64343,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/about-320.png",
+      "sha256": "623a7d4022f65ce2b8844daf3ffda55bfac5cfc5b9adaf06362dd5006fccfe43",
+      "size": 54960,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/settings-1280.png",
+      "sha256": "75aeb9c12c0c4f0a3cba88ed82358de019b3d0a6ecfe0965af917ed0e726302e",
+      "size": 91678,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/settings-320.png",
+      "sha256": "e58f504e4805010d9e67d0a76ed000b43e6efa06aa02b227019399684c0a6b3f",
+      "size": 53634,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/about-393.png",
+      "sha256": "9bd70e3b4195a99c6decd7fb928465d4c4ef27afb90a937e409877cda660df3a",
+      "size": 70877,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/about-1280.png",
+      "sha256": "d56930ea6cf4dda6c257574ba6082aa23559a22812af803c27a46d1b99355a09",
+      "size": 86964,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/navigation-feed.png",
+      "sha256": "e81b9a66f6a76a7edddafe6296896d2a32bf5461ca03baaec32d6333e4abc198",
+      "size": 72858,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-navigation-browser-20261014/about-427.png",
+      "sha256": "fe12c51f4967d522cc75798481d250f88c2599b221be8132a3ce5c22c21849bd",
+      "size": 70215,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-voice-browser-20261014/voice-return-chat.png",
+      "sha256": "dfa3b30a02933860c43392709ef22b5eab7b1558ca9fd20fe5122af704ec336a",
+      "size": 55306,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-voice-browser-20261014/voice-listening-427.png",
+      "sha256": "d8e53bae9ef68550ffd5a3e829a01e4074b246f337aeb152e81af91d0427be13",
+      "size": 55081,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-voice-browser-20261014/voice-encoding.png",
+      "sha256": "37bc85aa992222333bd57d78f04f2a9def69c73fbcdcf1150fc53a1723767e06",
+      "size": 52440,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-voice-browser-20261014/voice-listening-393.png",
+      "sha256": "40812b703dbd919fb3446c4cfa9a17af5a81657194c90b97719cc91406ce41e0",
+      "size": 54754,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-voice-browser-20261014/voice-large-text-320.png",
+      "sha256": "8ff93b8ad421e0df0f5b58ce30aa4062ed46d30b355db20fe0a283fb580095c6",
+      "size": 33261,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-voice-browser-20261014/voice-listening-320.png",
+      "sha256": "75fd22736b4cd2976258aee094458eb42ee475e3e6dacb9cc7da210ca8a8e808",
+      "size": 44879,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-voice-browser-20261014/voice-arming.png",
+      "sha256": "a2a7cdb348a652b051712b0885c387329f9a37b2f38e0f925c8fbafa83e57bc8",
+      "size": 50735,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-voice-browser-20261014/voice-transcribing.png",
+      "sha256": "7864cefe9623c7a033ad055e20e4d780d6d5c24103ce9216743ec73e0de23a4e",
+      "size": 49498,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-voice-browser-20261014/voice-unavailable.png",
+      "sha256": "fb67b85433dec173e93d99093e4ce222cf34597f100817ab10302dd6ddfac724",
+      "size": 58896,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-voice-browser-20261014/voice-not-recognized.png",
+      "sha256": "b96bf045f573347c7574d8f99cf2da7b530d2825e1d8b710a86bf153abe71b26",
+      "size": 50791,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-voice-browser-20261014/voice-listening-1280.png",
+      "sha256": "179d7afc220900f4e5eec57c356734dba634190d3afda7fc7f4c062d76d4683b",
+      "size": 71632,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-voice-browser-20261014/voice-held.png",
+      "sha256": "e805a7c3d504080ab49a39b2ca59689d0e7220318baebb054dcd1288cfc860e3",
+      "size": 58263,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-voice-browser-20261014/voice-too-short.png",
+      "sha256": "b0f7a6b713a091ef327905db4044a3cff6698ce12573e81d4de4c40c480fb2e1",
+      "size": 50975,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-schedule-browser-20261014/schedule-header-427.png",
+      "sha256": "3482d8146933f20c33bfb66b891883fdc8e5fd248bd9409c6fde6b1a8c45ee5b",
+      "size": 73270,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-schedule-browser-20261014/schedule-header-393.png",
+      "sha256": "b5ef9cede85f094375f28a745d021a0e9e52fa251f17518751b8adafee5e8969",
+      "size": 66549,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-schedule-browser-20261014/schedule-header-1280.png",
+      "sha256": "95611a2390bfe84e3fc61e9c78ba60d5866a2ce96bb52e9dd515b2aae8eda0f7",
+      "size": 81691,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-schedule-browser-20261014/schedule-header-320.png",
+      "sha256": "707cb3a59532d98a4d5e4919e20822873ec4402b8ffef8fc4d353c132dd1838c",
+      "size": 55926,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-schedule-browser-20261014/schedule-card-393.png",
+      "sha256": "9365a96e81acd1d77f7367df5fa6dd84239deabf7de1a58fa3e9e06f84f095cf",
+      "size": 62279,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-final02-schedule-browser-20261014/signin-393.png",
+      "sha256": "dca8e8d47c314ac34e18faf7c19f6a55b2807ba34f063fee5a2591c60c8ace88",
+      "size": 27941,
+      "reason": "fresh receipt archived; representative changed surface selected",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-jest.json",
+      "sha256": "4fe94e3c6c0630e596243f09745045155cb112f9ed3d3e2802ca79066df63152",
+      "size": 1519,
+      "reason": "safe selected observations extracted into RESULTS; no serialized model/request or test authorization artifact copied",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-observations.json",
+      "sha256": "387482d983a7f94e68bbd43671a3320fa034e590f2bc147ec7bb7048f2a33e54",
+      "size": 2627,
+      "reason": "safe selected observations extracted into RESULTS; no serialized model/request or test authorization artifact copied",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-serialized-model-requests.json",
+      "sha256": "e7ded591d1b39cbc6c2639e95c05156457db5672356c91eb6de1efccd5e43298",
+      "size": 1341452,
+      "reason": "safe selected observations extracted into RESULTS; no serialized model/request or test authorization artifact copied",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/browser.json",
+      "sha256": "9fdb616d9b90b13d3557e48d048fcac729aa769d1347a2f505938ee30bcf5720",
+      "size": 8921515,
+      "reason": "safe checks/network extracted; full synthetic DOM snapshots omitted",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/changed-chat-again.png",
+      "sha256": "48fa941fd405b0304a0f22b85ea4c57a1082da6ebc191e0f317e44773342f1f9",
+      "size": 82480,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/changed-preview.png",
+      "sha256": "58c48c8b54d69912b02957a0f59046dcfd55c43f4610e104c4746471d5c381d9",
+      "size": 113098,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/changed-result.png",
+      "sha256": "3e97e7629d3df63c7cdebe48a6104f685dd844b0d7d8da9efb48b0b2d928bf51",
+      "size": 85606,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/companion-choices-1280.png",
+      "sha256": "3db716100272a8b7635708901af6cb9857e08929a87d4f667ea9a42abbe8dcc3",
+      "size": 98966,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/companion-choices-320.png",
+      "sha256": "a9f3111f2cb2cefe006abf7f736c9c65f9e12743af8f2203de79a08cd19aee65",
+      "size": 54165,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/companion-choices-large-text.png",
+      "sha256": "3a230bf7ecbdebce340ab57a9b9d0d2350333033044c568ca79ea201da40f58c",
+      "size": 57134,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/companion-preview-1280.png",
+      "sha256": "6783eafad927b21d84af4aa98268c41d632e7a02f2daa2f281a2b4d8833effa7",
+      "size": 113074,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/companion-preview-320.png",
+      "sha256": "6c41fcfdfb8593b1c288a051ba774503130429e0d4cd204cbab9b809657a8afd",
+      "size": 56973,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/companion-slots-1280.png",
+      "sha256": "49c2039e74b7c10af4b054dd8f61178ea8731b5bb960ba5e1dbba5223ff792a3",
+      "size": 101236,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/companion-slots-320.png",
+      "sha256": "f124b9f705cb22dea28d812b41476fa08a6806dbd5485705c567ebd602cca277",
+      "size": 55441,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/companion-slots-large-text.png",
+      "sha256": "20d9e048c1bc2ca2da7a3b7968388357e92de57c7eabe24e1a897739477fb504",
+      "size": 56988,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/incomplete-unavailable.png",
+      "sha256": "83a2b1429a6d2b69f1eefe8c5158a73c4a17db000b66661bbb1aed6097234100",
+      "size": 118722,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/navRevoked-nav-refused.png",
+      "sha256": "2e418364668a6e2c7b3e19d700151f1057051a6f121c0398128c7c4e03729934",
+      "size": 75213,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/revoked-chat-again.png",
+      "sha256": "aa13cb5e64c1ac24c9d78060b67e5677c9ec9b6aa7255b7d3b14f91b5e9f2aa1",
+      "size": 84761,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/revoked-preview.png",
+      "sha256": "319166984145621eba0aa165acd6ab0d0a5bfebfd2f12f6d451129d8ae7d65b5",
+      "size": 113099,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/revoked-result.png",
+      "sha256": "000a4ce05923459a57e663bcf168a449e1b69b43df73c4655ebe25ee1f6c2ff3",
+      "size": 85566,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/success-chat-again.png",
+      "sha256": "38ed4a4647c14f5988d393a94c863667bf5a4f3c905cf0bbd59d2e5791c2c4a0",
+      "size": 85844,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/success-preview.png",
+      "sha256": "333799e88268b63ab4221c64ebab1fc9baf835df030e18551749de4799a28d12",
+      "size": 114745,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/unknown-chat-again.png",
+      "sha256": "7d3f4409112d7b466c981a2b6bf5b4d6c370b5c9ff49b5e0c369377c91bea418",
+      "size": 86545,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/unknown-preview.png",
+      "sha256": "2391939f3740fb6982876b306a10b436f502ee2a333011b132ce6f3f24b8f697",
+      "size": 129571,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/prepare-browser/output/playwright/unknown-result.png",
+      "sha256": "2715aba18fa5bb9ef68f0aa8f01ac6a83d2993ff32f71c9db0efc5fed1975c98",
+      "size": 127500,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/resume-jest.json",
+      "sha256": "195b07dac2dfca0ce1fdc83866228d8e5985bb718e2d9ad53e49b95a05160f27",
+      "size": 1519,
+      "reason": "safe selected observations extracted into RESULTS; no serialized model/request or test authorization artifact copied",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/resume-observations.json",
+      "sha256": "62787933161a287b8e867a01d5c14b31991dedeb54cbaca430d8abf98c0d9c11",
+      "size": 957,
+      "reason": "safe selected observations extracted into RESULTS; no serialized model/request or test authorization artifact copied",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/resume-serialized-model-requests.json",
+      "sha256": "7021403c3948ba82c48de930389559fd3b4f6fe025f796fc9c81b37da25523d9",
+      "size": 192512,
+      "reason": "safe selected observations extracted into RESULTS; no serialized model/request or test authorization artifact copied",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/resume-browser/output/playwright/browser.json",
+      "sha256": "3c1a542a786913450dd3f5704851a6f8ca049a74f0bede360344b7fed273ee19",
+      "size": 2953703,
+      "reason": "safe checks/network extracted; full synthetic DOM snapshots omitted",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    },
+    {
+      "source": "/private/tmp/maya-companion-booking-http-final03-20261014/personal-proof/resume-browser/output/playwright/success-restart.png",
+      "sha256": "03dd8d7b3c59948174f4f99f9768c7cfbc732a739c394c185746e0655d0c952e",
+      "size": 112507,
+      "reason": "representative synthetic screenshots selected; raw set retained locally",
+      "sensitiveData": "synthetic proof only; raw artifact not published"
+    }
+  ],
+  "references": [
+    {
+      "path": "/Users/stanislavmosin/Downloads/Maya_full_design_package/01_IMPLEMENTATION.txt",
+      "sha256": "8190b1f109140eaa34eda9765ba9a77602085b066481a5401f18c3b95e6d4e07",
+      "size": 20419,
+      "role": "owner visual reference; no demo booking authority"
+    },
+    {
+      "path": "/Users/stanislavmosin/Downloads/Maya_full_design_package/screens/13-schedule.png",
+      "sha256": "d226d73e8216fbcf23fd1134d35f207ba92da3558f3e61f820741e98e7aeaa4f",
+      "size": 18546,
+      "role": "owner visual reference; no demo booking authority"
+    },
+    {
+      "path": "/Users/stanislavmosin/Downloads/Maya_full_design_package/prototype/src/Prototype.tsx",
+      "sha256": "4b9123c60121b6db549de158d5c9853f79b8c3cfbc1a6858173b5c2779d5650a",
+      "size": 34745,
+      "role": "owner visual reference; no demo booking authority"
+    },
+    {
+      "path": "/Users/stanislavmosin/Downloads/Maya_full_design_package/prototype/src/prototype.css",
+      "sha256": "0c9c92962dfa7e93bd23dcc6d04dc26287501b35e38f868ecc7b4326ed7211c9",
+      "size": 22217,
+      "role": "owner visual reference; no demo booking authority"
+    }
+  ]
+}
