@@ -1,0 +1,69 @@
+{
+  "contract": "maya.staging-carrier-transport-proof/1",
+  "candidate": "f991ac59c9064f5541c2d1ddd99ea3244c11a9d6",
+  "sourceDirty": true,
+  "status": "PASS",
+  "checks": [
+    "adapted configuration validates",
+    "HTTPS listener ready on loopback only",
+    "TLS without explicit test trust refuses",
+    "exact current React file: icons/maya-192.png",
+    "exact current React file: icons/maya-512-maskable.png",
+    "exact current React file: icons/maya-512.png",
+    "exact current React file: icons/maya-apple-180.png",
+    "exact current React file: index.html",
+    "exact current React file: m/JFJCTFTP/main.js",
+    "exact current React file: manifest.webmanifest",
+    "exact current React file: styles.css",
+    "root selects React index",
+    "static no-store and no-referrer",
+    "current separate callback bytes preserved",
+    "callback no-store and no-referrer",
+    "SPA fallback selects React index",
+    "callback mount exposes no adjacent relay source",
+    "foreign host cannot receive Maya payload",
+    "native preflight preserved from upstream",
+    "API error/body never rewritten to shell",
+    "native Origin and Authorization reach existing API owner",
+    "unknown API remains upstream-owned",
+    "no raw OAuth query or authorization in gateway log"
+  ],
+  "realBackend": false,
+  "databaseAccess": false,
+  "externalProviders": false,
+  "publicListener": false,
+  "systemTrustChanged": false,
+  "caddyBinarySha256": "0d746e47f39d9706883b3633bf419feb25973e6caaa8eabbf5b44421d59e3973",
+  "caddyVersion": "v2.11.7 h1:yj0Y4fYZGPkSvibBJ1sTWE33xC0fxztVyXEW5iIdUT4=",
+  "preflight": {
+    "status": "PASS",
+    "scope": "selector-and-payload",
+    "owner": "React AChat",
+    "caddySha256": "1eaf825be97da242af3ce54ce1ebe2fc2dfeb0c63c667601967b9e18e6d2e4b9",
+    "deploymentPerformed": false
+  },
+  "payload": {
+    "icons/maya-192.png": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
+    "icons/maya-512-maskable.png": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
+    "icons/maya-512.png": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
+    "icons/maya-apple-180.png": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
+    "index.html": "66d905e8a8b8d5f2447947d51f42bc1e4644ca9ec15aaee477f9701190df7d09",
+    "m/JFJCTFTP/main.js": "1208fda26219ddf38396a7786d81f2f465864e56ac17bb33cce2c279335f0bca",
+    "manifest.webmanifest": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
+    "styles.css": "c2c54360fdd398952e7ed92137cd50d1945f5b60d62b3d957e574d17b01a3e29"
+  },
+  "topologySubstitutions": [
+    "loopback listener",
+    "synthetic loopback upstream",
+    "current local payload root",
+    "separate canonical callback root, exact route only",
+    "ephemeral per-request trusted TLS; automatic HTTPS/admin disabled"
+  ],
+  "callbackSha256": "b10e89898aa74a39756d4f49e1537c8ee6c0066bc7a2666982b4052b0f99444f",
+  "gatewayExit": {
+    "code": 0,
+    "signal": null
+  },
+  "listenersClosed": true,
+  "ephemeralKeyRemoved": true
+}

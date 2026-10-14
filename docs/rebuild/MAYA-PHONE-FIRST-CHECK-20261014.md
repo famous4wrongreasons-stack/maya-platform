@@ -1,5 +1,14 @@
 # MAYA: путь до первой проверки на iPhone — 14 октября 2026
 
+**Следующее выполненное уточнение — staging packaging, `5b6b3b19`.**
+У существующего staging исправлен выбор старой оболочки на canonical React;
+страница OAuth return подключена отдельно от её существующего владельца.
+17 selector checks, 18 packaging tests, 21 callback regressions и 23 actual
+loopback HTTPS checkpoints PASS на чистом committed SHA. Product/native bytes
+не менялись. Публичный endpoint и isolated real backend ещё не запущены:
+это закрытие ошибки упаковки, не доступность сервера с телефона.
+[Свежие receipts и точные границы](evidence/maya-staging-carrier-20261014/README.md).
+
 Проверенный исходный candidate: `1df1079a1d210cc4d176894c75b67585fb138348`.
 Ветка: `codex/maya-local-crm-setup-20261010`.
 Это локальная подготовка установки, не release certification, установка или

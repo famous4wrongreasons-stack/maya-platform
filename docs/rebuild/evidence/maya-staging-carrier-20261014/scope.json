@@ -1,0 +1,20 @@
+{
+  "candidate": "5b6b3b190a98fd5a8f97748d9408d50268b01087",
+  "previous": "f991ac59c9064f5541c2d1ddd99ea3244c11a9d6",
+  "unchangedPaths": [
+    "maya-saas-backend/src",
+    "maya-saas-backend/prisma",
+    "maya-carrier-react",
+    "maya-chat-shell/src",
+    "maya-ios-carrier",
+    "maya-saas-backend/deploy/platform/beget-edge/oauth-callback.html"
+  ],
+  "productDiff": [],
+  "productionEffects": 0,
+  "databaseEffects": 0,
+  "providerEffects": 0,
+  "iPhoneInstalls": 0,
+  "systemTrustChanges": 0,
+  "fullCIExecuted": false,
+  "currentReleaseCertificate": "NOT_ISSUED"
+}

@@ -1,5 +1,14 @@
 # План завершения MAYA — 10 октября 2026
 
+**14 октября, устранён stale staging payload — `5b6b3b19`: scoped PASS.**
+Существующий staging теперь выбирает React AChat и отдельный canonical OAuth
+callback. Старый shell отказывается до Docker/DB. На committed SHA: 17 selector,
+18 packaging, 21 callback tests и 23 actual loopback HTTPS checkpoints PASS.
+App/runtime/backend semantics и native source неизменны. Доступный iPhone HTTPS
+адрес, изолированный настоящий backend и установка ещё не готовы; public listener,
+DB/provider effects и device install не выполнялись. Это не новый certificate.
+[Точный результат и остаток](evidence/maya-staging-carrier-20261014/README.md).
+
 **14 октября, подготовка первого прогона на iPhone — `1df1079a`: PACKAGING PASS.**
 Текущий Companion собран в unsigned Simulator и iphoneos App.app; canonical
 React payload и PWA/Capacitor parity проверены. Отдельный Debug API target тоже

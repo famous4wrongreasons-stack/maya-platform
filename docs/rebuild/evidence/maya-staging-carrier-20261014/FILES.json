@@ -1,0 +1,42 @@
+{
+  "RESULT.json": {
+    "sha256": "afd51ead52fa9fea84b7f436a341c234858a240ee5797c15c969b83e92e0a58b",
+    "size": 961
+  },
+  "caddy-download-provenance.json": {
+    "sha256": "72e03daafffb7e5aa98192e888cd8cdabd1485820e39edfb98268782d55e40c0",
+    "size": 648
+  },
+  "callback-regression.log": {
+    "sha256": "989db4114d1af1908648ecb1a5a81006db75324f300156a3d31797fa1361757e",
+    "size": 5473
+  },
+  "https-development-pass.json": {
+    "sha256": "e5bb5909686af5e1f2a0a338a43023ffb41e34f9de896913f36b2dbcbb04772c",
+    "size": 3060
+  },
+  "https-final.json": {
+    "sha256": "55f52dfebfed73ff25d8988f09af25131f70f71b44f52f57c7185a7bebfc046f",
+    "size": 3061
+  },
+  "https-first-failure.json": {
+    "sha256": "b57c0adab9735970a927c727f662e0f9be0e9b65d60328cf6e2cbdb2ce3b28ab",
+    "size": 2531
+  },
+  "https-transport.log": {
+    "sha256": "2e1ec07215a4950dc45e478dae7a925d597a503c42a057f139156aa6d29c89c7",
+    "size": 111
+  },
+  "packaging.log": {
+    "sha256": "41c493a462291f061330673da0460b3cdc01835fb6a268ef38bf9b6d114c86ef",
+    "size": 3307
+  },
+  "scope.json": {
+    "sha256": "06289374e3cd6c874db88bb1807e76dd475c0373b2ae07dfe5f31977492dde8f",
+    "size": 573
+  },
+  "staging-selector.log": {
+    "sha256": "786de54dbce7e64b2aa86d3f86f5324d500b5c116322f3467ee27415faa0fb50",
+    "size": 2523
+  }
+}

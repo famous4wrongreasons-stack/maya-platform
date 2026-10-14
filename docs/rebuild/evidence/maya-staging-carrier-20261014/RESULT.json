@@ -1,0 +1,36 @@
+{
+  "candidate": "5b6b3b190a98fd5a8f97748d9408d50268b01087",
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "staging-selector",
+      "exit": 0,
+      "seconds": 14.42,
+      "logSha256": "786de54dbce7e64b2aa86d3f86f5324d500b5c116322f3467ee27415faa0fb50"
+    },
+    {
+      "name": "packaging",
+      "exit": 0,
+      "seconds": 42.62,
+      "logSha256": "41c493a462291f061330673da0460b3cdc01835fb6a268ef38bf9b6d114c86ef"
+    },
+    {
+      "name": "https-transport",
+      "exit": 0,
+      "seconds": 19.69,
+      "logSha256": "2e1ec07215a4950dc45e478dae7a925d597a503c42a057f139156aa6d29c89c7"
+    },
+    {
+      "name": "callback-regression",
+      "exit": 0,
+      "seconds": 0.18,
+      "logSha256": "989db4114d1af1908648ecb1a5a81006db75324f300156a3d31797fa1361757e"
+    }
+  ],
+  "releaseCertification": false,
+  "realDatabase": false,
+  "publicNetworkListener": false,
+  "deviceInstalled": false,
+  "providerEffects": 0,
+  "sourceUnchanged": true
+}
