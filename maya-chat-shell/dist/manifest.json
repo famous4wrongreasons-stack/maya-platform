@@ -137,7 +137,7 @@
       },
       {
         "path": "src/renderer/render.ts",
-        "sha256": "1eb3d7d726df8725427beb5d6f9c751e0ef4533bc3143c9d40919c6b75e06509"
+        "sha256": "69a4a878756c86d43d88e4dd7e85230b5795f5f15747553fc9a4c49640fe29e1"
       },
       {
         "path": "src/renderer/tables.ts",
@@ -205,8 +205,8 @@
       }
     ]
   },
-  "bytes": 689528,
-  "digest": "829a31aeeb3585337aba09d908e9f31901d2f5995dd2b981ccf1e01743b293bc",
+  "bytes": 689438,
+  "digest": "710037070ef222f1418e59e1523b43799ce3c01637a17241582fa1ec9466d22a",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -214,8 +214,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "b515a2ad3e28865ed0ca0c35c4baebe1a0d2faf0371fd42be90d9d6045069fab",
-    "modulePath": "m/b515a2ad3e28865e/",
+    "digest": "aeb57a41d847d624e0731c78589dca5f430a7c866b30be983e35b0c9864ebc88",
+    "modulePath": "m/aeb57a41d847d624/",
     "files": [
       {
         "path": "entry/main.js",
@@ -349,8 +349,8 @@
       },
       {
         "path": "src/renderer/render.js",
-        "sha256": "61ee861dcd2e2b01bf8db4633fb2cf01fa67656907d1e51b59b964d4c0b6b0ec",
-        "bytes": 24199
+        "sha256": "38180e44626e3102b516f7000ac77dba768ba85ce5c1ddaad897c7e4226dfe8a",
+        "bytes": 24105
       },
       {
         "path": "src/renderer/tables.js",
@@ -453,7 +453,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "eef9e8836a7b38d36527e74515df871ec76289817f4471fc53a4f3b8096ee6c8",
+      "sha256": "1a9eaedcea0ed1115e58d370b5d3a20377a70bfdcb73e8113ea1c11ab365e95b",
       "bytes": 1344
     },
     "assets": [

@@ -657,9 +657,10 @@ test('an envelope whose structured drawing would not match its sealed order is d
 
 // Real journal emission represents its shared NAVIGATE by entry refs, not an
 // additional intent ref. This unit tests that projection; HTTP/PG proves emission.
-test('SCHEDULE shared detail uses sealed entry controls without an extra unsealed button', () => {
+for (const detailIntent of ['i1', 'i3']) test('SCHEDULE shared detail keeps sealed controls in order: ' + detailIntent, () => {
   const input = inputOf('kind-schedule', { mutate: view => {
     for(const entry of view.body.entries) entry.detail_intent = 'i1';
+    view.body.detail_intent = detailIntent;
     view.presentation.a11y.reading_order = view.presentation.a11y.reading_order.filter(ref => keyOf(ref)!=='intent:i1');
     delete view.presentation.a11y.accessible_names['intent:i1'];
   }});
