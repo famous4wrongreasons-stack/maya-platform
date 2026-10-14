@@ -1,5 +1,23 @@
 # MAYA: путь до первой проверки на iPhone — 14 октября 2026
 
+**Обновление 15 октября: закрытый стенд Beget подготовлен, `7aee28d2`.**
+На выбранном VPS установлен Docker и проверен точный Linux-образ. Backend/БД
+прошли 35 фактических HTTP checks, чистый replay 106 миграций и строгий preflight;
+два вымышленных салона изолированы, сессии отзываются, исходящая сеть закрыта.
+SMM работает с прежним PID/start/restarts/unit hash; публичные порты прежние.
+После проверки контейнеры остановлены, synthetic volumes сохранены. Дополнительно:
+44 preparation/selector checks, 18 packaging tests и 50 fresh local-backend checks
+PASS на этом code candidate. Unsigned iphoneos App.app и exact endpoint parity PASS.
+Публичного DNS/TLS ещё нет; phone install не выполнялся. База салона не копировалась.
+Следующие конкретные шаги: закрытая конфигурация регистрации/обычный smoke-account,
+разрешение на новый test HTTPS endpoint, затем signing и отдельное разрешение на
+установку. Никакого нового release certificate этим проходом не выдано.
+[Полный результат и границы](evidence/maya-beget-phone-preparation-20261014/README.md).
+
+Ниже сохранены предыдущие этапы с их исходными SHA; они не подменяют свежие
+результаты выше и не объявляют текущий public endpoint доступным.
+
+
 **Следующий участок выполнен — настоящий backend на отдельной базе, `87c0d377`.**
 50 свежих scoped checkpoints PASS: compiled main с production config validation,
 чистый replay миграций, обычная регистрация двух trial-салонов и парольный вход,

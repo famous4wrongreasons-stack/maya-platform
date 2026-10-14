@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "candidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "imageId": "sha256:d8f6a5b33529e4a7f2e4503cc7e867de88d259f35236fb38d6b8886fcb5a9f6f",
+  "imageBytes": 251687057,
+  "architecture": "amd64",
+  "imageConfig": [
+    "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "NODE_VERSION=24.22.0",
+    "YARN_VERSION=1.22.22",
+    "NODE_ENV=production"
+  ],
+  "binaryProof": {
+    "main": "3caede16a0ba37d968aee8d0ae5b39c726ba545e1894d29dc944d2751c34898f",
+    "prismaConfig": true,
+    "platform": "linux",
+    "arch": "x64",
+    "node": "v24.22.0"
+  },
+  "macCompiledMainByteEquality": true,
+  "sourceArchiveSha256": "18ee4b2076c6dec30e032b8d7214a12c8ac438aa3988c6fee3fbd98ab0fa7204"
+}

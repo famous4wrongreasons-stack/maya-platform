@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "candidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "developmentApi": "https://phone-test.mayaos.ru/api",
+  "pwaFiles": 8,
+  "pwaBytesEqualUploadedPackage": true,
+  "canonicalReleaseVerify": "PASS",
+  "signed": false,
+  "installed": false,
+  "hostReachabilityProven": false,
+  "files": {
+    "index.html": "66d905e8a8b8d5f2447947d51f42bc1e4644ca9ec15aaee477f9701190df7d09",
+    "styles.css": "c2c54360fdd398952e7ed92137cd50d1945f5b60d62b3d957e574d17b01a3e29",
+    "manifest.webmanifest": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
+    "icons/maya-apple-180.png": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
+    "icons/maya-192.png": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
+    "icons/maya-512-maskable.png": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
+    "icons/maya-512.png": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
+    "m/JFJCTFTP/main.js": "1208fda26219ddf38396a7786d81f2f465864e56ac17bb33cce2c279335f0bca"
+  },
+  "capacitor": {
+    "index.html": "021b89c0f629c6c9a6c4a595d6d172030ced163804bf8a14129c06213d66517d",
+    "styles.css": "c2c54360fdd398952e7ed92137cd50d1945f5b60d62b3d957e574d17b01a3e29",
+    "manifest.webmanifest": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
+    "icons/maya-apple-180.png": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
+    "icons/maya-192.png": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
+    "icons/maya-512-maskable.png": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
+    "icons/maya-512.png": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
+    "m/fbd87e4bad7e18e8/main.js": "fbd87e4bad7e18e85a5abeea1b80bf21cd38744f74e23d3fe2cb72c9c5e7b9d9"
+  },
+  "initialSeparateClone": "Different dependency-source paths changed generated module labels; not accepted as uploaded-PWA equivalence. Rebuilt through same canonical workspace; no byte rewriting.",
+  "unsignedIphoneosBuild": "PASS",
+  "actualAppVerification": "PASS",
+  "appPath": "/private/tmp/maya-beget-preparation-20261014-01/ios/Build/Products/Debug-iphoneos/App.app",
+  "appExecutableSha256": "158b184311747bd1d7def3c28303710107aece25679346d2d341204deda90599"
+}

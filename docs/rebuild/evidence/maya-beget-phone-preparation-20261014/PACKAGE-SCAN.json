@@ -1,0 +1,14 @@
+{
+  "candidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "files": 2498,
+  "sourceArchiveSha256": "18ee4b2076c6dec30e032b8d7214a12c8ac438aa3988c6fee3fbd98ab0fa7204",
+  "scanner": "gitleaks, full redaction",
+  "genericFindingsReviewed": 84,
+  "unresolved": 0,
+  "reviewSha256": "32341c2fea04edc0ac599328dea605254eb882d83cbc9b0d03462c729a2ed3a9",
+  "realEnvFiles": 0,
+  "privateKeys": 0,
+  "salonDatabaseIncluded": false,
+  "provisioningPrivateMaterialIncluded": false,
+  "scope": "Exact allowlisted transfer package, not entire Git history"
+}

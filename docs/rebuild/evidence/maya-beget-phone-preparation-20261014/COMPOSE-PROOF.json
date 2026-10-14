@@ -1,0 +1,9 @@
+{
+  "parser": "official Docker Compose 5.6.0",
+  "effectiveModel": "PASS",
+  "hostPorts": "loopback only",
+  "dbAndBackend": "internal only",
+  "runtimeMemoryCeilingMiB": 992,
+  "engineStartPerformed": false,
+  "candidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3"
+}

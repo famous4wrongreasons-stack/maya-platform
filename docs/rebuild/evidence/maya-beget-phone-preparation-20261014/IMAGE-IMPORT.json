@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "candidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "imageId": "sha256:d8f6a5b33529e4a7f2e4503cc7e867de88d259f35236fb38d6b8886fcb5a9f6f",
+  "architecture": "amd64",
+  "archiveSha256": "130b2f37b9d11280e1b9b5d90d55f92bb99f874e15a53d3a50e3c0ac819291e9",
+  "archiveBytes": 250984075,
+  "freeDisk": 8415879168
+}

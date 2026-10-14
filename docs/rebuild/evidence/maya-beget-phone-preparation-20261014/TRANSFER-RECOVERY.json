@@ -1,0 +1,11 @@
+{
+  "firstTransfer": "TIMEOUT_AFTER_900_SECONDS",
+  "preservedBytes": 242876416,
+  "preservedPrefixSha256": "812c9bbb2a02f98ec55edc47a8275bc9649a6f44bf8247ad7da5a64a1a0d1e43",
+  "prefixComparedWithLocalArchive": true,
+  "openWritersBeforeResume": 0,
+  "resumedBytes": 8107659,
+  "completeArchiveSha256": "130b2f37b9d11280e1b9b5d90d55f92bb99f874e15a53d3a50e3c0ac819291e9",
+  "immutableImportedImageMatched": true,
+  "productCodeChanged": false
+}

@@ -1,0 +1,788 @@
+[
+  {
+    "file": "maya-saas-backend/.env.example",
+    "line": 46,
+    "rule": "generic-api-key",
+    "classification": "explicit placeholder template",
+    "lineSha256": "9196dad8a2c2e62e7c34950747db1f8613d87db7094a788bf70c396f404cf9df"
+  },
+  {
+    "file": "maya-saas-backend/.env.example",
+    "line": 52,
+    "rule": "generic-api-key",
+    "classification": "explicit placeholder template",
+    "lineSha256": "ac668e0188854ea1066c67d81010a341af74f031383bb8aa992c5aeacc82f3cb"
+  },
+  {
+    "file": "maya-saas-backend/.env.example",
+    "line": 163,
+    "rule": "generic-api-key",
+    "classification": "explicit placeholder template",
+    "lineSha256": "b1c647f5b6539443d25e1c95b0389e9e9990733dbfc89e54316abdce7984b099"
+  },
+  {
+    "file": "maya-saas-backend/.env.example",
+    "line": 167,
+    "rule": "generic-api-key",
+    "classification": "explicit placeholder template",
+    "lineSha256": "7683b3b71fa95eb30ab012eac276a3053ddce40242f20ac892622266a4d34c31"
+  },
+  {
+    "file": "maya-saas-backend/prisma/verification/p4-06-gift-certificate-presentation-structural.sql",
+    "line": 101,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "e89582ac87aaaecc239df789f17d738179c96c957fe1feb06ee68dd76238c461"
+  },
+  {
+    "file": "maya-saas-backend/scripts/action-engine-kernel-proof.ts",
+    "line": 764,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "0f896a4a1a4c1b94e9dc38aeaa4634e2c0616c5597a8958482c35bd32ac9e011"
+  },
+  {
+    "file": "maya-saas-backend/scripts/chapter9-foundation-proof.ts",
+    "line": 36,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "4820fd31a8013ae855fb80be0a5effe6d64cf76c9d64f506eac8643349865ba4"
+  },
+  {
+    "file": "maya-saas-backend/scripts/chapter9-wave3-proof.ts",
+    "line": 57,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "4820fd31a8013ae855fb80be0a5effe6d64cf76c9d64f506eac8643349865ba4"
+  },
+  {
+    "file": "maya-saas-backend/scripts/chapter9-p02-proof.ts",
+    "line": 43,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "4820fd31a8013ae855fb80be0a5effe6d64cf76c9d64f506eac8643349865ba4"
+  },
+  {
+    "file": "maya-saas-backend/scripts/crm-setup-local.test.mjs",
+    "line": 11,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "669b2ef2f7df93e6e8b844add57a444ffc8ab14fb825b1371d86ea6fecafc00c"
+  },
+  {
+    "file": "maya-saas-backend/scripts/p4-09-immutable-offer-value-version-schema-proof.ts",
+    "line": 653,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "e62a603f0c81df2e8131569b0279d166660a92a4650c7da284ec34ead9ed7dc0"
+  },
+  {
+    "file": "maya-saas-backend/scripts/p4-09-immutable-offer-value-version-schema-proof.ts",
+    "line": 766,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "e62a603f0c81df2e8131569b0279d166660a92a4650c7da284ec34ead9ed7dc0"
+  },
+  {
+    "file": "maya-saas-backend/scripts/p4-10-all4-executable-proof.ts",
+    "line": 40,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "2cc5c339575609e5f7de09038daf0efab79203ab4da0efff5b44ca2fd931f37a"
+  },
+  {
+    "file": "maya-saas-backend/scripts/loyalty-action-engine-proof.ts",
+    "line": 346,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "2c1bff41efcf7137917b88ad665d8be9dae16c348cdcb9f6074979c92ee7e861"
+  },
+  {
+    "file": "maya-saas-backend/scripts/loyalty-action-engine-proof.ts",
+    "line": 371,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "4dfcee4a2d59513524ca4e1a3957d1449b478853672bc8322416e18ff4ef44ab"
+  },
+  {
+    "file": "maya-saas-backend/scripts/loyalty-action-engine-proof.ts",
+    "line": 393,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "c81d1eb13ae3b3af89f4c6418681476fc7a2881cde1d0f6cf7939d4dbdf65fd8"
+  },
+  {
+    "file": "maya-saas-backend/scripts/package5-b26-appointment-read-proof.ts",
+    "line": 26,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "a8b563ca4542442ca305f9ef7aa6e721e82f7648b002fef563c98eee641ee6b7"
+  },
+  {
+    "file": "maya-saas-backend/scripts/package5-b26-appointment-read-proof.ts",
+    "line": 27,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "2c80658725666bbe1a1d239cddfe3ffdd0abbeeddb59393a92842cb71d8f7a39"
+  },
+  {
+    "file": "maya-saas-backend/scripts/package5-b25-reminder-proof.ts",
+    "line": 39,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "0560dc8f1eed5bc1c9d90877e5847b658be29bc12f3e586dfab41f230320d301"
+  },
+  {
+    "file": "maya-saas-backend/scripts/package5-b25-reminder-proof.ts",
+    "line": 40,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "93d99a86a934bb2bb7980bf0e9cd788a48350504ff17a3ab16e983217dd044e1"
+  },
+  {
+    "file": "maya-saas-backend/scripts/package5-b25-reminder-proof.ts",
+    "line": 183,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "d6fb094167e4d8fae44f499954d78f12e028073df16c44e883b9de9c9070c201"
+  },
+  {
+    "file": "maya-saas-backend/scripts/package5-b25-reminder-proof.ts",
+    "line": 184,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "0c8e702a4434227db42b2fd8df05d00b6c45a7e9396df598f2e0d225b19c16b5"
+  },
+  {
+    "file": "maya-saas-backend/scripts/package5-b25-reminder-proof.ts",
+    "line": 185,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "66eca4b38b792005db338ce4032f5fc35f5d02764aaf7ebb7ba46a2f347c7fa4"
+  },
+  {
+    "file": "maya-saas-backend/scripts/p4-09-all7-executable-proof.ts",
+    "line": 572,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "e62a603f0c81df2e8131569b0279d166660a92a4650c7da284ec34ead9ed7dc0"
+  },
+  {
+    "file": "maya-saas-backend/scripts/package5-b24-schema-proof.ts",
+    "line": 39,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "0560dc8f1eed5bc1c9d90877e5847b658be29bc12f3e586dfab41f230320d301"
+  },
+  {
+    "file": "maya-saas-backend/scripts/package5-b24-schema-proof.ts",
+    "line": 40,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "93d99a86a934bb2bb7980bf0e9cd788a48350504ff17a3ab16e983217dd044e1"
+  },
+  {
+    "file": "maya-saas-backend/scripts/package5-b24-schema-proof.ts",
+    "line": 466,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "c83feeebe39053d1945b7c5b2eb5443ea3ea6b62654bb31f0d130ca29d3f1a97"
+  },
+  {
+    "file": "maya-saas-backend/scripts/package5-b24-schema-proof.ts",
+    "line": 467,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "93846ccfd8416ea41a840ac11ccce5d9c4b51441d8fd04fb83700b21b6ea9f9a"
+  },
+  {
+    "file": "maya-saas-backend/scripts/package5-b24-schema-proof.ts",
+    "line": 468,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "2edf945b9f188d961834d87c786fd271e0dd50ef62429fdbe8cc1773f3d784d6"
+  },
+  {
+    "file": "maya-saas-backend/scripts/package5-b27-loyalty-read-proof.ts",
+    "line": 26,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "785e9c3c95ebf2c25b63ffef219291e4bc9909d08a17e201a6340cf4507655a3"
+  },
+  {
+    "file": "maya-saas-backend/scripts/package5-b27-loyalty-read-proof.ts",
+    "line": 27,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "b17d2108b665ae0048d70fd1ca27ad1e5ae6fec432916239390869a902b1e37b"
+  },
+  {
+    "file": "maya-saas-backend/scripts/p4-06-all3-executable-proof.ts",
+    "line": 59,
+    "rule": "generic-api-key",
+    "classification": "literal presentation-key test phrase repeated three times",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": false,
+        "repeatedString": true,
+        "literalLength": 20
+      }
+    ],
+    "lineSha256": "4493c2bbf78d95868f98b558c248ef559feb91003640abb1f3b80e9f6aeb0402"
+  },
+  {
+    "file": "maya-saas-backend/scripts/p4-06-all3-executable-proof.ts",
+    "line": 60,
+    "rule": "generic-api-key",
+    "classification": "literal presentation-key test phrase repeated three times",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": false,
+        "repeatedString": true,
+        "literalLength": 20
+      }
+    ],
+    "lineSha256": "4f8a353fdddd463eb0306b3b1e1d1779b35583051a14cb180dbc6096c16d68c8"
+  },
+  {
+    "file": "maya-saas-backend/scripts/p4-03-all8-executable-proof.ts",
+    "line": 268,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "2f822aa1b46b0dd0f851147312e8df8e9e9ed3372fc8cd41cd7482178f343575"
+  },
+  {
+    "file": "maya-saas-backend/src/action-engine/action-engine.ingress.spec.ts",
+    "line": 279,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "053375e629ea96d88125f2b3a6133b0bdac98d58e5d3953c440c661c2e884d75"
+  },
+  {
+    "file": "maya-saas-backend/src/action-engine/action-engine.registry.spec.ts",
+    "line": 34,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "0c9630e35ada5b2573ddab0b62a4e2d6b028c64e138938e342a6cb344bfd8730"
+  },
+  {
+    "file": "maya-saas-backend/src/action-engine/action-engine.registry.spec.ts",
+    "line": 436,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "6ad2621163ee2f8e6879a9cee4adf0b723f080925d42777e512e70dbef19d07e"
+  },
+  {
+    "file": "maya-saas-backend/src/admin/admin.service.spec.ts",
+    "line": 289,
+    "rule": "generic-api-key",
+    "classification": "unit-only readable password fixture",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": true,
+        "repeatedString": false,
+        "literalLength": 13
+      }
+    ],
+    "lineSha256": "56269eea98b7e80cf8360abec28c6335bf689a384d4a9390c3703334efac8b0f"
+  },
+  {
+    "file": "maya-saas-backend/src/admin/admin.service.spec.ts",
+    "line": 327,
+    "rule": "generic-api-key",
+    "classification": "unit-only readable password fixture",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": true,
+        "repeatedString": false,
+        "literalLength": 13
+      }
+    ],
+    "lineSha256": "56269eea98b7e80cf8360abec28c6335bf689a384d4a9390c3703334efac8b0f"
+  },
+  {
+    "file": "maya-saas-backend/src/ai-tools/ai-tool-expenses-create.spec.ts",
+    "line": 29,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "dc6700bae8542f3a777fdea6d5e36bf5debd521266e021ba67881f8e615c5df5"
+  },
+  {
+    "file": "maya-saas-backend/src/ai-tools/ai-tool-canonical-receipt.spec.ts",
+    "line": 19,
+    "rule": "generic-api-key",
+    "classification": "fixed synthetic idempotency UUID",
+    "shape": [
+      {
+        "uuid": true,
+        "humanNamedFixture": true,
+        "passwordFixture": false,
+        "repeatedString": false,
+        "literalLength": 36
+      }
+    ],
+    "lineSha256": "a7fc7dee021b28f04da0e97f3bf2a086e01a4bfcfb17e09ddc6242267bbefbfd"
+  },
+  {
+    "file": "maya-saas-backend/src/action-engine/action-engine.registry.ts",
+    "line": 981,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "3ab2c243b2cebf2c7c22de3b383eb554aeb03ca4c8ed2f8e41d44cf7bd7a1be1"
+  },
+  {
+    "file": "maya-saas-backend/src/action-engine/action-engine.registry.ts",
+    "line": 1029,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "bbe8323ed0dc03e7d0abf0b71415ea024cb124efe12a7a71df7f2970dc33ca0c"
+  },
+  {
+    "file": "maya-saas-backend/src/action-engine/action-engine.registry.ts",
+    "line": 1072,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "b4f1ff8e0185c2b0666cf963ca9eb71f700b63774edf2935e6491b7120bbc8c1"
+  },
+  {
+    "file": "maya-saas-backend/src/ai-tools/adversarial-expense-audit.spec.ts",
+    "line": 38,
+    "rule": "generic-api-key",
+    "classification": "fixed synthetic idempotency UUID",
+    "shape": [
+      {
+        "uuid": true,
+        "humanNamedFixture": false,
+        "passwordFixture": false,
+        "repeatedString": false,
+        "literalLength": 36
+      }
+    ],
+    "lineSha256": "8ed2d70b9cd80344bed25dc99334209be0736a4caaacea5a85251a5445e139a9"
+  },
+  {
+    "file": "maya-saas-backend/src/ai-tools/adversarial-expense-audit.spec.ts",
+    "line": 39,
+    "rule": "generic-api-key",
+    "classification": "fixed synthetic idempotency UUID",
+    "shape": [
+      {
+        "uuid": true,
+        "humanNamedFixture": false,
+        "passwordFixture": false,
+        "repeatedString": false,
+        "literalLength": 36
+      }
+    ],
+    "lineSha256": "caedf6fa3369f544a93fda3ab3c05da64eb214e75d801fa05e4768f4d93a940a"
+  },
+  {
+    "file": "maya-saas-backend/src/auth/auth.service.spec.ts",
+    "line": 614,
+    "rule": "generic-api-key",
+    "classification": "unit-only readable password fixture",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": true,
+        "repeatedString": false,
+        "literalLength": 13
+      }
+    ],
+    "lineSha256": "28afeaf140f81740b0a6a2edec5b53bddfe58c47c97ba2003044d888d2b753d2"
+  },
+  {
+    "file": "maya-saas-backend/src/auth/auth.service.spec.ts",
+    "line": 675,
+    "rule": "generic-api-key",
+    "classification": "unit-only readable password fixture",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": true,
+        "repeatedString": false,
+        "literalLength": 13
+      }
+    ],
+    "lineSha256": "28afeaf140f81740b0a6a2edec5b53bddfe58c47c97ba2003044d888d2b753d2"
+  },
+  {
+    "file": "maya-saas-backend/src/auth/auth.service.spec.ts",
+    "line": 714,
+    "rule": "generic-api-key",
+    "classification": "unit-only readable password fixture",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": true,
+        "repeatedString": false,
+        "literalLength": 13
+      }
+    ],
+    "lineSha256": "28afeaf140f81740b0a6a2edec5b53bddfe58c47c97ba2003044d888d2b753d2"
+  },
+  {
+    "file": "maya-saas-backend/src/auth/auth.service.spec.ts",
+    "line": 767,
+    "rule": "generic-api-key",
+    "classification": "unit-only readable password fixture",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": true,
+        "repeatedString": false,
+        "literalLength": 13
+      }
+    ],
+    "lineSha256": "56269eea98b7e80cf8360abec28c6335bf689a384d4a9390c3703334efac8b0f"
+  },
+  {
+    "file": "maya-saas-backend/src/auth/auth.service.spec.ts",
+    "line": 798,
+    "rule": "generic-api-key",
+    "classification": "unit-only readable password fixture",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": true,
+        "repeatedString": false,
+        "literalLength": 13
+      }
+    ],
+    "lineSha256": "56269eea98b7e80cf8360abec28c6335bf689a384d4a9390c3703334efac8b0f"
+  },
+  {
+    "file": "maya-saas-backend/src/commerce/commerce-integration.service.spec.ts",
+    "line": 15,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "f2090e4dbd338787868385672ab276c7b52ec20198617338a36dfdc614369fe6"
+  },
+  {
+    "file": "maya-saas-backend/src/commerce/p4-10-commerce-credential-shadow.service.spec.ts",
+    "line": 18,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "85b0afcb9a764d765f64b035ca10c8dba00236042f18d88ca1a99e09c2274a77"
+  },
+  {
+    "file": "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.spec.ts",
+    "line": 25,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "2ebdcbdb0a539359662ac6c0aaad4c2fe5f3a512f856bc7db1a4a23cfe971535"
+  },
+  {
+    "file": "maya-saas-backend/src/communication-delivery/communication-bulk-delivery.service.spec.ts",
+    "line": 35,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "7bdfd8bf050f38c7ef40810fbbb846fe574dbe3c74922f7e10dac2cdcecfeca0"
+  },
+  {
+    "file": "maya-saas-backend/src/communication-delivery/communication-bulk-delivery.service.spec.ts",
+    "line": 121,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "5cbd9d531474a593eef6a363c0fd625862cb30ea445dc79b490fa874b36bad42"
+  },
+  {
+    "file": "maya-saas-backend/src/crm/crm.visit-operations.spec.ts",
+    "line": 163,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "e6d3bc44d471a4a4fef1913dc0f59540259171177a9f85bf2e256c8cc63d9326"
+  },
+  {
+    "file": "maya-saas-backend/src/crm/legacy-appointment-bridge.service.spec.ts",
+    "line": 134,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "6ad2621163ee2f8e6879a9cee4adf0b723f080925d42777e512e70dbef19d07e"
+  },
+  {
+    "file": "maya-saas-backend/src/loyalty/loyalty.service.spec.ts",
+    "line": 313,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "6705829703b14db3e902ed097a0852cd0f8718d9add5c9767c9fc4cefb8a297c"
+  },
+  {
+    "file": "maya-saas-backend/src/loyalty/loyalty.service.spec.ts",
+    "line": 353,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "f6ec9887d516bd528ced68f6f2a4e63329abc729b64450428afc87ec1a5a2757"
+  },
+  {
+    "file": "maya-saas-backend/src/loyalty/loyalty.service.spec.ts",
+    "line": 391,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "f6ec9887d516bd528ced68f6f2a4e63329abc729b64450428afc87ec1a5a2757"
+  },
+  {
+    "file": "maya-saas-backend/src/loyalty/loyalty.service.spec.ts",
+    "line": 413,
+    "rule": "generic-api-key",
+    "classification": "named synthetic test fixture",
+    "lineSha256": "0ecb1fb13294c7091677129ef7a908bf09adc656ac6baf3231966ff1489cd21b"
+  },
+  {
+    "file": "maya-saas-backend/src/loyalty/loyalty.service.spec.ts",
+    "line": 451,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "6705829703b14db3e902ed097a0852cd0f8718d9add5c9767c9fc4cefb8a297c"
+  },
+  {
+    "file": "maya-saas-backend/src/package5-wave6/chapter7-measurement-retention.ts",
+    "line": 11,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "11c2152797dff762abad7ae5976900feafc51a4cf4dcfa4650992a7e1c1d657f"
+  },
+  {
+    "file": "maya-saas-backend/src/package5-wave6/chapter8-valuation-retention.ts",
+    "line": 10,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "d1a3de69ff0fc9d165adf0f37fbb5da65fcfcf40e2db1abeaef34026a53725a5"
+  },
+  {
+    "file": "maya-saas-backend/src/package5-wave6/chapter8-valuation-retention.ts",
+    "line": 18,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "4ffaf62b032e099b6d972103a69509d2f63a1ff7e12fc9bc75ffd9e2e18141f8"
+  },
+  {
+    "file": "maya-saas-backend/src/package5-wave6/package5-wave6.policy.spec.ts",
+    "line": 32,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "3db840c15fb2c6e90adb70514797be5220d4af633d5b8dea8b2f4d990b2f05a6"
+  },
+  {
+    "file": "maya-saas-backend/src/widgets/intent-submit-args.spec.ts",
+    "line": 35,
+    "rule": "generic-api-key",
+    "classification": "named synthetic widget intent token",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": true,
+        "passwordFixture": false,
+        "repeatedString": false,
+        "literalLength": 20
+      }
+    ],
+    "lineSha256": "06fd5786d1d54a97fb916a3aa3cbc979c1417eb4531d8be452ddea1fb7e981ee"
+  },
+  {
+    "file": "maya-saas-backend/src/widgets/gates/gate7.spec.ts",
+    "line": 182,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "a62273c86046fbf7703a9d7857fcf21bf6ca5b7f69603e167af3bdce5edcf971"
+  },
+  {
+    "file": "maya-saas-backend/src/widgets/proactive/moments.ts",
+    "line": 91,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "f2e337689d02bd5f26a69a705a53ca154b47ed1d6c44e04680229a4c50397e90"
+  },
+  {
+    "file": "maya-saas-backend/src/widgets/proactive/moments.ts",
+    "line": 118,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "f2e337689d02bd5f26a69a705a53ca154b47ed1d6c44e04680229a4c50397e90"
+  },
+  {
+    "file": "maya-saas-backend/test/widgets-live/crm-a17-local-form.probe-spec.ts",
+    "line": 129,
+    "rule": "generic-api-key",
+    "classification": "explicit uppercase test sentinel",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": false,
+        "repeatedString": false,
+        "literalLength": 21
+      }
+    ],
+    "lineSha256": "c61f8d2528bcf16c701f927d779ee15a7ab5b273e389190d40771268e2706799"
+  },
+  {
+    "file": "maya-saas-backend/test/widgets-live/crm-a17-local-form.probe-spec.ts",
+    "line": 293,
+    "rule": "generic-api-key",
+    "classification": "explicit SYNTHETIC A17 browser-test sentinel",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": false,
+        "repeatedString": false,
+        "literalLength": 16
+      }
+    ],
+    "lineSha256": "b08e691a072792b239323dfbede581484147f4a2b3a0ce6bcc3bcd85175b1e0e"
+  },
+  {
+    "file": "maya-saas-backend/test/widgets-live/crm-a17-operation-restart.probe-spec.ts",
+    "line": 292,
+    "rule": "generic-api-key",
+    "classification": "explicit SYNTHETIC A17 browser-test sentinel",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": false,
+        "repeatedString": false,
+        "literalLength": 16
+      }
+    ],
+    "lineSha256": "e1a1e4ea1b8cf20099ada54be76819a9aead9984593abd712c21900e71c99b4c"
+  },
+  {
+    "file": "maya-saas-backend/test/widgets-live/crm-a17-operation-restart.probe-spec.ts",
+    "line": 485,
+    "rule": "generic-api-key",
+    "classification": "explicit uppercase test sentinel",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": false,
+        "repeatedString": false,
+        "literalLength": 21
+      }
+    ],
+    "lineSha256": "f2a625d6b151f3436cab129fdee3b0ee4fedc98834ea160e2595b7b55813202b"
+  },
+  {
+    "file": "maya-saas-backend/test/widgets-live/crm-a17-operation-restart.probe-spec.ts",
+    "line": 1183,
+    "rule": "generic-api-key",
+    "classification": "explicit SYNTHETIC A17 browser-test sentinel",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": false,
+        "repeatedString": false,
+        "literalLength": 20
+      }
+    ],
+    "lineSha256": "2ac414c513c81d469a9e942ca1351b5e0f7d9793b00c40ebe1bdd1cd2851d32c"
+  },
+  {
+    "file": "maya-saas-backend/test/widgets-live/crm-a17-operation-restart.probe-spec.ts",
+    "line": 1273,
+    "rule": "generic-api-key",
+    "classification": "explicit SYNTHETIC A17 browser-test sentinel",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": false,
+        "repeatedString": false,
+        "literalLength": 16
+      }
+    ],
+    "lineSha256": "6e76c50b6410703647ce092991a3da8aa02d90d42f9e88326c3255a405059c2e"
+  },
+  {
+    "file": "maya-saas-backend/test/widgets-live/crm-a17-operation-restart.probe-spec.ts",
+    "line": 1527,
+    "rule": "generic-api-key",
+    "classification": "explicit SYNTHETIC A17 browser-test sentinel",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": false,
+        "repeatedString": false,
+        "literalLength": 23
+      }
+    ],
+    "lineSha256": "5233cde03552a7f68341d02cf4009b77c92c9fadd21b7c4c3af932f71e4c1163"
+  },
+  {
+    "file": "maya-saas-backend/test/widgets-live/crm-a17-operation-restart.probe-spec.ts",
+    "line": 1971,
+    "rule": "generic-api-key",
+    "classification": "explicit uppercase test sentinel",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": false,
+        "repeatedString": false,
+        "literalLength": 21
+      }
+    ],
+    "lineSha256": "f2a625d6b151f3436cab129fdee3b0ee4fedc98834ea160e2595b7b55813202b"
+  },
+  {
+    "file": "maya-saas-backend/test/widgets-live/c9-occupancy-restart.probe-spec.ts",
+    "line": 175,
+    "rule": "generic-api-key",
+    "classification": "explicit uppercase test sentinel",
+    "shape": [
+      {
+        "uuid": false,
+        "humanNamedFixture": false,
+        "passwordFixture": false,
+        "repeatedString": false,
+        "literalLength": 20
+      }
+    ],
+    "lineSha256": "8e536a5d70c62769cffd5c5a59bfd0fd824ae6c063bef8f349ac918d014f83d1"
+  },
+  {
+    "file": "maya-saas-backend/test/widgets-live/personal-owner-restart.probe-spec.ts",
+    "line": 469,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "07a035cd44b99926c6f424aa58e99b7e55093f0840a4ffa2bac30c102073a340"
+  },
+  {
+    "file": "maya-saas-backend/test/widgets-live/personal-owner-restart.probe-spec.ts",
+    "line": 487,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "0c19d3e781c4f5f866965d07c4fca343c659bd7aef4d273acda503d9383da630"
+  },
+  {
+    "file": "maya-saas-backend/test/widgets-live/personal-owner-restart.probe-spec.ts",
+    "line": 507,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "bcfd1adc3e7c357d57efb2e81b120fba8c979536910fbf2c11ea66a31bcf75d5"
+  },
+  {
+    "file": "maya-saas-backend/test/widgets-live/personal-owner-restart.probe-spec.ts",
+    "line": 566,
+    "rule": "generic-api-key",
+    "classification": "public policy/idempotency/version or test selector identifier",
+    "lineSha256": "bcfd1adc3e7c357d57efb2e81b120fba8c979536910fbf2c11ea66a31bcf75d5"
+  }
+]

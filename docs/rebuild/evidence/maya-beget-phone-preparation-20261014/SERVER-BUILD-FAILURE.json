@@ -1,0 +1,24 @@
+{
+  "status": "FAIL",
+  "candidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "builder": "maya-phone-7aee28d2",
+  "exit": 102,
+  "stopReason": null,
+  "elapsedSeconds": 199,
+  "minAvailableMemory": 635121664,
+  "minFreeDisk": 9147568128,
+  "botUnchanged": true,
+  "servicesStarted": false,
+  "builderState": {
+    "Status": "exited",
+    "OOMKilled": true,
+    "ExitCode": 1,
+    "Error": ""
+  },
+  "limits": {
+    "Memory": 805306368,
+    "MemorySwap": 805306368,
+    "CpuPeriod": 100000,
+    "CpuQuota": 50000
+  }
+}

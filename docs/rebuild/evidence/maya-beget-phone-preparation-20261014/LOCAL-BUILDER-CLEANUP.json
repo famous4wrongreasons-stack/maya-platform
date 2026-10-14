@@ -1,0 +1,9 @@
+{
+  "ownedVm": "maya-phone-build-20261014",
+  "status": "STOPPED",
+  "homeMounted": false,
+  "sshAgentForwarded": false,
+  "sourceCandidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "imageArchivePreserved": true,
+  "defaultDockerContextChanged": false
+}

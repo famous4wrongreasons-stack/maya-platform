@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "exit": 0,
+  "candidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "containers": [
+    {
+      "service": "backend",
+      "imageId": "sha256:d8f6a5b33529e4a7f2e4503cc7e867de88d259f35236fb38d6b8886fcb5a9f6f",
+      "status": "running",
+      "oomKilled": false,
+      "health": "healthy",
+      "memoryLimit": 671088640,
+      "memorySwapLimit": 671088640,
+      "hostPorts": {},
+      "networks": [
+        "maya-phone-staging_private"
+      ]
+    },
+    {
+      "service": "postgres",
+      "imageId": "sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea",
+      "status": "running",
+      "oomKilled": false,
+      "health": "healthy",
+      "memoryLimit": 268435456,
+      "memorySwapLimit": 268435456,
+      "hostPorts": {},
+      "networks": [
+        "maya-phone-staging_private"
+      ]
+    }
+  ],
+  "botUnchanged": true,
+  "minAvailableMemory": 1179766784,
+  "minFreeDisk": 8335917056,
+  "publicStarted": false,
+  "seeded": false,
+  "realProviders": false
+}

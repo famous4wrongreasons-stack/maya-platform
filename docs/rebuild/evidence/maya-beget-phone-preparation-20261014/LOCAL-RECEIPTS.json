@@ -1,0 +1,36 @@
+{
+  "codeCandidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "tests": {
+    "preparationAndSelector": 44,
+    "packaging": 18,
+    "localBackend": 50
+  },
+  "runtimeCodeChangedAfterProof": false,
+  "logs": {
+    "FINAL-HEAD-TESTS.log": {
+      "localPath": "/private/tmp/maya-beget-preparation-20261014-01/FINAL-HEAD-TESTS.log",
+      "sha256": "fdf38ec16fe1d1f7708d822bf8ca3e121fd774c60280f754ab1476ce51e6ba30",
+      "bytes": 2452
+    },
+    "PACKAGING-TESTS.log": {
+      "localPath": "/private/tmp/maya-beget-preparation-20261014-01/PACKAGING-TESTS.log",
+      "sha256": "b66d7253440582784a43ff3706b6fdaa3cc25f1d334910f358aa534ea037d874",
+      "bytes": 1396
+    },
+    "LOCAL-IMAGE-BUILD.log": {
+      "localPath": "/private/tmp/maya-beget-preparation-20261014-01/LOCAL-IMAGE-BUILD.log",
+      "sha256": "c3c43a00761ab4f18000c090a93900e610b8966f0ad19181412b0b0187eb7409",
+      "bytes": 13915
+    },
+    "IOS-UNSIGNED-BUILD-READY.log": {
+      "localPath": "/private/tmp/maya-beget-preparation-20261014-01/IOS-UNSIGNED-BUILD-READY.log",
+      "sha256": "0941ab4acbaccb5e90144af6575608892a764afda2c54d802536210c5bd2dfc7",
+      "bytes": 312555
+    },
+    "IOS-APP-VERIFICATION.log": {
+      "localPath": "/private/tmp/maya-beget-preparation-20261014-01/IOS-APP-VERIFICATION.log",
+      "sha256": "4b2c88cc32d6b407008e3a45ec9d645454e1feaca2bc7d004eb83ed208186b0a",
+      "bytes": 747
+    }
+  }
+}
