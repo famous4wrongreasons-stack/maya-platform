@@ -1,0 +1,52 @@
+FAIL src/analytics/operations-analytics.journal-services.spec.ts
+  internal day journal service labels
+    ✓ resolves only stored IDs in this tenant, in appointment order, including inactive services (4 ms)
+    ✓ does not turn current catalogue prices into historical service or appointment money (1 ms)
+    ✓ never resolves foreign or missing catalogue IDs, even when they are stored on the appointment (1 ms)
+    ✕ does not relabel retained external records from the internal catalogue (2 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: null (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: {}
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: "service-a" (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: []
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: [null, 7, false, "", [Object]] (1 ms)
+    ✓ keeps stored multiplicity/order but batches duplicate lookups across records (1 ms)
+    ✓ does not read the catalogue on an empty day
+    ✓ refuses a different tenant before any source read (1 ms)
+    ✓ propagates a catalogue read failure instead of presenting it as an empty catalogue (1 ms)
+    ✓ preserves provider journal names and amounts without touching the internal catalogue (1 ms)
+
+  ● internal day journal service labels › does not relabel retained external records from the internal catalogue
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 10
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "id": "service-b",
+    +     "name": "Архивная услуга",
+    +   },
+    +   Object {
+    +     "id": "service-a",
+    +     "name": "Учебная стрижка",
+    +   },
+    + ]
+
+      209 |     expect(result.records).toHaveLength(2);
+      210 |     expect(result.records[0].services).toHaveLength(2);
+    > 211 |     expect(result.records[1].services).toEqual([]);
+          |                                        ^
+      212 |     expect(result.records[1].totalPriceKopecks).toBe(12345);
+      213 |   });
+      214 |
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:211:40)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 13 passed, 14 total
+Snapshots:   0 total
+Time:        0.468 s, estimated 1 s
+Ran all test suites within paths "src/analytics/operations-analytics.journal-services.spec.ts".
+Test results written to: ../../mutation-source-confusion.json

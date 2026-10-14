@@ -1,0 +1,2275 @@
+{
+  "candidate": "91916d52903ac8f18fb8df30ead2b8d3a7aef0f0",
+  "cleanFinalCandidate": true,
+  "actualBackendHttpPg": true,
+  "actualRuntimeReactProjection": true,
+  "browserOverThisBackend": false,
+  "isolatedSyntheticDatabase": true,
+  "clusterStopped": true,
+  "realModel": false,
+  "externalProvider": false,
+  "effects": {
+    "production": 0,
+    "retainedSalonDatabase": 0,
+    "realYclients": 0,
+    "otp": 0,
+    "keychain": 0,
+    "iosInstall": 0
+  },
+  "suites": {
+    "backend-regressions": {
+      "numPassedTests": 326,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 9,
+      "cases": [
+        {
+          "name": "AiToolHandlerService output minimization bound employee service catalog [synthetic CRM owner] passes only the trusted source to the owner and preserves ranges/unknowns with a private witness",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound employee service catalog [synthetic CRM owner] refuses current source drift before owner read",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound employee service catalog [synthetic CRM owner] refuses current source drift after owner read",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound employee service catalog [synthetic CRM owner] preserves owner Forbidden without fallback",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound employee service catalog [synthetic CRM owner] rejects a public company marker as an employee-service witness",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound employee service catalog [synthetic CRM owner] keeps unscoped general catalog calls and their existing shape unchanged",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound public company profile [synthetic CRM owner] projects only exact CRM title/address and source marker, without roster or tenant branding",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound public company profile [synthetic CRM owner] leaves missing address unknown and never substitutes tenant branding",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound public company profile [synthetic CRM owner] refuses source drift before profile read",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound public company profile [synthetic CRM owner] refuses source drift after profile read",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound public company profile [synthetic CRM owner] keeps ordinary scoped staff catalogs on their existing path without company GET",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound employee journal READ source [synthetic owner boundary] passes the same source into the canonical day owner and preserves partial observation without private identities",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound employee journal READ source [synthetic owner boundary] withholds an unqualified canonical date result",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound employee journal READ source [synthetic owner boundary] withholds an unqualified canonical timezone result",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound employee journal READ source [synthetic owner boundary] withholds an unqualified canonical foreign-staff result",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound employee journal READ source [synthetic owner boundary] withholds an unqualified canonical missing-completeness result",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound employee journal READ source [synthetic owner boundary] withholds an unqualified canonical array-completeness result",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound employee journal READ source [synthetic owner boundary] rejects source drift during canonical journal read",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound employee journal READ source [synthetic owner boundary] does not turn duplicate current staff IDs into a first-match journal read",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound employee journal READ source [synthetic owner boundary] cannot authorize a client from a server source witness",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source uses the exact current branch/staff witness for the provider READ and emits only bounded source metadata",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source refuses foreign-branch before roster/provider reads",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source refuses revision before roster/provider reads",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source refuses timezone before roster/provider reads",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source refuses staff-source before roster/provider reads",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source refuses unavailable before roster/provider reads",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source refuses actor-branch before roster/provider reads",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source revalidates drift after roster read before schedule provider dispatch",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source withholds provider response after current company/branch changes",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source does not turn malformed staff provider output into a verified schedule",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source does not turn malformed date provider output into a verified schedule",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source does not turn malformed invalid-time provider output into a verified schedule",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source does not turn malformed overlap provider output into a verified schedule",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source does not turn malformed working-flag provider output into a verified schedule",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source does not turn malformed too-many provider output into a verified schedule",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source does not expose provider-only fields on a qualified slot",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source preserves a qualified day off and refuses duplicate current roster identity",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization bound staff schedule READ source current metadata checks do not call provider data readers and keep the actual tenant argument",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization goods search binding derives the source revision from the current actor and passes one normalized query without model-supplied source authority",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization canonical task list source reads completed A23 state despite stale or archived Inbox (archived=false)",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization canonical task list source reads completed A23 state despite stale or archived Inbox (archived=true)",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization exact source-local availability preference — synthetic source facts filters 2026-10-11 00:15 in Asia/Kathmandu without nearest/day/DST normalization",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization exact source-local availability preference — synthetic source facts filters 2026-10-11 14:30 in Europe/Moscow without nearest/day/DST normalization",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization exact source-local availability preference — synthetic source facts filters 2026-03-08 02:30 in America/New_York without nearest/day/DST normalization",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization exact source-local availability preference — synthetic source facts refuses overlap or non-round-trippable exact source instants [\"2026-11-01T05:30:00Z\", \"2026-11-01T06:30:00Z\"] without proposing a substitute",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization exact source-local availability preference — synthetic source facts refuses overlap or non-round-trippable exact source instants [\"2026-11-01T06:30:00Z\"] without proposing a substitute",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization exact source-local availability preference — synthetic source facts refuses overlap or non-round-trippable exact source instants [\"2026-11-01T01:30:00-05:00\"] without proposing a substitute",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization exact source-local availability preference — synthetic source facts continues an ordinary exact source instant without changing its branch witness",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization exact source-local availability preference — synthetic source facts reports incomplete source timestamps separately from an empty exact match",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization exact source-local availability preference — synthetic source facts uses the selected internal staff calendar instead of the tenant clock",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization exact source-local availability preference — synthetic source facts does not hide a foreign branch at a nonmatching time, or return facts after timezone/source drift",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization exact source-local availability preference — synthetic source facts propagates a revoked current calendar before reading source slots",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization catalog READ uses the CRM qualified projection and never the defaulted public DTO",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization reads only the current tenant/account CRM staff link for the own schedule",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization does not reuse an own-schedule CRM staff link across tenants",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization explicit unique client dossier returns only ambiguity before any history, loyalty or recency read",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization explicit unique client dossier reads only the unique customer after a fresh explicit more precise query",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization explicit unique client dossier reports native search failure as unavailable before dossier reads [synthetic transport]",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization explicit unique client dossier keeps empty distinct from ambiguous search without reading candidate facts",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization explicit unique client dossier keeps source-error distinct from ambiguous search without reading candidate facts",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization builds a redacted CRM client dossier for staff",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization retries a Russian client name in nominative form when CRM does not inflect search",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization не возвращает контакты или старый threshold без canonical C8 reader",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization returns and caches a PII-free full client registry analysis",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization removes provider payload and customer PII from appointments",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization does not expose encrypted expense notes",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization converts the spoken rubles into kopecks and stamps the expense as manual",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization returns only the authoritative loyalty summary",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization applies only the immutable schedule approved by a manager",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization reads the exact active staff schedule directly from CRM",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization refuses a staff id that is absent from the active CRM roster",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization reads an exact PII-free day journal for an active staff member",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization removes employee names and provider identifiers from analytics",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization resolves month-to-date on the server in the tenant timezone",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization resolves today as the full tenant calendar day",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization replaces external appointment prices with verified CRM finance totals",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization fails closed for external finance when the role cannot read payroll",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization gives the owner confirmed till and accrued payroll per master without mixing them",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization withholds per-master payroll from a role that may see names but not finance",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization gives a master their own accrued salary and never a colleague payroll row",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization reports per-master payroll as unavailable with the CRM reason instead of zero",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization says the internal calendar has no payroll instead of showing an empty salary",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization names per-master revenue as an unavailable metric with its reason",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization resolves both year-to-date windows on the server for a year-over-year query",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization answers a universal business query with server-computed metric and service changes",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization 🔴 у арендатора на CRM цены журнала не подменяют кассу даже без кассы",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization matches one master across both periods by name and never exposes the CRM id",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization tells two masters with the same name apart instead of merging them",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization keeps journal prices out of a CRM answer while names and services survive",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization publishes client cohorts as metrics and compares them between periods",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization reports unavailable client cohorts with a reason instead of zeroes",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization compares cancellations and repeat clients per master without leaking the CRM id",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization hides the named master breakdown from a role that only manages itself",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization shows a master only their own row even when the source returns colleagues",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization keeps a universal employee query scoped to the current master",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolHandlerService output minimization caches verified CRM operations even when the finance feed is unavailable",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService counts a client with an earlier visit as returning and one without as new",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService does not count a cancelled earlier appointment as a previous visit",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService marks cohorts unavailable instead of zero when the history cannot be read",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService refuses cohorts for a period longer than the lookback horizon without extra queries",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService excludes cancellations and keeps all currencies explicit",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService rejects a tenant mismatch before any analytics query",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService uses the external CRM journal for business analytics",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService breaks the CRM journal down by master and service in a stable order",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService counts cancellations per master and keeps a master who only had cancellations",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService reads the cohort history for external CRM in one extra chunked journal pass",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService names internal calendar masters from their provider card in one query",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService does not turn unidentified CRM appointments into unique clients",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService uses the tenant-scoped CRM staff link for employee analytics",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService returns tenant-scoped verified CRM finance without local calculations",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService keeps verified CRM revenue for long ranges and withholds payroll",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService rejects a finance tenant mismatch before contacting the CRM",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService returns the whole payroll for a staff-scoped finance read so the caller can pick one row",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService degrades a staff-scoped finance read to nothing instead of failing personal analytics",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService rejects a misleading Maya branch filter for company-wide CRM finance",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability computes profit from till-confirmed cash and not from journal prices",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability ignores the booked value of the journal even when it loads the overview itself",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability calculates from recorded expenses and treats unrecorded additions as zero",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability computes clean profit when the owner confirms there are no additional expenses",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability subtracts additional expenses entered in chat without requiring rent",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability accepts a category synonym so a real ledger is not called incomplete",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability counts salary once when CRM payroll and a manual salary expense both exist",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability refuses profit when the CRM gave no payroll, and does not ask to enter it by hand",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability refuses profit for an internal calendar because there is no till at all",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability refuses profit when the CRM did not confirm the cash",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability refuses to net expenses recorded in another currency",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability refuses profit for a branch filter without touching the CRM or the ledger",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability refuses everything when the expense ledger cannot be read",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability computes the cost of a new client and always carries the cohort horizon",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability refuses the cost of a new client instead of dividing by zero",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability carries the cohort reason when new clients cannot be counted at all",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability refuses the cost of a new client when no advertising is recorded",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability reports marketing ROI as permanently unavailable and points at the cost of a new client",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService profitability rejects a profitability tenant mismatch before any query",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService expenses through the canonical summation publishes the same totals the canonical summation produces",
+          "status": "passed"
+        },
+        {
+          "name": "OperationsAnalyticsService expenses through the canonical summation fails closed when the expense book cannot be read instead of showing zero",
+          "status": "passed"
+        },
+        {
+          "name": "post-gateway booking audit source boundary admits the exact metadata projection while retaining an added authority predicate",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) reads the files it guards, down to their leaves",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-1 [BUILD] the projection imports and references only the owners it is allowed, through their one call site each",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-1 on the port imports the CRM",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-1 on the port imports the AI-tool handler",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-1 on the projector calls a C9 write method",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-1 on the projector reads a Prisma delegate of another layer",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-1 on the projection reaches the store client",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-2 [BUILD] no file under src/widgets implements a PII path of its own",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) CONTROL: IR-K4K8-1 is applied — the three files are GONE, so the exclusion above is inert and the scan is not passing on an empty set",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-2 on a carrier PII ceiling comes back",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-2 on a PII rank comes back",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-2 on the deleted fences are imported again",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-2 on an absent field is read as PERMISSION",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-3 [BUILD] no gate antecedent, resolver input or projector input reads a presentation input, and no carrier PII ceiling is named outside the files IR-K4K8-1 deletes",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-3 on a gate reads profile_id",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-3 on a resolver reads a render header",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-3 on a projector input reads the bridge",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-3 admits only the post-gateway audit sink, never a new predicate, query or gate binding",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-4 [BUILD] the projection does no arithmetic and writes no hasMore: false",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-4 on a count is computed",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-4 on exhaustion is asserted",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-4 on the rows are aggregated",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-5 [BUILD] ProjectionPlan carries no C-class column and no free-text/phone input; its sole scalar is the typed journal date",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-6 [BUILD] ProjectionOutcome hands the minter a WidgetComposerInput and nothing else, and the projection branches on no presentation mode",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-7 [BUILD] every registered row names one READ subject, at most one row per (tapped_kind, subject_key), subject_key ∈ ownerClassKeys(result_kind) and result_kind is emittable",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-8 [BUILD] the projection builds no principal, calls no C9Authority, and every read is dominated by the authority/actor precondition",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-9 [BUILD] the projector is referenced only by the module that provides it and Gate 13, and called only by Gate 13",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-9 on Gate 1 composes through the projector",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-9 on the resolve route calls the projector",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-10 [BUILD] slot 12 is a pointer: it references nothing, returns only pass, and liveGateCount excludes it",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) CONTROL: ARCH-12-10 over the real gateway with IR-K4K8-1 applied — the source half is clean, and the gate12 battery’s anchors are there",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-10 on the slot looks the registry up",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-10 on the slot refuses",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-10 on the slot reads its context",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-11 [BUILD] F3/FR-16: this change adds no capability, no capability field and no column to a non-Widget table",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-12 [BUILD] composeNavigate reads only an exact sealed-source row for detail",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-13 [BUILD] the finite first row set has no blocker; deferred categories remain unregistered",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) ARCH-12-14 [BUILD] nothing reachable from canonical-read.port.ts reads BridgeSession or native_bridge",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-14 on a module on the edge imports the bridge session",
+          "status": "passed"
+        },
+        {
+          "name": "U12b — the projector fences (ARCH-12-1 … ARCH-12-14) RED: ARCH-12-14 on a module on the edge reads the native bridge off a value",
+          "status": "passed"
+        },
+        {
+          "name": "U12b [U] the projector reads only registered rows [U] compose on a subject with no registered row degrades",
+          "status": "passed"
+        },
+        {
+          "name": "U12b [U] the projector reads only registered rows [U] composeFromOwnerResponse never reads the response",
+          "status": "passed"
+        },
+        {
+          "name": "U12b [U] the projector reads only registered rows [U] composeNavigate requires detail plus exact sealed source evidence",
+          "status": "passed"
+        },
+        {
+          "name": "U12b [U] the projector reads only registered rows [U] no principal, no read (I47)",
+          "status": "passed"
+        },
+        {
+          "name": "U12b [U] the projector reads only registered rows [U] one registered capability row makes exactly one canonical read",
+          "status": "passed"
+        },
+        {
+          "name": "U12b [U] the projector reads only registered rows [JOURNAL-DATE] passes the exact validated date to the canonical owner without reinterpretation",
+          "status": "passed"
+        },
+        {
+          "name": "U12b [U] the projector reads only registered rows [JOURNAL-DATE] revoked/foreign authority refuses before the canonical read",
+          "status": "passed"
+        },
+        {
+          "name": "U12b [U] the projector reads only registered rows [JOURNAL-DATE] refuses an unparseable retained date and never substitutes a noun handle",
+          "status": "passed"
+        },
+        {
+          "name": "U12b [U] the projector reads only registered rows [U] the subject key is the record’s space and key, and a record naming none selects nothing",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal persists separate schedule and pricing owner identities in one emitter, with no generic mint authority",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal catalog personal child retains a sealed exact parent and no recursive navigation or mutation recipe",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal returns the existing bounded source refusal before minting an overlong inherited STAFF_SELECTOR identity",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal returns the existing bounded source refusal before minting an overlong inherited TIME_SLOT_SELECTOR identity",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal returns the existing bounded source refusal before minting an overlong inherited TIME_SLOT_SELECTOR identity",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal mints source-qualified nullable measures without losing the real service choice",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal FBE2E-2 mints a strict service selector and a closed server-owned transition domain",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal retains only a server-validated journal business date on the exact journal REFINE record",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal refuses invalid, unscoped and client-asserted retained scalars before any write",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal writes the emission and its intent record in one transaction",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal returns and stores the complete authorized envelope required by the shell B4 ingest path",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal stores only the token HASH, never the token",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal mints only the closed CONTROL escape in the fixture adapter: no actuating token exists in wave 2",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal hashes the body canonically, so key order cannot change the hash",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal gives two different bodies two different hashes",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal seals over the body: a body edited after sealing no longer verifies",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal seals over identity: a body moved to another envelope does not verify",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal gives every emission a distinct token",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal MINT-2 NONE appears in the envelope but creates no token and no intent record",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal MINT-3 refuses a generic actuating template and writes nothing after exact discharge",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal MINT-1 writes the exact derived audit members",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal MINT-1 persists the registry-owned semantics for every tokened non-actuating effect",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal MINT-9 rejects unknown nested composer members before persistence",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal MINT-5 never persists readback_text",
+          "status": "passed"
+        },
+        {
+          "name": "K3 emission — mint, compose, fit, seal MINT-6 removes label interpolation from a client-identified envelope",
+          "status": "passed"
+        },
+        {
+          "name": "refuses external-to-internal drift before a typed branch selector can be minted",
+          "status": "passed"
+        },
+        {
+          "name": "cancels the exact minted selector if the final source check fails",
+          "status": "passed"
+        },
+        {
+          "name": "erasure admission at the one minter keeps price approval mint and its erasure fence in the caller transaction",
+          "status": "passed"
+        },
+        {
+          "name": "erasure admission at the one minter keeps goods approval mint and its erasure fence in the caller transaction",
+          "status": "passed"
+        },
+        {
+          "name": "erasure admission at the one minter refuses a delayed emission after its exact parent was erased",
+          "status": "passed"
+        },
+        {
+          "name": "erasure admission at the one minter reuses the caller transaction through parent validation and all C writes",
+          "status": "passed"
+        },
+        {
+          "name": "uses the canonical internal source projection for branch slots",
+          "status": "passed"
+        },
+        {
+          "name": "uses the canonical external source projection for branch slots",
+          "status": "passed"
+        },
+        {
+          "name": "uses the canonical null source projection for branch slots",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] keeps the requested civil day across employee clarification and midnight in Europe/Moscow",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] keeps the requested civil day across employee clarification and midnight in Europe/Berlin",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] keeps the requested civil day across employee clarification and midnight in Europe/Berlin",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] cannot retain a calendar from a stale catalog",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] cannot retain a calendar from a failed catalog",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] cannot retain a calendar from a malformed catalog",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] rejects impossible or malformed calendar date 2026-02-29 before catalog",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] rejects impossible or malformed calendar date 2026-04-31 before catalog",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] rejects impossible or malformed calendar date 2026-11-01\n before catalog",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] invalidates retained branchId before catalog and requires fresh scope",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] invalidates retained timezone before catalog and requires fresh scope",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] invalidates retained sourceRevision before catalog and requires fresh scope",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] reads exactly current catalog then employee journal in branch timezone (dependency=false)",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] reads exactly current catalog then employee journal in branch timezone (dependency=true)",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] does not default missing branch authority or call provider readers",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] does not default unresolved branch authority or call provider readers",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] does not default foreign-preference branch authority or call provider readers",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] does not default foreign-member branch authority or call provider readers",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] resolves only a current request-local branch mention",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] does not guess an employee from ambiguous catalog",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] does not guess an employee from missing catalog",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] does not guess an employee from stale catalog",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] withholds journal READ on mismatched staff-source branchId",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] withholds journal READ on mismatched staff-source externalStaffId",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] withholds journal READ on mismatched staff-source timezone",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] does not convert a broad period into an invented day",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] propagates current tenant revocation instead of making an empty journal",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] does not intercept own appointments, mutations, decline or a broken dependency",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] rejects permission outside the exact finite whitelist",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] rejects action outside the exact finite whitelist",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] rejects data-class outside the exact finite whitelist",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] rejects tool outside the exact finite whitelist",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] rejects extra-entity outside the exact finite whitelist",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal existing owners [synthetic component] rejects extra-task outside the exact finite whitelist",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] does not echo client/private extras, guessed totals or attendance from the source envelope",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] labels cached evidence without claiming a new source observation",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] incomplete empty source never means no bookings (zero_means_none=true)",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] incomplete empty source never means no bookings (zero_means_none=false)",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] complete empty source honors explicit zero semantics=true",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] complete empty source honors explicit zero semantics=false",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] marks visible truncation from source without invented total counts",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] marks visible truncation from display without invented total counts",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] reports completed only as a CRM status, not proof that a paid-only visit took place",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] does not infer an empty day from an empty truncated projection",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] withholds stale/malformed/wrong-source stale without leaking rows",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] withholds stale/malformed/wrong-source failed without leaking rows",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] withholds stale/malformed/wrong-source date without leaking rows",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] withholds stale/malformed/wrong-source timezone without leaking rows",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] withholds stale/malformed/wrong-source branch without leaking rows",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] withholds stale/malformed/wrong-source staff without leaking rows",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] withholds stale/malformed/wrong-source hash without leaking rows",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] withholds stale/malformed/wrong-source name without leaking rows",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] withholds stale/malformed/wrong-source pii without leaking rows",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] withholds stale/malformed/wrong-source count without leaking rows",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] withholds stale/malformed/wrong-source status-array without leaking rows",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] withholds stale/malformed/wrong-source time without leaking rows",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] withholds stale/malformed/wrong-source services without leaking rows",
+          "status": "passed"
+        },
+        {
+          "name": "employee journal evidence presentation [synthetic source] withholds stale/malformed/wrong-source oversize without leaking rows",
+          "status": "passed"
+        },
+        {
+          "name": "P6 §10 — обязательная регрессия консолидации 🔴 1. боевой случай: журнал говорит 13, зеркало 12 — побеждает зеркало",
+          "status": "passed"
+        },
+        {
+          "name": "P6 §10 — обязательная регрессия консолидации 2. полный журнал: счётчики и минуты приходят от канона",
+          "status": "passed"
+        },
+        {
+          "name": "P6 §10 — обязательная регрессия консолидации 3. усечённый журнал: неполнота доезжает до ответа",
+          "status": "passed"
+        },
+        {
+          "name": "P6 §10 — обязательная регрессия консолидации 4. отказ провайдера не превращается в пустой день",
+          "status": "passed"
+        },
+        {
+          "name": "P6 §10 — обязательная регрессия консолидации 5. записи вне суток в день не попадают",
+          "status": "passed"
+        },
+        {
+          "name": "P6 §10 — обязательная регрессия консолидации 6. граница часового пояса: сутки строит владелец, а не инструмент",
+          "status": "passed"
+        },
+        {
+          "name": "P6 §10 — обязательная регрессия консолидации 7. стоимость записанного считает канон",
+          "status": "passed"
+        },
+        {
+          "name": "P6 §10 — обязательная регрессия консолидации 8. записанные минуты и утилизация — разные факты",
+          "status": "passed"
+        },
+        {
+          "name": "P6 §10 — обязательная регрессия консолидации 9. текущий и прошлый период считает один владелец",
+          "status": "passed"
+        },
+        {
+          "name": "P6 §10 — обязательная регрессия консолидации 10. внутренний календарь: присутствие не измеряется вовсе",
+          "status": "passed"
+        },
+        {
+          "name": "P6 §10 — обязательная регрессия консолидации 11. внешняя CRM: присутствие измеряется зеркалом",
+          "status": "passed"
+        },
+        {
+          "name": "P6 §10 — обязательная регрессия консолидации 12. читатели главы 3 не тронуты: зеркало и сверка читают журнал сами",
+          "status": "passed"
+        },
+        {
+          "name": "P6 — храповик источника 🔴 слой инструментов не читает журнал собственной нарезкой",
+          "status": "passed"
+        },
+        {
+          "name": "P6 — храповик источника 🔴 присутствие ЗА ПЕРИОД слой инструментов не выводит сам",
+          "status": "passed"
+        },
+        {
+          "name": "P6 — храповик источника 🔴 дневной срез принадлежит слою, который владеет агрегацией периода",
+          "status": "passed"
+        },
+        {
+          "name": "P6 — храповик источника 🔴 словарь отмены и цена записи в мотивации — из общего владельца",
+          "status": "passed"
+        },
+        {
+          "name": "P6 — храповик источника запрет не шире задуманного: границы главы 3 и транспорт не тронуты",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels resolves only stored IDs in this tenant, in appointment order, including inactive services",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels does not turn current catalogue prices into historical service or appointment money",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels never resolves foreign or missing catalogue IDs, even when they are stored on the appointment",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels does not relabel retained external records from the internal catalogue",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels leaves malformed/empty stored IDs unnamed without reading the catalogue: null",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels leaves malformed/empty stored IDs unnamed without reading the catalogue: {}",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels leaves malformed/empty stored IDs unnamed without reading the catalogue: \"service-a\"",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels leaves malformed/empty stored IDs unnamed without reading the catalogue: []",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels leaves malformed/empty stored IDs unnamed without reading the catalogue: [null, 7, false, \"\", [Object]]",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels keeps stored multiplicity/order but batches duplicate lookups across records",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels does not read the catalogue on an empty day",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels refuses a different tenant before any source read",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels propagates a catalogue read failure instead of presenting it as an empty catalogue",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels preserves provider journal names and amounts without touching the internal catalogue",
+          "status": "passed"
+        },
+        {
+          "name": "day journal source ownership uses source-local bounds including DST for 2026-10-09 and scopes canonical attendance",
+          "status": "passed"
+        },
+        {
+          "name": "day journal source ownership uses source-local bounds including DST for 2026-11-01 and scopes canonical attendance",
+          "status": "passed"
+        },
+        {
+          "name": "day journal source ownership refuses staff mismatch before journal or attendance reads",
+          "status": "passed"
+        },
+        {
+          "name": "day journal source ownership refuses missing-staff mismatch before journal or attendance reads",
+          "status": "passed"
+        },
+        {
+          "name": "day journal source ownership refuses internal mismatch before journal or attendance reads",
+          "status": "passed"
+        },
+        {
+          "name": "day journal source ownership refuses source-changed mismatch before journal or attendance reads",
+          "status": "passed"
+        },
+        {
+          "name": "day journal source ownership refuses metadata drift across the independent attendance await",
+          "status": "passed"
+        },
+        {
+          "name": "day journal source ownership preserves truncation and the raw attendance count with its incomplete observation",
+          "status": "passed"
+        },
+        {
+          "name": "day journal source ownership rejects a provider row belonging to a different employee in the period reader",
+          "status": "passed"
+        },
+        {
+          "name": "day journal source ownership preserves legacy unscoped tenant-local bounds and attendance scope",
+          "status": "passed"
+        },
+        {
+          "name": "P-JOURNAL-PROJECTION journal schedule presenter copies the authorized owner date, timezone and schedule facts into the certified body without PII",
+          "status": "passed"
+        },
+        {
+          "name": "P-JOURNAL-PROJECTION journal schedule presenter refuses a result for a different business date instead of reinterpreting it",
+          "status": "passed"
+        },
+        {
+          "name": "P-JOURNAL-PROJECTION journal schedule presenter is deterministic over the same authorized result and evidence",
+          "status": "passed"
+        },
+        {
+          "name": "P-JOURNAL-PROJECTION journal schedule presenter mints source wall times verbatim in Europe/Moscow without timezone/duration inference",
+          "status": "passed"
+        },
+        {
+          "name": "P-JOURNAL-PROJECTION journal schedule presenter mints source wall times verbatim in America/New_York without timezone/duration inference",
+          "status": "passed"
+        },
+        {
+          "name": "P-JOURNAL-PROJECTION journal schedule presenter mints source wall times verbatim in Pacific/Kiritimati without timezone/duration inference",
+          "status": "passed"
+        },
+        {
+          "name": "P-JOURNAL-PROJECTION journal schedule presenter empty or canceled journal rows never acquire availability or attendance",
+          "status": "passed"
+        }
+      ]
+    },
+    "availability-boundary": {
+      "numPassedTests": 182,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 3,
+      "cases": [
+        {
+          "name": "YclientsCRMAdapter classifies goods raw-body interruption and malformed envelopes without hiding program errors",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter reads exact goods metadata fresh through one existing authenticated GET without writes or catalog fallback",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter qualified catalog reads raw current facts without cached defaults, range-to-fixed conversion or guessed currency",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter qualified catalog preserves observed free prices and exact duration, and never uses management fallback",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter qualified catalog refuses ambiguous or invalid source identities: {\"id\":1,\"title\":\"One\"}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter qualified catalog refuses ambiguous or invalid source identities: {\"id\":0,\"title\":\"Invalid\"}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter qualified catalog refuses ambiguous or invalid source identities: {\"id\":1,\"title\":\" \"}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter qualified catalog refuses ambiguous or invalid source identities: null",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter qualified catalog refuses malformed containers, not an empty complete catalog: null",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter qualified catalog refuses malformed containers, not an empty complete catalog: {}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter qualified catalog refuses malformed containers, not an empty complete catalog: {\"services\":null}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter guest create sends api_id and rejects echoed id without record_id",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter exact guest provider readback exact validates exact record facts",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter exact guest provider readback foreign company validates exact record facts",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter exact guest provider readback foreign correlation validates exact record facts",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter exact guest provider readback foreign marker validates exact record facts",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter exact guest provider readback other staff validates exact record facts",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter exact guest provider readback other services validates exact record facts",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter exact guest provider readback other instant validates exact record facts",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter exact guest provider readback other duration validates exact record facts",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter exact guest provider readback deleted validates exact record facts",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter exact guest provider readback repeated full pages cannot establish unique correlation",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter exact guest provider readback does not resolve absent or duplicated correlation",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter exact guest provider readback does not resolve absent or duplicated correlation",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter guest catalog uses staff-specific book_services and refuses guessed ranges, duration and required prepayment",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter 🔴 Cycle 04 P0: статус и канон присутствия не расходятся на одной записи",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter 🔴 доходит до потолка страниц и НЕ выдаёт усечённый журнал за полный",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter неполная последняя страница — журнал читается без предупреждения",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter 🔴 отказ провайдера — это НЕ пустая выборка",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter maps staff response and filters by activeMasterIds",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter falls back to alternate staff endpoints when the management route is unavailable",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter excludes fired and hidden historical staff from the active team",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter discovers only active companies without exposing provider payload fields",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter keeps the provider status in rejected request errors",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter maps service category into normalized services",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter falls back to the management service catalog",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter keeps a city-only company profile address unavailable",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter keeps a city-only discovery address unavailable in the profile fallback",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter preserves qualified company profile offset null as null",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter preserves qualified company profile offset  as null",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter preserves qualified company profile offset false as null",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter preserves qualified company profile offset 5.5 as null",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter preserves qualified company profile offset 5.5 as null",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter preserves qualified company profile offset 0 as UTC",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter preserves qualified company profile offset 0 as UTC",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter preserves qualified company profile offset 3 as Etc/GMT-3",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter preserves qualified company profile offset -7 as Etc/GMT+7",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter does not expose another company profile from a mismatched provider response",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter uses the discovered company when the optional profile route is unavailable",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses incomplete or contradictory slot facts instead of inventing midnight/hour: {\"time\":\"10:00\"}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses incomplete or contradictory slot facts instead of inventing midnight/hour: {\"seance_length\":1800}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses incomplete or contradictory slot facts instead of inventing midnight/hour: {\"time\":\"10:00\",\"seance_length\":0}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses incomplete or contradictory slot facts instead of inventing midnight/hour: {\"time\":\"10:00\",\"seance_length\":-1800}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses incomplete or contradictory slot facts instead of inventing midnight/hour: {\"time\":\"10:00\",\"seance_length\":\"1800\"}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses incomplete or contradictory slot facts instead of inventing midnight/hour: {\"time\":\"25:00\",\"seance_length\":1800}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses incomplete or contradictory slot facts instead of inventing midnight/hour: {\"datetime\":\"2026-07-06T10:00:00\",\"seance_length\":1800}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses incomplete or contradictory slot facts instead of inventing midnight/hour: {\"datetime\":\"2026-07-05T10:00:00\",\"time\":\"11:00\",\"seance_length\":1800}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses malformed availability rather than reporting no windows: null",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses malformed availability rather than reporting no windows: {}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses malformed availability rather than reporting no windows: {\"slots\":[]}",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses unbound Maya branch before any yclients transport, including company-like identifiers",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses unbound Maya branch before any altegio transport, including company-like identifiers",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter reads the explicit branch through the exact yclients company only",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter reads the explicit branch through the exact altegio company only",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter normalizes ISO datetime query and maps slots",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter sends the salon wall-clock time to YClients for a canonical UTC booking",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter sends the salon wall-clock time when rescheduling a canonical UTC booking",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter writes only the explicit supported attendance code without a fallback",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter preserves the complete visit while applying every residual mutation family",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter rejects an unsupported attendance value before any CRM request",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter treats YClients 422 date-unavailable as empty slots",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter cancels an appointment when YClients returns 204 without JSON body",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter returns the exact client cashback balance instead of a local approximation",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter loads a client appointment history by exact phone and client id",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter returns full-card metrics for a server-side client dossier search",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter paginates the complete client registry and keeps personal fields inside",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter fails closed instead of returning a partial client registry",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter maps the external CRM journal without exposing client phones",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter keeps canceled visits out of the schedule grid by default",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter returns canceled visits apart from no-shows when analytics asks for them",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter marks a paid visit completed and keeps deletion above absence",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter does not open a grid column for a master whose whole day was canceled",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter returns exact YClients sales and official payroll without raw client data",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter reads a long revenue period without loading payroll",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter hides payroll totals when YClients returns only a partial result",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses an unverified own schedule source: missing date row",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses an unverified own schedule source: missing payload",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses an unverified own schedule source: wrong date row",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses an unverified own schedule source: missing status",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses an unverified own schedule source: missing slots",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses an unverified own schedule source: empty working day",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses an unverified own schedule source: partial interval",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses an unverified own schedule source: partially complete day",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses an unverified own schedule source: contradictory day off",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses an unverified own schedule source: invalid status",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses an unverified own schedule source: duplicate date",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter reads an explicit own schedule source status: true",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter reads an explicit own schedule source status: 1",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter reads an explicit own schedule source status: false",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter reads an explicit own schedule source status: 0",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter closes a staff day through the YClients schedule endpoint and verifies it",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter refuses schedule changes that would cut through an existing appointment",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety rejects an unproven blank conflict response before PUT",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety rejects an unproven html conflict response before PUT",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety rejects an unproven absent conflict response before PUT",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety rejects an unproven null conflict response before PUT",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety rejects an unproven object conflict response before PUT",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety rejects an unproven boolean-duration conflict response before PUT",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety rejects an unproven array-duration conflict response before PUT",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety rejects an unproven false-string conflict response before PUT",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety rejects an unproven missing-duration conflict response before PUT",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety rejects an unproven zero-duration conflict response before PUT",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety forbids automatic redirect replay for the single schedule PUT",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety refuses an incomplete page_limit conflict source during preview and before a write",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety refuses an incomplete repeated_page conflict source during preview and before a write",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety leaves divergent readback unverified after exactly one PUT without compensation or rollback claim",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety propagates source drift before_put with no additional PUT",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety propagates source drift after_readback with no additional PUT",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety preserves UNKNOWN on write_timeout after one PUT without retry",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter native single-day schedule write safety preserves UNKNOWN on readback_timeout after one PUT without retry",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter confirms recovered revenue only from positive service transactions with matching record ids",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter settles an unpaid visit once and proves the canonical payment by strict read-back",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter accepts exact split allocations and ignores an unrelated orphan operation",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter does not dispatch again when the visit is already canonically paid",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter preserves UNKNOWN when write acknowledgement is not followed by canonical payment proof",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter rejects amount mismatch and partial provider state before any payment write",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter never treats a deleted record as a paid visit even with exact payment links",
+          "status": "passed"
+        },
+        {
+          "name": "YclientsCRMAdapter fails closed when authoritative payment read-back is incomplete",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService admits an exact calendar period only with explicit all or one rating",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService fails closed for unknown tools and unknown arguments",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService accepts canonical executor Appointment identity for appointments.own.cancel without admitting arbitrary paths",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService accepts canonical executor Appointment identity for appointments.own.reschedule without admitting arbitrary paths",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService normalizes bounded analytics ranges",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService validates universal business and employee analytics comparisons",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects PII and invalid amounts in loyalty reasons",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService takes an expense amount in rubles and refuses anything that is not money",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService refuses an invented expense category and payroll by hand",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService re-validates stored expense arguments to the same payload",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService requires a human confirmation for a money-writing expense tool",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService shows the human rubles and the server kopecks on the expense card",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService puts the amount, the date and the category first even after a jsonb round trip",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService builds an immutable, explicit approval preview",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService normalizes booking arguments while accepting provider-native IDs",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService accepts only exact HH:mm with a selected staff and no caller timezone authority",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService keeps a booking availability day stable across timezone offsets",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService creates a PII-free booking approval payload",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService validates an exact staff schedule read without accepting tenant scope from the model",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService validates an exact operations journal read without accepting tenant scope from the model",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService validates an immutable staff schedule preview",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects a schedule preview whose revision does not match",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService validates source-bound schedule revision while preserving the existing approval card",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed supplied schedule source_hash: null",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed supplied schedule source_hash: undefined",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed supplied schedule source_hash: \"\"",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed supplied schedule source_hash: \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed supplied schedule source_hash: \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed supplied schedule source_hash: \"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed supplied schedule source_hash: \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\n\"",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed supplied schedule source_hash: {}",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects a changed field in a source-bound preview: {\"current_slots\":[{\"from\":\"09:00\",\"to\":\"20:00\"}]}",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects a changed field in a source-bound preview: {\"source_hash\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects a changed field in a source-bound preview: {\"staff_id\":\"8\"}",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects a changed field in a source-bound preview: {\"date\":\"2026-08-07\"}",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService refuses a raw revision paired with source metadata",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService requires the complete immutable source pair: {\"source_hash\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService requires the complete immutable source pair: {\"local_staff_id\":\"local-7\"}",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed local staff identity: null",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed local staff identity: undefined",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed local staff identity: \"\"",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed local staff identity: \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed local staff identity: \"../staff\"",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed local staff identity: \"local 7\"",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService rejects malformed local staff identity: \"local-7\\n\"",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService validates bounded group availability without accepting tenant scope",
+          "status": "passed"
+        },
+        {
+          "name": "AiToolRegistryService validates privacy-safe review and catalog reads",
+          "status": "passed"
+        },
+        {
+          "name": "InternalCalendarService provider creation creates a login-free provider and scopes every write to the active tenant",
+          "status": "passed"
+        },
+        {
+          "name": "InternalCalendarService provider creation rejects a provider write when the active tenant differs",
+          "status": "passed"
+        },
+        {
+          "name": "InternalCalendarService provider creation does not start provider writes after a staff quota rejection",
+          "status": "passed"
+        },
+        {
+          "name": "InternalCalendarService provider creation checks staff quota before reactivating an independent provider",
+          "status": "passed"
+        },
+        {
+          "name": "InternalCalendarService journal returns only the active tenant range with safe client identity",
+          "status": "passed"
+        },
+        {
+          "name": "InternalCalendarService journal rejects a journal read when the active tenant differs",
+          "status": "passed"
+        },
+        {
+          "name": "InternalCalendarService journal rejects ranges longer than 31 days before reading tenant data",
+          "status": "passed"
+        }
+      ]
+    },
+    "restored-baseline": {
+      "numPassedTests": 14,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 1,
+      "cases": [
+        {
+          "name": "internal day journal service labels resolves only stored IDs in this tenant, in appointment order, including inactive services",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels does not turn current catalogue prices into historical service or appointment money",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels never resolves foreign or missing catalogue IDs, even when they are stored on the appointment",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels does not relabel retained external records from the internal catalogue",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels leaves malformed/empty stored IDs unnamed without reading the catalogue: null",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels leaves malformed/empty stored IDs unnamed without reading the catalogue: {}",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels leaves malformed/empty stored IDs unnamed without reading the catalogue: \"service-a\"",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels leaves malformed/empty stored IDs unnamed without reading the catalogue: []",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels leaves malformed/empty stored IDs unnamed without reading the catalogue: [null, 7, false, \"\", [Object]]",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels keeps stored multiplicity/order but batches duplicate lookups across records",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels does not read the catalogue on an empty day",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels refuses a different tenant before any source read",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels propagates a catalogue read failure instead of presenting it as an empty catalogue",
+          "status": "passed"
+        },
+        {
+          "name": "internal day journal service labels preserves provider journal names and amounts without touching the internal catalogue",
+          "status": "passed"
+        }
+      ]
+    },
+    "source-carrier-jest": {
+      "numPassedTests": 3,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 1,
+      "cases": [
+        {
+          "name": "FBE2E approved personal production source through the unchanged carrier",
+          "status": "passed"
+        },
+        {
+          "name": "FBE2E approved journal production source through the unchanged carrier",
+          "status": "passed"
+        },
+        {
+          "name": "FBE2E approved journal-populated production source through the unchanged carrier",
+          "status": "passed"
+        }
+      ]
+    }
+  },
+  "mutations": [
+    {
+      "name": "source-confusion",
+      "killed": true,
+      "failed": 1,
+      "passed": 13
+    },
+    {
+      "name": "lost-labels",
+      "killed": true,
+      "failed": 5,
+      "passed": 9
+    },
+    {
+      "name": "foreign-catalogue",
+      "killed": true,
+      "failed": 2,
+      "passed": 12
+    },
+    {
+      "name": "catalogue-money-leak",
+      "killed": true,
+      "failed": 2,
+      "passed": 12
+    }
+  ],
+  "scenarios": {
+    "journal": {
+      "pass": true,
+      "backendDetail": true,
+      "scheduleChecks": [],
+      "fullscreenPhase": "open",
+      "timelineUnchanged": true
+    },
+    "journal-populated": {
+      "pass": true,
+      "backendDetail": true,
+      "scheduleChecks": [
+        {
+          "stage": "initial",
+          "mode": "structured",
+          "entries": 4,
+          "labels": [
+            "2026-09-24 · 10:00–11:00 · Europe/Moscow",
+            "2026-09-24 · 12:00–13:00 · Europe/Moscow",
+            "2026-09-24 · 14:00–15:00 · Europe/Moscow",
+            "2026-09-24 · 16:00–17:00 · Europe/Moscow"
+          ],
+          "titles": [
+            "Учебная стрижка",
+            "Архивная учебная услуга, Учебная стрижка",
+            "Запись",
+            "Запись"
+          ],
+          "refs": [
+            "entry:journal-entry-1",
+            "entry:journal-entry-2",
+            "entry:journal-entry-3",
+            "entry:journal-entry-4",
+            "intent:i2",
+            "intent:i3"
+          ],
+          "privateNoteAbsent": true,
+          "serviceNamesSupplied": true,
+          "foreignServiceAbsent": true,
+          "unresolvedServiceFallbackPreserved": true,
+          "gaps": 0
+        },
+        {
+          "stage": "detail",
+          "mode": "structured",
+          "entries": 4,
+          "labels": [
+            "2026-09-24 · 10:00–11:00 · Europe/Moscow",
+            "2026-09-24 · 12:00–13:00 · Europe/Moscow",
+            "2026-09-24 · 14:00–15:00 · Europe/Moscow",
+            "2026-09-24 · 16:00–17:00 · Europe/Moscow"
+          ],
+          "titles": [
+            "Учебная стрижка",
+            "Архивная учебная услуга, Учебная стрижка",
+            "Запись",
+            "Запись"
+          ],
+          "refs": [
+            "entry:journal-entry-1",
+            "entry:journal-entry-2",
+            "entry:journal-entry-3",
+            "entry:journal-entry-4",
+            "intent:i2",
+            "intent:i3",
+            "intent:i4"
+          ],
+          "privateNoteAbsent": true,
+          "serviceNamesSupplied": true,
+          "foreignServiceAbsent": true,
+          "unresolvedServiceFallbackPreserved": true,
+          "gaps": 0
+        }
+      ],
+      "fullscreenPhase": "open",
+      "timelineUnchanged": true
+    },
+    "personal": {
+      "pass": true,
+      "createRescheduleCancel": true
+    }
+  },
+  "availabilityCommand": {
+    "cwd": "/private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend",
+    "networkFence": "/private/tmp/maya-journal-service-names-final03-20261014/loopback.sb",
+    "environment": "env -i; pinned Node22 PATH; isolated HOME",
+    "argv": [
+      "node_modules/jest/bin/jest.js",
+      "--runInBand",
+      "--runTestsByPath",
+      "src/crm/adapters/yclients-crm.adapter.spec.ts",
+      "src/ai-tools/ai-tool-registry.service.spec.ts",
+      "src/internal-calendar/internal-calendar.service.spec.ts"
+    ],
+    "syntheticTransportOnly": true
+  }
+}

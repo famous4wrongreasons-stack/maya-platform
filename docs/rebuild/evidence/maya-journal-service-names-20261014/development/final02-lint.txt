@@ -1,0 +1,5 @@
+
+/private/tmp/maya-journal-service-names-final02-20261014/candidate/maya-saas-backend/src/analytics/operations-analytics.service.ts
+  879:21  error  The two values in this comparison do not have a shared enum type  @typescript-eslint/no-unsafe-enum-comparison
+
+✖ 1 problem (1 error, 0 warnings)

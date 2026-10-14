@@ -1,0 +1,143 @@
+FAIL src/analytics/operations-analytics.journal-services.spec.ts
+  internal day journal service labels
+    ✕ resolves only stored IDs in this tenant, in appointment order, including inactive services (5 ms)
+    ✕ does not turn current catalogue prices into historical service or appointment money (1 ms)
+    ✕ never resolves foreign or missing catalogue IDs, even when they are stored on the appointment (1 ms)
+    ✕ does not relabel retained external records from the internal catalogue (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: null (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: {}
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: "service-a"
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: []
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: [null, 7, false, "", [Object]] (1 ms)
+    ✕ keeps stored multiplicity/order but batches duplicate lookups across records (1 ms)
+    ✓ does not read the catalogue on an empty day
+    ✓ refuses a different tenant before any source read
+    ✓ propagates a catalogue read failure instead of presenting it as an empty catalogue (3 ms)
+    ✓ preserves provider journal names and amounts without touching the internal catalogue
+
+  ● internal day journal service labels › resolves only stored IDs in this tenant, in appointment order, including inactive services
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 10
+    + Received  +  1
+
+    - Array [
+    -   Object {
+    -     "id": "service-b",
+    -     "name": "Архивная услуга",
+    -   },
+    -   Object {
+    -     "id": "service-a",
+    -     "name": "Учебная стрижка",
+    -   },
+    - ]
+    + Array []
+
+      159 |     const f = fixture();
+      160 |     const result = await f.read();
+    > 161 |     expect(result.records[0].services).toEqual([
+          |                                        ^
+      162 |       { id: 'service-b', name: 'Архивная услуга' },
+      163 |       { id: 'service-a', name: 'Учебная стрижка' },
+      164 |     ]);
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:161:40)
+
+  ● internal day journal service labels › does not turn current catalogue prices into historical service or appointment money
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 2
+    Received length: 0
+    Received array:  []
+
+      183 |     expect(namedRecords[0].totalPriceKopecks).toBe(12345);
+      184 |     expect(namedRecords[0].currency).toBe('RUB');
+    > 185 |     expect(namedRecords[0].services).toHaveLength(2);
+          |                                      ^
+      186 |     expect(unnamedRecords[0].services).toEqual([]);
+      187 |     expect(withNames.services).toEqual([]);
+      188 |     expect(withNames.booked_value).toEqual([
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:185:38)
+
+  ● internal day journal service labels › never resolves foreign or missing catalogue IDs, even when they are stored on the appointment
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 6
+    + Received  + 1
+
+    - Array [
+    -   Object {
+    -     "id": "service-a",
+    -     "name": "Учебная стрижка",
+    -   },
+    - ]
+    + Array []
+
+      195 |     f.rows[0].serviceIds = ['foreign-service', 'deleted-service', 'service-a'];
+      196 |     const result = await f.read();
+    > 197 |     expect(result.records[0].services).toEqual([
+          |                                        ^
+      198 |       { id: 'service-a', name: 'Учебная стрижка' },
+      199 |     ]);
+      200 |     expect(JSON.stringify(result)).not.toContain(
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:197:40)
+
+  ● internal day journal service labels › does not relabel retained external records from the internal catalogue
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 2
+    Received length: 0
+    Received array:  []
+
+      208 |     const result = await f.read();
+      209 |     expect(result.records).toHaveLength(2);
+    > 210 |     expect(result.records[0].services).toHaveLength(2);
+          |                                        ^
+      211 |     expect(result.records[1].services).toEqual([]);
+      212 |     expect(result.records[1].totalPriceKopecks).toBe(12345);
+      213 |   });
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:210:40)
+
+  ● internal day journal service labels › keeps stored multiplicity/order but batches duplicate lookups across records
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 8
+    + Received  + 2
+
+      Array [
+    -   Array [
+    -     "Учебная стрижка",
+    -     "Учебная стрижка",
+    -   ],
+    -   Array [
+    -     "Учебная стрижка",
+    -     "Учебная стрижка",
+    -   ],
+    +   Array [],
+    +   Array [],
+      ]
+
+      235 |     expect(
+      236 |       result.records.map((row) => row.services.map((service) => service.name)),
+    > 237 |     ).toEqual([
+          |       ^
+      238 |       ['Учебная стрижка', 'Учебная стрижка'],
+      239 |       ['Учебная стрижка', 'Учебная стрижка'],
+      240 |     ]);
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:237:7)
+
+Test Suites: 1 failed, 1 total
+Tests:       5 failed, 9 passed, 14 total
+Snapshots:   0 total
+Time:        0.485 s, estimated 1 s
+Ran all test suites within paths "src/analytics/operations-analytics.journal-services.spec.ts".
+Test results written to: ../../mutation-lost-labels.json

@@ -1,0 +1,23 @@
+PASS src/analytics/operations-analytics.journal-services.spec.ts
+  internal day journal service labels
+    ✓ resolves only stored IDs in this tenant, in appointment order, including inactive services (4 ms)
+    ✓ does not turn current catalogue prices into historical service or appointment money (3 ms)
+    ✓ never resolves foreign or missing catalogue IDs, even when they are stored on the appointment
+    ✓ does not relabel retained external records from the internal catalogue (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: null
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: {} (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: "service-a"
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: [] (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: [null, 7, false, "", [Object]]
+    ✓ keeps stored multiplicity/order but batches duplicate lookups across records
+    ✓ does not read the catalogue on an empty day
+    ✓ refuses a different tenant before any source read
+    ✓ propagates a catalogue read failure instead of presenting it as an empty catalogue (5 ms)
+    ✓ preserves provider journal names and amounts without touching the internal catalogue (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       14 passed, 14 total
+Snapshots:   0 total
+Time:        0.366 s, estimated 1 s
+Ran all test suites within paths "src/analytics/operations-analytics.journal-services.spec.ts".
+Test results written to: ../../restored-baseline.json

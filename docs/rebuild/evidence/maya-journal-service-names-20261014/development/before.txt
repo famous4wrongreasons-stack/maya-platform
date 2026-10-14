@@ -1,0 +1,161 @@
+FAIL src/analytics/operations-analytics.journal-services.spec.ts
+  internal day journal service labels
+    ✕ resolves only stored IDs in this tenant, in appointment order, including inactive services (5 ms)
+    ✕ does not turn current catalogue prices into historical service or appointment money (1 ms)
+    ✕ never resolves foreign or missing catalogue IDs, even when they are stored on the appointment (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: null (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: {}
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: "service-a" (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: []
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: [null, 7, false, "", [Object]] (1 ms)
+    ✕ keeps stored multiplicity/order but batches duplicate lookups across records (1 ms)
+    ✓ does not read the catalogue on an empty day
+    ✓ refuses a different tenant before any source read (1 ms)
+    ✕ propagates a catalogue read failure instead of presenting it as an empty catalogue
+    ✕ preserves provider journal names and amounts without touching the internal catalogue
+
+  ● internal day journal service labels › resolves only stored IDs in this tenant, in appointment order, including inactive services
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 10
+    + Received  +  1
+
+    - Array [
+    -   Object {
+    -     "id": "service-b",
+    -     "name": "Архивная услуга",
+    -   },
+    -   Object {
+    -     "id": "service-a",
+    -     "name": "Учебная стрижка",
+    -   },
+    - ]
+    + Array []
+
+      59 |     const f = fixture();
+      60 |     const result = await f.read();
+    > 61 |     expect(result.records[0].services).toEqual([
+         |                                        ^
+      62 |       { id: 'service-b', name: 'Архивная услуга' },
+      63 |       { id: 'service-a', name: 'Учебная стрижка' },
+      64 |     ]);
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:61:40)
+
+  ● internal day journal service labels › does not turn current catalogue prices into historical service or appointment money
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 2
+    Received length: 0
+    Received array:  []
+
+      82 |     expect(namedRecords[0].totalPriceKopecks).toBe(12345);
+      83 |     expect(namedRecords[0].currency).toBe('RUB');
+    > 84 |     expect(namedRecords[0].services).toHaveLength(2);
+         |                                      ^
+      85 |     expect(unnamedRecords[0].services).toEqual([]);
+      86 |     expect(withNames.services).toEqual([]);
+      87 |     expect(withNames.booked_value).toEqual([{ currency: 'RUB', amount_kopecks: 12345 }]);
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:84:38)
+
+  ● internal day journal service labels › never resolves foreign or missing catalogue IDs, even when they are stored on the appointment
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 6
+    + Received  + 1
+
+    - Array [
+    -   Object {
+    -     "id": "service-a",
+    -     "name": "Учебная стрижка",
+    -   },
+    - ]
+    + Array []
+
+      92 |     f.rows[0].serviceIds = ['foreign-service', 'deleted-service', 'service-a'];
+      93 |     const result = await f.read();
+    > 94 |     expect(result.records[0].services).toEqual([{ id: 'service-a', name: 'Учебная стрижка' }]);
+         |                                        ^
+      95 |     expect(JSON.stringify(result)).not.toContain('FOREIGN-SERVICE-NOT-FOR-RENDER');
+      96 |   });
+      97 |
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:94:40)
+
+  ● internal day journal service labels › keeps stored multiplicity/order but batches duplicate lookups across records
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 8
+    + Received  + 2
+
+      Array [
+    -   Array [
+    -     "Учебная стрижка",
+    -     "Учебная стрижка",
+    -   ],
+    -   Array [
+    -     "Учебная стрижка",
+    -     "Учебная стрижка",
+    -   ],
+    +   Array [],
+    +   Array [],
+      ]
+
+      110 |     f.rows.push({ ...f.rows[0], id: 'visit-b', status: 'canceled', totalPriceKopecks: null });
+      111 |     const result = await f.read();
+    > 112 |     expect(result.records.map(row => row.services.map(service => service.name))).toEqual([
+          |                                                                                  ^
+      113 |       ['Учебная стрижка', 'Учебная стрижка'], ['Учебная стрижка', 'Учебная стрижка'],
+      114 |     ]);
+      115 |     expect(result.records[1].status).toBe('canceled');
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:112:82)
+
+  ● internal day journal service labels › propagates a catalogue read failure instead of presenting it as an empty catalogue
+
+    expect(received).rejects.toThrow()
+
+    Received promise resolved instead of rejected
+    Resolved to value: {"attendance": null, "booked_value": [{"amount_kopecks": 12345, "currency": "RUB"}], "completeness": {"appointments": {"observed_through": null, "out_of_period_discarded": 0, "reason": null, "source": "canonical_mirror", "status": "complete"}, "attendance": null}, "data_source": "maya", "date": "2026-10-14", "masters": undefined, "period": {"from": "2026-10-13T21:00:00.000Z", "timezone": "Europe/Moscow", "to": "2026-10-14T20:59:59.999Z"}, "records": [{"branchId": null, "clientId": null, "currency": "RUB", "durationMinutes": 60, "endAt": 2026-10-14T08:00:00.000Z, "id": "visit-a", "services": [], "staffExternalId": "provider-a", "staffName": "Учебный мастер", "startAt": 2026-10-14T07:00:00.000Z, "status": "confirmed", "totalPriceKopecks": 12345}], "services": [], "staff": [{"appointments": 1, "booked_minutes": 60, "cancellation_rate_percent": 0, "cancelled": 0, "completed": 0, "name": "Учебный мастер", "no_show": 0, "repeat_clients_in_period": 0, "revenue": [{"amount_kopecks": 12345, "currency": "RUB"}], "scheduled": 1, "services": [], "staff_external_id": "provider-a", "staff_id": null, "total": 1, "unique_clients": 0}], "summary": {"active": 1, "booked_minutes": 60, "cancellation_rate_percent": 0, "cancelled": 0, "clients_new": null, "clients_returning": null, "cohort_lookback_days": 90, "cohort_status": "unavailable", "cohort_unavailable_reason": "not_requested_for_day_operations", "completed": 0, "identified_client_visits": 0, "no_show": 0, "repeat_client_rate_percent": 0, "repeat_clients_in_period": 0, "returning_share_percent": null, "scheduled": 1, "total": 1, "unique_clients": 0}, "timezone": "Europe/Moscow"}
+
+      136 |     const f = fixture();
+      137 |     f.db.internalService.findMany.mockRejectedValueOnce(new Error('synthetic catalogue unavailable'));
+    > 138 |     await expect(f.read()).rejects.toThrow('synthetic catalogue unavailable');
+          |           ^
+      139 |   });
+      140 |
+      141 |   it('preserves provider journal names and amounts without touching the internal catalogue', async () => {
+
+      at expect (../node_modules/expect/build/index.js:2116:15)
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:138:11)
+
+  ● internal day journal service labels › preserves provider journal names and amounts without touching the internal catalogue
+
+    TypeError: Cannot read properties of null (reading 'id')
+
+      1197 |       return {
+      1198 |         id: appointment.id,
+    > 1199 |         clientId: appointment.client.id,
+           |                                      ^
+      1200 |         branchId: appointment.branch,
+      1201 |         staffExternalId: appointment.provider.id,
+      1202 |         staffName:
+
+      at analytics/operations-analytics.service.ts:1199:38
+          at Array.map (<anonymous>)
+      at OperationsAnalyticsService.loadExternalAppointments (analytics/operations-analytics.service.ts:1195:37)
+          at async Promise.all (index 0)
+      at OperationsAnalyticsService.getDayOperations (analytics/operations-analytics.service.ts:839:32)
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:143:20)
+
+Test Suites: 1 failed, 1 total
+Tests:       6 failed, 7 passed, 13 total
+Snapshots:   0 total
+Time:        0.821 s
+Ran all test suites within paths "src/analytics/operations-analytics.journal-services.spec.ts".
+Test results written to: ../../../../../../../../private/tmp/maya-journal-services-before-20261014.json

@@ -1,0 +1,10 @@
+{
+  "candidate": "91916d52903ac8f18fb8df30ead2b8d3a7aef0f0",
+  "scope": "changed product/test files and new evidence/document text only, not whole repository or history",
+  "filesChecked": 28,
+  "manifestHashes": "PASS",
+  "secretPatterns": "PASS",
+  "piiPatterns": "PASS",
+  "unresolvedFindings": [],
+  "realInputsUsed": false
+}

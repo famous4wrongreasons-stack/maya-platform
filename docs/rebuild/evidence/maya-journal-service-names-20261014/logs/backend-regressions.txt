@@ -1,0 +1,46 @@
+PASS src/ai-tools/ai-tool-handler.service.spec.ts
+[31m[Nest] 75243  - [39m10/14/2026, 10:40:20 AM [31m  ERROR[39m [38;5;3m[ExpensePeriodReader] [39m[31mexpense ledger read failed tenant=tenant-a period=2026-07-01T00:00:00.000Z..2026-07-31T20:59:59.000Z branch=all: expense ledger unavailable[39m
+Error: expense ledger unavailable
+    at Object.<anonymous> (/private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend/src/analytics/operations-analytics.service.spec.ts:1137:28)
+    at /private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend/node_modules/jest-mock/build/index.js:305:39
+    at Object.<anonymous> (/private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend/node_modules/jest-mock/build/index.js:312:13)
+    at Object.mockConstructor [as findMany] (/private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend/node_modules/jest-mock/build/index.js:102:19)
+    at readExpensePeriod (/private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend/src/expenses/expense-period.reader.ts:102:33)
+    at OperationsAnalyticsService.loadCategorisedExpenses (/private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend/src/analytics/operations-analytics.service.ts:1791:29)
+    at OperationsAnalyticsService.getBusinessProfitability (/private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend/src/analytics/operations-analytics.service.ts:484:14)
+    at Object.<anonymous> (/private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend/src/analytics/operations-analytics.service.spec.ts:1699:22)
+[31m[Nest] 75243  - [39m10/14/2026, 10:40:20 AM [31m  ERROR[39m [38;5;3m[ExpensePeriodReader] [39m[31mexpense ledger read failed tenant=tenant-a period=2026-07-01T00:00:00.000Z..2026-07-31T23:59:59.000Z branch=all: expense ledger unavailable[39m
+Error: expense ledger unavailable
+    at Object.<anonymous> (/private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend/src/analytics/operations-analytics.service.spec.ts:1889:28)
+    at /private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend/node_modules/jest-mock/build/index.js:305:39
+    at Object.<anonymous> (/private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend/node_modules/jest-mock/build/index.js:312:13)
+    at Object.mockConstructor [as findMany] (/private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend/node_modules/jest-mock/build/index.js:102:19)
+    at readExpensePeriod (/private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend/src/expenses/expense-period.reader.ts:102:33)
+    at OperationsAnalyticsService.buildOverview (/private/tmp/maya-journal-service-names-final03-20261014/candidate/maya-saas-backend/src/analytics/operations-analytics.service.ts:695:30)
+PASS src/analytics/operations-analytics.service.spec.ts
+[32m[Nest] 75243  - [39m10/14/2026, 10:40:20 AM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 75243  - [39m10/14/2026, 10:40:20 AM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 3 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 75243  - [39m10/14/2026, 10:40:20 AM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 5 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 75243  - [39m10/14/2026, 10:40:20 AM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 75243  - [39m10/14/2026, 10:40:20 AM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 2 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 75243  - [39m10/14/2026, 10:40:20 AM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-04-02T00:00:00.000Z..2026-06-30T23:59:59.999Z); they are not counted[39m
+PASS src/widgets/projection/projector-fences.architecture.spec.ts
+PASS src/widgets/emission/emitter.spec.ts
+PASS src/ai-tools/employee-journal-read.spec.ts
+PASS src/business-facts/journal-consolidation.spec.ts
+[33m[Nest] 75243  - [39m10/14/2026, 10:40:22 AM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-08-17T21:00:00.000Z..2026-08-18T20:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m
+[32m[Nest] 75243  - [39m10/14/2026, 10:40:22 AM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-08-17T21:00:00.000Z..2026-08-18T20:59:59.999Z); they are not counted[39m
+[32m[Nest] 75243  - [39m10/14/2026, 10:40:22 AM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-20T00:00:00.000Z..2026-08-17T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 75243  - [39m10/14/2026, 10:40:22 AM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-08-17T00:00:00.000Z..2026-08-17T23:59:59.999Z); they are not counted[39m
+[32m[Nest] 75243  - [39m10/14/2026, 10:40:22 AM [32m    LOG[39m [38;5;3m[AppointmentPeriodReader] [39m[32mprovider returned 1 record(s) outside the requested period (2026-05-19T00:00:00.000Z..2026-08-16T23:59:59.999Z); they are not counted[39m
+PASS src/analytics/operations-analytics.journal-services.spec.ts
+PASS src/analytics/operations-analytics.journal-source.spec.ts
+PASS src/widgets/composition/journal-schedule.presenter.spec.ts
+
+Test Suites: 9 passed, 9 total
+Tests:       326 passed, 326 total
+Snapshots:   0 total
+Time:        5.058 s
+Ran all test suites within paths "src/analytics/operations-analytics.journal-services.spec.ts", "src/analytics/operations-analytics.journal-source.spec.ts", "src/analytics/operations-analytics.service.spec.ts", "src/ai-tools/ai-tool-handler.service.spec.ts", "src/business-facts/journal-consolidation.spec.ts", "src/widgets/composition/journal-schedule.presenter.spec.ts", "src/widgets/projection/projector-fences.architecture.spec.ts", "src/widgets/emission/emitter.spec.ts", "src/ai-tools/employee-journal-read.spec.ts".
+Test results written to: ../../backend-regressions.json
+[33m[Nest] 75243  - [39m10/14/2026, 10:40:22 AM [33m   WARN[39m [38;5;3m[AppointmentPeriodReader] [39m[33mjournal read for 2026-10-09T07:00:00.000Z..2026-10-10T06:59:59.999Z is truncated (unknown); absence conclusions are not allowed[39m

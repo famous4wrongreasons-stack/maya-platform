@@ -222,3 +222,18 @@ sealed order. Actual internal HTTP/PG source: 2 entries survive initial/detail, 
 extra booking effects; source has generic «Запись» because its day owner currently
 omits service names. No inferred free windows. Browser fixtures and actual source
 proof remain separately identified. See [checkpoint](../../MAYA-COMPANION-SCHEDULE-ROWS-CHECKPOINT-20261014.md).
+
+## 2026-10-14 — internal journal service labels
+
+Candidate `91916d52903ac8f18fb8df30ead2b8d3a7aef0f0` closes the internal service-name
+gap recorded above. The current day owner resolves stored internal service IDs to
+same-tenant catalogue names after aggregation, without selecting current prices or
+changing historical totals. Missing/foreign labels and retained external rows stay
+unnamed; inactive services can still label old visits without becoming bookable.
+Actual HTTP/PG source: four synthetic rows keep exact titles and times in initial
+and detail, with no journal writes or timeline duplication. Fresh 508 unit tests,
+3 source scenarios, 4 targeted mutations, types/lint PASS. No frontend change.
+This is scoped local acceptance, not release certification. Aggregated free-window
+cards and alternating-master actual-source evidence remain open. Current branch
+binding is present in code; older absence-of-mapping reports are historical.
+See [checkpoint](../../MAYA-JOURNAL-SERVICE-NAMES-CHECKPOINT-20261014.md).

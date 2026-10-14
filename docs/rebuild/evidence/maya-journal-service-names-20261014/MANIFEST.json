@@ -1,0 +1,222 @@
+{
+  "candidate": "91916d52903ac8f18fb8df30ead2b8d3a7aef0f0",
+  "base": "552504468e31cb9fbe065695219c3e39f1b94bef",
+  "scope": "synthetic local source/read presentation proof; not release certification",
+  "artifacts": [
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/manifest.json",
+      "archive": "run-manifest.json",
+      "sourceSha256": "ac75623e49508fbd536476f4f57bdfe4165cbb7e96a0b67aa07791501898fb54",
+      "archiveSha256": "ac75623e49508fbd536476f4f57bdfe4165cbb7e96a0b67aa07791501898fb54",
+      "sourceSize": 18718,
+      "archiveSize": 18718,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/runner.mjs",
+      "archive": "runner.mjs",
+      "sourceSha256": "46ec16d71219b9ebea70e1d7bd3f2184610ae62acaaf890a3094f8dedfee2189",
+      "archiveSha256": "46ec16d71219b9ebea70e1d7bd3f2184610ae62acaaf890a3094f8dedfee2189",
+      "sourceSize": 9307,
+      "archiveSize": 9307,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/backend-types.log",
+      "archive": "logs/backend-types.txt",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archiveSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "sourceSize": 0,
+      "archiveSize": 1,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/live-types.log",
+      "archive": "logs/live-types.txt",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archiveSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "sourceSize": 0,
+      "archiveSize": 1,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/scoped-lint.log",
+      "archive": "logs/scoped-lint.txt",
+      "sourceSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archiveSha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "sourceSize": 0,
+      "archiveSize": 1,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/backend-regressions.log",
+      "archive": "logs/backend-regressions.txt",
+      "sourceSha256": "1402e8b704e04647e9727e24fc7f2b16035b342757e212e61f40b918aa32b1c1",
+      "archiveSha256": "1402e8b704e04647e9727e24fc7f2b16035b342757e212e61f40b918aa32b1c1",
+      "sourceSize": 7142,
+      "archiveSize": 7142,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/restored-baseline.log",
+      "archive": "logs/restored-baseline.txt",
+      "sourceSha256": "cc46b876b8b4c865176cb2cce596187b42293497074b13d1dcd8521f15381d26",
+      "archiveSha256": "cc46b876b8b4c865176cb2cce596187b42293497074b13d1dcd8521f15381d26",
+      "sourceSize": 1634,
+      "archiveSize": 1634,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/source-carrier.log",
+      "archive": "logs/source-carrier.txt",
+      "sourceSha256": "41534c70a51cfe52f0507cc72f8fb48124a041cc4cf529e0c80cec3d115e8d2f",
+      "archiveSha256": "41534c70a51cfe52f0507cc72f8fb48124a041cc4cf529e0c80cec3d115e8d2f",
+      "sourceSize": 2907,
+      "archiveSize": 2907,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/network-fence.log",
+      "archive": "logs/network-fence.txt",
+      "sourceSha256": "2f362c95a59e89184faa8a01fc9acd517b39419875ffc3022479d4701a6df9da",
+      "archiveSha256": "2f362c95a59e89184faa8a01fc9acd517b39419875ffc3022479d4701a6df9da",
+      "sourceSize": 34,
+      "archiveSize": 34,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/availability-boundary.log",
+      "archive": "logs/availability-boundary.txt",
+      "sourceSha256": "df7025f307f15d1bc1bea0f0ea7aec000fb196c05761f06c9c3b58fd8c865f40",
+      "archiveSha256": "df7025f307f15d1bc1bea0f0ea7aec000fb196c05761f06c9c3b58fd8c865f40",
+      "sourceSize": 520,
+      "archiveSize": 520,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/mutation-source-confusion.log",
+      "archive": "logs/mutation-source-confusion.txt",
+      "sourceSha256": "3287472de164359ea24a19d72d600b3ee0821956d4500d7183b33af3fbb20c56",
+      "archiveSha256": "3287472de164359ea24a19d72d600b3ee0821956d4500d7183b33af3fbb20c56",
+      "sourceSize": 2591,
+      "archiveSize": 2591,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/mutation-lost-labels.log",
+      "archive": "logs/mutation-lost-labels.txt",
+      "sourceSha256": "365e6be6fa32f2c7fee7ae20a3999b6390711e1ab6c4fe762a93b346679dbaea",
+      "archiveSha256": "365e6be6fa32f2c7fee7ae20a3999b6390711e1ab6c4fe762a93b346679dbaea",
+      "sourceSize": 5941,
+      "archiveSize": 5941,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/mutation-foreign-catalogue.log",
+      "archive": "logs/mutation-foreign-catalogue.txt",
+      "sourceSha256": "977c58dc31e08f2cc1cf91a3a5d431892d24c52666a87473f458dc380c0a6736",
+      "archiveSha256": "977c58dc31e08f2cc1cf91a3a5d431892d24c52666a87473f458dc380c0a6736",
+      "sourceSize": 3591,
+      "archiveSize": 3591,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/mutation-catalogue-money-leak.log",
+      "archive": "logs/mutation-catalogue-money-leak.txt",
+      "sourceSha256": "3f29ae7b2b0a9b88c294a44ed609a16c1c97f8dfd48c60ad43646f0c9e27e18c",
+      "archiveSha256": "3f29ae7b2b0a9b88c294a44ed609a16c1c97f8dfd48c60ad43646f0c9e27e18c",
+      "sourceSize": 3640,
+      "archiveSize": 3640,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-services-before-20261014.log",
+      "archive": "development/before.txt",
+      "sourceSha256": "dc3c3ed047a609e1d7b9b172524add381caf08b4b41305ec747a3ffa86bc1357",
+      "archiveSha256": "dc3c3ed047a609e1d7b9b172524add381caf08b4b41305ec747a3ffa86bc1357",
+      "sourceSize": 8924,
+      "archiveSize": 8924,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-services-before02-20261014.log",
+      "archive": "development/before02.txt",
+      "sourceSha256": "a1ef43a5d5bd5197a30193b49eecb006e75075a26bf0a0a73cf30c867f157a37",
+      "archiveSha256": "a1ef43a5d5bd5197a30193b49eecb006e75075a26bf0a0a73cf30c867f157a37",
+      "sourceSize": 7977,
+      "archiveSize": 7977,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final01-20261014/manifest.json",
+      "archive": "development/final01-manifest.json",
+      "sourceSha256": "3e4b9786754508f95affdac4340009eabf5b296e67ae8929be7a17878ee55ff3",
+      "archiveSha256": "3e4b9786754508f95affdac4340009eabf5b296e67ae8929be7a17878ee55ff3",
+      "sourceSize": 17704,
+      "archiveSize": 17704,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final02-20261014/manifest.json",
+      "archive": "development/final02-manifest.json",
+      "sourceSha256": "2f97d212eb11df1f9f2670db739f7d333233d2a99b75f64b5e23d07be71fe701",
+      "archiveSha256": "2f97d212eb11df1f9f2670db739f7d333233d2a99b75f64b5e23d07be71fe701",
+      "sourceSize": 9432,
+      "archiveSize": 9432,
+      "sensitiveData": false
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final02-20261014/scoped-lint.log",
+      "archive": "development/final02-lint.txt",
+      "sourceSha256": "d2b0904085ff2afa8a2282e64661f0c441e3a5a87362eb68a6fb61ae674dcff5",
+      "archiveSha256": "a4c1caf9a7df5b262b03de9da33f4d41cb09b5dae63b9a4964a4bfb6e95b99b8",
+      "sourceSize": 298,
+      "archiveSize": 297,
+      "sensitiveData": false
+    }
+  ],
+  "omitted": [
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/backend-regressions.json",
+      "sha256": "e6c685e3205c21181a13f32e5dc32856106d734f4cf63688d45e63f80f41cbb5",
+      "size": 161464,
+      "reason": "structured counts and case names archived; raw Jest diagnostics retained locally"
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/availability-boundary.json",
+      "sha256": "0b49344d01879fcc550b3be1e42ed997bf41ae0c1dd690cb33ce5114a7b589a3",
+      "size": 79005,
+      "reason": "structured counts and case names archived; raw Jest diagnostics retained locally"
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/restored-baseline.json",
+      "sha256": "fdac755bf165a776e1a19808c53bc2132e7b10768613a2809294942ab626de49",
+      "size": 7257,
+      "reason": "structured counts and case names archived; raw Jest diagnostics retained locally"
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/source-carrier-jest.json",
+      "sha256": "be2b5191abe6065ad1fd9eebbb75175e8d9e46e7783fec990005623522990674",
+      "size": 1952,
+      "reason": "structured counts and case names archived; raw Jest diagnostics retained locally"
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/source-observation.journal.json",
+      "sha256": "93983029dff8ba1f6285973d731afbd8ac4985fcc8596c24eea13e2a4604844b",
+      "size": 56740,
+      "reason": "raw envelopes, synthetic auth-related handles and receipts excluded; only source outcomes archived"
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/source-observation.journal-populated.json",
+      "sha256": "bcf4c12b8ab315b750604ede2b04fc7acc4ec5211b07495f8e43b3fb8a6872df",
+      "size": 96759,
+      "reason": "raw envelopes, synthetic auth-related handles and receipts excluded; only source outcomes archived"
+    },
+    {
+      "source": "/private/tmp/maya-journal-service-names-final03-20261014/source-observation.personal.json",
+      "sha256": "62b76372a971c8e62c888440da62360227c967d3f64af464341d2e022e14c864",
+      "size": 688,
+      "reason": "raw envelopes, synthetic auth-related handles and receipts excluded; only source outcomes archived"
+    }
+  ]
+}

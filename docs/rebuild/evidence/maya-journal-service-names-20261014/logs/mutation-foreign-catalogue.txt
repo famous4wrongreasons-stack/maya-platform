@@ -1,0 +1,80 @@
+FAIL src/analytics/operations-analytics.journal-services.spec.ts
+  internal day journal service labels
+    ✕ resolves only stored IDs in this tenant, in appointment order, including inactive services (4 ms)
+    ✓ does not turn current catalogue prices into historical service or appointment money (1 ms)
+    ✕ never resolves foreign or missing catalogue IDs, even when they are stored on the appointment (1 ms)
+    ✓ does not relabel retained external records from the internal catalogue (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: null
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: {} (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: "service-a"
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: [] (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: [null, 7, false, "", [Object]]
+    ✓ keeps stored multiplicity/order but batches duplicate lookups across records (1 ms)
+    ✓ does not read the catalogue on an empty day (1 ms)
+    ✓ refuses a different tenant before any source read (1 ms)
+    ✓ propagates a catalogue read failure instead of presenting it as an empty catalogue (1 ms)
+    ✓ preserves provider journal names and amounts without touching the internal catalogue
+
+  ● internal day journal service labels › resolves only stored IDs in this tenant, in appointment order, including inactive services
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    - Expected
+    + Received
+
+    @@ -8,8 +8,7 @@
+            "in": Array [
+              "service-b",
+              "service-a",
+            ],
+          },
+    -     "tenantId": "tenant-a",
+        },
+      },
+
+    Number of calls: 1
+
+      164 |     ]);
+      165 |     expect(f.db.internalService.findMany).toHaveBeenCalledTimes(1);
+    > 166 |     expect(f.db.internalService.findMany).toHaveBeenCalledWith({
+          |                                           ^
+      167 |       where: { tenantId: 'tenant-a', id: { in: ['service-b', 'service-a'] } },
+      168 |       select: { id: true, name: true },
+      169 |     });
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:166:43)
+
+  ● internal day journal service labels › never resolves foreign or missing catalogue IDs, even when they are stored on the appointment
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 4
+
+      Array [
+        Object {
+    +     "id": "foreign-service",
+    +     "name": "FOREIGN-SERVICE-NOT-FOR-RENDER",
+    +   },
+    +   Object {
+          "id": "service-a",
+          "name": "Учебная стрижка",
+        },
+      ]
+
+      195 |     f.rows[0].serviceIds = ['foreign-service', 'deleted-service', 'service-a'];
+      196 |     const result = await f.read();
+    > 197 |     expect(result.records[0].services).toEqual([
+          |                                        ^
+      198 |       { id: 'service-a', name: 'Учебная стрижка' },
+      199 |     ]);
+      200 |     expect(JSON.stringify(result)).not.toContain(
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:197:40)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 12 passed, 14 total
+Snapshots:   0 total
+Time:        0.475 s, estimated 1 s
+Ran all test suites within paths "src/analytics/operations-analytics.journal-services.spec.ts".
+Test results written to: ../../mutation-foreign-catalogue.json

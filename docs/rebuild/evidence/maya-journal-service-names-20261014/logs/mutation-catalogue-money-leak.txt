@@ -1,0 +1,81 @@
+FAIL src/analytics/operations-analytics.journal-services.spec.ts
+  internal day journal service labels
+    ✕ resolves only stored IDs in this tenant, in appointment order, including inactive services (4 ms)
+    ✓ does not turn current catalogue prices into historical service or appointment money (1 ms)
+    ✕ never resolves foreign or missing catalogue IDs, even when they are stored on the appointment
+    ✓ does not relabel retained external records from the internal catalogue
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: null (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: {}
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: "service-a" (1 ms)
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: []
+    ✓ leaves malformed/empty stored IDs unnamed without reading the catalogue: [null, 7, false, "", [Object]]
+    ✓ keeps stored multiplicity/order but batches duplicate lookups across records (2 ms)
+    ✓ does not read the catalogue on an empty day
+    ✓ refuses a different tenant before any source read (1 ms)
+    ✓ propagates a catalogue read failure instead of presenting it as an empty catalogue (1 ms)
+    ✓ preserves provider journal names and amounts without touching the internal catalogue
+
+  ● internal day journal service labels › resolves only stored IDs in this tenant, in appointment order, including inactive services
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 4
+
+      Array [
+        Object {
+    +     "currency": "EUR",
+          "id": "service-b",
+          "name": "Архивная услуга",
+    +     "price": 8000,
+        },
+        Object {
+    +     "currency": "USD",
+          "id": "service-a",
+          "name": "Учебная стрижка",
+    +     "price": 9000,
+        },
+      ]
+
+      159 |     const f = fixture();
+      160 |     const result = await f.read();
+    > 161 |     expect(result.records[0].services).toEqual([
+          |                                        ^
+      162 |       { id: 'service-b', name: 'Архивная услуга' },
+      163 |       { id: 'service-a', name: 'Учебная стрижка' },
+      164 |     ]);
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:161:40)
+
+  ● internal day journal service labels › never resolves foreign or missing catalogue IDs, even when they are stored on the appointment
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 0
+    + Received  + 2
+
+      Array [
+        Object {
+    +     "currency": "USD",
+          "id": "service-a",
+          "name": "Учебная стрижка",
+    +     "price": 9000,
+        },
+      ]
+
+      195 |     f.rows[0].serviceIds = ['foreign-service', 'deleted-service', 'service-a'];
+      196 |     const result = await f.read();
+    > 197 |     expect(result.records[0].services).toEqual([
+          |                                        ^
+      198 |       { id: 'service-a', name: 'Учебная стрижка' },
+      199 |     ]);
+      200 |     expect(JSON.stringify(result)).not.toContain(
+
+      at Object.<anonymous> (analytics/operations-analytics.journal-services.spec.ts:197:40)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 12 passed, 14 total
+Snapshots:   0 total
+Time:        0.472 s, estimated 1 s
+Ran all test suites within paths "src/analytics/operations-analytics.journal-services.spec.ts".
+Test results written to: ../../mutation-catalogue-money-leak.json

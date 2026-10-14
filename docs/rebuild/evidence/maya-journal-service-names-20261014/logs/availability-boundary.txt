@@ -1,0 +1,10 @@
+PASS src/crm/adapters/yclients-crm.adapter.spec.ts
+PASS src/ai-tools/ai-tool-registry.service.spec.ts
+PASS src/internal-calendar/internal-calendar.service.spec.ts
+
+Test Suites: 3 passed, 3 total
+Tests:       182 passed, 182 total
+Snapshots:   0 total
+Time:        1.503 s
+Ran all test suites within paths "src/crm/adapters/yclients-crm.adapter.spec.ts", "src/ai-tools/ai-tool-registry.service.spec.ts", "src/internal-calendar/internal-calendar.service.spec.ts".
+Test results written to: ../../availability-boundary.json

@@ -1,0 +1,463 @@
+{
+  "contract": "maya.journal-service-names-source-proof/1",
+  "head": "8a8dacaf401f7e43bf63c1b1bea620db8618750e",
+  "startedAt": "2026-10-14T10:35:56.278Z",
+  "status": "PASS",
+  "steps": [
+    {
+      "name": "clone",
+      "command": [
+        "git",
+        "clone",
+        "--shared",
+        "--no-checkout",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010",
+        "/private/tmp/maya-journal-service-names-final01-20261014/candidate"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014",
+      "startedAt": "2026-10-14T10:35:56.279Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:35:56.508Z",
+      "sha256": "752698b6e6c536e38404b61417ea285718410e1a9ce917cfe000ae4a4aeedf52"
+    },
+    {
+      "name": "checkout",
+      "command": [
+        "git",
+        "checkout",
+        "--detach",
+        "8a8dacaf401f7e43bf63c1b1bea620db8618750e"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate",
+      "startedAt": "2026-10-14T10:35:56.509Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:35:58.996Z",
+      "sha256": "bcd7aa469fe4201ec4485f8e29fd0072c48535cdf3cb1ec5f50df90002a6f987"
+    },
+    {
+      "name": "backend-dependencies",
+      "command": [
+        "/bin/cp",
+        "-cR",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-saas-backend/node_modules",
+        "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend/node_modules"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014",
+      "startedAt": "2026-10-14T10:35:58.996Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:06.706Z",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "carrier-dependencies",
+      "command": [
+        "/bin/cp",
+        "-cR",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-development-integration/maya-carrier-react/node_modules",
+        "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-carrier-react/node_modules"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014",
+      "startedAt": "2026-10-14T10:36:06.708Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:06.769Z",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "pg-init",
+      "command": [
+        "/opt/homebrew/opt/postgresql@16/bin/initdb",
+        "-D",
+        "/private/tmp/maya-journal-service-names-final01-20261014/pgdata",
+        "--auth=trust",
+        "--username=widget_proof",
+        "--encoding=UTF8",
+        "--locale=C"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:06.916Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:07.314Z",
+      "sha256": "d30d82c2b8b513d6e4f1c5d02b3adbe4d9169f5ab0c7fb7fed10299e22e820f7"
+    },
+    {
+      "name": "pg-start",
+      "command": [
+        "/opt/homebrew/opt/postgresql@16/bin/pg_ctl",
+        "-D",
+        "/private/tmp/maya-journal-service-names-final01-20261014/pgdata",
+        "-w",
+        "-t",
+        "30",
+        "-l",
+        "/private/tmp/maya-journal-service-names-final01-20261014/postgres.log",
+        "-o",
+        "-h 127.0.0.1 -p 51555 -k '' -c shared_buffers=64MB -c max_connections=30",
+        "start"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:07.314Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:07.439Z",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad"
+    },
+    {
+      "name": "createdb",
+      "command": [
+        "/opt/homebrew/opt/postgresql@16/bin/createdb",
+        "--host=127.0.0.1",
+        "--port=51555",
+        "--username=widget_proof",
+        "maya_widget_gate_proof_journal_names"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:07.439Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:07.503Z",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "network-fence",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-journal-service-names-final01-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "-e",
+        "const net=require('node:net'),assert=require('node:assert/strict');const x=net.connect(443,'198.51.100.1');x.setTimeout(1500,()=>{throw Error('denial not immediate')});x.on('error',e=>{assert.equal(e.code,'EPERM');console.log('external connection refused EPERM')});"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:07.504Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:07.550Z",
+      "sha256": "2f362c95a59e89184faa8a01fc9acd517b39419875ffc3022479d4701a6df9da"
+    },
+    {
+      "name": "prisma-generate",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-journal-service-names-final01-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/prisma/build/index.js",
+        "generate"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:07.551Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:10.619Z",
+      "sha256": "67c7fed20bad91ec33b972ae4c95550e3afc9a5fe128be202acc659fb2d262e0"
+    },
+    {
+      "name": "backend-types",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-journal-service-names-final01-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.build.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:10.620Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:18.517Z",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "live-types",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-journal-service-names-final01-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "test/tsconfig.widgets-live.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:18.518Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:28.537Z",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "scoped-lint",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-journal-service-names-final01-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/eslint/bin/eslint.js",
+        "src/analytics/operations-analytics.service.ts",
+        "src/analytics/operations-analytics.journal-services.spec.ts",
+        "test/widgets-live/source-carrier.probe-spec.ts"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:28.538Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:33.014Z",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "backend-regressions",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-journal-service-names-final01-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "src/analytics/operations-analytics.journal-services.spec.ts",
+        "src/analytics/operations-analytics.journal-source.spec.ts",
+        "src/analytics/operations-analytics.service.spec.ts",
+        "src/ai-tools/ai-tool-handler.service.spec.ts",
+        "src/business-facts/journal-consolidation.spec.ts",
+        "src/widgets/composition/journal-schedule.presenter.spec.ts",
+        "src/widgets/projection/projector-fences.architecture.spec.ts",
+        "src/widgets/emission/emitter.spec.ts",
+        "src/ai-tools/employee-journal-read.spec.ts",
+        "--json",
+        "--outputFile=/private/tmp/maya-journal-service-names-final01-20261014/backend-regressions.json"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:33.015Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:39.072Z",
+      "sha256": "8c17928e598e8daf441300d3ae300a312a2641415bd225c9bf698204dba3d5c5"
+    },
+    {
+      "name": "mutation-lost-labels",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-journal-service-names-final01-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "src/analytics/operations-analytics.journal-services.spec.ts",
+        "--json",
+        "--outputFile=/private/tmp/maya-journal-service-names-final01-20261014/mutation-lost-labels.json"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:39.073Z",
+      "exit": 1,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:39.695Z",
+      "sha256": "01b938a5f657cb377bb890832fd02c0fca57b5dcf4ff8f9d44f4acdffc50326d"
+    },
+    {
+      "name": "mutation-foreign-catalogue",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-journal-service-names-final01-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "src/analytics/operations-analytics.journal-services.spec.ts",
+        "--json",
+        "--outputFile=/private/tmp/maya-journal-service-names-final01-20261014/mutation-foreign-catalogue.json"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:39.695Z",
+      "exit": 1,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:40.310Z",
+      "sha256": "8c3896049cb2b869efe0c3f7416339393437ce36d6de6b5c4c5a7e5fa32e2a1e"
+    },
+    {
+      "name": "mutation-catalogue-money-leak",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-journal-service-names-final01-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "src/analytics/operations-analytics.journal-services.spec.ts",
+        "--json",
+        "--outputFile=/private/tmp/maya-journal-service-names-final01-20261014/mutation-catalogue-money-leak.json"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:40.310Z",
+      "exit": 1,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:40.920Z",
+      "sha256": "94772255bc478b30560543b571454d05a1a19a13760d2da0a1ac02ebc5be60aa"
+    },
+    {
+      "name": "restored-baseline",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-journal-service-names-final01-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--runTestsByPath",
+        "src/analytics/operations-analytics.journal-services.spec.ts",
+        "--json",
+        "--outputFile=/private/tmp/maya-journal-service-names-final01-20261014/restored-baseline.json"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:40.921Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:41.427Z",
+      "sha256": "a285cc8c1777928e2defa0458cbe1f8536d58e4171b156395fd44232859146b1"
+    },
+    {
+      "name": "test-only-migrations",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-journal-service-names-final01-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:41.427Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:42.352Z",
+      "sha256": "e339b1d419f87b5232459fbd8b689a4f8d5c1775ed46c8eb096040012198b4d1"
+    },
+    {
+      "name": "runtime-build",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-journal-service-names-final01-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "../maya-chat-shell/build.mjs"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:42.352Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:48.001Z",
+      "sha256": "246671e2f857312d18c587bfffc530ba2f5c41372c29a1f6b2374affdca7ab01"
+    },
+    {
+      "name": "carrier-harness",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-journal-service-names-final01-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "test/build-harness.mjs"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-carrier-react",
+      "startedAt": "2026-10-14T10:36:48.001Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:48.447Z",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "source-carrier",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-f",
+        "/private/tmp/maya-journal-service-names-final01-20261014/loopback.sb",
+        "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+        "node_modules/jest/bin/jest.js",
+        "--config",
+        "test/jest-widgets-live.json",
+        "--testRegex",
+        "widgets-live/source-carrier\\.probe-spec\\.ts$",
+        "--runInBand",
+        "--json",
+        "--outputFile=/private/tmp/maya-journal-service-names-final01-20261014/source-carrier-jest.json"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:48.447Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:57.156Z",
+      "sha256": "4098071e012f2827feecf361cc12d68c02275a58c664927bca12fab022e76aa6"
+    },
+    {
+      "name": "pg-stop",
+      "command": [
+        "/opt/homebrew/opt/postgresql@16/bin/pg_ctl",
+        "-D",
+        "/private/tmp/maya-journal-service-names-final01-20261014/pgdata",
+        "-w",
+        "-t",
+        "30",
+        "-m",
+        "fast",
+        "stop"
+      ],
+      "cwd": "/private/tmp/maya-journal-service-names-final01-20261014/candidate/maya-saas-backend",
+      "startedAt": "2026-10-14T10:36:57.795Z",
+      "exit": 0,
+      "signal": null,
+      "finishedAt": "2026-10-14T10:36:57.906Z",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d"
+    }
+  ],
+  "freshSyntheticDatabase": true,
+  "retainedDatabaseAccess": false,
+  "realProviderEffects": 0,
+  "certificate": "NOT_ISSUED",
+  "database": {
+    "host": "127.0.0.1",
+    "port": 51555,
+    "name": "maya_widget_gate_proof_journal_names"
+  },
+  "mutations": [
+    {
+      "name": "lost-labels",
+      "killed": true,
+      "failed": 4,
+      "passed": 9
+    },
+    {
+      "name": "foreign-catalogue",
+      "killed": true,
+      "failed": 2,
+      "passed": 11
+    },
+    {
+      "name": "catalogue-money-leak",
+      "killed": true,
+      "failed": 2,
+      "passed": 11
+    }
+  ],
+  "results": {
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0
+  },
+  "clusterStopped": true,
+  "finishedAt": "2026-10-14T10:36:57.906Z"
+}
