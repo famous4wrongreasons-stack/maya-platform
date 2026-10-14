@@ -268,3 +268,22 @@ This supersedes only the inline GoodsPhoto presentation. Generic media/file
 storage, prototype demo actions, real OCR/provider acceptance and full release
 certification remain outside this unit. See
 [checkpoint](../../MAYA-COMPANION-PHOTO-SHEET-CHECKPOINT-20261014.md).
+
+## 2026-10-14 — existing feed filter in the reference sheet
+
+Candidate `7e5eea892aaeffb67f37087ba122394844e48d97` presents the existing
+All/Unread filter in the screen-17 bottom sheet. Selection is projected from
+`WorkspaceReadsView.unreadOnly` and calls only `filterUnread`; no request,
+acknowledgement or subscription is created. Loaded-slice/cap semantics remain
+explicit; loading/refusal disables choices. Native modal focus, background
+inertness, concurrent mark-read completion and session expiry are covered.
+
+Fresh runtime 846 PASS + 7 SKIP, carrier 200 PASS, six browser suites 525 PASS,
+NS-1 16 PASS, packaging 18 PASS, parity/types/ratchets PASS. Actual emitted
+React/runtime uses synthetic intercepted HTTP; no actual backend/provider proof
+or full release certification is claimed. The old workspace browser Privacy
+transition was corrected to open its containing menu first, without product changes.
+
+This supersedes only inline All/Unread presentation. It does not close the
+prototype Salon/Opportunities taxonomy, Feed Save or notification-delivery policy.
+See [checkpoint](../../MAYA-COMPANION-FEED-FILTER-CHECKPOINT-20261014.md).

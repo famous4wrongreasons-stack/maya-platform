@@ -1,0 +1,55 @@
+{
+  "candidate": "7e5eea892aaeffb67f37087ba122394844e48d97",
+  "fullReleaseCertification": false,
+  "fullMutationCorpus": false,
+  "actualBackend": false,
+  "actualEmittedRuntimeReact": true,
+  "syntheticApiOnly": true,
+  "counts": {
+    "runtime": {
+      "tests": 853,
+      "pass": 846,
+      "fail": 0,
+      "skipped": 7
+    },
+    "carrier": {
+      "tests": 200,
+      "pass": 200,
+      "fail": 0,
+      "skipped": 0
+    },
+    "packaging-tests": {
+      "tests": 18,
+      "pass": 18,
+      "fail": 0,
+      "skipped": 0
+    }
+  },
+  "browserCounts": {
+    "chat-browser": 35,
+    "navigation-browser": 207,
+    "voice-browser": 56,
+    "schedule-browser": 50,
+    "photo-browser": 38,
+    "workspace-browser": 139
+  },
+  "effects": {
+    "production": 0,
+    "retainedSalonDatabase": 0,
+    "keychain": 0,
+    "realOtp": 0,
+    "realYclients": 0,
+    "realModel": 0,
+    "iosInstall": 0,
+    "push": 0,
+    "merge": 0
+  },
+  "developmentFailure": {
+    "originalReceipt": "/private/tmp/maya-companion-feed-filter-dev01-20261014/receipt.json",
+    "sha256": "b76c1da7dd322189b0dde4e206accc0b4c2d49fed08f86b17b8d7d48d45244d8",
+    "checksPassed": 133,
+    "failure": "canonical privacy replaces workspace",
+    "cause": "old harness clicked Privacy while its containing drawer was closed; now opens existing menu before click",
+    "productChangeForFailure": false
+  }
+}
