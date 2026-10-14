@@ -40,6 +40,7 @@ const server=http.createServer(async(req,res)=>{
     const data=body?JSON.parse(body):null;wire.push({path:req.url,method:req.method,body:data});
     if(req.url==='/api/auth/login')return json(res,{access_token:'synthetic-only',refresh_token:'synthetic-only-refresh',expires_in:900,refresh_expires_at:'2099-01-01T00:00:00.000Z',user:{name:'Тестовый пользователь',tenant:{name:'Учебный салон'}}},201);
     if(req.url==='/api/ai/conversation')return json(res,{contract:'maya.conversation-history/1',conversationId:cid,truncated:false,interrupted:false,turns});
+    if(req.url==='/api/auth/refresh')return json(res,{},401);
     if(req.url==='/api/inbox/feed-0/read'){
       if(markMode==='delayed'){pendingMark=res;return;}
       if(markMode==='denied')return json(res,{},403);
@@ -76,6 +77,9 @@ const button=text=>`Array.from(document.querySelectorAll('button')).find(b=>(b.g
 const composer=`document.querySelector('textarea[aria-disabled]')`;
 const check=async(expression,name)=>{assert.ok(await page.waitFor(expression),name);report.checks.push(name);};
 const click=async(name)=>assert.ok(await page.click(button(name)),name);
+const received=async read=>{const end=Date.now()+8000;while(!read()&&Date.now()<end)await new Promise(resolve=>setTimeout(resolve,20));assert.ok(read(),'synthetic server received the expected request');};
+const filterSheet="document.querySelector('.companion-feed-filter-sheet')";
+const filter=async label=>{await click('Настроить ленту');await click(label);};
 const screenshot=async name=>{
   const {data}=await page.send('Page.captureScreenshot',{format:'png'});
   fs.writeFileSync(path.join(out,name+'.png'),Buffer.from(data,'base64'));report.screenshots.push(name+'.png');
@@ -116,8 +120,26 @@ try {
   await check(`${composer}.getBoundingClientRect().height===0`,'composer hidden in workspace');
   await check("document.querySelector('.companion-read-meta').textContent.includes('09:00 UTC')",'feed instant explicit UTC');
   assert.equal(reads().length,1);
-  await click('Непрочитанные');await check("document.querySelectorAll('.companion-feed-list li').length===1",'unread filter reflects stored state');assert.equal(reads().length,1);report.checks.push('filter does not acknowledge or mutate');
-  await click('Все');
+  const beforeFilter=wire.length;
+  await click('Настроить ленту');
+  await check(`${filterSheet}.matches(':modal') && document.activeElement.id==='maya-feed-filter-title'`,'feed preferences use native modal with title focus');
+  await check(`${filterSheet}.querySelector('[aria-label="Все"]').getAttribute('aria-pressed')==='true'`,'filter selection projects existing runtime state');
+  assert.equal(await page.focus("document.querySelector('.companion-navigation button')"),false);report.checks.push('feed preferences make background navigation inert');
+  await page.press('Tab',{shift:true});await check("document.activeElement.getAttribute('aria-label')==='Непрочитанные'",'filter reverse focus from title reaches last option');
+  await page.press('Tab');await check("document.activeElement.getAttribute('aria-label')==='Закрыть настройки ленты'",'filter forward focus stays in modal');
+  for(const [width,height]of[[320,740],[393,852],[427,952],[1280,900],[393,400]]){
+    await size(width,height);await check(`(()=>{const d=${filterSheet},r=d.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&r.bottom<=innerHeight+1&&d.scrollWidth<=d.clientWidth&&[...d.querySelectorAll('button')].every(b=>b.getBoundingClientRect().height>=44)})()`,'feed filter geometry and targets at '+width+'x'+height);await screenshot('feed-filter-'+width+'x'+height);
+  }
+  await size(320,440);await page.eval(`${filterSheet}.querySelectorAll('h2,p,button').forEach(e=>{e.dataset.oldFilterFont=e.style.fontSize;e.style.fontSize=parseFloat(getComputedStyle(e).fontSize)*2+'px'})`);
+  await page.focus(`${filterSheet}.querySelector('[aria-label="Непрочитанные"]')`);
+  await check(`(()=>{const d=${filterSheet},r=document.activeElement.getBoundingClientRect();return d.scrollWidth<=d.clientWidth&&r.top>=0&&r.bottom<=innerHeight+1})()`,'feed filter enlarged text scrolls to focused choice without overflow');await screenshot('feed-filter-large-text');
+  await page.eval(`${filterSheet}.querySelectorAll('[data-old-filter-font]').forEach(e=>{e.style.fontSize=e.dataset.oldFilterFont;delete e.dataset.oldFilterFont})`);await size(393,852);
+  await page.press('Escape');await check(`!${filterSheet}.open && document.activeElement.getAttribute('aria-label')==='Настроить ленту' && !!document.querySelector('.companion-reads')`,'filter Escape closes only sheet and restores opener');
+  await filter('Непрочитанные');await check("document.querySelectorAll('.companion-feed-list li').length===1",'unread filter reflects stored state');assert.equal(reads().length,1);report.checks.push('filter does not acknowledge or mutate');
+  await check(`!${filterSheet}.open && document.activeElement.getAttribute('aria-label')==='Настроить ленту' && document.querySelector('.companion-feed-filter-summary').textContent.startsWith('Непрочитанные')`,'selecting unread closes sheet with truthful summary and focus');
+  await click('Настроить ленту');await check(`${filterSheet}.querySelector('[aria-label="Непрочитанные"]').getAttribute('aria-pressed')==='true'`,'reopening preserves canonical filter');
+  await click('Непрочитанные');await filter('Все');
+  assert.equal(wire.length,beforeFilter);report.checks.push('open select reselect close have zero requests and no acknowledgement');
   for(const [width,height] of [[393,852],[320,740],[427,952],[1280,900]]){
     await size(width,height);await check("document.documentElement.scrollWidth<=innerWidth && document.querySelector('.maya-chat-lane').scrollWidth<=document.querySelector('.maya-chat-lane').clientWidth",'feed fits '+width);await screenshot('feed-'+width);
   }
@@ -199,8 +221,15 @@ try {
   await screenshot('report-long-title-320-large-text');
   await click('Закрыть отчёт');await check("!document.querySelector('.companion-report-sheet').open",'close remains reachable with maximum title and enlarged text');await size(393,852);await close();
   mode='denied';await open('Лента');await check("document.querySelector('.companion-tasks-status').textContent.includes('недоступны') && !document.querySelector('.companion-feed-list li,.companion-tasks-empty')",'feed denial distinct from empty');await screenshot('feed-denied');
+  const beforeDeniedFilter=wire.length;await click('Настроить ленту');
+  await check(`[...${filterSheet}.querySelectorAll('[aria-pressed]')].every(b=>b.disabled)`,'denied source disables both filter choices');
+  await page.eval(`${filterSheet}.querySelector('[aria-label="Непрочитанные"]').click()`);
+  await check(`${filterSheet}.open && !document.querySelector('.companion-feed-list li') && ${filterSheet}.querySelector('[aria-label="Все"]').getAttribute('aria-pressed')==='true'`,'disabled filter cannot fabricate a successful feed');
+  await page.press('Tab',{shift:true});await check("document.activeElement.getAttribute('aria-label')==='Закрыть настройки ленты'",'filter focus skips unavailable choices');
+  await page.press('Escape');assert.equal(wire.length,beforeDeniedFilter);
   mode='malformed';await click('Обновить список');await check("document.querySelector('.companion-tasks-status').textContent.includes('Не удалось проверить')",'malformed feed refused');
   mode='cap';await click('Обновить список');await check("document.querySelectorAll('.companion-feed-list li').length===50 && document.querySelector('.companion-tasks-status').textContent.includes('50 последних')",'feed cap explicit');
+  await click('Настроить ленту');await check(`${filterSheet}.textContent.includes('50 последних') && ${filterSheet}.textContent.includes('только к загруженной части')`,'filter sheet discloses actual capped source');await screenshot('feed-filter-capped');await page.press('Escape');
   await page.eval("document.querySelector('.maya-chat-lane').scrollTop=900");
   mode='normal';await open('Библиотека');await loadedLibrary();await check("document.querySelector('.maya-chat-lane').scrollTop===0",'workspace switch resets scroll');
   mode='substituted';await readReport();await check("document.querySelector('.companion-tasks-status').textContent.includes('Не удалось проверить') && !document.querySelector('.companion-report-body,.companion-report-list li')",'substituted snapshot clears cached titles');
@@ -220,12 +249,14 @@ try {
   markMode='delayed';await click('Отметить прочитанным');
   await check("document.querySelector('.companion-tasks-status').textContent.includes('Сохраняю') && document.querySelector('.companion-feed-list button').disabled && document.querySelector('.companion-feed-dot').classList.contains('is-unread')",'pending mark retains unread and disables duplicate');
   await screenshot('feed-read-pending-393');
-  assert.equal(marks().length,1);assert.equal(pendingMark!==null,true);
+  await received(()=>pendingMark);assert.equal(marks().length,1);
   assert.ok(await page.eval(`${button('Обновить список')}.disabled`));
   await page.click("document.querySelector('.companion-feed-list button')");assert.equal(marks().length,1);
+  await click('Настроить ленту');await check(`${filterSheet}.open`,'filter can be inspected during an existing acknowledgement');
   marked=true;json(pendingMark,{ok:true});pendingMark=null;
   await check("document.querySelector('.companion-tasks-status').textContent.includes('Отмечено') && !document.querySelector('.companion-feed-list button,.companion-feed-dot.is-unread')",'persisted reread confirms mark');
-  await check("document.activeElement.id==='maya-reads-heading'",'mark completion restores focus');
+  await check(`${filterSheet}.open && ${filterSheet}.contains(document.activeElement)`,'acknowledgement completion cannot steal modal focus');
+  await page.press('Escape');await check("document.activeElement.getAttribute('aria-label')==='Настроить ленту'",'mark completion keeps filter opener available');
   assert.equal(marks().length,1);assert.deepEqual(marks()[0].body,{});assert.equal(marks()[0].method,'POST');
   report.checks.push('one exact mark POST with empty body, no tenant user or business action');
   await screenshot('feed-read-confirmed-393');
@@ -233,7 +264,7 @@ try {
   markMode='no-change';await click('Отметить прочитанным');
   await check("document.querySelector('.companion-tasks-status').textContent.includes('Не удалось подтвердить') && !!document.querySelector('.companion-feed-dot.is-unread')",'ok alone cannot fabricate read state');
   await screenshot('feed-read-unconfirmed-393');
-  markMode='lost';await click('Непрочитанные');await click('Отметить прочитанным');
+  markMode='lost';await filter('Непрочитанные');await click('Отметить прочитанным');
   await check("document.querySelector('.companion-tasks-status').textContent.includes('Отмечено') && document.querySelectorAll('.companion-feed-list li').length===0 && document.querySelector('.companion-tasks-empty h2').textContent.includes('нет непрочитанных')",'lost response resolved through read with unread filter preserved');
   const deliveredAfterLoss=marks().length;
   assert.equal(markNetwork.length,3);assert.ok(deliveredAfterLoss>=3);
@@ -241,7 +272,7 @@ try {
   // issues only one Fetch per gesture; the existing server mark-read is state-idempotent.
   report.acknowledgementDelivery={logicalFetches:markNetwork.length,httpDeliveries:deliveredAfterLoss,socketLossInjected:true};
   report.checks.push('lost response triggers no new application Fetch; transport redelivery is explicitly recorded');
-  await click('Все');await check("document.querySelectorAll('.companion-feed-list li').length===2 && !document.querySelector('.companion-feed-dot.is-unread')",'all filter reflects persisted read');
+  await filter('Все');await check("document.querySelectorAll('.companion-feed-list li').length===2 && !document.querySelector('.companion-feed-dot.is-unread')",'all filter reflects persisted read');
   marked=false;await click('Обновить список');await loadedFeed();markMode='denied';await click('Отметить прочитанным');
   await check("document.querySelector('.companion-tasks-status').textContent.includes('недоступны') && !document.querySelector('.companion-feed-list li')",'mark denial clears retained notification content');
   markMode='normal';await click('Обновить список');await loadedFeed();markMode='limited';await click('Отметить прочитанным');
@@ -254,7 +285,12 @@ try {
   await check(`document.activeElement===${composer} && ${composer}.value==='Черновик — сохранить' && !document.querySelector('.companion-reads')`,'late mark cannot reopen workspace or lose draft');
   await open('Лента');await loadedFeed();assert.equal(marks().length,deliveredAfterLoss+3);assert.equal(markNetwork.length,6);
   await check("!!document.querySelector('.companion-feed-dot.is-unread')",'reopen rereads real state after cancelled acknowledgement');
-  await click('Приватность и данные');await check("!document.querySelector('.companion-reads') && !!document.querySelector('[aria-label=\"Приватность\"]')",'canonical privacy replaces workspace');
+  await open('Приватность и данные');await check("!document.querySelector('.companion-reads') && !!document.querySelector('[aria-label=\"Приватность\"]')",'canonical privacy replaces workspace');
+  mode='delayed';await open('Лента');await received(()=>pending);
+  await click('Настроить ленту');await check(`${filterSheet}.matches(':modal') && [...${filterSheet}.querySelectorAll('[aria-pressed]')].every(b=>b.disabled)`,'loading filter is inspectable but cannot select data before response');
+  const beforeLoadingChoice=wire.length;await page.eval(`${filterSheet}.querySelector('[aria-label="Непрочитанные"]').click()`);assert.equal(wire.length,beforeLoadingChoice);
+  json(pending,{},401);pending=null;
+  await check(`!${filterSheet} && !document.querySelector('.companion-feed-list,[data-chat-message]')`,'revoked session removes open filter and retained content');
   assert.ok(reads().every(r=>r.method==='GET'&&r.body===null));report.checks.push('list and report requests remain GET; only explicit bounded mark-read POST added');
   assert.equal(wire.filter(x=>x.path==='/api/ai/chat').length,0);report.checks.push('draft never submitted and no model call');
   assert.deepEqual(report.unexpected,[]);assert.equal(report.externalRequests,0);assert.deepEqual(page.exceptions,[]);

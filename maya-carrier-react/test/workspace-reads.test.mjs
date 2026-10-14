@@ -53,3 +53,23 @@ test('library view uses a labelled passive sheet with the current runtime prefer
  assert.doesNotMatch(html,/<dialog[^>]* open/);
  assert.match(render({workspace:'library',phase:'failed'}),/aria-label="По дате" disabled=""/);
 });
+
+test('feed filter sheet is passive and exposes only the existing unread predicate',()=>{
+ const html=render({unreadOnly:true,possiblyCapped:true});
+ assert.match(html,/aria-label="Настроить ленту" aria-haspopup="dialog"/);
+ assert.match(html,/<dialog[^>]*companion-feed-filter-sheet[^>]*aria-labelledby="maya-feed-filter-title"[^>]*aria-modal="true"/);
+ assert.match(html,/aria-label="Непрочитанные" aria-pressed="true"/);
+ assert.match(html,/aria-label="Все" aria-pressed="false"/);
+ assert.match(html,/Фильтр относится только к загруженной части ленты/);
+ assert.match(html,/Просмотр не отмечает уведомления прочитанными/);
+ assert.doesNotMatch(html,/<dialog[^>]* open|События салона|Идеи для роста|Всё важное/);
+ assert.doesNotMatch(render({workspace:'library'}),/maya-feed-filter-title/);
+});
+test('feed filter choices stay unavailable until the existing reader is ready',()=>{
+ for(const phase of ['closed','loading','failed']) {
+  const html=render({phase});
+  assert.match(html,/aria-label="Все" aria-pressed="true" disabled=""/);
+  assert.match(html,/aria-label="Непрочитанные" aria-pressed="false" disabled=""/);
+ }
+ assert.doesNotMatch(render({markingRead:'private-id'}),/aria-label="Все" aria-pressed="true" disabled/);
+});

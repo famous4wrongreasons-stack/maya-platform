@@ -260,6 +260,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .companion-library-menu-done { width:100%; min-height:48px; border:0; border-radius:26px; padding:12px; color:#fff; background:#0068ed; font:inherit; font-size:14px; cursor:pointer; }
 .companion-library-menu :focus-visible { outline:2px solid #0068ed; outline-offset:2px; }
 .companion-library-menu h2:focus { outline:none; }
+.companion-feed-filter-summary { font-size:12px; line-height:1.6; color:#65696f; }
+.companion-filter-icon { display:grid; gap:6px; width:18px; }
+.companion-filter-icon > span { position:relative; height:1px; background:currentColor; }
+.companion-filter-icon > span::before { content:""; position:absolute; top:-2px; left:4px; width:5px; height:5px; border:1px solid currentColor; border-radius:50%; background:#fff; box-sizing:border-box; }
+.companion-filter-icon > span:last-child::before { left:11px; }
+.companion-feed-filter-note { margin:20px 0 0; padding:16px; border:1px solid #e6e7e9; border-radius:20px; color:#65696f; font-size:13px; line-height:1.6; overflow-wrap:anywhere; }
 
 /* Owner voice sheet, driven by the existing voice state and visible viewport. */
 .companion-voice-sheet { position:fixed; inset:auto 0; top:calc(var(--maya-viewport-top,0px) + var(--maya-viewport-height,100dvh)); transform:translateY(-100%); width:min(100%,560px); max-width:100%; max-height:calc(var(--maya-viewport-height,100dvh) - 24px); margin:0 auto; box-sizing:border-box; padding:0 18px calc(24px + env(safe-area-inset-bottom,0px)); border:0; border-radius:22px 22px 0 0; background:#fff; color:#191a1b; overflow:auto; box-shadow:0 -16px 48px rgb(0 0 0 /20%); }
