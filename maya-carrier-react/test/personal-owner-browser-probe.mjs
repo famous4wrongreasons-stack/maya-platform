@@ -51,6 +51,8 @@ async function clickNamed(page, name) {
 async function clickPersonalChoice(page, name) {
   const expression = `Q.all('dialog[open] button[data-personal-control]').find(el => Q.visible(el) && !el.disabled && Q.name(el) === ${JSON.stringify(name)})`;
   assert.ok(await page.waitFor('!!(' + expression + ')'), 'Enabled personal choice missing: ' + name);
+  await page.eval(`(() => {(${expression}).scrollIntoView({block:'center'});return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve(true))))})()`);
+  assert.ok(await page.waitFor(`(() => {const el=${expression},r=el.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('button')===el})()`), 'Personal choice must be hit-testable: '+name);
   assert.equal(await page.click(expression), true);
   assert.ok(await page.waitFor('(' + expression + ')?.getAttribute("aria-pressed") === "true"'));
 }
@@ -215,6 +217,8 @@ async function main() {
       await page.press('Tab');assert.ok(await page.waitFor('document.activeElement===('+first+')'),'forward focus ring '+phase);
       report.presentationChecks.push(phase+' keyboard focus ring');
       await page.send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});
+      assert.ok(await page.waitFor("document.documentElement.style.getPropertyValue('--maya-viewport-height')==='900px'"));
+      await page.eval('new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve(true))))');
     }
     async function clickRef(page, ref) {
       const view = await page.eval('Q.all("button[data-ref]").filter(Q.visible).map(el => ({ref:el.dataset.ref,name:Q.name(el)}))');
