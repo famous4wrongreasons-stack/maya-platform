@@ -1,0 +1,122 @@
+{
+  "candidate": "4adc54beb81f6f64e9d7c8ac412b39f4915e0a66",
+  "baseline": true,
+  "mutations": [
+    {
+      "name": "mark POST becomes GET",
+      "status": "KILLED",
+      "proof": "mark read uses the exact"
+    },
+    {
+      "name": "mark invalid key",
+      "status": "KILLED",
+      "proof": "mark read uses the exact"
+    },
+    {
+      "name": "mark forged acceptance",
+      "status": "KILLED",
+      "proof": "mark read transport rejects"
+    },
+    {
+      "name": "mark extra acceptance fields",
+      "status": "KILLED",
+      "proof": "mark read transport rejects"
+    },
+    {
+      "name": "mark foreign selection",
+      "status": "KILLED",
+      "proof": "mark read requires current visible"
+    },
+    {
+      "name": "mark already read",
+      "status": "KILLED",
+      "proof": "mark read requires current visible"
+    },
+    {
+      "name": "mark exact confirmation",
+      "status": "KILLED",
+      "proof": "mark read requires exact persisted"
+    },
+    {
+      "name": "mark persisted unread",
+      "status": "KILLED",
+      "proof": "mark read requires exact persisted"
+    },
+    {
+      "name": "mark deny boundary",
+      "status": "KILLED",
+      "proof": "mark read denial clears"
+    },
+    {
+      "name": "mark concurrent flight",
+      "status": "KILLED",
+      "proof": "mark read requires current visible"
+    },
+    {
+      "name": "feed cap",
+      "status": "KILLED",
+      "proof": "feed projection is text-only"
+    },
+    {
+      "name": "feed duplicate",
+      "status": "KILLED",
+      "proof": "feed malformed"
+    },
+    {
+      "name": "report duplicate",
+      "status": "KILLED",
+      "proof": "report list refuses"
+    },
+    {
+      "name": "substituted detail",
+      "status": "KILLED",
+      "proof": "report projection binds"
+    },
+    {
+      "name": "changed period",
+      "status": "KILLED",
+      "proof": "report projection binds"
+    },
+    {
+      "name": "read becomes write",
+      "status": "KILLED",
+      "proof": "finite authenticated GETs"
+    },
+    {
+      "name": "report read becomes write",
+      "status": "KILLED",
+      "proof": "finite authenticated GETs"
+    },
+    {
+      "name": "late response accepted",
+      "status": "KILLED",
+      "proof": "late detail cannot overwrite"
+    },
+    {
+      "name": "foreign key accepted",
+      "status": "KILLED",
+      "proof": "only current loaded report keys"
+    },
+    {
+      "name": "deny retains titles",
+      "status": "KILLED",
+      "proof": "denied detail clears"
+    },
+    {
+      "name": "duplicate refresh",
+      "status": "KILLED",
+      "proof": "lazy one-flight lists"
+    },
+    {
+      "name": "rate limit ignored",
+      "status": "KILLED",
+      "proof": "denied detail clears"
+    },
+    {
+      "name": "same session replacement retains",
+      "status": "KILLED",
+      "proof": "late detail cannot overwrite"
+    }
+  ],
+  "status": "PASS"
+}

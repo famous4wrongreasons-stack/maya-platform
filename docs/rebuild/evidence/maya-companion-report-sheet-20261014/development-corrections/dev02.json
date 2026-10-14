@@ -1,0 +1,180 @@
+{
+  "candidate": "0ec1a61581ce76179d331074d0e8290a8c91be55",
+  "dirtySource": true,
+  "contract": "maya.companion.workspace-reads-ui/1",
+  "realBackend": false,
+  "realProviders": false,
+  "realKeys": false,
+  "payload": {
+    "icons/maya-192.png": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
+    "icons/maya-512-maskable.png": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
+    "icons/maya-512.png": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
+    "icons/maya-apple-180.png": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
+    "index.html": "8d16e57b2c9b102e83b7b4efc8ab2a59b3f940446024a22a7b52c484e47ebbd5",
+    "m/E4PX4VFY/main.js": "c1f05d4114f8b1f2f163cca413c890b1eca4e2d97d21d8c10fa1115b9b6a19d3",
+    "manifest.webmanifest": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
+    "styles.css": "f7b326b17902a42062ed76f81707f652892419b72936603895eda5a3eb9d5000"
+  },
+  "checks": [
+    "real emitted sign-in",
+    "history restored through canonical runtime",
+    "no workspace reads on chat mount",
+    "retained feed rendered",
+    "heading focused",
+    "composer hidden in workspace",
+    "feed instant explicit UTC",
+    "unread filter reflects stored state",
+    "filter does not acknowledge or mutate",
+    "feed fits 393",
+    "feed fits 320",
+    "feed fits 427",
+    "feed fits 1280",
+    "retained reports rendered",
+    "library discloses pre-filter source cap",
+    "local title ordering",
+    "view/sort do not fetch",
+    "library grid fits 393",
+    "library grid fits 320",
+    "library grid fits 427",
+    "library grid fits 1280",
+    "exact snapshot opens as retained report",
+    "canonical local period/timezone preserved",
+    "plain text, no payload link or executable HTML",
+    "native modal keeps underlying library mounted",
+    "sheet heading receives focus",
+    "background library cannot take modal focus",
+    "background navigation cannot take modal focus",
+    "Tab enters close control",
+    "reverse Tab wraps inside sheet",
+    "forward Tab wraps inside sheet",
+    "sheet fits visible viewport 393x852",
+    "sheet fits visible viewport 320x740",
+    "sheet fits visible viewport 427x952",
+    "sheet fits visible viewport 1280x900",
+    "sheet fits visible viewport 393x400",
+    "reader wraps at 200 percent text",
+    "retained reports rendered",
+    "Escape closes canonical detail and restores exact opener",
+    "back preserves library view",
+    "Escape returns chat focus/draft",
+    "no report insertion or timeline duplication",
+    "long library loaded",
+    "sheet starts at top without moving scrolled library"
+  ],
+  "screenshots": [
+    "signin-393.png",
+    "feed-393.png",
+    "feed-320.png",
+    "feed-427.png",
+    "feed-1280.png",
+    "library-list-393.png",
+    "library-grid-393.png",
+    "library-grid-320.png",
+    "library-grid-427.png",
+    "library-grid-1280.png",
+    "report-393x852.png",
+    "report-320x740.png",
+    "report-427x952.png",
+    "report-1280x900.png",
+    "report-393x400.png",
+    "report-large-text.png",
+    "failure.png"
+  ],
+  "externalRequests": 0,
+  "unexpected": [],
+  "libraryScrollBeforeSheet": 1656,
+  "status": "FAIL",
+  "failure": "back restores exact list item and unchanged library scroll",
+  "syntheticWire": [
+    {
+      "path": "/api/auth/login",
+      "method": "POST",
+      "body": {
+        "tenantSlug": "synthetic-salon",
+        "email": "owner@example.invalid",
+        "password": "synthetic-password"
+      }
+    },
+    {
+      "path": "/api/ai/conversation",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/widgets/resolve",
+      "method": "POST",
+      "body": {
+        "thread_page": {
+          "limit": 20
+        }
+      }
+    },
+    {
+      "path": "/api/inbox",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/owner-reports",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/owner-reports/20000000-0000-4000-8000-000000000001/snapshot",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/owner-reports",
+      "method": "GET",
+      "body": null
+    },
+    {
+      "path": "/api/owner-reports/20000000-0000-4000-8000-000000000001/snapshot",
+      "method": "GET",
+      "body": null
+    }
+  ],
+  "markNetwork": [],
+  "exceptions": [],
+  "issues": [
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 43,
+          "violatingNodeAttribute": ""
+        }
+      }
+    },
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 45,
+          "violatingNodeAttribute": ""
+        }
+      }
+    },
+    {
+      "code": "GenericIssue",
+      "details": {
+        "genericIssueDetails": {
+          "errorType": "FormEmptyIdAndNameAttributesForInputError",
+          "violatingNodeId": 47,
+          "violatingNodeAttribute": ""
+        }
+      }
+    }
+  ],
+  "failureLayout": {
+    "laneScroll": 1656,
+    "sheetOpen": false,
+    "activeTag": "BUTTON",
+    "activeText": "▤Итоги дня: всё важное рядомОтчёт за день · 12.10.2026↗",
+    "activeClass": "",
+    "libraryCount": 21
+  }
+}

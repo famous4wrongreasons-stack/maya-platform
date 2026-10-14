@@ -103,3 +103,15 @@ composer content. Source/runtime/backend contracts remain unchanged.
 See `../../MAYA-COMPANION-NAVIGATION-CHECKPOINT-20261014.md` and
 `../maya-companion-navigation-20261014/README.md` for fresh scoped evidence.
 The policy gaps listed earlier remain open; this is not release certification.
+
+## Retained report sheet checkpoint (2026-10-14)
+
+`4adc54beb81f6f64e9d7c8ac412b39f4915e0a66` presents the existing retained report reader as the owner's
+document bottom sheet above the library. Native modal focus, independent scrolling
+and canonical back preserve the list, selected document and chat draft. Current
+authority reread, exact report tuple, cancellation and refusal remain with the
+existing runtime/backend owners. No report-to-model context, export, widget route,
+new writer or permission was added. This supersedes only the inline-reader
+presentation in the earlier Library checkpoint. See
+`../../MAYA-COMPANION-REPORT-SHEET-CHECKPOINT-20261014.md` and
+`../maya-companion-report-sheet-20261014/README.md` for fresh scoped evidence.
