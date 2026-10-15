@@ -1,0 +1,61 @@
+{
+  "status": "STAGING_SESSION_READY_WAITING_OWNER_TELEGRAM_CONFIRMATION",
+  "session": {
+    "status": "SESSION_READY_NOT_IDENTITY_VERIFIED",
+    "head": "d2098a25d03ac1c01296bf8dbb1cd64f71d61acd",
+    "appCandidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+    "notBefore": "2026-10-15T12:28:49.946826+00:00",
+    "expiresAt": "2026-10-15T12:44:06.813569+00:00",
+    "scopeSha256": "4e88f759e5a2c9d8729e9c8bdc007efe779a4524716cc644d8af5c827ce1128b",
+    "providerCalls": 0,
+    "unrelatedContainersUnchanged": true,
+    "exactFinder": true,
+    "foreignLoginRefused": true,
+    "secretOnlyInRelay": true,
+    "expiryCleanupArmed": true,
+    "productSourceChanged": false
+  },
+  "beforeLogin": {
+    "checkedAt": "2026-10-15T12:31:45.247682+00:00",
+    "database": {
+      "owner": {
+        "role": "tenant_owner",
+        "status": "active"
+      },
+      "telegramIdentities": 0,
+      "clients": 0,
+      "activeMayaUserLinks": 0,
+      "verifiedLinks": 0,
+      "methods": [],
+      "crmMatches": 0,
+      "appointments": 0,
+      "entitlements": 0
+    },
+    "transport": {
+      "contract": "maya.phone-owner-telegram/1",
+      "link": 0,
+      "login": 0,
+      "calls": 0,
+      "completed": 0,
+      "rows": 0,
+      "refused": 0,
+      "tokenOutcome": null,
+      "stopped": false,
+      "active": false
+    },
+    "credentialFilePresent": true,
+    "scopeRevoked": false,
+    "readOnly": true
+  },
+  "browser": {
+    "httpsOrigin": "https://phone-test.mayaos.ru",
+    "passwordLoginObserved": true,
+    "canonicalLinkButtonClicked": true,
+    "officialTelegramConfirmationVisible": true
+  },
+  "notClaimed": [
+    "Telegram identity linked",
+    "Client identity bound",
+    "real booking enabled"
+  ]
+}
