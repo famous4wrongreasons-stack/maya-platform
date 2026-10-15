@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "iosBundleId": "ru.mayaos.app",
+  "bundleFilesUnchanged": 36,
+  "codesignStrict": "PASS",
+  "publicEndpoint": "https://phone-test.mayaos.ru",
+  "backendReadiness": "ready",
+  "databaseReadiness": "ready",
+  "installed": false,
+  "providerCallsInThisCheck": 0,
+  "checkedAt": "2026-10-15T07:26:31.476900+00:00"
+}

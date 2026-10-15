@@ -1,0 +1,92 @@
+{
+  "status": "PASS",
+  "readOnlyState": {
+    "ownerExists": true,
+    "timezone": "Europe/Moscow",
+    "crm": {
+      "provider": "yclients",
+      "status": "active",
+      "verifiedAt": "2026-10-15T07:21:09.844Z",
+      "lastSyncAt": "2026-10-15T07:21:11.449Z",
+      "lastErrorCode": null,
+      "exactCompany503759": true,
+      "acceptedImportSnapshotPresent": true
+    },
+    "counts": {
+      "staff": 6,
+      "staffLinks": 6,
+      "staffAccess": 6,
+      "clients": 0,
+      "appointments": 0,
+      "enabledWidgetEntitlements": 0
+    },
+    "actions": [
+      {
+        "capability": "package5.wave3.install-crm-credentials.execute.v1",
+        "state": "SUCCEEDED",
+        "finalOutcomeCode": "local_transaction_committed",
+        "reconciliationState": "NOT_REQUIRED",
+        "finalizedAt": "2026-10-15T07:20:00.866Z"
+      },
+      {
+        "capability": "package5.wave3.activate-crm-integration.execute.v1",
+        "state": "SUCCEEDED",
+        "finalOutcomeCode": "local_transaction_committed",
+        "reconciliationState": "NOT_REQUIRED",
+        "finalizedAt": "2026-10-15T07:21:09.936Z"
+      },
+      {
+        "capability": "package5.wave3.confirm-crm-import.execute.v1",
+        "state": "SUCCEEDED",
+        "finalOutcomeCode": "local_transaction_committed",
+        "reconciliationState": "NOT_REQUIRED",
+        "finalizedAt": "2026-10-15T07:21:11.453Z"
+      }
+    ]
+  },
+  "containers": [
+    {
+      "service": "backend",
+      "running": true,
+      "startedAt": "2026-10-15T06:45:50.755889942Z",
+      "restartCount": 0,
+      "restartPolicy": "no",
+      "imageId": "sha256:d8f6a5b33529e4a7f2e4503cc7e867de88d259f35236fb38d6b8886fcb5a9f6f"
+    },
+    {
+      "service": "postgres",
+      "running": true,
+      "startedAt": "2026-10-14T22:53:56.305081225Z",
+      "restartCount": 0,
+      "restartPolicy": "no",
+      "imageId": "sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea"
+    },
+    {
+      "service": "catalog-egress",
+      "running": true,
+      "startedAt": "2026-10-15T06:45:50.245869258Z",
+      "restartCount": 0,
+      "restartPolicy": "no",
+      "imageId": "sha256:d8f6a5b33529e4a7f2e4503cc7e867de88d259f35236fb38d6b8886fcb5a9f6f"
+    },
+    {
+      "service": "gateway",
+      "running": true,
+      "startedAt": "2026-10-15T06:51:57.586504615Z",
+      "restartCount": 0,
+      "restartPolicy": "no",
+      "imageId": "sha256:d8542f48d34a9cf4e4c11a478865229840e87e4c96ea3f439101f31a5d35f75f"
+    }
+  ],
+  "scope": {
+    "contract": "maya.phone-catalog-egress/1",
+    "companyId": "503759",
+    "maxCalls": 40,
+    "notBefore": "2026-10-15T06:43:27.299Z",
+    "expiresAt": "2026-10-16T06:43:27.299Z"
+  },
+  "providerWrites": 0,
+  "newMigrationsApplied": 0,
+  "iPhoneInstalled": false,
+  "checkedAt": "2026-10-15T07:26:37.367519+00:00"
+}

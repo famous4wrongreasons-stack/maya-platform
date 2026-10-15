@@ -62,3 +62,49 @@ reopen signup. Remove only the newly added `phone-test` DNS record if needed.
 Read [PUBLIC-HTTPS-PROOF.json](PUBLIC-HTTPS-PROOF.json),
 [REMOTE-RECEIPTS.json](REMOTE-RECEIPTS.json), [DNS-PROOF.json](DNS-PROOF.json),
 and [scoped-tests.txt](scoped-tests.txt). Older preparation receipts remain historical.
+
+## Completed canonical connection — 2026-10-15, 07:26 UTC
+
+This section supersedes the pending-form state above; it does not rewrite the
+earlier zero-provider-call preparation receipts.
+
+The owner entered the user token in the existing authenticated A17 form and
+submitted it. The form confirmed company `503759`, branch Stavropol,
+Europe/Moscow. Under the already-approved catalogue scope, activation and import
+were submitted once through that same form. The resulting UI explicitly reports
+the integration active and the exact-version import confirmed.
+
+Fresh read-only server verification in [ACTIVATION-FINAL.json](ACTIVATION-FINAL.json):
+
+- Credential installation, activation and import each have one `SUCCEEDED`
+  canonical ActionExecution with `local_transaction_committed` and
+  `NOT_REQUIRED` reconciliation.
+- Integration is `active`, exact company matches, accepted import snapshot is
+  present, and `lastErrorCode` is null. Last sync: `2026-10-15T07:21:11.449Z`.
+- Six Staff, six YCLIENTS StaffProviderLink and six CrmStaffAccess rows exist in
+  this owner tenant. No Client or Appointment rows exist for it.
+- No enabled `widgets.runtime` entitlements. No migration or application/source
+  change occurred. Provider writes remain denied by the catalogue-only relay.
+- Backend, database and catalogue relay retain their original start times; none
+  restarted. The same 40-call/24-hour scope remains in effect and expires at
+  `2026-10-16T06:43:27.299Z` (09:43 Moscow), without renewal.
+
+The source's import verifies the service/staff/team/company snapshot and projects
+team identities and company presentation. This receipt does not claim a durable
+full service mirror or a measured provider-call total: the process-local counter
+is not exposed by the relay. No extra provider reads were made by the receipt
+collector. It returns only selected integration state, counts and action outcomes;
+no tokens, contacts, customer rows or raw provider payloads.
+
+[PHONE-READY-PROOF.json](PHONE-READY-PROOF.json) freshly verifies public HTTPS
+backend/database readiness, strict iOS code signature, and all 36 existing bundle
+files against the prior file manifest. The development build still targets
+`https://phone-test.mayaos.ru/api`, bundle `ru.mayaos.app`, and has not been
+installed. Its prior provisioning expiry remains 2026-10-20. The application
+source remains `7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3`.
+
+Next boundary: obtain separate authorization for installation on the owner's
+iPhone (it may replace an existing app with that bundle ID), then perform device
+acceptance. Model/voice credentials, widget grants, Telegram client binding and
+booking effects are not enabled by this catalogue connection. No full release
+certificate or successful device smoke is claimed here.
