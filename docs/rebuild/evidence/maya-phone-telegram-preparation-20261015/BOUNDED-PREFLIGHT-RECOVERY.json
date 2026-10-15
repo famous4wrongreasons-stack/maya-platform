@@ -1,0 +1,44 @@
+{
+  "status": "PREPARED_WAITING_OWNER_INPUT",
+  "scope": "same approved test stage; original expiry retained; no new login or registry budget",
+  "serverPreparation": {
+    "status": "PREPARED_NO_CREDENTIALS_NO_RESTART",
+    "head": "d2098a25d03ac1c01296bf8dbb1cd64f71d61acd",
+    "sourceHashes": {
+      "phone-telegram-scope.mjs": "96249e24acaf2161ee97625a0ca113446d3c634b9ca0bdbf235e9d50a4b30d3d",
+      "phone-telegram-runtime.mjs": "a3985d30ce676b442757103794576e5078c6d765e935f8bf2551117f94e49875",
+      "phone-telegram-egress.mjs": "a62ad1e1f8a2a19d1d345fe26f98de10d8e614e9e35062dd4ccc61a32f90499d",
+      "phone-telegram-entry.mjs": "4eb9a73a57f8cef9abd78c5836f33beb2302275aef67cbf043d5b5003dc8bc25",
+      "phone-telegram-bootstrap.mjs": "99c5d33f4d442195ced00e0b5cd2c6467e2e3ef282934084c6090cb4df4e4453"
+    },
+    "backendImageUnchanged": true,
+    "affectedContainers": 0,
+    "expiresAtUnchanged": "2026-10-15T12:44:06.813569+00:00"
+  },
+  "inputManifest": {
+    "head": "d2098a25d03ac1c01296bf8dbb1cd64f71d61acd",
+    "files": {
+      "/private/tmp/maya-phone-telegram-execution-20261015-02/Maya Telegram Setup.app/Contents/MacOS/PhoneTelegramSecret": "5a54437be17d3b8fa3d5a1d9eaab7c3c9c06c7009f031e25616fb14be449e055",
+      "/private/tmp/maya-phone-telegram-execution-20261015-02/Maya Telegram Setup.app/Contents/Info.plist": "4d7fdd03e6fccd6663321692f11239077cb3f275eaf8ee9aff213e4cd78bf8fd",
+      "/private/tmp/maya-phone-telegram-execution-20261015-02/receive.py": "b373011448ba7b214d374458c78e6993c59b66f40c9e79c053a282ba4cd1d385",
+      "/private/tmp/maya-phone-telegram-execution-20261015-02/input.mjs": "8b60359d7deb7119f1669742b2cd480e0f4432affb3c73b47e84b5298427f523",
+      "/private/tmp/maya-phone-ai-execution-20261015-01/ssh-packet.py": "fd9804245dc7a3c167308efd23ac0052b44d3f2ef2908609823999c77b88ea29"
+    },
+    "originalExpiryUnchanged": "2026-10-15T12:44:06.813569+00:00"
+  },
+  "operatorScriptHashes": {
+    "build-packet.mjs": "1e20fdcf36f984d1398a27f6517fc05260dc2c058de742926408be46136d0594",
+    "prepare.py": "f30ee9b0787aa1f629926fb8c68e29da045d749d86024a00e7f42ed51d0234f0",
+    "receive.py": "b373011448ba7b214d374458c78e6993c59b66f40c9e79c053a282ba4cd1d385",
+    "input.mjs": "8b60359d7deb7119f1669742b2cd480e0f4432affb3c73b47e84b5298427f523"
+  },
+  "predecessorPolicy": "Immutable revoked predecessor remains on server. Recovery refuses unless calls/rows/link/login/completed are all zero, relay is stopped, secret is absent, original expiry has not passed. New scope has the same expiry and no renewed budget.",
+  "notPerformed": [
+    "Telegram authentication",
+    "Client binding",
+    "real YCLIENTS registry request",
+    "booking",
+    "production changes",
+    "iPhone reinstall"
+  ]
+}
