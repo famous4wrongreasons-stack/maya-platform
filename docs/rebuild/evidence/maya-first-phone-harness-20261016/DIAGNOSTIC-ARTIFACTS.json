@@ -1,0 +1,96 @@
+{
+  "parent": "7d6aac8c1a46ca86aaac2b51025b1eb04adbaa56",
+  "certificate": "NOT_ISSUED",
+  "artifacts": [
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/supplemental/l27-terminal.log",
+      "sha256": "4f1b5b2c2c831037e15fe7f517801f7b9848aa1aad367ea51d9db22055f1828d",
+      "bytes": 1651,
+      "kind": "diagnostic-only"
+    },
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/supplemental/ns1-roundtrip.log",
+      "sha256": "9fd777832b3ae3f76e75fa85d605c0cfb88f5f27b2fa0641601dfe16d6039dc5",
+      "bytes": 1150,
+      "kind": "diagnostic-only"
+    },
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/final-surfaces-v2/manifest.json",
+      "sha256": "4eafc74123cf819e49618326d07ffc6a6e96af93489eebc517c34482e797a24b",
+      "bytes": 1631,
+      "kind": "diagnostic-only"
+    },
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/final-surfaces-v2/strict-evidence-verifier.log",
+      "sha256": "35329d8591a135696d72c2f7d8521d66feb54e3514fa587f06f025f67c5b8d29",
+      "bytes": 686,
+      "kind": "diagnostic-only"
+    },
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/full-mutations/manifest.json",
+      "sha256": "19f72162da79bf0ab97fdfbd6b2c743bd9fecc84d110c393d26ecf086e3f2f86",
+      "bytes": 463,
+      "kind": "diagnostic-only"
+    },
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/harness-repair/baseline.log",
+      "sha256": "e4291610f1d48cb71a97d6a7b71c0d272efdce6b7d43722d072199c073fa8dbe",
+      "bytes": 371,
+      "kind": "diagnostic-only"
+    },
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/harness-repair/no-canonical-dedup.log",
+      "sha256": "d8be2a572fe75eecbd6f6c1d8f160b591555078a0ce5fb9eabfa7ac1e8e9552c",
+      "bytes": 4696,
+      "kind": "diagnostic-only"
+    },
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/harness-repair/environment-before.log",
+      "sha256": "21d3b02af2e332665e1a3582140e2d7c295a054215f86c94f199fec096058c49",
+      "bytes": 16706,
+      "kind": "diagnostic-only"
+    },
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/harness-repair/environment-after.log",
+      "sha256": "9c8a036d76e3023ee0c2d234cec4f9f29f69208234476ca2d68e92bedbef4210",
+      "bytes": 15979,
+      "kind": "diagnostic-only"
+    },
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/harness-repair/collector/manifest.json",
+      "sha256": "5927dc1e4f1e748b210f33ada731ceda19603435248b1bda99c6c098b67050d7",
+      "bytes": 1015,
+      "kind": "diagnostic-only"
+    },
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/harness-repair/collector/strict-evidence-verifier.log",
+      "sha256": "6c8f4d36b702502fa8f1e18cc253b0a11ec324615ede4a91bb5cc63034f6508b",
+      "bytes": 706,
+      "kind": "diagnostic-only"
+    },
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/harness-repair/collector/global-collector-refusal.json",
+      "sha256": "df7cc38db0f59e5c37c6c2a7c228bdd42a5b2d9c4849ff283b6028c7c4a3f3f6",
+      "bytes": 5022,
+      "kind": "diagnostic-only"
+    },
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/harness-repair/collector/widgets-live-jest.json",
+      "sha256": "14291a06b9e36b699481ccdcc079331a999b6b6c6a798699ff291a05600e1f26",
+      "bytes": 11001,
+      "kind": "diagnostic-only"
+    },
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/harness-repair/collector/widgets-http-bin.log",
+      "sha256": "20f280ccd57ad6edcbcd9b1a40c03f6c8d519ede974195c9d85987740657da40",
+      "bytes": 3925,
+      "kind": "diagnostic-only"
+    },
+    {
+      "path": "/private/tmp/maya-first-phone-branches-20261015/harness-repair/collector/executed-runner.mjs",
+      "sha256": "f72ffc09faac8e84dff0212182d569e096c68dc0bd099b9be0fe87897867f47e",
+      "bytes": 9872,
+      "kind": "diagnostic-only"
+    }
+  ]
+}

@@ -70,12 +70,13 @@ export const WIDGETS_LIVE_TEST_LITERALS: Readonly<Record<string, string>> =
   });
 
 /**
- * The harness's own variables (the evidence manifest switch and its directory, `support/evidence.ts`). A jest
+ * The harness's own variables (manifest switch/directory and fixed evidence profile). A jest
  * suite keeps them; the application under test never receives them (`widgetsLiveChildEnvironment` drops them).
  */
 export const HARNESS_ONLY_VARIABLES: readonly string[] = Object.freeze([
   'WIDGETS_EVIDENCE',
   'WIDGETS_EVIDENCE_DIR',
+  'WIDGETS_EVIDENCE_PROFILE',
 ]);
 
 /** Process-level variables a Node test run needs. None of them configures the application. */

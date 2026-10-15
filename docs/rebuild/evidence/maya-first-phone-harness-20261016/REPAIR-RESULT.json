@@ -1,0 +1,42 @@
+{
+  "kind": "patched-working-tree-diagnostic",
+  "parent": "7d6aac8c1a46ca86aaac2b51025b1eb04adbaa56",
+  "scopedClaims": [
+    {
+      "test_id": "AR-FR6D-NONMONEY",
+      "entry": "HTTP",
+      "clauses": [
+        "FP-G7-FR6d"
+      ],
+      "claim": "L"
+    },
+    {
+      "test_id": "FP-REMAINDER-U",
+      "entry": "HTTP",
+      "clauses": [
+        "FP-G11-I4",
+        "FP-G11-I5",
+        "FP-G11-I6",
+        "FP-G11-I10",
+        "FP-G13-I1",
+        "FP-G13-I2",
+        "FP-G13-I9"
+      ],
+      "claim": "U"
+    },
+    {
+      "test_id": "AR-FR6D-NONMONEY",
+      "entry": "BIN",
+      "clauses": [
+        "FP-G7-FR6d"
+      ],
+      "claim": "L"
+    }
+  ],
+  "collectorViolations": 0,
+  "globalInventoryRefusals": 9,
+  "focusedLivePassed": 15,
+  "productSourceChanges": 0,
+  "externalCalls": 0,
+  "certificate": "NOT_ISSUED"
+}

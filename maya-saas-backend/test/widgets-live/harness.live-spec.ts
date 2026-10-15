@@ -537,6 +537,22 @@ describe('widgets-live harness', () => {
       ).toThrow(ProofDatabaseRefused);
     });
 
+    it('keeps fixed-profile evidence selection in the harness, never as application authority', () => {
+      const env: NodeJS.ProcessEnv = {
+        DATABASE_URL:
+          'postgresql://maya@127.0.0.1:55611/maya_widget_gate_proof_x',
+        WIDGETS_EVIDENCE: '1',
+        WIDGETS_EVIDENCE_PROFILE: 'closed-input.no-handoff.no-price-goods@1',
+      };
+      applyWidgetsLiveEnvironment(env);
+      expect(env.WIDGETS_EVIDENCE_PROFILE).toBe(
+        'closed-input.no-handoff.no-price-goods@1',
+      );
+      expect(
+        widgetsLiveChildEnvironment(env, {}).env.WIDGETS_EVIDENCE_PROFILE,
+      ).toBeUndefined();
+    });
+
     it("builds a child process's environment by the same scrub, on a copy, plus fixed settings", () => {
       const source: NodeJS.ProcessEnv = {
         PATH: '/usr/bin',
@@ -547,6 +563,7 @@ describe('widgets-live harness', () => {
         JWT_SECRET: 'from the shell',
         WIDGETS_EVIDENCE: '1',
         WIDGETS_EVIDENCE_DIR: '/tmp/widgets-evidence-from-the-shell',
+        WIDGETS_EVIDENCE_PROFILE: 'closed-input.no-handoff.no-price-goods@1',
       };
       const snapshot = { ...source };
       const { env, database } = widgetsLiveChildEnvironment(source, {
@@ -562,6 +579,7 @@ describe('widgets-live harness', () => {
       expect(HARNESS_ONLY_VARIABLES).toEqual([
         'WIDGETS_EVIDENCE',
         'WIDGETS_EVIDENCE_DIR',
+        'WIDGETS_EVIDENCE_PROFILE',
       ]);
       expect(env).toEqual({
         PATH: '/usr/bin',
