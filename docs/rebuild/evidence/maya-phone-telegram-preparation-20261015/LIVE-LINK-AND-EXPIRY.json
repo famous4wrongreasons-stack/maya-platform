@@ -1,0 +1,111 @@
+{
+  "status": "TELEGRAM_ACCOUNT_LINK_VERIFIED_CLIENT_MATCH_NOT_STARTED_SESSION_EXPIRED",
+  "environment": "phone-test staging only",
+  "evidenceParentHead": "e5f7f7cb472ca84f09bdff7c4dbfeb9c52ba8698",
+  "operationalWrapperCommit": "d2098a25d03ac1c01296bf8dbb1cd64f71d61acd",
+  "productCandidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "expiresAt": "2026-10-15T12:44:06.813569+00:00",
+  "afterOwnerConfirmation": {
+    "checkedAt": "2026-10-15T12:42:35.576454+00:00",
+    "database": {
+      "owner": {
+        "role": "tenant_owner",
+        "status": "active"
+      },
+      "telegramIdentities": 1,
+      "clients": 0,
+      "activeMayaUserLinks": 0,
+      "verifiedLinks": 0,
+      "methods": [],
+      "crmMatches": 0,
+      "appointments": 0,
+      "entitlements": 0
+    },
+    "transport": {
+      "contract": "maya.phone-owner-telegram/1",
+      "link": 1,
+      "login": 0,
+      "calls": 2,
+      "completed": 2,
+      "rows": 0,
+      "refused": 0,
+      "tokenOutcome": "id_token_present",
+      "stopped": false,
+      "active": false
+    },
+    "credentialFilePresent": true,
+    "scopeRevoked": false,
+    "readOnly": true
+  },
+  "afterExpiry": {
+    "checkedAt": "2026-10-15T12:47:01.148344+00:00",
+    "database": {
+      "owner": {
+        "role": "tenant_owner",
+        "status": "active"
+      },
+      "telegramIdentities": 1,
+      "clients": 0,
+      "activeMayaUserLinks": 0,
+      "verifiedLinks": 0,
+      "methods": [],
+      "crmMatches": 0,
+      "appointments": 0,
+      "entitlements": 0
+    },
+    "transport": {
+      "contract": "maya.phone-owner-telegram/1",
+      "link": 1,
+      "login": 0,
+      "calls": 2,
+      "completed": 2,
+      "rows": 0,
+      "refused": 0,
+      "tokenOutcome": "id_token_present",
+      "stopped": true,
+      "active": false
+    },
+    "credentialFilePresent": false,
+    "scopeRevoked": true,
+    "readOnly": true
+  },
+  "browser": {
+    "canonicalA23SuccessMessageObserved": true,
+    "message": "Telegram подключён к вашему аккаунту. При следующем входе через Telegram Maya проверит вашу клиентскую карточку.",
+    "freshTelegramLoginStarted": false,
+    "nextLoginFormLoaded": true,
+    "httpsRootStatus": 200,
+    "httpsRootSeconds": 2.694152
+  },
+  "provenance": {
+    "observerSha256": "b47a5ce95ebf2344ff28af1a38e90270574af724bba4e4b8a3256e008607078e",
+    "afterConfirmationReceiptSha256": "421452d08dae2cb5aaaeae318dba7f167bf97eea48d5ca0a60e3ef2007848e55",
+    "afterExpiryReceiptSha256": "d2fc4dfeab5a790df782d5dfe5e06f28db5c394bed011b3b43e06f15a658d942",
+    "observation": "Read-only database aggregate and relay/credential-presence checks over existing reviewed SSH transport; no credential values or customer rows exported."
+  },
+  "remaining": [
+    "Separate fresh canonical Telegram login to resolve personal Client; existing account link remains valid.",
+    "New explicitly authorized live window and temporary Login Widget Client Secret are required before further Telegram/YCLIENTS matching requests; prior window was not extended."
+  ],
+  "notClaimed": [
+    "verified personal Client binding",
+    "booking enabled",
+    "full release certification"
+  ],
+  "unchangedByThisCheckpoint": [
+    "product source and image",
+    "roles and authority contracts",
+    "widgets entitlements",
+    "production",
+    "iPhone payload"
+  ],
+  "effects": {
+    "telegramAccountLinkCreated": 1,
+    "yclientsRegistryRowsRead": 0,
+    "clientBindingsCreated": 0,
+    "bookingsCreated": 0,
+    "grantsCreated": 0,
+    "newModelRequests": 0,
+    "newSmsOrNotifications": 0
+  }
+}
