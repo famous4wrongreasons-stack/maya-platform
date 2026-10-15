@@ -108,3 +108,26 @@ iPhone (it may replace an existing app with that bundle ID), then perform device
 acceptance. Model/voice credentials, widget grants, Telegram client binding and
 booking effects are not enabled by this catalogue connection. No full release
 certificate or successful device smoke is claimed here.
+
+## Owner-authorized iPhone installation — 2026-10-15, 07:32 UTC
+
+The owner explicitly approved installation after being told that it could replace
+the existing Maya. This supersedes the not-installed state above, not its other
+scope restrictions. See [IPHONE-INSTALL.json](IPHONE-INSTALL.json).
+
+- The only iPhone matching the existing development profile is the owner's
+  iPhone 17 Pro Max. The profile-device match was checked before installation.
+- All 36 prepared app files still match the original manifest. No rebuild,
+  re-signing, source change or provisioning change was made.
+- `devicectl device install app` succeeded; a fresh device app query confirms
+  `ru.mayaos.app`, Maya 1.0, build 1. The previous matching app was replaced.
+- Launch was attempted once, but iOS refused it with a Security error listing
+  signature, entitlements or explicit profile trust as possible causes. Strict
+  signature verification, entitlement/team/application-ID matching, profile
+  expiry and developer-certificate dates all pass locally. Those checks do not
+  establish device trust or successful visual launch.
+- Owner has been asked to open Maya and report the actual iOS message. Do not
+  reinstall, change signing, or disable security protections to bypass this gate.
+- Visual acceptance, login, chat and booking remain unverified on the phone.
+  Public server readiness was checked before installation. No additional
+  provider calls, grants, migrations or production changes were made.

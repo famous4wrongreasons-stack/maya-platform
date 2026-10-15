@@ -1,0 +1,58 @@
+{
+  "status": "INSTALLED_LAUNCH_BLOCKED",
+  "ownerAuthorization": "Explicit owner reply: да разрешаю, to installation of prepared test build (including possible replacement).",
+  "applicationSource": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "repositoryHeadAtInstallation": "26d34a8e55dc585b05289e964095619af68f91d5",
+  "bundleId": "ru.mayaos.app",
+  "deviceModel": "iPhone 17 Pro Max",
+  "profileDeviceMatched": true,
+  "existingMatchingAppReplaced": true,
+  "installation": "PASS",
+  "installedApp": {
+    "bundleIdentifier": "ru.mayaos.app",
+    "bundleVersion": "1",
+    "version": "1.0",
+    "name": "MAYA"
+  },
+  "apiBase": "https://phone-test.mayaos.ru/api",
+  "bundleFileManifestMatches": true,
+  "bundleFileCount": 36,
+  "signingChecks": {
+    "codeSignStrict": true,
+    "profileUnexpired": true,
+    "developmentProvision": true,
+    "teamMatches": true,
+    "applicationIdentifierMatches": true,
+    "bundleIdentifierMatches": true,
+    "entitlementKeys": [
+      "application-identifier",
+      "com.apple.developer.team-identifier",
+      "get-task-allow"
+    ],
+    "profileAllowsEntitlements": true,
+    "certificateValidity": [
+      "notBefore=May  7 14:13:03 2026 GMT\nnotAfter=May  7 14:13:02 2027 GMT"
+    ]
+  },
+  "launch": "BLOCKED_BY_IOS_SECURITY",
+  "launchErrorDomains": [
+    "com.apple.dt.CoreDeviceError/10002",
+    "FBSOpenApplicationServiceErrorDomain/1",
+    "FBSOpenApplicationErrorDomain/3"
+  ],
+  "launchErrorSummary": "iOS refuses launch: invalid signature, inadequate entitlements, or profile not explicitly trusted. Local signing checks passed; device-specific trust state is not yet proven.",
+  "visualAcceptance": "PENDING_OWNER_SCREEN",
+  "loginAcceptance": "NOT_RUN",
+  "chatAcceptance": "NOT_RUN",
+  "bookingAcceptance": "NOT_RUN",
+  "newProviderCallsByInstallationWork": 0,
+  "productionChanged": false,
+  "migrationsApplied": 0,
+  "grantsChanged": false,
+  "checkedAt": "2026-10-15T07:35:39.725931+00:00",
+  "privateReceiptHashes": {
+    "IPHONE-INSTALL-PRIVATE.json": "dc8ef56a3478e41ea1fb305f77196a6ea6a1e3c955660a397c5bf747c2ef7b92",
+    "IPHONE-APP-AFTER-PRIVATE.json": "e561897ce43196ced2c372e02896efd558b617908252f2fd5de582880f527bd2",
+    "IPHONE-LAUNCH-PRIVATE.json": "1c3eadf5b3015f7ff4dc3678fe9033b99b9067418097fb05b1c4c3da8de89498"
+  }
+}
