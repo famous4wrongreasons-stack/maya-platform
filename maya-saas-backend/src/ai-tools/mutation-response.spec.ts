@@ -172,7 +172,7 @@ describe('bounded reschedule preference clarification', () => {
     const denied = plan();
     denied.tasks[0].permission.status = 'denied';
     expect(mutationClarification(denied)).toBe(
-      'Для этого действия нужен подтверждённый клиентский доступ.',
+      'В текущем режиме у вас нет разрешения на это действие с записью. Изменение не выполнено.',
     );
     const unavailable = plan();
     unavailable.tasks[0].tool.status = 'not_available';
@@ -201,6 +201,35 @@ describe('bounded reschedule preference clarification', () => {
     expect(reply).not.toContain('20:00');
     expect(reply).toContain('Какую запись хотите перенести?');
   });
+});
+
+describe('personal booking permission refusal', () => {
+  it.each([UserRole.TENANT_OWNER, UserRole.STAFF, UserRole.ACCOUNTANT])(
+    'offers a separate preparation request without claiming missing identity or rewriting the denied plan: %s',
+    (role) => {
+      const plan = new ConversationIntelligenceService().validatePlan(
+        {
+          parent_request: 'Запиши меня сегодня на 15:00',
+          tasks: [
+            { intent: 'booking.create_own', entities: {}, confidence: 1 },
+          ],
+        },
+        role,
+        ['appointments.own.create', 'catalog.services.read'],
+      )!;
+      const before = JSON.stringify(plan);
+      expect(plan.tasks[0].permission.status).toBe('denied');
+      expect(plan.tasks[0].tool.name).toBeNull();
+      const reply = mutationClarification(plan);
+      expect(reply).toContain('Открой форму личной записи');
+      expect(reply).toContain('отдельно проверю клиентский доступ');
+      expect(reply).toContain('попрошу подтвердить');
+      expect(reply).not.toMatch(
+        /нужен подтверждённый|Telegram|телефон|уже записан/,
+      );
+      expect(JSON.stringify(plan)).toBe(before);
+    },
+  );
 });
 
 describe('captured follow-up semantic and evidence regressions', () => {

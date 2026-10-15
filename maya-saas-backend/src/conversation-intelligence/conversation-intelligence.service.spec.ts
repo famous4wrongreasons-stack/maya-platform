@@ -188,6 +188,78 @@ describe('ConversationIntelligenceService', () => {
     });
   });
 
+  it.each([UserRole.CLIENT, UserRole.TENANT_OWNER, UserRole.STAFF])(
+    'treats initial personal booking preferences as preparation without execution authority: %s',
+    (role) => {
+      const tools = ['catalog.services.read', 'appointments.own.create'];
+      const contract = service.plannerContract(role, tools);
+      const preparation = contract.intents.find(
+        (item) => item.intent === 'booking.prepare_personal',
+      )!;
+      expect(preparation.language_hints).toContain('запиши меня');
+      expect(preparation.description).toContain('preparation for every role');
+      expect(preparation.ready_tools).toEqual(['catalog.services.read']);
+      const plan = service.validatePlan(
+        {
+          parent_request: 'Запиши меня к мастеру сегодня на 15:00 на стрижку',
+          tasks: [
+            {
+              intent: 'booking.prepare_personal',
+              entities: {
+                services: ['стрижка'],
+                employee: 'мастер',
+                date: 'today',
+                time: '15:00',
+              },
+              confidence: 1,
+              action: 'execute',
+              permission: {
+                status: 'allowed',
+                required: 'appointments.own.create',
+              },
+              tool: { name: 'appointments.own.create' },
+            },
+          ],
+        },
+        role,
+        tools,
+      )!;
+      expect(plan.tasks[0]).toMatchObject({
+        intent: 'booking.prepare_personal',
+        action: 'read',
+        data_class: 'C',
+        permission: { required: 'catalog.services.read', status: 'allowed' },
+        tool: {
+          name: 'catalog.services.read',
+          alternatives: ['catalog.services.read'],
+        },
+        entities: {
+          services: ['стрижка'],
+          employee: 'мастер',
+          date_or_period: 'today',
+          time_of_day: '15:00',
+        },
+        requires_confirmation: false,
+      });
+      expect(contract.principal_role).toBe(role);
+    },
+  );
+
+  it('does not unlock preparation when its actual catalog tool is unavailable', () => {
+    const plan = service.validatePlan(
+      {
+        parent_request: 'Запиши меня',
+        tasks: [{ intent: 'booking.prepare_personal', confidence: 1 }],
+      },
+      UserRole.TENANT_OWNER,
+      ['appointments.own.create'],
+    )!;
+    expect(plan.tasks[0]).toMatchObject({
+      action: 'read',
+      tool: { name: null, alternatives: [], status: 'not_available' },
+    });
+  });
+
   it('routes an understood reviews request through the configured registry', () => {
     const plan = service.validatePlan(
       {

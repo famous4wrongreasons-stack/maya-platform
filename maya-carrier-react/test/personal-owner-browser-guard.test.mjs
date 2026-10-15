@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { admitted } from './personal-owner-browser-guard.mjs';
+import { admitted, PROMPTS } from './personal-owner-browser-guard.mjs';
 
 const origin = 'http://127.0.0.1:45678';
 const scope = { branchId: '11111111-1111-4111-8111-111111111111', date: '2026-10-13', serviceId: 'synthetic-service', staffId: 'synthetic-staff' };
@@ -37,4 +37,11 @@ test('new catalog admission cannot admit other external effects', () => {
   for (const path of ['/api/integrations/crm/activate', '/api/notifications/send', '/api/appointments']) {
     assert.equal(admitted({ method: 'POST', url: origin + path, postData: '{}' }, origin, scope), false);
   }
+});
+
+test('new self-booking and denied-confirmation probes remain finite and loopback-only', () => {
+  const chat = (content) => ({ method: 'POST', url: origin + '/api/ai/chat', postData: JSON.stringify({ surface: 'web', messages: [{ role: 'user', content }] }) });
+  for (const content of Object.values(PROMPTS)) assert.equal(admitted(chat(content), origin, scope), true);
+  for (const content of ['Запиши другого клиента', 'Отправь сообщение', 'Импортируй клиентов']) assert.equal(admitted(chat(content), origin, scope), false);
+  assert.equal(admitted({ ...chat(PROMPTS.prepare), url: 'https://phone-test.mayaos.ru/api/ai/chat' }, origin, scope), false);
 });

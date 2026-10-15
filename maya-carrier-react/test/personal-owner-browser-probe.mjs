@@ -231,6 +231,17 @@ async function main() {
     }
     const catalogEntry = input.entrySource === 'catalog';
     const openPersonal = async (page, scenarioKey) => {
+      if (catalogEntry && scenarioKey === 'success' && input.stage === 'prepare') {
+        const deniedBefore = page.apiRequests('/ai/chat').length;
+        await sendClientRequest(page, PROMPTS.denied);
+        const denied = await answer(page, deniedBefore);
+        assert.ok(denied.reply.includes('Открой форму личной записи'));
+        assert.ok(!denied.reply.includes('нужен подтверждённый'));
+        assert.ok(!denied.resolution?.matched, 'Denied execution must not mint a widget source');
+        assert.equal(page.apiRequests('/personal-client/appointments').length, 0);
+        await checkpoint('success-before-prepare');
+        report.verifiedOwnerDeniedExecutionIsNotMissingIdentity = true;
+      }
       const before = page.apiRequests('/ai/chat').length;
       await sendClientRequest(page, catalogEntry ? PROMPTS.prepare : PROMPTS.own);
       const reply = await answer(page, before);

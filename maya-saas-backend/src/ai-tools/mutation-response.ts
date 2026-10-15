@@ -27,10 +27,16 @@ export function mutationClarification(
       (t.action === 'write' || t.action === 'execute'),
   );
   if (!task) return null;
-  if (task.permission.status === 'denied')
+  if (task.permission.status === 'denied') {
+    // This is a role/permission refusal, not a Client-link lookup. Never tell
+    // an already verified owner to repeat identity verification on that basis.
+    // The suggested new READ request grants no authority and dispatches nothing.
+    if (task.intent === 'booking.create_own')
+      return 'Прямо этой командой оформить запись в текущем режиме нельзя. Для записи себя напишите «Открой форму личной записи». В форме я отдельно проверю клиентский доступ и попрошу подтвердить запись.';
     return task.domain === 'booking'
-      ? 'Для этого действия нужен подтверждённый клиентский доступ.'
+      ? 'В текущем режиме у вас нет разрешения на это действие с записью. Изменение не выполнено.'
       : 'У вас нет разрешения на это действие.';
+  }
   if (task.tool.status === 'not_available')
     return 'Это действие сейчас недоступно. Подтверждённого результата выполнения нет.';
   const definition = MAYA_CONVERSATION_INTENTS.get(task.intent)!;

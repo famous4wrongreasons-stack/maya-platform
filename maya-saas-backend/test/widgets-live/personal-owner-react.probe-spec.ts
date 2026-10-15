@@ -175,7 +175,7 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
       }
       requests.push(init.body);
       expect(requests.length).toBeLessThanOrEqual(
-        stage === 'prepare' ? (catalogEntry ? 14 : 9) : 2,
+        stage === 'prepare' ? (catalogEntry ? 15 : 9) : 2,
       );
       expect(init.body).not.toMatch(
         /PRIVATE_OWNER_VISIT|PRIVATE_PERSONAL_BRANCH|Предстоящих: 1|12:00|Release proof client/,
@@ -211,18 +211,22 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
       );
       expect(planRequest.tool_results).toEqual([]);
       const prepare =
-        planRequest.conversation.at(-1)?.content === 'Хочу записаться';
+        planRequest.conversation.at(-1)?.content === 'Запиши меня';
+      const denied =
+        planRequest.conversation.at(-1)?.content === 'Подтверждаю запись';
       const plan = {
         semantic_plan: {
-          parent_request: prepare
-            ? 'Хочу записаться'
-            : 'Покажи мои личные записи',
+          parent_request: planRequest.conversation.at(-1)!.content,
           language: 'ru',
           dialogue_act: 'question',
           tasks: [
             {
               id: 'own',
-              intent: prepare ? 'booking.prepare_personal' : 'booking.list_own',
+              intent: denied
+                ? 'booking.create_own'
+                : prepare
+                  ? 'booking.prepare_personal'
+                  : 'booking.list_own',
               entities_json: '{}',
               depends_on: [],
               confidence: 1,
@@ -236,10 +240,12 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
             unresolved_references: [],
           },
         },
-        tool_call: {
-          name: prepare ? 'catalog.services.read' : 'appointments.own.list',
-          arguments_json: '{}',
-        },
+        tool_call: denied
+          ? null
+          : {
+              name: prepare ? 'catalog.services.read' : 'appointments.own.list',
+              arguments_json: '{}',
+            },
       };
       return Promise.resolve(
         new Response(
@@ -791,7 +797,25 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
                 | 'changed';
               const salon = saved[key],
                 snapshot = await state(salon);
-              if (m.name.endsWith('-before-nav')) {
+              if (m.name === 'success-before-prepare') {
+                expect(snapshot).toEqual({ rows: [], appointments: 0 });
+                expect(
+                  await db.prisma.widgetEmission.count({
+                    where: { tenantId: salon.tenant.id },
+                  }),
+                ).toBe(0);
+                expect(
+                  await db.prisma.clientChannelLink.count({
+                    where: { id: salon.linkId, revokedAt: null },
+                  }),
+                ).toBe(1);
+                observations.deniedVerifiedOwner = {
+                  actions: 0,
+                  appointments: 0,
+                  activeBinding: true,
+                  role: 'tenant_owner',
+                };
+              } else if (m.name.endsWith('-before-nav')) {
                 expect(snapshot).toEqual({ rows: [], appointments: 0 });
                 await revoke(salon);
               } else if (m.name.endsWith('-preview')) {
@@ -883,7 +907,7 @@ describe('Owner personal booking HTTP/read/restart [SYNTHETIC IDENTITY / SERIALI
         flag: 'wx',
       });
       expect(dispatches).toBe(1);
-      expect(requests).toHaveLength(catalogEntry ? 14 : 9);
+      expect(requests).toHaveLength(catalogEntry ? 15 : 9);
     } else {
       expect(dispatches).toBe(0);
       expect(requests).toHaveLength(2);

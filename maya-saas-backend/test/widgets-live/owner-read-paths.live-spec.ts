@@ -142,9 +142,8 @@ describe('Owner read paths [HTTP] [PostgreSQL] [synthetic model and facts]', () 
         .set('Authorization', `Bearer ${f.token}`)
         .send({ surface: 'native', requestId: randomUUID(), messages });
       expect(response.status).toBe(201);
-      expect(payload(response).reply).toContain(
-        'подтверждённый клиентский доступ',
-      );
+      expect(payload(response).reply).toContain('Открой форму личной записи');
+      expect(payload(response).reply).not.toContain('нужен подтверждённый');
       messages.push({ role: 'assistant', content: payload(response).reply });
     }
     expect(model).toHaveBeenCalledTimes(3);

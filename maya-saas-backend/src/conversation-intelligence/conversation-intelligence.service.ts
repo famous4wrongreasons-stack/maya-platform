@@ -93,6 +93,7 @@ export class ConversationIntelligenceService {
       'A short follow-up such as "а завтра?" changes only the mentioned slot and carries the rest of the active context.',
       'A correction such as "нет, не завтра, в пятницу" replaces the previous date.',
       'Set dependencies when a later task uses the result of an earlier task.',
+      'For every principal role, a NEW self-booking request (including "Запиши меня" with a service, specialist, day and time) starts booking.prepare_personal. Retain those values only as preferences. The imperative wording and complete preferences are not an existing proposal or confirmation. Do not apply this rule to booking another person, cancellation, rescheduling or confirmation of an existing proposal. This is initial semantic classification, never a fallback from a denied execution intent.',
       'When the canonical intent is forbidden for principal_role, keep that intent and return no tool call. Never relabel it to gain access.',
       'Capability readiness is authoritative: ready means fully implemented, partial means use only the exact boundary in readiness_note, and planned means understood but unavailable.',
       'Risk, permission details, clarification rules and response rules are server-owned and are added after semantic planning. Do not invent or override them.',

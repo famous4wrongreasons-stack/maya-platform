@@ -152,7 +152,7 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
     intent(
       'booking.prepare_personal',
       'booking',
-      'Open preparation for a personal booking by reading the current public service catalog. This never creates or confirms an appointment.',
+      'Begin a new personal booking with a public catalog read. An initial book-me request, even with complete preferences, is preparation for every role, never creation or confirmation.',
       {
         action: 'read',
         dataClass: 'C',
@@ -169,16 +169,20 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
           'For a verified Client, select a current service, then staff, then ask for an explicit day before reading availability. Other roles use the existing personal booking form. Never infer Client identity or confirmation.',
         synonyms: [
           'хочу записаться',
+          'запиши меня',
           'записаться для себя',
           'открыть личную запись',
         ],
-        examples: ['Хочу записаться', 'Открой форму личной записи'],
+        examples: [
+          'Запиши меня сегодня на 15:00',
+          'Открой форму личной записи',
+        ],
       },
     ),
     intent(
       'booking.create_own',
       'booking',
-      'Create an appointment for the actor.',
+      'Create from an existing booking proposal. New requests use booking.prepare_personal. This intent grants no identity, permission or confirmation.',
       {
         action: 'execute',
         dataClass: 'E',
@@ -190,8 +194,8 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
         optionalSlots: ['employee', 'branch'],
         clarificationRule:
           'Resolve service, date, time and ambiguous employee before previewing the appointment.',
-        synonyms: ['запиши', 'поставь меня', 'забронируй', 'хочу попасть'],
-        examples: ['Запиши меня завтра', 'Давай к Саше на 19:00'],
+        synonyms: ['подтвердить выбранную запись', 'оформить выбранную запись'],
+        examples: ['Подтверждаю предложенную запись'],
       },
     ),
     intent(

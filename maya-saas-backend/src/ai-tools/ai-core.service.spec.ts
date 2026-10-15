@@ -1932,7 +1932,8 @@ describe('AiCoreService', () => {
         })),
       ).toEqual(messages.filter((message) => message.role === 'user'));
       expect(mocks.runtime.execute).not.toHaveBeenCalled();
-      expect(result.reply).toContain('подтверждённый клиентский доступ');
+      expect(result.reply).toContain('Открой форму личной записи');
+      expect(result.reply).not.toContain('нужен подтверждённый');
     },
   );
 
