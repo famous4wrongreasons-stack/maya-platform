@@ -1,0 +1,165 @@
+{
+  "status": "ROOT_CAUSE_CONFIRMED_NOT_FIXED",
+  "checkedCandidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "evidenceParentHead": "9693126777f8ea8e28fff82b843c51bbb1d369f6",
+  "observation": {
+    "checkedAt": "2026-10-15T13:15:41.382965+00:00",
+    "exitCode": 0,
+    "result": {
+      "readOnly": true,
+      "modelCalls": 0,
+      "providerCalls": 0,
+      "latestTurns": [
+        {
+          "createdAt": "2026-10-15T13:09:48.057Z",
+          "surface": "web",
+          "source": "safe_fallback",
+          "model_calls": 1,
+          "tools_used": [],
+          "outcome": "reply",
+          "conversation_intents": [
+            "booking.create_own"
+          ],
+          "conversation_denied_task_count": 1,
+          "conversation_task_count": 1,
+          "grounding_status": "not_required"
+        },
+        {
+          "createdAt": "2026-10-15T13:09:22.646Z",
+          "surface": "web",
+          "source": "deepseek",
+          "model_calls": 1,
+          "tools_used": [],
+          "outcome": "reply",
+          "conversation_intents": [
+            "small_talk.greeting"
+          ],
+          "conversation_denied_task_count": 0,
+          "conversation_task_count": 1,
+          "grounding_status": "not_required"
+        },
+        {
+          "createdAt": "2026-10-15T10:12:43.580Z",
+          "surface": "web",
+          "source": "safe_fallback",
+          "model_calls": 1,
+          "tools_used": [],
+          "outcome": "reply",
+          "conversation_intents": [
+            "booking.create_own"
+          ],
+          "conversation_denied_task_count": 1,
+          "conversation_task_count": 1,
+          "grounding_status": "not_required"
+        },
+        {
+          "createdAt": "2026-10-15T10:11:43.713Z",
+          "surface": "web",
+          "source": "deepseek",
+          "model_calls": 1,
+          "tools_used": [],
+          "outcome": "reply",
+          "conversation_intents": [
+            "small_talk.greeting"
+          ],
+          "conversation_denied_task_count": 0,
+          "conversation_task_count": 1,
+          "grounding_status": "not_required"
+        },
+        {
+          "createdAt": "2026-10-15T10:00:56.796Z",
+          "surface": "web",
+          "source": "deepseek",
+          "model_calls": 2,
+          "tools_used": [
+            "catalog.services.read"
+          ],
+          "outcome": "reply",
+          "conversation_intents": [
+            "services.list"
+          ],
+          "conversation_denied_task_count": 0,
+          "conversation_task_count": 1,
+          "grounding_status": "verified"
+        },
+        {
+          "createdAt": "2026-10-15T09:46:04.458Z",
+          "surface": "web",
+          "source": "deepseek",
+          "model_calls": 1,
+          "tools_used": [],
+          "outcome": "reply",
+          "conversation_intents": [
+            "small_talk.greeting"
+          ],
+          "conversation_denied_task_count": 0,
+          "conversation_task_count": 1,
+          "grounding_status": "not_required"
+        }
+      ],
+      "exactRunningCompiledClassifier": {
+        "tenant_owner": {
+          "intent": "booking.create_own",
+          "permission": "denied",
+          "tool": "not_available",
+          "reply": "Для этого действия нужен подтверждённый клиентский доступ."
+        },
+        "client": {
+          "intent": "booking.create_own",
+          "permission": "allowed",
+          "tool": "not_available",
+          "reply": "Это действие сейчас недоступно. Подтверждённого результата выполнения нет."
+        }
+      },
+      "verifiedActiveLinks": 1,
+      "entitlements": 0
+    }
+  },
+  "rootCause": {
+    "latestDeniedTurnMsk": "2026-10-15 16:09:48",
+    "persistedClientBindingPresent": true,
+    "semanticIntent": "booking.create_own",
+    "currentActorRole": "tenant_owner",
+    "denialOwner": "conversation-intelligence.service.ts validatePlan: definition.allowedRoles.includes(role)",
+    "intentRoleOwner": "conversation-taxonomy.ts: booking.create_own allows CLIENT_ROLES only",
+    "wrongDiagnosticOwner": "mutation-response.ts maps every denied booking task to a missing verified client-access message",
+    "bindingConsultedBySemanticRoleGate": false,
+    "existingPersonalAuthorityRoute": "Explicit personal_client selection through personal-client HTTP and fs.booking form; membership remains tenant_owner",
+    "separateOperationalLimits": [
+      "phone-ai-runtime allows catalog/services/staff/hours reads only",
+      "ActionEngine execute and executeWithReceipt are refused",
+      "no widgets.runtime entitlement"
+    ]
+  },
+  "canonicalConstraints": [
+    "Do not widen CLIENT_ROLES or change persisted User role.",
+    "Do not turn a denied create into a fabricated catalog/widget source. Existing owner-empty checkpoint explicitly forbids that reinterpretation.",
+    "Do not claim that identity linkage enables live booking.",
+    "No production/source/payload changes or booking grants were made during this diagnosis."
+  ],
+  "nextUnit": "Resolve chat entry into the existing explicit personal booking path while preserving the denied own-create contract, truthful source, actual actor and mandatory confirmation. Separately prepare bounded staging booking admission.",
+  "notNeeded": [
+    "repeat Telegram account linking",
+    "read the customer registry again to diagnose this refusal",
+    "assume an iPhone reinstall or login refresh fixes a role-only semantic gate"
+  ],
+  "sourceReferences": [
+    "maya-saas-backend/src/conversation-intelligence/conversation-taxonomy.ts",
+    "maya-saas-backend/src/conversation-intelligence/conversation-intelligence.service.ts",
+    "maya-saas-backend/src/ai-tools/mutation-response.ts",
+    "maya-saas-backend/scripts/phone-ai-runtime.mjs",
+    "docs/rebuild/MAYA-PERSONAL-EMPTY-OWNER-CHECKPOINT-20261007.md"
+  ],
+  "diagnosticAttempts": {
+    "firstAndSecond": "Read-only probe failed because its own synthetic plan lacked parent_request, then attempted a nullable filter on required verifiedAt. No source/provider/data mutation; these are not product failures.",
+    "final": "Complete synthetic plan and non-nullable version filter; exact running compiled classifier and redacted recent audit metadata observed successfully."
+  },
+  "scriptSha256": "787b5e360aaabf4261b2c8c8aaac5e306d0c95a5c95ad59bad2cfcb881ea471a",
+  "effects": {
+    "additionalModelCalls": 0,
+    "additionalYclientsCalls": 0,
+    "sourceChanges": 0,
+    "entitlementChanges": 0,
+    "bookings": 0
+  }
+}
