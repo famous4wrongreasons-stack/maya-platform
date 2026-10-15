@@ -1,7 +1,7 @@
 // Minimal overlay for the already running isolated Beget phone staging.
 import assert from 'node:assert/strict';
 export const PHONE_APP_CANDIDATE='7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3';
-export const PHONE_AI_FILES=Object.freeze(['phone-ai-entry.mjs','phone-ai-runtime.mjs','phone-ai-scope.mjs','phone-ai-egress.mjs','conversation-qualification/current-candidate-budget.mjs','conversation-qualification/core-local-ab-checks.mjs']);
+export const PHONE_AI_FILES=Object.freeze(['phone-ai-entry.mjs','phone-ai-runtime.mjs','phone-ai-scope.mjs','phone-ai-egress.mjs','phone-ai-continuation.mjs','conversation-qualification/current-candidate-budget.mjs','conversation-qualification/core-local-ab-checks.mjs']);
 export function phoneAiPlan(previous,pin){
  assert.match(pin,/^[a-f0-9]{64}$/);assert.equal(previous.name,'maya-phone-staging');
  const root='/srv/maya-phone-staging',image='maya-phone-backend:'+PHONE_APP_CANDIDATE;

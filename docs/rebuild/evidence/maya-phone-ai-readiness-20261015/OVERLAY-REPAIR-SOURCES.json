@@ -1,0 +1,12 @@
+{
+  "maya-saas-backend/scripts/phone-ai-egress.mjs": "2dcab3e5ce66b5849000b831ca92eabe179ea73e8bc804eed50256b37dc73d3a",
+  "maya-saas-backend/scripts/phone-ai-entry.mjs": "d793d2dcaa20d46d1234396001e575ecc1932f3c6e1a191fda6608bf1a19a09f",
+  "maya-saas-backend/scripts/phone-ai-runtime.mjs": "5834494c20e18860ce65142c4a1ee11ce5f8b96684ada323d33b7eea00c74400",
+  "maya-saas-backend/scripts/phone-ai-plan.test.mjs": "44d30d1511e73ad87e402abaa5b187bd8e5a74ed8b2f7f9adbef17f37c37136f",
+  "maya-saas-backend/scripts/phone-ai-binary-proof.mjs": "17176bc8e898442efaea90c6b360ecf8f0376f24c8244c59b805d65aa378dc6c",
+  "maya-saas-backend/scripts/phone-ai.test.mjs": "86061ba08fb25887dbf441972bf11b403d8afb9762bacd08b35fd82647021dc4",
+  "maya-saas-backend/scripts/phone-ai-scope.mjs": "8453f72b54a43e83ee9e32f3eba432146035037988d8ca71917cc2fb90223863",
+  "maya-saas-backend/scripts/phone-ai-plan.mjs": "a6fa2c92dce54eff3b2f37c5e4cc7a0357503d0f0727c00b5fabd0b72a478f40",
+  "maya-saas-backend/scripts/phone-ai-continuation.mjs": "90178f19c20f337c4e68fa9534662a47ae548f00841dccc6e4e04c6ce267e49d",
+  "maya-saas-backend/scripts/conversation-qualification/current-candidate-budget.mjs": "63d0219f02b1ae74597645816fc4062c2853b73234dbae38be3b82085379b4f6"
+}

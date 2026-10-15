@@ -26,7 +26,7 @@ try{
  relay=phoneAiEgress({scope,pin,credential:'synthetic_not_real_key',ledgerPath:state+'/model-ledger.jsonl',testClock:()=>clock,testWait:async ms=>{clock+=ms;},assertCurrent(){assert.ok(alive)},nativeFetch:async(_url,init)=>{
   modelCalls++;const input=JSON.parse(JSON.parse(init.body).messages[1].content);assert.ok(!init.body.includes(own.email)&&!init.body.includes(own.owner.id));
   const answer=input.phase==='tool_planning'?JSON.stringify({semantic_plan:{parent_request:input.current_user_request,language:'ru',dialogue_act:'question',tasks:[{id:'hello',intent:'small_talk.greeting',entities_json:'{}',depends_on:[],confidence:1,requires_clarification:false,clarification_question:null}],context:{carried_slots:[],replaced_slots:[],unresolved_references:[]}},tool_call:null}):'Привет! Рада тебя видеть. Чем помочь?';
-  return Response.json({model:'deepseek-v4-pro',choices:[{finish_reason:'stop',message:{content:answer}}],usage:{prompt_tokens:100,completion_tokens:20,total_tokens:120}});
+  return Response.json({model:'deepseek-v4-pro',choices:[{finish_reason:input.phase==='tool_planning'?'length':'stop',message:{content:answer}}],usage:{prompt_tokens:100,completion_tokens:20,total_tokens:120}});
  }});await new Promise(r=>relay.server.listen(0,'127.0.0.1',r));
  installed=await installPhoneAi({app,require,backend,scope,assertCurrent(){assert.ok(alive)},nativeFetch:async()=>{throw Error('Unlisted external request');},relayFetch:init=>originalFetch(`http://127.0.0.1:${relay.server.address().port}/chat/completions`,{method:'POST',body:init.body,signal:init.signal,headers:{'content-type':'application/json','x-maya-scope':pin,'x-maya-tenant':scope.tenantId,'x-maya-user':scope.userId}})});globalThis.fetch=installed.fetch;
  load('bootstrap/configure-http-app.js').configureHttpApp(app);await app.listen(apiPort,'127.0.0.1');const request=require('supertest');
@@ -37,7 +37,7 @@ try{
  const calls=modelCalls;assert.equal((await chat('native',other)).status,403);assert.equal((await chat('native',null)).status,401);assert.equal(modelCalls,calls);report.checks.push('foreign-tenant-and-missing-login-refused-before-model');
  await prisma.membership.updateMany({where:{tenantId:own.tenant.id,userId:own.owner.id},data:{status:'suspended'}});assert.equal((await chat('native')).status,401);assert.equal(modelCalls,calls);report.checks.push('suspended-membership-current-reread');
  assert.equal(await prisma.appointment.count(),0);assert.equal(await prisma.client.count(),0);assert.equal(await prisma.tenantEntitlement.count(),0);report.checks.push('zero-booking-client-or-entitlement-effects');
- report.modelCallsSynthetic=modelCalls;report.modelStatus=relay.snapshot();report.status='PASS';
+ report.checks.push('canonical-length-plan-validation-preserved');report.modelCallsSynthetic=modelCalls;report.modelStatus=relay.snapshot();report.status='PASS';
 }catch(error){report.status='FAIL';report.failure=String(error.message).slice(0,3000);process.exitCode=1;}
 finally{
  installed?.stop();await app?.close().catch(()=>{});await prisma?.$disconnect();globalThis.fetch=originalFetch;

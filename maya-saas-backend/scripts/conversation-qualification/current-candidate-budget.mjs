@@ -222,6 +222,7 @@ export class CandidateBudgetGate {
     transport,
     assertAdmission,
     now,
+    carryForward,
     // Real timers may wake one clock tick early. The margin is waiting only;
     // the absolute six-second admission check below remains authoritative.
     wait,
@@ -235,6 +236,17 @@ export class CandidateBudgetGate {
       throw new Error('candidate_profile_offline_only');
     this.#profile = profile;
     this.#limits = profileLimits(profile);
+    if (carryForward !== undefined) {
+      if (profile !== CORE_PHONE_READ_PROFILE ||
+          !/^[a-f0-9]{64}$/.test(carryForward.ledgerSha256 ?? '') ||
+          Object.keys(carryForward).sort().join(',') !== 'attempts,inputTokens,ledgerSha256,outputTokens,reservedNanoUsd' ||
+          !['attempts','inputTokens','outputTokens','reservedNanoUsd'].every(k => Number.isSafeInteger(carryForward[k]) && carryForward[k] >= 0) ||
+          carryForward.attempts > this.#limits.attempts || carryForward.inputTokens > this.#limits.inputTokens ||
+          carryForward.outputTokens > this.#limits.outputTokens || carryForward.reservedNanoUsd > this.#limits.spendNanoUsd)
+        throw new Error('candidate_carry_forward_refused');
+      this.#dialogs=this.#turns=this.#attempts=carryForward.attempts;
+      this.#input=carryForward.inputTokens;this.#output=carryForward.outputTokens;this.#spend=carryForward.reservedNanoUsd;
+    }
     if (
       typeof manifestSha256 !== 'string' ||
       typeof candidateCommit !== 'string' ||
@@ -299,6 +311,7 @@ export class CandidateBudgetGate {
         limits: this.#limits,
         startedAt: this.#started,
         paidAuthorized: mode === 'ADMITTED_MODEL_ONLY',
+        ...(carryForward === undefined ? {} : {carryForward: {...carryForward}}),
       });
       const fd = openSync(dirname(ledgerPath), 'r');
       try {

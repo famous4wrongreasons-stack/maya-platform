@@ -123,3 +123,32 @@ Rollback: stop only model-egress; restore backend from the unchanged
 restart catalogue-egress, reset its counter, remove the AI ledger or recreate this
 window. Preserve PostgreSQL/gateway and all carrier bytes. Withdrawal needs no
 new grant or migration.
+
+
+### First live response and bounded adapter correction
+
+The real greeting completed through DeepSeek (two model requests). The following
+catalogue question stopped in the egress adapter after its third reservation.
+Two responses completed; cumulative conservative reservation is USD 0.284668560.
+The original adapter discarded the specific transport-validation error, so the
+cause of that particular live refusal is not retrospectively proven.
+
+Source comparison and an executable regression prove a separate narrow mismatch:
+canonical AiCore accepts non-empty `finish_reason=length` and validates the actual
+semantic plan/reply, whereas the reused qualification accounting helper required
+`stop`. The phone adapter now validates the same usage/cost bounds while preserving
+the original response bytes and canonical completion validation. Safe stage/status/
+finish-reason metadata is retained; no content/headers/keys are captured.
+
+One explicit operator continuation supports this repair without resetting spend:
+stop the old relay, pin/hash its immutable ledger, carry every reserved attempt,
+input/output token and cost (including the unresolved attempt) into one exclusive
+`continuation-1.jsonl`. The original scope/deadline/100-attempt/USD2 ceilings remain.
+Old ledger, first overlay and receipts remain intact. The second ledger cannot be
+reopened on restart; a second continuation is refused. No automatic renewal exists.
+Other qualification profiles cannot use carry-forward. This does not resume the
+failed question until the canonical UI explicitly retries it.
+
+Fresh repair proofs: 60/60; compiled HTTP native/web path and `length` canonical
+validation PASS; tampered/foreign ledger refused, unresolved prior cost retained,
+combined cap enforced before dispatch. Neither synthetic proof uses real providers.

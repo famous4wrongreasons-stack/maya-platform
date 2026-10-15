@@ -1,0 +1,370 @@
+TAP version 13
+# Subtest: offline binding is mandatory, no default/live transport or old ledger resume
+ok 1 - offline binding is mandatory, no default/live transport or old ledger resume
+  ---
+  duration_ms: 30.45675
+  type: 'test'
+  ...
+# Subtest: reserves/fsyncs before every attempt; never forwards or journals secrets/content
+ok 2 - reserves/fsyncs before every attempt; never forwards or journals secrets/content
+  ---
+  duration_ms: 88.517
+  type: 'test'
+  ...
+# Subtest: failed/unknown attempt keeps reservations and halts further dispatch
+ok 3 - failed/unknown attempt keeps reservations and halts further dispatch
+  ---
+  duration_ms: 59.03425
+  type: 'test'
+  ...
+# Subtest: short writes are completed before dispatch and zero progress fails closed
+ok 4 - short writes are completed before dispatch and zero progress fails closed
+  ---
+  duration_ms: 117.899084
+  type: 'test'
+  ...
+# Subtest: reservation/dispatch retain the validated URL/body despite caller mutation during spacing
+ok 5 - reservation/dispatch retain the validated URL/body despite caller mutation during spacing
+  ---
+  duration_ms: 73.268125
+  type: 'test'
+  ...
+# Subtest: early wakeup cannot dispatch before the minimum interval
+ok 6 - early wakeup cannot dispatch before the minimum interval
+  ---
+  duration_ms: 67.694334
+  type: 'test'
+  ...
+# Subtest: aggregate input reservation stops before overrun and charges no refused attempt
+ok 7 - aggregate input reservation stops before overrun and charges no refused attempt
+  ---
+  duration_ms: 5239.503375
+  type: 'test'
+  ...
+# Subtest: 96 attempts include retries and output reservations reach their aggregate ceiling exactly
+ok 8 - 96 attempts include retries and output reservations reach their aggregate ceiling exactly
+  ---
+  duration_ms: 2386.133791
+  type: 'test'
+  ...
+# Subtest: body/endpoint/model/output/shape refusals happen before any dispatch
+ok 9 - body/endpoint/model/output/shape refusals happen before any dispatch
+  ---
+  duration_ms: 63.459
+  type: 'test'
+  ...
+# Subtest: 24 dialog and 64 turn caps apply independently
+ok 10 - 24 dialog and 64 turn caps apply independently
+  ---
+  duration_ms: 1028.14525
+  type: 'test'
+  ...
+# Subtest: wall time and clock reversal cannot reopen budget
+ok 11 - wall time and clock reversal cannot reopen budget
+  ---
+  duration_ms: 108.731958
+  type: 'test'
+  ...
+# Subtest: aborted before admission consumes no reservation, including cancellation during spacing
+ok 12 - aborted before admission consumes no reservation, including cancellation during spacing
+  ---
+  duration_ms: 128.637583
+  type: 'test'
+  ...
+# Subtest: concurrency covers response body; cancellation halts even an uncooperative transport
+ok 13 - concurrency covers response body; cancellation halts even an uncooperative transport
+  ---
+  duration_ms: 82.683375
+  type: 'test'
+  ...
+# Subtest: remaining wall deadline cancels an unread body and no second call is possible
+ok 14 - remaining wall deadline cancels an unread body and no second call is possible
+  ---
+  duration_ms: 80.120333
+  type: 'test'
+  ...
+# Subtest: oversized output is unresolved, with full reservation kept
+ok 15 - oversized output is unresolved, with full reservation kept
+  ---
+  duration_ms: 96.342958
+  type: 'test'
+  ...
+# Subtest: core profile is closed, frozen and restrictive; the existing offline defaults stay unchanged
+ok 16 - core profile is closed, frozen and restrictive; the existing offline defaults stay unchanged
+  ---
+  duration_ms: 112.424625
+  type: 'test'
+  ...
+# Subtest: core independently caps three dialogs and five turns
+ok 17 - core independently caps three dialogs and five turns
+  ---
+  duration_ms: 130.227709
+  type: 'test'
+  ...
+# Subtest: core reserves every retry, admits at most twelve full-size attempts and stays below two dollars
+ok 18 - core reserves every retry, admits at most twelve full-size attempts and stays below two dollars
+  ---
+  duration_ms: 385.080542
+  type: 'test'
+  ...
+# Subtest: core expiry uses ten minutes and aborts the complete pending response body
+ok 19 - core expiry uses ten minutes and aborts the complete pending response body
+  ---
+  duration_ms: 148.860916
+  type: 'test'
+  ...
+# Subtest: core remains single-flight through response-body consumption and halts after cancellation
+ok 20 - core remains single-flight through response-body consumption and halts after cancellation
+  ---
+  duration_ms: 65.860625
+  type: 'test'
+  ...
+# Subtest: followup independently caps six dialogs and thirteen turns with its own pinned ledger
+ok 21 - followup independently caps six dialogs and thirteen turns with its own pinned ledger
+  ---
+  duration_ms: 243.389333
+  type: 'test'
+  ...
+# Subtest: followup reserves all 24 full-size retries, never refunds failures, and stays under four dollars
+ok 22 - followup reserves all 24 full-size retries, never refunds failures, and stays under four dollars
+  ---
+  duration_ms: 427.381708
+  type: 'test'
+  ...
+# Subtest: followup wall limit is twenty minutes and a pending full body is UNKNOWN without refund
+ok 23 - followup wall limit is twenty minutes and a pending full body is UNKNOWN without refund
+  ---
+  duration_ms: 80.899791
+  type: 'test'
+  ...
+# Subtest: followup single-flight and response byte cap still halt after UNKNOWN
+ok 24 - followup single-flight and response byte cap still halt after UNKNOWN
+  ---
+  duration_ms: 75.043667
+  type: 'test'
+  ...
+# Subtest: synthetic followup admission binds its exact profile hash at every check and refuses A authority
+ok 25 - synthetic followup admission binds its exact profile hash at every check and refuses A authority
+  ---
+  duration_ms: 39.757625
+  type: 'test'
+  ...
+# Subtest: admitted mode refuses missing/foreign admission and custom clocks before creating any ledger
+ok 26 - admitted mode refuses missing/foreign admission and custom clocks before creating any ledger
+  ---
+  duration_ms: 3.679125
+  type: 'test'
+  ...
+# Subtest: synthetic admitted callback receives exact immutable binding at construction and immediately before transport
+ok 27 - synthetic admitted callback receives exact immutable binding at construction and immediately before transport
+  ---
+  duration_ms: 39.434667
+  type: 'test'
+  ...
+# Subtest: a synthetic permit for another candidate or manifest refuses before ledger creation
+ok 28 - a synthetic permit for another candidate or manifest refuses before ledger creation
+  ---
+  duration_ms: 1.101166
+  type: 'test'
+  ...
+# Subtest: revoked synthetic admission stops before reservation and cannot reopen by restoring a callback flag
+ok 29 - revoked synthetic admission stops before reservation and cannot reopen by restoring a callback flag
+  ---
+  duration_ms: 25.871916
+  type: 'test'
+  ...
+# Subtest: revocation during durable reservation dispatches nothing, retains charge and cannot reuse a closed ledger
+ok 30 - revocation during durable reservation dispatches nothing, retains charge and cannot reuse a closed ledger
+  ---
+  duration_ms: 39.867334
+  type: 'test'
+  ...
+# Subtest: frozen manifest binds all 24 development variants, source proofs and pending HTTP status
+ok 31 - frozen manifest binds all 24 development variants, source proofs and pending HTTP status
+  ---
+  duration_ms: 8.554583
+  type: 'test'
+  ...
+# Subtest: corpus coverage changes are refused rather than silently reducing scope
+ok 32 - corpus coverage changes are refused rather than silently reducing scope
+  ---
+  duration_ms: 1.633375
+  type: 'test'
+  ...
+# Subtest: existing replay rejects tampered manifest before opening a dialog
+ok 33 - existing replay rejects tampered manifest before opening a dialog
+  ---
+  duration_ms: 2.211209
+  type: 'test'
+  ...
+# Subtest: offline executable runs new corpus without HTTP, paid calls or gold history, and refuses reset
+ok 34 - offline executable runs new corpus without HTTP, paid calls or gold history, and refuses reset
+  ---
+  duration_ms: 904.304625
+  type: 'test'
+  ...
+# Subtest: overlay keeps app, database, catalogue budget and carrier bytes; only relay can reach model
+ok 35 - overlay keeps app, database, catalogue budget and carrier bytes; only relay can reach model
+  ---
+  duration_ms: 1.410708
+  type: 'test'
+  ...
+# Subtest: unexpected candidate, external backend network, credential file or reused overlay refused
+ok 36 - unexpected candidate, external backend network, credential file or reused overlay refused
+  ---
+  duration_ms: 5.115958
+  type: 'test'
+  ...
+# Subtest: exact 24h/100/$2 scope and authenticated owner only
+ok 37 - exact 24h/100/$2 scope and authenticated owner only
+  ---
+  duration_ms: 1.9845
+  type: 'test'
+  ...
+# Subtest: canonical catalogue wire only; personal tools/history/contacts refused
+ok 38 - canonical catalogue wire only; personal tools/history/contacts refused
+  ---
+  duration_ms: 0.935958
+  type: 'test'
+  ...
+# Subtest: exact request; credentials only upstream; fsynced reservation and sanitized metadata
+ok 39 - exact request; credentials only upstream; fsynced reservation and sanitized metadata
+  ---
+  duration_ms: 81.600667
+  type: 'test'
+  ...
+# Subtest: foreign tenant refused before dispatch
+ok 40 - foreign tenant refused before dispatch
+  ---
+  duration_ms: 34.497167
+  type: 'test'
+  ...
+# Subtest: foreign user refused before dispatch
+ok 41 - foreign user refused before dispatch
+  ---
+  duration_ms: 33.927167
+  type: 'test'
+  ...
+# Subtest: wrong pin refused before dispatch
+ok 42 - wrong pin refused before dispatch
+  ---
+  duration_ms: 34.998625
+  type: 'test'
+  ...
+# Subtest: caller auth refused before dispatch
+ok 43 - caller auth refused before dispatch
+  ---
+  duration_ms: 39.889
+  type: 'test'
+  ...
+# Subtest: cookie refused before dispatch
+ok 44 - cookie refused before dispatch
+  ---
+  duration_ms: 27.682625
+  type: 'test'
+  ...
+# Subtest: route refusal GET/chat/completions
+ok 45 - route refusal GET/chat/completions
+  ---
+  duration_ms: 36.1585
+  type: 'test'
+  ...
+# Subtest: route refusal POST/v1/chat/completions
+ok 46 - route refusal POST/v1/chat/completions
+  ---
+  duration_ms: 35.812667
+  type: 'test'
+  ...
+# Subtest: route refusal POSThttps://evil.invalid
+ok 47 - route refusal POSThttps://evil.invalid
+  ---
+  duration_ms: 28.662916
+  type: 'test'
+  ...
+# Subtest: route refusal POST/clients
+ok 48 - route refusal POST/clients
+  ---
+  duration_ms: 31.518792
+  type: 'test'
+  ...
+# Subtest: expiry/revocation/changed scope stop without a second provider request
+ok 49 - expiry/revocation/changed scope stop without a second provider request
+  ---
+  duration_ms: 67.477583
+  type: 'test'
+  ...
+# Subtest: expiry before dispatch
+ok 50 - expiry before dispatch
+  ---
+  duration_ms: 24.695542
+  type: 'test'
+  ...
+# Subtest: exact persistent ledger refuses restart rather than resetting budget
+ok 51 - exact persistent ledger refuses restart rather than resetting budget
+  ---
+  duration_ms: 84.450959
+  type: 'test'
+  ...
+# Subtest: unknown usage latches refusal and reserves the failed call
+ok 52 - unknown usage latches refusal and reserves the failed call
+  ---
+  duration_ms: 86.373834
+  type: 'test'
+  ...
+# Subtest: provider redirect and error never expose response or credential
+ok 53 - provider redirect and error never expose response or credential
+  ---
+  duration_ms: 75.23275
+  type: 'test'
+  ...
+# Subtest: concurrent admission permits only one upstream reservation
+ok 54 - concurrent admission permits only one upstream reservation
+  ---
+  duration_ms: 76.152625
+  type: 'test'
+  ...
+# Subtest: USD 2 ceiling refuses before dispatch and cannot be reset by another request
+ok 55 - USD 2 ceiling refuses before dispatch and cannot be reset by another request
+  ---
+  duration_ms: 1119.829083
+  type: 'test'
+  ...
+# Subtest: 100 attempt ceiling stops exactly with a small payload
+ok 56 - 100 attempt ceiling stops exactly with a small payload
+  ---
+  duration_ms: 8678.316666
+  type: 'test'
+  ...
+# Subtest: revocation aborts in-flight provider request
+ok 57 - revocation aborts in-flight provider request
+  ---
+  duration_ms: 112.09875
+  type: 'test'
+  ...
+# Subtest: runtime keeps canonical chat/read owners and refuses foreign actor/effects/outside model context
+ok 58 - runtime keeps canonical chat/read owners and refuses foreign actor/effects/outside model context
+  ---
+  duration_ms: 1.588084
+  type: 'test'
+  ...
+# Subtest: provider length completion preserves original bytes for canonical validation; accounting remains strict
+ok 59 - provider length completion preserves original bytes for canonical validation; accounting remains strict
+  ---
+  duration_ms: 75.441625
+  type: 'test'
+  ...
+# Subtest: manual continuation charges unresolved predecessor cost and preserves original ceilings
+ok 60 - manual continuation charges unresolved predecessor cost and preserves original ceilings
+  ---
+  duration_ms: 114.936208
+  type: 'test'
+  ...
+1..60
+# tests 60
+# suites 0
+# pass 60
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 12445.72575

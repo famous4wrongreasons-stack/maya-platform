@@ -2,6 +2,9 @@ import test from 'node:test';import assert from 'node:assert/strict';import fs f
 import {phoneAiEgress} from './phone-ai-egress.mjs';
 import {validatePhoneAiScope,assertPhoneAiActor,assertPhoneAiPayload,PHONE_AI_TOOLS} from './phone-ai-scope.mjs';
 import {installPhoneAi} from './phone-ai-runtime.mjs';
+import {phoneAiCarryForward} from './phone-ai-continuation.mjs';
+import {createHash} from 'node:crypto';
+import {CandidateBudgetGate,CORE_PHONE_READ_PROFILE,CORE_DIAGNOSTIC_PROFILE} from './conversation-qualification/current-candidate-budget.mjs';
 const now=Date.now(),pin='a'.repeat(64);
 const scope={contract:'maya.phone-owner-ai/1',approvalRef:'owner-20261015-phone-deepseek-24h-usd2',candidate:'b'.repeat(40),tenantId:'tenant-a',userId:'user-a',branchId:'branch-a',tenantSlug:'synthetic-salon',companyId:'321',notBefore:new Date(now-1000).toISOString(),expiresAt:new Date(now+86399000).toISOString(),maxCalls:100,maxSpendNanoUsd:2000000000};
 const user={tenantId:scope.tenantId,userId:scope.userId,role:'tenant_owner',membershipStatus:'active'};
@@ -9,7 +12,7 @@ const wire=(patch={})=>JSON.stringify({model:'deepseek-v4-pro',messages:[{role:'
 const answer=()=>new Response(JSON.stringify({choices:[{finish_reason:'stop',message:{content:'Привет!'}}],usage:{prompt_tokens:100,completion_tokens:5,total_tokens:105}}),{status:200});
 async function fixture(t,options={}){
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'maya-phone-ai-test-'));let time=now,current=true;const calls=[];
- const app=phoneAiEgress({scope,pin,credential:'synthetic_not_real_key',ledgerPath:dir+'/ledger.jsonl',testClock:()=>time,testWait:async ms=>{time+=ms;},assertCurrent(){assert.ok(current);},nativeFetch:async(...args)=>{calls.push(args);return options.fetch?options.fetch(...args):answer();}});
+ const app=phoneAiEgress({carryForward:options.carryForward,scope,pin,credential:'synthetic_not_real_key',ledgerPath:dir+'/ledger.jsonl',testClock:()=>time,testWait:async ms=>{time+=ms;},assertCurrent(){assert.ok(current);},nativeFetch:async(...args)=>{calls.push(args);return options.fetch?options.fetch(...args):answer();}});
  await new Promise(r=>app.server.listen(0,'127.0.0.1',r));
  const request=(body=wire(),extra={},method='POST',target='/chat/completions')=>new Promise((resolve,reject)=>{
   const req=http.request({host:'127.0.0.1',port:app.server.address().port,method,path:target,agent:false,headers:{'content-type':'application/json','x-maya-scope':pin,'x-maya-tenant':scope.tenantId,'x-maya-user':scope.userId,...extra}},res=>{let text='';res.on('data',b=>{text+=b});res.on('end',()=>resolve({status:res.statusCode,text}));});req.on('error',reject);req.end(body);
@@ -72,4 +75,21 @@ test('runtime keeps canonical chat/read owners and refuses foreign actor/effects
  assert.throws(()=>services.ActionEngineRuntimeService.execute());assert.throws(()=>services.ActionEngineRuntimeService.executeWithReceipt());assert.equal(actions,0);
  values.membership=null;await assert.rejects(services.AiCoreService.chat(user,{surface:'native'}));values.membership={id:'synthetic'};
  alive=false;await assert.rejects(services.AiCoreService.chat(user,{surface:'native'}));assert.equal(paid,1);
+});
+
+test('provider length completion preserves original bytes for canonical validation; accounting remains strict',async t=>{
+ const f=await fixture(t,{fetch:async()=>Response.json({choices:[{finish_reason:'length',message:{content:'valid but bounded'}}],usage:{prompt_tokens:100,completion_tokens:5,total_tokens:105}})});
+ const r=await f.request();assert.equal(r.status,200);assert.equal(JSON.parse(r.text).choices[0].finish_reason,'length');assert.equal(f.snapshot().stats.halted,false);assert.equal(f.snapshot().lastTransport.finishReason,'length');
+});
+test('manual continuation charges unresolved predecessor cost and preserves original ceilings',async t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'maya-phone-carry-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const rows=[{event:'opened',manifestSha256:pin,candidateCommit:scope.candidate,profile:CORE_PHONE_READ_PROFILE,mode:'ADMITTED_MODEL_ONLY',paidAuthorized:true},{event:'reserved',attempt:1,input:1400000,output:20000,nanoUsd:1927200000,totalInput:1400000,totalOutput:20000,totalNanoUsd:1927200000},{event:'halted_after_attempt',attempt:1}];
+ const bytes=Buffer.from(rows.map(r=>JSON.stringify(r)).join('\n')+'\n'),binding={ledgerSha256:createHash('sha256').update(bytes).digest('hex'),scopePin:pin,candidate:scope.candidate};
+ const carry=phoneAiCarryForward(bytes,binding);assert.equal(carry.reservedNanoUsd,1927200000);assert.equal(carry.attempts,1);
+ for(const b of [{...binding,ledgerSha256:'f'.repeat(64)},{...binding,scopePin:'f'.repeat(64)},{...binding,candidate:'f'.repeat(40)}])assert.throws(()=>phoneAiCarryForward(bytes,b));
+ const f=await fixture(t,{carryForward:carry});assert.equal(f.snapshot().stats.reservedNanoUsd,1927200000);
+ const large=wire({conversation:[{role:'user',content:'x'.repeat(85000)}]});assert.equal((await f.request(large)).status,403);assert.equal(f.calls.length,0);assert.equal(f.snapshot().stats.reservedNanoUsd,1927200000);
+ assert.equal((await f.request()).status,200);assert.equal(f.snapshot().stats.attempts,2);assert.ok(f.snapshot().stats.reservedNanoUsd>1927200000);
+ assert.throws(()=>new CandidateBudgetGate({ledgerPath:dir+'/forbidden',manifestSha256:pin,candidateCommit:scope.candidate,profile:CORE_DIAGNOSTIC_PROFILE,mode:'OFFLINE_SYNTHETIC_ONLY',transport:async()=>answer(),carryForward:carry}),/carry_forward_refused/);
+ const tampered=Buffer.from(rows.map(r=>JSON.stringify(r.event==='reserved'?{...r,totalNanoUsd:0}:r)).join('\n')+'\n');assert.throws(()=>phoneAiCarryForward(tampered,{...binding,ledgerSha256:createHash('sha256').update(tampered).digest('hex')}));
 });
