@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "addedOnly": "phone-test.mayaos.ru",
+  "type": "A",
+  "value": "45.67.56.4",
+  "verifiedResolvers": {
+    "ns1.beget.com": [
+      "45.67.56.4"
+    ],
+    "ns2.beget.pro": [
+      "45.67.56.4"
+    ],
+    "1.1.1.1": [
+      "45.67.56.4"
+    ],
+    "8.8.8.8": [
+      "45.67.56.4"
+    ]
+  },
+  "checkedAt": "2026-10-15T06:55:08.314838+00:00"
+}

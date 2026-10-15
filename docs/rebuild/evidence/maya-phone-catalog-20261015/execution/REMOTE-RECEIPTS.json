@@ -1,0 +1,120 @@
+{
+  "receipts": {
+    "CREDENTIAL-TRANSFER.json": {
+      "status": "STORED",
+      "phase": "install-private-config",
+      "providerCalls": 0,
+      "migrationsApplied": 0,
+      "mode": "0600",
+      "sourceKind": "macos-keychain",
+      "destination": "Aspiring Eduard private/catalog.env",
+      "scope": {
+        "contract": "maya.phone-catalog-egress/1",
+        "companyId": "503759",
+        "maxCalls": 40,
+        "notBefore": "2026-10-15T06:43:27.299Z",
+        "expiresAt": "2026-10-16T06:43:27.299Z"
+      },
+      "deepseekTransferred": false,
+      "publicStarted": false,
+      "checkedAt": "2026-10-15T06:43:31.087691+00:00"
+    },
+    "PRIVATE-CATALOG-START.json": {
+      "status": "PASS",
+      "phase": "proof",
+      "providerCalls": 0,
+      "migrationsApplied": 0,
+      "publicStarted": false,
+      "preflight": {
+        "ok": true,
+        "environment": "production",
+        "config": "safe",
+        "local_migrations": 106,
+        "database": {
+          "status": "ready",
+          "applied_migrations": 106,
+          "pending_migrations": 0
+        }
+      },
+      "negativeProof": {
+        "negativeCases": 4,
+        "directBackendEgressRefused": true,
+        "providerCalls": 0
+      },
+      "containers": [
+        {
+          "service": "backend",
+          "running": true,
+          "imageId": "sha256:d8f6a5b33529e4a7f2e4503cc7e867de88d259f35236fb38d6b8886fcb5a9f6f",
+          "hostPorts": {},
+          "networks": [
+            "maya-phone-staging_catalog_private",
+            "maya-phone-staging_private"
+          ],
+          "restartPolicy": "no"
+        },
+        {
+          "service": "postgres",
+          "running": true,
+          "imageId": "sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea",
+          "hostPorts": {},
+          "networks": [
+            "maya-phone-staging_private"
+          ],
+          "restartPolicy": "no"
+        },
+        {
+          "service": "catalog-egress",
+          "running": true,
+          "imageId": "sha256:d8f6a5b33529e4a7f2e4503cc7e867de88d259f35236fb38d6b8886fcb5a9f6f",
+          "hostPorts": {},
+          "networks": [
+            "maya-phone-staging_catalog_private",
+            "maya-phone-staging_edge"
+          ],
+          "restartPolicy": "no"
+        },
+        {
+          "service": "gateway",
+          "running": true,
+          "imageId": "sha256:d8542f48d34a9cf4e4c11a478865229840e87e4c96ea3f439101f31a5d35f75f",
+          "hostPorts": {
+            "80/tcp": [
+              {
+                "HostIp": "127.0.0.1",
+                "HostPort": "9080"
+              }
+            ]
+          },
+          "networks": [
+            "maya-phone-staging_edge",
+            "maya-phone-staging_private"
+          ],
+          "restartPolicy": "no"
+        }
+      ],
+      "signupRefused": true,
+      "smmUnchanged": true,
+      "checkedAt": "2026-10-15T06:46:15.392957+00:00"
+    },
+    "PUBLIC-GATEWAY-START.json": {
+      "status": "PASS",
+      "phase": "start-public",
+      "providerCalls": 0,
+      "migrationsApplied": 0,
+      "caddyValidation": "PASS",
+      "backendDatabaseAndRelayNotRestarted": true,
+      "smmUnchanged": true,
+      "publicGatewayStarted": true,
+      "privateSetupReady": true,
+      "caddySha256": "4dd4ece4fbb7254cbdda914e30458843e0290f1c61236f2b61bdb03c53aa9b38",
+      "checkedAt": "2026-10-15T06:51:59.832567+00:00"
+    }
+  },
+  "readOnlyState": {
+    "ownerExists": true,
+    "crm": null,
+    "enabledWidgetEntitlements": 0
+  },
+  "checkedAt": "2026-10-15T06:54:07.063183+00:00"
+}

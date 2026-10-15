@@ -1,0 +1,114 @@
+[
+  {
+    "name": "prepare.mjs",
+    "localPath": "/private/tmp/maya-phone-catalog-execution-20261015-01/prepare.mjs",
+    "sha256": "253d57c34ebdba86a595071514841ebaa475d8911c713ff83d88ef3fafb28660",
+    "bytes": 2090,
+    "committed": false,
+    "reason": "Machine-specific operational helper or local screenshot; safe execution receipts and canonical plan source are committed. No secret values embedded."
+  },
+  {
+    "name": "execution-plan.json",
+    "localPath": "/private/tmp/maya-phone-catalog-execution-20261015-01/execution-plan.json",
+    "sha256": "8276c28b7d7eae59c539d02f1f6aba3fcec4a8ff999daa24fb45e75c92724eec",
+    "bytes": 14685,
+    "committed": false,
+    "reason": "Machine-specific operational helper or local screenshot; safe execution receipts and canonical plan source are committed. No secret values embedded."
+  },
+  {
+    "name": "receive.py",
+    "localPath": "/private/tmp/maya-phone-catalog-execution-20261015-01/receive.py",
+    "sha256": "5c7c9bbd408ad60d7fc5b11ddd3c7cffb543055b4cec5ebbcd069e89d36880f5",
+    "bytes": 4645,
+    "committed": false,
+    "reason": "Machine-specific operational helper or local screenshot; safe execution receipts and canonical plan source are committed. No secret values embedded."
+  },
+  {
+    "name": "ssh-packet.py",
+    "localPath": "/private/tmp/maya-phone-catalog-execution-20261015-01/ssh-packet.py",
+    "sha256": "fd9804245dc7a3c167308efd23ac0052b44d3f2ef2908609823999c77b88ea29",
+    "bytes": 1692,
+    "committed": false,
+    "reason": "Machine-specific operational helper or local screenshot; safe execution receipts and canonical plan source are committed. No secret values embedded."
+  },
+  {
+    "name": "transfer.mjs",
+    "localPath": "/private/tmp/maya-phone-catalog-execution-20261015-01/transfer.mjs",
+    "sha256": "9f51ef8f37cfe6b7254f57e32514a9ee2fb672de589dcf4c967eb0b6cc0f6a9f",
+    "bytes": 3916,
+    "committed": false,
+    "reason": "Machine-specific operational helper or local screenshot; safe execution receipts and canonical plan source are committed. No secret values embedded."
+  },
+  {
+    "name": "transfer-probe.py",
+    "localPath": "/private/tmp/maya-phone-catalog-execution-20261015-01/transfer-probe.py",
+    "sha256": "9a4be77db4bbbdb890b2a5b58650b8ab38e265047ed1716e026f6222d6d42dc6",
+    "bytes": 200,
+    "committed": false,
+    "reason": "Machine-specific operational helper or local screenshot; safe execution receipts and canonical plan source are committed. No secret values embedded."
+  },
+  {
+    "name": "gateway-prepare.mjs",
+    "localPath": "/private/tmp/maya-phone-catalog-execution-20261015-01/gateway-prepare.mjs",
+    "sha256": "9d2b997c60d11416bb2074260ebd5a8028147e33e0110ec9ed6c0d7a78152c15",
+    "bytes": 1013,
+    "committed": false,
+    "reason": "Machine-specific operational helper or local screenshot; safe execution receipts and canonical plan source are committed. No secret values embedded."
+  },
+  {
+    "name": "gateway-plan.json",
+    "localPath": "/private/tmp/maya-phone-catalog-execution-20261015-01/gateway-plan.json",
+    "sha256": "9d0b34ffc718ba1ae1f93eb37b0074b43bbf07899fd2609b50db5a980e67a6eb",
+    "bytes": 9384,
+    "committed": false,
+    "reason": "Machine-specific operational helper or local screenshot; safe execution receipts and canonical plan source are committed. No secret values embedded."
+  },
+  {
+    "name": "start-private.py",
+    "localPath": "/private/tmp/maya-phone-catalog-execution-20261015-01/start-private.py",
+    "sha256": "abcab74c1ff8b7b0e7967c0272390208e47fed86d525d8662b212a62a8aa36f0",
+    "bytes": 4224,
+    "committed": false,
+    "reason": "Machine-specific operational helper or local screenshot; safe execution receipts and canonical plan source are committed. No secret values embedded."
+  },
+  {
+    "name": "start-public.py",
+    "localPath": "/private/tmp/maya-phone-catalog-execution-20261015-01/start-public.py",
+    "sha256": "348f924c54fe1da00e3deb02bf3bd496527f24749b44332e248df22fca5e1b04",
+    "bytes": 10857,
+    "committed": false,
+    "reason": "Machine-specific operational helper or local screenshot; safe execution receipts and canonical plan source are committed. No secret values embedded."
+  },
+  {
+    "name": "collect.py",
+    "localPath": "/private/tmp/maya-phone-catalog-execution-20261015-01/collect.py",
+    "sha256": "db40e581186967999fe4f5ac917dbea239258da77f05d4bf538b3cdd4fdbd78f",
+    "bytes": 1621,
+    "committed": false,
+    "reason": "Machine-specific operational helper or local screenshot; safe execution receipts and canonical plan source are committed. No secret values embedded."
+  },
+  {
+    "name": "public-proof.py",
+    "localPath": "/private/tmp/maya-phone-catalog-execution-20261015-01/public-proof.py",
+    "sha256": "de0751174440c72a4859384c43dfc659148fb5d437c1330592fe827270691e24",
+    "bytes": 2293,
+    "committed": false,
+    "reason": "Machine-specific operational helper or local screenshot; safe execution receipts and canonical plan source are committed. No secret values embedded."
+  },
+  {
+    "name": "DNS-ADDED.png",
+    "localPath": "/private/tmp/maya-phone-catalog-execution-20261015-01/DNS-ADDED.png",
+    "sha256": "48a081f405a95c5081313e6c49f6fa7696b79423959397a02886cb9c56262e02",
+    "bytes": 415266,
+    "committed": false,
+    "reason": "Machine-specific operational helper or local screenshot; safe execution receipts and canonical plan source are committed. No secret values embedded."
+  },
+  {
+    "name": "MAYA-SETUP-LOGIN.png",
+    "localPath": "/private/tmp/maya-phone-catalog-execution-20261015-01/MAYA-SETUP-LOGIN.png",
+    "sha256": "62e0370f2bcb19102c44b5d67748c95dc667b88a6c8b96f3247a9c867e86f8b6",
+    "bytes": 198517,
+    "committed": false,
+    "reason": "Machine-specific operational helper or local screenshot; safe execution receipts and canonical plan source are committed. No secret values embedded."
+  }
+]

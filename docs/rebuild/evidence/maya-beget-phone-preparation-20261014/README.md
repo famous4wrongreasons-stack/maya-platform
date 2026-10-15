@@ -335,3 +335,19 @@ been repurposed as a remote credential-export authorization. The exact next
 operator action is recorded in the publication plan. User-token entry remains
 through canonical A17, with normal owner authentication and encrypted storage.
 No local retained database or existing Client authority is copied to the server.
+
+## Owner-authorized test publication — 15 October
+
+The owner subsequently approved the exact partner-key destination, test hostname
+and 40 catalogue reads within 24 hours. This supersedes the preceding approval
+blocker only; it does not certify a production release or authorize booking.
+The test HTTPS endpoint is now live with strict TLS, closed signup, all eight
+prepared web assets matching, and the private A17 setup entry retained.
+The partner key was transferred without displaying it. Backend/DB remain
+internal, and the catalogue relay denies writes/customer/journal routes.
+The owner still needs normal login and user-token entry to create the canonical
+CRM integration; it was absent at the receipt timestamp. No provider call or
+iPhone installation has occurred. Fresh scoped tests: 73/73.
+
+See the [execution checkpoint](../maya-phone-catalog-20261015/execution/README.md)
+for exact receipts, expiry, rollback and remaining owner action.

@@ -1,0 +1,19 @@
+{
+  "status": "STORED",
+  "phase": "install-private-config",
+  "providerCalls": 0,
+  "migrationsApplied": 0,
+  "mode": "0600",
+  "sourceKind": "macos-keychain",
+  "destination": "Aspiring Eduard private/catalog.env",
+  "scope": {
+    "contract": "maya.phone-catalog-egress/1",
+    "companyId": "503759",
+    "maxCalls": 40,
+    "notBefore": "2026-10-15T06:43:27.299Z",
+    "expiresAt": "2026-10-16T06:43:27.299Z"
+  },
+  "deepseekTransferred": false,
+  "publicStarted": false,
+  "checkedAt": "2026-10-15T06:43:31.087691+00:00"
+}
