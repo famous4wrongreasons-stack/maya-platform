@@ -1,0 +1,65 @@
+{
+  "files": [
+    {
+      "path": "LOCAL-ARTIFACTS.json",
+      "sha256": "c4ad0a4872baae5f288b8165bd6f31f1843c027b79d436f01941075804b93a83",
+      "bytes": 13247
+    },
+    {
+      "path": "README.md",
+      "sha256": "4869b4f1c12d1f1884813c27f890921b1bdfdd34c0639bf9ef972a5436869d11",
+      "bytes": 7493
+    },
+    {
+      "path": "RESULT.json",
+      "sha256": "4ffdf10dcbee3f2f90b92b6409505b144896c674af8b2da3d4be532006d3f446",
+      "bytes": 1421
+    },
+    {
+      "path": "baseline-manifest.json",
+      "sha256": "016a730590b94fb01e63e66dd5f36950d6ae142f136cb5be8b053e65dfc390f1",
+      "bytes": 1057
+    },
+    {
+      "path": "baseline-tests.json",
+      "sha256": "a7a6dea353174ca5eafe00c7a262058adceff9bd72f6e6f6e3cbbdd9d5f5b5f1",
+      "bytes": 11116
+    },
+    {
+      "path": "executed-source-runner.mjs",
+      "sha256": "93c598aa9f0b606ddd2a2a199de571d1aa9896f19d45223d37971a4cb9dd377c",
+      "bytes": 7688
+    },
+    {
+      "path": "mutant-manifest.json",
+      "sha256": "2a4e25b351a7bbdbc34cef6b0e1ce41fe32db0ad3b54b38b64f100e2024c6409",
+      "bytes": 997
+    },
+    {
+      "path": "mutant-tests.json",
+      "sha256": "c8b393a8da82d6ccb5a91925ba0d2ba715b10a20873eb0d0722ca51363a751d2",
+      "bytes": 2269
+    },
+    {
+      "path": "mutation.json",
+      "sha256": "1070a19f9dc95ed3e0647020207d9a279d11afc9902f28d96c642988e6371729",
+      "bytes": 1575
+    },
+    {
+      "path": "provider-source-review.json",
+      "sha256": "669b1f0abc7abbc1e1ff923a07363ae4cc1e0630d129932538c514382c84dd1d",
+      "bytes": 1330
+    },
+    {
+      "path": "restored-manifest.json",
+      "sha256": "e38414e702e6ea45c52f8bdc98465790f3cbd2e7a0d50d42acd98caee2d14481",
+      "bytes": 1057
+    },
+    {
+      "path": "restored-tests.json",
+      "sha256": "c336bedfed861ab2d476ff44be46174d83dd19f740cb84b2821d7da15f6c605a",
+      "bytes": 11116
+    }
+  ],
+  "sourceReceiptPolicy": "Exact manifests and executed runner; summarized Jest assertions; no release claim inferred."
+}

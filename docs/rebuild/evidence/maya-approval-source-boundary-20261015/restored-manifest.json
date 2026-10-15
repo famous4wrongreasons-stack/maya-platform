@@ -1,0 +1,35 @@
+{
+  "productSourceSha256": "e1d1ddba25957b741a3999004a86a5268778157c3d10c225c72c83d479ff1e93",
+  "sourceFileSha256": "1e187e8806d819284ea1229864c445e21830361826a14b9ca9267f2e978c263c",
+  "sourceHead": "bd4e9da71000c5a22b855bf896c657cafdff7ce8",
+  "sourceDirty": false,
+  "kind": "approval-source-boundary-isolated-proof",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-approval-source-T7UbJB/pg",
+  "database": "maya_widget_gate_proof_approval_source_5049cd6ddf7b",
+  "port": 62561,
+  "status": "passed",
+  "completed": [
+    "network-isolation",
+    "live-types",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "approval-source-http-pg",
+    "approval-source-unit",
+    "pg-stop"
+  ],
+  "signingKeysCreated": false,
+  "syntheticTenants": true,
+  "externalCalls": 0,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1,
+    "browserCount": 0
+  },
+  "clusterStopped": true
+}

@@ -1,0 +1,40 @@
+{
+  "mutation": "ASSUME_PROVIDER_STORE_AND_TYPE_SCOPE",
+  "sourceHead": "bd4e9da71000c5a22b855bf896c657cafdff7ce8",
+  "sourceSha256": "e1d1ddba25957b741a3999004a86a5268778157c3d10c225c72c83d479ff1e93",
+  "mutatedSha256": "7b43beee4513d5d54188794dc6c6b2a51650088fb7812ad4827b551d3df3b0e2",
+  "scope": "one diagnostic counterfactual; NOT the full 545-mutant release programme",
+  "status": "KILLED",
+  "exit": 1,
+  "failedTests": [
+    "GR-SOURCE refuses documented empty arrays without inferring provider scope",
+    "GR-SOURCE refuses numeric IDs without inferring provider scope",
+    "GR-SOURCE refuses string IDs without inferring provider scope",
+    "GR-SOURCE refuses objects containing IDs without inferring provider scope",
+    "GR-SOURCE refuses boolean descriptions without inferring provider scope",
+    "GR-SOURCE refuses wildcards without inferring provider scope",
+    "GR-SOURCE concurrent reviewed proposals remain refused before approval or dispatch"
+  ],
+  "sourceRestored": true,
+  "worktreeClean": true,
+  "restoredControl": {
+    "status": "PASS",
+    "manifest": "restored-manifest.json",
+    "http": 12,
+    "unit": 53
+  },
+  "patch": {
+    "path": "maya-saas-backend/src/crm/yclients-goods-receipt.ts",
+    "replacements": [
+      [
+        "can_receive: false,",
+        "can_receive: true,"
+      ],
+      [
+        "    blockers,",
+        "    blockers: [],"
+      ]
+    ]
+  },
+  "execution": "Inline Python orchestrator changed only the owned disposable clone, ran the unchanged final runner, and restored the exact original bytes in finally."
+}

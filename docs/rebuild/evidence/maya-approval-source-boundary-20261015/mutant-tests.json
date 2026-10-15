@@ -1,0 +1,74 @@
+{
+  "approval-source-http-pg-jest.json": {
+    "success": false,
+    "numPassedTests": 5,
+    "numFailedTests": 7,
+    "numPendingTests": 0,
+    "numTotalTests": 12,
+    "numPassedTestSuites": 0,
+    "numFailedTestSuites": 1,
+    "startTime": 1792085760150,
+    "assertions": [
+      {
+        "title": "GR-SOURCE refuses documented empty arrays without inferring provider scope",
+        "status": "failed",
+        "durationMs": 375
+      },
+      {
+        "title": "GR-SOURCE refuses numeric IDs without inferring provider scope",
+        "status": "failed",
+        "durationMs": 234
+      },
+      {
+        "title": "GR-SOURCE refuses string IDs without inferring provider scope",
+        "status": "failed",
+        "durationMs": 228
+      },
+      {
+        "title": "GR-SOURCE refuses objects containing IDs without inferring provider scope",
+        "status": "failed",
+        "durationMs": 238
+      },
+      {
+        "title": "GR-SOURCE refuses boolean descriptions without inferring provider scope",
+        "status": "failed",
+        "durationMs": 226
+      },
+      {
+        "title": "GR-SOURCE refuses wildcards without inferring provider scope",
+        "status": "failed",
+        "durationMs": 216
+      },
+      {
+        "title": "GR-SOURCE concurrent reviewed proposals remain refused before approval or dispatch",
+        "status": "failed",
+        "durationMs": 257
+      },
+      {
+        "title": "GR-SOURCE stale and foreign source revisions refuse before provider reads",
+        "status": "passed",
+        "durationMs": 273
+      },
+      {
+        "title": "GR-SOURCE caller permission and authority fields cannot open the real source",
+        "status": "passed",
+        "durationMs": 131
+      },
+      {
+        "title": "PRICE-SOURCE keyless chat cannot manufacture a price approval or confirmed effect",
+        "status": "passed",
+        "durationMs": 157
+      },
+      {
+        "title": "PRICE-SOURCE valid direct preview is not a canonical chat widget, including replay",
+        "status": "passed",
+        "durationMs": 145
+      },
+      {
+        "title": "PRICE-SOURCE caller-authored T-2a and user-turn fields are not internal authority",
+        "status": "passed",
+        "durationMs": 130
+      }
+    ]
+  }
+}

@@ -1,0 +1,336 @@
+{
+  "artifacts": [
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-baseline/approval-source-http-pg-jest.json",
+      "sha256": "1b65721f9c4e8714175bd0436ddc167fb57817f75a69c4b557a4ddf2a2f03b82",
+      "bytes": 7175,
+      "run": "baseline",
+      "archived": "nonidentifying assertion summary only"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-baseline/approval-source-http-pg.log",
+      "sha256": "08092a5c014ced88aba1c110e1435a078b6b594e69a46797df1ebfd246b55367",
+      "bytes": 1654,
+      "run": "baseline",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-baseline/approval-source-unit.log",
+      "sha256": "38e4b780fccc81916f4fab0d0ad93c602fd269ed15168200aa95aac5e5f072ba",
+      "bytes": 4788,
+      "run": "baseline",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-baseline/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "run": "baseline",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-baseline/initdb.log",
+      "sha256": "58e153bf5717e4b4bce6db1d86398de969f406b76740354a056ce37063a49cc0",
+      "bytes": 952,
+      "run": "baseline",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-baseline/live-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "run": "baseline",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-baseline/manifest.json",
+      "sha256": "016a730590b94fb01e63e66dd5f36950d6ae142f136cb5be8b053e65dfc390f1",
+      "bytes": 1057,
+      "run": "baseline",
+      "archived": "manifest copied exactly"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-baseline/migrations.log",
+      "sha256": "2ed9f6a40c22636085e155789e9a52267042a1b78a561391b5a3282c175c67f4",
+      "bytes": 14902,
+      "run": "baseline",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-baseline/network-isolation.log",
+      "sha256": "3045b54b8750a5cabd890ed5c0d33df7611e01e682579542d9aaa97ff21ad87b",
+      "bytes": 32,
+      "run": "baseline",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-baseline/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "run": "baseline",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-baseline/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "run": "baseline",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-baseline/postgres.log",
+      "sha256": "4287ee45fd2405870307f13f7e2819a2a3b1d4ab66e6699a5ee6684e864f6db6",
+      "bytes": 1246,
+      "run": "baseline",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-baseline/unit-jest.json",
+      "sha256": "2cadef598e2ec48dcac531d76867e376340d7f443cbbb03eceba1a13a4f2f5a8",
+      "bytes": 29096,
+      "run": "baseline",
+      "archived": "nonidentifying assertion summary only"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-mutant/approval-source-http-pg-jest.json",
+      "sha256": "cbc5e293f61e7663e8da2751e6c81ce0efe48dd04e1fa1fb2ae6e6f31b142b2d",
+      "bytes": 415541,
+      "run": "mutant",
+      "archived": "nonidentifying assertion summary only"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-mutant/approval-source-http-pg.log",
+      "sha256": "12f54dd9bccff0efe530c1d533bea000b2e9f05d18c8c03cf8a80ea8e79b379a",
+      "bytes": 118470,
+      "run": "mutant",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-mutant/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "run": "mutant",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-mutant/initdb.log",
+      "sha256": "6b847bbda50b921ecc0d736dc5ea17ee2e9aee4e812439e5b15e97d43f09a740",
+      "bytes": 952,
+      "run": "mutant",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-mutant/live-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "run": "mutant",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-mutant/manifest.json",
+      "sha256": "2a4e25b351a7bbdbc34cef6b0e1ce41fe32db0ad3b54b38b64f100e2024c6409",
+      "bytes": 997,
+      "run": "mutant",
+      "archived": "manifest copied exactly"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-mutant/migrations.log",
+      "sha256": "0ca89c64e57223c978ca233ec0098f9a321eed4e860a8e5e85a30735a739fb74",
+      "bytes": 15770,
+      "run": "mutant",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-mutant/network-isolation.log",
+      "sha256": "3045b54b8750a5cabd890ed5c0d33df7611e01e682579542d9aaa97ff21ad87b",
+      "bytes": 32,
+      "run": "mutant",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-mutant/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "run": "mutant",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-mutant/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "run": "mutant",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-mutant/postgres.log",
+      "sha256": "6f2f15f924dfbb6d7e33950d594a074342e2812c58a321d67cf033522def9477",
+      "bytes": 1246,
+      "run": "mutant",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-restored/approval-source-http-pg-jest.json",
+      "sha256": "934701c95e7f0a722ad31ca0cefa361895300c674a8fc7c8d8f11cfb683eefc0",
+      "bytes": 7175,
+      "run": "restored",
+      "archived": "nonidentifying assertion summary only"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-restored/approval-source-http-pg.log",
+      "sha256": "323f480a68c53455b39fa4f73707fb6d382bea5ed6ee9419a9d0e42597289aee",
+      "bytes": 1658,
+      "run": "restored",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-restored/approval-source-unit.log",
+      "sha256": "c3eb38929c747b8789cf8bb302f27c481f2801ae5d009fb166077b278393a46f",
+      "bytes": 4810,
+      "run": "restored",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-restored/createdb.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "run": "restored",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-restored/initdb.log",
+      "sha256": "67a59c7b81cf5139322cb4d87534621ebb6389b02d929bc46d1c1e9003b9ca11",
+      "bytes": 952,
+      "run": "restored",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-restored/live-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "run": "restored",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-restored/manifest.json",
+      "sha256": "e38414e702e6ea45c52f8bdc98465790f3cbd2e7a0d50d42acd98caee2d14481",
+      "bytes": 1057,
+      "run": "restored",
+      "archived": "manifest copied exactly"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-restored/migrations.log",
+      "sha256": "c55319154044b9be27ba7b156ad8fb9ef28b184af543fea203807c8e9889024f",
+      "bytes": 14902,
+      "run": "restored",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-restored/network-isolation.log",
+      "sha256": "3045b54b8750a5cabd890ed5c0d33df7611e01e682579542d9aaa97ff21ad87b",
+      "bytes": 32,
+      "run": "restored",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-restored/pg-start.log",
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "bytes": 52,
+      "run": "restored",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-restored/pg-stop.log",
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "bytes": 56,
+      "run": "restored",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-restored/postgres.log",
+      "sha256": "f6123e6787568d42a6f999b1b90f3b5dad49dca1c79244ed042027719903bc8f",
+      "bytes": 1246,
+      "run": "restored",
+      "archived": "local raw log; not committed"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-bd4e9da7-restored/unit-jest.json",
+      "sha256": "3ca3c21c0925e85e161efb7f704e796bec3d80e89d2e1adbf5021f794b71e444",
+      "bytes": 29096,
+      "run": "restored",
+      "archived": "nonidentifying assertion summary only"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-final-20261015.mjs",
+      "sha256": "93c598aa9f0b606ddd2a2a199de571d1aa9896f19d45223d37971a4cb9dd377c",
+      "bytes": 7688,
+      "archived": "executed-source-runner.mjs; exact copy"
+    },
+    {
+      "path": "/private/tmp/maya-yc-docs-20261015.html",
+      "sha256": "ed57f3e1908597d58e880184d7cea555534d6243837d5648069b114f4326bd36",
+      "bytes": 10060503,
+      "archived": "reviewed derived facts only; raw local source retained"
+    },
+    {
+      "path": "/private/tmp/maya-yc-storage-permissions-20261015.json",
+      "sha256": "d34b6e96b5bd6ee5f650d38fd41d0e750d30cad9cc3fbd2e6aa55b94aa37fcd7",
+      "bytes": 9569,
+      "archived": "reviewed derived facts only; raw local source retained"
+    },
+    {
+      "path": "/private/tmp/maya-approval-source-mutation-20261015.json",
+      "sha256": "1a7bdce107a64bcc072bc4e7109b28da80e9b9fea6a6464ee7e45f929ed3d92a",
+      "bytes": 1025,
+      "archived": "reviewed derived facts only; raw local source retained"
+    }
+  ],
+  "developmentIterations": [
+    {
+      "run": "/private/tmp/maya-approval-source-20261015-r1",
+      "status": "failed",
+      "sourceHead": "ab0b703a000dcf69df70f1b38056d87cd86182e2",
+      "sourceDirty": true,
+      "clusterStopped": true,
+      "note": "test setup lacked canonical tenant context",
+      "manifestSha256": "1632a9a8052f1740afd9a5f3a32beed644864c6c304b9fe6a88a63441ac1666f",
+      "releaseReceipt": false
+    },
+    {
+      "run": "/private/tmp/maya-approval-source-20261015-r2",
+      "status": "failed",
+      "sourceHead": "ab0b703a000dcf69df70f1b38056d87cd86182e2",
+      "sourceDirty": true,
+      "clusterStopped": true,
+      "note": "wrong expected HTTP status and incomplete synthetic service fields",
+      "manifestSha256": "5cd37e33d46aaeda18e3521692caab3018799dfe26fda9800ab2e41dd8cc170e",
+      "releaseReceipt": false
+    },
+    {
+      "run": "/private/tmp/maya-approval-source-20261015-r3",
+      "status": "failed",
+      "sourceHead": "ab0b703a000dcf69df70f1b38056d87cd86182e2",
+      "sourceDirty": true,
+      "clusterStopped": true,
+      "note": "one incomplete synthetic service fixture remained",
+      "manifestSha256": "d76b655e26fe5a81c109918e1ab3f90bfd24d25cbe3f8a85a0fb5b3f94e1576f",
+      "releaseReceipt": false
+    },
+    {
+      "run": "/private/tmp/maya-approval-source-20261015-r4",
+      "status": "passed",
+      "sourceHead": "ab0b703a000dcf69df70f1b38056d87cd86182e2",
+      "sourceDirty": true,
+      "clusterStopped": true,
+      "note": "12 HTTP plus 53 unit tests pass before one lint-only test cleanup",
+      "manifestSha256": "54e1b52d02e3ebad19a40a75310afa048843e4eb357daa45a92bc011a232cc61",
+      "releaseReceipt": false
+    }
+  ],
+  "excluded": [
+    "disposable databases",
+    "raw failed assertion payloads and sealed synthetic material",
+    "dependencies/build binaries",
+    "10 MB public HTML capture"
+  ],
+  "realSecretsOrCustomerDataUsed": false
+}

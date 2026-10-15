@@ -1,0 +1,31 @@
+{
+  "checkedAtLocalDate": "2026-10-15",
+  "url": "https://developers.yclients.com/ru/",
+  "authentication": "none; public documentation only",
+  "captureSha256": "ed57f3e1908597d58e880184d7cea555534d6243837d5648069b114f4326bd36",
+  "captureBytes": 10060503,
+  "jsonPath": "spec.data.components.schemas.user_permissions_response_data_types.properties.data.properties.storages.properties",
+  "nodes": {
+    "storages_ids": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "storages_transactions_types": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "descriptionFinding": "Rendered descriptions talk about yes/no access, including an Excel-export description on the transaction-type field; the schema declares arrays with unspecified object elements.",
+  "unresolved": [
+    "exact element fields and types",
+    "empty and all semantics",
+    "binding to selected store and incoming operation type",
+    "current-token permission meaning"
+  ],
+  "conclusion": "Provider contract remains insufficient for affirmative goods-receipt admission. No live account permission or business endpoint was queried.",
+  "historicalFixture": "src/crm/fixtures/yclients-receipt-openapi-20261007.json unchanged; new public capture does not replace the old source pin"
+}

@@ -1,0 +1,64 @@
+{
+  "testedSourceCommit": "bd4e9da71000c5a22b855bf896c657cafdff7ce8",
+  "classification": "SOURCE_BOUNDARY_DIAGNOSED_NOT_RELEASE_CERTIFIED",
+  "productCodeChanged": false,
+  "freshBaseline": {
+    "httpPostgresPassed": 12,
+    "adapterUnitPassed": 53,
+    "failed": 0
+  },
+  "counterfactual": {
+    "status": "KILLED",
+    "httpPassed": 5,
+    "httpFailedAsExpected": 7,
+    "full545Programme": false
+  },
+  "restoredControl": {
+    "httpPostgresPassed": 12,
+    "adapterUnitPassed": 53,
+    "failed": 0,
+    "cloneTrackedClean": true
+  },
+  "cleanup": [
+    {
+      "run": "baseline",
+      "pgStatusExit": 3,
+      "running": false
+    },
+    {
+      "run": "mutant",
+      "pgStatusExit": 3,
+      "running": false
+    },
+    {
+      "run": "restored",
+      "pgStatusExit": 3,
+      "running": false
+    }
+  ],
+  "sourceEvidenceDutiesWithoutAdmissibleClaims": [
+    "G7-FR6d",
+    "G11-I4",
+    "G11-I5",
+    "G11-I6",
+    "G11-I10",
+    "G13-I1",
+    "G13-I2",
+    "G13-I9"
+  ],
+  "globalAudit": {
+    "unqualified": 163,
+    "handoffStop": 2,
+    "promoted": false,
+    "baselineCheck": "PASS"
+  },
+  "certificate": "NOT_ISSUED",
+  "ownerDecision": "PENDING: MAYA-FIRST-PHONE-SCOPE-DECISION-20261015.md",
+  "realModelRequests": 0,
+  "realProviderBusinessRequests": 0,
+  "publicDocumentationFetched": true,
+  "serverChanged": false,
+  "productionChanged": false,
+  "grantsChanged": false,
+  "iphoneChanged": false
+}

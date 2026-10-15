@@ -1,0 +1,351 @@
+{
+  "approval-source-http-pg-jest.json": {
+    "success": true,
+    "numPassedTests": 12,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTests": 12,
+    "numPassedTestSuites": 1,
+    "numFailedTestSuites": 0,
+    "startTime": 1792085937989,
+    "assertions": [
+      {
+        "title": "GR-SOURCE refuses documented empty arrays without inferring provider scope",
+        "status": "passed",
+        "durationMs": 279
+      },
+      {
+        "title": "GR-SOURCE refuses numeric IDs without inferring provider scope",
+        "status": "passed",
+        "durationMs": 167
+      },
+      {
+        "title": "GR-SOURCE refuses string IDs without inferring provider scope",
+        "status": "passed",
+        "durationMs": 155
+      },
+      {
+        "title": "GR-SOURCE refuses objects containing IDs without inferring provider scope",
+        "status": "passed",
+        "durationMs": 153
+      },
+      {
+        "title": "GR-SOURCE refuses boolean descriptions without inferring provider scope",
+        "status": "passed",
+        "durationMs": 152
+      },
+      {
+        "title": "GR-SOURCE refuses wildcards without inferring provider scope",
+        "status": "passed",
+        "durationMs": 150
+      },
+      {
+        "title": "GR-SOURCE concurrent reviewed proposals remain refused before approval or dispatch",
+        "status": "passed",
+        "durationMs": 162
+      },
+      {
+        "title": "GR-SOURCE stale and foreign source revisions refuse before provider reads",
+        "status": "passed",
+        "durationMs": 269
+      },
+      {
+        "title": "GR-SOURCE caller permission and authority fields cannot open the real source",
+        "status": "passed",
+        "durationMs": 132
+      },
+      {
+        "title": "PRICE-SOURCE keyless chat cannot manufacture a price approval or confirmed effect",
+        "status": "passed",
+        "durationMs": 159
+      },
+      {
+        "title": "PRICE-SOURCE valid direct preview is not a canonical chat widget, including replay",
+        "status": "passed",
+        "durationMs": 158
+      },
+      {
+        "title": "PRICE-SOURCE caller-authored T-2a and user-turn fields are not internal authority",
+        "status": "passed",
+        "durationMs": 131
+      }
+    ]
+  },
+  "unit-jest.json": {
+    "success": true,
+    "numPassedTests": 53,
+    "numFailedTests": 0,
+    "numPendingTests": 0,
+    "numTotalTests": 53,
+    "numPassedTestSuites": 1,
+    "numFailedTestSuites": 0,
+    "startTime": 1792085941223,
+    "assertions": [
+      {
+        "title": "pins official schema required fields and the exact unresolved provider scope fields",
+        "status": "passed",
+        "durationMs": 2
+      },
+      {
+        "title": "real current reader never invents selected-store/type permission from {\"value\":[]}",
+        "status": "passed",
+        "durationMs": 3
+      },
+      {
+        "title": "real current reader never invents selected-store/type permission from {\"value\":[9]}",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "real current reader never invents selected-store/type permission from {\"value\":[{\"id\":9}]}",
+        "status": "passed",
+        "durationMs": 2
+      },
+      {
+        "title": "real current reader never invents selected-store/type permission from {\"value\":true}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "real current reader never invents selected-store/type permission from {\"value\":false}",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "real current reader never invents selected-store/type permission from {\"value\":null}",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "real writer stops at the exact schema scope blocker before POST or owner callback",
+        "status": "passed",
+        "durationMs": 24
+      },
+      {
+        "title": "requires explicit provider storages_access",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "requires explicit provider storages_transactions_access",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "requires explicit provider storages_create_transactions_access",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "requires explicit provider storages_create_transactions_buy_access",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "refuses absent or ambiguous exact store {\"stores\":[{\"id\":8,\"title\":\"Other\"}]}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "refuses absent or ambiguous exact store {\"stores\":[{\"id\":9,\"title\":\"A\"},{\"id\":9,\"title\":\"B\"}]}",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "refuses absent or ambiguous exact store {\"stores\":[]}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "separates permission-day uncertainty and rejects IDs before fetch",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "serializes declared unit 11 as operation type 1 without conversion, catalog mutation or fabricated document",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "serializes declared unit 22 as operation type 2 without conversion, catalog mutation or fabricated document",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "refuses numeric wire rounding and ambiguous equal-unit mapping",
+        "status": "passed",
+        "durationMs": 2
+      },
+      {
+        "title": "WIRE ONLY: one schema POST then attributed document/line GETs; final owner check follows fresh source",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "WIRE ONLY: refuses changed current source or revoked final owner before any POST",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "classifies failed source reads before POST as a definitive refusal",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "WIRE ONLY: storage_operations/operation/5 failure stays UNKNOWN, no retry, retains only verified acknowledgment identity",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "WIRE ONLY: storage_operations/documents/5/900 failure stays UNKNOWN, no retry, retains only verified acknowledgment identity",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "WIRE ONLY: storage_operations/documents/goods_transactions/900 failure stays UNKNOWN, no retry, retains only verified acknowledgment identity",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "WIRE ONLY: redirect rejection after POST remains UNKNOWN with no resend",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "WIRE ONLY: missing or contradictory total {\"count\":2} cannot prove complete readback",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "WIRE ONLY: missing or contradictory total {\"count\":0} cannot prove complete readback",
+        "status": "passed",
+        "durationMs": 2
+      },
+      {
+        "title": "WIRE ONLY: missing or contradictory total {\"count\":[1]} cannot prove complete readback",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "WIRE ONLY: missing or contradictory total {\"count\":[[1]]} cannot prove complete readback",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "WIRE ONLY: missing or contradictory total {} cannot prove complete readback",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "WIRE ONLY: missing or contradictory total null cannot prove complete readback",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "WIRE ONLY: malformed or foreign acknowledgment is never success",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "WIRE ONLY: malformed or foreign acknowledgment is never success",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "WIRE ONLY: malformed or foreign acknowledgment is never success",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "attributed readback refuses {\"company_id\":6}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "attributed readback refuses {\"document_id\":901}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "attributed readback refuses {\"storage_id\":8}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "attributed readback refuses {\"good_id\":124}",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "attributed readback refuses {\"unit_id\":22}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "attributed readback refuses {\"operation_unit_type\":2}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "attributed readback refuses {\"operation_unit_type\":[1]}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "attributed readback refuses {\"type_id\":[3]}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "attributed readback refuses {\"type_id\":1}",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "attributed readback refuses {\"amount\":-2.5}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "attributed readback refuses {\"amount\":3}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "attributed readback refuses {\"discount\":1}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "attributed readback refuses {\"cost\":25.6}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "attributed readback refuses {\"deleted\":true}",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "attributed readback refuses {\"create_date\":1493128800}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "attributed readback refuses {\"create_date\":\"2026-02-30T09:00:00Z\"}",
+        "status": "passed",
+        "durationMs": 0
+      },
+      {
+        "title": "preserves incoming decimal lexemes before binary floating point rounding",
+        "status": "passed",
+        "durationMs": 1
+      },
+      {
+        "title": "requires exactly one line and strips all unexpected provider fields",
+        "status": "passed",
+        "durationMs": 0
+      }
+    ]
+  }
+}
