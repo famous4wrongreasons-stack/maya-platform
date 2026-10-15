@@ -52,7 +52,7 @@ export function assertPhoneAiPayload(init) {
     if(typeof value==='string'){
       // AiCore replaces personal names with these per-turn opaque aliases.
       // Exclude only that exact canonical syntax from extra contact screening.
-      const screened=value.replace(/\[name removed\]@[a-f0-9]{32}_\d+/g,'[name removed]');
+      const screened=value.replace(/\[(?:name|reference) removed\]@[a-f0-9]{32}_\d+/g,'[name removed]');
       assert.ok(!screened.includes('@'),'phone_ai_raw_email');
       assert.ok(!/(?:\+\d[\d ()-]{8,}\d|\b\d{10,15}\b)/.test(screened),'phone_ai_raw_phone');
       if(/^(?:clientId|userId|tenantId|phone|email|customer_id|client_id)$/i.test(key))assert.ok(value===''||/^\[/.test(value),'phone_ai_raw_identity');

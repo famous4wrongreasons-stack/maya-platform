@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "qualification": "SYNTHETIC_HTTP_PG_COMPILED_APP_NOT_LIVE_ACCEPTANCE",
+  "checks": [
+    "canonical-password-logins",
+    "native-greeting-full-http-model-relay",
+    "web-greeting-full-http-model-relay",
+    "actual-compiled-catalog-projection-reference-alias-preserved",
+    "foreign-tenant-and-missing-login-refused-before-model",
+    "suspended-membership-current-reread",
+    "zero-booking-client-or-entitlement-effects",
+    "canonical-length-plan-validation-preserved"
+  ],
+  "realProviderCalls": 0,
+  "phase": "migrations",
+  "modelCallsSynthetic": 4,
+  "modelStatus": {
+    "contract": "maya.phone-ai-status/1",
+    "profile": "phone-owner-catalog-chat-20261015/1",
+    "expiresAt": "2026-10-15T10:08:06.210Z",
+    "maxCalls": 100,
+    "maxSpendNanoUsd": 2000000000,
+    "completed": 4,
+    "refusals": 0,
+    "usage": {
+      "promptTokens": 400,
+      "completionTokens": 80,
+      "totalTokens": 480
+    },
+    "stats": {
+      "dialogs": 4,
+      "turns": 4,
+      "attempts": 4,
+      "inputTokens": 249902,
+      "outputTokens": 6248,
+      "reservedNanoUsd": 354612720,
+      "halted": false
+    },
+    "revoked": false,
+    "lastTransport": {
+      "stage": "validated",
+      "upstreamStatus": 200,
+      "finishReason": "stop"
+    }
+  },
+  "proofDatabaseStopped": true
+}

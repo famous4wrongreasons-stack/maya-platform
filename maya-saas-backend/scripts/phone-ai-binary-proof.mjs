@@ -2,7 +2,7 @@
 // model relay. No credentials, retained owner DB or real provider network.
 import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import net from 'node:net';import {createRequire} from 'node:module';import {fileURLToPath} from 'node:url';import {randomBytes,randomUUID} from 'node:crypto';
 import {sessionPlan,stage} from './local-onboarding.mjs';import {PRIVATE_KEYS,profileEnvironment,migrationConfigSource} from './local-onboarding-profile.mjs';
-import {phoneAiEgress} from './phone-ai-egress.mjs';import {installPhoneAi} from './phone-ai-runtime.mjs';
+import {phoneAiEgress} from './phone-ai-egress.mjs';import {assertPhoneAiPayload} from './phone-ai-scope.mjs';import {installPhoneAi} from './phone-ai-runtime.mjs';
 const backend=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),require=createRequire(import.meta.url),out=process.argv[2];
 assert.ok(out&&path.isAbsolute(out)&&!fs.existsSync(out));fs.mkdirSync(out,{mode:0o700});
 const state=fs.mkdtempSync('/private/tmp/maya-phone-ai-proof-');fs.chmodSync(state,0o700);
@@ -34,6 +34,11 @@ try{
  const token=await login(own),other=await login(foreign);report.checks.push('canonical-password-logins');
  const chat=(surface,access=token)=>{const r=request(app.getHttpServer()).post('/api/ai/chat').send({surface,requestId:randomUUID(),messages:[{role:'user',content:'Привет'}]});if(access)r.set('Authorization','Bearer '+access);return r.timeout({response:60000,deadline:65000});};
  for(const surface of ['native','web']){const r=await chat(surface);assert.equal(r.status,201,JSON.stringify(r.body));assert.match(r.body.reply,/Рада тебя видеть/);assert.equal(r.body.source,'deepseek');report.checks.push(surface+'-greeting-full-http-model-relay');}
+ const projection=app.get(load('ai-tools/ai-core.service.js').AiCoreService).sanitizeMessages([{role:'user',content:'Какие услуги?'}]);
+ const projected=projection.project([{name:'catalog.services.read',result:{services:[{id:'synthetic-service-id',name:'Мужская стрижка',price_min:2000}]}}],true);
+ assert.match(JSON.stringify(projected),/\[reference removed\]@/);assert.ok(!JSON.stringify(projected).includes('synthetic-service-id'));
+ assertPhoneAiPayload({method:'POST',body:JSON.stringify({model:'deepseek-v4-pro',messages:[{role:'system',content:'Synthetic'},{role:'user',content:JSON.stringify({phase:'final_response',conversation:projection.messages,remembered_notes:[],tool_results:projected})}],max_tokens:128,thinking:{type:'disabled'},stream:false})});
+ report.checks.push('actual-compiled-catalog-projection-reference-alias-preserved');
  const calls=modelCalls;assert.equal((await chat('native',other)).status,403);assert.equal((await chat('native',null)).status,401);assert.equal(modelCalls,calls);report.checks.push('foreign-tenant-and-missing-login-refused-before-model');
  await prisma.membership.updateMany({where:{tenantId:own.tenant.id,userId:own.owner.id},data:{status:'suspended'}});assert.equal((await chat('native')).status,401);assert.equal(modelCalls,calls);report.checks.push('suspended-membership-current-reread');
  assert.equal(await prisma.appointment.count(),0);assert.equal(await prisma.client.count(),0);assert.equal(await prisma.tenantEntitlement.count(),0);report.checks.push('zero-booking-client-or-entitlement-effects');

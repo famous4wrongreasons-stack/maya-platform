@@ -152,3 +152,23 @@ failed question until the canonical UI explicitly retries it.
 Fresh repair proofs: 60/60; compiled HTTP native/web path and `length` canonical
 validation PASS; tampered/foreign ledger refused, unresolved prior cost retained,
 combined cap enforced before dispatch. Neither synthetic proof uses real providers.
+
+
+### Catalogue alias refusal — proven, 15 October
+
+After the first correction, the provider returned HTTP 200/stop with validated
+usage; the canonical catalogue tool completed. Final reply was then refused by
+`phone_ai_raw_email` before dispatch: canonical projection emits both
+`[name removed]@<nonce>_<index>` and `[reference removed]@<nonce>_<index>`.
+The additional guard admitted only the former. It now recognizes both exact
+canonical patterns without altering their bytes. Real addresses and malformed
+aliases remain refused. The executable test uses the compiled AiCore projection,
+not a separately invented serializer. 61/61 checks and compiled HTTP proof PASS.
+
+A second explicit repair preserves the first two immutable ledgers and verifies
+their chain before carrying the combined four attempts/USD 0.391926480 reservation
+into the exclusive second continuation. This supersedes the first correction's
+one-continuation limit; it does not change the original owner scope, expiry or cost
+cap, and does not allow automatic restart/renewal. A further continuation is not
+implemented. No model key is read again from the Mac. This operational repair
+changes no product, identity, booking, carrier or entitlement authority.

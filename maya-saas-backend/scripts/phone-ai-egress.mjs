@@ -78,8 +78,8 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
     const scope=readPhoneAiScope(file,pin),keyFile='/run/maya/deepseek.key',stat=fs.lstatSync(keyFile);
     assert.ok(stat.isFile()&&!stat.isSymbolicLink()&&stat.uid===0&&(stat.mode&0o077)===0&&stat.size<=512,'phone_ai_key_file');
     const continuation=process.env.MAYA_PHONE_AI_CONTINUATION_SHA256;
-    const carryForward=continuation?readPhoneAiContinuation(continuation,pin,scope):undefined;
-    const app=phoneAiEgress({scope,pin,credential:fs.readFileSync(keyFile,'utf8'),ledgerPath:continuation?'/var/lib/maya-ai/continuation-1.jsonl':'/var/lib/maya-ai/ledger.jsonl',carryForward,assertCurrent:()=>{readPhoneAiScope(file,pin);if(continuation)assert.deepEqual(readPhoneAiContinuation(continuation,pin,scope),carryForward);}});
+    const checkpoint=continuation?readPhoneAiContinuation(continuation,pin,scope):undefined;
+    const app=phoneAiEgress({scope,pin,credential:fs.readFileSync(keyFile,'utf8'),ledgerPath:'/var/lib/maya-ai/'+(checkpoint?.ledgerName??'ledger.jsonl'),carryForward:checkpoint?.carry,assertCurrent:()=>{readPhoneAiScope(file,pin);if(continuation)assert.deepEqual(readPhoneAiContinuation(continuation,pin,scope),checkpoint);}});
     const poll=setInterval(()=>{try{app.check();}catch{app.revoke();}},250);poll.unref();
     app.server.listen(8081,'0.0.0.0');
     for(const event of ['SIGTERM','SIGINT'])process.once(event,()=>{app.revoke();app.server.closeAllConnections();app.server.close(()=>{clearInterval(poll);app.close();});});

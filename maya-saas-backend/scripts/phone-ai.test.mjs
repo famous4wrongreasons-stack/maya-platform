@@ -27,6 +27,7 @@ test('exact 24h/100/$2 scope and authenticated owner only',()=>{
 });
 test('canonical catalogue wire only; personal tools/history/contacts refused',()=>{
  assertPhoneAiPayload({method:'POST',body:wire()});
+ assertPhoneAiPayload({method:'POST',body:wire({tool_results:[{name:'catalog.services.read',result:{id:'[reference removed]@0123456789abcdef0123456789abcdef_2'}}]})});
  assertPhoneAiPayload({method:'POST',body:wire({conversation:[{role:'user',content:'Привет, я [name removed]@0123456789abcdef0123456789abcdef_1'}]})});
  assert.throws(()=>assertPhoneAiPayload({method:'POST',body:wire({conversation:[{role:'user',content:'[name removed]@0123456789abcdef0123456789abcdef_1 me@example.invalid'}]})}));
  for(const patch of [{tool_results:[{name:'appointments.own.list',result:[]}]},{remembered_notes:['private']},{conversation:[{role:'user',content:'me@example.invalid'}]},{tool_results:[{name:'catalog.staff.read',result:{phone:'+79991234567'}}]},{available_tools:[{name:'appointments.create'}]},{pending_owner_review:{}}])assert.throws(()=>assertPhoneAiPayload({method:'POST',body:wire(patch)}));
@@ -92,4 +93,13 @@ test('manual continuation charges unresolved predecessor cost and preserves orig
  assert.equal((await f.request()).status,200);assert.equal(f.snapshot().stats.attempts,2);assert.ok(f.snapshot().stats.reservedNanoUsd>1927200000);
  assert.throws(()=>new CandidateBudgetGate({ledgerPath:dir+'/forbidden',manifestSha256:pin,candidateCommit:scope.candidate,profile:CORE_DIAGNOSTIC_PROFILE,mode:'OFFLINE_SYNTHETIC_ONLY',transport:async()=>answer(),carryForward:carry}),/carry_forward_refused/);
  const tampered=Buffer.from(rows.map(r=>JSON.stringify(r.event==='reserved'?{...r,totalNanoUsd:0}:r)).join('\n')+'\n');assert.throws(()=>phoneAiCarryForward(tampered,{...binding,ledgerSha256:createHash('sha256').update(tampered).digest('hex')}));
+});
+test('second explicit repair verifies both immutable ledgers and carries their combined reservations',()=>{
+ const hash=b=>createHash('sha256').update(b).digest('hex');
+ const baseRows=[{event:'opened',manifestSha256:pin,candidateCommit:scope.candidate,profile:CORE_PHONE_READ_PROFILE,mode:'ADMITTED_MODEL_ONLY',paidAuthorized:true},{event:'reserved',attempt:1,input:10,output:2,nanoUsd:21120,totalInput:10,totalOutput:2,totalNanoUsd:21120},{event:'halted_after_attempt',attempt:1}];
+ const first=Buffer.from(baseRows.map(JSON.stringify).join('\n')+'\n');const one=phoneAiCarryForward(first,{ledgerSha256:hash(first),scopePin:pin,candidate:scope.candidate});
+ const next=Buffer.from([JSON.stringify({...baseRows[0],carryForward:one}),JSON.stringify({event:'reserved',attempt:2,input:10,output:2,nanoUsd:21120,totalInput:20,totalOutput:4,totalNanoUsd:42240}),JSON.stringify({event:'closed'})].join('\n')+'\n');
+ const binding={ledgerSha256:hash(next),scopePin:pin,candidate:scope.candidate};
+ const two=phoneAiCarryForward(next,binding,one);assert.equal(two.attempts,2);assert.equal(two.reservedNanoUsd,42240);
+ assert.throws(()=>phoneAiCarryForward(next,binding));assert.throws(()=>phoneAiCarryForward(next,binding,{...one,reservedNanoUsd:0}));assert.throws(()=>phoneAiCarryForward(next,binding,{...one,ledgerSha256:'f'.repeat(64)}));
 });
