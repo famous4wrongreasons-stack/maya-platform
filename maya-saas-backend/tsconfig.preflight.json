@@ -9,6 +9,7 @@
     "noEmit": false
   },
   "include": [
+    "scripts/platform-owner-bootstrap.ts",
     "scripts/auth-retention-cleanup.ts",
     "scripts/a18-consent-security-remediation.ts",
     "scripts/package5-b35-history-cutover.ts",

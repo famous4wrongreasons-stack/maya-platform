@@ -105,6 +105,46 @@ jobs:
           MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION: widgets-live-test-1
         run: npm run test:http
 
+  platform-operator-bootstrap:
+    name: First platform operator (isolated database)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: maya_widget_gate_proof_platform_bootstrap_ci
+          POSTGRES_USER: maya_ci
+          POSTGRES_PASSWORD: maya_ci
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U maya_ci -d maya_widget_gate_proof_platform_bootstrap_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: maya-saas-backend
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://maya_ci:maya_ci@127.0.0.1:55432/maya_widget_gate_proof_platform_bootstrap_ci?schema=public
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: maya-saas-backend/package-lock.json
+      - run: npm ci
+      - run: npm run prisma:generate
+      - run: npx prisma migrate deploy
+      - run: npm run build
+      - run: npm run typecheck:widgets-live
+      # No broad seed. The test must exercise the actual first-operator case,
+      # normal HTTP login, atomic audit and compiled anonymous-input command.
+      - run: npx jest --config test/jest-widgets-live.json --testRegex 'widgets-live/platform-owner-bootstrap\.probe-spec\.ts$' --runInBand
+
   legacy-python:
     name: Legacy Python
     runs-on: ubuntu-latest
