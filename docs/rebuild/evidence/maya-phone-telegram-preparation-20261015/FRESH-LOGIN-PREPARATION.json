@@ -1,0 +1,59 @@
+{
+  "status": "FRESH_LOGIN_PREPARED_WAITING_OWNER_SECRET",
+  "authorization": "Owner explicitly approved new <=30min, <=3 fresh Telegram logins on phone-test; existing link preserved; YCLIENTS registry <=6400 rows per attempt; local test Client binding only. No booking/history/messages/model calls.",
+  "authorizationResponse": "Да, продолжай; Client Secret готов",
+  "predecessor": "LIVE-LINK-AND-EXPIRY.json",
+  "serverPreparation": {
+    "status": "PREPARED_NO_CREDENTIALS_NO_RESTART",
+    "head": "f046cbc32938f3226725012dcdad97bce88524c5",
+    "sourceHashes": {
+      "phone-telegram-scope.mjs": "96249e24acaf2161ee97625a0ca113446d3c634b9ca0bdbf235e9d50a4b30d3d",
+      "phone-telegram-runtime.mjs": "a3985d30ce676b442757103794576e5078c6d765e935f8bf2551117f94e49875",
+      "phone-telegram-egress.mjs": "a62ad1e1f8a2a19d1d345fe26f98de10d8e614e9e35062dd4ccc61a32f90499d",
+      "phone-telegram-entry.mjs": "4eb9a73a57f8cef9abd78c5836f33beb2302275aef67cbf043d5b5003dc8bc25",
+      "phone-telegram-bootstrap.mjs": "99c5d33f4d442195ced00e0b5cd2c6467e2e3ef282934084c6090cb4df4e4453"
+    },
+    "backendImageUnchanged": true,
+    "affectedContainers": 0,
+    "expiresAt": "2026-10-15T13:19:50+00:00",
+    "newWindowExplicitlyApproved": true
+  },
+  "inputManifest": {
+    "head": "f046cbc32938f3226725012dcdad97bce88524c5",
+    "files": {
+      "/private/tmp/maya-phone-telegram-execution-20261015-03/Maya Telegram Setup.app/Contents/MacOS/PhoneTelegramSecret": "5a54437be17d3b8fa3d5a1d9eaab7c3c9c06c7009f031e25616fb14be449e055",
+      "/private/tmp/maya-phone-telegram-execution-20261015-03/Maya Telegram Setup.app/Contents/Info.plist": "355b31956af81f0fea3265cbedc66a57130e2d8fcdbaa82f9f9c37d6c872dd9f",
+      "/private/tmp/maya-phone-telegram-execution-20261015-03/receive.py": "8867c8fdfed409cd90ddbf1a4af4815ad8c7e6c2998fdf4ae33454957afb0886",
+      "/private/tmp/maya-phone-telegram-execution-20261015-03/input.mjs": "9c6c9371f984b3fbeb6970188a1f4b133edb1060ab440e4062675f11933b9ed4",
+      "/private/tmp/maya-phone-ai-execution-20261015-01/ssh-packet.py": "fd9804245dc7a3c167308efd23ac0052b44d3f2ef2908609823999c77b88ea29"
+    },
+    "approvedExpiry": "2026-10-15T13:19:50+00:00",
+    "renewalApproval": "owner-20261015-fresh-linked-login-03",
+    "productSourceChanged": false
+  },
+  "operatorScriptHashes": {
+    "build-packet.mjs": "4fc98544ffd9e3e46797b97c1c2f778325ad70cc27cd774c17643e665951da91",
+    "prepare.py": "2022fcd497d6c979a5e7edd6c081f89aece26b465bb8a95d93b78b98ca1106e6",
+    "receive.py": "8867c8fdfed409cd90ddbf1a4af4815ad8c7e6c2998fdf4ae33454957afb0886",
+    "input.mjs": "9c6c9371f984b3fbeb6970188a1f4b133edb1060ab440e4062675f11933b9ed4",
+    "observe.py": "9a27989357b7de74abfedaee1b471e77509b611574cd5580457e10f058ab011d"
+  },
+  "verified": {
+    "sameTestedD2098Sources": true,
+    "previousScopeExpiredRevoked": true,
+    "previousSecretDeleted": true,
+    "priorAccountLinkPreserved": true,
+    "nativeSecureWindowVisible": true,
+    "nextLoginFormLoaded": true
+  },
+  "performedAtPreparation": {
+    "newProviderCalls": 0,
+    "productSourceChanges": 0,
+    "containerRestarts": 0
+  },
+  "notClaimed": [
+    "fresh Telegram login completed",
+    "Client binding created",
+    "booking enabled"
+  ]
+}
