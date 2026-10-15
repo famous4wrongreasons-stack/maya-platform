@@ -1,0 +1,111 @@
+{
+  "status": "LOCAL_BOOTSTRAP_AND_FULL_BACKEND_REGRESSION_PASS_NOT_DEPLOYED",
+  "testedSourceCommit": "b747a90c9304b285e11d093e473be0dea983f2e2",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "commits": {
+    "bootstrap": "0a10e295",
+    "boundedPlanner": "8c7a047e",
+    "sourceCensus": "b747a90c"
+  },
+  "checks": {
+    "fullBackend": {
+      "passed": 9912,
+      "failed": 0,
+      "skipped": 0,
+      "suites": 729
+    },
+    "bootstrapUnit": {
+      "passed": 20,
+      "failed": 0,
+      "includedInFullBackend": true
+    },
+    "bootstrapHttpPostgresCompiled": {
+      "passed": 7,
+      "failed": 0
+    },
+    "operatorOfflineCompiled": {
+      "passed": 39,
+      "failed": 0
+    },
+    "types": "PASS: scripts and live suites",
+    "scopedLint": "PASS",
+    "freshDisposableMigrationReplay": "PASS; test databases only",
+    "runtimeBuild": "PASS; fresh artifact used by R01 integration test"
+  },
+  "proven": [
+    "First operator is a distinct global User; tenant owner unchanged even with the same email.",
+    "Normal auth issues a genuine global session; tenant session is refused at the release route.",
+    "No bootstrap-created sessions, memberships, Client identity or widget entitlement.",
+    "Exact database, first-account state and retained audit are reread under the User writer lock.",
+    "Concurrent calls create exactly one User and audit; replay never resets password.",
+    "Suspended account or retained initialization audit refuses another initialization.",
+    "Audit failure rolls back the account. Anonymous credential input only; no email/password in CLI output."
+  ],
+  "fullRegressionFindings": [
+    {
+      "kind": "product request budget regression",
+      "before": "Two real serializer cases exceeded unchanged 98,304-byte ceiling (98,314 and 98,971).",
+      "after": "Concise equivalent instructions; existing complete schema/authority/history roundtrip and byte-budget tests PASS. No data truncation, filtering, threshold change or routing override."
+    },
+    {
+      "kind": "R01 integration evidence drift",
+      "before": "Expected 47 artifacts, actual current build 53.",
+      "after": "Exact census 53 plus explicit checks of six existing companion modules. Source provenance: 438909a8, ccd38792, e9cd4ad2. No runtime/build source changes."
+    }
+  ],
+  "liveReadOnly": {
+    "checkedAt": "2026-10-15T15:40:26.874469+00:00",
+    "exitCode": 0,
+    "result": {
+      "readOnly": true,
+      "providerCalls": 0,
+      "modelCalls": 0,
+      "allPlatformOwnerRows": 0,
+      "activeGlobalOperators": 0,
+      "otherGlobalAccounts": 0,
+      "retainedBootstrapAudits": 0
+    }
+  },
+  "compiledBuild": {
+    "buildDigest": "ccf0a949da78fa96f4aa167d54a688e313dbcd3bab79432bbab190aa45814140",
+    "certificateIssued": false,
+    "authorizationIssued": false
+  },
+  "notProven": [
+    "Full final release admission including complete fresh mutation corpus, all CI jobs, carrier/runtime/FBE2E and packaging.",
+    "Real DeepSeek classification with the changed personal-booking instructions.",
+    "Phone acceptance on the new candidate or any real booking/move/cancel."
+  ],
+  "remaining": [
+    "Full exact-candidate release qualification; no old certificate inheritance.",
+    "Owner-authorized first real global operator initialization and ordinary global login.",
+    "Operator-owned public trust key and exact V2 execution signature, separate approved phone-test update/grant.",
+    "Existing phone catalog-only/Action Engine write refusal remains; prepare bounded admission and obtain separate authorization before real YCLIENTS effects."
+  ],
+  "readyForProductionExecutionAuthorization": false,
+  "certificate": "NOT_ISSUED",
+  "effects": {
+    "remoteQueries": "read-only transaction; nonidentifying account counts only",
+    "serverChanges": 0,
+    "liveDatabaseWrites": 0,
+    "liveGrants": 0,
+    "realProviderCalls": 0,
+    "realModelCalls": 0,
+    "realOtp": 0,
+    "phoneInstall": 0,
+    "productionSigningKeysCreated": 0
+  },
+  "cleanup": [
+    {
+      "manifest": "/private/tmp/maya-platform-bootstrap-final-b747a90c/manifest.json",
+      "pgStatusExit": 3,
+      "portOpen": false
+    },
+    {
+      "manifest": "/private/tmp/maya-personal-full-backend-fixed-20261015/manifest.json",
+      "pgStatusExit": 3,
+      "portOpen": false
+    }
+  ],
+  "evidenceQualification": "New run replaces failed diagnostic backend run. No claim of full Platform CI/GitHub CI or full release certification. Documentation checkpoint after this commit does not change tested source bytes."
+}

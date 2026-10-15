@@ -1,0 +1,7 @@
+{
+  "scope": "this continuation diff and its compact archive only",
+  "filesReviewed": 18,
+  "highConfidenceSecretFindings": [],
+  "manualReview": "Only artificial credential literals in tests/CI; no real key, session, email/phone/customer records copied. Local provenance paths retained.",
+  "wholeRepositoryScan": false
+}

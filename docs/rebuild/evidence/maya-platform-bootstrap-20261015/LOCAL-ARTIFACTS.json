@@ -1,0 +1,548 @@
+[
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/live-types.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/build-digest.json",
+    "sha256": "ea1f147b1537eda54914340f9670e21d7e9925370c8859567a40a5ec4f91d076",
+    "size": 137,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/backend-build.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/bootstrap-unit.log",
+    "sha256": "a2e74291872f5031e4627ad68b8892c81fc2a1a4c63e0d9f8c4ec99d54861786",
+    "size": 1496,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/bootstrap-http-pg-binary-jest.json",
+    "sha256": "6ecb205ef85b8d1ca2909159aebfbd8a24a69880eb177a652e848748e24a2e7e",
+    "size": 4607,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/migrations.log",
+    "sha256": "37b682ad0202f5c7da702d4727b5ed440876956a12644df128bbdafbd75b5b52",
+    "size": 14905,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/bootstrap-http-pg-binary.log",
+    "sha256": "bcbb80a291fa23df15d16671953826a1c760c682668f0eb92736ed07084e8f23",
+    "size": 1981,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/postgres.log",
+    "sha256": "c5008e5feaaea42e294fc386cc867b4d9491750848dbf3bf7b661326798880b5",
+    "size": 2195,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/manifest.json",
+    "sha256": "d3ae30b088cf96fc56fd4bc7bf38471a98335ac4ac818aa0cf9dc3556a0551dd",
+    "size": 894,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/preflight-build.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/initdb.log",
+    "sha256": "b133fa39df2e27553f8d350cf5ee71591f0e3f2b41c5673f44492fe669512ce8",
+    "size": 958,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/operator-validation.log",
+    "sha256": "6b0043b14ef1201873655f7567c75d32f1379214226902c67e41eba07f269db7",
+    "size": 6645,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-b747a90c/unit-jest.json",
+    "sha256": "0389dfedd80bfa29d5fb07930cd41a5ebceffa96ebc7a0ac3b2be6d9e116837a",
+    "size": 9044,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-fixed-20261015/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-fixed-20261015/live-types.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-fixed-20261015/full-backend-jest.json",
+    "sha256": "c6bc1afcd60f2c3a062f512971e818a8a3bb6fd672216e856e93f692e95d64dd",
+    "size": 5034212,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-fixed-20261015/synthetic-seed.log",
+    "sha256": "027fde7cd0e4fbacb5133540c9a0ea3df1ede3cef06bad7abfebe3d86bbf825c",
+    "size": 574,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-fixed-20261015/full-backend.log",
+    "sha256": "0d82f1f8658c365af014fdf4bf8d7d4846fed2388f89c5e9847afa317cab8ba2",
+    "size": 1386598,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-fixed-20261015/migrations.log",
+    "sha256": "e9a4c48afbf8fe7471e8c8f2ad244e1e0ad8eea227d2a5bea81afa7c27f895e4",
+    "size": 14906,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-fixed-20261015/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-fixed-20261015/postgres.log",
+    "sha256": "5b6a430b6c1250bb2299dbae38520901b6707b574ad725d4ab0ea99766a8384f",
+    "size": 1609,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-fixed-20261015/manifest.json",
+    "sha256": "604378d7ac06e3b738517cc5f3f27c21b32291d4a42fc77961d5e018c857d9bb",
+    "size": 859,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-fixed-20261015/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-fixed-20261015/initdb.log",
+    "sha256": "538714b9c5d1b54ae83419a737ce3e070fc6526226ff56ce3b9b28afe312934c",
+    "size": 958,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-fixed-20261015/runtime-build.log",
+    "sha256": "21280e6c1c81afb91f8960431d1d7e780b33f70fbf045899ccbf607784fc4b7d",
+    "size": 1010,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r1/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r1/backend-build.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r1/bootstrap-unit.log",
+    "sha256": "047aae0cd739e8050c6785301da265c09779259588cfae53c5c9ad0cfbdda249",
+    "size": 2399,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r1/migrations.log",
+    "sha256": "c7abdbce4049d004d2f6f2379420d01d9b96598c7a26bcbf5c4289a3130a4bd3",
+    "size": 14905,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r1/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r1/postgres.log",
+    "sha256": "76b402cb18c46b8bf151b588ddfefec5bd055f371895cec5712e090768e6aece",
+    "size": 1234,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r1/manifest.json",
+    "sha256": "922be467c3fc202d27f9adc391486f1f581c52235b495472620c54ff82c3af60",
+    "size": 735,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r1/preflight-build.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r1/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r1/initdb.log",
+    "sha256": "d2139027bc624fefca508edda961e4eb2ec3b83c2c3a0ea78742c5e5f6a0cb52",
+    "size": 958,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r1/unit-jest.json",
+    "sha256": "d5ed7c210520d4cf0fd9f903d74f3c9b18114c3b171d42b30ad6a13356f37ae6",
+    "size": 12200,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r2/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r2/backend-build.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r2/bootstrap-unit.log",
+    "sha256": "d4afcd083ba4a6539fda9de8e8b7fc4f326620fd4d7e3f2a87f1fe8ae449bfaa",
+    "size": 1439,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r2/bootstrap-http-pg-binary-jest.json",
+    "sha256": "3a61b3435792f28d88f8f4a75787c051e963f9c304c711e4b34e01276aa8b2e6",
+    "size": 8704,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r2/migrations.log",
+    "sha256": "65b14fc7c80562e36ebd7ad5aada2ff73a1514a3c8dfdf045e54aa2d8ab50830",
+    "size": 14905,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r2/bootstrap-http-pg-binary.log",
+    "sha256": "cf3e9eb44044610d5c97624d6109ef884378e8f525f5954076c5c989bd747281",
+    "size": 3949,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r2/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r2/postgres.log",
+    "sha256": "15960b2628b228fb9712206a7c3e6eea327c7362d0b3f7c7905a18c803711d74",
+    "size": 2180,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r2/manifest.json",
+    "sha256": "a7bd07b12348cfc8cb560dc84569e8da2aed1eac0c666915c1d5ab322c035632",
+    "size": 757,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r2/preflight-build.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r2/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r2/initdb.log",
+    "sha256": "997580defaa98d45db2cb3ea8bf248e3a87fa1d6f96f2ac30d53b7780b24fc1d",
+    "size": 958,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r2/unit-jest.json",
+    "sha256": "14bc6187fa05d8d45b4c26149d53fa6968497ea55e989274770da9c1a802f180",
+    "size": 8628,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r3/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r3/live-types.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r3/backend-build.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r3/bootstrap-unit.log",
+    "sha256": "29ffd162d3f1c0e8102838fd00113eb83e913cf00bbcaf1d8750d15b8e6376de",
+    "size": 1425,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r3/bootstrap-http-pg-binary-jest.json",
+    "sha256": "6eef88b633d7f3bb0aafbe646ddf41d4917de257780b1bd5c93dd78022b20830",
+    "size": 4606,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r3/migrations.log",
+    "sha256": "3ffd54df01458919cdee2af71ec1835b7bbaf47e8db3b16df2a2fbeda4f75a41",
+    "size": 14905,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r3/bootstrap-http-pg-binary.log",
+    "sha256": "65d948157fb320ce242dcb6e8885a8ef143a2a1d29b05e2e5a65409f1dea37fa",
+    "size": 1983,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r3/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r3/postgres.log",
+    "sha256": "62b2527a1c761773250553c59f434d5cfb6dcb06e30e50df88176208a19db653",
+    "size": 2180,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r3/manifest.json",
+    "sha256": "044f0d36b15ac9c0af979df209fed7a8ac3a266b8bf000c5908222506d4095ee",
+    "size": 893,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r3/preflight-build.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r3/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r3/initdb.log",
+    "sha256": "a35529fa2efabdb64c7a0c40acf9182bce123838837e903dea2dfbfc3dc4733c",
+    "size": 958,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-20261015-r3/unit-jest.json",
+    "sha256": "b8973e467370f19104be7beab114b6a6512c44096ed477d70085ddecbbc1ea0d",
+    "size": 8628,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295/live-types.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295/full-backend.log",
+    "sha256": "df5690b07fcc70914f7b81492eaae5a2c38b934d735b443d0257718adeabe1be",
+    "size": 215,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295/migrations.log",
+    "sha256": "24748be281566836ed41ed0fd339a8381ecad8d97bf4c633c8811bf19ec2b577",
+    "size": 14906,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295/postgres.log",
+    "sha256": "2c05ecd05fb2945d03c5a3f4c9e20f54bff5d5584cf942a5b5572cef7d63f861",
+    "size": 1234,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295/manifest.json",
+    "sha256": "98f49377462c1a11d7276b919180419471135ea6fac4cc6abc0a8229e4047bf3",
+    "size": 845,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295/initdb.log",
+    "sha256": "c7967db80f99cce68a087ede1b958a7db7ef10617b678173497086f5f1c67f3c",
+    "size": 958,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295/runtime-build.log",
+    "sha256": "21280e6c1c81afb91f8960431d1d7e780b33f70fbf045899ccbf607784fc4b7d",
+    "size": 1010,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295-r2/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295-r2/live-types.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295-r2/full-backend-jest.json",
+    "sha256": "65f98cf33de50407b65eba3578a3d597db4fc1acc101539f962cbc9622e377fd",
+    "size": 5041831,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295-r2/synthetic-seed.log",
+    "sha256": "977df2cf71ee0112c8c418b787ce9f15c3ad5187bbfacc4cc346a3de4cb131f0",
+    "size": 574,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295-r2/full-backend.log",
+    "sha256": "95653c5b503d40d8d941eecc15eef2eb12275f4c5b6c5ebeff83abf8724a8589",
+    "size": 1383008,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295-r2/migrations.log",
+    "sha256": "5f3a621f25a6ba0778afc502e0247cbdf87dcd9b2924c9304e141e30ef56a4d1",
+    "size": 14906,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295-r2/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295-r2/postgres.log",
+    "sha256": "9cdc5f43f1eb818e6a09ed298bdd0fce9f203039c3d8ed99259ef4f7867d0822",
+    "size": 1595,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295-r2/manifest.json",
+    "sha256": "67fdc4aeb0d447464de14555482670061a773a6f556114cd401921db264ce941",
+    "size": 839,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295-r2/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295-r2/initdb.log",
+    "sha256": "aa84fc038f82354457a2b2c261db8c539ae05501c12f6cb9ba23fd7991b4dea0",
+    "size": 958,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-personal-full-backend-0a10e295-r2/runtime-build.log",
+    "sha256": "21280e6c1c81afb91f8960431d1d7e780b33f70fbf045899ccbf607784fc4b7d",
+    "size": 1010,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-booking-bounded-planner-regression-r2.json",
+    "sha256": "e5a17f964546c0e5a856452a7c8b085e70244a6204b5849f4157e38b8761c496",
+    "size": 66764,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-lint.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  },
+  {
+    "source": "/private/tmp/maya-platform-bootstrap-final-types.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "reasonNotCopied": "Raw local synthetic proof; compact results are committed. Earlier failed/cancelled attempts retained, not success substitutes."
+  }
+]

@@ -1,0 +1,33 @@
+{
+  "sourceHead": "b747a90c9304b285e11d093e473be0dea983f2e2",
+  "sourceDirty": false,
+  "kind": "personal-entry-full-backend-regression",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-platform-bootstrap-5pXfU6/pg",
+  "database": "maya_widget_gate_proof_personal_regression_d403bb6eec95",
+  "port": 59432,
+  "status": "passed",
+  "completed": [
+    "live-types",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "synthetic-seed",
+    "runtime-build",
+    "full-backend",
+    "pg-stop"
+  ],
+  "signingKeysCreated": false,
+  "syntheticTenants": true,
+  "externalCalls": 0,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1,
+    "browserCount": 0
+  },
+  "clusterStopped": true
+}

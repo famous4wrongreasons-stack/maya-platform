@@ -3,7 +3,10 @@
 Local preparation, 2026-10-15. This is deployment tooling for the existing
 `platform_owner` role, not a new AR-1 engine or an execution authorization.
 No real operator account, password, signature, session or entitlement is created
-by this document. No server execution has been performed.
+by this document. No bootstrap execution on the server has been performed.
+
+Executed local results and remaining boundaries are recorded in the
+[checkpoint](evidence/maya-platform-bootstrap-20261015/README.md).
 
 ## Why the existing full seed must not be used
 
