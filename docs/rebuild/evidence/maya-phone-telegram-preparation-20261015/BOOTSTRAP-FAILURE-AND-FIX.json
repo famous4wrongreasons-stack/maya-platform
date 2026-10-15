@@ -1,0 +1,188 @@
+{
+  "status": "BOOTSTRAP_FIX_SYNTHETIC_PASS_LIVE_LINK_NOT_STARTED",
+  "previousCode": "7f5af358297a941a5d92ff5add448103077a23a8",
+  "appCandidateUnchanged": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "inputWindow": {
+    "previousClosedWithoutTransfer": true,
+    "appBundleReopenVisiblyVerified": true,
+    "binaryBytesUnchanged": true,
+    "ownerSubmittedSecret": true
+  },
+  "livePreflight": {
+    "result": "REFUSED_NO_RETRY",
+    "phase": "readiness",
+    "initialError": "AssertionError",
+    "rawErrorOrKeyLogged": false,
+    "readOnlyCleanupCheckAt": "2026-10-15T12:15:29.576717+00:00",
+    "credentialFilePresent": false,
+    "scopeRevoked": true,
+    "telegramRelayStopped": true,
+    "externalProviderCalls": 0,
+    "registryRows": 0,
+    "linkAttempts": 0,
+    "loginAttempts": 0,
+    "health": 200,
+    "postgresGatewayCatalogueModelContainersUnchanged": true,
+    "previousBackendRestored": true
+  },
+  "rootCause": "NestFactory returns an application proxy whose set trap ignores ordinary app.init assignment. The Telegram installation was never invoked by listen; process health alone did not establish identity-readiness. The existing synthetic proof installed directly and missed this entry wiring.",
+  "correction": "Define a guarded init method on the proxy target, invoke the original prototype init with the Nest receiver, await one installation; cache failure so it cannot be retried into access. Use the same helper in entry and compiled HTTP proof.",
+  "beforeProof": {
+    "status": "FAIL",
+    "qualification": "SYNTHETIC_COMPILED_HTTP_PG_PRIVATE_RELAY_NOT_LIVE_ACCEPTANCE",
+    "checks": [],
+    "realProviderCalls": 0,
+    "phase": "migrations",
+    "failure": "Expected values to be strictly equal:\n\n503 !== 403\n",
+    "proofDatabaseStopped": true
+  },
+  "afterProof": {
+    "status": "PASS",
+    "qualification": "SYNTHETIC_COMPILED_HTTP_PG_PRIVATE_RELAY_NOT_LIVE_ACCEPTANCE",
+    "checks": [
+      "real-Nest-init-hook-and-exact-receiver-preflight",
+      "ordinary-password-sessions-remain-canonical",
+      "missing-foreign-owner-unknown-login-wrong-redirect-refused",
+      "actual-signed-A23-link-only-no-client-and-replay-refused",
+      "real-verifier-rejects-forgery-before-CRM",
+      "foreign-Telegram-subject-refused-before-CRM",
+      "fresh-signed-login-real-registry-adapter-unique-initial-binding-original-session-reread",
+      "fourth-login-and-second-link-refused",
+      "exact-finder-only-no-directory-or-install",
+      "catalogue-pass-through-unchanged",
+      "action-engine-refusal-and-no-booking-entitlement-effects",
+      "withdrawal-stops-Telegram-without-breaking-health-or-password"
+    ],
+    "realProviderCalls": 0,
+    "phase": "migrations",
+    "wireCalls": 6,
+    "relay": {
+      "contract": "maya.phone-owner-telegram/1",
+      "link": 1,
+      "login": 3,
+      "calls": 6,
+      "completed": 6,
+      "rows": 1,
+      "refused": 0,
+      "tokenOutcome": "id_token_present",
+      "stopped": false,
+      "active": false
+    },
+    "proofDatabaseStopped": true
+  },
+  "unit": {
+    "passed": 33,
+    "failed": 0
+  },
+  "mutations": {
+    "status": "PASS",
+    "sourceHashes": {
+      "scope": "96249e24acaf2161ee97625a0ca113446d3c634b9ca0bdbf235e9d50a4b30d3d",
+      "egress": "a62ad1e1f8a2a19d1d345fe26f98de10d8e614e9e35062dd4ccc61a32f90499d",
+      "bootstrap": "99c5d33f4d442195ced00e0b5cd2c6467e2e3ef282934084c6090cb4df4e4453"
+    },
+    "greenBaseline": true,
+    "greenRestored": true,
+    "mutantsKilled": 16,
+    "realProviderCalls": 0,
+    "results": [
+      {
+        "name": "baseline",
+        "exit": 0,
+        "expected": true
+      },
+      {
+        "name": "nest-proxy-assignment-regression",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "company",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "expiry",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "duration",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "actor-role",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "restart-fence",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "scope-pin",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "tenant",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "user",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "attempt-budget",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "operation-binding",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "token-replay",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "page-order",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "row-bound",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "redirect-mode",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "redirect-response",
+        "exit": 1,
+        "expected": true
+      },
+      {
+        "name": "restored",
+        "exit": 0,
+        "expected": true
+      }
+    ]
+  },
+  "notClaimed": [
+    "live Telegram authentication",
+    "Client Secret validity",
+    "canonical personal Client binding",
+    "release certification"
+  ],
+  "remaining": "Prepare reviewed retry using the remaining originally approved window, with no automatic extension or reset; owner secret needed again because failed session deleted it."
+}

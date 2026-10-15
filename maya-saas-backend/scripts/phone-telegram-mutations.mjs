@@ -8,6 +8,12 @@ import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 const scripts = path.dirname(fileURLToPath(import.meta.url));
 const mutations = [
+  [
+    'nest-proxy-assignment-regression',
+    'bootstrap',
+    "Object.defineProperty(app, 'init', {\n    value: guardedInit,\n    configurable: true,\n    writable: true,\n  });",
+    'app.init = guardedInit;',
+  ],
   ['company', 'scope', "assert.equal(s.companyId, '503759');", ''],
   ['expiry', 'scope', 'now < end &&', 'true &&'],
   ['duration', 'scope', 'end - start <= 1800000', 'true'],
@@ -56,6 +62,11 @@ try {
   ]) {
     const directory = path.join(temporary, name);
     fs.mkdirSync(directory);
+    fs.symlinkSync(
+      path.join(scripts, '..', 'node_modules'),
+      path.join(directory, 'node_modules'),
+      'dir',
+    );
     for (const f of fs.readdirSync(scripts))
       if (/\.(mjs|cjs)$/.test(f)) {
         if (f.startsWith('phone-telegram'))
@@ -70,7 +81,12 @@ try {
     }
     const r = spawnSync(
       process.execPath,
-      ['--test', '--test-reporter=tap', 'phone-telegram.test.mjs'],
+      [
+        '--test',
+        '--test-reporter=tap',
+        'phone-telegram.test.mjs',
+        'phone-telegram-bootstrap.test.mjs',
+      ],
       {
         cwd: directory,
         encoding: 'utf8',
@@ -81,7 +97,7 @@ try {
     assert.equal(r.error, undefined, 'harness:' + name);
     assert.equal(r.signal, null, 'signal:' + name);
     const output = r.stdout + r.stderr;
-    assert.match(output, /# tests 31\b/, 'collection:' + name);
+    assert.match(output, /# tests 33\b/, 'collection:' + name);
     assert.equal(r.status, before ? 1 : 0, 'exit:' + name);
     if (before) {
       assert.match(
@@ -90,11 +106,11 @@ try {
         'assertion:' + name,
       );
       assert.match(output, /# fail [1-9]/);
-    } else assert.match(output, /# pass 31\b/);
+    } else assert.match(output, /# pass 33\b/);
     results.push({ name, exit: r.status, expected: true });
   }
   const sourceHashes = Object.fromEntries(
-    ['scope', 'egress'].map((n) => [
+    ['scope', 'egress', 'bootstrap'].map((n) => [
       n,
       createHash('sha256')
         .update(

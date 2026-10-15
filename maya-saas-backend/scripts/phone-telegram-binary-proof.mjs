@@ -19,6 +19,7 @@ import {
   migrationConfigSource,
 } from './local-onboarding-profile.mjs';
 import { installPhoneTelegram } from './phone-telegram-runtime.mjs';
+import { beforePhoneTelegramInit } from './phone-telegram-bootstrap.mjs';
 import { phoneTelegramEgress } from './phone-telegram-egress.mjs';
 import { installPhoneAi } from './phone-ai-runtime.mjs';
 import {
@@ -294,39 +295,44 @@ try {
       throw Error('Model use not part of Telegram proof');
     },
   });
-  installed = await installPhoneTelegram({
-    app,
-    require,
-    backend,
-    scope,
-    assertCurrent() {
-      assert.ok(alive);
-      validatePhoneTelegramScope(scope);
-    },
-    nativeFetch: ai.fetch,
-    relay: (route, body, options = {}) =>
-      nativeFetch(`http://127.0.0.1:${relay.server.address().port}/${route}`, {
-        method: 'POST',
-        body: JSON.stringify(body),
-        signal: options.signal,
-        redirect: 'error',
-        headers: {
-          'content-type': 'application/json',
-          'x-maya-scope': pin,
-          'x-maya-tenant': scope.tenantId,
-          'x-maya-user': scope.userId,
-          ...(route === 'client_registry'
-            ? {
-                'x-maya-crm-authorization': new Headers(options.headers).get(
-                  'authorization',
-                ),
-              }
-            : {}),
-        },
-      }),
+  beforePhoneTelegramInit(app, async () => {
+    installed = await installPhoneTelegram({
+      app,
+      require,
+      backend,
+      scope,
+      assertCurrent() {
+        assert.ok(alive);
+        validatePhoneTelegramScope(scope);
+      },
+      nativeFetch: ai.fetch,
+      relay: (route, body, options = {}) =>
+        nativeFetch(
+          `http://127.0.0.1:${relay.server.address().port}/${route}`,
+          {
+            method: 'POST',
+            body: JSON.stringify(body),
+            signal: options.signal,
+            redirect: 'error',
+            headers: {
+              'content-type': 'application/json',
+              'x-maya-scope': pin,
+              'x-maya-tenant': scope.tenantId,
+              'x-maya-user': scope.userId,
+              ...(route === 'client_registry'
+                ? {
+                    'x-maya-crm-authorization': new Headers(
+                      options.headers,
+                    ).get('authorization'),
+                  }
+                : {}),
+            },
+          },
+        ),
+    });
+    globalThis.fetch = installed.fetch;
+    app.use((req, res, next) => installed.runRequest(req, res, next));
   });
-  globalThis.fetch = installed.fetch;
-  app.use((req, res, next) => installed.runRequest(req, res, next));
   load('bootstrap/configure-http-app.js').configureHttpApp(app);
   await app.listen(apiPort, '127.0.0.1');
   const request = require('supertest');
@@ -352,6 +358,21 @@ try {
     assert.equal(r.status, 201);
     return r.body.access_token;
   };
+  assert.equal(
+    (
+      await post('auth/oauth/telegram/start', {
+        tenantSlug: 'foreign',
+        platform: 'web',
+        redirectUri: origin + '/oauth-callback.html',
+      })
+    ).status,
+    403,
+  );
+  assert.equal((await get('mobile/pwa/search?q=foreign')).status, 403);
+  const preflightFinder = await get('mobile/pwa/search?q=' + own.tenant.slug);
+  assert.equal(preflightFinder.status, 200);
+  assert.equal(preflightFinder.body.items.length, 1);
+  report.checks.push('real-Nest-init-hook-and-exact-receiver-preflight');
   const token = await login(own),
     other = await login(foreign);
   report.checks.push('ordinary-password-sessions-remain-canonical');

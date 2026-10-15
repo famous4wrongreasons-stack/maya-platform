@@ -5,6 +5,7 @@ export const PHONE_TELEGRAM_FILES = Object.freeze([
   'phone-telegram-runtime.mjs',
   'phone-telegram-egress.mjs',
   'phone-telegram-entry.mjs',
+  'phone-telegram-bootstrap.mjs',
 ]);
 export function phoneTelegramPlan(previous, pin) {
   assert.match(pin, /^[a-f0-9]{64}$/);

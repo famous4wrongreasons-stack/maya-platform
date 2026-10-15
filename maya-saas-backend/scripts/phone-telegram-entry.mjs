@@ -7,6 +7,7 @@ import {
   claimPhoneTelegramProcess,
 } from './phone-telegram-scope.mjs';
 import { installPhoneTelegram } from './phone-telegram-runtime.mjs';
+import { beforePhoneTelegramInit } from './phone-telegram-bootstrap.mjs';
 const require = createRequire(import.meta.url);
 try {
   assert.equal(process.cwd(), '/app');
@@ -25,8 +26,7 @@ try {
     assert.equal(once, false);
     once = true;
     const app = await create(...args);
-    const init = app.init.bind(app);
-    app.init = async (...initArgs) => {
+    beforePhoneTelegramInit(app, async () => {
       const installed = await installPhoneTelegram({
         app,
         require,
@@ -71,9 +71,7 @@ try {
           clearInterval(timer);
           installed.stop();
         });
-      app.init = init;
-      return init(...initArgs);
-    };
+    });
     return app;
   };
   await import('./phone-ai-entry.mjs');
