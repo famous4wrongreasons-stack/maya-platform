@@ -42,6 +42,13 @@ export const CORE_DIAGNOSTIC_LIMITS = Object.freeze({
   concurrency: 1,
   pricingStatus: 'CURRENT_PRICE_EVIDENCE_REQUIRED_FOR_ADMISSION',
 });
+// Owner-approved, isolated phone staging conversation. Existing diagnostic
+// limits remain byte-for-byte unchanged; this profile issues no product rights.
+export const CORE_PHONE_READ_PROFILE = 'phone-owner-catalog-chat-20261015/1';
+export const CORE_PHONE_READ_LIMITS = Object.freeze({
+  ...CORE_DIAGNOSTIC_LIMITS, dialogs: 100, turns: 100, attempts: 100,
+  inputTokens: 10_240_000, outputTokens: 204_800, durationMs: 86_400_000,
+});
 export const CORE_DIAGNOSTIC_LIMITS_SHA256 = createHash('sha256')
   .update(JSON.stringify(CORE_DIAGNOSTIC_LIMITS))
   .digest('hex');
@@ -102,6 +109,7 @@ export const CORE_OFFLINE_LIMITS_SHA256 = createHash('sha256')
   .update(JSON.stringify(CORE_OFFLINE_LIMITS))
   .digest('hex');
 function profileLimits(profile) {
+  if (profile === CORE_PHONE_READ_PROFILE) return CORE_PHONE_READ_LIMITS;
   if (profile === CORE_OWNER_HISTORY_PROFILE) return CORE_OWNER_HISTORY_LIMITS;
   if (profile === CORE_OWNER_READ_PROFILE) return CORE_OWNER_READ_LIMITS;
   if (profile === undefined) return CANDIDATE_LIMITS;
@@ -243,6 +251,7 @@ export class CandidateBudgetGate {
           CORE_UNION_PROFILE,
           CORE_OWNER_READ_PROFILE,
           CORE_OWNER_HISTORY_PROFILE,
+          CORE_PHONE_READ_PROFILE,
         ].includes(profile) ||
         typeof assertAdmission !== 'function' ||
         now !== undefined ||

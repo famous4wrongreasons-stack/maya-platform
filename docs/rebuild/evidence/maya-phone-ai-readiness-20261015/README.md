@@ -84,3 +84,42 @@ claiming booking success.
 Actual staging AI activation: NOT PERFORMED. DeepSeek credential read/transfer: 0.
 Paid model calls by this diagnostic: 0. YCLIENTS calls by this diagnostic: 0.
 No source/product, server configuration, grants, database or iPhone changes.
+
+
+## Owner-approved bounded AI staging continuation — 15 October
+
+The owner's subsequent explicit “да” authorizes transferring the saved DeepSeek
+credential to this staging server and one non-renewing window of at most 24 hours,
+100 upstream attempts and USD 2 combined. This supersedes the pending-approval
+status above for this bounded operation only. No production release, widget grant,
+customer-history export or provider booking is authorized.
+
+The deployed application/carrier candidate remains `7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3`.
+Its product source, Prisma and React source match the current development HEAD.
+The separately pinned operational overlay wraps the unchanged compiled AppModule
+and existing HTTP/JWT/session/actor checks. It restricts chat to the exact existing
+owner/tenant, exposes only three existing catalogue read owners, and refuses Action
+Engine effects. It adds no tenant or platform entitlement.
+
+Only the private model sidecar receives the root-private DeepSeek key. The backend
+remains on internal networks and has no actual model credential. The sidecar accepts
+only bounded canonical sanitized model payloads, reserves conservative cost before
+sending, fsyncs a persistent exclusive ledger and refuses restart with that ledger.
+Timeout/unknown usage latches refusal. Expiry and explicit withdrawal close access.
+There is no automatic renewal, budget reset or paid retry outside the common cap.
+
+The catalogue relay, its process/counter and existing expiry remain unchanged.
+The catalogue permission expires on 16 October at 06:43:27 UTC even if the AI
+window ends later. New catalogue authorization must not be inferred from this.
+
+Fresh synthetic proofs: 58/58 unit/regression checks; native and web HTTP greeting
+through the compiled AppModule and real private relay; foreign tenant, missing
+login and suspended membership denied before model; zero appointment/client/grant
+effects. All model credentials/responses in those proofs are artificial. These
+receipts do not claim a real model response or full release certification.
+
+Rollback: stop only model-egress; restore backend from the unchanged
+`compose.catalog-public-with-setup.json` with `up -d --no-deps backend`. Never
+restart catalogue-egress, reset its counter, remove the AI ledger or recreate this
+window. Preserve PostgreSQL/gateway and all carrier bytes. Withdrawal needs no
+new grant or migration.
