@@ -1,0 +1,44 @@
+{
+  "contract": "maya.phone-owner-observation/1",
+  "observedAtLocal": "2026-10-15T13:12:47+03:00",
+  "evidence": "Owner-supplied screenshot of installed iPhone app; no screenshot or personal booking parameters committed",
+  "phoneTextChat": "PASS_OWNER_OBSERVED",
+  "booking": "REFUSED_CLIENT_ACCESS; NOT_CREATED",
+  "proofLimits": [
+    "Greeting delivered on iPhone; not a full device/release certification.",
+    "Booking request reached canonical permission refusal; no appointment creation shown or found in staging.",
+    "Model invited booking although current staging is read-only; wording/capability mismatch remains."
+  ],
+  "serverReadOnlyCheck": {
+    "checkedAt": "2026-10-15T10:16:25.574614+00:00",
+    "scope": "exact authorized staging tenant; counts and configuration booleans only",
+    "state": {
+      "owner": {
+        "role": "tenant_owner",
+        "status": "active"
+      },
+      "telegramIdentityCount": 0,
+      "clientCount": 0,
+      "activeMayaUserClientLinks": 0,
+      "appointmentCount": 0,
+      "enabledWidgetGrantCount": 0,
+      "actionExecutionCount": 3,
+      "telegramConfigured": {
+        "enabled": false,
+        "clientIdPresent": false,
+        "clientSecretPresent": false
+      }
+    }
+  },
+  "nextPrerequisites": [
+    "Configure approved Telegram login and verified personal client context on this separate staging environment; Mac-local bindings were not copied.",
+    "Obtain and execute appropriate widget/booking admission and explicitly authorized provider-write scope before any real booking."
+  ],
+  "effects": {
+    "productCodeChanged": false,
+    "serverConfigurationChanged": false,
+    "paidModelCallsByThisCheck": 0,
+    "yclientsCallsByThisCheck": 0,
+    "bookingEffects": 0
+  }
+}
