@@ -1,0 +1,245 @@
+{
+  "status": "STAGING_TELEGRAM_LOGIN_AND_EXACT_CLIENT_BINDING_PASS",
+  "completedOn": "2026-10-15",
+  "environment": "phone-test.mayaos.ru / isolated test database",
+  "evidenceParentHead": "4f9b6d7c",
+  "productCandidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "operationalWrapperCommit": "d2098a25d03ac1c01296bf8dbb1cd64f71d61acd",
+  "sessionReady": {
+    "status": "SESSION_READY_NOT_IDENTITY_VERIFIED",
+    "head": "f046cbc32938f3226725012dcdad97bce88524c5",
+    "appCandidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+    "notBefore": "2026-10-15T12:53:37.720114+00:00",
+    "expiresAt": "2026-10-15T13:19:50+00:00",
+    "scopeSha256": "e3fc96fb8ea1b00bc4fe736f51679fdcb6ba27e81eb6ae29f06135ee3dcfb7fe",
+    "providerCalls": 0,
+    "unrelatedContainersUnchanged": true,
+    "exactFinder": true,
+    "foreignLoginRefused": true,
+    "secretOnlyInRelay": true,
+    "expiryCleanupArmed": true,
+    "productSourceChanged": false
+  },
+  "beforeLogin": {
+    "checkedAt": "2026-10-15T12:54:37.970429+00:00",
+    "database": {
+      "owner": {
+        "role": "tenant_owner",
+        "status": "active"
+      },
+      "telegramIdentities": 1,
+      "clients": 0,
+      "activeMayaUserLinks": 0,
+      "verifiedLinks": 0,
+      "methods": [],
+      "crmMatches": 0,
+      "appointments": 0,
+      "entitlements": 0
+    },
+    "transport": {
+      "contract": "maya.phone-owner-telegram/1",
+      "link": 0,
+      "login": 0,
+      "calls": 0,
+      "completed": 0,
+      "rows": 0,
+      "refused": 0,
+      "tokenOutcome": null,
+      "stopped": false,
+      "active": false
+    },
+    "credentialFilePresent": true,
+    "scopeRevoked": false,
+    "readOnly": true
+  },
+  "afterLogin": {
+    "checkedAt": "2026-10-15T12:56:46.457001+00:00",
+    "database": {
+      "owner": {
+        "role": "tenant_owner",
+        "status": "active"
+      },
+      "telegramIdentities": 1,
+      "clients": 1,
+      "activeMayaUserLinks": 1,
+      "verifiedLinks": 1,
+      "methods": [
+        "proven_user_client_link"
+      ],
+      "crmMatches": 1,
+      "appointments": 0,
+      "entitlements": 0
+    },
+    "transport": {
+      "contract": "maya.phone-owner-telegram/1",
+      "link": 0,
+      "login": 1,
+      "calls": 31,
+      "completed": 31,
+      "rows": 5674,
+      "refused": 0,
+      "tokenOutcome": "id_token_present",
+      "stopped": false,
+      "active": false
+    },
+    "credentialFilePresent": true,
+    "scopeRevoked": false,
+    "readOnly": true
+  },
+  "exactBindingProof": {
+    "checkedAt": "2026-10-15T13:00:15.359681+00:00",
+    "exitCode": 0,
+    "result": {
+      "status": "PASS",
+      "checks": {
+        "exactUserSubject": true,
+        "exactTenant": true,
+        "oneActiveVerifiedLink": true,
+        "initialEpisode": true,
+        "canonicalMethod": true,
+        "evidenceHashMatches": true,
+        "evidenceExactClient": true,
+        "evidenceExactSubject": true,
+        "canonicalAudit": true,
+        "auditSessionExactUser": true,
+        "currentSession": true,
+        "actualOwnerIdentityPreserved": true,
+        "currentMembership": true,
+        "clientSeparateFromOwner": true,
+        "clientNotMerged": true,
+        "oneCanonicalCrmMapping": true,
+        "identityHoldAbsent": true,
+        "createdWithinAuthorizedWindow": true,
+        "oneTelegramIdentity": true
+      },
+      "scope": "read-only persisted binding/audit/session verification; no HTTP session fabricated, no personal history read",
+      "noRawIdentityOrContactOutput": true
+    },
+    "readOnly": true
+  },
+  "cleanup": {
+    "status": "COMPLETED_SESSION_CLOSED",
+    "checkedAt": "2026-10-15T13:00:44.806470+00:00",
+    "scopeRevoked": true,
+    "temporarySecretDeleted": true,
+    "sessionExpiryTimerCancelledAfterCleanup": true,
+    "unrelatedContainersUnchanged": {
+      "postgres": true,
+      "gateway": true,
+      "catalog-egress": true,
+      "model-egress": true
+    },
+    "backendReadinessStatus": 200,
+    "login": 1,
+    "registryRows": 5674,
+    "newProviderRequests": 0
+  },
+  "afterCleanup": {
+    "checkedAt": "2026-10-15T13:01:01.766571+00:00",
+    "database": {
+      "owner": {
+        "role": "tenant_owner",
+        "status": "active"
+      },
+      "telegramIdentities": 1,
+      "clients": 1,
+      "activeMayaUserLinks": 1,
+      "verifiedLinks": 1,
+      "methods": [
+        "proven_user_client_link"
+      ],
+      "crmMatches": 1,
+      "appointments": 0,
+      "entitlements": 0
+    },
+    "transport": {
+      "contract": "maya.phone-owner-telegram/1",
+      "link": 0,
+      "login": 1,
+      "calls": 31,
+      "completed": 31,
+      "rows": 5674,
+      "refused": 0,
+      "tokenOutcome": "id_token_present",
+      "stopped": true,
+      "active": false
+    },
+    "credentialFilePresent": false,
+    "scopeRevoked": true,
+    "readOnly": true
+  },
+  "browserObserved": {
+    "canonicalSalonFinderSucceeded": true,
+    "existingTelegramAccountLoginCompleted": true,
+    "callbackReturnedToMaya": true,
+    "AChatOpenedWithExistingConversation": true,
+    "additionalOwnerPasswordOrOtpRequired": false,
+    "newChatQuestionSubmitted": false
+  },
+  "diagnosticCorrection": {
+    "initialAdHocReadOnlyProbe": {
+      "checkedAt": "2026-10-15T12:59:26.565230+00:00",
+      "exitCode": 0,
+      "result": {
+        "status": "FAIL",
+        "checks": {
+          "exactUserSubject": true,
+          "exactTenant": true,
+          "oneActiveVerifiedLink": true,
+          "initialEpisode": true,
+          "canonicalMethod": true,
+          "evidenceHashMatches": false,
+          "evidenceExactClient": true,
+          "evidenceExactSubject": true,
+          "canonicalAudit": true,
+          "auditSessionExactUser": true,
+          "currentSession": true,
+          "actualOwnerIdentityPreserved": true,
+          "currentMembership": true,
+          "clientSeparateFromOwner": true,
+          "clientNotMerged": true,
+          "oneCanonicalCrmMapping": true,
+          "identityHoldAbsent": true,
+          "createdWithinAuthorizedWindow": true,
+          "oneTelegramIdentity": true
+        },
+        "scope": "read-only persisted binding/audit/session verification; no HTTP session fabricated, no personal history read",
+        "noRawIdentityOrContactOutput": true
+      },
+      "readOnly": true
+    },
+    "cause": "The ad-hoc observer hashed JSONB-returned object order. The canonical producer hashes an explicitly ordered evidence object. Reconstructing that exact existing producer order from src/crm/client-channel-link.service.ts gives the stored hash. No product or database changes were made to resolve this observer mismatch.",
+    "canonicalProbeStatus": "PASS",
+    "initialReceiptPreserved": true
+  },
+  "scriptHashes": {
+    "verify-binding.py": "b7fa4081925cf9f0b7c3f042bfa9e66a55ce8b67d3dbe85e92125ad04d1e7aed",
+    "verify-binding-canonical.py": "2a1fa2ac3d1d4fb5dbff17f5574bad475ab4c5412a46bd9299d191542c685e27",
+    "stop-completed.py": "505c66619dc48620ca9b5205d9cc69441e33356a7f3b1fb5806414dc919bc783",
+    "observe.py": "9a27989357b7de74abfedaee1b471e77509b611574cd5580457e10f058ab011d"
+  },
+  "limits": {
+    "freshLoginsUsed": 1,
+    "freshLoginsApprovedMaximum": 3,
+    "registryRowsRead": 5674,
+    "registryRowsMaximumPerAttempt": 6400,
+    "wholeRegistryPersisted": false,
+    "rawCustomerRowsInThisReceipt": false
+  },
+  "notPerformed": [
+    "real booking/create/reschedule/cancel",
+    "visit history import",
+    "model request in this identity stage",
+    "SMS or outbound customer notification",
+    "widgets.runtime entitlement grant",
+    "production change",
+    "iPhone reinstall",
+    "product code change"
+  ],
+  "notClaimed": [
+    "live personal-client HTTP operation from installed iPhone verified",
+    "booking enabled",
+    "full release certification"
+  ],
+  "nextBoundary": "Client identity is now verified in the test database. Booking remains refused by the phone AI operational wrapper; no widgets.runtime grant exists. A separate controlled booking stage is required before any real YCLIENTS write."
+}
