@@ -349,6 +349,29 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
         f.user.email,
         f.user.password,
       );
+      // The installed phone keeps its existing password session while the same
+      // account completes the web Telegram flow. Authority must be reread, not
+      // copied from the new browser token or inferred from the owner role.
+      const originalSessionResults = (selection = 'personal_client') =>
+        request(http.app.getHttpServer())
+          .get('/api/personal-client/appointments/results')
+          .set('Authorization', `Bearer ${bearer}`)
+          .set('x-maya-authority-context', selection);
+      if (status === 'active') {
+        // Independent feature admission remains mandatory. Only this disposable
+        // fixture receives booking; no widget entitlement or real grant.
+        const withoutFeature = await originalSessionResults();
+        expect(withoutFeature.status).toBe(403);
+        expect(withoutFeature.body).toMatchObject({
+          message: 'Feature booking is not enabled for this tenant',
+        });
+        await fx.grantFeature(f.tenant, 'booking');
+      }
+      const beforeBinding = await originalSessionResults();
+      expect(beforeBinding.status).toBe(403);
+      expect(beforeBinding.body).toMatchObject({
+        message: 'new_verified_maya_user_binding_required',
+      });
       installSignedIssuer(f);
       const start = await request(http.app.getHttpServer())
         .post('/api/auth/oauth/telegram/link/start')
@@ -389,6 +412,7 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
       });
       expect(await f.count()).toBe(0);
       expect(f.source).not.toHaveBeenCalled();
+      expect((await originalSessionResults()).status).toBe(403);
       expect(
         await db.prisma.client.count({ where: { tenantId: f.tenant.id } }),
       ).toBe(0);
@@ -426,6 +450,27 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
       expect(
         await db.prisma.membership.count({ where: { tenantId: f.tenant.id } }),
       ).toBe(1);
+      const originalSessionAfterBinding = await originalSessionResults();
+      expect(originalSessionAfterBinding.status).toBe(200);
+      expect(originalSessionAfterBinding.body).toMatchObject({
+        contract: 'maya.personal-booking.results/1',
+        results: [],
+        hasPending: false,
+      });
+      expect((await originalSessionResults('tenant_owner')).status).toBe(403);
+      expect((await originalSessionResults('')).status).toBe(403);
+      // Logging out that original session must close it even though the newly
+      // verified binding and separate Telegram browser session remain current.
+      expect(
+        (
+          await request(http.app.getHttpServer())
+            .post('/api/auth/logout')
+            .set('Authorization', `Bearer ${bearer}`)
+            .send({})
+        ).status,
+      ).toBe(201);
+      expect((await originalSessionResults()).status).toBe(401);
+      expect(await f.count()).toBe(1);
     },
   );
 
