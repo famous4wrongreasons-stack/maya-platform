@@ -1,0 +1,76 @@
+{
+  "contract": "maya.phone-telegram-execution-proposal/1",
+  "status": "PROPOSED_NOT_AUTHORIZED_OR_EXECUTED",
+  "appCandidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "testCommit": "058b66aa75135501bb55968d3c4668f8ddcf09d6",
+  "server": "45.67.56.4",
+  "host": "phone-test.mayaos.ru",
+  "tenantSlug": "malestheticstavropol",
+  "companyId": "503759",
+  "accountSelection": "Existing exact staging owner, resolved server-side; never a caller-selected Client.",
+  "flow": [
+    "Sign in to the existing staging account through the canonical web carrier.",
+    "Authenticated Telegram account link through existing A23.",
+    "Fresh Telegram login with freshly signed verified phone; existing canonical unique Client resolver and initial link writer.",
+    "Read personal context from the existing owner session; no role change."
+  ],
+  "telegramSettings": {
+    "bot": "@mayaos_login_bot",
+    "clientId": "8941349983",
+    "addRedirectUri": "https://phone-test.mayaos.ru/oauth-callback.html",
+    "addTrustedOrigin": "https://phone-test.mayaos.ru",
+    "preserveExistingSettings": true,
+    "nativeRedirect": "Not enabled by this web-only proposal; existing iPhone password session remains usable."
+  },
+  "credential": {
+    "source": "Owner enters Login Widget Client Secret once into a prepared secure local input; never bot API Token or chat.",
+    "currentAvailability": "Not in the approved two-item Maya Keychain helper and absent from staging. No ambient credential search or read performed.",
+    "proposedDestination": "Transient root-only 0600 file under /srv/maya-phone-staging/private/, mounted only to the dedicated Telegram transport; remove on completion/withdrawal.",
+    "repository": "Forbidden",
+    "logs": "Forbidden"
+  },
+  "window": {
+    "maxMinutes": 30,
+    "maxAuthenticatedLinkAttempts": 1,
+    "maxFreshLoginAttempts": 3,
+    "maxRegistryPagesPerLogin": 32,
+    "maxRowsPerPage": 200,
+    "maxRegistryRowsPerLogin": 6400,
+    "maxAggregateRowsAcrossLogins": 19200,
+    "maxProviderCalls": 128,
+    "automaticRenewal": false,
+    "restartBudgetReset": false
+  },
+  "registryFields": [
+    "id",
+    "name",
+    "phone",
+    "visits_count",
+    "sold_amount",
+    "last_visit_date"
+  ],
+  "dataHandling": {
+    "wholeSalonRegistryRead": "Needed transiently to prove unique matching; includes other clients.",
+    "retained": "Canonical identity/profile and exact matched Client/CRM link/binding/audit in staging. No bulk registry/history import.",
+    "modelExport": false,
+    "rawDataLogs": false
+  },
+  "forbidden": [
+    "YCLIENTS booking create/reschedule/cancel",
+    "SMS/OTP/messages",
+    "history import",
+    "widget grant",
+    "production changes",
+    "iPhone reinstall",
+    "extension/reset of AI or catalogue allowance"
+  ],
+  "preExecutionRequirements": [
+    "Owner approval for this new server-side identity/data scope and transient secret destination.",
+    "Actual Telegram Login Widget Client Secret entered through prepared protected input.",
+    "Verify/add exact BotFather redirect and origin with existing settings preserved.",
+    "Prepare and synthetically prove identity-specific bounded transport; existing catalogue relay refuses client registry and must not be broadened or restarted.",
+    "Pin unchanged application and current scope; preserve running model relay/ledger and catalogue relay/counter.",
+    "Prove startup, timeout/replay, tenant/user scope and shutdown/revocation before real dispatch."
+  ],
+  "readiness": "NOT_READY_FOR_LIVE_EXECUTION; canonical mechanism and same-session path proven, provider transport/configuration and owner inputs outstanding."
+}

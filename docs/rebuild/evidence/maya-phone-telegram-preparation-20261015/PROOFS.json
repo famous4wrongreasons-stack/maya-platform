@@ -1,0 +1,77 @@
+{
+  "qualification": "FRESH_SYNTHETIC_HTTP_POSTGRESQL; NOT_SERVER_TELEGRAM_ACCEPTANCE; NOT_RELEASE_CERTIFICATION",
+  "testedCommit": "058b66aa75135501bb55968d3c4668f8ddcf09d6",
+  "passed": 130,
+  "failed": 0,
+  "skipped": 0,
+  "sourceUnchanged": true,
+  "isolatedDatabaseStopped": true,
+  "sourceComparison": {
+    "auth/social-auth.service": {
+      "sourceMatches": true,
+      "sourceSha256": "b4b90532df00065ff5a35a380bd7c467461b1e4c32c31ddc0fb7df7e69666015",
+      "compiledMatches": false,
+      "diffLines": 7,
+      "compiledDifference": "Only the final sourceMappingURL comment is absent in the server image; all executable bytes match."
+    },
+    "auth/telegram-client-binding.service": {
+      "sourceMatches": true,
+      "sourceSha256": "afa412e7ccc27cb70a484a1de18563989413f0a11f0def6776b8cde365d3c51d",
+      "compiledMatches": false,
+      "diffLines": 7,
+      "compiledDifference": "Only the final sourceMappingURL comment is absent in the server image; all executable bytes match."
+    },
+    "appointments/personal-client-context.service": {
+      "sourceMatches": true,
+      "sourceSha256": "fc9b6e686bc592e595f39c287d7764c7e0cc099e10667222aab7353776cec862",
+      "compiledMatches": false,
+      "diffLines": 7,
+      "compiledDifference": "Only the final sourceMappingURL comment is absent in the server image; all executable bytes match."
+    },
+    "config/security-config": {
+      "sourceMatches": true,
+      "sourceSha256": "742ab859c37714dff74e624b2e47e526e7f9e81887abf5a000aa937378bf6b8e",
+      "compiledMatches": false,
+      "diffLines": 7,
+      "compiledDifference": "Only the final sourceMappingURL comment is absent in the server image; all executable bytes match."
+    }
+  },
+  "publicCallback": {
+    "url": "https://phone-test.mayaos.ru/oauth-callback.html",
+    "httpStatus": 200,
+    "cacheControl": "no-store",
+    "referrerPolicy": "no-referrer",
+    "sha256": "b10e89898aa74a39756d4f49e1537c8ee6c0066bc7a2666982b4052b0f99444f",
+    "canonicalBytesMatch": true
+  },
+  "newAssertions": [
+    "Existing password session refuses personal access before binding.",
+    "Telegram account link alone does not grant personal Client access.",
+    "Fresh signed Telegram login plus unique canonical CRM match enables personal results through the original password session.",
+    "Owner role and membership remain unchanged; no duplicate account.",
+    "Explicit personal_client selection remains mandatory.",
+    "Logout revokes original session despite a current verified Client link.",
+    "Active tenant still needs separate booking feature; synthetic fixture proves refusal before test-only feature admission."
+  ],
+  "lint": "PASS: scoped ESLint and Prettier",
+  "initialFailedFixture": {
+    "path": "/private/tmp/maya-phone-telegram-original-session-20261015-01",
+    "passed": 1,
+    "failed": 1,
+    "reason": "Active tenant correctly refused missing booking feature before client-link checking. Added assertion for that refusal, then used existing disposable fixture feature grant. No product gate change."
+  },
+  "receipts": [
+    {
+      "path": "/private/tmp/maya-phone-telegram-canonical-final-058b66aa-20261015/manifest.json",
+      "sha256": "d7b94c8e8d9b6fae4eee5003024f729157813f94b59b8cf090d7363bffdefe14",
+      "size": 719
+    },
+    {
+      "path": "/private/tmp/maya-phone-telegram-canonical-final-058b66aa-20261015/telegram-initial-jest.json",
+      "sha256": "39bc1528ed0fc5e5a7356e19882b376f8dee413d9d5f1cc4f58ea4f26db58434",
+      "size": 70233
+    }
+  ],
+  "externalProviderCalls": 0,
+  "realCustomerDataRead": false
+}

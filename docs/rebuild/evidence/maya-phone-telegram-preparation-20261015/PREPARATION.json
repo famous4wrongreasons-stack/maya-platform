@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-15",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "testedCommit": "058b66aa75135501bb55968d3c4668f8ddcf09d6",
+  "serverObservedAt": "2026-10-15T10:22:30.159216+00:00",
+  "tenant": "trial with full access; ends 2026-10-25T00:15:54.299Z",
+  "currentIntegration": "active, verified, exact company/branch match",
+  "telegramIdentities": 0,
+  "clients": 0,
+  "activeMayaUserLinks": 0,
+  "telegramLoginEnabled": false,
+  "telegramClientIdConfigured": false,
+  "telegramSecretConfigured": false,
+  "oauthRedirectConfigured": false,
+  "backendNetworks": "internal only; catalogue and model transports separately bounded",
+  "preparationOutcome": "Canonical binding requires no new product implementation or database migration; next operation requires explicit server identity/data admission and bounded network setup.",
+  "changesThisUnit": {
+    "tests": true,
+    "evidence": true,
+    "productSources": false,
+    "serverConfiguration": false,
+    "serverDatabase": false,
+    "secrets": false,
+    "realProviderCalls": 0,
+    "iphone": false
+  }
+}
