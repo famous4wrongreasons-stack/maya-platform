@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-10-15T07:48:58.843176+00:00",
+  "backendRunning": true,
+  "startedAt": "2026-10-15T06:45:50.755889942Z",
+  "imageId": "sha256:d8f6a5b33529e4a7f2e4503cc7e867de88d259f35236fb38d6b8886fcb5a9f6f",
+  "release": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "aiCoreProvider": "safe",
+  "deepseekKeyConfigured": false,
+  "openaiKeyConfigured": false,
+  "publicSalonFinderEnabled": false,
+  "backendNetworks": [
+    {
+      "name": "maya-phone-staging_catalog_private",
+      "internal": true
+    },
+    {
+      "name": "maya-phone-staging_private",
+      "internal": true
+    }
+  ],
+  "providerCallsMadeByProbe": 0,
+  "writes": 0
+}

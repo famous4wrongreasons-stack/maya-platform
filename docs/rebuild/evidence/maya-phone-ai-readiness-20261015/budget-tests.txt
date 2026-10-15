@@ -1,0 +1,42 @@
+✔ offline binding is mandatory, no default/live transport or old ledger resume (26.752083ms)
+✔ reserves/fsyncs before every attempt; never forwards or journals secrets/content (56.170542ms)
+✔ failed/unknown attempt keeps reservations and halts further dispatch (32.881917ms)
+✔ short writes are completed before dispatch and zero progress fails closed (52.938ms)
+✔ reservation/dispatch retain the validated URL/body despite caller mutation during spacing (49.446709ms)
+✔ early wakeup cannot dispatch before the minimum interval (34.998041ms)
+✔ aggregate input reservation stops before overrun and charges no refused attempt (923.886875ms)
+✔ 96 attempts include retries and output reservations reach their aggregate ceiling exactly (3471.501792ms)
+✔ body/endpoint/model/output/shape refusals happen before any dispatch (29.175834ms)
+✔ 24 dialog and 64 turn caps apply independently (498.8985ms)
+✔ wall time and clock reversal cannot reopen budget (53.326958ms)
+✔ aborted before admission consumes no reservation, including cancellation during spacing (61.320042ms)
+✔ concurrency covers response body; cancellation halts even an uncooperative transport (37.130417ms)
+✔ remaining wall deadline cancels an unread body and no second call is possible (47.303167ms)
+✔ oversized output is unresolved, with full reservation kept (34.7195ms)
+✔ core profile is closed, frozen and restrictive; the existing offline defaults stay unchanged (50.045584ms)
+✔ core independently caps three dialogs and five turns (58.054292ms)
+✔ core reserves every retry, admits at most twelve full-size attempts and stays below two dollars (167.88675ms)
+✔ core expiry uses ten minutes and aborts the complete pending response body (65.964333ms)
+✔ core remains single-flight through response-body consumption and halts after cancellation (34.378583ms)
+✔ followup independently caps six dialogs and thirteen turns with its own pinned ledger (122.782792ms)
+✔ followup reserves all 24 full-size retries, never refunds failures, and stays under four dollars (314.484667ms)
+✔ followup wall limit is twenty minutes and a pending full body is UNKNOWN without refund (81.136333ms)
+✔ followup single-flight and response byte cap still halt after UNKNOWN (76.117125ms)
+✔ synthetic followup admission binds its exact profile hash at every check and refuses A authority (38.826166ms)
+✔ admitted mode refuses missing/foreign admission and custom clocks before creating any ledger (6.564666ms)
+✔ synthetic admitted callback receives exact immutable binding at construction and immediately before transport (36.200708ms)
+✔ a synthetic permit for another candidate or manifest refuses before ledger creation (1.634333ms)
+✔ revoked synthetic admission stops before reservation and cannot reopen by restoring a callback flag (26.950166ms)
+✔ revocation during durable reservation dispatches nothing, retains charge and cannot reuse a closed ledger (34.370709ms)
+✔ frozen manifest binds all 24 development variants, source proofs and pending HTTP status (8.458958ms)
+✔ corpus coverage changes are refused rather than silently reducing scope (1.907709ms)
+✔ existing replay rejects tampered manifest before opening a dialog (4.775375ms)
+✔ offline executable runs new corpus without HTTP, paid calls or gold history, and refuses reset (876.054291ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7458.8055

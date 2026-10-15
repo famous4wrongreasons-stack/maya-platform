@@ -131,3 +131,15 @@ scope restrictions. See [IPHONE-INSTALL.json](IPHONE-INSTALL.json).
 - Visual acceptance, login, chat and booking remain unverified on the phone.
   Public server readiness was checked before installation. No additional
   provider calls, grants, migrations or production changes were made.
+
+## Owner device observation — 2026-10-15, 10:42 Moscow
+
+The owner subsequently reported successful password login and supplied an iPhone
+screenshot with the actual React AChat and two backend fallback responses. Thus
+launch and basic chat transport are now observed; the original automated launch
+refusal above is historical. The exact device-trust action was not observed.
+
+Assistant acceptance has **not passed**: the staging backend still has
+`AI_CORE_PROVIDER=safe` and no model credential. Public salon discovery is also
+disabled separately. See [the fresh AI readiness diagnosis](../../maya-phone-ai-readiness-20261015/README.md).
+No AI secret transfer or paid execution has been authorized for this server.

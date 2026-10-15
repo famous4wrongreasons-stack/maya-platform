@@ -1,0 +1,13 @@
+{
+  "source": "Owner-supplied iPhone screenshot, 2026-10-15 10:42 Moscow",
+  "sha256": "951a6b9c6368a79f2089a75e99b02fedd258230f7e6cac150d17f004486fe9df",
+  "rawImageCommitted": false,
+  "observation": {
+    "reactAChatVisible": true,
+    "salonHeaderVisible": true,
+    "greetingResponse": "AI_NOT_CONNECTED",
+    "bookingRequestResponse": "AI_NOT_CONNECTED"
+  },
+  "ownerReportedPasswordLoginSucceeded": true,
+  "endToEndAssistantAcceptance": "NOT_PASSED"
+}
