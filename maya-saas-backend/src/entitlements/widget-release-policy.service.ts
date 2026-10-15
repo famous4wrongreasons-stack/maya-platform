@@ -1,8 +1,8 @@
 import {
   profileCertificate,
   PROFILE_CERT,
-  NO_HANDOFF_PROFILE,
-  PROFILE_DIGEST,
+  type FixedReleaseProfile,
+  NO_PRICE_GOODS_PROFILE,
   type ProfileCertificate,
 } from './widget-release-profile.contract';
 import { widgetProofEnvironment } from './widget-release-environment';
@@ -44,7 +44,7 @@ import {
 } from './widget-release.contract';
 
 export interface VerifiedReleaseView {
-  readonly scope: 'full165.closed-input' | typeof NO_HANDOFF_PROFILE;
+  readonly scope: 'full165.closed-input' | FixedReleaseProfile;
   readonly version: string;
   readonly certificateDigest: string;
   readonly profileDigest: string | null;
@@ -289,6 +289,11 @@ export class WidgetReleasePolicy {
     )
       releaseDeny('certificate_binding');
     if (
+      c.scope === NO_PRICE_GOODS_PROFILE &&
+      !isProfileExecutionAuthorization(a)
+    )
+      releaseDeny('source_execution_binding');
+    if (
       isProfileExecutionAuthorization(a) &&
       (c.contract !== PROFILE_CERT ||
         c.scope !== a.profileId ||
@@ -366,7 +371,8 @@ export class WidgetReleasePolicy {
         scope: cert.scope,
         version: state.version,
         certificateDigest: a.certificateDigest,
-        profileDigest: cert.contract === PROFILE_CERT ? PROFILE_DIGEST : null,
+        profileDigest:
+          cert.contract === PROFILE_CERT ? cert.profileDigest : null,
         ...(isSingleOperatorAuthorization(a)
           ? {
               governance: SINGLE_OPERATOR,

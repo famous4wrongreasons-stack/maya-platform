@@ -1,0 +1,554 @@
+{
+  "contract": "maya.widgets-mutation-battery/2",
+  "source_head": "7f67abfcf437a7f4867f8712a783e64303002d96",
+  "battery_hashes": {
+    "gateFP.json": "f07ed7f8ea23e92d76d60dfd37bc772731dad8a2e3974418abfeb9aba1f2c03f"
+  },
+  "partition": null,
+  "startedAt": "2026-10-15T19:06:36.283Z",
+  "batteries": [
+    "gateFP.json"
+  ],
+  "neutraliser_sets": [
+    "N2",
+    "N4",
+    "N6-FLOOR"
+  ],
+  "steps": "per mutant (live for live-killed/pending; unit,typecheck,k3 for build-killed)",
+  "restrictions": {
+    "live_tests": "approval-source-boundary.live-spec.ts",
+    "live_filter": null,
+    "unit_tests": "entitlements/widget-release-(first-phone|source-scope)"
+  },
+  "mirror": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-mirror-41437e2d6a",
+  "jest_cache": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/widgets-mutation-jest-cache-41437e2d6a",
+  "neutraliser_controls": {},
+  "baseline_controls": {
+    "baseline|live": {
+      "set": null,
+      "steps": [
+        "live"
+      ],
+      "exits": {
+        "live": 0
+      },
+      "failed": [],
+      "problems": []
+    },
+    "baseline|unit,typecheck,k3": {
+      "set": null,
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "exits": {
+        "unit": 0,
+        "typecheck": 0,
+        "k3": 0
+      },
+      "failed": [],
+      "problems": []
+    }
+  },
+  "baseline_red": [],
+  "mutants": [
+    {
+      "battery": "gateFP.json",
+      "id": "FP-M1",
+      "files": [
+        "src/entitlements/widget-release-source-scope.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "FP-HTTP"
+      ],
+      "kills": [
+        {
+          "killer": "FP-HTTP",
+          "test": "Approval source boundary [HTTP/PG] [actual adapter, artificial wire facts] FP-HTTP restricted price and goods preparation refuse before any provider read, without changing catalog reads",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateFP.json",
+      "id": "FP-M2",
+      "files": [
+        "src/entitlements/widget-release-source-scope.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "FP-REVOKE"
+      ],
+      "kills": [
+        {
+          "killer": "FP-REVOKE",
+          "test": "Approval source boundary [HTTP/PG] [actual adapter, artificial wire facts] FP-REVOKE allowlist removal/candidate replacement still permits revoke, but cannot reopen forbidden source",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateFP.json",
+      "id": "FP-M3",
+      "files": [
+        "src/entitlements/widget-release-source-scope.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "FP-CONCURRENT"
+      ],
+      "kills": [
+        {
+          "killer": "FP-CONCURRENT",
+          "test": "Approval source boundary [HTTP/PG] [actual adapter, artificial wire facts] FP-CONCURRENT release writer waits for admitted owner and subsequent scope reads refuse",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    },
+    {
+      "battery": "gateFP.json",
+      "id": "FP-M4",
+      "files": [
+        "src/entitlements/widget-release-profile.contract.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "FP-SHARED"
+      ],
+      "kills": [
+        {
+          "killer": "FP-SHARED",
+          "test": "FIRST-PHONE fixed profile; artificial certificates only FP-SHARED G7-FR6d cannot become whole-clause U/STOP/L",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "FP-SHARED",
+          "test": "FIRST-PHONE fixed profile; artificial certificates only FP-SHARED G11-I4 cannot become whole-clause U/STOP/L",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "FP-SHARED",
+          "test": "FIRST-PHONE fixed profile; artificial certificates only FP-SHARED G11-I5 cannot become whole-clause U/STOP/L",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "FP-SHARED",
+          "test": "FIRST-PHONE fixed profile; artificial certificates only FP-SHARED G11-I6 cannot become whole-clause U/STOP/L",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "FP-SHARED",
+          "test": "FIRST-PHONE fixed profile; artificial certificates only FP-SHARED G11-I10 cannot become whole-clause U/STOP/L",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "FP-SHARED",
+          "test": "FIRST-PHONE fixed profile; artificial certificates only FP-SHARED G13-I1 cannot become whole-clause U/STOP/L",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "FP-SHARED",
+          "test": "FIRST-PHONE fixed profile; artificial certificates only FP-SHARED G13-I2 cannot become whole-clause U/STOP/L",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "FP-SHARED",
+          "test": "FIRST-PHONE fixed profile; artificial certificates only FP-SHARED G13-I9 cannot become whole-clause U/STOP/L",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 8
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateFP.json",
+      "id": "FP-M5",
+      "files": [
+        "src/entitlements/widget-release-profile.contract.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "FP-OD3"
+      ],
+      "kills": [
+        {
+          "killer": "FP-OD3",
+          "test": "FIRST-PHONE fixed profile; artificial certificates only FP-OD3 servicePrice requires every excluded source duty",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "FP-OD3",
+          "test": "FIRST-PHONE fixed profile; artificial certificates only FP-OD3 goodsReceipt requires every excluded source duty",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateFP.json",
+      "id": "FP-M6",
+      "files": [
+        "src/entitlements/widget-release-profile.contract.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "FP-PIN"
+      ],
+      "kills": [
+        {
+          "killer": "FP-PIN",
+          "test": "FIRST-PHONE fixed profile; artificial certificates only FP-PIN removes exactly six templates and four operation keys; preserves original profile",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateFP.json",
+      "id": "FP-M7",
+      "files": [
+        "src/entitlements/widget-release-profile.contract.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "FP-SUCCESSOR"
+      ],
+      "kills": [
+        {
+          "killer": "FP-SUCCESSOR",
+          "test": "FIRST-PHONE immutable mint/resolve/intent release binding FP-SUCCESSOR no generic refine substitute for catalog.service.price.update",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        },
+        {
+          "killer": "FP-SUCCESSOR",
+          "test": "FIRST-PHONE immutable mint/resolve/intent release binding FP-SUCCESSOR no generic refine substitute for inventory.goods.receipt.prepare",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 2
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateFP.json",
+      "id": "FP-M8",
+      "files": [
+        "src/entitlements/widget-release-access.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "FP-SEAL"
+      ],
+      "kills": [
+        {
+          "killer": "FP-SEAL",
+          "test": "FIRST-PHONE immutable mint/resolve/intent release binding FP-SEAL cannot substitute scope",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateFP.json",
+      "id": "FP-M9",
+      "files": [
+        "src/entitlements/widget-release-profile.contract.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "unit",
+        "typecheck",
+        "k3"
+      ],
+      "expect": "build-killed",
+      "status": "build-killed",
+      "killedBy": [
+        "FP-UNKNOWN"
+      ],
+      "kills": [
+        {
+          "killer": "FP-UNKNOWN",
+          "test": "FIRST-PHONE immutable mint/resolve/intent release binding FP-UNKNOWN cannot fall through to the full-contract path",
+          "step": "unit",
+          "entry": "BUILD",
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "BUILD": 1
+      },
+      "exits": {
+        "plain": {
+          "unit": 1,
+          "typecheck": 0,
+          "k3": 0
+        }
+      }
+    },
+    {
+      "battery": "gateFP.json",
+      "id": "FP-M10",
+      "files": [
+        "src/crm/crm.service.ts"
+      ],
+      "edits_applied": 1,
+      "neutralisers": [],
+      "steps": [
+        "live"
+      ],
+      "expect": "live-killed",
+      "status": "live-killed",
+      "killedBy": [
+        "FP-FINAL-DISPATCH"
+      ],
+      "kills": [
+        {
+          "killer": "FP-FINAL-DISPATCH",
+          "test": "Approval source boundary [HTTP/PG] [actual adapter, artificial wire facts] FP-FINAL-DISPATCH scope replacement after AE dispatch admission still prevents the provider write",
+          "step": "live",
+          "entry": null,
+          "neutralisers": null,
+          "evidence": false,
+          "evidence_basis": null
+        }
+      ],
+      "vacuous": [],
+      "live_evidence": false,
+      "kills_by_entry": {
+        "untagged": 1
+      },
+      "exits": {
+        "plain": {
+          "live": 1
+        }
+      }
+    }
+  ],
+  "status": "AS-DECLARED",
+  "mismatches": 0,
+  "live_evidence_mutants": [],
+  "evidence_rule": {
+    "flag_means": "a declared killer tagged [HTTP] failed in the live step (§3.2)",
+    "not_verified_here": [
+      "the record under test was minted by a production trigger, with D-17 provenance (§0.5 L) — in Wave 1 `test:widgets:http` reports mint_provenance.captured = 0 and every [HTTP] killer runs on a Fixtures.widget-minted record",
+      "an L claim also needs a BIN line for the same test id (§0.5 L)"
+    ],
+    "therefore": "live_evidence is NOT an L or L-T claim on its own; `scripts/widgets-evidence-verify.mjs` over the WIDGETS_EVIDENCE manifest is what decides that (§3.3)"
+  },
+  "finishedAt": "2026-10-15T19:11:37.045Z"
+}

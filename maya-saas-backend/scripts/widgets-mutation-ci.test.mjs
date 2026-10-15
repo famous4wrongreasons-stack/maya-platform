@@ -212,12 +212,14 @@ function fixture() {
   });
 }
 
-test('47 batteries, 68 jobs: AR1 single-operator governance covers 545 declarations', () => {
+test('48 batteries, 69 jobs: AR1 fixed first-phone profile covers 555 declarations', () => {
   const p = plan(declared);
-  assert.equal(p.gates.length, 47); assert.equal(p.matrix.include.length, 68);
+  assert.equal(p.gates.length, 48); assert.equal(p.matrix.include.length, 69);
   assert.deepEqual(declared.PU.mutants.map(m => m.id), Array.from({ length: 12 }, (_, i) => `PU-M${i + 1}`));
   assert.deepEqual(declared.SO.mutants.map(m => m.id), Array.from({ length: 9 }, (_, i) => `SO-M${i + 1}`));
   assert.equal(declared.FB.mutants.length, 15);
+  assert.deepEqual(declared.FP.mutants.map(m => m.id), Array.from({ length: 10 }, (_, i) => `FP-M${i + 1}`));
+  assert.deepEqual(p.matrix.include.filter(j => j.gate === 'FP'), [{ gate: 'FP', partition: '', slot: 'FP' }]);
   assert.deepEqual(declared.SB1.mutants.map(m => m.id), Array.from({ length: 10 }, (_, i) => `SB1-M${String(i + 1).padStart(2, '0')}`));
   assert.deepEqual(declared.AB.mutants.map(m => m.id), ['AB-M1', 'AB-M2']);
   assert.deepEqual(declared.SV2.mutants.map(m => m.id), Array.from({ length: 13 }, (_, i) => `SV2-M${i + 1}`));
@@ -230,7 +232,7 @@ test('47 batteries, 68 jobs: AR1 single-operator governance covers 545 declarati
   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-BOOT-LOOPBACK-1').length, 1);
   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-P408-CLOCK-1').length, 1);
   const r = assemble(declared, fixture(), head);
-  assert.equal(r.length, 47); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 545);
+  assert.equal(r.length, 48); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 555);
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
@@ -408,7 +410,7 @@ test('gate: a baseline control is red on a non-zero step exit, a failed assertio
     for (const c of Object.values(r.neutraliser_controls)) { c.exits[c.steps[0]] = 1; c.failed = ['red on the neutralised copy']; }
     assert.deepEqual(redBaselineControls(r.baseline_controls), []);
   }
-  assert.equal(assemble(declared, receipts, head).length, 47, 'a red neutraliser control is not a red baseline');
+  assert.equal(assemble(declared, receipts, head).length, 48, 'a red neutraliser control is not a red baseline');
 });
 
 test('gate: a red baseline is a distinct shard status and a non-zero exit, and never hides a mismatch', () => {

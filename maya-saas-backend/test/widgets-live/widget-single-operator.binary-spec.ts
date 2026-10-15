@@ -1,3 +1,4 @@
+import { firstPhoneCertificate } from './support/widget-first-phone-proof';
 import request from 'supertest';
 import type { ReleaseReceipt } from '../../src/entitlements/widget-release.contract';
 const resultBody = (r: { body: unknown }) =>
@@ -126,170 +127,183 @@ describe('AR-1 single-operator production execution (ephemeral keys, guarded pro
     db.prisma.auditLog.findMany({
       where: { action: 'widget.release', entityId: tenantId },
     });
-  it('SO-BIN [BIN] two production binaries observe the same grant, revoke and expiry without stale process state', async () => {
-    assertNoEnvFiles();
-    const f = await fixture();
-    // The separately built artifact computes its own bytes, not the ts-jest application digest.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const compiled = require(
-      resolve(
-        process.cwd(),
-        'dist/src/entitlements/widget-release-policy.service.js',
-      ),
-    ) as { WidgetReleasePolicy: new (c: ConfigService) => WidgetReleasePolicy };
-    const buildDigest = new compiled.WidgetReleasePolicy(
-      f.p.config,
-    ).buildDigest();
-    const command = f.p.command();
-    command.certificate = {
-      ...command.certificate,
-      buildDigest,
-    };
-    command.authorization = f.p.signOwner({
-      ...command.authorization.payload,
-      buildDigest,
-      certificateDigest: releaseHash(command.certificate),
-    });
-    async function binary() {
-      const socket = createServer();
-      socket.listen(0, '127.0.0.1');
-      await once(socket, 'listening');
-      const address = socket.address();
-      if (!address || typeof address === 'string')
-        throw new Error('loopback port');
-      const port = address.port;
-      await new Promise<void>((r) => socket.close(() => r()));
-      const settings: Record<string, string> = {
-        HOST: '127.0.0.1',
-        PORT: String(port),
-        NODE_ENV: 'production',
-        CLIENT_IDENTITY_HASH_SECRET:
-          'ephemeral-client-identity-domain-for-ar1-binary-proof',
-        CORS_ALLOWED_ORIGINS: 'capacitor://localhost',
-        AUTH_TRUST_PROXY: '127.0.0.1',
-        PHONE_LOGIN_ENABLED: 'false',
-        EMAIL_LOGIN_ENABLED: 'false',
-        SWAGGER_ENABLED: 'false',
-        AI_CORE_PROVIDER: 'safe',
+  it.each([false, true])(
+    'SO-BIN [BIN] first-phone=%s two production binaries observe the same grant, revoke and expiry without stale process state',
+    async (narrow) => {
+      assertNoEnvFiles();
+      const f = await fixture();
+      // The separately built artifact computes its own bytes, not the ts-jest application digest.
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const compiled = require(
+        resolve(
+          process.cwd(),
+          'dist/src/entitlements/widget-release-policy.service.js',
+        ),
+      ) as {
+        WidgetReleasePolicy: new (c: ConfigService) => WidgetReleasePolicy;
       };
-      for (const key of [
-        'WIDGET_RELEASE_ENVIRONMENT',
-        'WIDGET_RELEASE_CANDIDATE_SHA',
-        'WIDGET_RELEASE_TRUST_JSON',
-        'WIDGET_RELEASE_PRODUCTION_TRUST_JSON',
-        'WIDGET_RELEASE_PRODUCTION_TENANTS_JSON',
-      ])
-        settings[key] = f.p.config.getOrThrow<string>(key);
-      const { env } = widgetsLiveChildEnvironment(process.env, settings);
-      const child = spawn(process.execPath, ['dist/src/main'], {
-        cwd: process.cwd(),
-        env,
-        stdio: ['ignore', 'pipe', 'pipe'],
+      const buildDigest = new compiled.WidgetReleasePolicy(
+        f.p.config,
+      ).buildDigest();
+      const command = f.p.command();
+      if (narrow)
+        command.certificate = firstPhoneCertificate(command.certificate);
+      command.certificate = {
+        ...command.certificate,
+        buildDigest,
+      };
+      command.authorization = f.p.signOwner({
+        ...command.authorization.payload,
+        profileId: command.certificate.scope,
+        profileDigest: command.certificate.profileDigest,
+        buildDigest,
+        certificateDigest: releaseHash(command.certificate),
       });
-      let diagnostic = '';
-      for (const stream of [child.stdout, child.stderr])
-        stream.on('data', (chunk: Buffer) => {
-          diagnostic = (diagnostic + chunk.toString()).slice(-12000);
-        });
-      const stop = async () => {
-        if (child.exitCode !== null || child.signalCode !== null) return;
-        const done = once(child, 'exit');
-        child.kill('SIGTERM');
-        const timer = setTimeout(() => child.kill('SIGKILL'), 3000);
-        try {
-          await done;
-        } finally {
-          clearTimeout(timer);
-        }
-      };
-      try {
-        const until = Date.now() + 20000;
-        let ready = false;
-        while (Date.now() < until) {
-          if (child.exitCode !== null)
-            throw new Error('binary exited: ' + diagnostic);
-          try {
-            ready = (await fetch('http://127.0.0.1:' + port + '/api/health'))
-              .ok;
-          } catch {
-            /* Loopback process is still starting. */
-          }
-          if (ready) break;
-          await new Promise((r) => setTimeout(r, 50));
-        }
-        if (!ready) throw new Error('binary health deadline: ' + diagnostic);
-        const call = async (action: string, body?: unknown) => {
-          const response = await fetch(
-            'http://127.0.0.1:' +
-              port +
-              '/api/platform/widget-release/' +
-              f.tenant.id +
-              '/' +
-              action,
-            {
-              method: body ? 'POST' : 'GET',
-              headers: {
-                authorization: 'Bearer ' + f.token,
-                'content-type': 'application/json',
-              },
-              ...(body ? { body: JSON.stringify(body) } : {}),
-            },
-          );
-          return {
-            status: response.status,
-            body: (await response.json()) as unknown,
-          };
+      async function binary() {
+        const socket = createServer();
+        socket.listen(0, '127.0.0.1');
+        await once(socket, 'listening');
+        const address = socket.address();
+        if (!address || typeof address === 'string')
+          throw new Error('loopback port');
+        const port = address.port;
+        await new Promise<void>((r) => socket.close(() => r()));
+        const settings: Record<string, string> = {
+          HOST: '127.0.0.1',
+          PORT: String(port),
+          NODE_ENV: 'production',
+          CLIENT_IDENTITY_HASH_SECRET:
+            'ephemeral-client-identity-domain-for-ar1-binary-proof',
+          CORS_ALLOWED_ORIGINS: 'capacitor://localhost',
+          AUTH_TRUST_PROXY: '127.0.0.1',
+          PHONE_LOGIN_ENABLED: 'false',
+          EMAIL_LOGIN_ENABLED: 'false',
+          SWAGGER_ENABLED: 'false',
+          AI_CORE_PROVIDER: 'safe',
         };
-        return { call, stop };
-      } catch (error) {
-        await stop();
-        throw error;
+        for (const key of [
+          'WIDGET_RELEASE_ENVIRONMENT',
+          'WIDGET_RELEASE_CANDIDATE_SHA',
+          'WIDGET_RELEASE_TRUST_JSON',
+          'WIDGET_RELEASE_PRODUCTION_TRUST_JSON',
+          'WIDGET_RELEASE_PRODUCTION_TENANTS_JSON',
+        ])
+          settings[key] = f.p.config.getOrThrow<string>(key);
+        const { env } = widgetsLiveChildEnvironment(process.env, settings);
+        const child = spawn(process.execPath, ['dist/src/main'], {
+          cwd: process.cwd(),
+          env,
+          stdio: ['ignore', 'pipe', 'pipe'],
+        });
+        let diagnostic = '';
+        for (const stream of [child.stdout, child.stderr])
+          stream.on('data', (chunk: Buffer) => {
+            diagnostic = (diagnostic + chunk.toString()).slice(-12000);
+          });
+        const stop = async () => {
+          if (child.exitCode !== null || child.signalCode !== null) return;
+          const done = once(child, 'exit');
+          child.kill('SIGTERM');
+          const timer = setTimeout(() => child.kill('SIGKILL'), 3000);
+          try {
+            await done;
+          } finally {
+            clearTimeout(timer);
+          }
+        };
+        try {
+          const until = Date.now() + 20000;
+          let ready = false;
+          while (Date.now() < until) {
+            if (child.exitCode !== null)
+              throw new Error('binary exited: ' + diagnostic);
+            try {
+              ready = (await fetch('http://127.0.0.1:' + port + '/api/health'))
+                .ok;
+            } catch {
+              /* Loopback process is still starting. */
+            }
+            if (ready) break;
+            await new Promise((r) => setTimeout(r, 50));
+          }
+          if (!ready) throw new Error('binary health deadline: ' + diagnostic);
+          const call = async (action: string, body?: unknown) => {
+            const response = await fetch(
+              'http://127.0.0.1:' +
+                port +
+                '/api/platform/widget-release/' +
+                f.tenant.id +
+                '/' +
+                action,
+              {
+                method: body ? 'POST' : 'GET',
+                headers: {
+                  authorization: 'Bearer ' + f.token,
+                  'content-type': 'application/json',
+                },
+                ...(body ? { body: JSON.stringify(body) } : {}),
+              },
+            );
+            return {
+              status: response.status,
+              body: (await response.json()) as unknown,
+            };
+          };
+          return { call, stop };
+        } catch (error) {
+          await stop();
+          throw error;
+        }
       }
-    }
-    const one = await binary();
-    let two: Awaited<ReturnType<typeof binary>> | undefined;
-    try {
-      two = await binary();
-      expect(
-        (await one.call('grant', { certificate: command.certificate })).status,
-      ).toBe(403);
-      const grant = await one.call('grant', command);
-      expect(grant).toMatchObject({ status: 201 });
-      expect(resultBody(grant).receipt.execution?.environment).toBe(
-        'production',
-      );
-      expect(resultBody(await two.call('status')).enabled).toBe(true);
-      const revoke = {
-        authorization: f.p.signOwner({
+      const one = await binary();
+      let two: Awaited<ReturnType<typeof binary>> | undefined;
+      try {
+        two = await binary();
+        expect(
+          (await one.call('grant', { certificate: command.certificate }))
+            .status,
+        ).toBe(403);
+        const grant = await one.call('grant', command);
+        expect(grant).toMatchObject({ status: 201 });
+        expect(resultBody(grant).receipt.execution?.environment).toBe(
+          'production',
+        );
+        expect(resultBody(grant).receipt.execution?.profileId).toBe(
+          command.certificate.scope,
+        );
+        expect(resultBody(await two.call('status')).enabled).toBe(true);
+        const revoke = {
+          authorization: f.p.signOwner({
+            ...command.authorization.payload,
+            authorizationId: randomUUID(),
+            operation: 'revoke',
+            expectedVersion: resultBody(grant).receipt.version,
+            grantExpiresAt: null,
+          }),
+        };
+        const revoked = await two.call('revoke', revoke);
+        expect(revoked.status).toBe(201);
+        expect(resultBody(await one.call('status')).enabled).toBe(false);
+        expect((await one.call('grant', command)).status).toBe(201);
+        expect(resultBody(await two.call('status')).enabled).toBe(false);
+        const expiryCommand = structuredClone(command);
+        const expiry = new Date(Date.now() + 1200).toISOString();
+        expiryCommand.authorization = f.p.signOwner({
           ...command.authorization.payload,
           authorizationId: randomUUID(),
-          operation: 'revoke',
-          expectedVersion: resultBody(grant).receipt.version,
-          grantExpiresAt: null,
-        }),
-      };
-      const revoked = await two.call('revoke', revoke);
-      expect(revoked.status).toBe(201);
-      expect(resultBody(await one.call('status')).enabled).toBe(false);
-      expect((await one.call('grant', command)).status).toBe(201);
-      expect(resultBody(await two.call('status')).enabled).toBe(false);
-      const expiryCommand = structuredClone(command);
-      const expiry = new Date(Date.now() + 1200).toISOString();
-      expiryCommand.authorization = f.p.signOwner({
-        ...command.authorization.payload,
-        authorizationId: randomUUID(),
-        expectedVersion: resultBody(revoked).receipt.version,
-        grantExpiresAt: expiry,
-      });
-      expect((await one.call('grant', expiryCommand)).status).toBe(201);
-      expect(resultBody(await two.call('status')).enabled).toBe(true);
-      await new Promise((r) => setTimeout(r, 1400));
-      expect(resultBody(await one.call('status')).enabled).toBe(false);
-      expect(resultBody(await two.call('status')).enabled).toBe(false);
-      expect(await audits(f.tenant.id)).toHaveLength(3);
-    } finally {
-      await two?.stop();
-      await one.stop();
-    }
-  });
+          expectedVersion: resultBody(revoked).receipt.version,
+          grantExpiresAt: expiry,
+        });
+        expect((await one.call('grant', expiryCommand)).status).toBe(201);
+        expect(resultBody(await two.call('status')).enabled).toBe(true);
+        await new Promise((r) => setTimeout(r, 1400));
+        expect(resultBody(await one.call('status')).enabled).toBe(false);
+        expect(resultBody(await two.call('status')).enabled).toBe(false);
+        expect(await audits(f.tenant.id)).toHaveLength(3);
+      } finally {
+        await two?.stop();
+        await one.stop();
+      }
+    },
+  );
 });

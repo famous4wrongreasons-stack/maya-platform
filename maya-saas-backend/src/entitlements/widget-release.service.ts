@@ -1,4 +1,3 @@
-import { NO_HANDOFF_PROFILE } from './widget-release-profile.contract';
 import { SINGLE_OPERATOR } from './widget-release-production.contract';
 import {
   isProfileExecutionAuthorization,
@@ -64,7 +63,7 @@ export class WidgetReleaseService {
         featureKey: RELEASE_FEATURE,
         version: entitlementVersion(row),
         enabled: row !== null && row.enabled && view !== null,
-        ...(view?.scope === NO_HANDOFF_PROFILE
+        ...(view && view.scope !== 'full165.closed-input'
           ? {
               scope: view.scope,
               certification: 'CERTIFIED_FOR_PROFILE',

@@ -1,0 +1,111 @@
+{
+  "base": "7f67abfcf437a7f4867f8712a783e64303002d96",
+  "worktreeDirty": true,
+  "certificate": "NOT_ISSUED",
+  "archived": [
+    {
+      "archive": "diagnostic-mutations.json",
+      "source": "/private/tmp/maya-first-phone-mutants-20261015-03/scoped-mutations.json",
+      "sha256": "d686f4d2b8c93cac45b2f75d92153d6ca77e15537c86c00acb1d259174388c96",
+      "bytes": 14898,
+      "qualification": "diagnostic/pre-commit only"
+    },
+    {
+      "archive": "diagnostic-mutations-manifest.json",
+      "source": "/private/tmp/maya-first-phone-mutants-20261015-03/manifest.json",
+      "sha256": "2c7808d4a8c4e6c2a42ad290fc85b5ef23a27212e71ac7f954c1982b5c3256b8",
+      "bytes": 1130,
+      "qualification": "diagnostic/pre-commit only"
+    },
+    {
+      "archive": "diagnostic-http-binary-manifest.json",
+      "source": "/private/tmp/maya-first-phone-regression-20261015-01/manifest.json",
+      "sha256": "a9661fb6ce41fa68195fb5507ece742164c850e9eb405792ca8df06516ea31f2",
+      "bytes": 1148,
+      "qualification": "diagnostic/pre-commit only"
+    },
+    {
+      "archive": "diagnostic-staging-manifest.json",
+      "source": "/private/tmp/maya-first-phone-staging-20261015-01/manifest.json",
+      "sha256": "59c8d466d71680c2d320530b39a0fa42fc1292f11b6b4ae8276eb43699e6c994",
+      "bytes": 803,
+      "qualification": "diagnostic/pre-commit only"
+    },
+    {
+      "archive": "diagnostic-proof-runner.mjs",
+      "source": "/private/tmp/maya-first-phone-mutant-proof-20261015.mjs",
+      "sha256": "e18dfec9edc640cc25af33bcfb8c78eb7b37d6948b35ee89dea935243f0d8c7f",
+      "bytes": 8547,
+      "qualification": "diagnostic/pre-commit only"
+    },
+    {
+      "archive": "diagnostic-regression-runner.mjs",
+      "source": "/private/tmp/maya-first-phone-regression-20261015.mjs",
+      "sha256": "c9b823a39bd1d661d39886a133ab83ab73549f97f7622f497de919698f25d520",
+      "bytes": 8829,
+      "qualification": "diagnostic/pre-commit only"
+    }
+  ],
+  "rawTests": [
+    {
+      "source": "/private/tmp/maya-first-phone-mutants-20261015-03/unit-jest.json",
+      "sha256": "f11498f4937ed16c140d3f624294ae2512412afe58aa17932f66e7ca15488ade",
+      "bytes": 67577,
+      "passed": 130,
+      "failed": 0,
+      "pending": 0,
+      "suites": 4,
+      "whyNotCopied": "raw diagnostic output; hash and counts preserved; no release qualification"
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-mutants-20261015-03/first-phone-http-pg-jest.json",
+      "sha256": "23cd1d8bb2fe5d6c69de634ab725fba6e19204a66042481a5593bf9c8181808c",
+      "bytes": 12959,
+      "passed": 22,
+      "failed": 0,
+      "pending": 0,
+      "suites": 1,
+      "whyNotCopied": "raw diagnostic output; hash and counts preserved; no release qualification"
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-regression-20261015-01/profile-http-regression-jest.json",
+      "sha256": "b2ababd897bdae2b8b9cc0a5665f821f8bcbba15066c3b18ba0880419d15f494",
+      "bytes": 42809,
+      "passed": 72,
+      "failed": 0,
+      "pending": 0,
+      "suites": 4,
+      "whyNotCopied": "raw diagnostic output; hash and counts preserved; no release qualification"
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-regression-20261015-01/profile-binary-regression-jest.json",
+      "sha256": "b69a13b2e950463646565b1cb9d58033df6055d2ad8d0696fa4e53e59c92e38f",
+      "bytes": 2192,
+      "passed": 2,
+      "failed": 0,
+      "pending": 0,
+      "suites": 1,
+      "whyNotCopied": "raw diagnostic output; hash and counts preserved; no release qualification"
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-staging-20261015-01/staging-http-binary-jest.json",
+      "sha256": "064d3b80899bf6992128c6446b8e8063b3648e1d06874b099217e7cd4c639b98",
+      "bytes": 13190,
+      "passed": 19,
+      "failed": 0,
+      "pending": 0,
+      "suites": 2,
+      "whyNotCopied": "raw diagnostic output; hash and counts preserved; no release qualification"
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-staging-20261015-01/legacy-jest.json",
+      "sha256": "cffdd4a072e61637c3f81e4d94aea5902c266c4151cd688c2d04c2a7f16c2147",
+      "bytes": 23264,
+      "passed": 36,
+      "failed": 0,
+      "pending": 0,
+      "suites": 6,
+      "whyNotCopied": "raw diagnostic output; hash and counts preserved; no release qualification"
+    }
+  ]
+}

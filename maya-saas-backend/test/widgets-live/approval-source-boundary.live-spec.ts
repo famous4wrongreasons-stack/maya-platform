@@ -1,3 +1,17 @@
+import { releaseBookingProof } from './support/release-booking-proof';
+import { personalSource } from '../../scripts/widgets-http-proof/gateBS.cases';
+import { journalSource } from '../../scripts/widgets-http-proof/gateNS.cases';
+import type { TenantFixture } from './support/fixtures';
+import type { HttpProofContext } from './support/http-proof-contract';
+import { ConfigService } from '@nestjs/config';
+import { singleOperatorProof } from './support/widget-single-operator-proof';
+import { firstPhoneCertificate } from './support/widget-first-phone-proof';
+import { releaseHash } from '../../src/entitlements/widget-release.contract';
+import {
+  NO_PRICE_GOODS_PROFILE,
+  NO_PRICE_GOODS_DIGEST,
+} from '../../src/entitlements/widget-release-profile.contract';
+import { assertPriceGoodsScope } from '../../src/entitlements/widget-release-source-scope';
 import { randomUUID } from 'node:crypto';
 import { createServer, type Server } from 'node:http';
 import request from 'supertest';
@@ -16,6 +30,8 @@ import {
   type HttpHarness,
 } from './support/http-bootstrap';
 import type { Fixtures } from './support/fixtures';
+// Bootstrap module ordering matches the production AppModule before resolving this owner.
+import { ActionEngineKernel } from '../../src/action-engine/action-engine.kernel';
 
 const PARTNER = 'synthetic-approval-boundary-partner';
 const obj = (value: unknown): Record<string, unknown> =>
@@ -40,6 +56,7 @@ type ProviderFacts = {
   selectedStores: unknown;
   selectedTypes: unknown;
   requests: string[];
+  holdServiceRead?: { entered: () => void; released: Promise<void> };
 };
 
 /** Diagnostic of the actual closed source boundary, NOT an L/L-T/U claim.
@@ -144,8 +161,18 @@ describe('Approval source boundary [HTTP/PG] [actual adapter, artificial wire fa
                 : route.endsWith('/201')
                   ? service
                   : [service];
-      res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ success: true, data }));
+      const respond = () => {
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ success: true, data }));
+      };
+      const barrier = route.endsWith('/services/201')
+        ? state.holdServiceRead
+        : undefined;
+      if (barrier) {
+        delete state.holdServiceRead;
+        barrier.entered();
+        void barrier.released.then(respond);
+      } else respond();
     });
     await new Promise<void>((resolve) =>
       server.listen(0, '127.0.0.1', resolve),
@@ -183,6 +210,8 @@ describe('Approval source boundary [HTTP/PG] [actual adapter, artificial wire fa
     stores: unknown = [],
     types: unknown = [],
   ) {
+    http.app.get(ConfigService).set('NODE_ENV', 'test');
+    http.app.get(ConfigService).set('WIDGET_RELEASE_ENVIRONMENT', 'synthetic');
     const tenant = await fx.tenant(label, CalendarSource.EXTERNAL);
     tenants.push(tenant.id);
     const user = await fx.user(tenant, UserRole.TENANT_OWNER);
@@ -197,7 +226,7 @@ describe('Approval source boundary [HTTP/PG] [actual adapter, artificial wire fa
     ] as const)
       await fx.grantFeature(tenant, feature);
     const company = String(++companySequence);
-    const state = {
+    const state: ProviderFacts = {
       userToken: `synthetic-source-user-${company}`,
       selectedStores: stores,
       selectedTypes: types,
@@ -387,5 +416,347 @@ describe('Approval source boundary [HTTP/PG] [actual adapter, artificial wire fa
     expect(result.status).toBe(400);
     expect(f.state.requests).toEqual([]);
     await noEffect(f);
+  });
+  // Real AR-1 HTTP writer and global session; artificial signer and database only.
+  async function restricted(f: { tenant: TenantFixture }, grant = true) {
+    const operator = await fx.user(f.tenant, UserRole.PLATFORM_OWNER);
+    await db.prisma.user.update({
+      where: { id: operator.id },
+      data: { tenantId: null },
+    });
+    const login = await request(http.app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email: operator.email, password: operator.password });
+    expect(login.status).toBe(201);
+    const p = singleOperatorProof(
+      process.env.DATABASE_URL!,
+      f.tenant.id,
+      operator.id,
+    );
+    const cfg = http.app.get(ConfigService);
+    for (const key of [
+      'NODE_ENV',
+      'WIDGET_RELEASE_ENVIRONMENT',
+      'WIDGET_RELEASE_CANDIDATE_SHA',
+      'WIDGET_RELEASE_TRUST_JSON',
+      'WIDGET_RELEASE_PRODUCTION_TRUST_JSON',
+      'WIDGET_RELEASE_PRODUCTION_TENANTS_JSON',
+    ])
+      cfg.set(key, p.config.get(key));
+    const route = `/api/platform/widget-release/${f.tenant.id}`;
+    const send = (
+      action: string,
+      body: unknown,
+      token = String(obj(login.body).access_token),
+    ) =>
+      request(http.app.getHttpServer())
+        .post(route + '/' + action)
+        .set('Authorization', 'Bearer ' + token)
+        .send(body as object);
+    const status = async () =>
+      obj(
+        (
+          await request(http.app.getHttpServer())
+            .get(route + '/status')
+            .set(
+              'Authorization',
+              'Bearer ' + String(obj(login.body).access_token),
+            )
+        ).body,
+      );
+    const command = p.command(String((await status()).version));
+    command.certificate = firstPhoneCertificate(command.certificate);
+    command.authorization = p.signOwner({
+      ...command.authorization.payload,
+      profileId: NO_PRICE_GOODS_PROFILE,
+      profileDigest: NO_PRICE_GOODS_DIGEST,
+      certificateDigest: releaseHash(command.certificate),
+    });
+    if (grant) expect((await send('grant', command)).status).toBe(201);
+    const revoke = async () =>
+      send('revoke', {
+        authorization: p.signOwner({
+          ...command.authorization.payload,
+          authorizationId: randomUUID(),
+          operation: 'revoke',
+          expectedVersion: String((await status()).version),
+          grantExpiresAt: null,
+        }),
+      });
+    return { p, command, send, status, revoke };
+  }
+  const price = (f: Salon, key = randomUUID()) =>
+    post(f, '/ai/tools/catalog.service.price.update/execute', {
+      surface: 'web',
+      idempotencyKey: key,
+      arguments: { service_id: '201', price_rubles: 2500 },
+    });
+  const refusedScope = (r: { status: number; body: unknown }) => {
+    expect(r.status).toBe(403);
+    expect(JSON.stringify(r.body)).toContain('widget_release_source_scope');
+  };
+
+  it('FP-HTTP restricted price and goods preparation refuse before any provider read, without changing catalog reads', async () => {
+    const f = await setup('first phone prepare');
+    await restricted(f);
+    refusedScope(await price(f));
+    refusedScope(await review(f));
+    expect(f.state.requests).toEqual([]);
+    await noEffect(f);
+    const catalog = await post(f, '/ai/tools/catalog.services.read/execute', {
+      surface: 'web',
+      arguments: {},
+    });
+    expect(catalog.status).toBe(201);
+    expect(f.state.requests.length).toBeGreaterThan(0);
+  });
+  it('FP-OLD-APPROVAL existing pending price cannot approve/retry after restricted grant; safe rejection remains', async () => {
+    const f = await setup('first phone old approval');
+    const key = randomUUID();
+    const prepared = await price(f, key);
+    expect(prepared.status).toBe(201);
+    const approval = obj(obj(prepared.body).approval);
+    expect(typeof approval.id).toBe('string');
+    await restricted(f);
+    const reads = f.state.requests.length;
+    refusedScope(await price(f, key));
+    const decide = () =>
+      post(f, `/ai/approvals/${String(approval.id)}/approve`, {
+        payloadHash: approval.payload_hash,
+      });
+    for (const r of await Promise.all([decide(), decide()])) refusedScope(r);
+    expect(f.state.requests).toHaveLength(reads);
+    expect(
+      await db.prisma.aiApprovalRequest.findUnique({
+        where: { id: String(approval.id) },
+      }),
+    ).toMatchObject({ status: 'pending' });
+    const rejected = await post(
+      f,
+      `/ai/approvals/${String(approval.id)}/reject`,
+      { payloadHash: approval.payload_hash },
+    );
+    expect(rejected.status).toBe(201);
+    await noEffect(f, 1);
+  });
+  it('FP-REVOKE allowlist removal/candidate replacement still permits revoke, but cannot reopen forbidden source', async () => {
+    const f = await setup('first phone revoke');
+    const r = await restricted(f);
+    const cfg = http.app.get(ConfigService);
+    cfg.set('WIDGET_RELEASE_PRODUCTION_TENANTS_JSON', '[]');
+    cfg.set('WIDGET_RELEASE_CANDIDATE_SHA', 'b'.repeat(40));
+    expect((await r.status()).enabled).toBe(false);
+    refusedScope(await price(f));
+    expect((await r.revoke()).status).toBe(201);
+    refusedScope(await price(f));
+    refusedScope(await review(f));
+    expect(f.state.requests).toEqual([]);
+    await noEffect(f);
+  });
+  it('FP-AUTH tenant owner cannot grant; malformed or stale CAS cannot replace restricted state', async () => {
+    const f = await setup('first phone auth');
+    const r = await restricted(f, false);
+    expect((await r.send('grant', r.command, f.bearer)).status).toBe(403);
+    expect(
+      (
+        await r.send('grant', {
+          ...r.command,
+          authorization: r.command.authorization.payload,
+        })
+      ).status,
+    ).toBe(403);
+    const good = await r.send('grant', r.command);
+    expect(good.status).toBe(201);
+    const stale = {
+      ...r.command,
+      authorization: r.p.signOwner({
+        ...r.command.authorization.payload,
+        authorizationId: randomUUID(),
+      }),
+    };
+    expect((await r.send('grant', stale)).status).toBe(409);
+    const repeat = await r.send('grant', r.command);
+    expect(repeat.status).toBe(201);
+    expect(obj(repeat.body).replayed).toBe(true);
+    expect(
+      await db.prisma.auditLog.count({
+        where: { action: 'widget.release', entityId: f.tenant.id },
+      }),
+    ).toBe(1);
+    refusedScope(await price(f));
+    await noEffect(f);
+  });
+  it('FP-CONCURRENT release writer waits for admitted owner and subsequent scope reads refuse', async () => {
+    const f = await setup('first phone concurrency');
+    const r = await restricted(f, false);
+    let entered!: () => void, release!: () => void;
+    const admission = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const owner = db.prisma.$transaction(
+      async (tx) => {
+        await assertPriceGoodsScope(
+          tx,
+          f.tenant.id,
+          'crm.service.fixed-price.update.v1',
+        );
+        entered();
+        await held;
+      },
+      { timeout: 10000 },
+    );
+    await admission;
+    let completed = false;
+    const grant = r.send('grant', r.command).then((result) => {
+      completed = true;
+      return result;
+    });
+    try {
+      // Observe the lock wait on this exact tenant, rather than assuming a timing race.
+      let waiting = false;
+      for (let i = 0; i < 50 && !waiting; i++) {
+        const rows = await db.prisma.$queryRaw<
+          Array<{ n: number }>
+        >`SELECT count(*)::int AS n FROM pg_locks WHERE locktype='advisory' AND NOT granted`;
+        waiting = rows.some((x) => x.n > 0);
+        if (!waiting) await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+      expect(waiting).toBe(true);
+      expect(completed).toBe(false);
+    } finally {
+      release();
+    }
+    await owner;
+    expect((await grant).status).toBe(201);
+    await expect(
+      db.prisma.$transaction((tx) =>
+        assertPriceGoodsScope(
+          tx,
+          f.tenant.id,
+          'crm.service.fixed-price.update.v1',
+        ),
+      ),
+    ).rejects.toThrow('widget_release_source_scope');
+    await noEffect(f);
+  });
+  it('FP-DISPATCH a new scope during the provider pre-read commits and blocks the pending effect without deadlock', async () => {
+    const f = await setup('first phone dispatch race');
+    const prepared = await price(f);
+    expect(prepared.status).toBe(201);
+    const approval = obj(obj(prepared.body).approval);
+    let enter!: () => void, release!: () => void;
+    const entered = new Promise<void>((resolve) => {
+      enter = resolve;
+    });
+    f.state.holdServiceRead = {
+      entered: enter,
+      released: new Promise<void>((resolve) => {
+        release = resolve;
+      }),
+    };
+    const approved = post(f, `/ai/approvals/${String(approval.id)}/approve`, {
+      payloadHash: approval.payload_hash,
+    }).then((r) => r);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([
+        entered,
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(
+            () => reject(new Error('synthetic provider pre-read not reached')),
+            5000,
+          );
+        }),
+      ]);
+      clearTimeout(timer);
+      // This must finish while the pre-read is held, before provider dispatch.
+      await restricted(f);
+    } finally {
+      clearTimeout(timer);
+      release();
+    }
+    const result = await approved;
+    expect(obj(result.body).status).not.toBe('completed');
+    expect(
+      await db.prisma.actionExecution.count({
+        where: { tenantId: f.tenant.id, state: 'SUCCEEDED' },
+      }),
+    ).toBe(0);
+    expect(unexpected).toEqual([]);
+  });
+  async function proofContext(): Promise<HttpProofContext> {
+    const base = await http.listenLoopback();
+    return {
+      apiBase: base,
+      fixtures: fx.binView(),
+      mintProvenance: () => http.mintProvenance(),
+      request: async (route, init) => {
+        const r = await fetch(`${base}/api${route}`, init);
+        return { status: r.status, body: (await r.json()) as unknown };
+      },
+      // Execute existing assertions without emitting source-qualification claims.
+      evidence: { enabled: false, record: () => false },
+    };
+  }
+  const authorizeJourney = async (tenant: TenantFixture) => {
+    tenants.push(tenant.id);
+    await restricted({ tenant });
+  };
+  it('FP-BOOKING all four production HTTP widgets and COMMIT remain mandatory under new signed scope', async () => {
+    const proofs = await releaseBookingProof(
+      await proofContext(),
+      undefined,
+      authorizeJourney,
+    );
+    expect(proofs).toHaveLength(7);
+  });
+  it.each([
+    ['NS', journalSource],
+    ['BS', personalSource],
+  ] as const)(
+    'FP-SOURCE %s still traverses its actual canonical source under new signed scope',
+    async (_name, proof) => {
+      await proof(await proofContext(), authorizeJourney);
+    },
+  );
+  it('FP-FINAL-DISPATCH scope replacement after AE dispatch admission still prevents the provider write', async () => {
+    const f = await setup('first phone last dispatch race');
+    const prepared = await price(f);
+    expect(prepared.status).toBe(201);
+    const approval = obj(obj(prepared.body).approval);
+    const kernel = http.app.get(ActionEngineKernel);
+    const original = kernel.markDispatchMayHaveCrossed.bind(kernel);
+    // Scheduling barrier only: the real kernel commits its original result.
+    // Replace the release through real AR-1 before allowing the owner to dispatch.
+    const barrier = jest
+      .spyOn(kernel, 'markDispatchMayHaveCrossed')
+      .mockImplementationOnce(async (...args) => {
+        const result = await original(...args);
+        await restricted(f);
+        return result;
+      });
+    try {
+      const result = await post(
+        f,
+        `/ai/approvals/${String(approval.id)}/approve`,
+        { payloadHash: approval.payload_hash },
+      );
+      expect(barrier).toHaveBeenCalledTimes(1);
+      expect(obj(result.body).status).toBe('failed');
+      expect(obj(obj(result.body).error).code).toBe(
+        'service_price_predispatch_refused',
+      );
+      expect(unexpected).toEqual([]);
+      expect(
+        await db.prisma.actionExecution.count({
+          where: { tenantId: f.tenant.id, state: 'SUCCEEDED' },
+        }),
+      ).toBe(0);
+    } finally {
+      barrier.mockRestore();
+    }
   });
 });

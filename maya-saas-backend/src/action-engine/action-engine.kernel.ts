@@ -1,3 +1,4 @@
+import { readPriceGoodsScope } from '../entitlements/widget-release-source-scope';
 import {
   DURABLE_CLAIM_POLICY_CONTRACT,
   RC_DURABLE_COMMANDS,
@@ -293,6 +294,11 @@ export class ActionEngineKernel {
     ) {
       try {
         const persist = async (tx: Prisma.TransactionClient) => {
+          await readPriceGoodsScope(
+            tx,
+            request.tenantId,
+            normalized.capability.capability,
+          );
           const source = await this.validateSource(
             tx,
             request,
@@ -2767,6 +2773,8 @@ export class ActionEngineKernel {
   ): Promise<ActionAttempt> {
     return this.prisma.$transaction(async (tx) => {
       const { execution, attempt } = await this.lockOwnedAttempt(tx, input);
+      if (next === ExternalDispatchState.MAY_HAVE_CROSSED)
+        await readPriceGoodsScope(tx, input.tenantId, execution.capability);
       if (
         next === ExternalDispatchState.MAY_HAVE_CROSSED &&
         !this.controlledFixtureMode &&

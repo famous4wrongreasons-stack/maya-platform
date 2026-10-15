@@ -51,6 +51,12 @@ function setup(currentStatus: string) {
     idempotencyKey: key,
   };
   const prisma = {
+    $queryRaw: jest.fn().mockResolvedValue([]),
+    tenantEntitlement: { findUnique: jest.fn().mockResolvedValue(null) },
+    $transaction: jest.fn(
+      (work: (tx: PrismaService) => Promise<unknown>): Promise<unknown> =>
+        work(prisma as unknown as PrismaService),
+    ),
     aiApprovalRequest: {
       findUnique: jest.fn().mockResolvedValue(saved),
       findUniqueOrThrow: jest

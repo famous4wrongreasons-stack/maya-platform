@@ -7,9 +7,8 @@ import {
   type VerifiedReleaseView,
 } from './widget-release-policy.service';
 import {
-  NO_HANDOFF_PROFILE,
-  PROFILE_DIGEST,
-  PROFILE_MANIFEST,
+  fixedProfile,
+  type FixedReleaseProfile,
   PROFILE_REGISTRY_DIGEST,
 } from './widget-release-profile.contract';
 import { object, releaseDeny, releaseHash } from './widget-release.contract';
@@ -91,17 +90,18 @@ export class WidgetReleaseAccessService {
   ): Promise<void> {
     const view = await this.current(tenantId, tx);
     if (view === null) releaseDeny('admission');
-    if (view.scope !== NO_HANDOFF_PROFILE) return;
+    if (view.scope === 'full165.closed-input') return;
+    const selected = fixedProfile(view.scope);
     if (registryDigest !== PROFILE_REGISTRY_DIGEST)
       releaseDeny('registry_binding');
     // Envelope-level refusal also covers zero/all-NONE intents (no records).
-    if (PROFILE_MANIFEST.unavailableKinds.includes(widgetKind))
+    if (selected.manifest.unavailableKinds.includes(widgetKind))
       releaseDeny('profile_unavailable');
     for (const row of rows) {
       if (
         row.record.tenantId !== tenantId ||
         row.record.widgetKind !== widgetKind ||
-        !this.allowed(row.template, row.record)
+        !this.allowed(row.template, row.record, view.scope)
       )
         releaseDeny('profile_unavailable');
       await this.audit.log(
@@ -130,11 +130,17 @@ export class WidgetReleaseAccessService {
   ): Promise<boolean> {
     const view = await this.current(tenantId, tx);
     if (view === null || tenantId !== record.tenantId) return false;
-    if (view.scope !== NO_HANDOFF_PROFILE) return true;
+    if (view.scope === 'full165.closed-input') return true;
+    let selected: ReturnType<typeof fixedProfile>;
+    try {
+      selected = fixedProfile(view.scope);
+    } catch {
+      return false;
+    }
     if (
       registryDigest !== PROFILE_REGISTRY_DIGEST ||
       record.effect === 'HANDOFF' ||
-      PROFILE_MANIFEST.unavailableKinds.includes(record.widgetKind)
+      selected.manifest.unavailableKinds.includes(record.widgetKind)
     )
       return false;
     const rows = await tx.auditLog.findMany({
@@ -153,28 +159,35 @@ export class WidgetReleaseAccessService {
       const b = object(rows[0].metadataJson);
       return (
         b.contract === 'maya.widget-release-emission-binding/1' &&
-        b.scope === NO_HANDOFF_PROFILE &&
-        b.profileDigest === PROFILE_DIGEST &&
+        b.scope === view.scope &&
+        b.profileDigest === selected.digest &&
         b.version === view.version &&
         b.certificateDigest === view.certificateDigest &&
         b.factsDigest === bindingHash(record) &&
         typeof b.template === 'string' &&
-        this.allowed(b.template, record)
+        this.allowed(b.template, record, view.scope)
       );
     } catch {
       return false;
     }
   }
 
-  private allowed(template: string, record: ReleaseIntentFacts): boolean {
+  private allowed(
+    template: string,
+    record: ReleaseIntentFacts,
+    scope: FixedReleaseProfile,
+  ): boolean {
+    const selected = fixedProfile(scope);
     if (
-      !PROFILE_MANIFEST.templates.includes(template) ||
+      !selected.manifest.templates.includes(template) ||
       record.effect === 'HANDOFF' ||
-      PROFILE_MANIFEST.unavailableKinds.includes(record.widgetKind)
+      selected.manifest.unavailableKinds.includes(record.widgetKind)
     )
       return false;
     const tuple =
-      PROFILE_REGISTRY.tuples[template as keyof typeof PROFILE_REGISTRY.tuples];
+      selected.manifest.combinations.tuples[
+        template as keyof typeof PROFILE_REGISTRY.tuples
+      ];
     if (
       !tuple ||
       tuple.effect !== record.effect ||
@@ -196,9 +209,10 @@ export class WidgetReleaseAccessService {
       return (
         record.capabilitySpace === 'C9' &&
         typeof record.capabilityKey === 'string' &&
-        (PROFILE_REGISTRY.successorCapabilities as readonly string[]).includes(
-          record.capabilityKey,
-        )
+        (
+          selected.manifest.combinations
+            .successorCapabilities as readonly string[]
+        ).includes(record.capabilityKey)
       );
     return (
       (tuple.subject?.space ?? null) === record.capabilitySpace &&

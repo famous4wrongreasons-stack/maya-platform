@@ -1,3 +1,8 @@
+import { PRICE_GOODS_OPERATIONS } from '../entitlements/widget-release-profile.contract';
+import {
+  assertPriceGoodsScope,
+  checkPriceGoodsScope,
+} from '../entitlements/widget-release-source-scope';
 import {
   staffScheduleReadScope,
   type StaffScheduleReadScope,
@@ -204,6 +209,7 @@ export class AiToolRuntimeService {
       this.approvalConflict('goods_review_context_invalid');
     const validated = this.registry.validateArguments(toolName, dto.arguments);
     await this.policy.assertCanExecute(principal, definition);
+    await checkPriceGoodsScope(this.prisma, principal.tenantId, toolName);
     const revalidateScopedRead = await this.bindScopedRead(
       principal,
       definition,
@@ -1545,6 +1551,11 @@ export class AiToolRuntimeService {
       principal,
     );
     this.assertPayloadHash(approval, dto.payloadHash);
+    await checkPriceGoodsScope(
+      this.prisma,
+      principal.tenantId,
+      approval.toolName,
+    );
 
     if (approval.status === APPROVAL_STATUS.COMPLETED) {
       return this.replayCompletedApproval(approval);
@@ -1562,20 +1573,31 @@ export class AiToolRuntimeService {
       this.approvalConflict('ai_approval_expired');
     }
 
-    const transitioned = await this.prisma.aiApprovalRequest.updateMany({
-      where: {
-        id: approval.id,
-        tenantId: approval.tenantId,
-        status: APPROVAL_STATUS.PENDING,
-        expiresAt: { gt: now },
-      },
-      data: {
-        status: APPROVAL_STATUS.APPROVED,
-        decidedByUserId: principal.userId,
-        decidedByTenantId: principal.tenantId,
-        decidedAt: now,
-      },
-    });
+    const transition = (tx: Prisma.TransactionClient) =>
+      tx.aiApprovalRequest.updateMany({
+        where: {
+          id: approval.id,
+          tenantId: approval.tenantId,
+          status: APPROVAL_STATUS.PENDING,
+          expiresAt: { gt: now },
+        },
+        data: {
+          status: APPROVAL_STATUS.APPROVED,
+          decidedByUserId: principal.userId,
+          decidedByTenantId: principal.tenantId,
+          decidedAt: now,
+        },
+      });
+    const transitioned = PRICE_GOODS_OPERATIONS.includes(approval.toolName)
+      ? await this.prisma.$transaction(async (tx) => {
+          await assertPriceGoodsScope(
+            tx,
+            principal.tenantId,
+            approval.toolName,
+          );
+          return transition(tx);
+        })
+      : await transition(this.prisma);
     if (transitioned.count !== 1) {
       const decided = await this.prisma.aiApprovalRequest.findUnique({
         where: {
@@ -1851,6 +1873,7 @@ export class AiToolRuntimeService {
     args: ValidatedAiToolArguments,
   ) {
     return this.prisma.$transaction(async (tx) => {
+      await assertPriceGoodsScope(tx, principal.tenantId, GOODS_RECEIPT_TOOL);
       await tx.$executeRaw(
         Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${principal.tenantId}:goods-review:${principal.userId}:${String(args.photo_sha256)}:${String(args.source_line)}`},0))`,
       );
@@ -2028,6 +2051,11 @@ export class AiToolRuntimeService {
           ? await this.admitGoodsApproval(data, principal, args)
           : definition.name === SERVICE_PRICE_TOOL
             ? await this.prisma.$transaction(async (tx) => {
+                await assertPriceGoodsScope(
+                  tx,
+                  principal.tenantId,
+                  SERVICE_PRICE_TOOL,
+                );
                 await tx.$executeRaw(
                   Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${principal.tenantId}:service-price-proposal:${principal.userId}:${String(args.service_id)}`}, 0))`,
                 );
@@ -2102,6 +2130,11 @@ export class AiToolRuntimeService {
     if (!approval.requestedByUserId) {
       this.approvalConflict('ai_approval_requester_unavailable');
     }
+    await checkPriceGoodsScope(
+      this.prisma,
+      approval.tenantId,
+      approval.toolName,
+    );
     const requester = await this.prisma.membership.findUnique({
       where: {
         userId_tenantId: {

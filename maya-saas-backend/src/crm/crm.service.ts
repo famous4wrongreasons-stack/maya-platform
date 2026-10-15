@@ -1,3 +1,8 @@
+import {
+  assertPriceGoodsScope,
+  checkPriceGoodsScope,
+  readPriceGoodsScope,
+} from '../entitlements/widget-release-source-scope';
 import { crmConfigurationVersion } from './crm-configuration-version';
 import {
   goodsSearchQuery,
@@ -1424,6 +1429,7 @@ export class CrmService {
   }
 
   async prepareGoodsReceipt(tenantId: string, userId: string, value: unknown) {
+    await checkPriceGoodsScope(this.prisma, tenantId, GOODS_RECEIPT_TOOL);
     const proposal = goodsProposal(value),
       context = await this.goodsContext(tenantId, userId);
     if (
@@ -1521,6 +1527,7 @@ export class CrmService {
     };
     const receipt = await this.prisma.$transaction(
       async (tx) => {
+        await readPriceGoodsScope(tx, tenantId, GOODS_RECEIPT_CAPABILITY);
         await tx.$executeRaw(
           Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${tenantId}:${photoRef}`},0))`,
         );
@@ -1561,6 +1568,16 @@ export class CrmService {
               return observe();
             },
             dispatch: async () => {
+              // Acquire after canonical AE/receipt admission, on the existing owner
+              // transaction. Hold through the effect/settlement, without nesting
+              // another shared admission lock behind a queued AR-1 writer.
+              await assertPriceGoodsScope(
+                tx,
+                tenantId,
+                GOODS_RECEIPT_CAPABILITY,
+              ).catch(() =>
+                goodsRefuse('goods_predispatch_release_scope_changed'),
+              );
               await observe().catch(() =>
                 goodsRefuse('goods_predispatch_source_or_authority_changed'),
               );
@@ -1850,6 +1867,7 @@ export class CrmService {
     userId: string,
     proposal: { service_id: unknown; price_rubles: unknown },
   ): Promise<Record<string, unknown>> {
+    await checkPriceGoodsScope(this.prisma, tenantId, SERVICE_PRICE_TOOL);
     const amount = priceMinor(proposal.price_rubles);
     const serviceId = ycId(proposal.service_id);
     const { adapter, revision } = await this.servicePriceContext(
@@ -1936,6 +1954,7 @@ export class CrmService {
     // MAYA commands, not edits performed concurrently by an external YC editor.
     const receipt = await this.prisma.$transaction(
       async (tx) => {
+        await readPriceGoodsScope(tx, tenantId, SERVICE_PRICE_CAPABILITY);
         await tx.$executeRaw(
           Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${tenantId}:service-price:${targetRef}`}, 0))`,
         );
@@ -1992,6 +2011,17 @@ export class CrmService {
               };
             },
             dispatch: async () => {
+              // Re-read under the release lock immediately before the provider
+              // boundary. The outer owner transaction retains it until settlement.
+              await assertPriceGoodsScope(
+                tx,
+                tenantId,
+                SERVICE_PRICE_CAPABILITY,
+              ).catch(() =>
+                priceUnavailable(
+                  'service_price_predispatch_release_scope_changed',
+                ),
+              );
               await authorize(true).catch(() =>
                 priceUnavailable('service_price_prepatch_authority_changed'),
               );

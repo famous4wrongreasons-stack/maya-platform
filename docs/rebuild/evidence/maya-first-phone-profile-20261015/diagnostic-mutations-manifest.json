@@ -1,0 +1,37 @@
+{
+  "productSourceSha256": "e1d1ddba25957b741a3999004a86a5268778157c3d10c225c72c83d479ff1e93",
+  "sourceFileSha256": "3f1529a85da3b341fb0219b99921eff2c7870082e84ef02b9da82b6d311eb1df",
+  "sourceHead": "7f67abfcf437a7f4867f8712a783e64303002d96",
+  "sourceDirty": true,
+  "kind": "first-phone-restricted-profile-isolated-proof",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-approval-source-QzhmfX/pg",
+  "database": "maya_widget_gate_proof_approval_source_843296e92eb9",
+  "port": 55489,
+  "status": "passed",
+  "completed": [
+    "network-isolation",
+    "live-types",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "first-phone-http-pg",
+    "first-phone-unit",
+    "scoped-mutations",
+    "pg-stop"
+  ],
+  "productionSigningKeysCreated": false,
+  "artificialEphemeralTestSigners": true,
+  "syntheticTenants": true,
+  "externalCalls": 0,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1,
+    "browserCount": 0
+  },
+  "clusterStopped": true
+}

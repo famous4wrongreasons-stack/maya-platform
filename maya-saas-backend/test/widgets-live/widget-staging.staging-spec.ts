@@ -1,3 +1,4 @@
+import { firstPhoneCertificate } from './support/widget-first-phone-proof';
 import request from 'supertest';
 import {
   releaseHash,
@@ -50,7 +51,7 @@ describe('AR-1 single-operator local staging execution contract with ephemeral t
   afterAll(async () => {
     await http?.close();
   });
-  async function fixture() {
+  async function fixture(narrow = false) {
     const tenant = await fx.tenant('AR1 synthetic', CalendarSource.INTERNAL);
     tenants.push(tenant.id);
     const operator = await fx.user(tenant, UserRole.PLATFORM_OWNER);
@@ -102,6 +103,15 @@ describe('AR-1 single-operator local staging execution contract with ephemeral t
         .get(route + '/status')
         .set('Authorization', 'Bearer ' + token);
     const command = p.command();
+    if (narrow) {
+      command.certificate = firstPhoneCertificate(command.certificate);
+      command.authorization = p.signOwner({
+        ...command.authorization.payload,
+        profileId: command.certificate.scope,
+        profileDigest: command.certificate.profileDigest,
+        certificateDigest: releaseHash(command.certificate),
+      });
+    }
     const revoke = (
       version: string,
       over: Partial<StagingSingleOperatorAuthorization> = {},
@@ -127,117 +137,120 @@ describe('AR-1 single-operator local staging execution contract with ephemeral t
     db.prisma.auditLog.findMany({
       where: { action: 'widget.release', entityId: tenantId },
     });
-  it('LSO-LIFECYCLE validate is read-only; signed grant has atomic audit; same authorization retry never grants twice; revoke refuses an old widget token', async () => {
-    const f = await fixture();
-    expect((await f.post('validate', f.command)).status).toBe(201);
-    expect(await row(f.tenant.id)).toBeNull();
-    expect(await audits(f.tenant.id)).toHaveLength(0);
-    const g = await f.post('grant', f.command);
-    expect(g.status).toBe(201);
-    expect(resultBody(g).replayed).toBe(false);
-    expect(resultBody(g).receipt.execution).toEqual({
-      releaseId: 'synthetic-release',
-      environment: 'staging',
-      profileId: 'closed-input.no-handoff@1',
-      profileDigest: f.command.authorization.payload.profileDigest,
-      evidenceDigest: f.command.certificate.evidenceDigest,
-    });
-    const disclosure = {
-      governance: 'single-operator',
-      independentHumanReview: false,
-      reviewerId: null,
-      approverId: f.operator.id,
-      actorId: f.operator.id,
-    };
-    expect(resultBody(g).receipt).toMatchObject(disclosure);
-    expect((await audits(f.tenant.id))[0].metadataJson).toMatchObject({
-      receipt: disclosure,
-    });
-    expect(await audits(f.tenant.id)).toHaveLength(1);
-    expect((await f.status()).body).toMatchObject({
-      enabled: true,
-      governance: 'single-operator',
-      independentHumanReview: false,
-    });
-    const replay = await f.post('grant', f.command);
-    expect(replay.status).toBe(201);
-    expect(resultBody(replay).replayed).toBe(true);
-    expect(resultBody(replay).receipt).toEqual(resultBody(g).receipt);
-    expect(await audits(f.tenant.id)).toHaveLength(1);
-    const client = await fx.user(f.tenant, UserRole.CLIENT);
-    await fx.bookingSource(f.tenant, client);
-    for (const key of [
-      'ai.consultant',
-      'booking',
-      'booking.customer_app',
-      'crm.integration',
-    ] as const)
-      await grantStagingAncillaryFeature(db, f.tenant, key);
-    const login = await http.login(
-      f.tenant.slug,
-      client.email,
-      client.password,
-    );
-    const catalog = await http.executeTool(
-      login,
-      'catalog.services.read',
-      { arguments: {}, surface: 'web' },
-      'ar1-' + randomUUID(),
-    );
-    expect([200, 201]).toContain(catalog.status);
-    const envelope = (
-      catalog.body as {
-        resolution: {
-          receipt: {
-            envelope: {
-              widget_id: string;
-              intents: Array<{ intent_token: string }>;
-              body: { options: Array<{ option_id: string }> };
+  it.each([false, true])(
+    'LSO-LIFECYCLE first-phone=%s validate is read-only; signed grant has atomic audit; same authorization retry never grants twice; revoke refuses an old widget token',
+    async (narrow) => {
+      const f = await fixture(narrow);
+      expect((await f.post('validate', f.command)).status).toBe(201);
+      expect(await row(f.tenant.id)).toBeNull();
+      expect(await audits(f.tenant.id)).toHaveLength(0);
+      const g = await f.post('grant', f.command);
+      expect(g.status).toBe(201);
+      expect(resultBody(g).replayed).toBe(false);
+      expect(resultBody(g).receipt.execution).toEqual({
+        releaseId: 'synthetic-release',
+        environment: 'staging',
+        profileId: f.command.certificate.scope,
+        profileDigest: f.command.authorization.payload.profileDigest,
+        evidenceDigest: f.command.certificate.evidenceDigest,
+      });
+      const disclosure = {
+        governance: 'single-operator',
+        independentHumanReview: false,
+        reviewerId: null,
+        approverId: f.operator.id,
+        actorId: f.operator.id,
+      };
+      expect(resultBody(g).receipt).toMatchObject(disclosure);
+      expect((await audits(f.tenant.id))[0].metadataJson).toMatchObject({
+        receipt: disclosure,
+      });
+      expect(await audits(f.tenant.id)).toHaveLength(1);
+      expect((await f.status()).body).toMatchObject({
+        enabled: true,
+        governance: 'single-operator',
+        independentHumanReview: false,
+      });
+      const replay = await f.post('grant', f.command);
+      expect(replay.status).toBe(201);
+      expect(resultBody(replay).replayed).toBe(true);
+      expect(resultBody(replay).receipt).toEqual(resultBody(g).receipt);
+      expect(await audits(f.tenant.id)).toHaveLength(1);
+      const client = await fx.user(f.tenant, UserRole.CLIENT);
+      await fx.bookingSource(f.tenant, client);
+      for (const key of [
+        'ai.consultant',
+        'booking',
+        'booking.customer_app',
+        'crm.integration',
+      ] as const)
+        await grantStagingAncillaryFeature(db, f.tenant, key);
+      const login = await http.login(
+        f.tenant.slug,
+        client.email,
+        client.password,
+      );
+      const catalog = await http.executeTool(
+        login,
+        'catalog.services.read',
+        { arguments: {}, surface: 'web' },
+        'ar1-' + randomUUID(),
+      );
+      expect([200, 201]).toContain(catalog.status);
+      const envelope = (
+        catalog.body as {
+          resolution: {
+            receipt: {
+              envelope: {
+                widget_id: string;
+                intents: Array<{ intent_token: string }>;
+                body: { options: Array<{ option_id: string }> };
+              };
             };
           };
-        };
-      }
-    ).resolution.receipt.envelope;
-    const body = {
-      contract: 'maya.widget.intent.submission/1',
-      widget_id: envelope.widget_id,
-      intent_token: envelope.intents[0].intent_token,
-      inputs: { service_ref: envelope.body.options[0].option_id },
-      client_nonce: randomUUID(),
-      profile_id: 'pwa.default',
-    };
-    const revoke = f.revoke(resultBody(g).receipt.version);
-    expect((await f.post('revoke', revoke)).status).toBe(201);
-    expect(resultBody(await f.status()).enabled).toBe(false);
-    expect((await row(f.tenant.id))?.enabled).toBe(false);
-    expect(await audits(f.tenant.id)).toHaveLength(2);
-    const denied = await http.postIntent(login, body);
-    expect(denied.status).toBe(403);
-    expect(denied.body).toMatchObject({ error: { code: 'feature_locked' } });
-    expect(
-      await db.prisma.actionExecution.count({
-        where: { tenantId: f.tenant.id },
-      }),
-    ).toBe(0);
-    await f.post('grant', f.command);
-    expect(resultBody(await f.status()).enabled).toBe(false);
-    expect(await audits(f.tenant.id)).toHaveLength(2);
-    const version = resultBody(await f.status()).version;
-    expect((await f.post('grant', f.p.command(version))).status).toBe(201);
-    expect(resultBody(await f.status()).enabled).toBe(true);
-    const old = await http.postIntent(login, body);
-    expect(old.status).toBe(200);
-    expect(old.body).toMatchObject({
-      outcome: 'refuse',
-      code: 'insufficient_authority',
-      stopped_at_gate: '6',
-    });
-    expect(
-      await db.prisma.actionExecution.count({
-        where: { tenantId: f.tenant.id },
-      }),
-    ).toBe(0);
-  });
+        }
+      ).resolution.receipt.envelope;
+      const body = {
+        contract: 'maya.widget.intent.submission/1',
+        widget_id: envelope.widget_id,
+        intent_token: envelope.intents[0].intent_token,
+        inputs: { service_ref: envelope.body.options[0].option_id },
+        client_nonce: randomUUID(),
+        profile_id: 'pwa.default',
+      };
+      const revoke = f.revoke(resultBody(g).receipt.version);
+      expect((await f.post('revoke', revoke)).status).toBe(201);
+      expect(resultBody(await f.status()).enabled).toBe(false);
+      expect((await row(f.tenant.id))?.enabled).toBe(false);
+      expect(await audits(f.tenant.id)).toHaveLength(2);
+      const denied = await http.postIntent(login, body);
+      expect(denied.status).toBe(403);
+      expect(denied.body).toMatchObject({ error: { code: 'feature_locked' } });
+      expect(
+        await db.prisma.actionExecution.count({
+          where: { tenantId: f.tenant.id },
+        }),
+      ).toBe(0);
+      await f.post('grant', f.command);
+      expect(resultBody(await f.status()).enabled).toBe(false);
+      expect(await audits(f.tenant.id)).toHaveLength(2);
+      const version = resultBody(await f.status()).version;
+      expect((await f.post('grant', f.p.command(version))).status).toBe(201);
+      expect(resultBody(await f.status()).enabled).toBe(true);
+      const old = await http.postIntent(login, body);
+      expect(old.status).toBe(200);
+      expect(old.body).toMatchObject({
+        outcome: 'refuse',
+        code: 'insufficient_authority',
+        stopped_at_gate: '6',
+      });
+      expect(
+        await db.prisma.actionExecution.count({
+          where: { tenantId: f.tenant.id },
+        }),
+      ).toBe(0);
+    },
+  );
   it('LSO-CONCURRENT two consumes of one authorization produce one grant and one audit', async () => {
     const f = await fixture();
     const result = await Promise.all([

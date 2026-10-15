@@ -36,7 +36,7 @@
     "id": "PU-M4",
     "description": "PU-SCHEMA",
     "file": "src/entitlements/widget-release-production.contract.ts",
-    "find": "v.profileId !== NO_HANDOFF_PROFILE || v.profileDigest !== PROFILE_DIGEST",
+    "find": "v.profileDigest !== fixedProfile(v.profileId).digest ||\n    (!single && v.profileId !== NO_HANDOFF_PROFILE)",
     "replace": "false",
     "killers": [
       "PU-SCHEMA"

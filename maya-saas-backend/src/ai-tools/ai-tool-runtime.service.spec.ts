@@ -1703,6 +1703,8 @@ function createHarness(
     .fn()
     .mockResolvedValue({ id: 'maya-branch', timezone: 'Europe/Moscow' });
   const prisma = {
+    $queryRaw: jest.fn().mockResolvedValue([]),
+    tenantEntitlement: { findUnique: jest.fn().mockResolvedValue(null) },
     tenant: { findUnique: availabilityTenant },
     crmIntegration: { findUnique: availabilityIntegration },
     branch: { findFirst: availabilityBranch },
@@ -1724,8 +1726,14 @@ function createHarness(
     staff: { findMany: jest.fn().mockResolvedValue([]) },
     crmStaffAccess: { findMany: jest.fn().mockResolvedValue([]) },
     client: { findMany: clientFindMany },
-    $transaction: jest.fn((operations: Array<Promise<unknown>>) =>
-      Promise.all(operations),
+    $transaction: jest.fn(
+      (
+        operations:
+          Array<Promise<unknown>> | ((tx: PrismaService) => Promise<unknown>),
+      ) =>
+        typeof operations === 'function'
+          ? operations(prisma)
+          : Promise.all(operations),
     ),
   } as unknown as PrismaService;
   const tenantContext = new TenantContextService();

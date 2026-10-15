@@ -10,7 +10,8 @@ import {
 } from './widget-release.contract';
 import {
   NO_HANDOFF_PROFILE,
-  PROFILE_DIGEST,
+  fixedProfile,
+  type FixedReleaseProfile,
 } from './widget-release-profile.contract';
 import type { StagingSingleOperatorAuthorization } from './widget-release-staging.contract';
 
@@ -27,7 +28,7 @@ export interface ProductionReleaseAuthorization extends Omit<
   contract: typeof PRODUCTION_RELEASE_AUTH;
   environment: 'production';
   releaseId: string;
-  profileId: typeof NO_HANDOFF_PROFILE;
+  profileId: FixedReleaseProfile;
   profileDigest: string;
   evidenceDigest: string;
 }
@@ -86,7 +87,10 @@ export function productionAuthorization(
   validateAuthorizationFields(v, single ? 'single-operator' : 'independent');
   identifier(v.releaseId);
   digest(v.evidenceDigest);
-  if (v.profileId !== NO_HANDOFF_PROFILE || v.profileDigest !== PROFILE_DIGEST)
+  if (
+    v.profileDigest !== fixedProfile(v.profileId).digest ||
+    (!single && v.profileId !== NO_HANDOFF_PROFILE)
+  )
     releaseDeny('production_profile');
   if (
     v.operation === 'grant' &&

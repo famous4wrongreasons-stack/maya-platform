@@ -15,10 +15,7 @@ import {
   type ProductionAuthorization,
   type SingleOperatorReleaseAuthorization,
 } from './widget-release-production.contract';
-import {
-  NO_HANDOFF_PROFILE,
-  PROFILE_DIGEST,
-} from './widget-release-profile.contract';
+import { fixedProfile } from './widget-release-profile.contract';
 
 /** Separate local staging execution; never parsed as a production V2 authorization. */
 export const STAGING_SINGLE_OPERATOR_AUTH =
@@ -58,7 +55,7 @@ export function stagingSingleOperatorAuthorization(
   validateAuthorizationFields(v, 'single-operator');
   identifier(v.releaseId);
   digest(v.evidenceDigest);
-  if (v.profileId !== NO_HANDOFF_PROFILE || v.profileDigest !== PROFILE_DIGEST)
+  if (v.profileDigest !== fixedProfile(v.profileId).digest)
     releaseDeny('staging_profile');
   if (
     v.operation === 'grant' &&

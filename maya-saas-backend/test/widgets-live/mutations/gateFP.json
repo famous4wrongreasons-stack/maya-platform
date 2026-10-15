@@ -1,0 +1,112 @@
+[
+  {
+    "id": "FP-M1",
+    "description": "FP-HTTP",
+    "file": "src/entitlements/widget-release-source-scope.ts",
+    "find": "    authorization.profileId === NO_PRICE_GOODS_PROFILE\n  )\n    releaseDeny('source_scope');",
+    "replace": "    authorization.profileId === NO_PRICE_GOODS_PROFILE\n  )\n    return;",
+    "killers": [
+      "FP-HTTP"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FP-M2",
+    "description": "FP-REVOKE",
+    "file": "src/entitlements/widget-release-source-scope.ts",
+    "find": "  if (!row?.configJson) return;",
+    "replace": "  if (!row?.configJson || !row.enabled) return;",
+    "killers": [
+      "FP-REVOKE"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FP-M3",
+    "description": "FP-CONCURRENT",
+    "file": "src/entitlements/widget-release-source-scope.ts",
+    "find": "  await tx.$queryRaw`SELECT pg_advisory_xact_lock_shared(hashtextextended(${'widget-release:tenant:' + tenantId}, 0))::text`;",
+    "replace": "  // mutant: no shared lock",
+    "killers": [
+      "FP-CONCURRENT"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FP-M4",
+    "description": "FP-SHARED",
+    "file": "src/entitlements/widget-release-profile.contract.ts",
+    "find": "        r.state !== 'L-T'",
+    "replace": "        false",
+    "killers": [
+      "FP-SHARED"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "FP-M5",
+    "description": "FP-OD3",
+    "file": "src/entitlements/widget-release-profile.contract.ts",
+    "find": "      for (const value of Object.values(proof)) digest(value);",
+    "replace": "      void proof;",
+    "killers": [
+      "FP-OD3"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "FP-M6",
+    "description": "FP-PIN",
+    "file": "src/entitlements/widget-release-profile.contract.ts",
+    "find": "      (t) => !PRICE_GOODS_TEMPLATES.includes(t),",
+    "replace": "      () => true,",
+    "killers": [
+      "FP-PIN"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "FP-M7",
+    "description": "FP-SUCCESSOR",
+    "file": "src/entitlements/widget-release-profile.contract.ts",
+    "find": "        (k) => !PRICE_GOODS_OPERATIONS.includes(k),",
+    "replace": "        () => true,",
+    "killers": [
+      "FP-SUCCESSOR"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "FP-M8",
+    "description": "FP-SEAL",
+    "file": "src/entitlements/widget-release-access.service.ts",
+    "find": "        b.scope === view.scope &&",
+    "replace": "        true &&",
+    "killers": [
+      "FP-SEAL"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "FP-M9",
+    "description": "FP-UNKNOWN",
+    "file": "src/entitlements/widget-release-profile.contract.ts",
+    "find": "  return releaseDeny('profile_binding');",
+    "replace": "  return { manifest: PROFILE_MANIFEST, digest: PROFILE_DIGEST };",
+    "killers": [
+      "FP-UNKNOWN"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "FP-M10",
+    "description": "Remove the last price provider boundary after canonical AE admission",
+    "file": "src/crm/crm.service.ts",
+    "find": "              await assertPriceGoodsScope(\n                tx,\n                tenantId,\n                SERVICE_PRICE_CAPABILITY,\n              ).catch(() =>\n                priceUnavailable(\n                  'service_price_predispatch_release_scope_changed',\n                ),\n              );\n",
+    "replace": "",
+    "killers": [
+      "FP-FINAL-DISPATCH"
+    ],
+    "expect": "live-killed"
+  }
+]

@@ -72,7 +72,7 @@
   {
     "id": "PI-M14",
     "file": "src/entitlements/widget-release-access.service.ts",
-    "find": "b.profileDigest === PROFILE_DIGEST",
+    "find": "b.profileDigest === selected.digest",
     "replace": "true",
     "killers": [
       "refuses changed durable binding:"
@@ -102,7 +102,7 @@
   {
     "id": "PI-M17",
     "file": "src/entitlements/widget-release-access.service.ts",
-    "find": "!this.allowed(row.template, row.record)",
+    "find": "!this.allowed(row.template, row.record, view.scope)",
     "replace": "false",
     "killers": [
       "PROFILE-TUPLE"
@@ -142,7 +142,7 @@
   {
     "id": "PI-M21",
     "file": "src/entitlements/widget-release-profile.contract.ts",
-    "find": "v.profileDigest !== PROFILE_DIGEST",
+    "find": "v.profileDigest !== selected.digest",
     "replace": "false",
     "killers": [
       "refuses missing or forged"
