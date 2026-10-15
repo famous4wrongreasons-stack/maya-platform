@@ -1,0 +1,51 @@
+{
+  "checkedAt": "2026-10-15T10:02:53.535508+00:00",
+  "payload": [
+    {
+      "path": "index.html",
+      "sha256": "66d905e8a8b8d5f2447947d51f42bc1e4644ca9ec15aaee477f9701190df7d09",
+      "unchanged": true
+    },
+    {
+      "path": "styles.css",
+      "sha256": "c2c54360fdd398952e7ed92137cd50d1945f5b60d62b3d957e574d17b01a3e29",
+      "unchanged": true
+    },
+    {
+      "path": "manifest.webmanifest",
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e",
+      "unchanged": true
+    },
+    {
+      "path": "icons/maya-apple-180.png",
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1",
+      "unchanged": true
+    },
+    {
+      "path": "icons/maya-192.png",
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551",
+      "unchanged": true
+    },
+    {
+      "path": "icons/maya-512-maskable.png",
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be",
+      "unchanged": true
+    },
+    {
+      "path": "icons/maya-512.png",
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a",
+      "unchanged": true
+    },
+    {
+      "path": "m/JFJCTFTP/main.js",
+      "sha256": "1208fda26219ddf38396a7786d81f2f465864e56ac17bb33cce2c279335f0bca",
+      "unchanged": true
+    }
+  ],
+  "nativeCors": {
+    "status": 204,
+    "origin": "capacitor://localhost"
+  },
+  "ready": 200,
+  "status": "PASS"
+}

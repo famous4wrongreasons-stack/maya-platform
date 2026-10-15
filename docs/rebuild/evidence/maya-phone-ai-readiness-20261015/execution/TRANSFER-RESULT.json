@@ -1,0 +1,9 @@
+{
+  "status": "STORED",
+  "phase": "complete",
+  "providerCalls": 0,
+  "expiresAt": "2026-10-16T09:43:09.076Z",
+  "scopePin": "c1099b1f5627587a926d8263d58ce941acc0b4d2d7e7615631953e358f458c0a",
+  "credentialMode": "0600",
+  "started": false
+}

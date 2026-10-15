@@ -172,3 +172,47 @@ one-continuation limit; it does not change the original owner scope, expiry or c
 cap, and does not allow automatic restart/renewal. A further continuation is not
 implemented. No model key is read again from the Mac. This operational repair
 changes no product, identity, booking, carrier or entitlement authority.
+
+
+## Current executed checkpoint — 15 October, about 10:02 UTC
+
+**Bounded live AI chat: PASS. Phone acceptance: pending owner response.**
+
+- Mac Keychain transfer was automatic; no repeated owner key entry, key printed,
+  private signing key, browser credential extraction or new login was used.
+- Exact application image/candidate remains unchanged; operational overlay commit
+  `1671d467` is active through `compose.phone-ai-alias.json`.
+- A real DeepSeek greeting and catalogue/prices reply were visibly delivered in
+  the existing owner React AChat. `catalog.services.read` is completed with no
+  error. The same Beget backend serves the installed phone payload.
+- HTTPS readiness 200; all eight public payload files still match their prior
+  hashes; native origin preflight 204 with `capacitor://localhost`. No iOS build,
+  sync, reinstall, UI/source change or new migration in this execution.
+- Six cumulative model attempts, conservative reserved maximum USD 0.578971800,
+  including the unknown earlier attempt. This is a billing safety reservation,
+  not a claim of the provider's actual charge. Latest relay healthy, not halted,
+  final model response HTTP 200/stop. All prior ledger charges preserved.
+- Original AI deadline: **16 October 12:43:09 Moscow**. Aggregate limits remain
+  USD 2 / 100 attempts, no renewal. Catalogue retains its separate earlier
+  deadline **16 October 09:43:27 Moscow** and 40-read cap. Do not extend either
+  implicitly. No further real reads are required by the receipt collector.
+- Zero clients, appointments, widget grants. The existing three setup action
+  executions are unchanged. PostgreSQL/catalogue/gateway processes and unrelated
+  SMM service are unchanged. Action effects, customer history/model export and
+  real bookings remain closed. This is not a full release certificate.
+
+For immediate withdrawal, stop only `model-egress` using
+`compose.phone-ai-alias.json`. If restoring the previous AI-safe backend is needed,
+use prepared `compose.phone-ai-rollback.json` with `up -d --no-deps backend`.
+That rollback starts existing main directly and runs no migration command.
+Never remove/reset either historical ledger or restart the catalogue relay to
+renew its allowance. Scope/key remain root-private; no provider credential is
+mounted into the backend or exposed by a public endpoint.
+
+Fresh safe execution receipts are in `execution/`. Private execution packet,
+owner identifiers and raw browser screenshot stay outside Git; the screenshot's
+hash/location and observed outcomes are recorded separately. UI wording/formatting
+limitations remain disclosed in `UI-OBSERVATION.json`; availability promises in a
+model greeting do not create authority. Public salon search and voice readiness
+are not established by this AI-only unit. The owner has been asked to send one
+message from the already installed iPhone app.

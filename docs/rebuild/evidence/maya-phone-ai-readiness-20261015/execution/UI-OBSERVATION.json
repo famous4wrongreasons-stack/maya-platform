@@ -1,0 +1,18 @@
+{
+  "observedAt": "2026-10-15T10:02:00Z",
+  "timePrecision": "approximately within live test",
+  "surface": "React AChat through authorized SSH-loopback gateway to same Beget backend used by iPhone",
+  "auth": "existing owner browser session; no extraction, no new login",
+  "greeting": "PASS",
+  "catalogueWithPrices": "PASS",
+  "realModel": "deepseek-v4-pro",
+  "screenshotLocalPath": "/private/tmp/maya-phone-ai-execution-20261015-01/ACHAT-LIVE.png",
+  "screenshotSha256": "af65699304ee59b2c4908de77f3bccd86ba822d82cc0f6e47e9098073a49bc11",
+  "screenshotCommitted": false,
+  "phoneAcceptance": "PENDING_OWNER_RESPONSE",
+  "notes": [
+    "Full reply visible, not truncated: haircuts, beard/face, extras, prices.",
+    "Existing renderer displays markdown markers and flattens line breaks; presentation not changed.",
+    "Greeting offers cash/appointments beyond this staging scope; no corresponding capability enabled."
+  ]
+}

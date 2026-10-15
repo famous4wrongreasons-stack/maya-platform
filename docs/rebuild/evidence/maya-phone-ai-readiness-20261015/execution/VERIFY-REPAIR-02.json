@@ -1,0 +1,83 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-10-15T09:53:57.218543+00:00",
+  "migrationsApplied": 0,
+  "services": {
+    "backend": {
+      "running": true,
+      "restarts": 0,
+      "health": "healthy",
+      "image": "sha256:d8f6a5b33529e4a7f2e4503cc7e867de88d259f35236fb38d6b8886fcb5a9f6f",
+      "internalNetworksOnly": true,
+      "realModelKeyMounted": false
+    },
+    "postgres": {
+      "running": true,
+      "restarts": 0,
+      "health": "healthy",
+      "image": "sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea",
+      "unchangedProcess": true
+    },
+    "catalog-egress": {
+      "running": true,
+      "restarts": 0,
+      "health": null,
+      "image": "sha256:d8f6a5b33529e4a7f2e4503cc7e867de88d259f35236fb38d6b8886fcb5a9f6f",
+      "unchangedProcess": true
+    },
+    "gateway": {
+      "running": true,
+      "restarts": 0,
+      "health": null,
+      "image": "sha256:d8542f48d34a9cf4e4c11a478865229840e87e4c96ea3f439101f31a5d35f75f",
+      "unchangedProcess": true
+    },
+    "model-egress": {
+      "running": true,
+      "restarts": 0,
+      "health": null,
+      "image": "sha256:d8f6a5b33529e4a7f2e4503cc7e867de88d259f35236fb38d6b8886fcb5a9f6f",
+      "publishedPorts": 0
+    }
+  },
+  "checks": {
+    "ready": 200,
+    "unauthenticatedChat": 401,
+    "egressRefusals": [
+      403,
+      403,
+      403
+    ],
+    "negativeProbesPaidCalls": 0,
+    "model": {
+      "contract": "maya.phone-ai-status/1",
+      "profile": "phone-owner-catalog-chat-20261015/1",
+      "expiresAt": "2026-10-16T09:43:09.076Z",
+      "maxCalls": 100,
+      "maxSpendNanoUsd": 2000000000,
+      "completed": 0,
+      "refusals": 3,
+      "usage": {
+        "promptTokens": 0,
+        "completionTokens": 0,
+        "totalTokens": 0
+      },
+      "stats": {
+        "dialogs": 3,
+        "turns": 3,
+        "attempts": 3,
+        "inputTokens": 202314,
+        "outputTokens": 4448,
+        "reservedNanoUsd": 284668560,
+        "halted": false
+      },
+      "revoked": false,
+      "lastTransport": null
+    }
+  },
+  "unrelatedServiceUnchanged": true,
+  "overlayCommit": "1b5dbe78c5780e96acd4cbf0b3645d4357c964d0",
+  "appCandidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "expiresAt": "2026-10-16T09:43:09.076Z",
+  "catalogueExpiresAt": "2026-10-16T06:43:27.299Z"
+}

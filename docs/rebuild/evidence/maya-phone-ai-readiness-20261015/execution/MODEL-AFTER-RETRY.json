@@ -1,0 +1,40 @@
+{
+  "model": {
+    "contract": "maya.phone-ai-status/1",
+    "profile": "phone-owner-catalog-chat-20261015/1",
+    "expiresAt": "2026-10-16T09:43:09.076Z",
+    "maxCalls": 100,
+    "maxSpendNanoUsd": 2000000000,
+    "completed": 1,
+    "refusals": 3,
+    "usage": {
+      "promptTokens": 15959,
+      "completionTokens": 182,
+      "totalTokens": 16141
+    },
+    "stats": {
+      "dialogs": 4,
+      "turns": 4,
+      "attempts": 4,
+      "inputTokens": 279970,
+      "outputTokens": 5648,
+      "reservedNanoUsd": 391926480,
+      "halted": false
+    },
+    "revoked": false,
+    "lastTransport": {
+      "stage": "validated",
+      "upstreamStatus": 200,
+      "finishReason": "stop"
+    }
+  },
+  "errorCategories": {
+    "phone_ai_raw_email": 2
+  },
+  "logLineCount": 484,
+  "modelFailures": [
+    "AI Core stage failed: deepseek:final_reply:phone_ai_raw_email",
+    "AI Core provider failed: deepseek:phone_ai_raw_email"
+  ],
+  "ledgerAgeMs": 111235
+}

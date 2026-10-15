@@ -1,0 +1,10 @@
+{
+  "status": "STARTED",
+  "phase": "readiness-pending",
+  "priorAttemptsCharged": 3,
+  "priorReservedNanoUsd": 284668560,
+  "expiresAt": "2026-10-16T09:43:09.076Z",
+  "scopeUnchanged": true,
+  "budgetReset": false,
+  "privateKeyRereadOnMac": false
+}

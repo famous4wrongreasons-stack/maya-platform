@@ -1,0 +1,35 @@
+{
+  "model": {
+    "contract": "maya.phone-ai-status/1",
+    "profile": "phone-owner-catalog-chat-20261015/1",
+    "expiresAt": "2026-10-16T09:43:09.076Z",
+    "maxCalls": 100,
+    "maxSpendNanoUsd": 2000000000,
+    "completed": 2,
+    "refusals": 3,
+    "usage": {
+      "promptTokens": 26308,
+      "completionTokens": 506,
+      "totalTokens": 26814
+    },
+    "stats": {
+      "dialogs": 6,
+      "turns": 6,
+      "attempts": 6,
+      "inputTokens": 411927,
+      "outputTokens": 8896,
+      "reservedNanoUsd": 578971800,
+      "halted": false
+    },
+    "revoked": false,
+    "lastTransport": {
+      "stage": "validated",
+      "upstreamStatus": 200,
+      "finishReason": "stop"
+    }
+  },
+  "errorCategories": {},
+  "logLineCount": 482,
+  "modelFailures": [],
+  "ledgerAgeMs": 476621
+}
