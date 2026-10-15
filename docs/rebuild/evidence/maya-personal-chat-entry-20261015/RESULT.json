@@ -1,0 +1,123 @@
+{
+  "status": "LOCAL_IMPLEMENTATION_AND_SYNTHETIC_FLOW_PASS_NOT_DEPLOYED",
+  "date": "2026-10-15T13:56:12.453352+00:00",
+  "testedSourceCommit": "70eb182c5ed9fc64174bb1b08b3c8ccfa9c3391c",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "previousCheckpoint": "d8035a68",
+  "fix": {
+    "initialRequest": "Role-independent semantic instruction: a NEW self-booking request, including complete preferences, selects existing booking.prepare_personal catalog READ. This is initial planning, not a post-denial role/intent substitution.",
+    "deniedExecution": "A validated booking.create_own owner task remains denied and dispatches nothing; it no longer asserts a missing Client binding and explains the separate explicit form request.",
+    "authority": "Unchanged CLIENT_ROLES, current PersonalClientContext, source/seal/profile admission, preview facts, confirmation and Action Engine. No User role changes, new source, arbitrary Client ID, mirror writer or persistent schema.",
+    "presentation": "No carrier/runtime product source or design changes. Only existing synthetic browser proof/guard extended."
+  },
+  "checks": {
+    "backend": {
+      "passed": 601,
+      "failed": 0,
+      "suites": 11
+    },
+    "personalRuntime": {
+      "passed": 16,
+      "failed": 0
+    },
+    "browserAdmissionGuard": {
+      "passed": 5,
+      "failed": 0
+    },
+    "targetedMutations": {
+      "killed": 4,
+      "total": 4,
+      "baselinePassed": 49,
+      "restoredPassed": 49,
+      "notFullReleaseMutationCorpus": true
+    },
+    "reactHttpPostgres": "PASS: fresh owned database, real browser/HTTP/carrier/AE, prepare and application/PG restart. 14 scenario checkpoints. Model, identity verifier and provider are synthetic.",
+    "types": "PASS",
+    "scopedLint": "PASS",
+    "unitsAndBrowserReceipts": [
+      {
+        "receipt": "unit-jest.json",
+        "passed": 409,
+        "failed": 1,
+        "suites": 3,
+        "startTime": 1792071860529
+      },
+      {
+        "receipt": "unit-r2-jest.json",
+        "passed": 410,
+        "failed": 0,
+        "suites": 3,
+        "startTime": 1792071959871
+      },
+      {
+        "receipt": "final-unit-jest.json",
+        "passed": 601,
+        "failed": 0,
+        "suites": 11,
+        "startTime": 1792072273458
+      },
+      {
+        "receipt": "catalog-r1/prepare-jest.json",
+        "passed": 1,
+        "failed": 0,
+        "suites": 1,
+        "startTime": 1792072092166
+      },
+      {
+        "receipt": "catalog-r1/resume-jest.json",
+        "passed": 1,
+        "failed": 0,
+        "suites": 1,
+        "startTime": 1792072129864
+      }
+    ]
+  },
+  "proved": [
+    "Verified owner denied execution creates no widget, action or appointment; active binding and tenant_owner remain intact.",
+    "New preparation uses actual completed catalog source and bound personal navigation.",
+    "Explicit confirmation creates one canonical synthetic appointment.",
+    "Revocation before navigation or confirmation refuses.",
+    "Missing price/duration/currency or changed quote refuses.",
+    "Provider response loss leaves UNKNOWN with one synthetic provider row; repeat result reads and restart do not dispatch another booking.",
+    "Private personal facts absent from actual serialized model requests; preview/result readers do not write booking state."
+  ],
+  "notProved": [
+    "Live DeepSeek classification on the changed prompt. The browser proof scripts the model response and is not evidence of real-model accuracy.",
+    "Real phone booking, move, cancel, notifications or new iPhone acceptance.",
+    "Fresh full release certification / actual AR-1 grant for this candidate."
+  ],
+  "knownLiveState": {
+    "readOnlyObservedAt": "2026-10-15T13:52:53.490005+00:00",
+    "activeVerifiedPersonalLinks": 1,
+    "widgetEntitlements": 0,
+    "activeGlobalOperators": 0,
+    "activeGlobalSessions": 0,
+    "releaseTrustConfigured": false,
+    "sourceStillDeployed": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+    "scope": "phone AI permits catalog READ only and refuses AE writes; not changed"
+  },
+  "nextUnit": {
+    "engineering": [
+      "Prepare the narrow existing platform-owner bootstrap for the separate phone test database; do not run the broad demo seed or promote the salon owner.",
+      "Qualify the final candidate and obtain the exact AR-1 certificate/profile evidence before grant.",
+      "Prepare exact backend deployment, rollback, trust validation, grant/revoke and bounded provider-read/write admission without resetting existing scope budgets."
+    ],
+    "ownerActionsBeforeExecution": [
+      "Establish separate actual global platform credentials through a reviewed narrow bootstrap, then complete normal platform login.",
+      "Provide an operator-owned signing public key and sign the exact execution authorization outside Git/chat; agent must not generate or retain a production private key.",
+      "Authorize exact phone-test deployment/configuration/limited grant and later the first explicit real booking effect. These are not covered by this local implementation."
+    ],
+    "contractWarning": "The phone server uses NODE_ENV=production. Local staging authorization has a loopback/database boundary and cannot be reused by changing labels or renaming the live database. Resolve admission through the existing AR-1 contract; no ad-hoc grant."
+  },
+  "qualification": "NOT_ISSUED",
+  "effects": {
+    "realProviderCalls": 0,
+    "realModelCalls": 0,
+    "productionChanges": 0,
+    "liveDatabaseWrites": 0,
+    "liveEntitlementChanges": 0,
+    "phoneReinstall": 0,
+    "privateKeysCreated": 0
+  },
+  "history": "Initial unit run failed compact planner contract byte budget. Descriptions were shortened; the existing <61000-byte limit remains unchanged. All earlier receipts retained."
+}

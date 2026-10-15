@@ -1,0 +1,71 @@
+{
+  "candidate": "70eb182c5ed9fc64174bb1b08b3c8ccfa9c3391c",
+  "archiveSha256": "2e5e77552df710478223d8c86fae42fffdaec54c70230213e389e6840608049e",
+  "isolatedArchive": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-personal-entry-mutations-62n9he4p",
+  "productionEffects": 0,
+  "externalCalls": 0,
+  "runs": [
+    {
+      "name": "baseline",
+      "exitCode": 0,
+      "passed": 49,
+      "failed": 0,
+      "failedAssertions": []
+    },
+    {
+      "name": "old-false-identity-message",
+      "exitCode": 1,
+      "passed": 46,
+      "failed": 3,
+      "failedAssertions": [
+        "personal booking permission refusal offers a separate preparation request without claiming missing identity or rewriting the denied plan: tenant_owner",
+        "personal booking permission refusal offers a separate preparation request without claiming missing identity or rewriting the denied plan: staff",
+        "personal booking permission refusal offers a separate preparation request without claiming missing identity or rewriting the denied plan: accountant"
+      ]
+    },
+    {
+      "name": "owner-role-promotion",
+      "exitCode": 1,
+      "passed": 47,
+      "failed": 2,
+      "failedAssertions": [
+        "personal booking permission refusal offers a separate preparation request without claiming missing identity or rewriting the denied plan: tenant_owner",
+        "ConversationIntelligenceService allows owner catalog preparation without promoting the role or repurposing a denied create"
+      ]
+    },
+    {
+      "name": "prepare-execution-tool",
+      "exitCode": 1,
+      "passed": 44,
+      "failed": 5,
+      "failedAssertions": [
+        "ConversationIntelligenceService allows owner catalog preparation without promoting the role or repurposing a denied create",
+        "ConversationIntelligenceService treats initial personal booking preferences as preparation without execution authority: client",
+        "ConversationIntelligenceService treats initial personal booking preferences as preparation without execution authority: tenant_owner",
+        "ConversationIntelligenceService treats initial personal booking preferences as preparation without execution authority: staff",
+        "ConversationIntelligenceService does not unlock preparation when its actual catalog tool is unavailable"
+      ]
+    },
+    {
+      "name": "lost-initial-intent-hint",
+      "exitCode": 1,
+      "passed": 46,
+      "failed": 3,
+      "failedAssertions": [
+        "ConversationIntelligenceService treats initial personal booking preferences as preparation without execution authority: client",
+        "ConversationIntelligenceService treats initial personal booking preferences as preparation without execution authority: tenant_owner",
+        "ConversationIntelligenceService treats initial personal booking preferences as preparation without execution authority: staff"
+      ]
+    },
+    {
+      "name": "restored-control",
+      "exitCode": 0,
+      "passed": 49,
+      "failed": 0,
+      "failedAssertions": []
+    }
+  ],
+  "status": "PASS",
+  "mutationsKilled": 4,
+  "checkedAt": "2026-10-15T13:50:42.597395+00:00"
+}

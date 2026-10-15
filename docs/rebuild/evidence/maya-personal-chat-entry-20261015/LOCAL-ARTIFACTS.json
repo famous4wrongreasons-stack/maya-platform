@@ -1,0 +1,634 @@
+[
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/CLEANUP.json",
+    "sha256": "d402664869791d9487e922f24857dd42564c124f882a2d22c089656f6dcfd9fd",
+    "size": 92,
+    "syntheticTestArtifact": true,
+    "committed": true,
+    "omissionReason": null
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/LIVE-ADMISSION.json",
+    "sha256": "a40816b4555dfb5b85b3b8f3295cc050aa140815638bccca164c82eb46730556",
+    "size": 611,
+    "syntheticTestArtifact": false,
+    "committed": true,
+    "omissionReason": null
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/createdb.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/initdb.log",
+    "sha256": "c0aeaf8b8a9910546052a12e8b6fc3268cbab1d78ffdf5418f5bae3661fa28c1",
+    "size": 950,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/manifest.json",
+    "sha256": "931de45549d50d6d937dd9e9904721596c08ea8d5dafbfa3d0c7222996ad1617",
+    "size": 856,
+    "syntheticTestArtifact": true,
+    "committed": true,
+    "omissionReason": null
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/migrations.log",
+    "sha256": "6866e7a67b2d7e7497b97bcf69969c3bec97f648ba23624a7784ca50a53b2216",
+    "size": 14900,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/pg-restart.log",
+    "sha256": "8a80265796bcf38f17c15672e07077674b6a8755c11971d378a46f352dc57b74",
+    "size": 1349,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/pg-start.log",
+    "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+    "size": 52,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/pg-stop.log",
+    "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+    "size": 56,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/postgres.log",
+    "sha256": "78dae89797b45e17b48d9936874a6468b60a4047c9c347d19333afe35697456f",
+    "size": 1246,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/browser.json",
+    "sha256": "e2cdf078429a8f316c68f4358f119928b63b253fb68fc713b3b6b46ad6a3aae7",
+    "size": 8927521,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/changed-chat-again.png",
+    "sha256": "766f6367f0bfd0c64cab320148026d4651f9554108300cac7b834b7a6ea46667",
+    "size": 82668,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/changed-preview.png",
+    "sha256": "255c4587b9025cdb7e9021a60b694ac61ad7f2552b4aa61ec295e989fa184638",
+    "size": 112564,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/changed-result.png",
+    "sha256": "2eccd36d9ee83f6936f13df83fa74c61cd53501af380ba95a0acab748a4bdd7b",
+    "size": 85215,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/companion-choices-1280.png",
+    "sha256": "8acb03c3208e57e142896eca16cf3222c4014328075adfbd7c907b9eb9849cf0",
+    "size": 110572,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/companion-choices-320.png",
+    "sha256": "68d1855bc420c3b854d04a708c1768f5980399b22417701f593ef22dccf5f376",
+    "size": 54657,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/companion-choices-393.png",
+    "sha256": "05468ea85bfaad13061e0729e96d4312c8f532bdda7473dfc6c2e6bf5aad2323",
+    "size": 62884,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/companion-choices-large-text.png",
+    "sha256": "f401710b0a0330cd50f636a9bd338aab9c8c1932121a66dd72b41698913290b0",
+    "size": 57540,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/companion-preview-1280.png",
+    "sha256": "fce43b55a950346bbb79b5c53388a6636dc115369d883730822289e40e306af9",
+    "size": 124479,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/companion-preview-320.png",
+    "sha256": "c5ff13b37b9f69cfdbca59b154da94c12631d043221208bcb603637784d87abe",
+    "size": 57483,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/companion-preview-393.png",
+    "sha256": "a369e607b6b466f6454ceba4fe89df1e2fd23e612970f1be32389da67d602ad5",
+    "size": 68521,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/companion-preview-large-text.png",
+    "sha256": "0e2dbeff2e2b903d985dad061050b28075068d6e506bb761799e2a854c0b4e24",
+    "size": 57226,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/companion-slots-1280.png",
+    "sha256": "3f955031f2cb1dc67b87d6d4e06d1042b143a78205cee2316f63c6a9eec1e300",
+    "size": 112531,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/companion-slots-320.png",
+    "sha256": "daf3bd6f0d6dec77426aab5df06d2f719efac1f45c62da486e648a843ee1d9d1",
+    "size": 55890,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/companion-slots-393.png",
+    "sha256": "2d471a1a27e6037040fd0b452d8e8358edb2f59c035b2dc24e982f850d1a207c",
+    "size": 64814,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/companion-slots-large-text.png",
+    "sha256": "d3b36f05337adc242ccfb0861529ffbb86ff646093af1d65b6e9f8b62437c6cf",
+    "size": 57417,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/incomplete-unavailable.png",
+    "sha256": "9c1a0f9b0854ac7fc8db830aa1720354fbbd5c391e7ce830f5c640d7a272532a",
+    "size": 119379,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/navRevoked-nav-refused.png",
+    "sha256": "b8e90b7370dcbcc9f0e9a6829b82bbe2c40e7618c3e08c9955b33b431c01d8d3",
+    "size": 74668,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/revoked-chat-again.png",
+    "sha256": "0fe664ecd593124b74458deee67d60b999ce345b58c2469c98d6cc4decd31dcc",
+    "size": 84931,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/revoked-preview.png",
+    "sha256": "25a270ab79c2b0d78750e488adaf3c5d78db984265c1fa8348da499443fb7c17",
+    "size": 112568,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/revoked-result.png",
+    "sha256": "83f88f690b1e0bd1dec571f67c27ce57a2935d7b09a3faf70fb3ebf6df3be04e",
+    "size": 85169,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/success-chat-again.png",
+    "sha256": "e91914469a14df2cfcd2fd253be32be05be0a27dcd2fd27871b37d27e908fb31",
+    "size": 84511,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/success-preview.png",
+    "sha256": "825292e655062fcb294635df469489f40d1e8384015b6a072184efcaa359d59f",
+    "size": 126158,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/success-result.png",
+    "sha256": "87f5e9dad5f721245a886a53bb11ad3b805dcda71aea2aa07dbef75f9997d470",
+    "size": 99117,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/unknown-chat-again.png",
+    "sha256": "adf6e6b4bd80297e44a864da69d968371e275fb1e3c86b7af582ca1d9e92fba5",
+    "size": 86942,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/unknown-preview.png",
+    "sha256": "79323e5a44477a000396fd7fb7f669a0af0e1e2eb163ab5f83e2446fd2920da4",
+    "size": 130079,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-browser/output/playwright/unknown-result.png",
+    "sha256": "ba23f1ab2953460f24a2ea5d01fb17668db9d3aea4fd897dac11489070f0736c",
+    "size": 128225,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-jest.json",
+    "sha256": "ae2209156f80913af405bca45af8895480a42ba24f33f6b7ac21e221dd1c1ef6",
+    "size": 1537,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-observations.json",
+    "sha256": "1961ab9169871153281e1da302021f71a7cbf212ae9fa3f1dfb44751a31b42fc",
+    "size": 2784,
+    "syntheticTestArtifact": true,
+    "committed": true,
+    "omissionReason": null
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare-serialized-model-requests.json",
+    "sha256": "e2411b734b9b78270887ef3615d02395bef84304f45c0d837561aec8c83a096e",
+    "size": 1448125,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/prepare.log",
+    "sha256": "cbd4c216323698e015fa660a437a6097cbb7c14c10cd803e20a2a2f97b4fbe38",
+    "size": 1905,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/react-build.log",
+    "sha256": "b2f86c3dd96dbae3effccd431e7a01779950834c3971f3fb9c332ec24e0e058b",
+    "size": 185,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/resume-browser/output/playwright/browser.json",
+    "sha256": "f0f9562ca8aea25798873b94b787aa342cdf1df7e993f4aa1c9c58c28c7b0752",
+    "size": 2954074,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/resume-browser/output/playwright/success-restart.png",
+    "sha256": "7953b45565869d1c3ac10ea7a85c99e01bf653d5d28d2af9f280bceba212dd4b",
+    "size": 112670,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/resume-browser/output/playwright/unknown-restart.png",
+    "sha256": "86df9df258388012fbf0af2a60e86d9cb8355901386a44b5876e20441f48b407",
+    "size": 130054,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/resume-jest.json",
+    "sha256": "bb19d027f261c3fa6080e46a8f7c4db96672cc9d1ffaee8601bf11b05c178042",
+    "size": 1537,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/resume-observations.json",
+    "sha256": "62787933161a287b8e867a01d5c14b31991dedeb54cbaca430d8abf98c0d9c11",
+    "size": 957,
+    "syntheticTestArtifact": true,
+    "committed": true,
+    "omissionReason": null
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/resume-serialized-model-requests.json",
+    "sha256": "ba9dab3564ff55172a99dd5aee3b5adfc14bdea08b7e698400f9b57c0844a32b",
+    "size": 193930,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/resume.log",
+    "sha256": "d68999714c4776bad6377f1f83632eea38367e3ff89f45fb86a02f9763f8ca74",
+    "size": 1706,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1/shell-build.log",
+    "sha256": "21280e6c1c81afb91f8960431d1d7e780b33f70fbf045899ccbf607784fc4b7d",
+    "size": 1010,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/catalog-r1-launch.log",
+    "sha256": "869bd30e08d5aff89b2f2df785e995f4b33f915838496dc7ccc95db795ea833e",
+    "size": 193,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/final-lint.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/final-typecheck.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/final-unit-jest.json",
+    "sha256": "4b2ceddeeafe72bb5abe57ed394390b73b54b60a070af99bd61017152e2e78d4",
+    "size": 291507,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/final-unit.log",
+    "sha256": "c57bfb65794ca53aa35f214a822ac5a4cb3e69912abee180d19e1076d77c0408",
+    "size": 4140,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/guard.log",
+    "sha256": "bfd3d9fc4d40664cd9f3d2f014df2e4bea0ec6f9e4e4741c1c3032c565cedc56",
+    "size": 1211,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/lint.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations/RESULT.json",
+    "sha256": "096202379c8944ec6e0f628f8a72269931a0c72d9b241fee9b7e93bb9881a41e",
+    "size": 3140,
+    "syntheticTestArtifact": true,
+    "committed": true,
+    "omissionReason": null
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations/baseline.json",
+    "sha256": "a8b09ee7c2425a17822bbd2199402b4e454a32057cc08b32d7b48d01071238fb",
+    "size": 23751,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations/baseline.log",
+    "sha256": "4a39966cc37e721b89e3f0e232b3694b4a467be74d446c7fd2969ae47ee771fd",
+    "size": 489,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations/lost-initial-intent-hint.json",
+    "sha256": "d94578d463381035900fe52582fc4e57e92c35e8011db4789e1fc1281ffee1a6",
+    "size": 37041,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations/lost-initial-intent-hint.log",
+    "sha256": "3c682dc1319ae5e90e7521acdfd8165cff6faa9e6f3a47495b9bc3c1dfed0239",
+    "size": 3647,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations/old-false-identity-message.json",
+    "sha256": "7b00dd81719427b44717c4c067c7bac929779bc56a72152e0aa45f177b49abf2",
+    "size": 36236,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations/old-false-identity-message.log",
+    "sha256": "3800cfc1d05913344034e19a26002609d4147f83e7f2b5e1c68c707d4ac0ed10",
+    "size": 3457,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations/owner-role-promotion.json",
+    "sha256": "018ebe92125333e9eafd6509cbc0d23584aa0ca63f91841ddf1536bbe850a913",
+    "size": 31112,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations/owner-role-promotion.log",
+    "sha256": "1bb451cba522ef2fe8fd77969e229a86af27bb9c82c84fc1e2b9445e64dc037b",
+    "size": 2089,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations/prepare-execution-tool.json",
+    "sha256": "836789b2a11498f677272e1ccea7bd22eb067f9c0a3ed7b4959083d4efcffd22",
+    "size": 44337,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations/prepare-execution-tool.log",
+    "sha256": "1852ac4d4e2c00a676c5ff1a456c59d4a3fbd83189392267a21657a83b2845a6",
+    "size": 5135,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations/restored-control.json",
+    "sha256": "bd38916555d0f573b301e228cfb1b61ff8dac5b77e612a3fd281ce26c8cdc1ae",
+    "size": 23751,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations/restored-control.log",
+    "sha256": "3114b462ae2dcced731947a81d86c643a222a7097310c9f595e44af245449e2c",
+    "size": 512,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations-launch.log",
+    "sha256": "1f6d39fd6e61a02974f902695b7736a2e8f8ea60011d10de960f4992d3f6a8a3",
+    "size": 212,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/mutations.py",
+    "sha256": "ef76425ae64166bc4a81d9820cfd2c3c9abcf9b4e89ae64991f86cdfececd71d",
+    "size": 4436,
+    "syntheticTestArtifact": true,
+    "committed": true,
+    "omissionReason": null
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/personal-runtime.log",
+    "sha256": "e94ffa35a5d92857e4a18504389b896099ab6bdc36194a520f87d0c7eb121905",
+    "size": 4278,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/read-admission.py",
+    "sha256": "a1bcc5c37d846d07c881c24aa8cc5a37d849ff7fdc3d1ef7484633167e43e6df",
+    "size": 2323,
+    "syntheticTestArtifact": false,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/typecheck.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/unit-jest.json",
+    "sha256": "8634370cb7d3826d4a75611ff1918b5ce7dcf92f80c5b6dff81f63393a511938",
+    "size": 206507,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/unit-r2-jest.json",
+    "sha256": "ffaf16bceb82ed843fd38ddc0714eda0baa4e12fbdf40889d718b471bdf77c90",
+    "size": 203078,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/unit-r2.log",
+    "sha256": "0a75588801c719be77f2574d350c653bd2350e2f0ae4a116f22c29b96c3be62c",
+    "size": 430,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  },
+  {
+    "path": "/private/tmp/maya-personal-chat-entry-20261015-01/unit.log",
+    "sha256": "28aa790ef45654229f820353fdcb8beea8b803fca3fce1786138c3d6c4b103de",
+    "size": 1247,
+    "syntheticTestArtifact": true,
+    "committed": false,
+    "omissionReason": "Full local raw receipt or generated artifact retained locally; compact safe observation archived."
+  }
+]
