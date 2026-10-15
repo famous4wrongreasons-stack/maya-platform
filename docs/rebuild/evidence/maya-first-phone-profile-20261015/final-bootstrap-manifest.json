@@ -1,0 +1,34 @@
+{
+  "sourceHead": "cfea53a8fc745bb43e025d2556d37bdf9d5d0781",
+  "sourceDirty": false,
+  "kind": "platform-owner-bootstrap-isolated-proof",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-platform-bootstrap-EnElQf/pg",
+  "database": "maya_widget_gate_proof_platform_bootstrap_caa46ed7a11e",
+  "port": 49690,
+  "status": "passed",
+  "completed": [
+    "live-types",
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "backend-build",
+    "preflight-build",
+    "bootstrap-unit",
+    "bootstrap-http-pg-binary",
+    "pg-stop"
+  ],
+  "signingKeysCreated": false,
+  "syntheticTenants": true,
+  "externalCalls": 0,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1,
+    "browserCount": 0
+  },
+  "clusterStopped": true
+}

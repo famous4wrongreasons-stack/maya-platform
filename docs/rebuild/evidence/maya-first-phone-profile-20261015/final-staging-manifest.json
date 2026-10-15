@@ -1,0 +1,34 @@
+{
+  "sourceHead": "cfea53a8fc745bb43e025d2556d37bdf9d5d0781",
+  "sourceDirty": false,
+  "kind": "widget-staging-http-binary-isolated-proof",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-widget-staging-sdaorZ/pg",
+  "database": "maya_widget_release_staging_proof_3b45412fafc2",
+  "port": 65339,
+  "status": "passed",
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "backend-build",
+    "staging-http-binary",
+    "legacy-createdb",
+    "legacy-migrations",
+    "legacy-http-binary",
+    "pg-stop"
+  ],
+  "syntheticSigners": true,
+  "syntheticTenants": true,
+  "externalCalls": 0,
+  "externalProviderAcceptance": false,
+  "realModelAcceptance": false,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1,
+    "browserCount": 0
+  },
+  "clusterStopped": true
+}

@@ -1,0 +1,25 @@
+{
+  "sourceHead": "cfea53a8fc745bb43e025d2556d37bdf9d5d0781",
+  "checks": [
+    {
+      "manifest": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/manifest.json",
+      "clusterStopped": true,
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/manifest.json",
+      "clusterStopped": true,
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-first-phone-final-staging-20261015-01/manifest.json",
+      "clusterStopped": true,
+      "pgCtlStatusExit": 3
+    },
+    {
+      "manifest": "/private/tmp/maya-first-phone-final-bootstrap-20261015-01/manifest.json",
+      "clusterStopped": true,
+      "pgCtlStatusExit": 3
+    }
+  ]
+}

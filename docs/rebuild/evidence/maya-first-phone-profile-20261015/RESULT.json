@@ -1,0 +1,258 @@
+{
+  "status": "LOCAL_FIXED_PROFILE_IMPLEMENTED_AND_TESTED_NOT_RELEASE_CERTIFIED",
+  "testedSourceCommit": "cfea53a8fc745bb43e025d2556d37bdf9d5d0781",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "implementationParent": "7f67abfcf437a7f4867f8712a783e64303002d96",
+  "profile": "closed-input.no-handoff.no-price-goods@1",
+  "ownerDecision": "B approved 2026-10-15; local code and synthetic tests only",
+  "checks": {
+    "platformCi": "PASS local macOS equivalents of all four workflow jobs; not GitHub-hosted receipts",
+    "backend": {
+      "numPassedTests": 9988,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 732
+    },
+    "e2e": {
+      "numPassedTests": 1,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 1
+    },
+    "eventsPostgres": {
+      "numPassedTests": 4,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 1
+    },
+    "bootstrapUnit": {
+      "numPassedTests": 20,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 1
+    },
+    "bootstrapHttpPostgresCompiled": {
+      "numPassedTests": 7,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 1
+    },
+    "runtimeNode22": {
+      "tests": 853,
+      "pass": 846,
+      "fail": 0,
+      "skipped": 7,
+      "cancelled": 0,
+      "todo": 0
+    },
+    "runtimeNode24": {
+      "tests": 853,
+      "pass": 846,
+      "fail": 0,
+      "skipped": 7,
+      "cancelled": 0,
+      "todo": 0
+    },
+    "carrier": {
+      "tests": 200,
+      "pass": 200,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "todo": 0
+    },
+    "releasePackaging": {
+      "tests": 18,
+      "pass": 18,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "todo": 0
+    },
+    "operatorOffline": {
+      "tests": 30,
+      "pass": 30,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "todo": 0
+    },
+    "operatorCompiled": {
+      "tests": 9,
+      "pass": 9,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "todo": 0
+    },
+    "stagingCarrierPreflight": {
+      "tests": 17,
+      "pass": 17,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "todo": 0
+    },
+    "phonePackagingBoundaries": {
+      "tests": 73,
+      "pass": 73,
+      "fail": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "todo": 0
+    },
+    "widgetsLive": {
+      "numPassedTests": 710,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 60
+    },
+    "releaseBinary": {
+      "numPassedTests": 5,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 4
+    },
+    "stagingHttpBinary": {
+      "numPassedTests": 19,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 2
+    },
+    "legacyAr1HttpBinary": {
+      "numPassedTests": 36,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 6
+    },
+    "legacyPython": {
+      "passed": 618,
+      "failed": 0,
+      "python": "3.11",
+      "externalNetwork": "REFUSED by tested sandbox"
+    },
+    "strictEvidenceVerifier": {
+      "contract": "maya.widgets-evidence-verify/1",
+      "manifest": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/evidence/evidence-manifest.jsonl",
+      "manifest_sha256": "8c9dc7e371227ecff701713829d44ce509b073c902480ca668ae7da8ad87ed6c",
+      "inventory": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/candidate/docs/rebuild/evidence/maya-chat-first-ux/gate-clause-inventory.json",
+      "lines": 35,
+      "claims": 31,
+      "captured_mints": {
+        "HTTP": 360,
+        "BIN": 47
+      },
+      "refused_mints": 0,
+      "records_before_teardown": 654,
+      "harness_files_scanned": 41,
+      "u_proof_map": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/candidate/docs/rebuild/widget-release-programme/development-v14/u-proofs.json",
+      "violations": []
+    },
+    "phoneCatalogMutations": {
+      "status": "PASS",
+      "sourceSha256": "878955ce8d44a52b41bf820109db72f0376877d76b459102ca82b75135d1882b",
+      "greenBaseline": true,
+      "greenRestored": true,
+      "mutantsKilled": 6,
+      "realProviderCalls": 0,
+      "results": [
+        {
+          "name": "baseline",
+          "exit": 0,
+          "expected": true
+        },
+        {
+          "name": "method",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "expiry",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "budget",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "redirect",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "revocation",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "body",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "restored",
+          "exit": 0,
+          "expected": true
+        }
+      ]
+    },
+    "httpBin": {
+      "cases": 21,
+      "status": "PASS",
+      "failed": 0
+    },
+    "widgetContract": "PASS blocking types/check; full backend suite includes admission refusals",
+    "migrationReplay": "PASS clean and idempotent replay on owned disposable databases; no new migration",
+    "pwaCapacitorParity": "PASS React AChat; only approved API endpoint substitution",
+    "iosSimulatorPackaging": "PASS unsigned simulator app, https://mayaos.ru/api; no installation",
+    "phoneTargetPackaging": "PASS actual unsigned iphoneos app, explicit https://phone-test.mayaos.ru/api development target; no signing or installation"
+  },
+  "qualification": {
+    "offeredClauseCount": 155,
+    "missingApplicableSharedDuties": [
+      "G7-FR6d",
+      "G11-I4",
+      "G11-I5",
+      "G11-I6",
+      "G11-I10",
+      "G13-I1",
+      "G13-I2",
+      "G13-I9"
+    ],
+    "handoffGlobalStop": [
+      "G6-6",
+      "G13-R8"
+    ],
+    "globalAuditPromoted": false,
+    "full165Changed": false,
+    "originalProfileChanged": false,
+    "fullMutationCorpus": "NOT_EXECUTED; 555 declarations validated at this SHA",
+    "newProfileMutations": "10/10 diagnostic AS-DECLARED before commit; NOT final full-corpus receipts",
+    "allApplicableFbe2e": "NOT_CLAIMED; only named fresh suites above",
+    "certificate": "NOT_ISSUED",
+    "certifiedForProfile": false,
+    "fullContractCertified": false,
+    "readyForReleaseAuthorization": false
+  },
+  "remaining": [
+    "Qualify the eight shared duties with strict source/subbranch evidence: approved price/goods absence/refusal/mechanism and every remaining applicable obligation; do not mark whole rows U.",
+    "Execute the complete fresh 555-mutant corpus, applicable FBE2E and final strict admission on the final candidate.",
+    "Bounded real-model acceptance of changed personal-booking instructions remains separate; no real model was used by this unit.",
+    "Platform operator credentials/trust/signature and separately authorized exact update/grant remain ahead of live phone testing; unsigned packaging proof is not installation or release authorization."
+  ],
+  "effects": {
+    "serverChanges": 0,
+    "ownerDatabaseAccess": 0,
+    "productionMigrations": 0,
+    "liveGrants": 0,
+    "realOtp": 0,
+    "realYclientsEffects": 0,
+    "realModelCalls": 0,
+    "iphoneInstall": 0,
+    "productionPrivateKeysCreated": false,
+    "allOwnedPostgresStopped": true
+  },
+  "provenance": "A later documentation-only commit records these results; its HEAD does not replace the tested code SHA or create a certificate."
+}

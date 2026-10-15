@@ -1,0 +1,17 @@
+{
+  "contract": "maya.widgets-evidence-verify/1",
+  "manifest": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/evidence/evidence-manifest.jsonl",
+  "manifest_sha256": "8c9dc7e371227ecff701713829d44ce509b073c902480ca668ae7da8ad87ed6c",
+  "inventory": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/candidate/docs/rebuild/evidence/maya-chat-first-ux/gate-clause-inventory.json",
+  "lines": 35,
+  "claims": 31,
+  "captured_mints": {
+    "HTTP": 360,
+    "BIN": 47
+  },
+  "refused_mints": 0,
+  "records_before_teardown": 654,
+  "harness_files_scanned": 41,
+  "u_proof_map": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/candidate/docs/rebuild/widget-release-programme/development-v14/u-proofs.json",
+  "violations": []
+}

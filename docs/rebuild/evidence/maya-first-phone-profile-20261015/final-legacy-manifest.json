@@ -1,0 +1,87 @@
+{
+  "sourceHead": "cfea53a8fc745bb43e025d2556d37bdf9d5d0781",
+  "kind": "local legacy Python CI equivalent",
+  "status": "passed",
+  "steps": [
+    {
+      "name": "venv",
+      "command": [
+        "/opt/homebrew/opt/python@3.11/bin/python3.11",
+        "-m",
+        "venv",
+        "/private/tmp/maya-ci-packaging-cfea53a8-20261015/legacy/venv"
+      ],
+      "started": 1792094363.174295,
+      "exit": 0,
+      "finished": 1792094364.966224
+    },
+    {
+      "name": "dependencies",
+      "command": [
+        "/private/tmp/maya-ci-packaging-cfea53a8-20261015/legacy/venv/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "--disable-pip-version-check",
+        "-r",
+        "/private/tmp/maya-ci-packaging-cfea53a8-20261015/candidate/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440/requirements.txt"
+      ],
+      "started": 1792094364.9666219,
+      "exit": 0,
+      "finished": 1792094709.675937
+    },
+    {
+      "name": "network-isolation",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-p",
+        "(version 1)(allow default)(deny network-outbound)(allow network-outbound (remote ip \"localhost:*\"))",
+        "/private/tmp/maya-ci-packaging-cfea53a8-20261015/legacy/venv/bin/python",
+        "-c",
+        "import socket; s=socket.socket(); s.bind((\"127.0.0.1\",0)); s.listen(); c=socket.socket(); c.connect(s.getsockname()); c.close(); s.close(); s=socket.socket(); s.settimeout(1);\ntry: s.connect((\"192.0.2.1\",443)); raise AssertionError(\"external network admitted\")\nexcept PermissionError: print(\"loopback PASS; external REFUSED\")\nfinally: s.close()"
+      ],
+      "started": 1792094709.677106,
+      "exit": 0,
+      "finished": 1792094709.718119
+    },
+    {
+      "name": "compileall",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-p",
+        "(version 1)(allow default)(deny network-outbound)(allow network-outbound (remote ip \"localhost:*\"))",
+        "/private/tmp/maya-ci-packaging-cfea53a8-20261015/legacy/venv/bin/python",
+        "-m",
+        "compileall",
+        "-q",
+        "/private/tmp/maya-ci-packaging-cfea53a8-20261015/candidate/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440"
+      ],
+      "started": 1792094709.718538,
+      "exit": 0,
+      "finished": 1792094710.117795
+    },
+    {
+      "name": "unittest",
+      "command": [
+        "/usr/bin/sandbox-exec",
+        "-p",
+        "(version 1)(allow default)(deny network-outbound)(allow network-outbound (remote ip \"localhost:*\"))",
+        "/private/tmp/maya-ci-packaging-cfea53a8-20261015/legacy/venv/bin/python",
+        "-u",
+        "-m",
+        "unittest",
+        "discover",
+        "-v",
+        "-s",
+        "/private/tmp/maya-ci-packaging-cfea53a8-20261015/candidate/ai \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440",
+        "-p",
+        "test_*.py"
+      ],
+      "started": 1792094710.118214,
+      "exit": 0,
+      "finished": 1792095150.960535
+    }
+  ],
+  "network": "unittest and compileall sandbox: loopback only",
+  "certificate": "NOT_ISSUED"
+}

@@ -1,0 +1,64 @@
+{
+  "sourceHead": "cfea53a8fc745bb43e025d2556d37bdf9d5d0781",
+  "kind": "unsigned-device-build-for-phone-test",
+  "endpoint": "https://phone-test.mayaos.ru/api",
+  "status": "passed",
+  "steps": [
+    {
+      "name": "sync-phone-payload",
+      "cmd": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "maya-carrier-react/tools/release.mjs",
+        "sync",
+        "--development-api=https://phone-test.mayaos.ru/api"
+      ],
+      "started": "2026-10-15T20:09:43.207Z",
+      "exit": 0,
+      "signal": null,
+      "finished": "2026-10-15T20:10:20.454Z"
+    },
+    {
+      "name": "unsigned-device-build",
+      "cmd": "/usr/bin/xcodebuild",
+      "args": [
+        "-project",
+        "maya-ios-carrier/ios/App/App.xcodeproj",
+        "-scheme",
+        "App",
+        "-configuration",
+        "Debug",
+        "-sdk",
+        "iphoneos",
+        "-destination",
+        "generic/platform=iOS",
+        "-derivedDataPath",
+        "/private/tmp/maya-first-phone-payload-cfea53a8-20261015/ios-device-build",
+        "CODE_SIGNING_ALLOWED=NO",
+        "MAYA_DEVELOPMENT_API=https://phone-test.mayaos.ru/api",
+        "build"
+      ],
+      "started": "2026-10-15T20:10:20.455Z",
+      "exit": 0,
+      "signal": null,
+      "finished": "2026-10-15T20:10:38.026Z"
+    },
+    {
+      "name": "verify-actual-device-app",
+      "cmd": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "maya-carrier-react/tools/release.mjs",
+        "verify-app",
+        "/private/tmp/maya-first-phone-payload-cfea53a8-20261015/ios-device-build/Build/Products/Debug-iphoneos/App.app",
+        "--development-api=https://phone-test.mayaos.ru/api"
+      ],
+      "started": "2026-10-15T20:10:38.027Z",
+      "exit": 0,
+      "signal": null,
+      "finished": "2026-10-15T20:10:53.253Z"
+    }
+  ],
+  "signed": false,
+  "installed": false,
+  "serverChanges": 0,
+  "certificate": "NOT_ISSUED"
+}

@@ -80,3 +80,62 @@ replay/concurrent approval, неверных полномочий, stale CAS и 
 AR-1 HTTP/BIN. Обе версии бинарного теста проверяют два отдельных процесса:
 grant виден второму, revoke и expiry видны обоим; unsigned command не проходит.
 См. `DIAGNOSTIC-ARTIFACTS.json`. Все owned PostgreSQL после проверки остановлены.
+
+
+## Свежий проход на committed candidate
+
+Проверен именно `cfea53a8fc745bb43e025d2556d37bdf9d5d0781` в чистой
+изолированной копии. Последующий documentation-only commit сохраняет receipts;
+он не переименовывает проверенный SHA и не выдаёт сертификат.
+
+| Поверхность | Свежий результат |
+| --- | --- |
+| Backend full | 9 988 PASS, 732 suites, 0 FAIL / SKIP |
+| Platform CI | Все четыре job воспроизведены локально на macOS; это не GitHub-hosted receipt |
+| Widget Contract | Blocking types/check PASS; строгие admission refusals входят в полную backend suite |
+| Widgets Live | 710 PASS, 60 suites, 0 FAIL / SKIP |
+| HTTP/BIN | 21/21 PASS |
+| Release binary | 5/5 PASS, 4 suites; новый и старый production contract на искусственной БД |
+| Local staging HTTP/BIN | 19/19 PASS; legacy AR-1 отдельно 36/36 PASS |
+| Runtime Node 22 и Node 24 | На каждой версии 846 PASS, 7 SKIP, 0 FAIL; пропуски не считаются PASS |
+| React carrier | 200/200 PASS |
+| Release packaging | 18/18 PASS; PWA/Capacitor byte equivalence с разрешённой заменой endpoint |
+| Platform bootstrap | 20 unit + 7 HTTP/PG/compiled PASS, искусственный оператор |
+| Schema | Clean + idempotent replay PASS на новых одноразовых БД; новых migrations нет |
+| iOS | Unsigned simulator и device app собраны и проверены, без подписания/установки |
+| Mutation declarations | 555 declarations / 48 batteries валидны; полный corpus ещё не исполнен |
+
+Legacy Python 3.11: 618 PASS, 0 FAIL; внешняя сеть при тестах
+закрыта проверенным sandbox. Сравнение исходного и нового profile-контрактов
+отдельно подтвердило неизменность старого manifest/digest и registry digest.
+Точный результат и размеры/хеши локальных receipts:
+[RESULT.json](RESULT.json), [FINAL-ARTIFACTS.json](FINAL-ARTIFACTS.json).
+Все созданные этим проходом PostgreSQL остановлены; исходники при проверках
+не менялись.
+
+Сборка симулятора имеет канонический endpoint `https://mayaos.ru/api`.
+Это проверка упаковки, а не обращение к production. Отдельно собран и проверен
+unsigned device payload для `https://phone-test.mayaos.ru/api` на этом же SHA.
+Он не подписан и не установлен; сборка не обновляет тестовый сервер.
+
+### Почему сертификат ещё не выдан
+
+Строгий verifier принял происхождение 31 предложенного claim: 155 различных ID,
+0 нарушений формата/provenance. Это не оценка всех 165 обязанностей. По восьми
+общим требованиям из раздела выше пока нет полной scoped qualification; две
+HANDOFF-обязанности остаются глобальными STOP. Новый профиль требует доказать
+недоступность исключённых price/goods подветвей и все оставшиеся применимые
+обязанности. Нельзя превратить эти восемь строк целиком в U или использовать
+искусственный `firstPhoneCertificate` как результат сертификации.
+
+Следующий разрешённый локальный этап: строгие source/subbranch proofs, полный
+555-mutant corpus, применимый FBE2E и final admission. 10 новых FP mutations
+прошли до commit только диагностически; шесть свежих phone-catalog mutations
+тоже не заменяют полный corpus. Ни прежний сертификат, ни этот набор зелёных
+проверок не перенесены автоматически на новый профиль.
+
+`CERTIFIED_FOR_PROFILE: NO`; `READY_FOR_RELEASE_AUTHORIZATION: NO`.
+Beget, production, настоящая база салона, grants, OTP/YCLIENTS/model calls и
+установка на телефон этим проходом не затронуты. Оставшиеся реальные полномочия,
+ограниченная модельная приёмка и обновление стенда перечислены в RESULT.json;
+новое подтверждение Telegram само по себе не устраняет эти release-условия.

@@ -1,0 +1,15 @@
+const fs=require('node:fs'),path=require('node:path'),Module=require('node:module'),{execFileSync}=require('node:child_process'),assert=require('node:assert/strict');
+const backend='/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-saas-backend';
+process.chdir(backend);
+const requireB=Module.createRequire(path.join(backend,'package.json'));
+requireB('ts-node/register/transpile-only');
+const ts=requireB('typescript');
+const filename=path.join(backend,'src/entitlements/widget-release-profile.contract.ts');
+const oldText=execFileSync('git',['show','7f67abfc:maya-saas-backend/src/entitlements/widget-release-profile.contract.ts'],{cwd:backend,encoding:'utf8'});
+const compiled=ts.transpileModule(oldText,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,esModuleInterop:true}}).outputText;
+const old=new Module(filename);old.filename=filename;old.paths=Module._nodeModulePaths(path.dirname(filename));old._compile(compiled,filename);
+const current=requireB(filename);
+assert.equal(old.exports.PROFILE_DIGEST,current.PROFILE_DIGEST);
+assert.deepEqual(old.exports.PROFILE_MANIFEST,current.PROFILE_MANIFEST);
+assert.equal(old.exports.PROFILE_REGISTRY_DIGEST,current.PROFILE_REGISTRY_DIGEST);
+console.log(JSON.stringify({sourceHead:execFileSync('git',['rev-parse','HEAD'],{cwd:backend,encoding:'utf8'}).trim(),baseline:'7f67abfcf437a7f4867f8712a783e64303002d96',oldManifestUnchanged:true,oldProfileDigest:current.PROFILE_DIGEST,newProfile:current.NO_PRICE_GOODS_PROFILE,newProfileDigest:current.NO_PRICE_GOODS_DIGEST,registryDigest:current.PROFILE_REGISTRY_DIGEST,certificate:'NOT_ISSUED'},null,2));

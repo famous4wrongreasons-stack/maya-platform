@@ -1,0 +1,543 @@
+{
+  "sourceHead": "cfea53a8fc745bb43e025d2556d37bdf9d5d0781",
+  "certificate": "NOT_ISSUED",
+  "archived": [
+    {
+      "archive": "final-ci-manifest.json",
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/manifest.json",
+      "sha256": "a7ba56038ec35f87f21e64ad8ad9bf13ac7724c2cf64b0aceb3e068912108f3f",
+      "bytes": 18815
+    },
+    {
+      "archive": "final-surfaces-manifest.json",
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/manifest.json",
+      "sha256": "4fbbfeeccbcbd7cf3db8968ae5793b3940fc42c31f506ff60845f2a5a15c53ad",
+      "bytes": 1591
+    },
+    {
+      "archive": "final-staging-manifest.json",
+      "source": "/private/tmp/maya-first-phone-final-staging-20261015-01/manifest.json",
+      "sha256": "e38e08f5ddcca3f4711d33e7cb7dd967a0ad9e6e2cdad53b6247c75619f4ff3b",
+      "bytes": 887
+    },
+    {
+      "archive": "final-bootstrap-manifest.json",
+      "source": "/private/tmp/maya-first-phone-final-bootstrap-20261015-01/manifest.json",
+      "sha256": "620cf7175f32d8b267a138b85103a427729e9ee15587441db025548d63f962cb",
+      "bytes": 894
+    },
+    {
+      "archive": "final-legacy-manifest.json",
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/legacy/manifest.json",
+      "sha256": "183c10a9225fca2b825639af97f95adbc3a7a6fbd9c1305e75ef94e698231512",
+      "bytes": 3136
+    },
+    {
+      "archive": "final-phone-payload-manifest.json",
+      "source": "/private/tmp/maya-first-phone-payload-cfea53a8-20261015/manifest.json",
+      "sha256": "9b96d68d212fbba296d3fa0699bb1b35f88ccc8918cac4feab9e65b4a82c7ebf",
+      "bytes": 1977
+    },
+    {
+      "archive": "profile-digest-proof.json",
+      "source": "/private/tmp/maya-first-phone-digest-proof.json",
+      "sha256": "c1aba85f892927b1bceeb2dd3e406c36c1b137801cdf48e22deaeebb462af281",
+      "bytes": 512
+    },
+    {
+      "archive": "owned-services-stopped.json",
+      "source": "/private/tmp/maya-first-phone-owned-cleanup.json",
+      "sha256": "a233d1e16a7ef305a39328ee95fe12d8f4d99dffe5bc6c166ffc262d9c8aa1fd",
+      "bytes": 721
+    },
+    {
+      "archive": "runtime-tests-skips.json",
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/runtime-tests-skips.json",
+      "sha256": "37990c2c4ff28832f9ad0d1ef55fef68b8a8cf5bd9ecd74c18c4e2c041dd24f5",
+      "bytes": 1471
+    },
+    {
+      "archive": "runtime-node24-tests-skips.json",
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/runtime-node24-tests-skips.json",
+      "sha256": "37990c2c4ff28832f9ad0d1ef55fef68b8a8cf5bd9ecd74c18c4e2c041dd24f5",
+      "bytes": 1471
+    },
+    {
+      "archive": "executed-final-ci-runner.mjs",
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/executed-runner.mjs",
+      "sha256": "72c2f62f54b30d918a43532769c99e1ea232f2b9625bbeb783aa6f0bf1230416",
+      "bytes": 9892
+    },
+    {
+      "archive": "executed-final-surfaces-runner.mjs",
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/executed-runner.mjs",
+      "sha256": "cb4c0b396ac71597b9b11a49dcd56563378426835d2b61ebb001b0681fc18b6f",
+      "bytes": 12539
+    },
+    {
+      "archive": "executed-final-staging-runner.mjs",
+      "source": "/private/tmp/maya-first-phone-final-staging.mjs",
+      "sha256": "ee2f5415739dbc7f6b90119a9f42f70bba01dbd3bd356f6c413cdb70cf5e9c5f",
+      "bytes": 7002
+    },
+    {
+      "archive": "executed-final-legacy-runner.py",
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/legacy/executed-runner.py",
+      "sha256": "82f650bf56df37ad4acf2f042427701035434db2648ccae1bb25e7542730e036",
+      "bytes": 3162
+    },
+    {
+      "archive": "executed-final-phone-runner.mjs",
+      "source": "/private/tmp/maya-first-phone-payload-cfea53a8-20261015/executed-runner.mjs",
+      "sha256": "5c394d94bf8db219d7a0d87a7c7d4af1d631148738f84fb8e56a69b37e0f7404",
+      "bytes": 3220
+    },
+    {
+      "archive": "executed-profile-digest-proof.cjs",
+      "source": "/private/tmp/maya-first-phone-digest-proof.cjs",
+      "sha256": "24355665f6872ca0bda2f9606e6dfd9f38ad58bb0365e748c4367fc1539ead86",
+      "bytes": 1668
+    }
+  ],
+  "rawReceipts": [
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/full-unit.json",
+      "sha256": "5b3691093162048c8fe5c9b656fa98af286151f4fc40d4232525f8a9cc196f52",
+      "bytes": 5053611,
+      "purpose": "Executed Jest result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "numPassedTests": 9988,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numPassedTestSuites": 732
+      }
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/e2e.json",
+      "sha256": "65283aa471b17bc45234bfe0b208974d33e05d529a5dd3ce78581fcf94c2204c",
+      "bytes": 1083,
+      "purpose": "Executed Jest result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "numPassedTests": 1,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numPassedTestSuites": 1
+      }
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/events-live.json",
+      "sha256": "26510371ae177d585a797bc42e066d4f72c68a33c2a3218738bc3710c79b7da2",
+      "bytes": 3320,
+      "purpose": "Executed Jest result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "numPassedTests": 4,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numPassedTestSuites": 1
+      }
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-bootstrap-20261015-01/unit-jest.json",
+      "sha256": "f2387156ea823c4434cc0b105ce2c90d29f3a6d7abf131afc025569517505c00",
+      "bytes": 9017,
+      "purpose": "Executed Jest result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "numPassedTests": 20,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numPassedTestSuites": 1
+      }
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-bootstrap-20261015-01/bootstrap-http-pg-binary-jest.json",
+      "sha256": "d47b64fc044d27060329f0159c4e112dc9a80aaa346ed43000f7be009e206697",
+      "bytes": 4581,
+      "purpose": "Executed Jest result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "numPassedTests": 7,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numPassedTestSuites": 1
+      }
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/runtime-tests.log",
+      "sha256": "d757c493031e71a5b777ad5774215239b5b64a0fca18626fb84e16f5bc91f184",
+      "bytes": 213134,
+      "purpose": "Executed TAP result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "tests": 853,
+        "pass": 846,
+        "fail": 0,
+        "skipped": 7,
+        "cancelled": 0,
+        "todo": 0
+      }
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/runtime-node24-tests.log",
+      "sha256": "74ea275aaa9c327ab64ecc7d45b0158a40cf95a134ac232515010972a92ab3c8",
+      "bytes": 213129,
+      "purpose": "Executed TAP result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "tests": 853,
+        "pass": 846,
+        "fail": 0,
+        "skipped": 7,
+        "cancelled": 0,
+        "todo": 0
+      }
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/carrier-tests.log",
+      "sha256": "997722ab8f9af553dfcb363e076c4175e9677bd7cffd0cbad77e1560d263cf19",
+      "bytes": 42344,
+      "purpose": "Executed TAP result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "tests": 200,
+        "pass": 200,
+        "fail": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "todo": 0
+      }
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/carrier-release-tests.log",
+      "sha256": "0ec3b5aed3b2605d51321e03c89315a976ca15f9eae32eaab6fc8325fc014250",
+      "bytes": 3381,
+      "purpose": "Executed TAP result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "tests": 18,
+        "pass": 18,
+        "fail": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "todo": 0
+      }
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/operator-tests.log",
+      "sha256": "71dc8c44f198df0285d1179f86a12fe6d846c14f69a4451c47f65f6d0961d741",
+      "bytes": 4623,
+      "purpose": "Executed TAP result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "tests": 30,
+        "pass": 30,
+        "fail": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "todo": 0
+      }
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/operator-compiled.log",
+      "sha256": "19f72ab65a075dffdc1e6ca6673cefeb4e78970cde02db209989c24f255cd626",
+      "bytes": 2131,
+      "purpose": "Executed TAP result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "tests": 9,
+        "pass": 9,
+        "fail": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "todo": 0
+      }
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/staging-carrier-preflight.log",
+      "sha256": "6d88663c12f8f9d5cc37341af6d29e08d343c44b83e325bd2b45ff6ed06029ed",
+      "bytes": 2519,
+      "purpose": "Executed TAP result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "tests": 17,
+        "pass": 17,
+        "fail": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "todo": 0
+      }
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/phone-packaging-boundaries.log",
+      "sha256": "8d009e2159be1c2f06b94341dcd9006aa308a10852e62095be7a32f1926a80c7",
+      "bytes": 12005,
+      "purpose": "Executed TAP result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "tests": 73,
+        "pass": 73,
+        "fail": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "todo": 0
+      }
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/widgets-live-jest.json",
+      "sha256": "caf08e677f0a213577ecfa2973d9133af01003762feabe18a3fff0867292c3e1",
+      "bytes": 405865,
+      "purpose": "Executed Jest result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "numPassedTests": 710,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numPassedTestSuites": 60
+      }
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/release-binary-jest.json",
+      "sha256": "aa880e4adc5cc8a4b305485dc4bbdba07f608ad7424909215c98a28353480fca",
+      "bytes": 4643,
+      "purpose": "Executed Jest result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "numPassedTests": 5,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numPassedTestSuites": 4
+      }
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-staging-20261015-01/staging-http-binary-jest.json",
+      "sha256": "1a0ed9d083d5de4235f91053cb4d6a39164bbb06c8bb09991121f496d476c51c",
+      "bytes": 13190,
+      "purpose": "Executed Jest result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "numPassedTests": 19,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numPassedTestSuites": 2
+      }
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-staging-20261015-01/legacy-jest.json",
+      "sha256": "5674a38bedff1a2c576213bbcb5dd8be536f4f73485396ae0daebc242533ebf5",
+      "bytes": 23265,
+      "purpose": "Executed Jest result",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "numPassedTests": 36,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numPassedTestSuites": 6
+      }
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/legacy/unittest.log",
+      "sha256": "e52838f55f15f61db0833c28c7df25b0233075547b8c9aa6ffef7173f05bbdee",
+      "bytes": 109088,
+      "purpose": "Executed full legacy Python suite",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead.",
+      "counts": {
+        "passed": 618,
+        "failed": 0,
+        "python": "3.11",
+        "externalNetwork": "REFUSED by tested sandbox"
+      }
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/strict-evidence-verifier.log",
+      "sha256": "577ccadd940507d46f1b0d3e3c7e3e4d7a7524cdaad61992528536929af1f509",
+      "bytes": 736,
+      "purpose": "Strict verifier output; offered evidence only, not release admission",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/phone-catalog-mutations.log",
+      "sha256": "627ac0ac1d2d942fe23ed6a144237c7cd4849bebf6b674af74d0fef9ab83d23f",
+      "bytes": 850,
+      "purpose": "Six separate phone catalog wrapper mutations, not full release corpus",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/widgets-http-bin.log",
+      "sha256": "3a080432a6b21ef44cb1ec91ca2f22a37df116ac6d3a0846b79552ce39631dfc",
+      "bytes": 3909,
+      "purpose": "Executed HTTP/BIN suite",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/evidence/evidence-manifest.jsonl",
+      "sha256": "8c9dc7e371227ecff701713829d44ce509b073c902480ca668ae7da8ad87ed6c",
+      "bytes": 16790,
+      "purpose": "Raw fresh evidence rows; accepted claim coverage is not a certificate",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-declarations.json",
+      "sha256": "de7491782ec4f2dba643cb24d5bfce38134a7f7d43cad3f801d01a559256a64d",
+      "bytes": 213972,
+      "purpose": "All 555 declarations validated; mutants not executed in this receipt",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/contract.log",
+      "sha256": "bebe953a66851b7112f6a081047c0918731c0ad9a69715eb8b557352c8f916f8",
+      "bytes": 6777,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/contract-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/k3.log",
+      "sha256": "378e93addd6207e68ac6a6745263c79568d037efcf979f7c74dfd13075683401",
+      "bytes": 7984,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/k1-dossier.log",
+      "sha256": "13cc78b7c621f558203f6afbe815cc2eb9ca6b43199005c892c040e6311cf52a",
+      "bytes": 1304,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/migration-clean-replay.log",
+      "sha256": "dce4858c97624c627e28cdeca02f1c647e51a17ee721b814d8e31abae28871db",
+      "bytes": 14876,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/migration-idempotent-replay.log",
+      "sha256": "1c4e41a084ea0dd7b3fe3b84940a00066b58e0bece3875126ef37619e255d4dc",
+      "bytes": 1141,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/http-smoke.log",
+      "sha256": "eb8a8cc6b37bbf578fa6c9b806b5ae4eb1a8d49d950329c466118405c6ec0edd",
+      "bytes": 341,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/release-sync.log",
+      "sha256": "9832c7f74afd42f9a2783fdc38016458b64bb18099a1bd1af0b30d9a01cf349e",
+      "bytes": 2881,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/ios-unsigned-build.log",
+      "sha256": "280d7c826a0949b9e42ec224d1491e47441db169172b75e08a065f4aeb0433ce",
+      "bytes": 497132,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/ios-built-app-verify.log",
+      "sha256": "2771d468ce9acf379d9eacfdcd2ee2ceb5abade6fc36c184d0b807bbaf4e09ff",
+      "bytes": 735,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/lint.log",
+      "sha256": "1337f9a2a2113524300e5ca95c2bdf66ac5de421c24ccbce5df30b902eb4bc89",
+      "bytes": 2391,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/typecheck.log",
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "bytes": 103,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/typecheck-scripts.log",
+      "sha256": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+      "bytes": 113,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-ci-packaging-cfea53a8-20261015/prepublication-tests.log",
+      "sha256": "13beec1bb009d2610d3afb90d55ec2d6e68a7324dc15a1ba7d4ab6a5bcc5c4a2",
+      "bytes": 1661,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/widget-contract-check.log",
+      "sha256": "bebe953a66851b7112f6a081047c0918731c0ad9a69715eb8b557352c8f916f8",
+      "bytes": 6777,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/widget-contract-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/k5-exit.log",
+      "sha256": "0476b222faec4d3c6f9a3c29b2ef66744010e7f9866b992d9e94d9bc9c658a55",
+      "bytes": 892,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-final-surfaces-20261015-01/k15-census.log",
+      "sha256": "76b20a8871de9e7cc5d05374b1ee38a5152a443f30fc9df0f66599514328d861",
+      "bytes": 3552,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-payload-cfea53a8-20261015/sync-phone-payload.log",
+      "sha256": "e2fd80c04bb507e6520fb5df260c3e808c5ff858dbb43bdf4a2093bcf1f7f284",
+      "bytes": 2810,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-payload-cfea53a8-20261015/unsigned-device-build.log",
+      "sha256": "49a30a519b66cfeba7609577fe9194e3de9cd7b884cf16b61788c865e41a89cf",
+      "bytes": 323392,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/private/tmp/maya-first-phone-payload-cfea53a8-20261015/verify-actual-device-app.log",
+      "sha256": "4b94a2d4cc32528612c7712401238111f03f93a1923f6e3b94ad11859997cdda",
+      "bytes": 747,
+      "purpose": "Executed local verification log",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    },
+    {
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-saas-backend/scripts/platform-owner-bootstrap-proof.mjs",
+      "sha256": "d30cad8c9cc02df143cd14ead08b65e6c6b4ee635bf47ce8004ca2bc6fc3c53b",
+      "bytes": 6825,
+      "purpose": "Committed bootstrap runner executed unchanged",
+      "whyNotCopied": "Raw local output retained; compact counts, hashes and manifests archived instead."
+    }
+  ]
+}
