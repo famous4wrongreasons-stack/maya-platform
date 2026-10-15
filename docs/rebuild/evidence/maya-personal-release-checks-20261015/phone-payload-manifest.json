@@ -1,0 +1,64 @@
+{
+  "sourceHead": "4a4e5e3d833999dd15d236d492dd987c6f865083",
+  "kind": "unsigned-device-build-for-phone-test",
+  "endpoint": "https://phone-test.mayaos.ru/api",
+  "status": "passed",
+  "steps": [
+    {
+      "name": "sync-phone-payload",
+      "cmd": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "maya-carrier-react/tools/release.mjs",
+        "sync",
+        "--development-api=https://phone-test.mayaos.ru/api"
+      ],
+      "started": "2026-10-15T16:47:44.546Z",
+      "exit": 0,
+      "signal": null,
+      "finished": "2026-10-15T16:48:13.426Z"
+    },
+    {
+      "name": "unsigned-device-build",
+      "cmd": "/usr/bin/xcodebuild",
+      "args": [
+        "-project",
+        "maya-ios-carrier/ios/App/App.xcodeproj",
+        "-scheme",
+        "App",
+        "-configuration",
+        "Debug",
+        "-sdk",
+        "iphoneos",
+        "-destination",
+        "generic/platform=iOS",
+        "-derivedDataPath",
+        "/private/tmp/maya-phone-payload-4a4e5e3d-20261015/ios-device-build",
+        "CODE_SIGNING_ALLOWED=NO",
+        "MAYA_DEVELOPMENT_API=https://phone-test.mayaos.ru/api",
+        "build"
+      ],
+      "started": "2026-10-15T16:48:13.426Z",
+      "exit": 0,
+      "signal": null,
+      "finished": "2026-10-15T16:48:32.420Z"
+    },
+    {
+      "name": "verify-actual-device-app",
+      "cmd": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "maya-carrier-react/tools/release.mjs",
+        "verify-app",
+        "/private/tmp/maya-phone-payload-4a4e5e3d-20261015/ios-device-build/Build/Products/Debug-iphoneos/App.app",
+        "--development-api=https://phone-test.mayaos.ru/api"
+      ],
+      "started": "2026-10-15T16:48:32.420Z",
+      "exit": 0,
+      "signal": null,
+      "finished": "2026-10-15T16:48:43.722Z"
+    }
+  ],
+  "signed": false,
+  "installed": false,
+  "serverChanges": 0,
+  "certificate": "NOT_ISSUED"
+}

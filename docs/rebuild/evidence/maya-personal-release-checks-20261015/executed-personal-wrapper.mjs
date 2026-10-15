@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {spawn,execFileSync} from 'node:child_process';
+const repo='/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010';
+const out='/private/tmp/maya-personal-proof-4a4e5e3d-20261015';
+assert(!fs.existsSync(out));fs.mkdirSync(out,{mode:0o700});fs.copyFileSync(process.argv[1],out+'/executed-runner.mjs');
+const git=(...args)=>execFileSync('git',args,{cwd:repo,encoding:'utf8'}).trim();
+const head=git('rev-parse','HEAD');assert.equal(head,'4a4e5e3d833999dd15d236d492dd987c6f865083');assert.equal(git('status','--porcelain'),'');
+const manifest={sourceHead:head,sourceTree:git('rev-parse','HEAD^{tree}'),status:'running',realProviderCalls:0,realModelCalls:0,ownerDatabaseAccessed:false,certificate:'NOT_ISSUED',synthetic:true};
+const save=()=>fs.writeFileSync(out+'/manifest.json',JSON.stringify(manifest,null,2)+'\n');save();
+const child=spawn(process.execPath,['scripts/personal-owner-react-proof.mjs','--run','--entry','catalog','--output',out+'/proof'],{cwd:repo+'/maya-saas-backend',env:{PATH:'/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin',HOME:'/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/home',TMPDIR:'/private/tmp',LANG:'en_US.UTF-8'},stdio:['ignore','inherit','inherit']});
+const forward=()=>child.kill('SIGTERM');process.on('SIGTERM',forward);process.on('SIGINT',forward);
+const code=await new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',resolve)});
+manifest.exitCode=code;manifest.sourceAfter=git('rev-parse','HEAD');manifest.dirtyAfter=git('status','--porcelain');manifest.status=code===0 && manifest.sourceAfter===head && !manifest.dirtyAfter?'passed':'failed';save();assert.equal(manifest.status,'passed');

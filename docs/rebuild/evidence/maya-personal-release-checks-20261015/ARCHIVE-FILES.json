@@ -1,0 +1,124 @@
+{
+  "files": [
+    {
+      "path": "CLAUSE-CLAIM-COVERAGE.json",
+      "size": 2431,
+      "sha256": "d8e277629e42afa15e9eb77657ed78d8ab6e8e4bf81c89fb4da806c498f2a9b8"
+    },
+    {
+      "path": "LOCAL-ARTIFACTS.json",
+      "size": 71976,
+      "sha256": "34302ec87d4f195f9afdee9f23f77eb3fa94ae8e6adbd63b918c0bde23766bbc"
+    },
+    {
+      "path": "README.md",
+      "size": 3549,
+      "sha256": "440b0e281030f036ed37969a0be0172447f55cc181c9ecb3c1a8c87ac443469a"
+    },
+    {
+      "path": "RESULT.json",
+      "size": 9045,
+      "sha256": "4e250fce92f224ddfa49f5fcba56cf0ab3aced8b3423238358a3b9959cfc290c"
+    },
+    {
+      "path": "bootstrap-manifest.json",
+      "size": 858,
+      "sha256": "ee8e679612b2b7070f4d3aff408a5492580ca9c4aaa4db52883a49b682458359"
+    },
+    {
+      "path": "executed-ci-runner.mjs",
+      "size": 9850,
+      "sha256": "4d505766e521d41193adfa26d111baf402d9db2e8c497f69dc38c749a50475ef"
+    },
+    {
+      "path": "executed-legacy-runner.py",
+      "size": 3162,
+      "sha256": "f82893aa2ee042226ed0e99e59c6dd4d99f616309dbb313139abc06c57b146cc"
+    },
+    {
+      "path": "executed-personal-wrapper.mjs",
+      "size": 1843,
+      "sha256": "2f2291d376d0d6c629c6e907157dc1840b7ccec01f1456f69fcc9eae39f99653"
+    },
+    {
+      "path": "executed-phone-runner.mjs",
+      "size": 3169,
+      "sha256": "989480365da48dde7ca5289dbadc68627d7cf6dcc3405c95ceca95d46503a8f7"
+    },
+    {
+      "path": "executed-surfaces-runner.mjs",
+      "size": 12401,
+      "sha256": "707ab828695d4207eaff3e24eadb52b746fb390053a13d4e7010d6d3f1959c6c"
+    },
+    {
+      "path": "final-lint.log",
+      "size": 2391,
+      "sha256": "7e951282d3ee255488977b70169bded3fbc672616cdf680e230d3e8cd202c3db"
+    },
+    {
+      "path": "historical-e049ac1f-lint-failure.log",
+      "size": 6117,
+      "sha256": "d84cb3981968a1e926f4995d66d1212721c7df273af567764b275a2ae0ff8843"
+    },
+    {
+      "path": "ios-device-verification.log",
+      "size": 747,
+      "sha256": "4b94a2d4cc32528612c7712401238111f03f93a1923f6e3b94ad11859997cdda"
+    },
+    {
+      "path": "ios-simulator-verification.log",
+      "size": 735,
+      "sha256": "2771d468ce9acf379d9eacfdcd2ee2ceb5abade6fc36c184d0b807bbaf4e09ff"
+    },
+    {
+      "path": "legacy-ci-manifest.json",
+      "size": 3137,
+      "sha256": "3fe9469b3af7cb56f956f984f6ab3891753edfeb5f29c641184d4013594fc339"
+    },
+    {
+      "path": "mutation-preflight-only.json",
+      "size": 210248,
+      "sha256": "4429f1b664205323f7838c1da34732891ede4ea870857d05380ead8870e80b27"
+    },
+    {
+      "path": "personal-proof-manifest.json",
+      "size": 820,
+      "sha256": "1193c9a0b80aa467ae901f7de55a8a30c89052bf61d6eb77d746b2ac4e7da0e4"
+    },
+    {
+      "path": "personal-wrapper-manifest.json",
+      "size": 378,
+      "sha256": "d553952aa26cc22c3993bbb162fe00967941a0d1518d3a0878522495aa3319be"
+    },
+    {
+      "path": "phone-payload-manifest.json",
+      "size": 1965,
+      "sha256": "20a04169eb8c88e9979da713686ff9de307e1395dd2c1d47591e4a9270dd24d8"
+    },
+    {
+      "path": "platform-ci-manifest.json",
+      "size": 18815,
+      "sha256": "87a7fd1558901aa77fa121a0bc29e95924f252c77e0156ba21e9f899efda0140"
+    },
+    {
+      "path": "runtime-node24-tests-skips.json",
+      "size": 1471,
+      "sha256": "37990c2c4ff28832f9ad0d1ef55fef68b8a8cf5bd9ecd74c18c4e2c041dd24f5"
+    },
+    {
+      "path": "runtime-tests-skips.json",
+      "size": 1471,
+      "sha256": "37990c2c4ff28832f9ad0d1ef55fef68b8a8cf5bd9ecd74c18c4e2c041dd24f5"
+    },
+    {
+      "path": "strict-evidence-verifier.log",
+      "size": 733,
+      "sha256": "60af3811370662fc7e36b252ce0d0318ebe922c9498e53a2837812edcdb38c71"
+    },
+    {
+      "path": "surfaces-manifest.json",
+      "size": 1555,
+      "sha256": "6457b9bb17600ac6e948b0eae60c0ec50e6b7d45fc564fffb9e1a45a29080762"
+    }
+  ]
+}

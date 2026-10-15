@@ -1,0 +1,600 @@
+{
+  "kind": "fresh-ci-packaging-followup",
+  "sourceHead": "4a4e5e3d833999dd15d236d492dd987c6f865083",
+  "sourceTree": "1a43a77a07d7d24cf3fea28af907507a9597e4af",
+  "node": "v22.23.3",
+  "host": "macOS-local-equivalent-not-GitHub-hosted",
+  "status": "passed",
+  "steps": [
+    {
+      "name": "clone",
+      "started": "2026-10-15T16:21:01.987Z",
+      "command": "git",
+      "args": [
+        "clone",
+        "--shared",
+        "--no-checkout",
+        "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010",
+        "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015",
+      "finished": "2026-10-15T16:21:02.061Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "checkout",
+      "started": "2026-10-15T16:21:02.061Z",
+      "command": "git",
+      "args": [
+        "checkout",
+        "--detach",
+        "4a4e5e3d833999dd15d236d492dd987c6f865083"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate",
+      "finished": "2026-10-15T16:21:03.960Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "backend-npm-ci",
+      "started": "2026-10-15T16:21:03.968Z",
+      "command": "npm",
+      "args": [
+        "ci",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:21:11.842Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "dependency-audit",
+      "started": "2026-10-15T16:21:11.843Z",
+      "command": "npm",
+      "args": [
+        "audit",
+        "--omit=dev",
+        "--audit-level=high",
+        "--json"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:21:13.057Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "maya-carrier-react-npm-ci",
+      "started": "2026-10-15T16:21:13.058Z",
+      "command": "npm",
+      "args": [
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-carrier-react",
+      "finished": "2026-10-15T16:21:13.353Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "maya-ios-carrier-npm-ci",
+      "started": "2026-10-15T16:21:13.354Z",
+      "command": "npm",
+      "args": [
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-ios-carrier",
+      "finished": "2026-10-15T16:21:13.694Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "pg-init",
+      "started": "2026-10-15T16:21:13.835Z",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/initdb",
+      "args": [
+        "-D",
+        "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/pgdata",
+        "--auth=trust",
+        "--username=ci_proof",
+        "--encoding=UTF8",
+        "--locale=C"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:21:14.228Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "pg-start",
+      "started": "2026-10-15T16:21:14.228Z",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/pg_ctl",
+      "args": [
+        "-D",
+        "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/pgdata",
+        "-w",
+        "-t",
+        "30",
+        "-l",
+        "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/postgres.log",
+        "-o",
+        "-h 127.0.0.1 -p 50306 -k '' -c shared_buffers=64MB -c max_connections=30",
+        "start"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:21:14.346Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "create-db",
+      "started": "2026-10-15T16:21:14.347Z",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/createdb",
+      "args": [
+        "--host=127.0.0.1",
+        "--port=50306",
+        "--username=ci_proof",
+        "maya_gates_smoke_4a4e5e3d"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:21:14.411Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "prisma-generate",
+      "started": "2026-10-15T16:21:14.411Z",
+      "command": "npm",
+      "args": [
+        "run",
+        "prisma:generate"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:21:16.994Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "prisma-validate",
+      "started": "2026-10-15T16:21:16.994Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "validate"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:21:17.437Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "migration-clean-replay",
+      "started": "2026-10-15T16:21:17.437Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:21:18.909Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "migration-idempotent-replay",
+      "started": "2026-10-15T16:21:18.909Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:21:19.314Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "seed",
+      "started": "2026-10-15T16:21:19.314Z",
+      "command": "npm",
+      "args": [
+        "run",
+        "prisma:seed"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:21:20.283Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "typecheck",
+      "started": "2026-10-15T16:21:20.283Z",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:21:28.455Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "typecheck-scripts",
+      "started": "2026-10-15T16:21:28.456Z",
+      "command": "npm",
+      "args": [
+        "run",
+        "typecheck:scripts"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:21:48.546Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "lint",
+      "started": "2026-10-15T16:21:48.546Z",
+      "command": "npm",
+      "args": [
+        "run",
+        "lint"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:23:02.320Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "k3",
+      "started": "2026-10-15T16:23:02.320Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "scripts/k3-gateway-check.mjs"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:23:07.042Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "contract-types",
+      "started": "2026-10-15T16:23:07.042Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--project",
+        "tsconfig.widget-contract.json",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:23:10.577Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "contract",
+      "started": "2026-10-15T16:23:10.577Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "scripts/widget-contract-check.mjs"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:23:11.510Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "k1-dossier",
+      "started": "2026-10-15T16:23:11.511Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "docs/rebuild/evidence/maya-chat-first-ux/k1/k1-dossier-check.mjs"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate",
+      "finished": "2026-10-15T16:23:11.545Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "runtime-artifact",
+      "started": "2026-10-15T16:23:11.545Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "../maya-chat-shell/build.mjs"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:23:17.291Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "full-unit",
+      "started": "2026-10-15T16:23:17.292Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--json",
+        "--outputFile=/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/full-unit.json"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:32:32.502Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "e2e",
+      "started": "2026-10-15T16:32:32.502Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--config",
+        "test/jest-e2e.json",
+        "--runInBand",
+        "--json",
+        "--outputFile=/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/e2e.json"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:32:33.256Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "events-create-db",
+      "started": "2026-10-15T16:32:33.257Z",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/createdb",
+      "args": [
+        "--host=127.0.0.1",
+        "--port=50306",
+        "--username=ci_proof",
+        "maya_events_proof_4a4e5e3d"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:32:33.337Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "events-migrate",
+      "started": "2026-10-15T16:32:33.337Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:32:34.447Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "events-live",
+      "started": "2026-10-15T16:32:34.447Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "node_modules/jest/bin/jest.js",
+        "--config",
+        "test/jest-events-live.json",
+        "--runInBand",
+        "--json",
+        "--outputFile=/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/events-live.json"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:32:35.356Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "full-build",
+      "started": "2026-10-15T16:32:35.356Z",
+      "command": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:32:59.337Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "http-smoke",
+      "started": "2026-10-15T16:32:59.337Z",
+      "command": "npm",
+      "args": [
+        "run",
+        "test:http"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:33:06.368Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "frontend-parse",
+      "started": "2026-10-15T16:33:06.369Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "scripts/verify-frontend-bundles.mjs",
+        "сайт и приложение/app.html",
+        "сайт и приложение/maya-admin.html",
+        "сайт и приложение/maya-start.html",
+        "сайт и приложение/oauth-callback.html"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate",
+      "finished": "2026-10-15T16:33:06.431Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "prepublication",
+      "started": "2026-10-15T16:33:06.431Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "scripts/verify-prepublication-contracts.mjs"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate",
+      "finished": "2026-10-15T16:33:06.475Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "prepublication-tests",
+      "started": "2026-10-15T16:33:06.475Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "--test",
+        "scripts/verify-prepublication-contracts.test.mjs"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate",
+      "finished": "2026-10-15T16:33:06.870Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "release-sync",
+      "started": "2026-10-15T16:33:06.871Z",
+      "command": "npm",
+      "args": [
+        "run",
+        "sync"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-ios-carrier",
+      "finished": "2026-10-15T16:33:36.195Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "carrier-full",
+      "started": "2026-10-15T16:33:36.196Z",
+      "command": "npm",
+      "args": [
+        "test"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-carrier-react",
+      "finished": "2026-10-15T16:33:36.778Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "release-packaging-tests",
+      "started": "2026-10-15T16:33:36.778Z",
+      "command": "npm",
+      "args": [
+        "run",
+        "test:release"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-carrier-react",
+      "finished": "2026-10-15T16:34:10.182Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "operator-tests",
+      "started": "2026-10-15T16:34:10.182Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "--test",
+        "scripts/widget-release-operator.test.cjs"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:34:10.271Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "operator-compiled",
+      "started": "2026-10-15T16:34:10.271Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "--test",
+        "scripts/widget-release-operator.compiled-test.cjs"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:34:12.722Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "ios-unsigned-build",
+      "started": "2026-10-15T16:34:12.722Z",
+      "command": "/usr/bin/xcodebuild",
+      "args": [
+        "-project",
+        "maya-ios-carrier/ios/App/App.xcodeproj",
+        "-scheme",
+        "App",
+        "-configuration",
+        "Debug",
+        "-sdk",
+        "iphonesimulator",
+        "-derivedDataPath",
+        "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/ios-build",
+        "CODE_SIGNING_ALLOWED=NO",
+        "build"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate",
+      "finished": "2026-10-15T16:34:35.868Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "ios-built-app-verify",
+      "started": "2026-10-15T16:34:35.869Z",
+      "command": "/private/tmp/maya-cert-node22-20261013/node-v22.23.3-darwin-arm64/bin/node",
+      "args": [
+        "maya-carrier-react/tools/release.mjs",
+        "verify-app",
+        "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/ios-build/Build/Products/Debug-iphonesimulator/App.app"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate",
+      "finished": "2026-10-15T16:34:47.048Z",
+      "exit": 0,
+      "signal": null
+    },
+    {
+      "name": "pg-stop",
+      "started": "2026-10-15T16:34:47.364Z",
+      "command": "/opt/homebrew/opt/postgresql@16/bin/pg_ctl",
+      "args": [
+        "-D",
+        "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/pgdata",
+        "-w",
+        "-t",
+        "30",
+        "-m",
+        "fast",
+        "stop"
+      ],
+      "cwd": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend",
+      "finished": "2026-10-15T16:34:47.472Z",
+      "exit": 0,
+      "signal": null
+    }
+  ],
+  "productionEffects": 0,
+  "realProviderEffects": 0,
+  "ownerDatabaseAccessed": false,
+  "certificate": "NOT_ISSUED",
+  "database": {
+    "cluster": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/pgdata",
+    "port": 50306,
+    "database": "maya_gates_smoke_4a4e5e3d",
+    "synthetic": true
+  },
+  "mirrorDiff": "",
+  "clusterStopped": true
+}

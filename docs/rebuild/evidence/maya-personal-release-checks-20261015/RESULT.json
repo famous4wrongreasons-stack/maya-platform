@@ -1,0 +1,299 @@
+{
+  "status": "FRESH_LOCAL_CI_AND_PERSONAL_PATH_PASS_NOT_RELEASE_CERTIFIED",
+  "testedSourceCommit": "4a4e5e3d833999dd15d236d492dd987c6f865083",
+  "branch": "codex/maya-local-crm-setup-20261010",
+  "change": {
+    "parent": "e049ac1f4590ad94a3485b6b7719c446bace463b",
+    "kind": "test-only lint repair",
+    "files": [
+      "maya-saas-backend/src/package5-wave1/operational-work.http.spec.ts",
+      "maya-saas-backend/src/valuation/c8.companion-list.spec.ts"
+    ],
+    "productRuntimeChanged": false,
+    "before": "Full CI refused 24 lint errors in two Companion test files.",
+    "after": "Typed JSON/matchers and Promise-returning fixtures; all assertions retained. Full lint passes, with nine existing nonblocking warnings."
+  },
+  "checks": {
+    "platformCi": "PASS local macOS equivalents of all four workflow jobs; not a GitHub-hosted receipt",
+    "backend": {
+      "numPassedTests": 9912,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 729
+    },
+    "e2e": {
+      "numPassedTests": 1,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 1
+    },
+    "eventsPostgres": {
+      "numPassedTests": 4,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 1
+    },
+    "legacyPython": {
+      "passed": 618,
+      "failed": 0,
+      "python": "3.11",
+      "externalNetwork": "REFUSED by tested sandbox"
+    },
+    "bootstrapUnit": {
+      "numPassedTests": 20,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 1
+    },
+    "bootstrapHttpPostgresCompiled": {
+      "numPassedTests": 7,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 1
+    },
+    "runtimeNode22": {
+      "tests": 853,
+      "pass": 846,
+      "fail": 0,
+      "skipped": 7
+    },
+    "runtimeNode24": {
+      "tests": 853,
+      "pass": 846,
+      "fail": 0,
+      "skipped": 7
+    },
+    "carrier": {
+      "tests": 200,
+      "pass": 200,
+      "fail": 0,
+      "skipped": 0
+    },
+    "releasePackaging": {
+      "tests": 18,
+      "pass": 18,
+      "fail": 0,
+      "skipped": 0
+    },
+    "operatorOffline": {
+      "tests": 30,
+      "pass": 30,
+      "fail": 0,
+      "skipped": 0
+    },
+    "operatorCompiled": {
+      "tests": 9,
+      "pass": 9,
+      "fail": 0,
+      "skipped": 0
+    },
+    "stagingCarrierPreflight": {
+      "tests": 17,
+      "pass": 17,
+      "fail": 0,
+      "skipped": 0
+    },
+    "phonePackagingBoundaries": {
+      "tests": 73,
+      "pass": 73,
+      "fail": 0,
+      "skipped": 0
+    },
+    "phoneCatalogMutations": {
+      "status": "PASS",
+      "sourceSha256": "878955ce8d44a52b41bf820109db72f0376877d76b459102ca82b75135d1882b",
+      "greenBaseline": true,
+      "greenRestored": true,
+      "mutantsKilled": 6,
+      "realProviderCalls": 0,
+      "results": [
+        {
+          "name": "baseline",
+          "exit": 0,
+          "expected": true
+        },
+        {
+          "name": "method",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "expiry",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "budget",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "redirect",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "revocation",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "body",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "restored",
+          "exit": 0,
+          "expected": true
+        }
+      ]
+    },
+    "widgetsLive": {
+      "numPassedTests": 687,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 59
+    },
+    "releaseBinary": {
+      "numPassedTests": 4,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "numPassedTestSuites": 4
+    },
+    "httpBin": {
+      "cases": 21,
+      "status": "PASS",
+      "failed": 0,
+      "binary": {
+        "health": 200
+      },
+      "mint_provenance": {
+        "captured": 47,
+        "malformed": 0
+      }
+    },
+    "strictEvidenceVerifier": {
+      "contract": "maya.widgets-evidence-verify/1",
+      "manifest": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/evidence/evidence-manifest.jsonl",
+      "manifest_sha256": "525e3523d70198476e90318ecccbc40e5fa9ba482ef1b3844cdee8ef019405ca",
+      "inventory": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/docs/rebuild/evidence/maya-chat-first-ux/gate-clause-inventory.json",
+      "lines": 35,
+      "claims": 31,
+      "captured_mints": {
+        "HTTP": 325,
+        "BIN": 47
+      },
+      "refused_mints": 0,
+      "records_before_teardown": 651,
+      "harness_files_scanned": 40,
+      "u_proof_map": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/docs/rebuild/widget-release-programme/development-v14/u-proofs.json",
+      "violations": []
+    },
+    "personalBrowser": {
+      "prepare": {
+        "numPassedTests": 1,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numPassedTestSuites": 1
+      },
+      "resume": {
+        "numPassedTests": 1,
+        "numFailedTests": 0,
+        "numPendingTests": 0,
+        "numPassedTestSuites": 1
+      },
+      "checkpoints": [
+        "success-before-prepare",
+        "success-preview",
+        "success-result",
+        "revoked-preview",
+        "revoked-result",
+        "unknown-preview",
+        "unknown-result",
+        "navRevoked-before-nav",
+        "navRevoked-result",
+        "incomplete-result",
+        "changed-preview",
+        "changed-result",
+        "success-restart",
+        "unknown-restart"
+      ],
+      "providerLedgerBeforeRestart": 1,
+      "providerLedgerAfterRestart": 1,
+      "unexpectedCalls": 0,
+      "syntheticModel": true,
+      "syntheticProvider": true,
+      "realModelAcceptance": false
+    },
+    "migrationReplay": "PASS clean and idempotent replay on owned disposable databases only",
+    "iosSimulatorPackaging": "PASS actual unsigned app, standard production API target, no installation",
+    "iosDevicePackaging": "PASS actual unsigned iphoneos app, explicit https://phone-test.mayaos.ru/api development target, no signing or installation"
+  },
+  "qualification": {
+    "currentContractSha256": "0843f3cfc8c651423a8d3a355092aa27742163bcf5fc5ba99f8328a4f033398c",
+    "offeredClauseCount": 155,
+    "missingApplicableSourceDuties": [
+      "G7-FR6d",
+      "G11-I4",
+      "G11-I5",
+      "G11-I6",
+      "G11-I10",
+      "G13-I1",
+      "G13-I2",
+      "G13-I9"
+    ],
+    "handoffGlobalStop": [
+      "G6-6",
+      "G13-R8"
+    ],
+    "committedAudit": "UNCHANGED: 163 false/unqualified, 2 STOPPED:D-H; offered claim coverage is not promotion",
+    "fullMutationCorpus": "NOT_EXECUTED; 545 declarations / 47 batteries / 68 planned jobs preflight passed at this SHA",
+    "allApplicableFbe2e": "NOT_CLAIMED; only named fresh executions above",
+    "certificate": "NOT_ISSUED",
+    "readyForProductionExecutionAuthorization": false
+  },
+  "remaining": [
+    "Price and goods exact approval source duties need admissible paired HTTP/BIN evidence; scripted model fixtures cannot substitute under D-15.",
+    "Complete exact-candidate mutation programme and final strict admission remain outstanding.",
+    "Changed personal-booking instructions still lack bounded real-model acceptance.",
+    "Actual global operator credentials/login and operator-owned trust/signature remain separate from tenant authority.",
+    "Phone-test still needs separately authorized exact update/grant and bounded provider-effect admission. This run did not change the installed phone or server."
+  ],
+  "effects": {
+    "serverChanges": 0,
+    "ownerDatabaseAccess": 0,
+    "productionMigrations": 0,
+    "liveGrants": 0,
+    "realOtp": 0,
+    "realYclientsEffects": 0,
+    "realModelCalls": 0,
+    "iphoneInstall": 0,
+    "productionPrivateKeysCreated": 0,
+    "syntheticEphemeralSigningKeysUsed": true,
+    "dependencyDownloads": "npm/pip only; not model/provider acceptance"
+  },
+  "cleanup": [
+    {
+      "manifest": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/manifest.json",
+      "pgStatusExit": 3,
+      "portOpen": false
+    },
+    {
+      "manifest": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/manifest.json",
+      "pgStatusExit": 3,
+      "portOpen": false
+    },
+    {
+      "manifest": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/manifest.json",
+      "pgStatusExit": 3,
+      "portOpen": false
+    },
+    {
+      "manifest": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/manifest.json",
+      "pgStatusExit": 3,
+      "portOpen": false
+    }
+  ],
+  "earlierRunErratum": "The unmodified e049ac1f surface manifest inherited signingKeysCreated:false from a bootstrap-only runner. Its release tests used ephemeral synthetic signing keys. It must not be interpreted as no synthetic keys. The fresh 4a4e5e3d runner distinguishes production keys from synthetic keys."
+}

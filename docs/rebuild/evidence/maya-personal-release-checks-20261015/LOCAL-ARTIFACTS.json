@@ -1,0 +1,1284 @@
+{
+  "testedSourceCommit": "4a4e5e3d833999dd15d236d492dd987c6f865083",
+  "artifacts": [
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/backend-npm-ci.log",
+      "size": 1376,
+      "sha256": "95dc10dd59a1ae517c3dc423a488dd709388ed2c0d064ff92d2fa780c5b84b3b",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/carrier-full.log",
+      "size": 42344,
+      "sha256": "10a18b9dc14a6e14c76aca9dd8215e1d9cab45f9785af053884ebbe44796bf10",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/checkout.log",
+      "size": 93,
+      "sha256": "382320fbdd5f11a1df07da69c511cf1a93258da6212e474ee82a0f2166c03332",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/clone.log",
+      "size": 83,
+      "sha256": "82b848acfe413a1a4791635dad5a80ff8eed01497b31772102dae36b125bbe9b",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/contract-types.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/contract.log",
+      "size": 6777,
+      "sha256": "bebe953a66851b7112f6a081047c0918731c0ad9a69715eb8b557352c8f916f8",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/create-db.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/dependency-audit.log",
+      "size": 366,
+      "sha256": "07734426b2b6084f979e8cfe7437651399dce9ef8be47eb6fbb94091d6648114",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/e2e.json",
+      "size": 1083,
+      "sha256": "258f954f1df3753179fdd30c1356f6ad14b13a56cd2df934633437a1f01fcc46",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/e2e.log",
+      "size": 247,
+      "sha256": "f795dfad7040193cefbc01b59ea1137dbaa8f93a2d719c1c10e2b088f7299537",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/events-create-db.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/events-live.json",
+      "size": 3320,
+      "sha256": "7ba0292d2eda1a399691148ea5dd47fe25b586863ecb96c1693a06957363aa9d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/events-live.log",
+      "size": 816,
+      "sha256": "8b3cf7fd849ea0bdb6bedc54fb6dcbd220102cf9a194e2751d93f30dec53aa19",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/events-migrate.log",
+      "size": 14877,
+      "sha256": "7c2f60b2d1e5ee2f579a51d798b9f6ed72f2cbe67afe2e062b4a40b970b3ff01",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/executed-runner.mjs",
+      "size": 9850,
+      "sha256": "4d505766e521d41193adfa26d111baf402d9db2e8c497f69dc38c749a50475ef",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/frontend-parse.log",
+      "size": 304,
+      "sha256": "0c479910b1adf24b78a6472ab90349377b397f2c94ec5396db78a635bb72eb74",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/full-build.log",
+      "size": 158,
+      "sha256": "b74e5c60033b62edf5aa47fcace858704866272bf6c05a53d7b76d4f3abdaf15",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/full-unit.json",
+      "size": 5013327,
+      "sha256": "ba6b1827fb3a1370360c41ff8a9e32192e5191cf739097fe00b02f4c5a3165cb",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/full-unit.log",
+      "size": 1385038,
+      "sha256": "d0c367facbaff173368429708c4cc928a79d44d3261e3caaedc1ecb22d620749",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/http-smoke.log",
+      "size": 341,
+      "sha256": "eb8a8cc6b37bbf578fa6c9b806b5ae4eb1a8d49d950329c466118405c6ec0edd",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/ios-built-app-verify.log",
+      "size": 735,
+      "sha256": "2771d468ce9acf379d9eacfdcd2ee2ceb5abade6fc36c184d0b807bbaf4e09ff",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/ios-unsigned-build.log",
+      "size": 497045,
+      "sha256": "28a2091f00f80d14b6cbe2dfe208933454329894b4f544c59fe0530d2d70dc48",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/k1-dossier.log",
+      "size": 1304,
+      "sha256": "13cc78b7c621f558203f6afbe815cc2eb9ca6b43199005c892c040e6311cf52a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/k3.log",
+      "size": 7984,
+      "sha256": "378e93addd6207e68ac6a6745263c79568d037efcf979f7c74dfd13075683401",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/lint.log",
+      "size": 2391,
+      "sha256": "7e951282d3ee255488977b70169bded3fbc672616cdf680e230d3e8cd202c3db",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/manifest.json",
+      "size": 18815,
+      "sha256": "87a7fd1558901aa77fa121a0bc29e95924f252c77e0156ba21e9f899efda0140",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/maya-carrier-react-npm-ci.log",
+      "size": 27,
+      "sha256": "41e8e820f36002ab33a70e5ac006cbc31dd0fb8a15618c7a4eb589eefc974b18",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/maya-ios-carrier-npm-ci.log",
+      "size": 246,
+      "sha256": "3708fc31caacf1f522a48f4476ab738246e30d7a82d77164f881699823a61d2a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/migration-clean-replay.log",
+      "size": 14876,
+      "sha256": "dde6e60a4754b075172729d5e2fe50ec12d21fdab52c5059fc42129d64ca1de2",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/migration-idempotent-replay.log",
+      "size": 1141,
+      "sha256": "5398afae4783567d8fad7acfbb7ef05708a11b6a906de69ad180c2805d278ac5",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/operator-compiled.log",
+      "size": 2136,
+      "sha256": "d8d1ceb83cd4b818abe7812811a217ea015fa616654bfdbaca54271079ddf717",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/operator-tests.log",
+      "size": 4627,
+      "sha256": "106012cd6df1c107e223f9c0e1fd4bf5d09fa0032a31fb8fd54a0c756006bfe3",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/pg-init.log",
+      "size": 904,
+      "sha256": "a4fa7943f6f156a2d6f3f5f3833f93e9fe569d7b35bea8d6fa104c7638a28235",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/pg-start.log",
+      "size": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/pg-stop.log",
+      "size": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/postgres.log",
+      "size": 2744,
+      "sha256": "5f755efae0d109b363739ab798123f29620f291658e844e3323bc1e8465fcf88",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/prepublication-tests.log",
+      "size": 1659,
+      "sha256": "29b6831323dc33f68dd3e8f87afc9fa96d3ad9e7c56c99d60e2ed7b84aa16e5f",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/prepublication.log",
+      "size": 78,
+      "sha256": "c9b82d22c11b498c44890c95a03a46c33f85f2697a0b04820b131a4cfd5108fb",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/prisma-generate.log",
+      "size": 318,
+      "sha256": "dd52c1417a9518b96c9dea063aefaf87e66155139ee4eb9667bd696d2a123974",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/prisma-validate.log",
+      "size": 142,
+      "sha256": "e1344514cb0e93026a245afd134e0c874287a64f7c5798cbda02eff700d2aa22",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/release-packaging-tests.log",
+      "size": 3389,
+      "sha256": "3d26b8cc516a7119c18c5e9c1c7f45b42782586f9764da65c30edecb6160375d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/release-sync.log",
+      "size": 2880,
+      "sha256": "2f33d55bc22edd2038ad794c59dadf0b48111ac2c19ed413a6347e0973b2555e",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/runtime-artifact.log",
+      "size": 1010,
+      "sha256": "21280e6c1c81afb91f8960431d1d7e780b33f70fbf045899ccbf607784fc4b7d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/scarf-js-history-stanislavmosin.log",
+      "size": 32,
+      "sha256": "3e851207e8f0734db3fc940510dd35568ed68faf2abee79c1f5df8888d7c0bf0",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/seed.log",
+      "size": 656,
+      "sha256": "8c6dd77b90dea6052128952a78e7a266af19a1890cc63807b0fe5f266a36a14d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/typecheck-scripts.log",
+      "size": 113,
+      "sha256": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/typecheck.log",
+      "size": 103,
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/legacy/compileall.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/legacy/dependencies.log",
+      "size": 23805,
+      "sha256": "0c9ee8ffdef0fe4453b93268f7aa8f8da27af01d0d5a381f966f6503a0771925",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/legacy/executed-runner.py",
+      "size": 3162,
+      "sha256": "f82893aa2ee042226ed0e99e59c6dd4d99f616309dbb313139abc06c57b146cc",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/legacy/manifest.json",
+      "size": 3137,
+      "sha256": "3fe9469b3af7cb56f956f984f6ab3891753edfeb5f29c641184d4013594fc339",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/legacy/network-isolation.log",
+      "size": 32,
+      "sha256": "3045b54b8750a5cabd890ed5c0d33df7611e01e682579542d9aaa97ff21ad87b",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/legacy/unittest.log",
+      "size": 109560,
+      "sha256": "28508557cbe8f21090ddcab0c6f549d7ed28e0b0f60ea49bc651f3fae7885012",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/legacy/venv.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/backend-build.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/canonical-release-build.log",
+      "size": 2288,
+      "sha256": "b7a52320a99886b2fb5c3948d3d4f9731dcfc8ab0bf95f2799251cd2c3693698",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/carrier-release-tests.log",
+      "size": 3388,
+      "sha256": "8a1a0f00a3b9273f069b2419750e35e7da0a1ccb26b89e5098a7ecdebc7f2481",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/carrier-tests.log",
+      "size": 42350,
+      "sha256": "c62abae5148389ecbe3c36261271531ce1115972ccf225f9e0148e28e5401786",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/createdb.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/executed-runner.mjs",
+      "size": 12401,
+      "sha256": "707ab828695d4207eaff3e24eadb52b746fb390053a13d4e7010d6d3f1959c6c",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/initdb.log",
+      "size": 886,
+      "sha256": "fcc4599f33a5ba58bae44fdfb914fe7d517df9bdd730cae8b9f39a90d9954da9",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/k1-dossier.log",
+      "size": 1304,
+      "sha256": "13cc78b7c621f558203f6afbe815cc2eb9ca6b43199005c892c040e6311cf52a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/k15-census.log",
+      "size": 3552,
+      "sha256": "76b20a8871de9e7cc5d05374b1ee38a5152a443f30fc9df0f66599514328d861",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/k5-exit.log",
+      "size": 892,
+      "sha256": "0476b222faec4d3c6f9a3c29b2ef66744010e7f9866b992d9e94d9bc9c658a55",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/live-types.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/manifest.json",
+      "size": 1555,
+      "sha256": "6457b9bb17600ac6e948b0eae60c0ec50e6b7d45fc564fffb9e1a45a29080762",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/migrations.log",
+      "size": 14903,
+      "sha256": "fd4e2374a7ca596d64441edb50cf4197f689572940a4a81517b3a0284e406210",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/pg-start.log",
+      "size": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/pg-stop.log",
+      "size": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/phone-catalog-mutations.log",
+      "size": 850,
+      "sha256": "627ac0ac1d2d942fe23ed6a144237c7cd4849bebf6b674af74d0fef9ab83d23f",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/phone-packaging-boundaries.log",
+      "size": 12008,
+      "sha256": "e5562118ad8babf29074b6cdb68c40574892d91a7daab06859e49cd7e91c9909",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/postgres.log",
+      "size": 107683,
+      "sha256": "7e1b1442270ae8d245686f732c0707cd2f4e02f3b3f5ec054e1b1cafbd75ce74",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/preflight-build.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/release-binary-jest.json",
+      "size": 3931,
+      "sha256": "754e07d8082aecd8c1c8220475eeb0cc4c55f2d94ecf3bb4487ba84514727837",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/runtime-build.log",
+      "size": 1010,
+      "sha256": "21280e6c1c81afb91f8960431d1d7e780b33f70fbf045899ccbf607784fc4b7d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/runtime-check.log",
+      "size": 1150,
+      "sha256": "99024fee4724cee4cf7461ec00b94613680149ffacc086119d11c872c7c47d67",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/runtime-icons.log",
+      "size": 494,
+      "sha256": "ef077d6837f7f024f63cdd013b59af63e6628d5b1c3a43e5180b52f02c837ed6",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/runtime-node24-build.log",
+      "size": 1010,
+      "sha256": "21280e6c1c81afb91f8960431d1d7e780b33f70fbf045899ccbf607784fc4b7d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/runtime-node24-check.log",
+      "size": 1150,
+      "sha256": "99024fee4724cee4cf7461ec00b94613680149ffacc086119d11c872c7c47d67",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/runtime-node24-icons.log",
+      "size": 494,
+      "sha256": "ef077d6837f7f024f63cdd013b59af63e6628d5b1c3a43e5180b52f02c837ed6",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/runtime-node24-selftest.log",
+      "size": 12458,
+      "sha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/runtime-node24-tests-skips.json",
+      "size": 1471,
+      "sha256": "37990c2c4ff28832f9ad0d1ef55fef68b8a8cf5bd9ecd74c18c4e2c041dd24f5",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/runtime-node24-tests.log",
+      "size": 213035,
+      "sha256": "9372bb08172a18a5888189101f167fa64d7c1b4ce5c6ac59addda09d9ef100ef",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/runtime-node24-types.log",
+      "size": 253,
+      "sha256": "addccbaedd812f979305d8e4e34a9eed1a7dc3d1d92302d9edfcfca9b4e7635b",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/runtime-selftest.log",
+      "size": 12458,
+      "sha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/runtime-tests-skips.json",
+      "size": 1471,
+      "sha256": "37990c2c4ff28832f9ad0d1ef55fef68b8a8cf5bd9ecd74c18c4e2c041dd24f5",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/runtime-tests.log",
+      "size": 213057,
+      "sha256": "0de292dbcd376ae3d43495ae751f25de139c971622a4037a7728f9f51b06f15f",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/runtime-types.log",
+      "size": 253,
+      "sha256": "addccbaedd812f979305d8e4e34a9eed1a7dc3d1d92302d9edfcfca9b4e7635b",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/staging-carrier-preflight.log",
+      "size": 2517,
+      "sha256": "5413cda27931714ba8c76e0edad5da2e6c82da0f5638efb3dd23cf706e9e905f",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/strict-evidence-verifier.log",
+      "size": 733,
+      "sha256": "60af3811370662fc7e36b252ce0d0318ebe922c9498e53a2837812edcdb38c71",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/widget-contract-check.log",
+      "size": 6777,
+      "sha256": "bebe953a66851b7112f6a081047c0918731c0ad9a69715eb8b557352c8f916f8",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/widget-contract-types.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/widgets-http-bin.log",
+      "size": 3906,
+      "sha256": "807d831826600600a247e6b268c2ab27a56b8f2122a5b6d14e0a149b20270ed7",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/widgets-live-jest.json",
+      "size": 392620,
+      "sha256": "8dc5bcc5f5547b63048be7ed3226bd4f39f752782ad86783193a942d20ff9c09",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/widgets-live.log",
+      "size": 61782,
+      "sha256": "fceb1780d22bf659282ba11fd25e8d7715d6ca2ea51865071f382f9924bd52ee",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/widgets-release-binary.log",
+      "size": 3245,
+      "sha256": "ede14f2262f5baa10d312942e7fee49da443c37a4a5aa5b743ae59f386ace856",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/evidence/database-before-teardown.jsonl",
+      "size": 99485,
+      "sha256": "51d92225d5a20587556e622f8a195b2d1747726cda863b3ff7986994626dd438",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/evidence/evidence-manifest.jsonl",
+      "size": 16790,
+      "sha256": "525e3523d70198476e90318ecccbc40e5fa9ba482ef1b3844cdee8ef019405ca",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-followup-surfaces-4a4e5e3d-20261015/evidence/mint-provenance.jsonl",
+      "size": 160476,
+      "sha256": "c74a43c3033e6fbf0c0e19bd4d094eb1795e8f6af24a7923262ce7558ff0ea5e",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/backend-build.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/bootstrap-http-pg-binary-jest.json",
+      "size": 4607,
+      "sha256": "b100c1b6de06edb98ba892807adbe555fbf98aca4ba05e78df49a6df7b0d8d66",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/bootstrap-http-pg-binary.log",
+      "size": 1975,
+      "sha256": "9be1b9990891c158dae45f4b80b368a40fc4b6903b96e837307e55e5abedd633",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/bootstrap-unit.log",
+      "size": 1474,
+      "sha256": "d41c7ef21cf19b7cd57020b3aa77339ea11567d03cdbfa356905e1ebaef12144",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/createdb.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/initdb.log",
+      "size": 886,
+      "sha256": "d5e057612d37812d6b431c3227554b40a3499e424e3f7bb5b651b1022b17f757",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/live-types.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/manifest.json",
+      "size": 858,
+      "sha256": "ee8e679612b2b7070f4d3aff408a5492580ca9c4aaa4db52883a49b682458359",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/migrations.log",
+      "size": 14905,
+      "sha256": "73c9847106bd81479de98da8cc1dfc6a7a3d8c8c15ebfba8d86eb7466ae54f51",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/pg-start.log",
+      "size": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/pg-stop.log",
+      "size": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/postgres.log",
+      "size": 2195,
+      "sha256": "04ee90376f848d19cfb52cc6fa6f3e73b9bcd5c6cda0aaaa48efbe5cd3a632ca",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/preflight-build.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-bootstrap-proof-4a4e5e3d-20261015/unit-jest.json",
+      "size": 9044,
+      "sha256": "7d813b5127fe54d4ea6050c245e651a89a835024a41c3f58fc5cab98128fa304",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/executed-runner.mjs",
+      "size": 1843,
+      "sha256": "2f2291d376d0d6c629c6e907157dc1840b7ccec01f1456f69fcc9eae39f99653",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/manifest.json",
+      "size": 378,
+      "sha256": "d553952aa26cc22c3993bbb162fe00967941a0d1518d3a0878522495aa3319be",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/createdb.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/initdb.log",
+      "size": 878,
+      "sha256": "de3466e07f7962d13529f578cc9330ca85898c097f23c8b1725003347eeed643",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/manifest.json",
+      "size": 820,
+      "sha256": "1193c9a0b80aa467ae901f7de55a8a30c89052bf61d6eb77d746b2ac4e7da0e4",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/migrations.log",
+      "size": 15768,
+      "sha256": "cd46cd0fc969f8540d354b50fd4c59bd0777ef903f4e93dd187e5ebc149f7aeb",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/pg-restart.log",
+      "size": 1349,
+      "sha256": "6aa4b1ffb159d14e1e986779348be870b5e208f472dbe02c296c9a48977f1c15",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/pg-start.log",
+      "size": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/pg-stop.log",
+      "size": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/postgres.log",
+      "size": 1246,
+      "sha256": "73407584c12bb82bb83cb41169c61b4f290a2baa496ba33750997dc613ec4344",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/prepare-jest.json",
+      "size": 1537,
+      "sha256": "77226153a3aec024a1fedefb00e1b1bf75bdf9d8959507b36b4638db423545bf",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/prepare-observations.json",
+      "size": 2784,
+      "sha256": "1961ab9169871153281e1da302021f71a7cbf212ae9fa3f1dfb44751a31b42fc",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/prepare-serialized-model-requests.json",
+      "size": 1436200,
+      "sha256": "b109072285b241fc8a0af150f428389843cd8bc98fa0221cef1e01d4f8765fde",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/prepare.log",
+      "size": 1886,
+      "sha256": "4bbff2f019a6b6c4fd33ccedc0f92a4e36a2b3cf33f47071d79e2d05cc9556c2",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/react-build.log",
+      "size": 185,
+      "sha256": "b2f86c3dd96dbae3effccd431e7a01779950834c3971f3fb9c332ec24e0e058b",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/resume-jest.json",
+      "size": 1537,
+      "sha256": "c56802b9df321dbe190a17c8363bdf3ac3022788ef83953c45d295ff774a22bd",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/resume-observations.json",
+      "size": 957,
+      "sha256": "62787933161a287b8e867a01d5c14b31991dedeb54cbaca430d8abf98c0d9c11",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/resume-serialized-model-requests.json",
+      "size": 192340,
+      "sha256": "38526007a28739b23822923387597960f98964e47da3571313740709ecb06190",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/resume.log",
+      "size": 1704,
+      "sha256": "35f3d8fa54f9ed1e62637b6d2bad27a1c7e5c89c9dc5428f241c2520559345a3",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-proof-4a4e5e3d-20261015/proof/shell-build.log",
+      "size": 1010,
+      "sha256": "21280e6c1c81afb91f8960431d1d7e780b33f70fbf045899ccbf607784fc4b7d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-phone-payload-4a4e5e3d-20261015/executed-runner.mjs",
+      "size": 3169,
+      "sha256": "989480365da48dde7ca5289dbadc68627d7cf6dcc3405c95ceca95d46503a8f7",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-phone-payload-4a4e5e3d-20261015/manifest.json",
+      "size": 1965,
+      "sha256": "20a04169eb8c88e9979da713686ff9de307e1395dd2c1d47591e4a9270dd24d8",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-phone-payload-4a4e5e3d-20261015/sync-phone-payload.log",
+      "size": 2809,
+      "sha256": "22d6f76a513d0472b7631532b5715284a95a3a44b96f5486bc0deba08187c14d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-phone-payload-4a4e5e3d-20261015/unsigned-device-build.log",
+      "size": 316659,
+      "sha256": "1e19f48c09f96e13c3d4e4965d1f0e3957d65837eee7372ba69175f01d23b988",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-phone-payload-4a4e5e3d-20261015/verify-actual-device-app.log",
+      "size": 747,
+      "sha256": "4b94a2d4cc32528612c7712401238111f03f93a1923f6e3b94ad11859997cdda",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/backend-build.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/carrier-release-tests.log",
+      "size": 4316,
+      "sha256": "d231ee28c59a1936ede5ac9f766a3708470ab681669850b115835c26c91e6065",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/carrier-tests.log",
+      "size": 42352,
+      "sha256": "c3fb176408af4d3522d1d26d669dd7b8136f5ff0759be9314456d30bb05b84b1",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/createdb.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/initdb.log",
+      "size": 958,
+      "sha256": "9e2cca56fdc91416cc4ad591b59f31aa80e73ddf8f24b3e981c74cf93fafd557",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/k1-dossier.log",
+      "size": 1304,
+      "sha256": "13cc78b7c621f558203f6afbe815cc2eb9ca6b43199005c892c040e6311cf52a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/live-types.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/manifest.json",
+      "size": 1068,
+      "sha256": "762880a50329365db4c5b6748eb89d278d4c8f2feb55de719f27faff9b4c7539",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/migrations.log",
+      "size": 14903,
+      "sha256": "450b86d5818d9f378142c216eb9afbe4a66316f32ce4f738f468db9f20d09e4a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/pg-start.log",
+      "size": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/pg-stop.log",
+      "size": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/postgres.log",
+      "size": 1246,
+      "sha256": "5788b159a0a62787cda0b9f8cbc37fc217f1fffc5f568105a1f7d48e6d11080a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/pre-rebuild-payloads.json",
+      "size": 411,
+      "sha256": "482bf8c87dff784c4b1fff47879a8f1ebf6eb16dd68439b93c30ed1c7bd30f94",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/preflight-build.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/runtime-build.log",
+      "size": 1010,
+      "sha256": "21280e6c1c81afb91f8960431d1d7e780b33f70fbf045899ccbf607784fc4b7d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/runtime-check.log",
+      "size": 1150,
+      "sha256": "99024fee4724cee4cf7461ec00b94613680149ffacc086119d11c872c7c47d67",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/runtime-icons.log",
+      "size": 494,
+      "sha256": "ef077d6837f7f024f63cdd013b59af63e6628d5b1c3a43e5180b52f02c837ed6",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/runtime-selftest.log",
+      "size": 12458,
+      "sha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/runtime-tests.log",
+      "size": 213060,
+      "sha256": "43fbb112f5c6b7f5ec302b1b859ec16e4d07f480fc3896deb02cf06c0eae9777",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/runtime-types.log",
+      "size": 253,
+      "sha256": "addccbaedd812f979305d8e4e34a9eed1a7dc3d1d92302d9edfcfca9b4e7635b",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/widget-contract-check.log",
+      "size": 6777,
+      "sha256": "bebe953a66851b7112f6a081047c0918731c0ad9a69715eb8b557352c8f916f8",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f/widget-contract-types.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/backend-build.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/canonical-packaging-inventory.json",
+      "size": 2693,
+      "sha256": "0d0cdf57d9860ed35b4b7a5bf7543ea1db2218560b6af1a88688e75336bebd14",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/canonical-release-build.log",
+      "size": 2288,
+      "sha256": "4bd8f36090e2b844303ed8675b8dd59953f923a63195403e555b4c705548ab6a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/carrier-release-tests.log",
+      "size": 3385,
+      "sha256": "e50ccd3fdcbe2fc57422419b41c4a20158a58ce0f95cdafcd52b12d30c1bbad1",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/carrier-tests.log",
+      "size": 42349,
+      "sha256": "9a66c157faf7ca30612a9574fc2fb36b8fad077ba7b35037196df6efb562011a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/clause-claim-coverage.json",
+      "size": 2426,
+      "sha256": "831c0cfaa9e139626280f7f73a0541869c0359a52c9447a742733cd1efe5d2c1",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/createdb.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/initdb.log",
+      "size": 958,
+      "sha256": "30f369fd91dae97b2d62fea2f29d4aded43aff118e7913064d5b341fafb1d5c0",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/k1-dossier.log",
+      "size": 1304,
+      "sha256": "13cc78b7c621f558203f6afbe815cc2eb9ca6b43199005c892c040e6311cf52a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/live-types.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/manifest.json",
+      "size": 1234,
+      "sha256": "baee8c4452b7c8683bcf65a7542b179a75717bc7b12faf09c445269d3bd6dd79",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/migrations.log",
+      "size": 14903,
+      "sha256": "e0bf688e20a7d863aa2d9fecf428bb8ab22b10f6bcad15c265e9ba4ea0a4abf1",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/pg-start.log",
+      "size": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/pg-stop.log",
+      "size": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/postgres.log",
+      "size": 105386,
+      "sha256": "502ae85e0925f3ddfbd3c6de19c9b93691fd24152735a9c7247c700606d6052a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/preflight-build.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/release-binary-jest.json",
+      "size": 4039,
+      "sha256": "08ddce28a405c9ce3fd822df40879d5ba486008272c0d8e2d194964f44cb6dec",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/runtime-build.log",
+      "size": 1010,
+      "sha256": "21280e6c1c81afb91f8960431d1d7e780b33f70fbf045899ccbf607784fc4b7d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/runtime-check.log",
+      "size": 1150,
+      "sha256": "99024fee4724cee4cf7461ec00b94613680149ffacc086119d11c872c7c47d67",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/runtime-icons.log",
+      "size": 494,
+      "sha256": "ef077d6837f7f024f63cdd013b59af63e6628d5b1c3a43e5180b52f02c837ed6",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/runtime-selftest.log",
+      "size": 12458,
+      "sha256": "4e910d66eeb266835fb196e74b8ebfa95f61e3e2e9d403c3fad30b3270e6a50a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/runtime-skips.json",
+      "size": 1519,
+      "sha256": "9575ccd469e42c860a47ba31c394dc2a194b344579ff2cddaece7027d91ed4ef",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/runtime-tests.log",
+      "size": 213013,
+      "sha256": "88a5f165fafb8f6af204b558f0f437465b54dd2c0ab65d51978a0d26c5734a7f",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/runtime-types.log",
+      "size": 253,
+      "sha256": "addccbaedd812f979305d8e4e34a9eed1a7dc3d1d92302d9edfcfca9b4e7635b",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/strict-evidence-verifier.log",
+      "size": 789,
+      "sha256": "97c31ae9f14cab21eeac292fca305b8fe9d7602c9b7a324c812f0c22b1fa1502",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/widget-contract-check.log",
+      "size": 6777,
+      "sha256": "bebe953a66851b7112f6a081047c0918731c0ad9a69715eb8b557352c8f916f8",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/widget-contract-types.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/widgets-http-bin.log",
+      "size": 3908,
+      "sha256": "3610ca4a6e81f8ad3b83736b401a6f23e0397dfe60be4a7814e0f9725acc0312",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/widgets-live-jest.json",
+      "size": 394217,
+      "sha256": "9ab81692d864074390a934d0eee434bb063e39b554f164c2f71d102f7b72aa90",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/widgets-live.log",
+      "size": 62721,
+      "sha256": "981a68322cd2da6c9726e9150c3192419f78b8b034ab4b9376c1e5915205adb6",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-personal-release-surfaces-e049ac1f-r2/widgets-release-binary.log",
+      "size": 3290,
+      "sha256": "010f6ffb10432bddd819eb471821518aa1ac5d3ff4f981b4ac2e85a67c6fb707",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/backend-npm-ci.log",
+      "size": 1376,
+      "sha256": "95dc10dd59a1ae517c3dc423a488dd709388ed2c0d064ff92d2fa780c5b84b3b",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/checkout.log",
+      "size": 104,
+      "sha256": "9dcacab992bb04348a25aed0d8419ec63f5fcca58ef5519e40136f5aca5cd1fe",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/clone.log",
+      "size": 83,
+      "sha256": "a301a5cdc4351c101afa021d21ed296365d2d5d6e0d8080166700845283d5426",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/create-db.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/dependency-audit.log",
+      "size": 366,
+      "sha256": "07734426b2b6084f979e8cfe7437651399dce9ef8be47eb6fbb94091d6648114",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/executed-runner.mjs",
+      "size": 9850,
+      "sha256": "b6dc2f8e8383a78c7b34c711fedca93d6bc74e5e7555dd6bf521af601e2c6f1a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/lint.log",
+      "size": 6117,
+      "sha256": "d84cb3981968a1e926f4995d66d1212721c7df273af567764b275a2ae0ff8843",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/manifest.json",
+      "size": 8475,
+      "sha256": "30da5e5d92dda10984cc1c4c07d9c54d8bfcc8e0a93bb10e65bdd93d585e528a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/maya-carrier-react-npm-ci.log",
+      "size": 27,
+      "sha256": "c8bd6735c5ec030fd3ad2e9a4b7d4e7339b3f98774e43daf010f0316e8e48ccc",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/maya-ios-carrier-npm-ci.log",
+      "size": 246,
+      "sha256": "3c30fdba268bfa9b678529e007d6364bf20f8f3df28076e28d4fe193272fdf8e",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/migration-clean-replay.log",
+      "size": 14876,
+      "sha256": "03a693867640d5743bff52709a8e95702a405f5c7641f0081b062de163f35fb9",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/migration-idempotent-replay.log",
+      "size": 1141,
+      "sha256": "1492fc72f9197355a73c81c2ae7d65e5fb232529a3948c0834abc1552b6d96d5",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/pg-init.log",
+      "size": 904,
+      "sha256": "34e65209021b4ef12da2228aef5c7e85f325410ba6425fe0ba14bebcb4022e6b",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/pg-start.log",
+      "size": 52,
+      "sha256": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/pg-stop.log",
+      "size": 56,
+      "sha256": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/postgres.log",
+      "size": 1246,
+      "sha256": "fec19574d82f735226e4d8907c99c499f07e03a6c226ebd5b57c54875e12a17a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/prisma-generate.log",
+      "size": 318,
+      "sha256": "bb8b7fb88ac9318131f892bc0d7ef3106986e6db4e05991000e6ba1cba588fae",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/prisma-validate.log",
+      "size": 142,
+      "sha256": "e1344514cb0e93026a245afd134e0c874287a64f7c5798cbda02eff700d2aa22",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/scarf-js-history-stanislavmosin.log",
+      "size": 32,
+      "sha256": "d9774fdd7d6021f585da15c2b9c5d70f782021a0c0db86067df883bedcc20bd9",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/seed.log",
+      "size": 656,
+      "sha256": "c4eafecca0d9e05bf67c9b40741b0dd2a1eb2037675f2ac5abfe762bb6f11cdb",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/typecheck-scripts.log",
+      "size": 113,
+      "sha256": "122277dee7b2d0d045b40e6fe45e789f5629ff17638902da431d81857825144a",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    },
+    {
+      "path": "/private/tmp/maya-ci-packaging-e049ac1f-20261015/typecheck.log",
+      "size": 103,
+      "sha256": "65e6162d314e77002547ea047c39dd701a0280ad8f0918e2583dd4aea942567d",
+      "publication": "Only selected manifests, runners and nonidentifying summaries copied; raw payload/log/receipt remains local"
+    }
+  ],
+  "excluded": "Database clusters, native app/build products, dependency trees, raw payloads, sealed test receipts and large logs are not Git artifacts. All described executions use artificial data. No owner credentials or raw customer data were read for this archive."
+}
