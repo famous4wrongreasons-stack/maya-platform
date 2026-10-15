@@ -1,0 +1,208 @@
+{
+  "contract": "maya.phone-telegram-operational-preparation/1",
+  "status": "PREPARED_AWAITING_OWNER_SECRET_AND_LIVE_LOGIN",
+  "codeCommit": "7f5af358297a941a5d92ff5add448103077a23a8",
+  "productAppCandidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "approval": {
+    "source": "direct owner answer to call_48a832a0e1334aecac6c9949c283301e",
+    "approved": true,
+    "scope": "one 30-minute test-Beget Telegram account link and up to three fresh logins; registry at most 6400 rows per attempt; no booking/history/messages/model"
+  },
+  "botFatherSettings": {
+    "status": "OWNER_REPORTED_ADDED",
+    "source": "direct owner answer to call_305aa9eb28d54e9c969a2b20757638f8",
+    "redirect": "https://phone-test.mayaos.ru/oauth-callback.html",
+    "trustedOrigin": "https://phone-test.mayaos.ru",
+    "automatedVerification": false,
+    "reason": "native Telegram accessibility actions returned AXError.notImplemented; owner performed the approved additions"
+  },
+  "proofs": {
+    "wireUnitTests": {
+      "passed": 31,
+      "failed": 0
+    },
+    "counterfactuals": {
+      "status": "PASS",
+      "sourceHashes": {
+        "scope": "96249e24acaf2161ee97625a0ca113446d3c634b9ca0bdbf235e9d50a4b30d3d",
+        "egress": "a62ad1e1f8a2a19d1d345fe26f98de10d8e614e9e35062dd4ccc61a32f90499d"
+      },
+      "greenBaseline": true,
+      "greenRestored": true,
+      "mutantsKilled": 15,
+      "realProviderCalls": 0,
+      "results": [
+        {
+          "name": "baseline",
+          "exit": 0,
+          "expected": true
+        },
+        {
+          "name": "company",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "expiry",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "duration",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "actor-role",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "restart-fence",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "scope-pin",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "tenant",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "user",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "attempt-budget",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "operation-binding",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "token-replay",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "page-order",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "row-bound",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "redirect-mode",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "redirect-response",
+          "exit": 1,
+          "expected": true
+        },
+        {
+          "name": "restored",
+          "exit": 0,
+          "expected": true
+        }
+      ]
+    },
+    "compiledHttpDatabase": {
+      "status": "PASS",
+      "qualification": "SYNTHETIC_COMPILED_HTTP_PG_PRIVATE_RELAY_NOT_LIVE_ACCEPTANCE",
+      "checks": [
+        "ordinary-password-sessions-remain-canonical",
+        "missing-foreign-owner-unknown-login-wrong-redirect-refused",
+        "actual-signed-A23-link-only-no-client-and-replay-refused",
+        "real-verifier-rejects-forgery-before-CRM",
+        "foreign-Telegram-subject-refused-before-CRM",
+        "fresh-signed-login-real-registry-adapter-unique-initial-binding-original-session-reread",
+        "fourth-login-and-second-link-refused",
+        "exact-finder-only-no-directory-or-install",
+        "catalogue-pass-through-unchanged",
+        "action-engine-refusal-and-no-booking-entitlement-effects",
+        "withdrawal-stops-Telegram-without-breaking-health-or-password"
+      ],
+      "realProviderCalls": 0,
+      "phase": "migrations",
+      "wireCalls": 6,
+      "relay": {
+        "contract": "maya.phone-owner-telegram/1",
+        "link": 1,
+        "login": 3,
+        "calls": 6,
+        "completed": 6,
+        "rows": 1,
+        "refused": 0,
+        "tokenOutcome": "id_token_present",
+        "stopped": false,
+        "active": false
+      },
+      "proofDatabaseStopped": true
+    },
+    "secretInput": "Swift synthetic format/menu self-test PASS; no actual input claimed yet",
+    "javascriptLint": "ESLint recommended Node ESM PASS using scoped non-TypeScript config; repository TypeScript project service does not include .mjs files",
+    "format": "Prettier PASS"
+  },
+  "serverPreparation": {
+    "status": "PREPARED_NO_CREDENTIALS_NO_RESTART",
+    "head": "7f5af358297a941a5d92ff5add448103077a23a8",
+    "sourceHashes": {
+      "phone-telegram-scope.mjs": "96249e24acaf2161ee97625a0ca113446d3c634b9ca0bdbf235e9d50a4b30d3d",
+      "phone-telegram-runtime.mjs": "a3985d30ce676b442757103794576e5078c6d765e935f8bf2551117f94e49875",
+      "phone-telegram-egress.mjs": "a62ad1e1f8a2a19d1d345fe26f98de10d8e614e9e35062dd4ccc61a32f90499d",
+      "phone-telegram-entry.mjs": "2825e1b0522b8ad1c2701caadf84ef117f737b77abf7bfae36e8d2748b41a73b"
+    },
+    "backendImageUnchanged": true,
+    "affectedContainers": 0
+  },
+  "temporaryCredential": {
+    "destination": "/srv/maya-phone-staging/private/phone-telegram-secret/client-secret",
+    "permissions": "root 0600",
+    "backendMount": false,
+    "macDiskStorage": false,
+    "cleanup": "relay expiry plus independent systemd timer; early stop deletes file and revokes scope",
+    "lifetime": "at most approved session; no renewal"
+  },
+  "scope": {
+    "candidatePinned": true,
+    "tenantUserBranchCompanyPinned": true,
+    "separatePersistentBackendAndRelayClaims": true,
+    "maxLinkAttempts": 1,
+    "maxFreshLoginAttempts": 3,
+    "maxProviderCalls": 128,
+    "maxRowsPerLogin": 6400,
+    "canonicalWriterUnchanged": true,
+    "existingAiAndCatalogueBudgetsUnchanged": true,
+    "sameImage": true,
+    "frontendChanges": false,
+    "schemaChanges": false
+  },
+  "realEffects": {
+    "telegramProviderCalls": 0,
+    "yclientsRegistryCalls": 0,
+    "bindingsCreated": 0,
+    "bookingEffects": 0,
+    "otp": 0,
+    "iphoneInstall": 0
+  },
+  "notClaimed": [
+    "live Telegram acceptance",
+    "live Client binding",
+    "booking available",
+    "release certification",
+    "production release"
+  ]
+}

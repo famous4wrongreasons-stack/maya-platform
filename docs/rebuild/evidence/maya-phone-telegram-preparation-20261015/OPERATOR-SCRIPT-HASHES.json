@@ -1,0 +1,11 @@
+{
+  "classification": "LOCAL_EXECUTION_SOURCES_NO_SECRETS",
+  "files": {
+    "prepare.py": "72374c874af694387f479ead3b96630e49399a884466748e9f08d453c247d6d6",
+    "receive.py": "eba4150f6ca1e58e22efc411f6bc7c5ac84d6930e5e745687ac43ab4600edb84",
+    "input.mjs": "26c6ff56fde67430ea162dff496b5a0937238d5effb2e2bdaa68d2df8970ed46",
+    "PhoneTelegramSecret": "5a54437be17d3b8fa3d5a1d9eaab7c3c9c06c7009f031e25616fb14be449e055",
+    "INPUT-MANIFEST.json": "579604397097cd80e9f3c9228eb6c147504849e38d07330ceeff2a65e73a03c2"
+  },
+  "originalDirectory": "/private/tmp/maya-phone-telegram-execution-20261015-01"
+}
