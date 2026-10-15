@@ -52,24 +52,27 @@ function fixture(policyContent?: unknown) {
     financeAllowed = true;
   const member = { role: 'tenant_owner', branchId: null as string | null };
   const viewer = {
-    viewer: jest.fn(async (tenant: string, user: string, purpose: string) => {
-      expect(tenant).toBe('tenant-a');
-      expect(user).toBe('user-a');
-      if (!active) throw new ForbiddenException('revoked');
-      if (!financeAllowed && purpose === 'business_period')
-        throw new ForbiddenException('finance_denied');
-      return member;
-    }),
+    viewer: jest.fn((tenant: string, user: string, purpose: string) =>
+      Promise.resolve().then(() => {
+        expect(tenant).toBe('tenant-a');
+        expect(user).toBe('user-a');
+        if (!active) throw new ForbiddenException('revoked');
+        if (!financeAllowed && purpose === 'business_period')
+          throw new ForbiddenException('finance_denied');
+        return member;
+      }),
+    ),
   };
   const findMany = jest.fn(
-    async (q: {
+    (q: {
       where: { tenantId: string; expiresAt: { gt: Date } };
       take: number;
-    }) => {
-      expect(q.where.tenantId).toBe('tenant-a');
-      expect(q.take).toBe(26);
-      return rows.filter((r) => r.expiresAt > q.where.expiresAt.gt);
-    },
+    }) =>
+      Promise.resolve().then(() => {
+        expect(q.where.tenantId).toBe('tenant-a');
+        expect(q.take).toBe(26);
+        return rows.filter((r) => r.expiresAt > q.where.expiresAt.gt);
+      }),
   );
   const tx = {
     c8ResultRevision: {
@@ -88,10 +91,12 @@ function fixture(policyContent?: unknown) {
     hash: row.policyContentHash,
     content: policyContent,
   };
-  const policyRead = jest.fn(async () => {
-    if (!policyContent) throw Error('unexpected policy read');
-    return policyRecord;
-  });
+  const policyRead = jest.fn(() =>
+    Promise.resolve().then(() => {
+      if (!policyContent) throw Error('unexpected policy read');
+      return policyRecord;
+    }),
+  );
   const reader = new C8ReadService(
     { c8ResultRevision: { findMany } } as never,
     {
@@ -133,7 +138,7 @@ function project(list: unknown) {
   const moduleUrl = pathToFileURL(
     resolve(__dirname, '../../../maya-chat-shell/src/net/ideas.ts'),
   ).href;
-  return JSON.parse(
+  const projected: unknown = JSON.parse(
     execFileSync(
       process.execPath,
       [
@@ -150,6 +155,20 @@ function project(list: unknown) {
       },
     ),
   );
+  if (
+    typeof projected !== 'object' ||
+    projected === null ||
+    !('rows' in projected) ||
+    !Array.isArray(projected.rows) ||
+    !(projected.rows as unknown[]).every(
+      (row) => typeof row === 'object' && row !== null && 'finding' in row,
+    )
+  )
+    throw new Error('Invalid shipped Ideas projection');
+  // Retain the complete object so privacy assertions inspect every emitted field.
+  return projected as {
+    rows: Array<Record<string, unknown> & { finding: unknown }>;
+  };
 }
 describe('Companion Ideas existing C8 list source', () => {
   it('passes the actual C8 list through the shipped runtime projector without exposing subjects or unprojected evidence', async () => {
@@ -258,9 +277,9 @@ describe('Companion Ideas existing C8 list source', () => {
   });
   it('rechecks authority after dependency resolution and before list exposure', async () => {
     const f = fixture();
-    f.store.refsCurrent.mockImplementation(async () => {
+    f.store.refsCurrent.mockImplementation(() => {
       f.revoke();
-      return true;
+      return Promise.resolve(true);
     });
     await expect(f.read()).rejects.toThrow('revoked');
   });
@@ -294,7 +313,7 @@ describe('Companion Ideas deterministic production values through reader and pro
     dormancyRules: [
       {
         ruleKey: 'cadence',
-        serviceScope: [],
+        serviceScope: [] as string[],
         elapsed: { unit: 'day', count: 30 },
         comparison: 'gt',
         evidence: 'proven_attendance',
@@ -393,8 +412,8 @@ describe('Companion Ideas deterministic production values through reader and pro
               },
             ],
     });
-    r.valuesJson = output.valuesJson as never;
-    r.reasonsJson = output.reasonsJson as never;
+    r.valuesJson = output.valuesJson;
+    r.reasonsJson = output.reasonsJson;
     const result = project(await f.read()).rows[0].finding;
     expect(result).toMatchObject(
       dormancy
@@ -428,7 +447,7 @@ describe('Companion Ideas deterministic production values through reader and pro
     comparison = 'gt',
     services: string[] = [],
   ) {
-    const content = JSON.parse(JSON.stringify(policy));
+    const content = structuredClone(policy);
     content.dormancyRules[0] = {
       ...content.dormancyRules[0],
       elapsed: { unit, count },
@@ -504,17 +523,17 @@ describe('Companion Ideas deterministic production values through reader and pro
   );
   it('rechecks revocation during exact rule read before exposing parameters', async () => {
     const f = ruleFixture();
-    f.policyRead.mockImplementation(async () => {
+    f.policyRead.mockImplementation(() => {
       f.revoke();
-      return f.policyRecord;
+      return Promise.resolve(f.policyRecord);
     });
     await expect(f.read()).rejects.toThrow('revoked');
   });
   it('withholds expired rule while read is in flight', async () => {
     const f = ruleFixture();
-    f.policyRead.mockImplementation(async () => {
+    f.policyRead.mockImplementation(() => {
       f.row.expiresAt = new Date('2000-01-01T00:00:00.000Z');
-      return f.policyRecord;
+      return Promise.resolve(f.policyRecord);
     });
     await expect(f.read()).rejects.toThrow('c8_result_unavailable');
   });
