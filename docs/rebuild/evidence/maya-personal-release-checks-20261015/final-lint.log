@@ -1,0 +1,35 @@
+
+> maya-saas-backend@0.0.1 lint
+> eslint "{src,apps,libs,test,scripts}/**/*.ts"
+
+
+/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend/src/widget-contract/capability-ref.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars' or '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend/src/widget-contract/confirmation-guard.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars' or '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend/src/widget-contract/envelope-roots.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend/src/widget-contract/envelope.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend/src/widget-contract/intent.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend/src/widget-contract/kinds.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars' or '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend/src/widget-contract/lifecycle.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend/src/widget-contract/registries.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-4a4e5e3d-20261015/candidate/maya-saas-backend/src/widget-contract/verification-floor.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+✖ 9 problems (0 errors, 9 warnings)
+  0 errors and 9 warnings potentially fixable with the `--fix` option.
+

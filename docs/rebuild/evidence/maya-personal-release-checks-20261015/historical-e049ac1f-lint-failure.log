@@ -1,0 +1,63 @@
+
+> maya-saas-backend@0.0.1 lint
+> eslint "{src,apps,libs,test,scripts}/**/*.ts"
+
+
+/private/tmp/maya-ci-packaging-e049ac1f-20261015/candidate/maya-saas-backend/src/package5-wave1/operational-work.http.spec.ts
+  360:26  error  Unsafe member access .tasks on an `any` value  @typescript-eslint/no-unsafe-member-access
+  374:9   error  Unsafe assignment of an `any` value            @typescript-eslint/no-unsafe-assignment
+  375:11  error  Unsafe assignment of an `any` value            @typescript-eslint/no-unsafe-assignment
+
+/private/tmp/maya-ci-packaging-e049ac1f-20261015/candidate/maya-saas-backend/src/valuation/c8.companion-list.spec.ts
+   55:75  error  Async arrow function has no 'await' expression                                                @typescript-eslint/require-await
+   68:8   error  Async arrow function has no 'await' expression                                                @typescript-eslint/require-await
+   91:39  error  Async arrow function has no 'await' expression                                                @typescript-eslint/require-await
+  136:3   error  Unsafe return of a value of type `any`                                                        @typescript-eslint/no-unsafe-return
+  157:11  error  Unsafe assignment of an `any` value                                                           @typescript-eslint/no-unsafe-assignment
+  159:22  error  Unsafe member access .rows on an `any` value                                                  @typescript-eslint/no-unsafe-member-access
+  261:53  error  Async arrow function has no 'await' expression                                                @typescript-eslint/require-await
+  396:20  error  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  397:21  error  This assertion is unnecessary since the receiver accepts the original type of the expression  @typescript-eslint/no-unnecessary-type-assertion
+  398:11  error  Unsafe assignment of an `any` value                                                           @typescript-eslint/no-unsafe-assignment
+  398:44  error  Unsafe member access .rows on an `any` value                                                  @typescript-eslint/no-unsafe-member-access
+  421:36  error  Unsafe member access .rows on an `any` value                                                  @typescript-eslint/no-unsafe-member-access
+  431:11  error  Unsafe assignment of an `any` value                                                           @typescript-eslint/no-unsafe-assignment
+  432:5   error  Unsafe assignment of an `any` value                                                           @typescript-eslint/no-unsafe-assignment
+  432:13  error  Unsafe member access .dormancyRules on an `any` value                                         @typescript-eslint/no-unsafe-member-access
+  433:18  error  Unsafe member access .dormancyRules on an `any` value                                         @typescript-eslint/no-unsafe-member-access
+  471:9   error  Unsafe assignment of an `any` value                                                           @typescript-eslint/no-unsafe-assignment
+  471:32  error  Unsafe member access .rows on an `any` value                                                  @typescript-eslint/no-unsafe-member-access
+  501:38  error  Unsafe member access .rows on an `any` value                                                  @typescript-eslint/no-unsafe-member-access
+  507:46  error  Async arrow function has no 'await' expression                                                @typescript-eslint/require-await
+  515:46  error  Async arrow function has no 'await' expression                                                @typescript-eslint/require-await
+
+/private/tmp/maya-ci-packaging-e049ac1f-20261015/candidate/maya-saas-backend/src/widget-contract/capability-ref.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars' or '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-e049ac1f-20261015/candidate/maya-saas-backend/src/widget-contract/confirmation-guard.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars' or '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-e049ac1f-20261015/candidate/maya-saas-backend/src/widget-contract/envelope-roots.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-e049ac1f-20261015/candidate/maya-saas-backend/src/widget-contract/envelope.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-e049ac1f-20261015/candidate/maya-saas-backend/src/widget-contract/intent.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-e049ac1f-20261015/candidate/maya-saas-backend/src/widget-contract/kinds.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars' or '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-e049ac1f-20261015/candidate/maya-saas-backend/src/widget-contract/lifecycle.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-e049ac1f-20261015/candidate/maya-saas-backend/src/widget-contract/registries.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/private/tmp/maya-ci-packaging-e049ac1f-20261015/candidate/maya-saas-backend/src/widget-contract/verification-floor.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+✖ 33 problems (24 errors, 9 warnings)
+  2 errors and 9 warnings potentially fixable with the `--fix` option.
+
