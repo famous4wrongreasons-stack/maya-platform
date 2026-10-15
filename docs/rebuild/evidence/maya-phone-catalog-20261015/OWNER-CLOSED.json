@@ -1,0 +1,25 @@
+{
+  "applicationSource": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+  "providerCalls": 0,
+  "migrationsApplied": 0,
+  "ownerTenantConfirmed": true,
+  "branchCount": 1,
+  "crmIntegrations": 0,
+  "ownerScopeSha256": "c1d90cf317da4491d35725712b09aead600c89d7379b440ae111c3de72646c42",
+  "preflight": {
+    "ok": true,
+    "environment": "production",
+    "config": "safe",
+    "local_migrations": 106,
+    "database": {
+      "status": "ready",
+      "applied_migrations": 106,
+      "pending_migrations": 0
+    }
+  },
+  "signupRefusalStatus": 403,
+  "signupRefusalCode": "self_serve_signup_disabled",
+  "status": "PASS",
+  "botUnchanged": true,
+  "checkedAt": "2026-10-15T00:22:40.150084+00:00"
+}

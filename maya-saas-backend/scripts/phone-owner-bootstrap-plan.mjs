@@ -29,3 +29,16 @@ export function ownerBootstrapPlan(privatePlan, composeText, caddyBytes) {
 export function verifyOwnerBootstrap(plan, original, compose, caddy) {
   assert.deepEqual(plan, ownerBootstrapPlan(original, compose, caddy), 'owner_bootstrap_changed');
 }
+
+// After the ordinary owner has registered, close signup without changing the
+// authenticated session keys, data, providers, network or application image.
+export function closedOwnerBootstrapPlan(original, compose, caddy) {
+  const plan = ownerBootstrapPlan(original, compose, caddy);
+  plan.contract = 'maya.phone-owner-bootstrap-closed/1';
+  plan.environment.SELF_SERVE_TRIAL_SIGNUP = 'false';
+  plan.compose.services.backend.env_file = [`${ROOT}/private/owner-closed.env`];
+  return plan;
+}
+export function verifyClosedOwnerBootstrap(plan, original, compose, caddy) {
+  assert.deepEqual(plan, closedOwnerBootstrapPlan(original, compose, caddy), 'closed_owner_bootstrap_changed');
+}

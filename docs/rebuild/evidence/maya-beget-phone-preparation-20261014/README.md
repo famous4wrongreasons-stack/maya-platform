@@ -300,3 +300,38 @@ At this checkpoint: real YCLIENTS/model calls **0**, customer DB transfers **0**
 production deploy/migration/grants **0**, iPhone installs **0**. The separate
 Beget preparation and private gateway were changed; do not call the server
 unchanged. `CERTIFICATE: NOT_ISSUED` and HANDOFF STOP remain.
+
+## Owner account confirmed; private signup closed — 15 October continuation
+
+The owner completed ordinary registration in Chrome and reached React AChat.
+Read-only verification found exactly the selected tenant slug and one branch,
+with no CRM integration. Identifiers are retained only in the server-private
+`private/owner-scope.json`; the repository receipt contains its digest, not the
+owner's email, password or session tokens.
+
+`closedOwnerBootstrapPlan` changes only signup to false and selects a separate
+private environment file. Service keys, database, application image, gateway,
+network and original bootstrap files are preserved. Nine focused plan tests
+passed. The complete scoped staging/bootstrap/catalogue suite then passed 68/68;
+see [owner-closed-all-tests.txt](../maya-phone-catalog-20261015/owner-closed-all-tests.txt).
+This is not a full release-certification run. The closed configuration passed the actual compiled strict preflight
+(106 applied, zero pending migrations), and its backend was restarted. Current
+ordinary owner access was subsequently exercised in the visible Tasks screen:
+empty own list rendered without a new login; then the UI returned to AChat.
+
+[OWNER-CLOSED.json](../maya-phone-catalog-20261015/OWNER-CLOSED.json) proves
+actual `POST /onboarding/trial` refusal with 403 / `self_serve_signup_disabled`,
+unchanged SMM and no provider calls. The first probe wrongly expected the
+distinct activation-token endpoint to be disabled too. That endpoint can still
+issue a token; it does not create a tenant or bypass the closed signup owner.
+The first probe FAIL is preserved separately. The corrected probe used a
+synthetic signup payload and the exact canonical refusal code; no product guard
+was changed to pass it. No customer account was created by the probe.
+
+**Current blocker: credential destination and test publication approval.**
+The saved partner key's helper signature/hash was checked without requesting
+credential data. Its existing admission is for local Mac sessions; it has not
+been repurposed as a remote credential-export authorization. The exact next
+operator action is recorded in the publication plan. User-token entry remains
+through canonical A17, with normal owner authentication and encrypted storage.
+No local retained database or existing Client authority is copied to the server.

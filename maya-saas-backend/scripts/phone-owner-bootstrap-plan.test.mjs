@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { privatePhonePlan } from './phone-staging-plan.mjs';
-import { ownerBootstrapPlan, verifyOwnerBootstrap } from './phone-owner-bootstrap-plan.mjs';
+import { ownerBootstrapPlan, verifyOwnerBootstrap, closedOwnerBootstrapPlan, verifyClosedOwnerBootstrap } from './phone-owner-bootstrap-plan.mjs';
 const compose = fs.readFileSync(new URL('../compose.staging.yml', import.meta.url), 'utf8');
 const caddy = fs.readFileSync(new URL('../deploy/staging/Caddyfile', import.meta.url));
 const original = privatePhonePlan('a'.repeat(40), compose, caddy);
@@ -31,4 +31,19 @@ for (const [name, change] of [
 ]) test('refuse bootstrap ' + name, () => {
   const plan = ownerBootstrapPlan(original, compose, caddy); change(plan);
   assert.throws(() => verifyOwnerBootstrap(plan, original, compose, caddy));
+});
+test('closed bootstrap only closes signup and selects its private environment file', () => {
+  const plan = closedOwnerBootstrapPlan(original, compose, caddy);
+  verifyClosedOwnerBootstrap(plan, original, compose, caddy);
+  const before = ownerBootstrapPlan(original, compose, caddy);
+  before.contract = plan.contract;
+  before.environment.SELF_SERVE_TRIAL_SIGNUP = 'false';
+  before.compose.services.backend.env_file = plan.compose.services.backend.env_file;
+  assert.deepEqual(plan, before);
+  for (const edit of [p => p.environment.SELF_SERVE_TRIAL_SIGNUP = 'true',
+    p => p.compose.services.backend.env_file = ['/foreign.env'],
+    p => p.compose.services.gateway.ports = ['80:80']]) {
+    const changed = structuredClone(plan); edit(changed);
+    assert.throws(() => verifyClosedOwnerBootstrap(changed, original, compose, caddy));
+  }
 });
