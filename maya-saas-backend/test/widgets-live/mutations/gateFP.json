@@ -36,8 +36,8 @@
     "id": "FP-M4",
     "description": "FP-SHARED",
     "file": "src/entitlements/widget-release-profile.contract.ts",
-    "find": "        r.state !== 'L-T'",
-    "replace": "        false",
+    "find": "      if (r.state !== 'SCOPED')",
+    "replace": "      if (false)",
     "killers": [
       "FP-SHARED"
     ],
@@ -108,5 +108,27 @@
       "FP-FINAL-DISPATCH"
     ],
     "expect": "live-killed"
+  },
+  {
+    "id": "FP-M11",
+    "description": "Allow another remaining branch identity or evidence class",
+    "file": "src/entitlements/widget-release-profile.contract.ts",
+    "find": "      if (\n        remainder.id !== `FP-${String(r.id)}` ||\n        remainder.state !== (r.id === 'G7-FR6d' ? 'L' : 'U')\n      )",
+    "replace": "      if (false)",
+    "killers": [
+      "FP-BRANCH"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "FP-M12",
+    "description": "Accept a shared row with unbound component evidence",
+    "file": "src/entitlements/widget-release-profile.contract.ts",
+    "find": "        r.evidenceDigest !==\n        releaseHash({",
+    "replace": "        false && r.evidenceDigest !==\n        releaseHash({",
+    "killers": [
+      "FP-BRANCH"
+    ],
+    "expect": "build-killed"
   }
 ]

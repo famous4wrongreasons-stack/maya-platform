@@ -6,6 +6,7 @@ import { CalendarSource, UserRole } from '../../../src/common/domain.enums';
 import type { HttpProofContext } from './http-proof-contract';
 import type { TenantFixture } from './fixtures';
 import type { EvidenceLineInput } from './evidence';
+import { NO_PRICE_GOODS_PROFILE } from '../../../src/entitlements/widget-release-profile.contract';
 export const requireProof: (ok: unknown, message: string) => asserts ok = (
   ok,
   message,
@@ -367,8 +368,15 @@ export async function releaseBookingProof(
   proofs.push({
     ...commitProof,
     testId: 'AR-FR6D-NONMONEY',
-    clauses: [],
-    claim: null,
+    // Only the non-MONEY remainder; never a claim about the global F32a/b row.
+    clauses:
+      process.env.WIDGETS_EVIDENCE_PROFILE === NO_PRICE_GOODS_PROFILE
+        ? ['FP-G7-FR6d']
+        : [],
+    claim:
+      process.env.WIDGETS_EVIDENCE_PROFILE === NO_PRICE_GOODS_PROFILE
+        ? 'L'
+        : null,
   });
   proofs.push({
     ...commitProof,

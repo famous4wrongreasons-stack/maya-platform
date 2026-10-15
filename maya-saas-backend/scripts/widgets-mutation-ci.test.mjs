@@ -212,13 +212,13 @@ function fixture() {
   });
 }
 
-test('48 batteries, 69 jobs: AR1 fixed first-phone profile covers 555 declarations', () => {
+test('48 batteries, 69 jobs: AR1 fixed first-phone profile covers 557 declarations', () => {
   const p = plan(declared);
   assert.equal(p.gates.length, 48); assert.equal(p.matrix.include.length, 69);
   assert.deepEqual(declared.PU.mutants.map(m => m.id), Array.from({ length: 12 }, (_, i) => `PU-M${i + 1}`));
   assert.deepEqual(declared.SO.mutants.map(m => m.id), Array.from({ length: 9 }, (_, i) => `SO-M${i + 1}`));
   assert.equal(declared.FB.mutants.length, 15);
-  assert.deepEqual(declared.FP.mutants.map(m => m.id), Array.from({ length: 10 }, (_, i) => `FP-M${i + 1}`));
+  assert.deepEqual(declared.FP.mutants.map(m => m.id), Array.from({ length: 12 }, (_, i) => `FP-M${i + 1}`));
   assert.deepEqual(p.matrix.include.filter(j => j.gate === 'FP'), [{ gate: 'FP', partition: '', slot: 'FP' }]);
   assert.deepEqual(declared.SB1.mutants.map(m => m.id), Array.from({ length: 10 }, (_, i) => `SB1-M${String(i + 1).padStart(2, '0')}`));
   assert.deepEqual(declared.AB.mutants.map(m => m.id), ['AB-M1', 'AB-M2']);
@@ -232,7 +232,7 @@ test('48 batteries, 69 jobs: AR1 fixed first-phone profile covers 555 declaratio
   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-BOOT-LOOPBACK-1').length, 1);
   assert.equal(declared['H-harness'].mutants.filter(m => m.id === 'H-P408-CLOCK-1').length, 1);
   const r = assemble(declared, fixture(), head);
-  assert.equal(r.length, 48); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 555);
+  assert.equal(r.length, 48); assert.equal(r.reduce((n, b) => n + b.mutants.length, 0), 557);
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));

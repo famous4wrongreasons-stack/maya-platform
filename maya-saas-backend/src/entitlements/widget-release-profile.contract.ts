@@ -85,6 +85,17 @@ export const NO_PRICE_GOODS_MANIFEST = Object.freeze({
   forbiddenOperations: PRICE_GOODS_OPERATIONS,
   sourceBranches: Object.freeze(['F32a/F74a', 'F32b/F74b']),
   sourceDuties: PRICE_GOODS_DUTIES,
+  // This is a finite decomposition, not a caller-selected exception list.
+  // A scoped receipt never upgrades these eight global clauses to L/L-T/U.
+  sourceEvidence: Object.freeze({
+    contract: 'maya.first-phone-source-evidence/1',
+    moneyRemainder: 'FP-G7-FR6d',
+    approvalRemainder: Object.freeze(
+      PRICE_GOODS_DUTIES.filter((id) => id !== 'G7-FR6d').map(
+        (id) => `FP-${id}`,
+      ),
+    ),
+  }),
 });
 export const NO_PRICE_GOODS_DIGEST = releaseHash(NO_PRICE_GOODS_MANIFEST);
 /** Finite switch only. No registry registration/configuration API. */
@@ -106,6 +117,18 @@ export interface HandoffStop {
   state: 'STOP';
   evidenceDigest: string;
 }
+/** Only the eight shared rows of the fixed first-phone profile. Global status
+ * remains unresolved. The unavailable AE-approval remainder needs OD-3 proof;
+ * it is not an additional excluded business operation. A new actual approval
+ * carrier invalidates its absence proof and requires requalification. */
+export interface ScopedSourceClause {
+  id: string;
+  state: 'SCOPED';
+  evidenceDigest: string;
+  remainder: ReleaseClause;
+  refusalProofDigest: string;
+  mechanismProofDigest: string;
+}
 export interface ProfileCertificate extends Omit<
   ReleaseCertificate,
   'contract' | 'scope' | 'matrix' | 'environment'
@@ -122,7 +145,7 @@ export interface ProfileCertificate extends Omit<
   globalAuditDigest: string;
   isolationProofDigest: string;
   dependencyProofDigest: string;
-  matrix: (ReleaseClause | HandoffStop)[];
+  matrix: (ReleaseClause | HandoffStop | ScopedSourceClause)[];
 }
 
 /** Validate the unchanged V1 common contract and each applicable duty without relabelling STOP. */
@@ -196,15 +219,37 @@ export function profileCertificate(value: unknown): ProfileCertificate {
       exact(r, ['id', 'state', 'evidenceDigest']);
       if (r.state !== 'STOP') releaseDeny('handoff_stop');
       digest(r.evidenceDigest);
+    } else if (narrow && PRICE_GOODS_DUTIES.includes(String(r.id))) {
+      exact(r, [
+        'id',
+        'state',
+        'evidenceDigest',
+        'remainder',
+        'refusalProofDigest',
+        'mechanismProofDigest',
+      ]);
+      if (r.state !== 'SCOPED') releaseDeny('source_threshold');
+      const remainder = object(r.remainder);
+      validateReleaseClause(remainder);
+      if (
+        remainder.id !== `FP-${String(r.id)}` ||
+        remainder.state !== (r.id === 'G7-FR6d' ? 'L' : 'U')
+      )
+        releaseDeny('source_remainder');
+      digest(r.refusalProofDigest);
+      digest(r.mechanismProofDigest);
+      if (
+        r.evidenceDigest !==
+        releaseHash({
+          remainder,
+          refusalProofDigest: r.refusalProofDigest,
+          mechanismProofDigest: r.mechanismProofDigest,
+          excludedSourceProofs: v.excludedSourceProofs,
+        })
+      )
+        releaseDeny('source_evidence_binding');
     } else {
       validateReleaseClause(r);
-      // Shared duties are retained. Negative source proof cannot turn them into whole-clause U.
-      if (
-        narrow &&
-        PRICE_GOODS_DUTIES.includes(String(r.id)) &&
-        r.state !== 'L-T'
-      )
-        releaseDeny('source_threshold');
     }
   }
   // Common fields are checked by the V1 parser's extracted common validator. It sees no matrix.

@@ -1,0 +1,170 @@
+{
+  "contract": "maya.first-phone-source-evidence/1",
+  "profile": "closed-input.no-handoff.no-price-goods@1",
+  "decision": "docs/rebuild/MAYA-FIRST-PHONE-SCOPE-DECISION-20261015.md",
+  "global_clause_promotion": false,
+  "rows": [
+    {
+      "clause": "G7-FR6d",
+      "remainder": "FP-G7-FR6d",
+      "claim": "L",
+      "basis": "Owner Option B 2026-10-15: only F32a/F74a and F32b/F74b excluded; existing C11:5073 / SH-11 PKT:476 AE-approval carrier absence must be re-proven. B35 authority remains implemented; no additional business exclusion."
+    },
+    {
+      "clause": "G11-I4",
+      "remainder": "FP-G11-I4",
+      "claim": "U",
+      "basis": "Owner Option B 2026-10-15: only F32a/F74a and F32b/F74b excluded; existing C11:5073 / SH-11 PKT:476 AE-approval carrier absence must be re-proven. B35 authority remains implemented; no additional business exclusion.",
+      "absence": {
+        "source": "test/widgets-live/support/first-phone-source-census.ts",
+        "marker": "approval source changed; requalify every remaining approval branch"
+      },
+      "refusal": {
+        "source": "test/widgets-live/first-phone-remainder.live-spec.ts",
+        "marker": "FP-REMAINDER-U",
+        "entry": "BUILD/RI",
+        "disclosed_no_http_carrier": true
+      },
+      "mechanism": {
+        "source": "src/widgets/gates/gate11.spec.ts",
+        "marker": "REQUEST_APPROVAL",
+        "battery": "gate11.json"
+      }
+    },
+    {
+      "clause": "G11-I5",
+      "remainder": "FP-G11-I5",
+      "claim": "U",
+      "basis": "Owner Option B 2026-10-15: only F32a/F74a and F32b/F74b excluded; existing C11:5073 / SH-11 PKT:476 AE-approval carrier absence must be re-proven. B35 authority remains implemented; no additional business exclusion.",
+      "absence": {
+        "source": "test/widgets-live/support/first-phone-source-census.ts",
+        "marker": "approval source changed; requalify every remaining approval branch"
+      },
+      "refusal": {
+        "source": "test/widgets-live/first-phone-remainder.live-spec.ts",
+        "marker": "FP-REMAINDER-U",
+        "entry": "BUILD/RI",
+        "disclosed_no_http_carrier": true
+      },
+      "mechanism": {
+        "source": "src/widgets/gates/gate11.spec.ts",
+        "marker": "REQUEST_APPROVAL",
+        "battery": "gate11.json"
+      }
+    },
+    {
+      "clause": "G11-I6",
+      "remainder": "FP-G11-I6",
+      "claim": "U",
+      "basis": "Owner Option B 2026-10-15: only F32a/F74a and F32b/F74b excluded; existing C11:5073 / SH-11 PKT:476 AE-approval carrier absence must be re-proven. B35 authority remains implemented; no additional business exclusion.",
+      "absence": {
+        "source": "test/widgets-live/support/first-phone-source-census.ts",
+        "marker": "approval source changed; requalify every remaining approval branch"
+      },
+      "refusal": {
+        "source": "test/widgets-live/first-phone-remainder.live-spec.ts",
+        "marker": "FP-REMAINDER-U",
+        "entry": "BUILD/RI",
+        "disclosed_no_http_carrier": true
+      },
+      "mechanism": {
+        "source": "src/widgets/gates/gate11.spec.ts",
+        "marker": "REQUEST_APPROVAL",
+        "battery": "gate11.json"
+      }
+    },
+    {
+      "clause": "G11-I10",
+      "remainder": "FP-G11-I10",
+      "claim": "U",
+      "basis": "Owner Option B 2026-10-15: only F32a/F74a and F32b/F74b excluded; existing C11:5073 / SH-11 PKT:476 AE-approval carrier absence must be re-proven. B35 authority remains implemented; no additional business exclusion.",
+      "absence": {
+        "source": "test/widgets-live/support/first-phone-source-census.ts",
+        "marker": "approval source changed; requalify every remaining approval branch"
+      },
+      "refusal": {
+        "source": "test/widgets-live/first-phone-remainder.live-spec.ts",
+        "marker": "FP-REMAINDER-U",
+        "entry": "BUILD/RI",
+        "disclosed_no_http_carrier": true
+      },
+      "mechanism": {
+        "source": "src/widgets/gates/gate11.spec.ts",
+        "marker": "REQUEST_APPROVAL",
+        "battery": "gate11.json"
+      }
+    },
+    {
+      "clause": "G13-I1",
+      "remainder": "FP-G13-I1",
+      "claim": "U",
+      "basis": "Owner Option B 2026-10-15: only F32a/F74a and F32b/F74b excluded; existing C11:5073 / SH-11 PKT:476 AE-approval carrier absence must be re-proven. B35 authority remains implemented; no additional business exclusion.",
+      "absence": {
+        "source": "test/widgets-live/support/first-phone-source-census.ts",
+        "marker": "approval source changed; requalify every remaining approval branch"
+      },
+      "refusal": {
+        "source": "test/widgets-live/first-phone-remainder.live-spec.ts",
+        "marker": "FP-REMAINDER-U",
+        "entry": "BUILD/RI",
+        "disclosed_no_http_carrier": true
+      },
+      "mechanism": {
+        "source": "src/widgets/routing/effect-router.service.spec.ts",
+        "marker": "routes APPROVAL COMMIT by the server-owned approvalDecision",
+        "battery": "gate13.json"
+      }
+    },
+    {
+      "clause": "G13-I2",
+      "remainder": "FP-G13-I2",
+      "claim": "U",
+      "basis": "Owner Option B 2026-10-15: only F32a/F74a and F32b/F74b excluded; existing C11:5073 / SH-11 PKT:476 AE-approval carrier absence must be re-proven. B35 authority remains implemented; no additional business exclusion.",
+      "absence": {
+        "source": "test/widgets-live/support/first-phone-source-census.ts",
+        "marker": "approval source changed; requalify every remaining approval branch"
+      },
+      "refusal": {
+        "source": "test/widgets-live/first-phone-remainder.live-spec.ts",
+        "marker": "FP-REMAINDER-U",
+        "entry": "BUILD/RI",
+        "disclosed_no_http_carrier": true
+      },
+      "mechanism": {
+        "source": "src/widgets/routing/effect-router.service.spec.ts",
+        "marker": "routes APPROVAL COMMIT by the server-owned approvalDecision",
+        "battery": "gate13.json"
+      }
+    },
+    {
+      "clause": "G13-I9",
+      "remainder": "FP-G13-I9",
+      "claim": "U",
+      "basis": "Owner Option B 2026-10-15: only F32a/F74a and F32b/F74b excluded; existing C11:5073 / SH-11 PKT:476 AE-approval carrier absence must be re-proven. B35 authority remains implemented; no additional business exclusion.",
+      "absence": {
+        "source": "test/widgets-live/support/first-phone-source-census.ts",
+        "marker": "approval source changed; requalify every remaining approval branch"
+      },
+      "refusal": {
+        "source": "test/widgets-live/first-phone-remainder.live-spec.ts",
+        "marker": "FP-REMAINDER-U",
+        "entry": "BUILD/RI",
+        "disclosed_no_http_carrier": true
+      },
+      "mechanism": {
+        "source": "src/widgets/routing/effect-router.service.spec.ts",
+        "marker": "routes APPROVAL COMMIT by the server-owned approvalDecision",
+        "battery": "gate13.json"
+      }
+    }
+  ],
+  "additional_required_batteries": [
+    "gateFP.json",
+    "gateP-mint.json",
+    "gateP-ae.json",
+    "gate7.json",
+    "gate11.json",
+    "gate13.json"
+  ],
+  "qualification": "Inputs for the existing strict collector only. All four OD-3 duties and full fresh mutation admission are mandatory. No certificate is issued by this file."
+}

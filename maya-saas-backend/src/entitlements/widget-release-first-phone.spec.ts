@@ -4,6 +4,7 @@ import { stagingOperatorProof } from '../../test/widgets-live/support/widget-sta
 import { releaseUnitDatabase } from '../../test/widgets-live/support/widget-release-unit-database';
 import { profileCommand } from '../../test/widgets-live/support/widget-profile-proof';
 import { releaseProof } from '../../test/widgets-live/support/widget-release-proof';
+import { firstPhoneSourceCensus } from '../../test/widgets-live/support/first-phone-source-census';
 import { certificate, releaseHash } from './widget-release.contract';
 import {
   NO_PRICE_GOODS_PROFILE,
@@ -17,7 +18,21 @@ import {
   PRICE_GOODS_DUTIES,
   profileCertificate,
   fixedProfile,
+  type ProfileCertificate,
 } from './widget-release-profile.contract';
+
+const rebind = (c: ProfileCertificate) => {
+  for (const row of c.matrix)
+    if (row.state === 'SCOPED')
+      row.evidenceDigest = releaseHash({
+        remainder: row.remainder,
+        refusalProofDigest: row.refusalProofDigest,
+        mechanismProofDigest: row.mechanismProofDigest,
+        excludedSourceProofs: c.excludedSourceProofs,
+      });
+  c.globalAuditDigest = releaseHash(c.matrix);
+  return c;
+};
 
 const fixture = () => {
   const p = singleOperatorProof(releaseUnitDatabase(), 'tenant');
@@ -33,6 +48,9 @@ const fixture = () => {
 };
 
 describe('FIRST-PHONE fixed profile; artificial certificates only', () => {
+  it('FP-CENSUS actual source registry has only excluded approval carriers and preserves the existing B35 owner', () => {
+    expect(firstPhoneSourceCensus().b35OwnerPreserved).toBe(true);
+  });
   it('FP-PIN removes exactly six templates and four operation keys; preserves original profile', () => {
     expect(NO_PRICE_GOODS_DIGEST).not.toBe(PROFILE_DIGEST);
     expect(
@@ -60,7 +78,7 @@ describe('FIRST-PHONE fixed profile; artificial certificates only', () => {
     expect(fixedProfile(NO_HANDOFF_PROFILE).digest).toBe(PROFILE_DIGEST);
     expect(() => fixedProfile('caller-profile')).toThrow();
   });
-  it('FP-THRESHOLD retains all 165 IDs, two global STOP and eight mandatory shared L-T duties', () => {
+  it('FP-THRESHOLD retains all 165 IDs, two STOP and eight separately proven shared branches', () => {
     const { c } = fixture();
     const parsed = profileCertificate(c.certificate);
     expect(parsed.matrix).toHaveLength(165);
@@ -73,15 +91,29 @@ describe('FIRST-PHONE fixed profile; artificial certificates only', () => {
     expect(
       parsed.matrix
         .filter((r) => PRICE_GOODS_DUTIES.includes(r.id))
-        .every((r) => r.state === 'L-T'),
+        .every((r) => r.state === 'SCOPED'),
     ).toBe(true);
     expect(() => certificate(parsed)).toThrow();
+    expect(() =>
+      profileCertificate({
+        ...parsed,
+        scope: NO_HANDOFF_PROFILE,
+        profileDigest: PROFILE_DIGEST,
+      }),
+    ).toThrow();
   });
   it.each(PRICE_GOODS_DUTIES)(
-    'FP-SHARED %s cannot become whole-clause U/STOP/L',
+    'FP-SHARED %s cannot become whole-clause U/STOP/L/L-T',
     (id) => {
       const { c } = fixture();
-      for (const state of ['U', 'STOP', 'L']) {
+      for (const state of ['U', 'STOP', 'L', 'L-T']) {
+        const withBranches = structuredClone(c.certificate);
+        Object.assign(
+          withBranches.matrix.find((r) => r.id === id)!,
+          { state },
+        );
+        withBranches.globalAuditDigest = releaseHash(withBranches.matrix);
+        expect(() => profileCertificate(withBranches)).toThrow();
         const matrix = c.certificate.matrix.map((r) =>
           r.id === id
             ? {
@@ -104,17 +136,55 @@ describe('FIRST-PHONE fixed profile; artificial certificates only', () => {
       }
     },
   );
+  it.each(PRICE_GOODS_DUTIES)(
+    'FP-BRANCH %s requires exact remainder, refusal, mechanism and proof binding',
+    (id) => {
+      const { c } = fixture();
+      for (const alteration of [
+        'missing',
+        'wrong-id',
+        'wrong-state',
+        'missing-u-duty',
+        'refusal',
+        'mechanism',
+        'digest',
+      ]) {
+        const next = structuredClone(c.certificate);
+        const row = next.matrix.find((r) => r.id === id)!;
+        if (row.state !== 'SCOPED') throw new Error('fixture');
+        if (alteration === 'missing') Reflect.deleteProperty(row, 'remainder');
+        if (alteration === 'wrong-id') row.remainder.id = '9.6';
+        if (alteration === 'wrong-state')
+          row.remainder.state = id === 'G7-FR6d' ? 'L-T' : 'L';
+        if (alteration === 'missing-u-duty') {
+          if (!row.remainder.u) continue;
+          Reflect.deleteProperty(row.remainder.u, 'absence');
+        }
+        if (alteration === 'refusal') row.refusalProofDigest = 'invalid';
+        if (alteration === 'mechanism') row.mechanismProofDigest = 'invalid';
+        if (alteration !== 'missing') rebind(next);
+        else next.globalAuditDigest = releaseHash(next.matrix);
+        if (alteration === 'digest') {
+          row.evidenceDigest = 'e'.repeat(64);
+          next.globalAuditDigest = releaseHash(next.matrix);
+        }
+        expect(() => profileCertificate(next)).toThrow();
+      }
+    },
+  );
   it.each(['servicePrice', 'goodsReceipt'] as const)(
     'FP-OD3 %s requires every excluded source duty',
     (source) => {
       const { c } = fixture();
       for (const key of ['decisionDigest', 'absence', 'refusal', 'mechanism']) {
-        const next = structuredClone(c.certificate) as unknown as {
-          excludedSourceProofs: Record<string, Record<string, unknown>>;
-        };
-        delete next.excludedSourceProofs[source][key];
+        const next = structuredClone(c.certificate);
+        Reflect.deleteProperty(next.excludedSourceProofs![source], key);
+        rebind(next);
         expect(() => profileCertificate(next)).toThrow();
-        next.excludedSourceProofs[source][key] = 'not-a-digest';
+        Object.assign(next.excludedSourceProofs![source], {
+          [key]: 'not-a-digest',
+        });
+        rebind(next);
         expect(() => profileCertificate(next)).toThrow();
       }
       const missing = structuredClone(c.certificate) as unknown as {
