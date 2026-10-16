@@ -212,9 +212,9 @@ function fixture() {
   });
 }
 
-test('48 batteries, 69 jobs: AR1 fixed first-phone profile covers 559 declarations', () => {
+test('48 batteries, 72 jobs: AR1 fixed first-phone profile covers 559 declarations', () => {
   const p = plan(declared);
-  assert.equal(p.gates.length, 48); assert.equal(p.matrix.include.length, 69);
+  assert.equal(p.gates.length, 48); assert.equal(p.matrix.include.length, 72);
   assert.deepEqual(declared.PU.mutants.map(m => m.id), Array.from({ length: 12 }, (_, i) => `PU-M${i + 1}`));
   assert.deepEqual(declared.SO.mutants.map(m => m.id), Array.from({ length: 9 }, (_, i) => `SO-M${i + 1}`));
   assert.equal(declared.FB.mutants.length, 17);
@@ -236,6 +236,21 @@ test('48 batteries, 69 jobs: AR1 fixed first-phone profile covers 559 declaratio
   for (const report of r) {
     assert.equal(report.status, 'AS-DECLARED');
     assert.deepEqual(report.mutants.map((m) => m.id), declared[report.batteries[0].slice(4, -5)].mutants.map((m) => m.id));
+  }
+});
+
+test('Gate 8r uses four complete-suite partitions and rejects a missing partition', () => {
+  const jobs = plan(declared, '8r').matrix.include;
+  assert.deepEqual(jobs.map(j => j.partition), ['1/4', '2/4', '3/4', '4/4']);
+  const ids = jobs.flatMap(j => selectPartition(declared['8r'].mutants, j.partition).selected.map(m => m.id));
+  assert.equal(ids.length, 29);
+  assert.equal(new Set(ids).size, 29);
+  assert.deepEqual(ids.slice().sort(), declared['8r'].mutants.map(m => m.id).sort());
+  const receipts = fixture().filter(r => r.batteries[0] === 'gate8r.json');
+  assert.equal(receipts.length, 4);
+  assert.equal(assemble(declared, receipts, head, '8r')[0].mutants.length, 29);
+  for (let i = 0; i < 4; i++) {
+    assert.throws(() => assemble(declared, receipts.filter((_, n) => n !== i), head, '8r'));
   }
 });
 

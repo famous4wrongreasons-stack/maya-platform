@@ -39,9 +39,11 @@ export function plan(declared, requested = '') {
     // three hours, and final-head Gate 6, Gate 10 and Gate 13 jobs were cancelled at the 180-minute budget.
     // P-mint completed at 178 minutes, which is not a repeatable release margin. Partition mutants only:
     // FBE2E L16: four P-mint partitions replace two; WR uses the same bounded partitioning.
+    // Gate 8r also reached the unchanged 180-minute local runner budget on cde265b9.
+    // Its 29 declarations now use the same four-way scheduling, without shortening any suite.
     // Every job retains its full tests and controls, and assemble() refuses incomplete or overlapping
     // coverage. No assertion, killer, control or declared expectation is reduced.
-    const count = gate === '6' || gate === '7' || gate === '9' || gate === '10' || gate === '13' || gate === 'P-mint' || gate === 'WR' ? 4 : 1;
+    const count = gate === '8r' || gate === '6' || gate === '7' || gate === '9' || gate === '10' || gate === '13' || gate === 'P-mint' || gate === 'WR' ? 4 : 1;
     return Array.from({ length: count }, (_, i) => ({ gate, partition: count === 1 ? '' : `${i + 1}/${count}`, slot: count === 1 ? gate : `${gate}-part-${i + 1}-of-${count}` }));
   });
   return { gates, matrix: { include } };

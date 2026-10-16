@@ -1,0 +1,18 @@
+{
+  "qualification": "scheduling regression only, not full certification",
+  "before": {
+    "result": "FAIL_EXPECTED",
+    "path": "/private/tmp/maya-first-phone-fb-diagnosis-20261016/8r-before.log",
+    "sha256": "3e604f40e5bf193b052a5cc6fe9fd90ca2768710b85d7c73d628561ede29bf90"
+  },
+  "after": {
+    "result": "PASS",
+    "tests": 61,
+    "path": "/private/tmp/maya-first-phone-fb-diagnosis-20261016/8r-after.log",
+    "sha256": "6e0082da081ade907e3f06303e9cab1b511b0de0fefd2cff1ca6fa7843619ec8"
+  },
+  "timeoutIncreased": false,
+  "testFilteringInReleaseJobs": false,
+  "productChanges": false,
+  "certificate": "NOT_ISSUED"
+}
