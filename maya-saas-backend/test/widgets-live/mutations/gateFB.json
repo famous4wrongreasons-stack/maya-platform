@@ -5,9 +5,9 @@
     "find": "const p = partsInTimezone(now, timezone);",
     "replace": "const p = partsInTimezone(now, 'UTC');",
     "killers": [
-      "L5-PIPELINE"
+      "L5-CALENDAR"
     ],
-    "expect": "live-killed"
+    "expect": "build-killed"
   },
   {
     "id": "FB-DAY-ELAPSED",
@@ -15,7 +15,27 @@
     "find": "Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day) + 1)",
     "replace": "now.getTime() + 86400000",
     "killers": [
-      "L5-PIPELINE"
+      "L5-CALENDAR"
+    ],
+    "expect": "build-killed"
+  },
+  {
+    "id": "FB-CHAT-DAY-UTC",
+    "file": "src/ai-tools/booking-catalog-binding.ts",
+    "find": "const today = localCalendarDate(timezone, now);",
+    "replace": "const today = localCalendarDate('UTC', now);",
+    "killers": [
+      "L5-CHAT-TOMORROW"
+    ],
+    "expect": "live-killed"
+  },
+  {
+    "id": "FB-CHAT-DAY-ELAPSED",
+    "file": "src/ai-tools/booking-catalog-binding.ts",
+    "find": "localDateMinuteToUtc(today, 24 * 60, timezone),",
+    "replace": "new Date(now.getTime() + 86400000),",
+    "killers": [
+      "L5-CHAT-TOMORROW"
     ],
     "expect": "live-killed"
   },

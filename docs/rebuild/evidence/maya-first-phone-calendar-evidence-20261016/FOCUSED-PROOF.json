@@ -1,0 +1,98 @@
+{
+  "sourceHead": "cde265b99439996fb9fa4de687aabae182fcb54c",
+  "diagnosticOnly": true,
+  "certificate": "NOT_ISSUED",
+  "productionEffects": 0,
+  "results": [
+    {
+      "id": "FB-DAY-UTC",
+      "expected": "build-killed",
+      "failedTests": 7,
+      "failedTitles": [
+        "L5-CALENDAR Europe/Moscow at 2026-10-01T21:30:00Z selects local calendar 2026-10-03",
+        "L5-CALENDAR America/Los_Angeles at 2026-01-01T02:00:00Z selects local calendar 2026-01-01",
+        "L5-CALENDAR Pacific/Kiritimati at 2026-12-31T12:00:00Z selects local calendar 2027-01-02",
+        "L5-CALENDAR Asia/Kathmandu at 2026-01-31T20:00:00Z selects local calendar 2026-02-02",
+        "L5-CALENDAR America/New_York at 2026-03-08T04:30:00Z selects local calendar 2026-03-08",
+        "L5-CALENDAR Europe/Berlin at 2026-10-24T22:30:00Z selects local calendar 2026-10-26",
+        "L5-OWNER resolves selected branch first, tenant fallback (null)"
+      ],
+      "reportSha256": "8ccb41b0ead333420f2de230996e38885a5d8e7752c7de474679f14a278c6985"
+    },
+    {
+      "id": "FB-DAY-ELAPSED",
+      "expected": "build-killed",
+      "failedTests": 7,
+      "failedTitles": [
+        "L5-CALENDAR Europe/Moscow at 2026-10-01T21:30:00Z selects local calendar 2026-10-03",
+        "L5-CALENDAR America/Los_Angeles at 2026-01-01T02:00:00Z selects local calendar 2026-01-01",
+        "L5-CALENDAR Pacific/Kiritimati at 2026-12-31T12:00:00Z selects local calendar 2027-01-02",
+        "L5-CALENDAR Asia/Kathmandu at 2026-01-31T20:00:00Z selects local calendar 2026-02-02",
+        "L5-CALENDAR America/New_York at 2026-03-08T04:30:00Z selects local calendar 2026-03-08",
+        "L5-CALENDAR Europe/Berlin at 2026-10-24T22:30:00Z selects local calendar 2026-10-26",
+        "L5-OWNER resolves selected branch first, tenant fallback (null)"
+      ],
+      "reportSha256": "52da77c1a19ccdbb687d8af40dd72feb8c557a2e1b8006097d428e145e10396e"
+    },
+    {
+      "id": "FB-CHAT-DAY-UTC",
+      "expected": "live-killed",
+      "failedTests": 8,
+      "failedTitles": [
+        "L5-CHAT-TOMORROW Europe/Moscow at 2027-10-01T21:30:00Z → 2027-10-03 (branch=true)",
+        "L5-CHAT-TOMORROW Europe/Moscow at 2027-10-01T21:30:00Z → 2027-10-03 (branch=false)",
+        "L5-CHAT-TOMORROW America/Los_Angeles at 2027-01-01T02:00:00Z → 2027-01-01 (branch=true)",
+        "L5-CHAT-TOMORROW America/Los_Angeles at 2027-01-01T02:00:00Z → 2027-01-01 (branch=false)",
+        "L5-CHAT-TOMORROW Pacific/Kiritimati at 2027-12-31T12:00:00Z → 2028-01-02 (branch=true)",
+        "L5-CHAT-TOMORROW Asia/Kathmandu at 2027-01-31T20:00:00Z → 2027-02-02 (branch=true)",
+        "L5-CHAT-TOMORROW America/New_York at 2027-03-14T04:30:00Z → 2027-03-14 (branch=true)",
+        "L5-CHAT-TOMORROW Europe/Berlin at 2027-10-30T22:30:00Z → 2027-11-01 (branch=true)"
+      ],
+      "reportSha256": "fa0d6a2414cab39f988cb831367001efc8259585153880fbc1f270c5d6a45986"
+    },
+    {
+      "id": "FB-CHAT-DAY-ELAPSED",
+      "expected": "live-killed",
+      "failedTests": 4,
+      "failedTitles": [
+        "L5-CHAT-TOMORROW America/New_York at 2027-03-14T04:30:00Z → 2027-03-14 (branch=true)",
+        "L5-CHAT-TOMORROW America/New_York at 2027-11-07T04:30:00Z → 2027-11-08 (branch=true)",
+        "L5-CHAT-TOMORROW America/New_York at 2027-11-07T04:30:00Z → 2027-11-08 (branch=false)",
+        "L5-CHAT-TOMORROW Europe/Berlin at 2027-10-30T22:30:00Z → 2027-11-01 (branch=true)"
+      ],
+      "reportSha256": "c422be95fd500d0d7ed80e644ee69da4222f4d82476d013599dccd32cfbf25bf"
+    }
+  ],
+  "status": "passed",
+  "productSourcesRestored": true,
+  "qualification": "Focused diagnostic proof, not full mutation corpus or release certification.",
+  "historicalDriftCommit": "aeb987b43a2663aef6b49e8aa77774311ddf4d46",
+  "newTestSha256": "ca2143035ce371a020db85b2e18c462c26afaeb01292c6836730316343d2422e",
+  "controls": {
+    "baseline-final": {
+      "passed": 12,
+      "failed": 0,
+      "sha256": "ecb0f03416c5515968806de35ce5297ae5e8e2db551fd9b0f957cfb7bd933d2c",
+      "path": "/private/tmp/maya-first-phone-fb-diagnosis-20261016/baseline-final/jest.json"
+    },
+    "old-unit-baseline": {
+      "passed": 26,
+      "failed": 0,
+      "sha256": "794ea5dd317f35a95cfeffe49a4a5fd250d3118d00c3e5140f891cec98d40198",
+      "path": "/private/tmp/maya-first-phone-fb-diagnosis-20261016/old-unit-baseline/jest.json"
+    },
+    "restored-final": {
+      "passed": 12,
+      "failed": 0,
+      "sha256": "05c53a285bc9160c81459021ff0768d577e657bcf7b2a27652f25f211cd856e2",
+      "path": "/private/tmp/maya-first-phone-fb-diagnosis-20261016/restored-final/jest.json"
+    }
+  },
+  "originalFailure": {
+    "path": "/private/tmp/maya-first-phone-final-cde265b9-20261016/full-mutations-v3/parts/widgets-mutation-part-FB.json",
+    "sha256": "c2ad404ab86bdccddb0762fa8a110263b52bb24dfdce786e120fa7e5d2c22d51",
+    "status": "MISMATCH",
+    "mismatches": 2,
+    "qualification": "Original unmutated controls green; FB-DAY-UTC and FB-DAY-ELAPSED survived the full live suite."
+  }
+}
