@@ -1,0 +1,91 @@
+{
+  "parentCandidate": "4846bdbac11309455fb775353da85e016eeb0b8a",
+  "productChanges": 0,
+  "productionEffects": 0,
+  "certificate": "NOT_ISSUED",
+  "manifests": [
+    {
+      "source": "/private/tmp/maya-search-isolation-20261016-01/retained-fixture-census.json",
+      "archived": "1-retained-fixture-census.json",
+      "sha256": "ba76944f9c08155c83830961018baec1cc9fcda901ec080b6f1c105bc4855b83"
+    },
+    {
+      "source": "/private/tmp/maya-search-isolation-20261016-01/retained-fixture-types.json",
+      "archived": "2-retained-fixture-types.json",
+      "sha256": "5defdd396360bdab8ff674388b3c27e8ca34711123136ec26d330cedc5aaddb3"
+    },
+    {
+      "source": "/private/tmp/maya-search-isolation-20261016-01/reproduction-v2/manifest.json",
+      "archived": "3-reproduction-v2-manifest.json",
+      "sha256": "808752b2c0e3e477e5ae226d007014305783731f6a3251ddb4a539b701eaf170"
+    },
+    {
+      "source": "/private/tmp/maya-search-isolation-20261016-01/fix-proof-v2/manifest.json",
+      "archived": "4-fix-proof-v2-manifest.json",
+      "sha256": "31aaa8dec79e15c13aca217b6fbe94ceeac4d772405c71675c3d7b608bfec446"
+    },
+    {
+      "source": "/private/tmp/maya-search-isolation-20261016-01/combined-fix-proof-v2/manifest.json",
+      "archived": "5-combined-fix-proof-v2-manifest.json",
+      "sha256": "9e5838cf70853bffd084cbd0c6d9d62aaf82383082a0f14b209da5983ca2b1c0"
+    }
+  ],
+  "jestReports": [
+    {
+      "name": "fixed-repeat-1.json",
+      "path": "/private/tmp/maya-search-isolation-20261016-01/combined-fix-proof-v2/fixed-repeat-1.json",
+      "sha256": "8de6432d6109397a662c4b3e7fd979ede9ff089c1f9c6a06d601df64886fd7dd",
+      "passedTests": 37,
+      "failedTests": 0,
+      "failedSuites": 0
+    },
+    {
+      "name": "fixed-repeat-2.json",
+      "path": "/private/tmp/maya-search-isolation-20261016-01/combined-fix-proof-v2/fixed-repeat-2.json",
+      "sha256": "90155fdd5fde9eb11c2b5254a10311a2cf10de552b574d09855309521c1773a4",
+      "passedTests": 37,
+      "failedTests": 0,
+      "failedSuites": 0
+    },
+    {
+      "name": "fixed-repeat-3.json",
+      "path": "/private/tmp/maya-search-isolation-20261016-01/combined-fix-proof-v2/fixed-repeat-3.json",
+      "sha256": "4ea1e80ad52abcb36f5b5f4a7ab01a83e070390081bd7eff7d5ccc0cf5aa81a3",
+      "passedTests": 37,
+      "failedTests": 0,
+      "failedSuites": 0
+    },
+    {
+      "name": "fixed-repeat-4.json",
+      "path": "/private/tmp/maya-search-isolation-20261016-01/combined-fix-proof-v2/fixed-repeat-4.json",
+      "sha256": "ca20dcabcf7ade33f3e9f8ef5df1aba4eca77cb8f4b2ccbd789a8c7ae7a2222b",
+      "passedTests": 37,
+      "failedTests": 0,
+      "failedSuites": 0
+    },
+    {
+      "name": "fixed-repeat-5.json",
+      "path": "/private/tmp/maya-search-isolation-20261016-01/combined-fix-proof-v2/fixed-repeat-5.json",
+      "sha256": "0bf60fadef17d3e2c56d10c8b813dfb2beaf20e492bfd3528f9cb7311d360905",
+      "passedTests": 37,
+      "failedTests": 0,
+      "failedSuites": 0
+    },
+    {
+      "name": "retirement-removed-refused.json",
+      "path": "/private/tmp/maya-search-isolation-20261016-01/combined-fix-proof-v2/retirement-removed-refused.json",
+      "sha256": "ee9d493c3a304f5eb25f6ace3299479c7e6eefd3ab2c57716da1cd408437222c",
+      "passedTests": 37,
+      "failedTests": 0,
+      "failedSuites": 1
+    },
+    {
+      "name": "schedule-retirement-removed-refused.json",
+      "path": "/private/tmp/maya-search-isolation-20261016-01/combined-fix-proof-v2/schedule-retirement-removed-refused.json",
+      "sha256": "8e10f0d29a6d09bb108b65ddf73484e722564f3fce9cbaac7f5629caa9bc54bf",
+      "passedTests": 37,
+      "failedTests": 0,
+      "failedSuites": 1
+    }
+  ]
+}

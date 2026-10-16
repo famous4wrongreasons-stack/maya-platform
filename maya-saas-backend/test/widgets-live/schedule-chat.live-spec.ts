@@ -36,6 +36,7 @@ type CarrierObservation = {
 };
 describe('schedule conversation bridge [HTTP] [PostgreSQL] [synthetic provider]', () => {
   let db: FixtureContext, http: HttpHarness, fx: Fixtures;
+  const retainedFixtureTenantIds: string[] = [];
   let hold: Promise<void> | null = null;
   let conflict = false;
   let drift = false;
@@ -96,14 +97,33 @@ describe('schedule conversation bridge [HTTP] [PostgreSQL] [synthetic provider]'
   });
   afterAll(async () => {
     jest.restoreAllMocks();
-    await http?.close();
-    await db?.close();
+    try {
+      await http?.close();
+    } finally {
+      try {
+        // Keep immutable booking/audit evidence, but do not leak active salons
+        // into later search tests in the same mutation proof database.
+        await db.prisma.tenant.updateMany({
+          where: { id: { in: retainedFixtureTenantIds } },
+          data: { status: 'cancelled' },
+        });
+        const retained = await db.prisma.tenant.findMany({
+          where: { id: { in: retainedFixtureTenantIds } },
+          select: { status: true },
+        });
+        expect(retained).toHaveLength(retainedFixtureTenantIds.length);
+        expect(retained.every((row) => row.status === 'cancelled')).toBe(true);
+      } finally {
+        await db?.close();
+      }
+    }
   });
   async function salon(role = UserRole.TENANT_OWNER) {
     const tenant = await fx.tenant(
       'Schedule conversation',
       CalendarSource.EXTERNAL,
     );
+    retainedFixtureTenantIds.push(tenant.id);
     const user = await fx.user(tenant, role);
     for (const feature of [
       'crm.integration',

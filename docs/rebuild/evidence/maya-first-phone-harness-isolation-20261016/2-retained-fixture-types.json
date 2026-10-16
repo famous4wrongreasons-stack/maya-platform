@@ -1,0 +1,57 @@
+{
+  "sourceHead": "4846bdbac11309455fb775353da85e016eeb0b8a",
+  "readOnly": true,
+  "clustersStopped": true,
+  "results": [
+    {
+      "worker": 1,
+      "database": "maya_widget_gate_proof_full_1_4",
+      "total": 1532,
+      "active": 202,
+      "telegram_fixture_active": 105,
+      "telegram_fixture_retired": 0,
+      "telegram_fixtures_within_first100": 9,
+      "telegram_fixtures_outside_first100": 96,
+      "last_telegram_position": 196,
+      "candidateTypes": [
+        {
+          "name": "MAYA OS",
+          "count": 1
+        },
+        {
+          "name": "widgets-live Schedule conversation",
+          "count": 90
+        },
+        {
+          "name": "widgets-live bounded Telegram owner",
+          "count": 105
+        }
+      ]
+    },
+    {
+      "worker": 3,
+      "database": "maya_widget_gate_proof_full_3_3",
+      "total": 920,
+      "active": 122,
+      "telegram_fixture_active": 63,
+      "telegram_fixture_retired": 0,
+      "telegram_fixtures_within_first100": 45,
+      "telegram_fixtures_outside_first100": 18,
+      "last_telegram_position": 118,
+      "candidateTypes": [
+        {
+          "name": "MAYA OS",
+          "count": 1
+        },
+        {
+          "name": "widgets-live Schedule conversation",
+          "count": 54
+        },
+        {
+          "name": "widgets-live bounded Telegram owner",
+          "count": 63
+        }
+      ]
+    }
+  ]
+}

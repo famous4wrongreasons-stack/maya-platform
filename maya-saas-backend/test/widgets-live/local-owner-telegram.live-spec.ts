@@ -18,6 +18,7 @@ import { bootHttp, type HttpHarness } from './support/http-bootstrap';
 import { Fixtures } from './support/fixtures';
 import { EvidenceWriter } from './support/evidence';
 import {
+  resetLoopbackLoginPreflight,
   resetLoopbackOauthPreflight,
   resetLoopbackOauthCompletionPreflight,
 } from './support/login-rate-limit';
@@ -78,6 +79,8 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
   let db: FixtureContext, http: HttpHarness, fx: Fixtures;
   let runtime: Awaited<ReturnType<typeof installOwnerTelegram>>;
   let tenant: Awaited<ReturnType<Fixtures['tenant']>>;
+  let fixtureTenantId: string | null = null;
+  const retainedFixtureTenantIds: string[] = [];
   let owner: Awaited<ReturnType<Fixtures['user']>>, foreign: typeof owner;
   let expired = false,
     subject = 'synthetic-owner-telegram',
@@ -98,6 +101,7 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
     code: string | null;
   }>;
   beforeEach(async () => {
+    fixtureTenantId = null;
     expired = false;
     subject = 'synthetic-owner-telegram';
     dispatches = 0;
@@ -108,6 +112,8 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
     db = await bootFixtureContext();
     fx = new Fixtures(db, null);
     tenant = await fx.tenant('bounded Telegram owner', CalendarSource.EXTERNAL);
+    fixtureTenantId = tenant.id;
+    retainedFixtureTenantIds.push(tenant.id);
     owner = await fx.user(tenant, UserRole.TENANT_OWNER);
     foreign = await fx.user(tenant, UserRole.CLIENT);
     await db.prisma.tenant.update({
@@ -150,6 +156,8 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
       'booking.customer_app',
     ] as const)
       await fx.grantFeature(tenant, feature);
+    // Independent cases share localhost; preserve every rate check within a case.
+    await resetLoopbackLoginPreflight(db.prisma);
     await resetLoopbackOauthPreflight(db.prisma);
     await resetLoopbackOauthCompletionPreflight(db.prisma);
     const scope = {
@@ -309,8 +317,36 @@ describe('retained-owner Telegram restriction [HTTP] [PG] [synthetic wire]', () 
   afterEach(async () => {
     runtime?.stop();
     jest.restoreAllMocks();
-    await http?.close();
-    await db?.close();
+    try {
+      await http?.close();
+    } finally {
+      try {
+        // Repeated mutation runs share a proof DB. Retain identity/audit history,
+        // but keep this completed fixture out of the public tenant search.
+        if (fixtureTenantId)
+          await db.prisma.tenant.update({
+            where: { id: fixtureTenantId },
+            data: { status: 'cancelled' },
+          });
+      } finally {
+        await db?.close();
+      }
+    }
+  });
+  afterAll(async () => {
+    const verification = await bootFixtureContext();
+    try {
+      // Independent reread catches a removed cleanup without deleting retained
+      // episodes, changing search behavior, or touching another suite's tenants.
+      const retained = await verification.prisma.tenant.findMany({
+        where: { id: { in: retainedFixtureTenantIds } },
+        select: { status: true },
+      });
+      expect(retained).toHaveLength(retainedFixtureTenantIds.length);
+      expect(retained.every((row) => row.status === 'cancelled')).toBe(true);
+    } finally {
+      await verification.close();
+    }
   });
   const post = (route: string, body: object, token?: string) => {
     const r = request(http.app.getHttpServer()).post('/api/' + route);

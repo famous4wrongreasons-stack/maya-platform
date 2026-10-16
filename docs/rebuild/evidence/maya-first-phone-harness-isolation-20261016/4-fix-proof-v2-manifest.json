@@ -1,0 +1,157 @@
+{
+  "sourceHead": "4846bdbac11309455fb775353da85e016eeb0b8a",
+  "fixedTestSha256": "51a3d63965811539fe8565912db0bb6e502500bfe9da94864f9378cb77c063b3",
+  "productChanged": false,
+  "externalCalls": 0,
+  "status": "passed",
+  "steps": [
+    {
+      "name": "clone",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.072
+    },
+    {
+      "name": "checkout",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 1.985
+    },
+    {
+      "name": "deps-maya-saas-backend",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 7.525
+    },
+    {
+      "name": "deps-maya-carrier-react",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.075
+    },
+    {
+      "name": "live-types",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 13.698
+    },
+    {
+      "name": "scoped-lint",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 4.876
+    },
+    {
+      "name": "initdb",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.391
+    },
+    {
+      "name": "start",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.181
+    },
+    {
+      "name": "telegram_fixed-createdb",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.073
+    },
+    {
+      "name": "telegram_fixed-migrate",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 1.902
+    },
+    {
+      "name": "telegram_fixed-sentinel",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.039
+    },
+    {
+      "name": "fixed-repeat-1",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 21.109
+    },
+    {
+      "name": "fixed-repeat-2",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 12.712
+    },
+    {
+      "name": "fixed-repeat-3",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 12.879
+    },
+    {
+      "name": "fixed-repeat-4",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 12.871
+    },
+    {
+      "name": "fixed-repeat-5",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 12.573
+    },
+    {
+      "name": "fixed-census",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.037
+    },
+    {
+      "name": "sentinel-unchanged",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.039
+    },
+    {
+      "name": "telegram_missing_retirement-createdb",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.072
+    },
+    {
+      "name": "telegram_missing_retirement-migrate",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.982
+    },
+    {
+      "name": "telegram_missing_retirement-sentinel",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.037
+    },
+    {
+      "name": "retirement-removed-refused",
+      "exit": 1,
+      "expected": 1,
+      "seconds": 12.485
+    },
+    {
+      "name": "missing-retirement-census",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.04
+    },
+    {
+      "name": "stop",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.225
+    }
+  ],
+  "positiveTests": 105,
+  "retirementRemovalRefused": true,
+  "otherSuiteTenantUnchanged": true,
+  "clusterStopped": true
+}

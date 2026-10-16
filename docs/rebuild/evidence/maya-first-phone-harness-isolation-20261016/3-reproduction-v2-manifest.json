@@ -1,0 +1,69 @@
+{
+  "sourceHead": "4846bdbac11309455fb775353da85e016eeb0b8a",
+  "productChanged": false,
+  "externalCalls": 0,
+  "status": "passed-counterfactual",
+  "steps": [
+    {
+      "name": "initdb",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.448
+    },
+    {
+      "name": "start",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.175
+    },
+    {
+      "name": "createdb",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.127
+    },
+    {
+      "name": "migrate",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.984
+    },
+    {
+      "name": "unchanged-clean",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 1.592
+    },
+    {
+      "name": "seed-prior-fixtures",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.038
+    },
+    {
+      "name": "unchanged-retained-fixtures",
+      "exit": 1,
+      "expected": 1,
+      "seconds": 1.56
+    },
+    {
+      "name": "retire-only-prior-fixtures",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.04
+    },
+    {
+      "name": "unchanged-prior-fixtures-retired",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 1.675
+    },
+    {
+      "name": "stop",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.125
+    }
+  ],
+  "clusterStopped": true
+}

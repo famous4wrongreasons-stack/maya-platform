@@ -1,0 +1,200 @@
+{
+  "sourceHead": "4846bdbac11309455fb775353da85e016eeb0b8a",
+  "fixedTestSha256": "51a3d63965811539fe8565912db0bb6e502500bfe9da94864f9378cb77c063b3",
+  "scheduleTestSha256": "abf3d3f0559be4e31d9adab8557fa62f74d75a979142beb8169194c57546fe6e",
+  "productChanged": false,
+  "externalCalls": 0,
+  "status": "passed",
+  "steps": [
+    {
+      "name": "clone",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.073
+    },
+    {
+      "name": "checkout",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 1.942
+    },
+    {
+      "name": "deps-maya-saas-backend",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 7.658
+    },
+    {
+      "name": "deps-maya-carrier-react",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.071
+    },
+    {
+      "name": "runtime-build",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 5.925
+    },
+    {
+      "name": "react-harness",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.764
+    },
+    {
+      "name": "live-types",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 12.414
+    },
+    {
+      "name": "scoped-lint",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 4.569
+    },
+    {
+      "name": "initdb",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.39
+    },
+    {
+      "name": "start",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.176
+    },
+    {
+      "name": "telegram_fixed-createdb",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.125
+    },
+    {
+      "name": "telegram_fixed-migrate",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 1.663
+    },
+    {
+      "name": "telegram_fixed-sentinel",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.038
+    },
+    {
+      "name": "fixed-repeat-1",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 41.488
+    },
+    {
+      "name": "fixed-repeat-2",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 34.327
+    },
+    {
+      "name": "fixed-repeat-3",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 34.325
+    },
+    {
+      "name": "fixed-repeat-4",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 35.762
+    },
+    {
+      "name": "fixed-repeat-5",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 34.424
+    },
+    {
+      "name": "fixed-census",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.041
+    },
+    {
+      "name": "schedule-census",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.04
+    },
+    {
+      "name": "sentinel-unchanged",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.04
+    },
+    {
+      "name": "telegram_missing_retirement-createdb",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.074
+    },
+    {
+      "name": "telegram_missing_retirement-migrate",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.978
+    },
+    {
+      "name": "telegram_missing_retirement-sentinel",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.036
+    },
+    {
+      "name": "retirement-removed-refused",
+      "exit": 1,
+      "expected": 1,
+      "seconds": 34.85
+    },
+    {
+      "name": "missing-retirement-census",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.04
+    },
+    {
+      "name": "schedule_missing_retirement-createdb",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.074
+    },
+    {
+      "name": "schedule_missing_retirement-migrate",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.984
+    },
+    {
+      "name": "schedule_missing_retirement-sentinel",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.04
+    },
+    {
+      "name": "schedule-retirement-removed-refused",
+      "exit": 1,
+      "expected": 1,
+      "seconds": 34.863
+    },
+    {
+      "name": "stop",
+      "exit": 0,
+      "expected": 0,
+      "seconds": 0.329
+    }
+  ],
+  "positiveTests": 185,
+  "retirementRemovalRefused": true,
+  "otherSuiteTenantUnchanged": true,
+  "clusterStopped": true
+}
