@@ -1,0 +1,181 @@
+{
+  "contract": "maya.phone-canonical-cutover-local-proof/1",
+  "observedAt": "2026-10-17T19:18:01.372Z",
+  "status": "PREPARATION_PASS",
+  "candidate": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "buildDigest": "a7f07289450289f4669bcd3dfbfc1218fb7e9df4a7c60de4734142c9e14955bf",
+  "sourceBindings": [
+    {
+      "path": "maya-saas-backend/scripts/phone-staging-plan.mjs",
+      "sha256": "9a8773e72b95a73e61eb1b661338ad1a6a4e76851935b60b17f315a483f7f558"
+    },
+    {
+      "path": "maya-saas-backend/scripts/phone-catalog-plan.mjs",
+      "sha256": "e0d0d30eae9e3f24983ff58b08256404734e04f0aa5e587398f8434d6b304270"
+    },
+    {
+      "path": "maya-saas-backend/scripts/phone-ai-plan.mjs",
+      "sha256": "a6fa2c92dce54eff3b2f37c5e4cc7a0357503d0f0727c00b5fabd0b72a478f40"
+    },
+    {
+      "path": "maya-saas-backend/scripts/staging-carrier-preflight.mjs",
+      "sha256": "2a8d6b5fd0ca93dffe759599689eadef2fb2babf24770ed909936e1a958740d6"
+    },
+    {
+      "path": "maya-saas-backend/scripts/local-onboarding-profile.mjs",
+      "sha256": "ac53a8a0885d4f8918ee2437050d0dd952ecd52bf5c6ace864e31b2350c685e0"
+    },
+    {
+      "path": "maya-saas-backend/compose.staging.yml",
+      "sha256": "656e14c87d1c4c62b8c18f263d819f1df6152aab3af4c1ac2126caf8a57c8834"
+    },
+    {
+      "path": "maya-saas-backend/deploy/staging/Caddyfile",
+      "sha256": "1eaf825be97da242af3ce54ce1ebe2fc2dfeb0c63c667601967b9e18e6d2e4b9"
+    },
+    {
+      "path": "maya-saas-backend/Dockerfile",
+      "sha256": "ae81e9c4e5882cb622701945131675530adb6dbfacc80822150683eaca95910e"
+    },
+    {
+      "path": "maya-saas-backend/package-lock.json",
+      "sha256": "33d01c3efcf8924fef5a20bee0c00c3c6d1fc068be958a9b116ee5c63d563d67"
+    },
+    {
+      "path": "maya-carrier-react/tools/release.mjs",
+      "sha256": "9f8bd1f5e943c44ecb9ef5a15279c887b302bdb613c386332bca39a96144ea32"
+    },
+    {
+      "path": "maya-carrier-react/tools/payload-files.mjs",
+      "sha256": "7a788d5cb2e3f8f688d13d7da82c535a94ef8c6ff633d120490c2b51ba100ca7"
+    },
+    {
+      "path": "maya-carrier-react/tools/native-api-target.mjs",
+      "sha256": "d67b20b891e7cc79901e4370300005450419b8bf9e7c587ed52ec573c974b40c"
+    },
+    {
+      "path": "maya-carrier-react/build.mjs",
+      "sha256": "a5f43d0006cb2c33d99ad5496a5eae99b7e2e46118aad92379937ae73e85e89d"
+    },
+    {
+      "path": "maya-carrier-react/tools/ratchets.mjs",
+      "sha256": "d2e9b5efd895c21462211f87a8d7538f30cb81891f2f7fb5ed25c84654bdf0f1"
+    },
+    {
+      "path": "maya-carrier-react/tools/design-assets.mjs",
+      "sha256": "d4be1a4672c03cb5befbb72573a8ecd1e768577aec1b121fc183d5f4825a191e"
+    }
+  ],
+  "webInventory": [
+    {
+      "path": "icons/maya-192.png",
+      "size": 1970,
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+    },
+    {
+      "path": "icons/maya-512-maskable.png",
+      "size": 4476,
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+    },
+    {
+      "path": "icons/maya-512.png",
+      "size": 5951,
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+    },
+    {
+      "path": "icons/maya-apple-180.png",
+      "size": 1977,
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+    },
+    {
+      "path": "index.html",
+      "size": 842,
+      "sha256": "fdea7952c23ef97dbc13f49dd95ee7eadd1332a543c6740f069c84e8ac7369ec"
+    },
+    {
+      "path": "m/QYN5QZ27/main.js",
+      "size": 1809603,
+      "sha256": "fd9aae58aa28c4a456bb2527adc95a4a4f7e5a315dbb0c29bf63d0ff5981fc0c"
+    },
+    {
+      "path": "manifest.webmanifest",
+      "size": 670,
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+    },
+    {
+      "path": "styles.css",
+      "size": 1514076,
+      "sha256": "c2c54360fdd398952e7ed92137cd50d1945f5b60d62b3d957e574d17b01a3e29"
+    }
+  ],
+  "capacitorInventory": [
+    {
+      "path": "icons/maya-192.png",
+      "size": 1970,
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+    },
+    {
+      "path": "icons/maya-512-maskable.png",
+      "size": 4476,
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+    },
+    {
+      "path": "icons/maya-512.png",
+      "size": 5951,
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+    },
+    {
+      "path": "icons/maya-apple-180.png",
+      "size": 1977,
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+    },
+    {
+      "path": "index.html",
+      "size": 879,
+      "sha256": "7884ee64fdd473799d211806379069d84e8fb0256e1130f566ebc1e463252c74"
+    },
+    {
+      "path": "m/a60c04895bfaece9/main.js",
+      "size": 1809631,
+      "sha256": "a60c04895bfaece977c26c1ec7b3154339ef900e59873273f581eefe0d91d78f"
+    },
+    {
+      "path": "manifest.webmanifest",
+      "size": 670,
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+    },
+    {
+      "path": "styles.css",
+      "size": 1514076,
+      "sha256": "c2c54360fdd398952e7ed92137cd50d1945f5b60d62b3d957e574d17b01a3e29"
+    }
+  ],
+  "previousMigrations": 106,
+  "targetMigrations": 106,
+  "addedMigrationsInGit": 0,
+  "canonicalMainDraft": true,
+  "implicitMigrationRefused": true,
+  "sixGeneratorDerivedNegativesPassed": true,
+  "sourceVerifiedWeb": true,
+  "carrierVerificationStdoutSha256": "5429ec51d11d054804c136d651e3a6776277907f8b7a7aa6dc883de912541604",
+  "correlatedPayloadSubstitutionRefused": true,
+  "pwaPhonePayloadParity": true,
+  "nativeCodeSigningVerified": false,
+  "actualPhoneInstallation": false,
+  "historicalBaseline": "reconstructed fixture with synthetic scope digest; not a live inventory",
+  "serverRead": false,
+  "currentDatabaseInspected": false,
+  "rollbackExecuted": false,
+  "providerTransportProven": false,
+  "certificate": "NOT_ISSUED",
+  "readyForExecution": false,
+  "planSha256": "209c9819e3c02d5a60646bcda0fd518ae7c9fca28d132640667e8a9e2ef861b1",
+  "effects": {
+    "network": 0,
+    "database": 0,
+    "deployment": 0,
+    "grants": 0,
+    "provider": 0,
+    "phoneInstallation": 0
+  }
+}

@@ -1,0 +1,142 @@
+TAP version 13
+# Subtest: canonical-main draft has no automatic migration, old wrapper or direct model egress; durable volumes preserved
+ok 1 - canonical-main draft has no automatic migration, old wrapper or direct model egress; durable volumes preserved
+  ---
+  duration_ms: 1.612917
+  type: 'test'
+  ...
+# Subtest: even matching configuration and complete hashes confer no execution, booking, grant or certificate
+ok 2 - even matching configuration and complete hashes confer no execution, booking, grant or certificate
+  ---
+  duration_ms: 0.211042
+  type: 'test'
+  ...
+# Subtest: wrong target refused in input
+ok 3 - wrong target refused in input
+  ---
+  duration_ms: 0.458041
+  type: 'test'
+  ...
+# Subtest: wrong previous candidate refused in input
+ok 4 - wrong previous candidate refused in input
+  ---
+  duration_ms: 0.155459
+  type: 'test'
+  ...
+# Subtest: broader profile refused in input
+ok 5 - broader profile refused in input
+  ---
+  duration_ms: 0.572416
+  type: 'test'
+  ...
+# Subtest: missing byte binding refused in input
+ok 6 - missing byte binding refused in input
+  ---
+  duration_ms: 0.134917
+  type: 'test'
+  ...
+# Subtest: caller authorization attached refused in input
+ok 7 - caller authorization attached refused in input
+  ---
+  duration_ms: 0.165167
+  type: 'test'
+  ...
+# Subtest: historical backend on edge refused in input
+ok 8 - historical backend on edge refused in input
+  ---
+  duration_ms: 0.316959
+  type: 'test'
+  ...
+# Subtest: historical provider already open refused in input
+ok 9 - historical provider already open refused in input
+  ---
+  duration_ms: 0.331542
+  type: 'test'
+  ...
+# Subtest: removed, rewritten, duplicated and path-traversal migration inventories refused
+ok 10 - removed, rewritten, duplicated and path-traversal migration inventories refused
+  ---
+  duration_ms: 0.562792
+  type: 'test'
+  ...
+# Subtest: implicit migrate command refused in emitted plan
+ok 11 - implicit migrate command refused in emitted plan
+  ---
+  duration_ms: 1.139166
+  type: 'test'
+  ...
+# Subtest: seed entrypoint refused in emitted plan
+ok 12 - seed entrypoint refused in emitted plan
+  ---
+  duration_ms: 0.829042
+  type: 'test'
+  ...
+# Subtest: reintroduced runtime wrapper refused in emitted plan
+ok 13 - reintroduced runtime wrapper refused in emitted plan
+  ---
+  duration_ms: 0.587792
+  type: 'test'
+  ...
+# Subtest: direct external network refused in emitted plan
+ok 14 - direct external network refused in emitted plan
+  ---
+  duration_ms: 0.46125
+  type: 'test'
+  ...
+# Subtest: database volume replacement refused in emitted plan
+ok 15 - database volume replacement refused in emitted plan
+  ---
+  duration_ms: 0.394375
+  type: 'test'
+  ...
+# Subtest: unknown provider environment refused in emitted plan
+ok 16 - unknown provider environment refused in emitted plan
+  ---
+  duration_ms: 0.73775
+  type: 'test'
+  ...
+# Subtest: missing old revoke refused in emitted plan
+ok 17 - missing old revoke refused in emitted plan
+  ---
+  duration_ms: 0.481958
+  type: 'test'
+  ...
+# Subtest: rollback crosses digest before revoke refused in emitted plan
+ok 18 - rollback crosses digest before revoke refused in emitted plan
+  ---
+  duration_ms: 0.419042
+  type: 'test'
+  ...
+# Subtest: automatic certificate refused in emitted plan
+ok 19 - automatic certificate refused in emitted plan
+  ---
+  duration_ms: 0.381125
+  type: 'test'
+  ...
+# Subtest: ready flag forged refused in emitted plan
+ok 20 - ready flag forged refused in emitted plan
+  ---
+  duration_ms: 0.604125
+  type: 'test'
+  ...
+# Subtest: unknown live compose changes cannot silently inherit historical preparation
+ok 21 - unknown live compose changes cannot silently inherit historical preparation
+  ---
+  duration_ms: 0.504292
+  type: 'test'
+  ...
+# Subtest: cutover and rollback require durable revoke before changing runtime; newer business state is retained
+ok 22 - cutover and rollback require durable revoke before changing runtime; newer business state is retained
+  ---
+  duration_ms: 0.09675
+  type: 'test'
+  ...
+1..22
+# tests 22
+# suites 0
+# pass 22
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 54.434

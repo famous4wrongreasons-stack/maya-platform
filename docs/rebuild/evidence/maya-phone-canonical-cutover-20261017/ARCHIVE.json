@@ -1,0 +1,26 @@
+{
+  "contract": "maya.phone-cutover-safe-receipt-archive/1",
+  "artifacts": [
+    {
+      "name": "PLAN.json",
+      "originalLocalPath": "/private/tmp/maya-phone-canonical-cutover-proof-20261017-02/PLAN.json",
+      "sha256": "209c9819e3c02d5a60646bcda0fd518ae7c9fca28d132640667e8a9e2ef861b1",
+      "bytes": 66278
+    },
+    {
+      "name": "PROOF.json",
+      "originalLocalPath": "/private/tmp/maya-phone-canonical-cutover-proof-20261017-02/PROOF.json",
+      "sha256": "77c7d7bde1a665c461ffbe26579f3a3c57e94f876732bf5fefeda04a0eceac31",
+      "bytes": 6140
+    },
+    {
+      "name": "unit-tests.tap",
+      "originalLocalPath": "/private/tmp/maya-phone-canonical-cutover-proof-20261017-02/unit-tests.tap",
+      "sha256": "3eebe7785c2760e57077715f13e28cff8cad88b4c728c97b4b14957d78e2ad53",
+      "bytes": 4126
+    }
+  ],
+  "containsCredentials": false,
+  "containsCustomerPII": false,
+  "executionAuthorized": false
+}
