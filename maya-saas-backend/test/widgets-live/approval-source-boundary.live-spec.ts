@@ -268,6 +268,25 @@ describe('Approval source boundary [HTTP/PG] [actual adapter, artificial wire fa
       proposal: proposal(),
       ...extra,
     });
+  async function openConversation(f: Salon) {
+    // Use the existing HTTP chat owner: no fixture-created turn or mirror writer.
+    const result = await post(f, '/ai/chat', {
+      surface: 'web',
+      audience: 'owner',
+      requestId: randomUUID(),
+      messages: [{ role: 'user', content: 'Привет!' }],
+    });
+    expect(result.status).toBe(201);
+    const body = obj(result.body);
+    expect(body.source).toBe('safe_fallback');
+    expect(body.action).toBeNull();
+    const conversationId = obj(body.user_turn).conversationId;
+    if (typeof conversationId !== 'string' || !conversationId)
+      throw new Error(
+        'Canonical chat did not return its conversation identity',
+      );
+    return conversationId;
+  }
   async function noEffect(f: Salon, approvals = 0) {
     const where = { tenantId: f.tenant.id };
     expect(await db.prisma.aiApprovalRequest.count({ where })).toBe(approvals);
@@ -320,13 +339,31 @@ describe('Approval source boundary [HTTP/PG] [actual adapter, artificial wire fa
 
   it('GR-SOURCE concurrent reviewed proposals remain refused before approval or dispatch', async () => {
     const f = await setup('goods concurrent');
-    const results = await Promise.all([review(f), review(f)]);
+    const conversationId = await openConversation(f);
+    // Both concurrent requests belong to the same server-authored conversation.
+    // Omitting its ID races initial conversation creation and tests a different guard.
+    const results = await Promise.all([
+      review(f, { conversationId }),
+      review(f, { conversationId }),
+    ]);
     for (const result of results) {
       expect(JSON.stringify(result.body)).toContain(
         'yclients_receipt_storages_ids_semantics_undocumented',
       );
       expect(result.status).toBe(409);
     }
+    await noEffect(f);
+  });
+
+  it('GR-SOURCE missing current conversation identity refuses before source scope or dispatch', async () => {
+    const f = await setup('goods missing conversation');
+    await openConversation(f);
+    const result = await review(f);
+    expect(result.status).toBe(400);
+    expect(JSON.stringify(result.body)).toContain(
+      'goods_photo_conversation_required',
+    );
+    expect(f.state.requests).toEqual([]);
     await noEffect(f);
   });
 

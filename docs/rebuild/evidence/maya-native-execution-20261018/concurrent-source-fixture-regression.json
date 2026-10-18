@@ -1,0 +1,82 @@
+{
+  "contract": "maya.approval-source-fixture-regression/1",
+  "baseCandidate": "6735418a6bf65dc35c593b772a07262c36c4332d",
+  "recordedAt": "2026-10-18T19:06:22.894338+00:00",
+  "hostedFailure": {
+    "run": 39152334644,
+    "job": 117748807950,
+    "battery": "PI",
+    "unmutatedBaseline": {
+      "passed": 723,
+      "failed": 1
+    },
+    "expected": "409 yclients_receipt_storages_ids_semantics_undocumented",
+    "actual": "400 goods_photo_conversation_required"
+  },
+  "rootCause": "Concurrent test requests omitted conversationId. After the first request persists the canonical conversation, the other can reach the intentional missing-current-conversation guard before the provider-scope guard. The fixture relied on scheduler ordering.",
+  "productDefectProven": false,
+  "productSourcesChanged": false,
+  "change": "Create the conversation through actual authenticated /api/ai/chat and send its returned ID in both concurrent reviews; add a separate missing-current-conversation refusal proof.",
+  "beforeProof": "Original test forced into observed legal ordering; canonical reads/writes forwarded unchanged; exactly one expected assertion failure.",
+  "afterProof": {
+    "completeRepeatedRuns": 3,
+    "testsPerRun": 23,
+    "failed": 0,
+    "skipped": 0,
+    "formattedFinalRunPassed": 23,
+    "typecheck": "PASS",
+    "lint": "PASS"
+  },
+  "counterfactual": "Remove conversationId from the corrected concurrent requests: original scope assertion fails with goods_photo_conversation_required. Restored final bytes pass.",
+  "preserved": [
+    "parallel requests",
+    "exact 409 scope refusal",
+    "no approval/widget/Action Engine/provider writes",
+    "canonical conversation owner",
+    "existing missing-conversation guard",
+    "all timeouts"
+  ],
+  "diagnosticRoot": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/certification-6735418a/pi-baseline-diagnosis",
+  "artifacts": [
+    {
+      "name": "original-test.ts",
+      "sha256": "d4803cc9e87e3745005129b27cd4394785d8ee1f50fc4fad83ab1e61265fd561"
+    },
+    {
+      "name": "forced-order-test.ts",
+      "sha256": "2079017e0b4ab4f66bd66315729b35ac745b084d3f5111729e180748f0c71b41"
+    },
+    {
+      "name": "before.json",
+      "sha256": "1a2b5eacd82c7e179804206bbfb02e85515627928e7e8d7fd4c68f4b34ab483c"
+    },
+    {
+      "name": "after-1.json",
+      "sha256": "0d9f463a1fead93b98c36c47b774259b4866f31cac9e68b347aa3d523422d760"
+    },
+    {
+      "name": "after-2.json",
+      "sha256": "000446a0f5cdbadffec9d309c06fc882e6b34c201d3242233ef4f7a3348d7a69"
+    },
+    {
+      "name": "after-3.json",
+      "sha256": "ccd8d43d8bedff422e2bac20c38b0d71854600d765963c98640e1b2276ad8b32"
+    },
+    {
+      "name": "regression-negative.json",
+      "sha256": "7d5fdad07754cb95e7d604ce49c85a615c51b7dea748669a8720d133001c207c"
+    },
+    {
+      "name": "final2-1.json",
+      "sha256": "6d20cc5eeaf01be3f8d1a43a37336c73893470ce18aa1a9022badeddbd743e55"
+    },
+    {
+      "name": "final2-checks.json",
+      "sha256": "a33c6fd1d196fc543d99692b01bab839f970f650cefd93dfedaa545f099f301e"
+    }
+  ],
+  "finalTestSha256": "606c5a6a9f0d124b10dcf76c0190366d592901f9765d550659ed6b4b8c763631",
+  "externalBusinessEffects": 0,
+  "certificate": "NOT_ISSUED",
+  "fullFreshCertificationRequired": true
+}
