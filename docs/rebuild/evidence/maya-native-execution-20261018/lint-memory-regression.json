@@ -1,0 +1,65 @@
+{
+  "candidate": "a435a8d095b6140e0f2891b46acc892ab8317083",
+  "state": "completed",
+  "steps": [
+    {
+      "name": "default-heap",
+      "startedAt": "2026-10-18T17:58:19.696557+00:00",
+      "status": "failed",
+      "node": {
+        "node": "v22.23.3",
+        "heap": 4345298944
+      },
+      "exit": -6,
+      "finishedAt": "2026-10-18T17:59:32.084993+00:00",
+      "logSha256": "2695df75b422dbff5d4ce81c8cb7502d04b703efd5fe25ae47efb2a8c65886b8"
+    },
+    {
+      "name": "six-gib-heap",
+      "startedAt": "2026-10-18T17:59:32.085335+00:00",
+      "status": "passed",
+      "node": {
+        "node": "v22.23.3",
+        "heap": 6492782592
+      },
+      "exit": 0,
+      "finishedAt": "2026-10-18T18:00:48.597838+00:00",
+      "logSha256": "a8a88e4becf2e6dcf0a37c8671396bd7502d4bc98cfc175416933841b9af0785"
+    }
+  ],
+  "hostedFailure": {
+    "run": 39150735768,
+    "job": 117743884744,
+    "step": "npm run lint",
+    "exit": 134,
+    "classification": "V8 JavaScript heap out of memory near 4 GiB; no lint assertion reached"
+  },
+  "runtimeSourceChanges": 0,
+  "contract": "maya.ci-lint-memory-regression/1",
+  "productDefectProven": false,
+  "harnessDefect": "Platform CI omitted the measured bounded heap allocation needed by the full type-aware ESLint programme.",
+  "hostedFailureUrl": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/39150735768",
+  "diagnosticRoot": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/certification-a435a8d0/lint-memory-diagnosis",
+  "hostedFailureLogSha256": "3635284ac272ead9f98f5891cab8f396f67209bd5ffc05413611ad107570f943",
+  "commandUnchanged": "npm run lint",
+  "beforeEnv": {
+    "NODE_OPTIONS": null
+  },
+  "afterStepEnv": {
+    "NODE_OPTIONS": "--max-old-space-size=6144"
+  },
+  "stepScope": "platform-backend lint only",
+  "rulesChanged": false,
+  "filesExcluded": 0,
+  "timeoutsChanged": false,
+  "productSourcesChanged": false,
+  "realEffects": 0,
+  "certificate": "NOT_ISSUED",
+  "fullFreshCertificationRequired": true,
+  "runnerCapacityReference": "https://docs.github.com/en/actions/reference/runners/github-hosted-runners",
+  "sourceHashes": {
+    "maya-saas-backend/eslint.config.mjs": "6bc82fb2ad88ee60f1090f3018393e4cce0b9292fa568577a8b13e2570df1386",
+    "maya-saas-backend/package.json": "fdb17380d16067d14efe429ca7519746aed79a310c84a9e580182595f7339a1e",
+    "maya-saas-backend/package-lock.json": "33d01c3efcf8924fef5a20bee0c00c3c6d1fc068be958a9b116ee5c63d563d67"
+  }
+}

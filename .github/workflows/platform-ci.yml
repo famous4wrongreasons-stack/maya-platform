@@ -73,7 +73,11 @@ jobs:
       - run: npm run prisma:seed
       - run: npm run typecheck
       - run: npm run typecheck:scripts
+      # a435a8d0 / job 117743884744 exhausted V8's default 4 GiB heap.
+      # The unchanged full typed lint passes with 6 GiB; keep all files/rules.
       - run: npm run lint
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
       # K3 structural checks (widget gate pipeline): one ordered array, no silent pass, the owner-ports
       # boundary, the dark entitlement. Blocking: a red check fails the job.
       - run: node scripts/k3-gateway-check.mjs
