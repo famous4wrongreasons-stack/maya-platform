@@ -234,6 +234,7 @@ try {
     candidateSha: process.env.MAYA_PROOF_CANDIDATE,
     buildDigest: policy.buildDigest(true),
   });
+  result.buildDigest = command.certificate.buildDigest;
   command.authorization = proof.signOwner({
     ...command.authorization.payload,
     candidateSha: process.env.MAYA_PROOF_CANDIDATE,

@@ -1,0 +1,41 @@
+{
+  "contract": "maya.native-compiled-build-regression/1",
+  "diagnosedCandidate": "6667fca2f8c29e9a12cedbe47830d4694bd72a97",
+  "rootCause": "The isolated compiled proof invoked nest build, while Docker and package scripts use npm run build (Nest followed by build:preflight). The latter recompiles 958 source JS files without sourceMappingURL comments. The strict installed-build digest correctly refused byte parity.",
+  "productDefectProven": false,
+  "harnessDefectProven": true,
+  "productSourceChanged": false,
+  "before": {
+    "command": "nest build",
+    "buildDigest": "8946b8659a21e806509dbafdbf51da9a40593a6068b23071ccfc0d2f7e3b87b8",
+    "exactImageParity": "FAIL"
+  },
+  "canonicalControl": {
+    "command": "nest build + tsc --project tsconfig.preflight.json",
+    "buildDigest": "a7f07289450289f4669bcd3dfbfc1218fb7e9df4a7c60de4734142c9e14955bf",
+    "exactImageParity": "PASS",
+    "sameSourceFiles": 992,
+    "changedSourceMapComments": 958,
+    "otherJavaScriptDifferences": 0
+  },
+  "correction": "Use the existing package build command; record compiled digest and assert both compiled scenarios use the same unchanged digest. Do not weaken build hashing.",
+  "finalProofStatus": "REQUIRES_FRESH_COMMITTED_HEAD_RUN",
+  "priorCandidateReceiptsAdmitted": false,
+  "evidence": [
+    {
+      "file": "image-parity-diagnosis/initial-failure.json",
+      "sha256": "3852aaffae803d75a71ad6405a5c2cfa1b1c8a163dc626848e9da6795df39094"
+    },
+    {
+      "file": "image-parity-diagnosis/canonical-build-comparison.json",
+      "sha256": "6779aa5907af8965dbb654c4c197bfcb0e8263865d6026aafa268038b3bb09ad"
+    },
+    {
+      "file": "image-parity-diagnosis/mac-builder-comparison.json",
+      "sha256": "04a72773b425e0c08d0c4c0b6887d5157500d0b5b16a6e83ec3c887e858963f0"
+    }
+  ],
+  "productionEffects": 0,
+  "realProviderEffects": 0,
+  "timestamp": "2026-10-18T19:43:15.139992+00:00"
+}

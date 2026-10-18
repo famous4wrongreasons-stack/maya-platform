@@ -7,6 +7,7 @@ import { spawn, execFileSync } from 'node:child_process';
 import { randomBytes, createHash } from 'node:crypto';
 import { parseArgs } from 'node:util';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 const { values } = parseArgs({
   options: {
     run: { type: 'boolean' },
@@ -146,10 +147,18 @@ try {
     `-h 127.0.0.1 -p ${port} -k '' -c shared_buffers=32MB -c max_connections=20`,
     'start',
   ]);
-  await run('backend-build', process.execPath, [
-    'node_modules/@nestjs/cli/bin/nest.js',
-    'build',
-  ]);
+  // Match Docker's complete build, including the preflight compilation pass.
+  // Running Nest alone leaves different bytes under dist/src.
+  await run('backend-build', 'npm', ['run', 'build']);
+  process.chdir(backend);
+  const require = createRequire(import.meta.url);
+  require('reflect-metadata');
+  const {
+    WidgetReleasePolicy,
+  } = require('../dist/src/entitlements/widget-release-policy.service.js');
+  const policy = new WidgetReleasePolicy();
+  m.buildDigest = policy.buildDigest(true);
+  save();
   m.proofs = [];
   for (const [label, suffix, flags] of [
     ['lifecycle', 'a', []],
@@ -181,8 +190,11 @@ try {
     const result = JSON.parse(bytes);
     assert.equal(result.status, 'passed');
     assert.equal(result.applicationStopped, true);
+    assert.equal(result.buildDigest, m.buildDigest);
+    assert.equal(policy.buildDigest(true), m.buildDigest);
     m.proofs.push({
       mode: label,
+      buildDigest: result.buildDigest,
       sha256: createHash('sha256').update(bytes).digest('hex'),
       checks: result.checks.length,
     });
