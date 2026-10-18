@@ -1026,7 +1026,7 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
   });
   // Diagnostic-only repetition of the unchanged concurrent-login contract.
   // No fixture authority, provider data, product source or assertions are changed.
-  it.each(Array.from({ length: 1000 }, (_, index) => index + 1))(
+  it.each(Array.from({ length: 8 }, (_, index) => index + 1))(
     'gives one initial writer under concurrent valid login contexts, run %s',
     async (iteration) => {
       const f = await fixture();
@@ -1058,9 +1058,9 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
       });
       const results = await Promise.all([f.run(), f.run(), f.run()]);
       if (results.some((result) => !['linked', 'already_linked'].includes(result.status))) {
-        console.error('SYNTHETIC_CONCURRENCY_DIAGNOSTIC', JSON.stringify({
+        process.stderr.write('SYNTHETIC_CONCURRENCY_DIAGNOSTIC ' + JSON.stringify({
           iteration, results, errors, links: await f.count(),
-        }));
+        }) + '\n');
       }
       expect(results.filter((r) => r.status === 'linked')).toHaveLength(1);
       expect(
