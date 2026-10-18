@@ -17,8 +17,23 @@ const { values } = parseArgs({
     counterfactual: { type: 'string' },
     repository: { type: 'string' },
     'create-egress': { type: 'boolean' },
+    'lifecycle-wire': { type: 'boolean' },
+    'lifecycle-ae': { type: 'boolean' },
   },
 });
+assert(
+  !values['lifecycle-wire'] || values['create-egress'],
+  'Lifecycle requires bounded egress',
+);
+assert(
+  !values['lifecycle-wire'] || values.counterfactual !== 'definite-outcome',
+);
+assert(
+  !values['lifecycle-ae'] ||
+    (values['create-egress'] &&
+      !values['lifecycle-wire'] &&
+      !values.counterfactual),
+);
 const candidate = '6356db1875545337e34b6c8888b7ca858bb64361';
 assert.equal(values.run, true, 'Explicit local --run required');
 assert(values.source && path.isAbsolute(values.source));
@@ -50,7 +65,9 @@ const tooling = path.resolve(
 );
 const spec = path.join(
   tooling,
-  'test/widgets-diagnostics/native-provider-socket-loss.probe-spec.ts',
+  values['lifecycle-wire']
+    ? 'test/widgets-diagnostics/native-provider-lifecycle.probe-spec.ts'
+    : 'test/widgets-diagnostics/native-provider-socket-loss.probe-spec.ts',
 );
 const sha = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const git = (args) =>
@@ -300,6 +317,7 @@ const environment = {
   JEST_NATIVE_SOCKET_OUTPUT: path.join(output, 'observations.json'),
   JEST_NATIVE_SOCKET_COUNTERFACTUAL: values.counterfactual ?? '',
   ...(proxyModule ? { JEST_NATIVE_CREATE_EGRESS: proxyModule } : {}),
+  ...(values['lifecycle-ae'] ? { JEST_NATIVE_LIFECYCLE_AE: '1' } : {}),
 };
 const sandbox =
   '(version 1)(allow default)(deny network-outbound)(allow network-outbound (remote ip "localhost:*"))';
@@ -309,6 +327,8 @@ const receipt = {
   startedAt: new Date().toISOString(),
   status: 'running',
   counterfactual: values.counterfactual ?? null,
+  lifecycleWireOnly: Boolean(values['lifecycle-wire']),
+  lifecycleActionEngine: Boolean(values['lifecycle-ae']),
   mutation,
   createEgress: proxyProof,
   runnerSha256: sha(fs.readFileSync(fileURLToPath(import.meta.url))),
@@ -469,7 +489,11 @@ try {
     assert(match, 'Missing Node test summary: ' + key);
     return Number(match[1]);
   };
-  assert.equal(count('tests'), 2, 'Both healthy and loss cases must execute');
+  assert.equal(
+    count('tests'),
+    values['lifecycle-wire'] ? 3 : 2,
+    'All healthy/loss cases must execute',
+  );
   assert.equal(count('cancelled'), 0);
   assert.equal(count('skipped'), 0);
   const observations = JSON.parse(
@@ -480,9 +504,36 @@ try {
     'SUCCEEDED',
     'Healthy native wire baseline must pass',
   );
+  if (values['lifecycle-ae']) {
+    assert.equal(observations.lifecycleAE?.status, 'PASS');
+    assert.equal(observations.lifecycleAE?.sameAppointment, true);
+    assert.equal(observations.lifecycleAE?.providerCreate, 1);
+    assert.equal(observations.lifecycleAE?.providerPut, 1);
+    assert.equal(observations.lifecycleAE?.providerDelete, 1);
+    assert.equal(
+      observations.lifecycleAE?.normalAndConcurrentMoveRetries,
+      true,
+    );
+    assert.equal(
+      observations.lifecycleAE?.normalAndConcurrentCancelRetries,
+      true,
+    );
+  }
   assert.equal(observations.providerContractFailures, 0);
   assert.equal(observations.fetchIdentityUnchanged, true);
-  if (values.counterfactual) {
+  if (values['lifecycle-wire'] && values.counterfactual) {
+    assert.equal(result.exitCode, 1);
+    assert.equal(count('fail'), 2);
+    for (const mode of ['move-loss', 'cancel-loss']) {
+      const item = observations[mode];
+      assert.equal(item.errorClass, 'CrmProviderResponseError');
+      assert.equal(item.persistedBookings, 1);
+      assert.equal(item.posts, 1);
+      assert.equal(item.puts + item.deletes, 1);
+      assert.equal(item.socketLosses, 1);
+    }
+    receipt.status = 'counterfactual-detected';
+  } else if (values.counterfactual) {
     assert.equal(result.exitCode, 1);
     assert.equal(
       count('fail'),

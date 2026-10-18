@@ -1,0 +1,202 @@
+{
+  "contract": "maya.native-lifecycle-preparation/1",
+  "status": "LOCAL_PROOFS_PASS_NOT_RELEASE_CERTIFICATION",
+  "parentToolingCommit": "71df972014e11f781b44a05c4620441c67ef1725",
+  "applicationCandidate": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "profile": "closed-input.no-handoff.no-price-goods@1",
+  "codeSha256": {
+    "maya-saas-backend/scripts/phone-native-create-egress.mjs": "5c000a72496d2cd1c8879ca124dec3cba0bdb77c93cea81ad386c0b58cf1ab19",
+    "maya-saas-backend/scripts/phone-native-create-egress.test.mjs": "27c9075bf7ac8bf07f6479e99e8cfcd8d88cbd6cab49999b173927bee6887b85",
+    "maya-saas-backend/scripts/phone-native-create-egress-mutation.mjs": "01d0f49ccb5d10c75b51002b14c834e1aef12495bb7205294d484bbca11ac66f",
+    "maya-saas-backend/scripts/native-provider-socket-proof.mjs": "3fd843c131f6ef7b271aebee924a96c336b1c2e0c29c09d0afffef0f48370094",
+    "maya-saas-backend/test/widgets-diagnostics/native-provider-socket-loss.probe-spec.ts": "cf66690cf0b1c41feabce6e698d1a3270b73fb1b73a1ee91edc96cefaaeabfa0",
+    "maya-saas-backend/test/widgets-diagnostics/native-provider-lifecycle.probe-spec.ts": "e4518406515664a1f234ef2fa330be4c51183d49b98f0724947742f781754a93"
+  },
+  "artifacts": [
+    {
+      "artifact": "wire-final-manifest.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/wire-final/manifest.json",
+      "sha256": "28f8a8638b9454ee7e4b2093cb4408b382a0c7f326994c499413ccec7a4774db",
+      "size": 3010,
+      "containsSensitiveData": false,
+      "basis": "SYNTHETIC_LOCAL_ONLY"
+    },
+    {
+      "artifact": "wire-final-observations.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/wire-final/observations.json",
+      "sha256": "7f22ab3545c0368a24c17067a6e7445d6502aad87b100dd371f7c637b32a5254",
+      "size": 1319,
+      "containsSensitiveData": false,
+      "basis": "SYNTHETIC_LOCAL_ONLY"
+    },
+    {
+      "artifact": "wire-final-native-socket.log",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/wire-final/native-socket.log",
+      "sha256": "a7a006d8727b9946bf096841e41feb5beff47e320b8ee91042b76c19bd615781",
+      "size": 1160,
+      "committed": false,
+      "reason": "Full synthetic output retained locally; structured observations archived",
+      "containsSensitiveData": false
+    },
+    {
+      "artifact": "wire-counterfactual-final-manifest.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/wire-counterfactual-final/manifest.json",
+      "sha256": "2c4259a5ea8907ab76b6461d8b2dd03dae4dc283b4335044f2f352bb9c2bf864",
+      "size": 3303,
+      "containsSensitiveData": false,
+      "basis": "SYNTHETIC_LOCAL_ONLY"
+    },
+    {
+      "artifact": "wire-counterfactual-final-observations.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/wire-counterfactual-final/observations.json",
+      "sha256": "e275793662dd9ea2c8ee69f5f52573cb5e7153b4685825e39defdff4ef466b6c",
+      "size": 1229,
+      "containsSensitiveData": false,
+      "basis": "SYNTHETIC_LOCAL_ONLY"
+    },
+    {
+      "artifact": "wire-counterfactual-final-native-socket.log",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/wire-counterfactual-final/native-socket.log",
+      "sha256": "561405699e6214524535ff14befbda1d57c08617f7d5cb7a331decce63b5529d",
+      "size": 3315,
+      "committed": false,
+      "reason": "Full synthetic output retained locally; structured observations archived",
+      "containsSensitiveData": false
+    },
+    {
+      "artifact": "ae-final-manifest.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/ae-final/manifest.json",
+      "sha256": "eeba18987bd63cc0291e0733766aa37b136ddb46b05e6b16ff3ca4ff2a867f4c",
+      "size": 3008,
+      "containsSensitiveData": false,
+      "basis": "SYNTHETIC_LOCAL_ONLY"
+    },
+    {
+      "artifact": "ae-final-observations.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/ae-final/observations.json",
+      "sha256": "a9ba51ab31e82874042c1d38277509a84d7f7ee4b89f9f28277088791a06e006",
+      "size": 3231,
+      "containsSensitiveData": false,
+      "basis": "SYNTHETIC_LOCAL_ONLY"
+    },
+    {
+      "artifact": "ae-final-native-socket.log",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/ae-final/native-socket.log",
+      "sha256": "55ba7b1cd8801ed7d163be9ab29a4605b1ab1965eb3abc38f1a3e072ae86bf0a",
+      "size": 1657,
+      "committed": false,
+      "reason": "Full synthetic output retained locally; structured observations archived",
+      "containsSensitiveData": false
+    },
+    {
+      "artifact": "unit-mutations-manifest.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/unit-mutations-final/manifest.json",
+      "sha256": "4048bfd6730adb3ff1371185271292483fde6fcc31bce73dbd0ad192c321efb8",
+      "size": 3349,
+      "containsSensitiveData": false,
+      "basis": "SYNTHETIC_LOCAL_ONLY"
+    },
+    {
+      "artifact": "unit-baseline.tap",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/unit-mutations-final/baseline/unit.tap",
+      "sha256": "742c6416d439245bbf430464546ab1b677a63a6550be7a6153b52126b8f51ffb",
+      "size": 18308,
+      "committed": false,
+      "reason": "Full synthetic TAP retained locally; summary and exact hash archived",
+      "containsSensitiveData": false
+    },
+    {
+      "artifact": "unit-preservation.tap",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/unit-mutations-final/preservation/unit.tap",
+      "sha256": "ae3a58b081318b8a5202d2aafffe5cbd242e7d736f03b0bcee151ba4c8e1c728",
+      "size": 30284,
+      "committed": false,
+      "reason": "Full synthetic TAP retained locally; summary and exact hash archived",
+      "containsSensitiveData": false
+    },
+    {
+      "artifact": "unit-stale-read.tap",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/unit-mutations-final/stale-read/unit.tap",
+      "sha256": "e52eb8ed09e5504ec09053e7fe36009fa74118dd765b69b02dfdb9e603e960b3",
+      "size": 19257,
+      "committed": false,
+      "reason": "Full synthetic TAP retained locally; summary and exact hash archived",
+      "containsSensitiveData": false
+    },
+    {
+      "artifact": "unit-echo-receipt.tap",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/unit-mutations-final/echo-receipt/unit.tap",
+      "sha256": "5c5abd36c677071c22903a1794a1ccad07ade70be94ff35b5d63c0cce3c94be2",
+      "size": 19891,
+      "committed": false,
+      "reason": "Full synthetic TAP retained locally; summary and exact hash archived",
+      "containsSensitiveData": false
+    },
+    {
+      "artifact": "unit-unknown-to-rejection.tap",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/unit-mutations-final/unknown-to-rejection/unit.tap",
+      "sha256": "cf27d9ea81080c29a7f27d175b3ce92f9b706d9a679b772a64e59d8848e88d96",
+      "size": 49381,
+      "committed": false,
+      "reason": "Full synthetic TAP retained locally; summary and exact hash archived",
+      "containsSensitiveData": false
+    },
+    {
+      "artifact": "unit-uncertain-write.tap",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-20261018/unit-mutations-final/uncertain-write/unit.tap",
+      "sha256": "6d0c3722191d78d839a2f49f2d61a888697e2b6db2cf0b90a4d68d9c1f413314",
+      "size": 19257,
+      "committed": false,
+      "reason": "Full synthetic TAP retained locally; summary and exact hash archived",
+      "containsSensitiveData": false
+    }
+  ],
+  "freshTests": {
+    "unit": {
+      "pass": 90,
+      "fail": 0,
+      "skip": 0
+    },
+    "unitMutationsDetected": 5,
+    "nativeWire": {
+      "pass": 3,
+      "fail": 0
+    },
+    "nativeWireCounterfactual": {
+      "healthyPass": 1,
+      "expectedDetectedFailures": 2
+    },
+    "nativeActionEngine": {
+      "pass": 2,
+      "fail": 0
+    }
+  },
+  "qualifications": {
+    "healthyLifecycleViaCanonicalHttpAndActionEngine": true,
+    "moveCancelLostResponse": "NATIVE_ADAPTER_AND_TRANSPORT_ONLY",
+    "rescheduleCancelWidgetAcceptance": false,
+    "iphoneAcceptance": false,
+    "realPlatformExecutionAdmission": false
+  },
+  "effects": {
+    "realProviderCalls": 0,
+    "modelCalls": 0,
+    "ownerDatabaseAccess": false,
+    "productionChanges": 0,
+    "serverDeploy": false,
+    "iphoneChanges": false,
+    "grants": 0,
+    "keychainAccess": false,
+    "migrationsOutsideDisposableProofDatabases": 0
+  },
+  "certification": "NOT_ISSUED",
+  "release_admissible": false,
+  "fullMutationProgramme": "INCOMPLETE_V6_FINAL_RECEIPT_UNAVAILABLE",
+  "ownerDeletions": {
+    "count": 1333,
+    "pathsSha256": "2e476be9ddc949e1031ec446c347da5a411a77d349be043d82b1f7f76136897a",
+    "restored": 0,
+    "staged": 0
+  },
+  "gitPush": "NOT_PERFORMED_IN_THIS_UNIT"
+}

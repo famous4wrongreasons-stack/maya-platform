@@ -9,6 +9,7 @@ import {
   nativeCreateEgress,
   validateCreateEgressScope,
   CREATE_EGRESS_CONTRACT,
+  LIFECYCLE_EGRESS_CONTRACT,
   CREATE_EGRESS_LIMITS,
 } from './phone-native-create-egress.mjs';
 
@@ -468,4 +469,427 @@ test('duplicate date, widened window and substituted service query are refused',
       403,
     );
   assert.equal(f.calls.length, 0);
+});
+
+const lifecycleScope = {
+  ...scope,
+  contract: LIFECYCLE_EGRESS_CONTRACT,
+  maxReschedules: 1,
+  maxCancels: 1,
+  expiresAt: new Date(now + 300000).toISOString(),
+};
+const recordRoute = '/api/v1/record/450001/123';
+const providerRecord = {
+  id: 123,
+  staff: { id: 71 },
+  client: {
+    id: 91,
+    phone: '79990000001',
+    name: 'Synthetic client',
+    surname: 'Fixture',
+    email: 'fixture@example.invalid',
+  },
+  services: [{ id: 81, cost: 1200, first_cost: 1500, discount: 20 }],
+  seance_length: 1800,
+  attendance: 0,
+  comment: 'synthetic preserved comment',
+};
+const moveBody = {
+  staff_id: 71,
+  datetime: '2026-10-19T18:00:00',
+  seance_length: 1800,
+  save_if_busy: false,
+  send_sms: false,
+  client: { ...providerRecord.client, phone: '+79990000001' },
+  services: [{ id: 81, amount: 1, cost: 1200, first_cost: 1500, discount: 20 }],
+  attendance: 0,
+  comment: providerRecord.comment,
+};
+const json = (data) => new Response(JSON.stringify({ success: true, data }));
+async function lifecycleFixture(t, options = {}) {
+  return fixture(t, {
+    scope: lifecycleScope,
+    fetch: async (url, init) => {
+      if (init.method === 'POST')
+        return new Response(options.createReply ?? reply);
+      if (init.method === 'GET')
+        return options.read ? options.read(url, init) : json(providerRecord);
+      return options.write ? options.write(url, init) : json({});
+    },
+  });
+}
+async function createdAndRead(f) {
+  assert.equal((await f.request()).status, 200);
+  assert.equal((await f.request(recordRoute, 'GET', null)).status, 200);
+}
+
+test('V2 scope is fixed; V1 cannot acquire lifecycle budgets', () => {
+  assert.deepEqual(
+    validateCreateEgressScope(lifecycleScope, now),
+    lifecycleScope,
+  );
+  for (const patch of [
+    { maxReschedules: 2 },
+    { maxCancels: 0 },
+    { recordId: '123' },
+    { contract: CREATE_EGRESS_CONTRACT },
+    { contract: 'generic-lifecycle' },
+  ])
+    assert.throws(() =>
+      validateCreateEgressScope({ ...lifecycleScope, ...patch }, now),
+    );
+});
+test('V2 confirmed create → fresh exact read → time-only PUT → DELETE preserves bytes', async (t) => {
+  const f = await lifecycleFixture(t);
+  await createdAndRead(f);
+  assert.equal((await f.request(recordRoute, 'PUT', moveBody)).status, 200);
+  assert.equal((await f.request(recordRoute, 'DELETE', null)).status, 200);
+  assert.deepEqual(
+    f.calls.map((x) => x[1].method),
+    ['POST', 'GET', 'PUT', 'DELETE'],
+  );
+  assert.equal(f.calls[2][1].body.toString(), JSON.stringify(moveBody));
+  assert.equal(f.calls[3][1].body, undefined);
+  assert.equal(f.snapshot().reschedules, 1);
+  assert.equal(f.snapshot().cancels, 1);
+  const ledger = fs.readFileSync(f.ledgerPath, 'utf8');
+  assert(
+    !ledger.includes('79990000001') &&
+      !ledger.includes('fixture@example.invalid'),
+  );
+  assert(
+    !ledger.includes('synthetic preserved comment') && !ledger.includes(auth),
+  );
+});
+for (const method of ['GET', 'PUT', 'DELETE']) {
+  test(
+    'V2 caller record id cannot replace missing provider create receipt: ' +
+      method,
+    async (t) => {
+      const f = await lifecycleFixture(t);
+      assert.equal(
+        (
+          await f.request(
+            recordRoute,
+            method,
+            method === 'PUT' ? moveBody : null,
+          )
+        ).status,
+        403,
+      );
+      assert.equal(f.calls.length, 0);
+    },
+  );
+  test(
+    'V2 foreign record/company denied after valid create: ' + method,
+    async (t) => {
+      const f = await lifecycleFixture(t);
+      await createdAndRead(f);
+      for (const route of [
+        '/api/v1/record/450002/123',
+        '/api/v1/record/450001/124',
+        recordRoute + '?include=clients',
+      ])
+        assert.equal(
+          (await f.request(route, method, method === 'PUT' ? moveBody : null))
+            .status,
+          403,
+        );
+      assert.equal(f.calls.length, 2);
+    },
+  );
+}
+for (const data of [
+  [{ id: 1 }],
+  [{ id: 1, record_id: 0 }],
+  [{ id: 2, record_id: 123 }],
+  [
+    { id: 1, record_id: 123 },
+    { id: 1, record_id: 124 },
+  ],
+  { id: 1, record_id: 123 },
+])
+  test(
+    'V2 ambiguous/echo-only receipt never binds a record: ' +
+      JSON.stringify(data),
+    async (t) => {
+      const f = await lifecycleFixture(t, {
+        createReply: JSON.stringify({ success: true, data }),
+      });
+      assert.deepEqual(await f.request(), { socketLost: true });
+      assert.equal(f.snapshot().recordBound, false);
+      assert.equal((await f.request(recordRoute, 'DELETE', null)).status, 403);
+      assert.equal(f.calls.length, 1);
+    },
+  );
+for (const [name, patch] of [
+  ['price', { services: [{ ...moveBody.services[0], cost: 1 }] }],
+  ['discount', { services: [{ ...moveBody.services[0], discount: 100 }] }],
+  [
+    'original price',
+    { services: [{ ...moveBody.services[0], first_cost: 1 }] },
+  ],
+  ['service', { services: [{ ...moveBody.services[0], id: 82 }] }],
+  ['staff', { staff_id: 72 }],
+  ['duration', { seance_length: 3600 }],
+  ['client', { client: { ...moveBody.client, id: 92 } }],
+  ['phone', { client: { ...moveBody.client, phone: '+79990000002' } }],
+  ['notes', { comment: 'changed' }],
+  ['attendance', { attendance: 1 }],
+  ['SMS', { send_sms: true }],
+  ['busy override', { save_if_busy: true }],
+  ['extra field', { handoff: true }],
+  ['invalid day', { datetime: '2026-02-30T18:00:00' }],
+  ['offset wire', { datetime: '2026-10-19T18:00:00+03:00' }],
+])
+  test('V2 time-only move refuses changed ' + name, async (t) => {
+    const f = await lifecycleFixture(t);
+    await createdAndRead(f);
+    assert.equal(
+      (await f.request(recordRoute, 'PUT', { ...moveBody, ...patch })).status,
+      403,
+    );
+    assert.equal(f.calls.length, 2);
+  });
+test('V2 missing/stale read cannot supply a move', async (t) => {
+  const f = await lifecycleFixture(t);
+  assert.equal((await f.request()).status, 200);
+  assert.equal((await f.request(recordRoute, 'PUT', moveBody)).status, 403);
+  assert.equal((await f.request(recordRoute, 'GET', null)).status, 200);
+  f.setTime(now + 60000);
+  assert.equal((await f.request(recordRoute, 'PUT', moveBody)).status, 403);
+  assert.equal(f.calls.length, 2);
+});
+for (const changed of [
+  { ...providerRecord, id: 124 },
+  {
+    ...providerRecord,
+    client: { ...providerRecord.client, phone: '79990000002' },
+  },
+])
+  test(
+    'V2 substituted provider read cannot authorize a move: ' +
+      changed.id +
+      changed.client.phone,
+    async (t) => {
+      const f = await lifecycleFixture(t, { read: () => json(changed) });
+      assert.equal((await f.request()).status, 200);
+      assert.equal((await f.request(recordRoute, 'GET', null)).status, 403);
+      assert.equal((await f.request(recordRoute, 'PUT', moveBody)).status, 403);
+      assert.equal(f.calls.length, 2);
+    },
+  );
+for (const method of ['PUT', 'DELETE']) {
+  test(
+    'V2 concurrent ' + method + ' is dispatched once, later replay refused',
+    async (t) => {
+      let unblock, started;
+      const wait = new Promise((resolve) => {
+        started = resolve;
+      });
+      const f = await lifecycleFixture(t, {
+        write: async () => {
+          started();
+          await new Promise((resolve) => {
+            unblock = resolve;
+          });
+          return json({});
+        },
+      });
+      await createdAndRead(f);
+      const first = f.request(
+        recordRoute,
+        method,
+        method === 'PUT' ? moveBody : null,
+      );
+      await wait;
+      const repeated = await Promise.all(
+        Array.from({ length: 6 }, () =>
+          f.request(recordRoute, method, method === 'PUT' ? moveBody : null),
+        ),
+      );
+      assert(repeated.every((r) => r.status === 403));
+      // Cross-operation concurrency must not reorder move/cancel either.
+      assert.equal(
+        (
+          await f.request(
+            recordRoute,
+            method === 'PUT' ? 'DELETE' : 'PUT',
+            method === 'PUT' ? null : moveBody,
+          )
+        ).status,
+        403,
+      );
+      unblock();
+      assert.equal((await first).status, 200);
+      assert.equal(
+        (
+          await f.request(
+            recordRoute,
+            method,
+            method === 'PUT' ? moveBody : null,
+          )
+        ).status,
+        403,
+      );
+      assert.equal(f.calls.length, 3);
+    },
+  );
+  test(
+    'V2 ' +
+      method +
+      ' response loss stays uncertain and blocks further effects',
+    async (t) => {
+      const f = await lifecycleFixture(t, {
+        write: async () => {
+          throw new TypeError('synthetic lost response');
+        },
+      });
+      await createdAndRead(f);
+      assert.deepEqual(
+        await f.request(
+          recordRoute,
+          method,
+          method === 'PUT' ? moveBody : null,
+        ),
+        { socketLost: true },
+      );
+      assert.equal(f.snapshot().lifecycleUncertain, true);
+      for (const m of ['PUT', 'DELETE'])
+        assert.equal(
+          (await f.request(recordRoute, m, m === 'PUT' ? moveBody : null))
+            .status,
+          403,
+        );
+      assert.equal(f.calls.length, 3);
+    },
+  );
+}
+test('V2 DELETE 204 is a genuine empty native cancellation response', async (t) => {
+  const f = await lifecycleFixture(t, {
+    write: () => new Response(null, { status: 204 }),
+  });
+  await createdAndRead(f);
+  const result = await f.request(recordRoute, 'DELETE', null);
+  assert.equal(result.status, 204);
+  assert.equal(result.body, '');
+  assert.equal(f.snapshot().cancelled, true);
+});
+test('V2 deletion request cannot carry a body', async (t) => {
+  const f = await lifecycleFixture(t);
+  await createdAndRead(f);
+  assert.equal((await f.request(recordRoute, 'DELETE', {})).status, 403);
+  assert.equal(f.calls.length, 2);
+});
+test('V2 record read arriving after a move claim cannot restore stale write input', async (t) => {
+  let unblock, started;
+  let count = 0;
+  const wait = new Promise((resolve) => {
+    started = resolve;
+  });
+  const f = await lifecycleFixture(t, {
+    read: async () => {
+      if (++count > 1) {
+        started();
+        await new Promise((resolve) => {
+          unblock = resolve;
+        });
+      }
+      return json(providerRecord);
+    },
+  });
+  await createdAndRead(f);
+  const stale = f.request(recordRoute, 'GET', null);
+  await wait;
+  assert.equal((await f.request(recordRoute, 'DELETE', null)).status, 200);
+  unblock();
+  assert.equal((await stale).status, 200);
+  assert.equal((await f.request(recordRoute, 'PUT', moveBody)).status, 403);
+});
+
+for (const method of ['PUT', 'DELETE']) {
+  for (const reason of ['expiry', 'revocation', 'admission', 'credential']) {
+    test(
+      'V2 ' + method + ' pre-dispatch ' + reason + ' refuses without a write',
+      async (t) => {
+        const f = await lifecycleFixture(t);
+        await createdAndRead(f);
+        if (reason === 'expiry') f.setTime(now + 300000);
+        if (reason === 'revocation') f.revoke();
+        if (reason === 'admission') f.deny();
+        const headers =
+          reason === 'credential'
+            ? { authorization: auth.replace('PARTNER', 'FOREIGN') }
+            : {};
+        assert.equal(
+          (
+            await f.request(
+              recordRoute,
+              method,
+              method === 'PUT' ? moveBody : null,
+              headers,
+            )
+          ).status,
+          403,
+        );
+        assert.equal(f.calls.length, 2);
+      },
+    );
+  }
+  for (const reason of ['expiry', 'revocation']) {
+    test(
+      'V2 ' +
+        method +
+        ' post-dispatch ' +
+        reason +
+        ' is uncertainty, never definite refusal',
+      async (t) => {
+        let f;
+        f = await lifecycleFixture(t, {
+          write: () => {
+            if (reason === 'expiry') f.setTime(now + 300000);
+            else f.revoke();
+            return json({});
+          },
+        });
+        await createdAndRead(f);
+        assert.deepEqual(
+          await f.request(
+            recordRoute,
+            method,
+            method === 'PUT' ? moveBody : null,
+          ),
+          { socketLost: true },
+        );
+        assert.equal(f.snapshot().lifecycleUncertain, true);
+        assert.equal(f.calls.length, 3);
+      },
+    );
+  }
+}
+test('V2 price/goods/HANDOFF endpoints stay unavailable', async (t) => {
+  const f = await lifecycleFixture(t);
+  await createdAndRead(f);
+  for (const [method, route] of [
+    ['PATCH', '/api/v1/company/450001/services/81'],
+    ['POST', '/api/v1/storage_operations/operation/450001'],
+    ['POST', '/api/v1/handoff'],
+  ])
+    assert.equal((await f.request(route, method, {})).status, 403);
+  assert.equal(f.calls.length, 2);
+});
+test('V2 durable write reservation failure refuses before PUT and revokes', async (t) => {
+  const f = await lifecycleFixture(t);
+  await createdAndRead(f);
+  const fsync = fs.fsyncSync;
+  fs.fsyncSync = () => {
+    throw new Error('synthetic fsync failure');
+  };
+  try {
+    assert.equal((await f.request(recordRoute, 'PUT', moveBody)).status, 403);
+  } finally {
+    fs.fsyncSync = fsync;
+  }
+  assert.equal(f.calls.length, 2);
+  assert.equal(f.snapshot().revoked, true);
 });

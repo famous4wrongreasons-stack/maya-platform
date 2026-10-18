@@ -51,6 +51,7 @@ const output = process.env.JEST_NATIVE_SOCKET_OUTPUT;
 assert.ok(output, 'Use native-provider-socket-proof.mjs');
 const HEALTHY = 450001,
   LOSS = 450002;
+const lifecycleAE = process.env.JEST_NATIVE_LIFECYCLE_AE === '1';
 const capability = 'crm.appointment.create.v1';
 const nativeFetch = globalThis.fetch;
 const observations: Record<string, unknown> = {
@@ -99,6 +100,8 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       socketLosses: number;
       reconciliations: number;
       reads: number;
+      puts: number;
+      deletes: number;
     }
   >();
   const errors: string[] = [];
@@ -111,10 +114,15 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
   const rows = async (company: number) =>
     (
       await ledger.query(
-        `SELECT id::int, payload FROM ${schema}.bookings WHERE company_id=$1 ORDER BY id`,
+        `SELECT id::int, payload, moved_start, cancelled FROM ${schema}.bookings WHERE company_id=$1 ORDER BY id`,
         [company],
       )
-    ).rows as Array<{ id: number; payload: Record<string, unknown> }>;
+    ).rows as Array<{
+      id: number;
+      payload: Record<string, unknown>;
+      moved_start: string | null;
+      cancelled: boolean;
+    }>;
 
   beforeAll(async () => {
     assert.equal(process.env.YCLIENTS_PARTNER_TOKEN, undefined);
@@ -129,7 +137,7 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
     // Surrogate row identity only: repeated identical POSTs create repeated rows.
     // There is deliberately no company/payload uniqueness or provider idempotency.
     await ledger.query(
-      `CREATE TABLE ${schema}.bookings (id bigserial primary key, company_id integer not null, payload jsonb not null)`,
+      `CREATE TABLE ${schema}.bookings (id bigserial primary key, company_id integer not null, payload jsonb not null, moved_start text, cancelled boolean not null default false)`,
     );
     server = createServer((req, res) => {
       void (async () => {
@@ -209,7 +217,39 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
                 'date',
                 'service_ids[]',
               ]);
-              reply([{ time: '17:00', seance_length: 1800 }]);
+              reply([
+                {
+                  time:
+                    lifecycleAE && company === HEALTHY && counter.posts
+                      ? '18:00'
+                      : '17:00',
+                  seance_length: 1800,
+                },
+              ]);
+            } else if (lifecycleAE && route.startsWith(`record/${company}/`)) {
+              const row = (await rows(company)).find(
+                (r) => String(r.id) === route.split('/')[2],
+              );
+              assert.ok(row);
+              reply({
+                id: row.id,
+                company_id: company,
+                staff_id: 71,
+                staff: { id: 71, name: 'Артём' },
+                datetime: row.moved_start ?? `${day}T17:00:00`,
+                seance_length: 1800,
+                services: [
+                  { id: 81, cost: 1500, first_cost: 1500, discount: 0 },
+                ],
+                client: {
+                  id: 901,
+                  name: row.payload.fullname,
+                  phone: row.payload.phone,
+                },
+                attendance: 0,
+                comment: row.payload.comment,
+                deleted: row.cancelled,
+              });
             } else throw new Error('Unadmitted read route');
             return;
           }
@@ -221,7 +261,49 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
               'Finite synthetic request size',
             );
           }
-          const payload: unknown = JSON.parse(raw);
+          const payload: unknown = raw ? JSON.parse(raw) : null;
+          if (
+            lifecycleAE &&
+            company === HEALTHY &&
+            ['PUT', 'DELETE'].includes(req.method ?? '')
+          ) {
+            const row = (await rows(company)).find(
+              (r) => route === `record/${company}/${r.id}`,
+            );
+            assert.ok(row);
+            if (req.method === 'PUT') {
+              expect(payload).toMatchObject({
+                staff_id: 71,
+                datetime: `${day}T18:00:00`,
+                save_if_busy: false,
+                send_sms: false,
+                services: [
+                  {
+                    id: 81,
+                    amount: 1,
+                    cost: 1500,
+                    first_cost: 1500,
+                    discount: 0,
+                  },
+                ],
+              });
+              await ledger.query(
+                `UPDATE ${schema}.bookings SET moved_start=$1 WHERE id=$2`,
+                [`${day}T18:00:00`, row.id],
+              );
+              counter.puts++;
+              reply({});
+            } else {
+              assert.equal(raw, '');
+              await ledger.query(
+                `UPDATE ${schema}.bookings SET cancelled=true WHERE id=$1`,
+                [row.id],
+              );
+              counter.deletes++;
+              reply({});
+            }
+            return;
+          }
           if (req.method === 'POST' && route === `book_record/${company}`) {
             expect(payload).toMatchObject({
               notify_by_email: 0,
@@ -416,16 +498,26 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       socketLosses: 0,
       reconciliations: 0,
       reads: 0,
+      puts: 0,
+      deletes: 0,
     });
     if (process.env.JEST_NATIVE_CREATE_EGRESS) {
-      const { nativeCreateEgress, CREATE_EGRESS_CONTRACT } = await import(
-        process.env.JEST_NATIVE_CREATE_EGRESS
-      );
+      const {
+        nativeCreateEgress,
+        CREATE_EGRESS_CONTRACT,
+        LIFECYCLE_EGRESS_CONTRACT,
+      } = await import(process.env.JEST_NATIVE_CREATE_EGRESS);
       const auth =
         'Bearer SYNTHETIC_NATIVE_SOCKET_PARTNER, User SYNTHETIC_NATIVE_SOCKET_USER';
       const proxy = nativeCreateEgress({
         scope: {
-          contract: CREATE_EGRESS_CONTRACT,
+          contract:
+            lifecycleAE && company === HEALTHY
+              ? LIFECYCLE_EGRESS_CONTRACT
+              : CREATE_EGRESS_CONTRACT,
+          ...(lifecycleAE && company === HEALTHY
+            ? { maxReschedules: 1, maxCancels: 1 }
+            : {}),
           candidate: observations.candidate,
           profile: 'closed-input.no-handoff.no-price-goods@1',
           tenantId: source.tenant.id,
@@ -630,6 +722,88 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       }),
     ).toBe(1);
     expect(errors).toEqual([]);
+    if (lifecycleAE) {
+      const appointment = await db.prisma.appointment.findFirstOrThrow({
+        where: { tenantId: source.tenant.id, source: 'external' },
+      });
+      const moveKey = randomUUID(),
+        cancelKey = randomUUID();
+      const mutate = (
+        action: string,
+        key: string,
+        body: Record<string, unknown> = {},
+      ) =>
+        request(http.app.getHttpServer())
+          .post(`/api/appointments/${appointment.id}/${action}`)
+          .set('Authorization', 'Bearer ' + source.token)
+          .set('Idempotency-Key', key)
+          .send(body);
+      const moved = await mutate('reschedule', moveKey, {
+        start: source.startsAt.slice(0, 10) + 'T15:00:00.000Z',
+      });
+      observations.lifecycleMoveHttp = {
+        status: moved.status,
+        body: moved.status === 201 ? 'SUCCESS' : moved.body,
+      };
+      expect(moved.status).toBe(201);
+      const moveAgain = () =>
+        mutate('reschedule', moveKey, {
+          start: source.startsAt.slice(0, 10) + 'T15:00:00.000Z',
+        });
+      await moveAgain();
+      await Promise.all(Array.from({ length: 6 }, moveAgain));
+      expect(counts(HEALTHY).puts).toBe(1);
+      const cancelled = await mutate('cancel', cancelKey);
+      observations.lifecycleCancelHttp = {
+        status: cancelled.status,
+        body: cancelled.status === 201 ? 'SUCCESS' : cancelled.body,
+      };
+      expect(cancelled.status).toBe(201);
+      await mutate('cancel', cancelKey);
+      await Promise.all(
+        Array.from({ length: 6 }, () => mutate('cancel', cancelKey)),
+      );
+      const actions = await db.prisma.actionExecution.findMany({
+        where: { tenantId: source.tenant.id },
+        select: { capability: true, state: true, executionAttemptCount: true },
+      });
+      for (const name of ['create', 'reschedule', 'cancel'])
+        expect(
+          actions.filter((a) => a.capability === `crm.appointment.${name}.v1`),
+        ).toEqual([
+          {
+            capability: `crm.appointment.${name}.v1`,
+            state: 'SUCCEEDED',
+            executionAttemptCount: 1,
+          },
+        ]);
+      const persisted = await rows(HEALTHY);
+      expect(persisted).toHaveLength(1);
+      expect(persisted[0].cancelled).toBe(true);
+      expect(counts(HEALTHY)).toMatchObject({ posts: 1, puts: 1, deletes: 1 });
+      expect(proxies.get(HEALTHY)!.snapshot()).toMatchObject({ refused: 0 });
+      const final = await db.prisma.appointment.findUniqueOrThrow({
+        where: { id: appointment.id },
+      });
+      expect(final.status).toBe('canceled');
+      expect(final.startAt.toISOString()).toBe(
+        source.startsAt.slice(0, 10) + 'T15:00:00.000Z',
+      );
+      observations.lifecycleAE = {
+        status: 'PASS',
+        sameAppointment: true,
+        providerCreate: 1,
+        providerPut: 1,
+        providerDelete: 1,
+        canonicalHttp: true,
+        actionEngine: true,
+        widgetCreateConfirmation: true,
+        rescheduleCancelViaHttp: true,
+        rescheduleCancelWidgetOrPhoneAcceptance: false,
+        normalAndConcurrentMoveRetries: true,
+        normalAndConcurrentCancelRetries: true,
+      };
+    }
     observations.healthy = {
       state: 'SUCCEEDED',
       providerBookings: 1,

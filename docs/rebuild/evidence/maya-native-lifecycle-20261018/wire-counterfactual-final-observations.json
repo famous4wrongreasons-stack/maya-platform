@@ -1,0 +1,54 @@
+{
+  "contract": "maya.native-provider-lifecycle-wire/1",
+  "candidate": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "status": "FAIL",
+  "realProviderEffects": 0,
+  "realModelCalls": 0,
+  "scope": "ADAPTER_TRANSPORT_ONLY_NOT_ACTION_ENGINE_OR_PHONE_ACCEPTANCE",
+  "syntheticAdmissionOnly": true,
+  "providerUniquenessOrIdempotencyGuard": false,
+  "releaseCertification": "NOT_ISSUED",
+  "healthy": {
+    "state": "SUCCEEDED",
+    "sameRecord": true,
+    "syntheticEffects": 3
+  },
+  "move-loss": {
+    "errorClass": "CrmProviderResponseError",
+    "persistedBookings": 1,
+    "posts": 1,
+    "puts": 1,
+    "deletes": 0,
+    "socketLosses": 1
+  },
+  "cancel-loss": {
+    "errorClass": "CrmProviderResponseError",
+    "persistedBookings": 1,
+    "posts": 1,
+    "puts": 0,
+    "deletes": 1,
+    "socketLosses": 1
+  },
+  "providerContractFailures": 0,
+  "fetchIdentityUnchanged": true,
+  "syntheticCounters": {
+    "healthy": {
+      "posts": 1,
+      "puts": 1,
+      "deletes": 1,
+      "socketLosses": 0
+    },
+    "move-loss": {
+      "posts": 1,
+      "puts": 1,
+      "deletes": 0,
+      "socketLosses": 1
+    },
+    "cancel-loss": {
+      "posts": 1,
+      "puts": 0,
+      "deletes": 1,
+      "socketLosses": 1
+    }
+  }
+}

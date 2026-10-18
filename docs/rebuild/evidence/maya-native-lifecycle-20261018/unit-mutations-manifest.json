@@ -1,0 +1,105 @@
+{
+  "contract": "maya.phone-native-egress-mutation/1",
+  "runnerSha256": "01d0f49ccb5d10c75b51002b14c834e1aef12495bb7205294d484bbca11ac66f",
+  "status": "passed",
+  "moduleSha256": "5c000a72496d2cd1c8879ca124dec3cba0bdb77c93cea81ad386c0b58cf1ab19",
+  "testSha256": "27c9075bf7ac8bf07f6479e99e8cfcd8d88cbd6cab49999b173927bee6887b85",
+  "helperSha256": "23ccec0d12f2953e26e8d28323a624358ee4da8eaa8eadf7f4e073e62b3765a7",
+  "network": "OS_LOOPBACK_ONLY",
+  "realProviderEffects": 0,
+  "certificate": "NOT_ISSUED",
+  "release_admissible": false,
+  "runs": [
+    {
+      "name": "baseline",
+      "mutatedSha256": "5c000a72496d2cd1c8879ca124dec3cba0bdb77c93cea81ad386c0b58cf1ab19",
+      "expectedFailure": null,
+      "exitCode": 0,
+      "signal": null,
+      "tapSha256": "742c6416d439245bbf430464546ab1b677a63a6550be7a6153b52126b8f51ffb",
+      "tests": {
+        "pass": 90,
+        "fail": 0,
+        "skip": 0,
+        "cancelled": 0
+      },
+      "status": "passed"
+    },
+    {
+      "name": "preservation",
+      "mutatedSha256": "f5ecaeffbcceea2c10413f4355e1b0b62c803fdb360161f752a98b6104b4c07f",
+      "expectedFailure": "V2 time-only move refuses changed price",
+      "exitCode": 1,
+      "signal": null,
+      "tapSha256": "ae3a58b081318b8a5202d2aafffe5cbd242e7d736f03b0bcee151ba4c8e1c728",
+      "tests": {
+        "pass": 77,
+        "fail": 13,
+        "skip": 0,
+        "cancelled": 0
+      },
+      "status": "detected"
+    },
+    {
+      "name": "stale-read",
+      "mutatedSha256": "143620a9e06e2de821dc07e52eae7735f7016d0f0f215f6c3515846892b0ccd4",
+      "expectedFailure": "V2 missing/stale read cannot supply a move",
+      "exitCode": 1,
+      "signal": null,
+      "tapSha256": "e52eb8ed09e5504ec09053e7fe36009fa74118dd765b69b02dfdb9e603e960b3",
+      "tests": {
+        "pass": 89,
+        "fail": 1,
+        "skip": 0,
+        "cancelled": 0
+      },
+      "status": "detected"
+    },
+    {
+      "name": "echo-receipt",
+      "mutatedSha256": "3c88bfbe630c66df5504920dfd06c91c0ec7311d84176b5bb0ebc27c539a0fce",
+      "expectedFailure": "V2 ambiguous/echo-only receipt never binds a record",
+      "exitCode": 1,
+      "signal": null,
+      "tapSha256": "5c5abd36c677071c22903a1794a1ccad07ade70be94ff35b5d63c0cce3c94be2",
+      "tests": {
+        "pass": 89,
+        "fail": 1,
+        "skip": 0,
+        "cancelled": 0
+      },
+      "status": "detected"
+    },
+    {
+      "name": "unknown-to-rejection",
+      "mutatedSha256": "d8af2ab09f38d4f7bfc0a0f3780f8c4dfe684b7ac181e2b729a06bfd91db585a",
+      "expectedFailure": "V2 PUT response loss stays uncertain",
+      "exitCode": 1,
+      "signal": null,
+      "tapSha256": "cf27d9ea81080c29a7f27d175b3ce92f9b706d9a679b772a64e59d8848e88d96",
+      "tests": {
+        "pass": 70,
+        "fail": 20,
+        "skip": 0,
+        "cancelled": 0
+      },
+      "status": "detected"
+    },
+    {
+      "name": "uncertain-write",
+      "mutatedSha256": "e437baf5e54e75eabecff182c61b8b7796287d2c81f80034262919eae2f3946b",
+      "expectedFailure": "V2 PUT response loss stays uncertain",
+      "exitCode": 1,
+      "signal": null,
+      "tapSha256": "6d0c3722191d78d839a2f49f2d61a888697e2b6db2cf0b90a4d68d9c1f413314",
+      "tests": {
+        "pass": 89,
+        "fail": 1,
+        "skip": 0,
+        "cancelled": 0
+      },
+      "status": "detected"
+    }
+  ],
+  "detected": 5
+}

@@ -9,6 +9,8 @@ import path from 'node:path';
 import { admittedProviderRead } from './local-yclients-read-transport.mjs';
 
 export const CREATE_EGRESS_CONTRACT = 'maya.phone-native-create-egress/1';
+// Fixed extension for one confirmed created record; V1 stays create-only.
+export const LIFECYCLE_EGRESS_CONTRACT = 'maya.phone-native-create-egress/2';
 export const CREATE_EGRESS_LIMITS = Object.freeze({
   requestBytes: 16384,
   responseBytes: 2097152,
@@ -33,7 +35,9 @@ const refused =
   '{"success":false,"error":"phone_native_create_egress_refused"}';
 
 export function validateCreateEgressScope(input, now = Date.now()) {
+  const lifecycle = input?.contract === LIFECYCLE_EGRESS_CONTRACT;
   keys(input, [
+    ...(lifecycle ? ['maxReschedules', 'maxCancels'] : []),
     'contract',
     'candidate',
     'profile',
@@ -46,7 +50,15 @@ export function validateCreateEgressScope(input, now = Date.now()) {
     'maxReads',
     'maxCreates',
   ]);
-  assert.equal(input.contract, CREATE_EGRESS_CONTRACT);
+  assert(
+    [CREATE_EGRESS_CONTRACT, LIFECYCLE_EGRESS_CONTRACT].includes(
+      input.contract,
+    ),
+  );
+  if (lifecycle) {
+    assert.equal(input.maxReschedules, 1);
+    assert.equal(input.maxCancels, 1);
+  }
   assert.equal(input.candidate, '6356db1875545337e34b6c8888b7ca858bb64361');
   assert.equal(input.profile, 'closed-input.no-handoff.no-price-goods@1');
   assert.match(input.tenantId, /^[A-Za-z0-9_-]{1,128}$/);
@@ -72,7 +84,15 @@ export function validateCreateEgressScope(input, now = Date.now()) {
   return Object.freeze({ ...input });
 }
 
-function classify(raw, method, body, scope, createdPhoneDigest) {
+function classify(
+  raw,
+  method,
+  body,
+  scope,
+  createdPhoneDigest,
+  lifecycle,
+  now,
+) {
   assert(
     typeof raw === 'string' &&
       raw.startsWith('/api/v1/') &&
@@ -83,6 +103,54 @@ function classify(raw, method, body, scope, createdPhoneDigest) {
     company = scope.companyId;
   assert.equal(raw.split('?')[0], url.pathname, 'normalized_route_refused');
   assert(!url.pathname.includes('%'));
+  if (
+    scope.contract === LIFECYCLE_EGRESS_CONTRACT &&
+    url.pathname.startsWith('/api/v1/record/')
+  ) {
+    assert(lifecycle.recordId, 'provider_created_record_required');
+    assert.equal(
+      url.pathname,
+      `/api/v1/record/${company}/${lifecycle.recordId}`,
+    );
+    assert.equal(url.search, '');
+    if (method === 'GET') {
+      assert.equal(body.length, 0);
+      return 'recordRead';
+    }
+    assert(
+      !lifecycle.mutationPending &&
+        !lifecycle.uncertain &&
+        !lifecycle.cancelled,
+      'lifecycle_write_not_current',
+    );
+    if (method === 'DELETE') {
+      assert.equal(body.length, 0);
+      return 'cancel';
+    }
+    assert.equal(method, 'PUT');
+    assert(
+      lifecycle.read &&
+        now >= lifecycle.read.at &&
+        now - lifecycle.read.at < 60000,
+      'fresh_record_read_required',
+    );
+    const value = JSON.parse(body.toString('utf8'));
+    assert(
+      typeof value.datetime === 'string' &&
+        /^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/.test(
+          value.datetime,
+        ) &&
+        day(value.datetime.slice(0, 10)),
+    );
+    // Time-only move. Existing native serializer preserves all other fields.
+    // Availability/ownership/confirmation still belong to canonical backend owners.
+    assert.deepEqual(value, {
+      ...lifecycle.read.body,
+      datetime: value.datetime,
+    });
+    return 'reschedule';
+  }
+
   if (method === 'GET') {
     assert.equal(body.length, 0);
     if (admittedProviderRead(url, { method }, company)) return 'read';
@@ -173,6 +241,70 @@ function classify(raw, method, body, scope, createdPhoneDigest) {
   return 'create';
 }
 
+function preservedMove(record, lifecycle) {
+  assert(record && !Array.isArray(record));
+  assert.equal(
+    String(record.id),
+    lifecycle.recordId,
+    'record_response_substitution',
+  );
+  assert(numericId(Number(record.staff?.id)));
+  assert(
+    Number.isSafeInteger(Number(record.seance_length)) &&
+      Number(record.seance_length) > 0,
+  );
+  assert(record.client && typeof record.client.phone === 'string');
+  // Only an already canonical provider phone format is supported here. This is
+  // response correlation, never a Client-authority decision or phone resolver.
+  assert(/^\+?[0-9]{10,15}$/.test(record.client.phone));
+  assert.equal(
+    sha(record.client.phone.replace(/^\+/, '')),
+    lifecycle.phoneDigest,
+  );
+  const client = record.client;
+  assert(numericId(Number(client.id)));
+  assert(typeof client.name === 'string' && client.name.length > 0);
+  const services = record.services;
+  assert(
+    Array.isArray(services) && services.length > 0 && services.length <= 20,
+  );
+  assert(new Set(services.map((s) => String(s.id))).size === services.length);
+  return {
+    staff_id: Number(record.staff.id),
+    seance_length: Number(record.seance_length),
+    save_if_busy: false,
+    send_sms: false,
+    client: {
+      id: Number(client.id),
+      phone: '+' + client.phone.replace(/^\+/, ''),
+      name: client.name,
+      ...(client.surname ? { surname: client.surname } : {}),
+      ...(client.email ? { email: client.email } : {}),
+    },
+    services: services.map((service) => {
+      assert(numericId(Number(service.id)));
+      const cost = Number(service.cost),
+        first = Number(service.first_cost),
+        discount = Number(service.discount);
+      assert(
+        Number.isFinite(cost) && cost >= 0,
+        'preserved_service_price_required',
+      );
+      return {
+        id: Number(service.id),
+        amount: 1,
+        cost,
+        first_cost: Number.isFinite(first) ? first : cost,
+        ...(Number.isFinite(discount) ? { discount } : {}),
+      };
+    }),
+    ...(typeof record.attendance === 'number'
+      ? { attendance: record.attendance }
+      : {}),
+    comment: record.comment ?? '',
+  };
+}
+
 export function nativeCreateEgress({
   scope: input,
   ledgerPath,
@@ -206,6 +338,8 @@ export function nativeCreateEgress({
   const counters = {
     reads: 0,
     creates: 0,
+    reschedules: 0,
+    cancels: 0,
     completed: 0,
     refused: 0,
     uncertainTransport: 0,
@@ -214,6 +348,15 @@ export function nativeCreateEgress({
   let revoked = false,
     closed = false,
     createdPhoneDigest = null;
+  const lifecycle = {
+    recordId: null,
+    phoneDigest: null,
+    read: null,
+    readEpoch: 0,
+    mutationPending: false,
+    uncertain: false,
+    cancelled: false,
+  };
   const controllers = new Set();
   const append = (event) => {
     const bytes = Buffer.from(JSON.stringify(event) + '\n');
@@ -227,7 +370,7 @@ export function nativeCreateEgress({
   };
   try {
     append({
-      contract: CREATE_EGRESS_CONTRACT,
+      contract: scope.contract,
       scopeDigest: sha(JSON.stringify(scope)),
       event: 'opened',
     });
@@ -268,7 +411,9 @@ export function nativeCreateEgress({
     async (req, res) => {
       let controller,
         reserved = false,
-        writeDispatched = false;
+        writeDispatched = false,
+        lifecycleWrite = false,
+        readEpoch = null;
       const reject = () => {
         counters.refused++;
         if (res.destroyed) return;
@@ -338,26 +483,49 @@ export function nativeCreateEgress({
           chunks.push(chunk);
         }
         const body = Buffer.concat(chunks),
-          kind = classify(req.url, req.method, body, scope, createdPhoneDigest);
+          kind = classify(
+            req.url,
+            req.method,
+            body,
+            scope,
+            createdPhoneDigest,
+            lifecycle,
+            clock(),
+          );
         current();
         assert(counters.inFlight < CREATE_EGRESS_LIMITS.inFlight);
-        assert(
-          kind === 'create'
-            ? counters.creates < scope.maxCreates
-            : counters.reads < scope.maxReads,
-          'create_egress_budget',
-        );
+        const budget = {
+          create: ['creates', 'maxCreates'],
+          reschedule: ['reschedules', 'maxReschedules'],
+          cancel: ['cancels', 'maxCancels'],
+        }[kind] ?? ['reads', 'maxReads'];
+        assert(counters[budget[0]] < scope[budget[1]], 'create_egress_budget');
         try {
           append({
             event: 'attempt',
             kind,
-            number: counters.reads + counters.creates + 1,
+            number:
+              counters.reads +
+              counters.creates +
+              counters.reschedules +
+              counters.cancels +
+              1,
           });
         } catch (error) {
           revoke();
           throw error;
         }
-        counters[kind === 'create' ? 'creates' : 'reads']++;
+        counters[budget[0]]++;
+        if (kind === 'recordRead') {
+          lifecycle.read = null;
+          readEpoch = ++lifecycle.readEpoch;
+        }
+        if (kind === 'reschedule' || kind === 'cancel') {
+          lifecycleWrite = true;
+          lifecycle.mutationPending = true;
+          lifecycle.read = null;
+          lifecycle.readEpoch++;
+        }
         counters.inFlight++;
         reserved = true;
         controller = new AbortController();
@@ -365,9 +533,13 @@ export function nativeCreateEgress({
         res.once('close', () => controller.abort());
         current();
         const url = 'https://api.yclients.com' + req.url;
-        if (kind === 'create')
-          createdPhoneDigest = sha(JSON.parse(body.toString('utf8')).phone);
-        writeDispatched = kind === 'create';
+        if (kind === 'create') {
+          const phone = JSON.parse(body.toString('utf8')).phone;
+          createdPhoneDigest = sha(phone);
+          lifecycle.phoneDigest = sha(phone.replace(/^\+/, ''));
+        }
+        writeDispatched = kind === 'create' || lifecycleWrite;
+        if (lifecycleWrite) lifecycle.uncertain = true;
         const response = await nativeFetch(url, {
           method: req.method,
           redirect: 'error',
@@ -406,7 +578,39 @@ export function nativeCreateEgress({
           parts.push(chunk);
         }
         const result = Buffer.concat(parts);
-        JSON.parse(result.toString('utf8'));
+        const emptyCancel =
+          kind === 'cancel' && response.status === 204 && result.length === 0;
+        const parsed = emptyCancel
+          ? { success: true }
+          : JSON.parse(result.toString('utf8'));
+        if (
+          scope.contract === LIFECYCLE_EGRESS_CONTRACT &&
+          response.ok &&
+          parsed.success === true
+        ) {
+          if (kind === 'create') {
+            assert(Array.isArray(parsed.data) && parsed.data.length === 1);
+            const created = parsed.data[0];
+            assert.equal(created.id, 1);
+            assert(
+              id(String(created.record_id)),
+              'explicit_provider_record_id_required',
+            );
+            lifecycle.recordId = String(created.record_id);
+          } else if (
+            kind === 'recordRead' &&
+            readEpoch === lifecycle.readEpoch &&
+            !lifecycle.mutationPending
+          ) {
+            lifecycle.read = {
+              at: clock(),
+              body: preservedMove(parsed.data, lifecycle),
+            };
+          } else if (lifecycleWrite) {
+            lifecycle.uncertain = false;
+            if (kind === 'cancel') lifecycle.cancelled = true;
+          }
+        }
         current();
         assert(!res.destroyed);
         const headers = {
@@ -420,9 +624,11 @@ export function nativeCreateEgress({
         res.writeHead(response.status, headers).end(result);
         counters.completed++;
       } catch {
+        if (lifecycleWrite && writeDispatched) lifecycle.uncertain = true;
         controller?.abort();
         reject();
       } finally {
+        if (lifecycleWrite) lifecycle.mutationPending = false;
         controllers.delete(controller);
         if (reserved) counters.inFlight--;
       }
@@ -444,8 +650,11 @@ export function nativeCreateEgress({
     revoke,
     check: current,
     snapshot: () => ({
-      contract: CREATE_EGRESS_CONTRACT,
+      contract: scope.contract,
       ...counters,
+      recordBound: lifecycle.recordId !== null,
+      lifecycleUncertain: lifecycle.uncertain,
+      cancelled: lifecycle.cancelled,
       revoked,
       closed,
     }),
