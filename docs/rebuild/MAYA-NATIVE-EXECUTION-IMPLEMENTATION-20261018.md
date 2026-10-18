@@ -111,3 +111,23 @@ or product timeout was raised to turn the failure green.
 The owner's 1,333 intentional tracked deletions are preserved, not restored or
 staged. Final validation uses a clean committed checkout. No production state is
 changed by this checkpoint.
+
+## K3 fixture ownership correction
+
+The first full CI attempt at `9ad82d139802197c86e5e3842ccf5dc9c7857902`
+was correctly refused by K3 (9/10): the synthetic compiled proof contained
+entitlement setup and deliberate stale-CAS/disabled-grant fault injection under
+`scripts/`. The proof's actual widget grant already used the signed AR-1 HTTP
+writer, but the raw fixture mutations did not belong in that production-script
+namespace. No full release certificate was issued.
+
+The complete guarded fixture now lives at
+`test/widgets-live/support/native-execution-compiled-proof.mjs`; the existing
+isolated runner invokes that test path. Only location, relative imports and
+comments change; all fixture operations, assertions and guards are preserved.
+K3, its allowlist and production authority code are byte-unchanged. The same
+checker returns 10/10 on the correction. Non-loopback, default PostgreSQL port
+and non-proof database names are each refused before output creation/connection.
+[Regression receipt](evidence/maya-native-execution-20261018/k3-fixture-regression.json)
+records the before/after hashes. This is a test-harness correction; the new
+committed SHA still requires its own full fresh certification.

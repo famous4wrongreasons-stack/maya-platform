@@ -172,7 +172,7 @@ try {
       'deploy',
     ]);
     await run(label + '-compiled', process.execPath, [
-      'scripts/phone-native-execution-proof.mjs',
+      'test/widgets-live/support/native-execution-compiled-proof.mjs',
       '--run',
       path.join(out, label),
       ...flags,

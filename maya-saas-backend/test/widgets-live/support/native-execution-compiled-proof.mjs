@@ -1,4 +1,6 @@
-// Synthetic compiled AppModule/HTTP/PG proof; no real key, model or CRM access.
+// Synthetic compiled AppModule/HTTP/PG fixture; no real key, model or CRM access.
+// Keep raw synthetic setup/fault injection in test support. Production scripts
+// must reach the existing certified writer; K3 admits no ad-hoc entitlement writer.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -10,15 +12,15 @@ import {
   installedExecutorDigest,
   executionHash,
   NATIVE_EXECUTION,
-} from './phone-native-execution.mjs';
+} from '../../../scripts/phone-native-execution.mjs';
 import {
   openNativeChannel,
   forwardNativeOnce,
-} from './phone-native-channel.mjs';
-import { installNativeExecution } from './phone-native-runtime.mjs';
-import { revokeNativeRun } from './phone-native-run-guard.mjs';
-import { assertNativeModelPayload } from './phone-native-model.mjs';
-import { EXECUTION_EGRESS_CONTRACT } from './phone-native-create-egress.mjs';
+} from '../../../scripts/phone-native-channel.mjs';
+import { installNativeExecution } from '../../../scripts/phone-native-runtime.mjs';
+import { revokeNativeRun } from '../../../scripts/phone-native-run-guard.mjs';
+import { assertNativeModelPayload } from '../../../scripts/phone-native-model.mjs';
+import { EXECUTION_EGRESS_CONTRACT } from '../../../scripts/phone-native-create-egress.mjs';
 const require = createRequire(import.meta.url),
   backend = process.cwd();
 assert.equal(process.argv[2], '--run');
@@ -41,15 +43,15 @@ require('ts-node').register({
 });
 const {
   WIDGETS_LIVE_TEST_LITERALS,
-} = require('../test/widgets-live/support/environment.ts');
+} = require('./environment.ts');
 for (const [k, v] of Object.entries(WIDGETS_LIVE_TEST_LITERALS))
   process.env[k] = v;
 const {
   singleOperatorProof,
-} = require('../test/widgets-live/support/widget-single-operator-proof.ts');
+} = require('./widget-single-operator-proof.ts');
 const {
   firstPhoneCertificate,
-} = require('../test/widgets-live/support/widget-first-phone-proof.ts');
+} = require('./widget-first-phone-proof.ts');
 const load = (n) => require(path.join(backend, 'dist/src', n));
 const { NestFactory } = require('@nestjs/core'),
   { ConfigService } = require('@nestjs/config'),
@@ -1011,7 +1013,7 @@ try {
     submit,
     firstOption,
     firstSlot,
-  } = require('../test/widgets-live/support/release-booking-flow.ts');
+  } = require('./release-booking-flow.ts');
   const http = {
     resolveWidgets: (t, b) => call('/api/widgets/resolve', b, t),
     postIntent: (t, b) => call('/api/widgets/intent', b, t),

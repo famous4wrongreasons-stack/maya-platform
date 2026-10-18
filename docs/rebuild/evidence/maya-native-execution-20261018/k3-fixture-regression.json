@@ -1,0 +1,32 @@
+{
+  "base": "9ad82d139802197c86e5e3842ccf5dc9c7857902",
+  "overlayOnly": true,
+  "before": "K3 9/10 FAIL: scripts/phone-native-execution-proof.mjs direct entitlement writes",
+  "afterExit": 0,
+  "gateChanged": false,
+  "databaseGuards": [
+    {
+      "case": "nonloopback",
+      "exit": 1,
+      "outputCreated": false,
+      "dbConnectionReached": false
+    },
+    {
+      "case": "defaultport",
+      "exit": 1,
+      "outputCreated": false,
+      "dbConnectionReached": false
+    },
+    {
+      "case": "ownerdb",
+      "exit": 1,
+      "outputCreated": false,
+      "dbConnectionReached": false
+    }
+  ],
+  "effects": 0,
+  "beforeReceiptSha256": "96d49894ca1d6728b70706245979c46d8748d52bb733a9649b16d619ba66d279",
+  "afterReceiptSha256": "378e93addd6207e68ac6a6745263c79568d037efcf979f7c74dfd13075683401",
+  "fixtureStatementsUnchanged": true,
+  "productRuntimeChanged": false
+}
