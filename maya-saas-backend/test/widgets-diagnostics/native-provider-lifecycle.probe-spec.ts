@@ -11,6 +11,39 @@ import { YclientsCRMAdapter } from '../../src/crm/adapters/yclients-crm.adapter'
 import { CrmOutcomeUnknownError } from '../../src/crm/crm-request.errors';
 import { assertProofDatabase } from '../widgets-live/support/proof-db-guard';
 
+// The runner pins the dynamically loaded transport bytes. Keep this boundary
+// explicitly typed instead of allowing an untyped import to erase test checks.
+interface NativeEgress {
+  server: Server;
+  close(): void;
+  snapshot(): Record<string, unknown>;
+}
+interface NativeEgressOptions {
+  scope: Record<string, unknown>;
+  ledgerPath: string;
+  assertCurrent(): boolean;
+  nativeFetch(raw: string, init: RequestInit): Promise<Response>;
+}
+interface NativeEgressModule {
+  CREATE_EGRESS_CONTRACT: string;
+  LIFECYCLE_EGRESS_CONTRACT: string;
+  nativeCreateEgress(this: void, options: NativeEgressOptions): NativeEgress;
+}
+
+interface StoredBooking {
+  id: number;
+  record: {
+    client: Record<string, unknown>;
+    comment: string;
+    datetime: string;
+  };
+  cancelled: boolean;
+}
+function object(value: unknown): Record<string, unknown> {
+  assert(value && typeof value === 'object' && !Array.isArray(value));
+  return value as Record<string, unknown>;
+}
+
 const proof = assertProofDatabase();
 assert.match(
   proof.database,
@@ -21,7 +54,7 @@ assert.ok(output && process.env.JEST_NATIVE_CREATE_EGRESS);
 const nativeFetch = globalThis.fetch;
 const auth =
   'Bearer SYNTHETIC_NATIVE_SOCKET_PARTNER, User SYNTHETIC_NATIVE_SOCKET_USER';
-const observations: Record<string, any> = {
+const observations: Record<string, unknown> = {
   contract: 'maya.native-provider-lifecycle-wire/1',
   candidate: '6356db1875545337e34b6c8888b7ca858bb64361',
   status: 'INCOMPLETE',
@@ -37,7 +70,7 @@ describe('native lifecycle wire through bounded transport [isolated HTTP/PG]', (
   let db: Client, server: Server, origin: string, schema: string;
   let contractFailures = 0,
     passed = 0;
-  const proxies: any[] = [];
+  const proxies: NativeEgress[] = [];
   const companies = new Map<
     number,
     {
@@ -51,7 +84,7 @@ describe('native lifecycle wire through bounded transport [isolated HTTP/PG]', (
   >();
   const rows = async (company: number) =>
     (
-      await db.query(
+      await db.query<StoredBooking>(
         `SELECT id::int, record, cancelled FROM ${schema}.bookings WHERE company=$1`,
         [company],
       )
@@ -98,7 +131,7 @@ describe('native lifecycle wire through bounded transport [isolated HTTP/PG]', (
             raw += String(chunk);
             assert(Buffer.byteLength(raw) < 16384);
           }
-          const body = raw ? JSON.parse(raw) : null;
+          const body = raw ? object(JSON.parse(raw) as unknown) : null;
           const transaction = new Client({
             connectionString: proof.connectionString,
           });
@@ -107,12 +140,15 @@ describe('native lifecycle wire through bounded transport [isolated HTTP/PG]', (
             await transaction.query('BEGIN');
             if (req.method === 'POST') {
               assert.equal(parts[0], 'book_record');
+              assert(body);
+              assert(typeof body.phone === 'string');
+              assert(typeof body.fullname === 'string');
+              assert(Array.isArray(body.appointments));
+              const appointment = object(body.appointments[0]);
+              assert(typeof appointment.datetime === 'string');
               assert.equal(body.notify_by_sms, 0);
               assert.equal(body.notify_by_email, 0);
-              assert.equal(
-                body.appointments[0].datetime,
-                '2026-11-02T17:00:00',
-              );
+              assert.equal(appointment.datetime, '2026-11-02T17:00:00');
               const record = {
                 staff: { id: 71 },
                 client: {
@@ -127,9 +163,9 @@ describe('native lifecycle wire through bounded transport [isolated HTTP/PG]', (
                 seance_length: 1800,
                 attendance: 0,
                 comment: 'preserved synthetic note',
-                datetime: body.appointments[0].datetime,
+                datetime: appointment.datetime,
               };
-              const inserted = await transaction.query(
+              const inserted = await transaction.query<{ id: number }>(
                 `INSERT INTO ${schema}.bookings(company,record) VALUES($1,$2::jsonb) RETURNING id::int`,
                 [company, JSON.stringify(record)],
               );
@@ -143,6 +179,7 @@ describe('native lifecycle wire through bounded transport [isolated HTTP/PG]', (
               assert.equal(parts[0], 'record');
               assert.equal(Number(parts[2]), state.recordId);
               if (req.method === 'PUT') {
+                assert(body);
                 const record = (await rows(company))[0].record;
                 assert.deepEqual(body, {
                   staff_id: 71,
@@ -251,9 +288,9 @@ describe('native lifecycle wire through bounded transport [isolated HTTP/PG]', (
       deletes: 0,
       socketLosses: 0,
     });
-    const { nativeCreateEgress, LIFECYCLE_EGRESS_CONTRACT } = await import(
+    const { nativeCreateEgress, LIFECYCLE_EGRESS_CONTRACT } = (await import(
       process.env.JEST_NATIVE_CREATE_EGRESS!
-    );
+    )) as NativeEgressModule;
     const proxy = nativeCreateEgress({
       scope: {
         contract: LIFECYCLE_EGRESS_CONTRACT,
@@ -292,13 +329,15 @@ describe('native lifecycle wire through bounded transport [isolated HTTP/PG]', (
     await new Promise<void>((resolve) =>
       proxy.server.listen(0, '127.0.0.1', resolve),
     );
+    const proxyAddress = proxy.server.address();
+    assert(proxyAddress && typeof proxyAddress !== 'string');
     const adapter = new YclientsCRMAdapter(
       {
         provider: CrmProvider.YCLIENTS,
         tenantId: 'synthetic-lifecycle-' + company,
         apiToken: 'SYNTHETIC_NATIVE_SOCKET_USER',
         settings: { companyId: company, currency: 'RUB' },
-        baseUrl: `http://127.0.0.1:${proxy.server.address().port}/api/v1`,
+        baseUrl: `http://127.0.0.1:${proxyAddress.port}/api/v1`,
       },
       'SYNTHETIC_NATIVE_SOCKET_PARTNER',
     );
@@ -389,13 +428,13 @@ describe('native lifecycle wire through bounded transport [isolated HTTP/PG]', (
         if (mode === 'move-loss')
           assert.equal(persisted[0].record.datetime, '2026-11-02T18:00:00');
         else assert.equal(persisted[0].cancelled, true);
-        const effects = await db.query(
+        const effects = await db.query<{ count: number }>(
           `SELECT count(*)::int AS count FROM ${schema}.effects WHERE company=$1`,
           [company],
         );
         assert.equal(effects.rows[0].count, 2);
         assert.equal(f.proxy.snapshot().lifecycleUncertain, true);
-        observations[mode].normalAndConcurrentRetriesRefused = true;
+        object(observations[mode]).normalAndConcurrentRetriesRefused = true;
         passed++;
       },
     );

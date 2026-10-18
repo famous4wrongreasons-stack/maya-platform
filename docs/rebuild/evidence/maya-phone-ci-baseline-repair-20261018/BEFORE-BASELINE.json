@@ -1,0 +1,230 @@
+{
+  "contract": "maya.current-head-baselines/1",
+  "candidate": "be58cf4138e03ede2fae5cb3097e6722a0a2f546",
+  "startedAt": "2026-10-18T14:24:20.287Z",
+  "state": "failed",
+  "steps": [
+    {
+      "name": "install-backend",
+      "startedAt": "2026-10-18T14:24:20.287Z",
+      "state": "passed",
+      "args": [
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/toolchains/node-v22.23.3/node-v22.23.3-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "ci",
+        "--no-fund"
+      ],
+      "pid": 36205,
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T14:25:13.217Z"
+    },
+    {
+      "name": "audit-production-dependencies",
+      "startedAt": "2026-10-18T14:25:13.218Z",
+      "state": "passed",
+      "args": [
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/toolchains/node-v22.23.3/node-v22.23.3-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "audit",
+        "--omit=dev",
+        "--audit-level=high"
+      ],
+      "pid": 37018,
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T14:25:14.215Z"
+    },
+    {
+      "name": "install-carrier",
+      "startedAt": "2026-10-18T14:25:14.215Z",
+      "state": "passed",
+      "args": [
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/toolchains/node-v22.23.3/node-v22.23.3-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "ci",
+        "--no-fund"
+      ],
+      "pid": 37024,
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T14:25:17.132Z"
+    },
+    {
+      "name": "initdb",
+      "startedAt": "2026-10-18T14:25:17.136Z",
+      "state": "passed",
+      "args": [
+        "-D",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/pg",
+        "--auth=trust",
+        "--username=proof",
+        "--encoding=UTF8",
+        "--locale=C"
+      ],
+      "pid": 37091,
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T14:25:17.535Z"
+    },
+    {
+      "name": "pg-start",
+      "startedAt": "2026-10-18T14:25:17.535Z",
+      "state": "passed",
+      "args": [
+        "-D",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/pg",
+        "-w",
+        "-t",
+        "30",
+        "-l",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/postgres.log",
+        "-o",
+        "-h 127.0.0.1 -p 58524 -k '' -c shared_buffers=128MB -c max_connections=40",
+        "start"
+      ],
+      "pid": 37102,
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T14:25:17.669Z"
+    },
+    {
+      "name": "createdb-maya_events_proof_be58_final",
+      "startedAt": "2026-10-18T14:25:17.669Z",
+      "state": "passed",
+      "args": [
+        "-h",
+        "127.0.0.1",
+        "-p",
+        "58524",
+        "-U",
+        "proof",
+        "maya_events_proof_be58_final"
+      ],
+      "pid": 37111,
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T14:25:17.741Z"
+    },
+    {
+      "name": "prisma-generate",
+      "startedAt": "2026-10-18T14:25:17.741Z",
+      "state": "passed",
+      "args": [
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/toolchains/node-v22.23.3/node-v22.23.3-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "prisma:generate"
+      ],
+      "pid": 37113,
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T14:25:20.005Z"
+    },
+    {
+      "name": "prisma-validate",
+      "startedAt": "2026-10-18T14:25:20.005Z",
+      "state": "passed",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "validate"
+      ],
+      "pid": 37133,
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T14:25:20.450Z"
+    },
+    {
+      "name": "migration-clean-replay",
+      "startedAt": "2026-10-18T14:25:20.450Z",
+      "state": "passed",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy"
+      ],
+      "pid": 37146,
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T14:25:21.733Z"
+    },
+    {
+      "name": "seed-synthetic-ci",
+      "startedAt": "2026-10-18T14:25:21.733Z",
+      "state": "passed",
+      "args": [
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/toolchains/node-v22.23.3/node-v22.23.3-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "prisma:seed"
+      ],
+      "pid": 37170,
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T14:25:22.520Z"
+    },
+    {
+      "name": "typecheck",
+      "startedAt": "2026-10-18T14:25:22.520Z",
+      "state": "passed",
+      "args": [
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/toolchains/node-v22.23.3/node-v22.23.3-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "typecheck"
+      ],
+      "pid": 37190,
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T14:25:29.998Z"
+    },
+    {
+      "name": "typecheck-scripts",
+      "startedAt": "2026-10-18T14:25:29.998Z",
+      "state": "passed",
+      "args": [
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/toolchains/node-v22.23.3/node-v22.23.3-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "typecheck:scripts"
+      ],
+      "pid": 37250,
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T14:25:46.023Z"
+    },
+    {
+      "name": "lint",
+      "startedAt": "2026-10-18T14:25:46.023Z",
+      "state": "failed",
+      "args": [
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/toolchains/node-v22.23.3/node-v22.23.3-darwin-arm64/lib/node_modules/npm/bin/npm-cli.js",
+        "run",
+        "lint"
+      ],
+      "pid": 37393,
+      "code": 1,
+      "signal": null,
+      "finishedAt": "2026-10-18T14:26:55.742Z"
+    },
+    {
+      "name": "pg-stop",
+      "startedAt": "2026-10-18T14:26:55.742Z",
+      "state": "passed",
+      "args": [
+        "-D",
+        "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/pg",
+        "-w",
+        "-t",
+        "30",
+        "-m",
+        "fast",
+        "stop"
+      ],
+      "pid": 37911,
+      "code": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T14:26:55.860Z"
+    }
+  ],
+  "network": "TESTS_LOOPBACK_ONLY;NPM_REGISTRY_INSTALL_AUDIT_ONLY",
+  "externalBusinessEffects": 0,
+  "certificate": "NOT_ISSUED",
+  "pgPort": 58524,
+  "failure": "lint: 1/null",
+  "pgStopped": true,
+  "finishedAt": "2026-10-18T14:26:55.860Z"
+}

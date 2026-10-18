@@ -1,0 +1,114 @@
+
+> maya-saas-backend@0.0.1 lint
+> eslint "{src,apps,libs,test,scripts}/**/*.ts"
+
+
+/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/candidate/maya-saas-backend/src/widget-contract/capability-ref.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars' or '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/candidate/maya-saas-backend/src/widget-contract/confirmation-guard.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars' or '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/candidate/maya-saas-backend/src/widget-contract/envelope-roots.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/candidate/maya-saas-backend/src/widget-contract/envelope.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/candidate/maya-saas-backend/src/widget-contract/intent.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/candidate/maya-saas-backend/src/widget-contract/kinds.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unused-vars' or '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/candidate/maya-saas-backend/src/widget-contract/lifecycle.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/candidate/maya-saas-backend/src/widget-contract/registries.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/candidate/maya-saas-backend/src/widget-contract/verification-floor.ts
+  5:1  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/candidate/maya-saas-backend/test/widgets-diagnostics/native-provider-lifecycle.probe-spec.ts
+   53:5   error  Unsafe return of a value of type `any[]`                                   @typescript-eslint/no-unsafe-return
+   93:44  error  Unsafe member access .record on an `any` value                             @typescript-eslint/no-unsafe-member-access
+  101:17  error  Unsafe assignment of an `any` value                                        @typescript-eslint/no-unsafe-assignment
+  110:33  error  Unsafe member access .notify_by_sms on an `any` value                      @typescript-eslint/no-unsafe-member-access
+  111:33  error  Unsafe member access .notify_by_email on an `any` value                    @typescript-eslint/no-unsafe-member-access
+  113:22  error  Unsafe member access .appointments on an `any` value                       @typescript-eslint/no-unsafe-member-access
+  120:19  error  Unsafe assignment of an `any` value                                        @typescript-eslint/no-unsafe-assignment
+  120:26  error  Unsafe call of an `any` typed value                                        @typescript-eslint/no-unsafe-call
+  120:31  error  Unsafe member access .phone on an `any` value                              @typescript-eslint/no-unsafe-member-access
+  121:19  error  Unsafe assignment of an `any` value                                        @typescript-eslint/no-unsafe-assignment
+  121:30  error  Unsafe member access .fullname on an `any` value                           @typescript-eslint/no-unsafe-member-access
+  130:17  error  Unsafe assignment of an `any` value                                        @typescript-eslint/no-unsafe-assignment
+  130:32  error  Unsafe member access .appointments on an `any` value                       @typescript-eslint/no-unsafe-member-access
+  136:15  error  Unsafe assignment of an `any` value                                        @typescript-eslint/no-unsafe-assignment
+  136:49  error  Unsafe member access .id on an `any` value                                 @typescript-eslint/no-unsafe-member-access
+  146:23  error  Unsafe assignment of an `any` value                                        @typescript-eslint/no-unsafe-assignment
+  146:57  error  Unsafe member access .record on an `any` value                             @typescript-eslint/no-unsafe-member-access
+  153:19  error  Unsafe assignment of an `any` value                                        @typescript-eslint/no-unsafe-assignment
+  153:39  error  Unsafe member access .client on an `any` value                             @typescript-eslint/no-unsafe-member-access
+  164:19  error  Unsafe assignment of an `any` value                                        @typescript-eslint/no-unsafe-assignment
+  164:35  error  Unsafe member access .comment on an `any` value                            @typescript-eslint/no-unsafe-member-access
+  234:7   error  Unsafe call of an `any` typed value                                        @typescript-eslint/no-unsafe-call
+  234:13  error  Unsafe member access .close on an `any` value                              @typescript-eslint/no-unsafe-member-access
+  235:7   error  Unsafe call of an `any` typed value                                        @typescript-eslint/no-unsafe-call
+  235:13  error  Unsafe member access .server on an `any` value                             @typescript-eslint/no-unsafe-member-access
+  236:44  error  Unsafe return of a value of type `any`                                     @typescript-eslint/no-unsafe-return
+  236:44  error  Unsafe call of an `any` typed value                                        @typescript-eslint/no-unsafe-call
+  236:50  error  Unsafe member access .server on an `any` value                             @typescript-eslint/no-unsafe-member-access
+  254:11  error  Unsafe assignment of an `any` value                                        @typescript-eslint/no-unsafe-assignment
+  257:11  error  Unsafe assignment of an `any` value                                        @typescript-eslint/no-unsafe-assignment
+  257:19  error  Unsafe call of an `any` typed value                                        @typescript-eslint/no-unsafe-call
+  259:9   error  Unsafe assignment of an `any` value                                        @typescript-eslint/no-unsafe-assignment
+  260:9   error  Unsafe assignment of an `any` value                                        @typescript-eslint/no-unsafe-assignment
+  293:7   error  Unsafe return of a value of type `any`                                     @typescript-eslint/no-unsafe-return
+  293:7   error  Unsafe call of an `any` typed value                                        @typescript-eslint/no-unsafe-call
+  293:13  error  Unsafe member access .server on an `any` value                             @typescript-eslint/no-unsafe-member-access
+  301:38  error  Unsafe call of an `any` typed value                                        @typescript-eslint/no-unsafe-call
+  301:44  error  Unsafe member access .server on an `any` value                             @typescript-eslint/no-unsafe-member-access
+  301:61  error  Unsafe member access .port on an `any` value                               @typescript-eslint/no-unsafe-member-access
+  329:14  error  Unsafe assignment of an `any` value                                        @typescript-eslint/no-unsafe-assignment
+  339:31  error  Unsafe member access .cancelled on an `any` value                          @typescript-eslint/no-unsafe-member-access
+  340:31  error  Unsafe member access .record on an `any` value                             @typescript-eslint/no-unsafe-member-access
+  343:18  error  Unsafe call of an `any` typed value                                        @typescript-eslint/no-unsafe-call
+  343:26  error  Unsafe member access .snapshot on an `any` value                           @typescript-eslint/no-unsafe-member-access
+  343:37  error  Unsafe member access .refused on an `any` value                            @typescript-eslint/no-unsafe-member-access
+  390:37  error  Unsafe member access .record on an `any` value                             @typescript-eslint/no-unsafe-member-access
+  391:40  error  Unsafe member access .cancelled on an `any` value                          @typescript-eslint/no-unsafe-member-access
+  396:38  error  Unsafe member access .count on an `any` value                              @typescript-eslint/no-unsafe-member-access
+  397:22  error  Unsafe call of an `any` typed value                                        @typescript-eslint/no-unsafe-call
+  397:30  error  Unsafe member access .snapshot on an `any` value                           @typescript-eslint/no-unsafe-member-access
+  397:41  error  Unsafe member access .lifecycleUncertain on an `any` value                 @typescript-eslint/no-unsafe-member-access
+  398:28  error  Unsafe member access .normalAndConcurrentRetriesRefused on an `any` value  @typescript-eslint/no-unsafe-member-access
+
+/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/candidate/maya-saas-backend/test/widgets-diagnostics/native-provider-socket-loss.probe-spec.ts
+   388:48  error    Unsafe member access .id on an `any` value                                                                                                                                                              @typescript-eslint/no-unsafe-member-access
+   560:19  error    This assertion is unnecessary since it does not change the type of the expression                                                                                                                       @typescript-eslint/no-unnecessary-type-assertion
+   750:13  error    Unsafe assignment of an `any` value                                                                                                                                                                     @typescript-eslint/no-unsafe-assignment
+   759:11  error    Unsafe assignment of an `any` value                                                                                                                                                                     @typescript-eslint/no-unsafe-assignment
+   808:15  error    Unsafe assignment of an `any` value                                                                                                                                                                     @typescript-eslint/no-unsafe-assignment
+   828:9   error    Unsafe assignment of an `any` value                                                                                                                                                                     @typescript-eslint/no-unsafe-assignment
+   828:17  error    Unsafe call of an `any` typed value                                                                                                                                                                     @typescript-eslint/no-unsafe-call
+   834:22  error    Unsafe return of a value of type `any`                                                                                                                                                                  @typescript-eslint/no-unsafe-return
+   834:22  error    Unsafe call of an `any` typed value                                                                                                                                                                     @typescript-eslint/no-unsafe-call
+   838:14  error    Unsafe assignment of an `any` value                                                                                                                                                                     @typescript-eslint/no-unsafe-assignment
+   838:22  error    Unsafe call of an `any` typed value                                                                                                                                                                     @typescript-eslint/no-unsafe-call
+   840:9   error    Unsafe return of a value of type `any`                                                                                                                                                                  @typescript-eslint/no-unsafe-return
+   840:9   error    Unsafe call of an `any` typed value                                                                                                                                                                     @typescript-eslint/no-unsafe-call
+   840:15  error    Unsafe member access .server on an `any` value                                                                                                                                                          @typescript-eslint/no-unsafe-member-access
+   842:13  error    Unsafe assignment of an `any` value                                                                                                                                                                     @typescript-eslint/no-unsafe-assignment
+   842:23  error    Unsafe call of an `any` typed value                                                                                                                                                                     @typescript-eslint/no-unsafe-call
+   842:29  error    Unsafe member access .server on an `any` value                                                                                                                                                          @typescript-eslint/no-unsafe-member-access
+   844:28  warning  Unsafe argument of type `any` assigned to a parameter of type `{ server: Server<typeof IncomingMessage, typeof ServerResponse>; close(): void; snapshot(): Record<string, unknown>; origin: string; }`  @typescript-eslint/no-unsafe-argument
+   846:45  error    Unsafe member access .port on an `any` value                                                                                                                                                            @typescript-eslint/no-unsafe-member-access
+  1036:9   error    Unsafe assignment of an `any` value                                                                                                                                                                     @typescript-eslint/no-unsafe-assignment
+  1049:9   error    Unsafe assignment of an `any` value                                                                                                                                                                     @typescript-eslint/no-unsafe-assignment
+  1372:40  error    This assertion is unnecessary since it does not change the type of the expression                                                                                                                       @typescript-eslint/no-unnecessary-type-assertion
+  1449:36  error    This assertion is unnecessary since it does not change the type of the expression                                                                                                                       @typescript-eslint/no-unnecessary-type-assertion
+
+✖ 84 problems (74 errors, 10 warnings)
+  3 errors and 9 warnings potentially fixable with the `--fix` option.
+

@@ -48,13 +48,47 @@ import {
   submit,
 } from '../widgets-live/support/release-booking-flow';
 
+// The runner pins the dynamically loaded transport bytes. Keep this boundary
+// explicitly typed instead of allowing an untyped import to erase test checks.
+interface NativeEgress {
+  server: Server;
+  close(): void;
+  snapshot(): Record<string, unknown>;
+}
+interface NativeEgressOptions {
+  scope: Record<string, unknown>;
+  ledgerPath: string;
+  assertCurrent(): boolean;
+  nativeFetch(raw: string, init: RequestInit): Promise<Response>;
+}
+interface NativeEgressModule {
+  CREATE_EGRESS_CONTRACT: string;
+  LIFECYCLE_EGRESS_CONTRACT: string;
+  nativeCreateEgress(this: void, options: NativeEgressOptions): NativeEgress;
+}
+
+interface GuardedEgressModule {
+  guardedNativeEgress(
+    this: void,
+    options: {
+      scopeFile: string;
+      scopeSha256: string;
+      ledgerDirectory: string;
+      operatorUid: number;
+      assertCurrent(): boolean;
+      nativeFetch(raw: string, init: RequestInit): Promise<Response>;
+    },
+  ): NativeEgress;
+}
+
 const proof = assertProofDatabase();
 assert.match(
   proof.database,
   /^maya_widget_gate_proof_native_socket_[a-f0-9]+$/,
 );
-const output = process.env.JEST_NATIVE_SOCKET_OUTPUT;
-assert.ok(output, 'Use native-provider-socket-proof.mjs');
+const outputEnvironment = process.env.JEST_NATIVE_SOCKET_OUTPUT;
+assert.ok(outputEnvironment, 'Use native-provider-socket-proof.mjs');
+const output = outputEnvironment;
 const HEALTHY = 450001,
   LOSS = 450002,
   BROWSER = 450020;
@@ -381,7 +415,7 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
             let inserted: number;
             try {
               await transaction.query('BEGIN');
-              const result = await transaction.query(
+              const result = await transaction.query<{ id: number }>(
                 `INSERT INTO ${schema}.bookings(company_id,payload) VALUES ($1,$2::jsonb) RETURNING id::int`,
                 [company, JSON.stringify(payload)],
               );
@@ -557,7 +591,7 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
         proxy.snapshot(),
       ]),
     );
-    writeFileSync(output!, JSON.stringify(observations, null, 2) + '\n', {
+    writeFileSync(output, JSON.stringify(observations, null, 2) + '\n', {
       mode: 0o600,
     });
     jest.restoreAllMocks();
@@ -751,7 +785,9 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
         nativeCreateEgress,
         CREATE_EGRESS_CONTRACT,
         LIFECYCLE_EGRESS_CONTRACT,
-      } = await import(process.env.JEST_NATIVE_CREATE_EGRESS);
+      } = (await import(
+        process.env.JEST_NATIVE_CREATE_EGRESS
+      )) as NativeEgressModule;
       const auth =
         'Bearer SYNTHETIC_NATIVE_SOCKET_PARTNER, User SYNTHETIC_NATIVE_SOCKET_USER';
       const config = {
@@ -783,7 +819,7 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
           maxCreates: 1,
         },
         ledgerPath: path.join(
-          path.dirname(output!),
+          path.dirname(output),
           `create-egress-${company}.jsonl`,
         ),
         // Synthetic construction only; this is not a platform execution authorization.
@@ -803,12 +839,12 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
           });
         },
       };
-      let proxy;
+      let proxy: NativeEgress;
       if (process.env.JEST_NATIVE_RUN_GUARD) {
-        const { guardedNativeEgress } = await import(
+        const { guardedNativeEgress } = (await import(
           process.env.JEST_NATIVE_RUN_GUARD
-        );
-        const root = path.join(path.dirname(output!), 'run-guard-' + company);
+        )) as GuardedEgressModule;
+        const root = path.join(path.dirname(output), 'run-guard-' + company);
         const installed = path.join(root, 'installed'),
           state = path.join(root, 'state');
         mkdirSync(root, { mode: 0o700 });
@@ -1033,7 +1069,7 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       });
       observations.lifecycleMoveHttp = {
         status: moved.status,
-        body: moved.status === 201 ? 'SUCCESS' : moved.body,
+        body: moved.status === 201 ? 'SUCCESS' : (moved.body as unknown),
       };
       expect(moved.status).toBe(201);
       const moveAgain = () =>
@@ -1046,7 +1082,8 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       const cancelled = await mutate('cancel', cancelKey);
       observations.lifecycleCancelHttp = {
         status: cancelled.status,
-        body: cancelled.status === 201 ? 'SUCCESS' : cancelled.body,
+        body:
+          cancelled.status === 201 ? 'SUCCESS' : (cancelled.body as unknown),
       };
       expect(cancelled.status).toBe(201);
       await mutate('cancel', cancelKey);
@@ -1369,7 +1406,7 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
                 child.send({
                   type: 'start',
                   backendOrigin: await http.listenLoopback(),
-                  output: path.dirname(output!),
+                  output: path.dirname(output),
                   email: source.user.email,
                   start: source.startsAt,
                   nativeSyntheticYclients: true,
@@ -1446,7 +1483,7 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
                 const report = JSON.parse(
                   readFileSync(
                     path.join(
-                      path.dirname(output!),
+                      path.dirname(output),
                       'current-react/browser.json',
                     ),
                     'utf8',

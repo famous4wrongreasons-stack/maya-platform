@@ -1,0 +1,50 @@
+{
+  "contract": "maya.phone-ci-baseline-repair/1",
+  "previousHead": "be58cf4138e03ede2fae5cb3097e6722a0a2f546",
+  "releaseAdmissible": false,
+  "artifacts": {
+    "BEFORE-LINT.log": {
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/logs/lint.log",
+      "sha256": "5a73cc4eef2b679bbe6a2b3b4a41369ac50d680a9891fb26628381b9e2695a27",
+      "bytes": 16508
+    },
+    "BEFORE-BASELINE.json": {
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/baselines.json",
+      "sha256": "f4273ea24ddb7e06f2b5b3f61b630defff4b94e955c184c573115daf572a263d",
+      "bytes": 7153
+    },
+    "TARGETED-LINT.log": {
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/targeted-lint-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "WIRE.json": {
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lint-fix-20261018-wire-final/manifest.json",
+      "sha256": "6079b662f3c50851a7497b44a4737b09bca294191c304f391cd7e78dcb7a653f",
+      "bytes": 3143
+    },
+    "ACTION-ENGINE.json": {
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lint-fix-20261018-ae-final/manifest.json",
+      "sha256": "6a1e8c11e541204e046e893dec4babe34390ac5009d29d693c4587b1e325ce8f",
+      "bytes": 3461
+    },
+    "BROWSER.json": {
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lint-fix-20261018-browser-final/manifest.json",
+      "sha256": "5283ee3c6f9574de5b1c5735d1b6be0defccdef3119b333508834dc9de140d70",
+      "bytes": 4790
+    }
+  },
+  "changedSources": {
+    "maya-saas-backend/test/widgets-diagnostics/native-provider-lifecycle.probe-spec.ts": "54ca871ed9651c72380cd7381fa52a5108834bc97616ca5bb70ae4e7877bd821",
+    "maya-saas-backend/test/widgets-diagnostics/native-provider-socket-loss.probe-spec.ts": "c0ecef8f896d2a89da17bd063b063d8177c77772bb1198000eb5e160b7476722"
+  },
+  "targetedLint": {
+    "exitCode": 0,
+    "errors": 0,
+    "warnings": 0,
+    "files": [
+      "maya-saas-backend/test/widgets-diagnostics/native-provider-lifecycle.probe-spec.ts",
+      "maya-saas-backend/test/widgets-diagnostics/native-provider-socket-loss.probe-spec.ts"
+    ]
+  }
+}
