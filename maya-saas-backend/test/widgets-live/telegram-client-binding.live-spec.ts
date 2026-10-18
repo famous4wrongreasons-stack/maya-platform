@@ -1024,11 +1024,44 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
     ).toBe('linked');
     expect(await f.count()).toBe(1);
   });
-  it.each([1, 2, 3, 4, 5, 6, 7, 8])(
+  // Diagnostic-only repetition of the unchanged concurrent-login contract.
+  // No fixture authority, provider data, product source or assertions are changed.
+  it.each(Array.from({ length: 1000 }, (_, index) => index + 1))(
     'gives one initial writer under concurrent valid login contexts, run %s',
-    async () => {
+    async (iteration) => {
       const f = await fixture();
+      const errors: Array<Record<string, unknown>> = [];
+      const observed = binding as unknown as {
+        bind(proof: VerifiedTelegramClientLogin): Promise<unknown>;
+      };
+      const originalBind = observed.bind.bind(observed);
+      jest.spyOn(observed, 'bind').mockImplementation(async (proof) => {
+        try {
+          return await originalBind(proof);
+        } catch (error) {
+          const value = error as {
+            name?: string;
+            code?: string;
+            stack?: string;
+            meta?: { code?: string; modelName?: string };
+          };
+          errors.push({
+            name: value.name,
+            code: value.code,
+            sqlState: value.meta?.code,
+            modelName: value.meta?.modelName,
+            prismaKnown: error instanceof Prisma.PrismaClientKnownRequestError,
+            frames: value.stack?.split('\n').filter((line) => /^\s+at /.test(line)).slice(0, 8),
+          });
+          throw error;
+        }
+      });
       const results = await Promise.all([f.run(), f.run(), f.run()]);
+      if (results.some((result) => !['linked', 'already_linked'].includes(result.status))) {
+        console.error('SYNTHETIC_CONCURRENCY_DIAGNOSTIC', JSON.stringify({
+          iteration, results, errors, links: await f.count(),
+        }));
+      }
       expect(results.filter((r) => r.status === 'linked')).toHaveLength(1);
       expect(
         results.every((r) => ['linked', 'already_linked'].includes(r.status)),
