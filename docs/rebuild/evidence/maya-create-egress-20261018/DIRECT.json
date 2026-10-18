@@ -1,0 +1,83 @@
+{
+  "contract": "maya.native-provider-socket-loss-proof/1",
+  "sourceHead": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "startedAt": "2026-10-18T08:24:21.385Z",
+  "status": "passed",
+  "counterfactual": null,
+  "mutation": {},
+  "createEgress": {},
+  "runnerSha256": "1360ac35d41f5dbcac2034977c5bd2fd38227dce1f8ea6230ab55384ebb9e7e5",
+  "testSha256": "05af901bd5562dbe996125af371e80d867ff749e843116fc17a2278a03753ab8",
+  "relocatedTestSha256": "fd8444562dbb31ab79f3e96e27592e885ffb62b0430b0af89fd1de875c9786da",
+  "loaderSha256": "07fc9fdd00c847815853d5799a181b7cf425a899f8be238b672c5d572113af5e",
+  "execution": "NODE_TEST_SINGLE_REALM_WITH_UNCHANGED_APPLICATION_MODULES",
+  "cluster": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-create-egress-20261018/direct-regression/pg",
+  "database": "maya_widget_gate_proof_native_socket_149bf15746e3",
+  "port": 55198,
+  "steps": [
+    {
+      "name": "typecheck",
+      "startedAt": "2026-10-18T08:24:21.386Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T08:24:29.377Z"
+    },
+    {
+      "name": "initdb",
+      "startedAt": "2026-10-18T08:24:29.377Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T08:24:29.797Z"
+    },
+    {
+      "name": "pg-start",
+      "startedAt": "2026-10-18T08:24:29.797Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T08:24:29.926Z"
+    },
+    {
+      "name": "createdb",
+      "startedAt": "2026-10-18T08:24:29.926Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T08:24:29.999Z"
+    },
+    {
+      "name": "migrations",
+      "startedAt": "2026-10-18T08:24:29.999Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T08:24:31.017Z"
+    },
+    {
+      "name": "native-socket",
+      "startedAt": "2026-10-18T08:24:31.017Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T08:24:37.196Z"
+    },
+    {
+      "name": "pg-stop",
+      "startedAt": "2026-10-18T08:24:37.197Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T08:24:37.310Z"
+    }
+  ],
+  "network": "OS_LOOPBACK_ONLY",
+  "nativeAdapterOperationsMocked": false,
+  "fetchMocked": false,
+  "realProviderCalls": 0,
+  "ownerDatabaseAccessed": false,
+  "certificate": "NOT_ISSUED",
+  "release_admissible": false,
+  "tests": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0
+  },
+  "clusterStopped": true,
+  "sourcesUnchanged": true,
+  "finishedAt": "2026-10-18T08:24:37.456Z"
+}

@@ -1,0 +1,64 @@
+{
+  "contract": "maya.phone-native-create-egress-local-proof/1",
+  "applicationCandidate": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "profile": "closed-input.no-handoff.no-price-goods@1",
+  "applicationChanged": false,
+  "certificate": "NOT_ISSUED",
+  "release_admissible": false,
+  "executionReady": false,
+  "realProviderCalls": 0,
+  "realModelCalls": 0,
+  "ownerDatabaseAccessed": false,
+  "productionChanged": false,
+  "toolingSha256": {
+    "scripts/phone-native-create-egress.mjs": "3d7392d8aeb9c0f0f77c9bfe9f4119c32a42242e34b91c94c132ac2b0e5c8461",
+    "scripts/phone-native-create-egress.test.mjs": "656b9e73052f9661992daec69b672408726a72c14565b78d2e8c21ffd6812b08",
+    "scripts/native-provider-socket-proof.mjs": "1360ac35d41f5dbcac2034977c5bd2fd38227dce1f8ea6230ab55384ebb9e7e5",
+    "test/widgets-diagnostics/native-provider-socket-loss.probe-spec.ts": "05af901bd5562dbe996125af371e80d867ff749e843116fc17a2278a03753ab8"
+  },
+  "runs": [
+    {
+      "name": "native-final",
+      "status": "passed",
+      "tests": {
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0
+      },
+      "sourceManifestSha256": "86c93d8e321f66d8406562bb07d2608572952fa0b51d24389e4dd58d8521eb45",
+      "localPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-create-egress-20261018/native-final",
+      "nativeLogSha256": "2df4c226eeffa01a0cc23b33fd100159cda06533fd3e88ba43b3920d27b5f3b6"
+    },
+    {
+      "name": "direct-regression",
+      "status": "passed",
+      "tests": {
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0
+      },
+      "sourceManifestSha256": "d4d78e0e93259da11554251163b7188b8c78ad474ea341f1e6f0ae9f8a76e228",
+      "localPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-create-egress-20261018/direct-regression",
+      "nativeLogSha256": "02e2758af3dbe21f5f6bc92fe65d97f11fd0387ff4fb408e155c8dafbc9d0eb5"
+    },
+    {
+      "name": "proxy-counterfactual-01",
+      "status": "counterfactual-detected",
+      "tests": {
+        "passed": 1,
+        "failed": 1,
+        "skipped": 0
+      },
+      "sourceManifestSha256": "089981b7c18ef697527a86beff1b8d1493fbbb83c253cd65bf4d50bf579eb35f",
+      "localPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-create-egress-20261018/proxy-counterfactual-01",
+      "nativeLogSha256": "7e47deff919e83684cdcbf7889d428057c40f8742274edf0b17c350a4841e113"
+    }
+  ],
+  "unit": {
+    "passed": 38,
+    "failed": 0,
+    "skipped": 0,
+    "sha256": "c4ecdc8ee4d27fab31db4b97d3cd19e350123e3187694ffe774731dd7fd5fa3e",
+    "network": "OS_LOOPBACK_ONLY"
+  }
+}

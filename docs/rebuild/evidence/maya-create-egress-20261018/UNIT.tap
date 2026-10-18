@@ -1,0 +1,238 @@
+TAP version 13
+# Subtest: scope is exact candidate/profile/company/window and one create only
+ok 1 - scope is exact candidate/profile/company/window and one create only
+  ---
+  duration_ms: 3.222792
+  type: 'test'
+  ...
+# Subtest: configuration alone and async/false admission never open a ledger
+ok 2 - configuration alone and async/false admission never open a ledger
+  ---
+  duration_ms: 1.516125
+  type: 'test'
+  ...
+# Subtest: native create body and genuine provider response pass byte-for-byte, with no extra headers
+ok 3 - native create body and genuine provider response pass byte-for-byte, with no extra headers
+  ---
+  duration_ms: 22.132958
+  type: 'test'
+  ...
+# Subtest: allow exact catalog/one-day availability: /api/v1/book_services/450001
+ok 4 - allow exact catalog/one-day availability: /api/v1/book_services/450001
+  ---
+  duration_ms: 14.775291
+  type: 'test'
+  ...
+# Subtest: allow exact catalog/one-day availability: /api/v1/book_services/450001?staff_id=71
+ok 5 - allow exact catalog/one-day availability: /api/v1/book_services/450001?staff_id=71
+  ---
+  duration_ms: 16.294792
+  type: 'test'
+  ...
+# Subtest: allow exact catalog/one-day availability: /api/v1/book_staff/450001
+ok 6 - allow exact catalog/one-day availability: /api/v1/book_staff/450001
+  ---
+  duration_ms: 11.8625
+  type: 'test'
+  ...
+# Subtest: allow exact catalog/one-day availability: /api/v1/book_times/450001/71/2026-10-19?date=2026-10-19&service_ids%5B%5D=81
+ok 7 - allow exact catalog/one-day availability: /api/v1/book_times/450001/71/2026-10-19?date=2026-10-19&service_ids%5B%5D=81
+  ---
+  duration_ms: 12.755792
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: POST /api/v1/book_record/450002
+ok 8 - unadmitted route is refused without dispatch: POST /api/v1/book_record/450002
+  ---
+  duration_ms: 8.020958
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: POST /api/v1/records/450001
+ok 9 - unadmitted route is refused without dispatch: POST /api/v1/records/450001
+  ---
+  duration_ms: 8.4595
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: PUT /api/v1/record/450001/123
+ok 10 - unadmitted route is refused without dispatch: PUT /api/v1/record/450001/123
+  ---
+  duration_ms: 8.568209
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: DELETE /api/v1/record/450001/123
+ok 11 - unadmitted route is refused without dispatch: DELETE /api/v1/record/450001/123
+  ---
+  duration_ms: 9.961042
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: PATCH /api/v1/company/450001/services/81
+ok 12 - unadmitted route is refused without dispatch: PATCH /api/v1/company/450001/services/81
+  ---
+  duration_ms: 6.949666
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: POST /api/v1/storage_operations/operation/450001
+ok 13 - unadmitted route is refused without dispatch: POST /api/v1/storage_operations/operation/450001
+  ---
+  duration_ms: 6.26975
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: POST /api/v1/handoff
+ok 14 - unadmitted route is refused without dispatch: POST /api/v1/handoff
+  ---
+  duration_ms: 6.597458
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: POST /api/v1/book_record/%34%35%30%30%30%31
+ok 15 - unadmitted route is refused without dispatch: POST /api/v1/book_record/%34%35%30%30%30%31
+  ---
+  duration_ms: 7.580083
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: POST /api/v1/x/../book_record/450001
+ok 16 - unadmitted route is refused without dispatch: POST /api/v1/x/../book_record/450001
+  ---
+  duration_ms: 7.560291
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: POST //evil.invalid/api/v1/book_record/450001
+ok 17 - unadmitted route is refused without dispatch: POST //evil.invalid/api/v1/book_record/450001
+  ---
+  duration_ms: 8.063833
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: GET /api/v1/records/450001
+ok 18 - unadmitted route is refused without dispatch: GET /api/v1/records/450001
+  ---
+  duration_ms: 8.435583
+  type: 'test'
+  ...
+# Subtest: SMS, email, guest/admin extras, multiple appointments and forged credentials are refused
+ok 19 - SMS, email, guest/admin extras, multiple appointments and forged credentials are refused
+  ---
+  duration_ms: 16.01475
+  type: 'test'
+  ...
+# Subtest: only matching post-create reconciliation contact read is admitted
+ok 20 - only matching post-create reconciliation contact read is admitted
+  ---
+  duration_ms: 18.887875
+  type: 'test'
+  ...
+# Subtest: one durable reservation covers all concurrent creates and all later retries
+ok 21 - one durable reservation covers all concurrent creates and all later retries
+  ---
+  duration_ms: 17.775
+  type: 'test'
+  ...
+# Subtest: restart cannot reopen an already consumed run ledger
+ok 22 - restart cannot reopen an already consumed run ledger
+  ---
+  duration_ms: 15.5845
+  type: 'test'
+  ...
+# Subtest: ledger removal prevents dispatch
+ok 23 - ledger removal prevents dispatch
+  ---
+  duration_ms: 8.896708
+  type: 'test'
+  ...
+# Subtest: durable reservation failure poisons the run before provider dispatch
+ok 24 - durable reservation failure poisons the run before provider dispatch
+  ---
+  duration_ms: 7.167625
+  type: 'test'
+  ...
+# Subtest: read quota is finite and independent from the single create
+ok 25 - read quota is finite and independent from the single create
+  ---
+  duration_ms: 27.253209
+  type: 'test'
+  ...
+# Subtest: post-dispatch transport is socket loss, never a fabricated definite response
+ok 26 - post-dispatch transport is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 15.970667
+  type: 'test'
+  ...
+# Subtest: post-dispatch partial-body is socket loss, never a fabricated definite response
+ok 27 - post-dispatch partial-body is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 14.891917
+  type: 'test'
+  ...
+# Subtest: post-dispatch invalid-json is socket loss, never a fabricated definite response
+ok 28 - post-dispatch invalid-json is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 11.538167
+  type: 'test'
+  ...
+# Subtest: post-dispatch oversize is socket loss, never a fabricated definite response
+ok 29 - post-dispatch oversize is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 22.908209
+  type: 'test'
+  ...
+# Subtest: post-dispatch redirect is socket loss, never a fabricated definite response
+ok 30 - post-dispatch redirect is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 17.723625
+  type: 'test'
+  ...
+# Subtest: post-dispatch expired is socket loss, never a fabricated definite response
+ok 31 - post-dispatch expired is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 11.858667
+  type: 'test'
+  ...
+# Subtest: post-dispatch revoked is socket loss, never a fabricated definite response
+ok 32 - post-dispatch revoked is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 12.706333
+  type: 'test'
+  ...
+# Subtest: post-dispatch admission-revoked is socket loss, never a fabricated definite response
+ok 33 - post-dispatch admission-revoked is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 15.322416
+  type: 'test'
+  ...
+# Subtest: pre-dispatch expiry or revocation refuses without any provider call
+ok 34 - pre-dispatch expiry or revocation refuses without any provider call
+  ---
+  duration_ms: 9.825584
+  type: 'test'
+  ...
+# Subtest: actual provider rejection status/body are preserved rather than invented
+ok 35 - actual provider rejection status/body are preserved rather than invented
+  ---
+  duration_ms: 16.222625
+  type: 'test'
+  ...
+# Subtest: revocation aborts an in-flight request and burns its create reservation
+ok 36 - revocation aborts an in-flight request and burns its create reservation
+  ---
+  duration_ms: 13.457375
+  type: 'test'
+  ...
+# Subtest: current execution admission is reread before dispatch, with no cached allow
+ok 37 - current execution admission is reread before dispatch, with no cached allow
+  ---
+  duration_ms: 7.208791
+  type: 'test'
+  ...
+# Subtest: duplicate date, widened window and substituted service query are refused
+ok 38 - duplicate date, widened window and substituted service query are refused
+  ---
+  duration_ms: 10.076458
+  type: 'test'
+  ...
+1..38
+# tests 38
+# suites 0
+# pass 38
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 504.6505

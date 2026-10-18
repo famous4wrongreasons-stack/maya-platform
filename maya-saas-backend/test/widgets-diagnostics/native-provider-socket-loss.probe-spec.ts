@@ -2,9 +2,10 @@
  * a test-provider PostgreSQL ledger. No fetch/operation override and no supplied
  * UNKNOWN verdict. The exact source candidate is pinned by the external runner. */
 import assert from 'node:assert/strict';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { writeFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
+import path from 'node:path';
 import { Client as PgClient } from 'pg';
 import request from 'supertest';
 import {
@@ -68,6 +69,9 @@ const observations: Record<string, unknown> = {
   realProviderEffects: 0,
   realModelCalls: 0,
   releaseCertification: 'NOT_ISSUED',
+  createEgress: process.env.JEST_NATIVE_CREATE_EGRESS
+    ? 'SYNTHETIC_ADMISSION_LOOPBACK_TRANSPORT'
+    : 'NOT_USED',
 };
 
 describe('native provider durable POST then actual socket loss [HTTP/PG diagnostic]', () => {
@@ -79,6 +83,15 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
   let origin: string, schema: string;
   const sources = new Map<string, CandidateSource>();
   const companies = new Map<number, CandidateSource>();
+  const proxies = new Map<
+    number,
+    {
+      server: Server;
+      close(): void;
+      snapshot(): Record<string, unknown>;
+      origin: string;
+    }
+  >();
   const counters = new Map<
     number,
     {
@@ -283,7 +296,12 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
         const settings = object(config.settings);
         assert.ok(companies.has(Number(settings.companyId)));
         return new YclientsCRMAdapter(
-          { ...config, baseUrl: origin + '/api/v1' },
+          {
+            ...config,
+            baseUrl:
+              (proxies.get(Number(settings.companyId))?.origin ?? origin) +
+              '/api/v1',
+          },
           'SYNTHETIC_NATIVE_SOCKET_PARTNER',
         );
       });
@@ -342,10 +360,21 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       socketLoss: counters.get(LOSS) ?? null,
     };
     observations.fetchIdentityUnchanged = globalThis.fetch === nativeFetch;
+    observations.createEgressSnapshots = Object.fromEntries(
+      [...proxies].map(([company, proxy]) => [
+        company === HEALTHY ? 'healthy' : 'socketLoss',
+        proxy.snapshot(),
+      ]),
+    );
     writeFileSync(output!, JSON.stringify(observations, null, 2) + '\n', {
       mode: 0o600,
     });
     jest.restoreAllMocks();
+    for (const proxy of proxies.values()) {
+      proxy.close();
+      proxy.server.closeAllConnections();
+      await new Promise<void>((resolve) => proxy.server.close(() => resolve()));
+    }
     if (server) {
       server.closeAllConnections();
       await new Promise<void>((resolve) => server.close(() => resolve()));
@@ -388,6 +417,57 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       reconciliations: 0,
       reads: 0,
     });
+    if (process.env.JEST_NATIVE_CREATE_EGRESS) {
+      const { nativeCreateEgress, CREATE_EGRESS_CONTRACT } = await import(
+        process.env.JEST_NATIVE_CREATE_EGRESS
+      );
+      const auth =
+        'Bearer SYNTHETIC_NATIVE_SOCKET_PARTNER, User SYNTHETIC_NATIVE_SOCKET_USER';
+      const proxy = nativeCreateEgress({
+        scope: {
+          contract: CREATE_EGRESS_CONTRACT,
+          candidate: observations.candidate,
+          profile: 'closed-input.no-handoff.no-price-goods@1',
+          tenantId: source.tenant.id,
+          companyId: String(company),
+          executionAuthorizationDigest: 'a'.repeat(64),
+          credentialDigest: createHash('sha256').update(auth).digest('hex'),
+          notBefore: new Date(Date.now() - 1000).toISOString(),
+          expiresAt: new Date(Date.now() + 600000).toISOString(),
+          maxReads: 256,
+          maxCreates: 1,
+        },
+        ledgerPath: path.join(
+          path.dirname(output!),
+          `create-egress-${company}.jsonl`,
+        ),
+        // Synthetic construction only; this is not a platform execution authorization.
+        assertCurrent: () => true,
+        nativeFetch: async (raw: string, init: RequestInit) => {
+          const target = new URL(raw);
+          assert.equal(target.origin, 'https://api.yclients.com');
+          const response = await nativeFetch(
+            origin + target.pathname + target.search,
+            init,
+          );
+          // Test destination substitution only. Preserve actual status/body stream,
+          // including native socket/body errors; never supply UNKNOWN ourselves.
+          return new Response(response.body, {
+            status: response.status,
+            headers: response.headers,
+          });
+        },
+      });
+      await new Promise<void>((resolve) =>
+        proxy.server.listen(0, '127.0.0.1', resolve),
+      );
+      const address = proxy.server.address();
+      assert.ok(address && typeof address !== 'string');
+      proxies.set(company, {
+        ...proxy,
+        origin: `http://127.0.0.1:${address.port}`,
+      });
+    }
     await db.prisma.tenant.update({
       where: { id: source.tenant.id },
       data: { calendarSource: CalendarSource.EXTERNAL },
@@ -534,6 +614,12 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
     });
     expect(await rows(HEALTHY)).toHaveLength(1);
     expect(counts(HEALTHY)).toMatchObject({ posts: 1, socketLosses: 0 });
+    if (proxies.has(HEALTHY))
+      expect(proxies.get(HEALTHY)!.snapshot()).toMatchObject({
+        creates: 1,
+        refused: 0,
+        uncertainTransport: 0,
+      });
     expect(
       await db.prisma.appointment.count({
         where: {
@@ -606,6 +692,14 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
     for (const result of [first, normal, ...concurrent])
       expect(JSON.stringify(result)).not.toContain('Запись подтверждена.');
     expect(counts(LOSS).posts).toBe(1);
+    // The proxy's one-write ceiling must not hide a broken Action Engine retry.
+    // Only the first real transport loss is a refusal; retries never reach it.
+    if (proxies.has(LOSS))
+      expect(proxies.get(LOSS)!.snapshot()).toMatchObject({
+        creates: 1,
+        refused: 1,
+        uncertainTransport: 1,
+      });
     expect(await rows(LOSS)).toHaveLength(1);
     expect(
       await db.prisma.actionExecution.count({

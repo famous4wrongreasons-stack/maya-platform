@@ -16,6 +16,7 @@ const { values } = parseArgs({
     output: { type: 'string' },
     counterfactual: { type: 'string' },
     repository: { type: 'string' },
+    'create-egress': { type: 'boolean' },
   },
 });
 const candidate = '6356db1875545337e34b6c8888b7ca858bb64361';
@@ -26,7 +27,14 @@ assert(
     path.isAbsolute(values.output) &&
     !fs.existsSync(values.output),
 );
-assert([undefined, 'definite-outcome'].includes(values.counterfactual));
+assert(
+  [undefined, 'definite-outcome', 'proxy-definite-outcome'].includes(
+    values.counterfactual,
+  ),
+);
+assert(
+  values.counterfactual !== 'proxy-definite-outcome' || values['create-egress'],
+);
 const source = fs.realpathSync(values.source),
   output = path.resolve(values.output);
 assert(!output.startsWith(source + path.sep));
@@ -161,7 +169,7 @@ fs.symlinkSync(
 );
 fs.writeFileSync(path.join(overlay, 'package.json'), '{"type":"commonjs"}\n');
 const mutation = {};
-if (values.counterfactual) {
+if (values.counterfactual === 'definite-outcome') {
   const original = path.join(
     backend,
     'src/crm/adapters/yclients-crm.adapter.ts',
@@ -194,6 +202,42 @@ if (values.counterfactual) {
     contract: 'TEST_ONLY_NATIVE_UNKNOWN_TO_DEFINITE_FAILURE',
     originalSha256: sha(input),
     changedSha256: sha(changed),
+  });
+}
+const proxyModule = values['create-egress']
+  ? path.join(overlay, 'phone-native-create-egress.mjs')
+  : null;
+const proxyProof = {};
+if (proxyModule) {
+  const original = path.join(tooling, 'scripts/phone-native-create-egress.mjs');
+  const input = fs.readFileSync(original, 'utf8');
+  let changed = input;
+  if (values.counterfactual === 'proxy-definite-outcome') {
+    const needle = '        res.destroy();';
+    assert.equal(
+      input.split(needle).length,
+      2,
+      'Exactly one post-dispatch uncertainty branch required',
+    );
+    changed = input.replace(
+      needle,
+      "        res.writeHead(403, { 'content-type': 'application/json' }).end(refused);",
+    );
+    Object.assign(mutation, {
+      contract: 'TEST_ONLY_PROXY_LOSS_TO_DEFINITE_FAILURE',
+      originalSha256: sha(input),
+      changedSha256: sha(changed),
+    });
+  }
+  fs.writeFileSync(
+    proxyModule,
+    relocate(changed, path.join(backend, 'scripts')),
+  );
+  Object.assign(proxyProof, {
+    original,
+    originalSha256: sha(input),
+    relocatedSha256: sha(fs.readFileSync(proxyModule)),
+    syntheticAdmissionOnly: true,
   });
 }
 fs.writeFileSync(generatedSpec, relocatedSpec);
@@ -255,6 +299,7 @@ const environment = {
   DATABASE_URL: `postgresql://native_socket_proof@127.0.0.1:${port}/${database}`,
   JEST_NATIVE_SOCKET_OUTPUT: path.join(output, 'observations.json'),
   JEST_NATIVE_SOCKET_COUNTERFACTUAL: values.counterfactual ?? '',
+  ...(proxyModule ? { JEST_NATIVE_CREATE_EGRESS: proxyModule } : {}),
 };
 const sandbox =
   '(version 1)(allow default)(deny network-outbound)(allow network-outbound (remote ip "localhost:*"))';
@@ -265,6 +310,7 @@ const receipt = {
   status: 'running',
   counterfactual: values.counterfactual ?? null,
   mutation,
+  createEgress: proxyProof,
   runnerSha256: sha(fs.readFileSync(fileURLToPath(import.meta.url))),
   testSha256: sha(testBytes),
   relocatedTestSha256: sha(fs.readFileSync(generatedSpec)),
@@ -488,6 +534,11 @@ try {
   try {
     assert.deepEqual(snapshot(), before);
     assert.equal(sha(fs.readFileSync(spec)), receipt.testSha256);
+    if (proxyModule)
+      assert.equal(
+        sha(fs.readFileSync(proxyProof.original)),
+        proxyProof.originalSha256,
+      );
     receipt.sourcesUnchanged = true;
   } catch {
     receipt.sourcesUnchanged = false;
