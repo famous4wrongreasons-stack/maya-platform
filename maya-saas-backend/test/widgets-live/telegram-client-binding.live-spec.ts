@@ -1057,16 +1057,29 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
         }
       });
       const results = await Promise.all([f.run(), f.run(), f.run()]);
+      let diagnostic: string | undefined;
       if (results.some((result) => !['linked', 'already_linked'].includes(result.status))) {
-        process.stderr.write('SYNTHETIC_CONCURRENCY_DIAGNOSTIC ' + JSON.stringify({
+        diagnostic = 'SYNTHETIC_CONCURRENCY_DIAGNOSTIC ' + JSON.stringify({
           iteration, results, errors, links: await f.count(),
-        }) + '\n');
+        });
+        process.stderr.write(diagnostic + '\n');
       }
-      expect(results.filter((r) => r.status === 'linked')).toHaveLength(1);
-      expect(
-        results.every((r) => ['linked', 'already_linked'].includes(r.status)),
-      ).toBe(true);
-      expect(await f.count()).toBe(1);
+      try {
+        expect(results.filter((r) => r.status === 'linked')).toHaveLength(1);
+        expect(
+          results.every((r) => ['linked', 'already_linked'].includes(r.status)),
+        ).toBe(true);
+        expect(await f.count()).toBe(1);
+      } catch (error) {
+        // The mutation runner retains Jest assertion failures, not full stderr.
+        // Keep the original failed assertion and attach only synthetic categories.
+        if (error instanceof Error && diagnostic) {
+          const originalStack = error.stack;
+          error.message += '\n' + diagnostic;
+          error.stack = (originalStack ?? error.message) + '\n' + diagnostic;
+        }
+        throw error;
+      }
     },
   );
   it.each([
