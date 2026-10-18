@@ -1,0 +1,68 @@
+TAP version 13
+# Subtest: native Maya icon: approved opaque 1024px artwork
+ok 1 - native Maya icon: approved opaque 1024px artwork
+  ---
+  duration_ms: 1.127458
+  type: 'test'
+  ...
+# Subtest: native icon is a blocking check in every canonical release entry
+not ok 2 - native icon is a blocking check in every canonical release entry
+  ---
+  duration_ms: 29.222459
+  type: 'test'
+  location: '/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-completion-20261018/packaging-source/maya-carrier-react/test/native-app-icon.test.mjs:16:1'
+  failureType: 'testCodeFailure'
+  error: 'build'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 0
+  actual: 0
+  operator: 'notStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-completion-20261018/packaging-source/maya-carrier-react/test/native-app-icon.test.mjs:35:14)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: native Maya icon refuses Capacitor placeholder selected
+ok 3 - native Maya icon refuses Capacitor placeholder selected
+  ---
+  duration_ms: 1.260125
+  type: 'test'
+  ...
+# Subtest: native Maya icon refuses substituted image
+ok 4 - native Maya icon refuses substituted image
+  ---
+  duration_ms: 1.102125
+  type: 'test'
+  ...
+# Subtest: native Maya icon refuses missing icon
+ok 5 - native Maya icon refuses missing icon
+  ---
+  duration_ms: 0.617375
+  type: 'test'
+  ...
+# Subtest: native Maya icon refuses linked icon
+ok 6 - native Maya icon refuses linked icon
+  ---
+  duration_ms: 0.734084
+  type: 'test'
+  ...
+# Subtest: native Maya icon refuses additional rendition
+ok 7 - native Maya icon refuses additional rendition
+  ---
+  duration_ms: 1.0815
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 6
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 72.333125

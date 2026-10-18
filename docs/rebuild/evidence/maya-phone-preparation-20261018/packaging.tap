@@ -1,0 +1,164 @@
+
+> maya-carrier-react@0.0.0 test:release
+> node --test test/release.test.mjs test/native-app-icon.test.mjs
+
+TAP version 13
+# Subtest: native Maya icon: approved opaque 1024px artwork
+ok 1 - native Maya icon: approved opaque 1024px artwork
+  ---
+  duration_ms: 1.195041
+  type: 'test'
+  ...
+# Subtest: native icon is a blocking check in every canonical release entry
+ok 2 - native icon is a blocking check in every canonical release entry
+  ---
+  duration_ms: 296.66425
+  type: 'test'
+  ...
+# Subtest: native Maya icon refuses Capacitor placeholder selected
+ok 3 - native Maya icon refuses Capacitor placeholder selected
+  ---
+  duration_ms: 1.907167
+  type: 'test'
+  ...
+# Subtest: native Maya icon refuses substituted image
+ok 4 - native Maya icon refuses substituted image
+  ---
+  duration_ms: 1.250625
+  type: 'test'
+  ...
+# Subtest: native Maya icon refuses missing icon
+ok 5 - native Maya icon refuses missing icon
+  ---
+  duration_ms: 0.823625
+  type: 'test'
+  ...
+# Subtest: native Maya icon refuses linked icon
+ok 6 - native Maya icon refuses linked icon
+  ---
+  duration_ms: 1.011125
+  type: 'test'
+  ...
+# Subtest: native Maya icon refuses additional rendition
+ok 7 - native Maya icon refuses additional rendition
+  ---
+  duration_ms: 1.640667
+  type: 'test'
+  ...
+# Subtest: RPK positive: complete real React PWA and native payload parity
+ok 8 - RPK positive: complete real React PWA and native payload parity
+  ---
+  duration_ms: 3.929917
+  type: 'test'
+  ...
+# Subtest: RPK explicit development API preserves production default and refuses unsafe shapes
+ok 9 - RPK explicit development API preserves production default and refuses unsafe shapes
+  ---
+  duration_ms: 1.726541
+  type: 'test'
+  ...
+# Subtest: RPK old/alternate native payload refused: ../maya-chat-shell/dist/capacitor
+ok 10 - RPK old/alternate native payload refused: ../maya-chat-shell/dist/capacitor
+  ---
+  duration_ms: 0.211792
+  type: 'test'
+  ...
+# Subtest: RPK old/alternate native payload refused: ../maya-chat-shell/dist/web
+ok 11 - RPK old/alternate native payload refused: ../maya-chat-shell/dist/web
+  ---
+  duration_ms: 0.153292
+  type: 'test'
+  ...
+# Subtest: RPK old/alternate native payload refused: www
+ok 12 - RPK old/alternate native payload refused: www
+  ---
+  duration_ms: 0.145875
+  type: 'test'
+  ...
+# Subtest: RPK old/alternate native payload refused: ../maya-carrier-react/dist/web
+ok 13 - RPK old/alternate native payload refused: ../maya-carrier-react/dist/web
+  ---
+  duration_ms: 0.171583
+  type: 'test'
+  ...
+# Subtest: RPK remote server override refuses
+ok 14 - RPK remote server override refuses
+  ---
+  duration_ms: 0.332459
+  type: 'test'
+  ...
+# Subtest: RPK legacy shell replacing native www refuses even if supplied with an inventory
+ok 15 - RPK legacy shell replacing native www refuses even if supplied with an inventory
+  ---
+  duration_ms: 2.587625
+  type: 'test'
+  ...
+# Subtest: RPK missing manifest refuses
+ok 16 - RPK missing manifest refuses
+  ---
+  duration_ms: 0.246834
+  type: 'test'
+  ...
+# Subtest: RPK altered icon refuses
+ok 17 - RPK altered icon refuses
+  ---
+  duration_ms: 0.282042
+  type: 'test'
+  ...
+# Subtest: RPK extra script refuses
+ok 18 - RPK extra script refuses
+  ---
+  duration_ms: 0.26175
+  type: 'test'
+  ...
+# Subtest: RPK altered main refuses
+ok 19 - RPK altered main refuses
+  ---
+  duration_ms: 0.248375
+  type: 'test'
+  ...
+# Subtest: RPK only empty generated bridge placeholders admitted
+ok 20 - RPK only empty generated bridge placeholders admitted
+  ---
+  duration_ms: 0.3235
+  type: 'test'
+  ...
+# Subtest: RPK endpoint/CSS/identity divergence refuses
+ok 21 - RPK endpoint/CSS/identity divergence refuses
+  ---
+  duration_ms: 10.079
+  type: 'test'
+  ...
+# Subtest: RPK symlink payload refuses
+ok 22 - RPK symlink payload refuses
+  ---
+  duration_ms: 0.753375
+  type: 'test'
+  ...
+# Subtest: RPK Xcode and sync are bound to the same refusing release entry
+ok 23 - RPK Xcode and sync are bound to the same refusing release entry
+  ---
+  duration_ms: 0.181375
+  type: 'test'
+  ...
+# Subtest: RPK verifier rebuilds expected bytes, refuses a swapped artifact, does not repair it
+ok 24 - RPK verifier rebuilds expected bytes, refuses a swapped artifact, does not repair it
+  ---
+  duration_ms: 33893.34425
+  type: 'test'
+  ...
+# Subtest: RPK refuses keyboard-overlay and outer-scroll regressions
+ok 25 - RPK refuses keyboard-overlay and outer-scroll regressions
+  ---
+  duration_ms: 0.288291
+  type: 'test'
+  ...
+1..25
+# tests 25
+# suites 0
+# pass 25
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 33960.533542

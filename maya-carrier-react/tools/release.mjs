@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { assertFiles, readTree } from './payload-files.mjs';
 import { nativeApiTarget, parseDevelopmentApi, xcodeDevelopmentApi } from './native-api-target.mjs';
+import { verifyNativeIcon } from './native-app-icon.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = path.dirname(ROOT);
@@ -63,6 +64,7 @@ export function main(mode, appDirectory, developmentApi) {
   assert.equal(Boolean(appDirectory), mode === 'verify-app', 'app directory is required only for verify-app');
   const config = JSON.parse(fs.readFileSync(path.join(IOS, 'capacitor.config.json'), 'utf8'));
   checkNativeConfig(config);
+  verifyNativeIcon(path.join(IOS, 'ios/App/App/Assets.xcassets/AppIcon.appiconset'));
   if (mode === 'build' || mode === 'sync') {
     // Headless runtime compilation only: its DOM entry is never selected as the release payload.
     run('build.mjs', [], path.join(REPO, 'maya-chat-shell'));
@@ -89,7 +91,7 @@ export function main(mode, appDirectory, developmentApi) {
     profileAuthority: 'server only', nativeVerified: ['sync', 'verify-native', 'verify-app'].includes(mode) }));
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && fs.realpathSync(path.resolve(process.argv[1])) === fileURLToPath(import.meta.url)) {
   try {
     const args = process.argv.slice(2), mode = args.shift();
     const appDirectory = mode === 'verify-app' ? args.shift() : undefined;

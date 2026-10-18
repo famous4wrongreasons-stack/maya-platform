@@ -1,0 +1,111 @@
+{
+  "contract": "maya.phone-packaging-preparation/1",
+  "classification": "SCOPED_PROOF_NOT_RELEASE_CERTIFICATE",
+  "recordedAt": "2026-10-18T14:13:29.988704+00:00",
+  "parentCommit": "33da499bba32426f133a98018f7f4d1da0c1c027",
+  "applicationCandidate": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "sourceHashes": {
+    "maya-carrier-react/package.json": "2fb7eed5527a1701c337d0311358fba8b0677910aabdd2778c43c770dc1d2965",
+    "maya-carrier-react/tools/release.mjs": "5123bae2a0828b49c01943a49c15e886df432703c60d0cf3f71bb615fbe343b6",
+    "maya-carrier-react/tools/native-app-icon.mjs": "5920a348d090ef3f4d0dac36c6e847e6be2b11ccd827a470b3d4f6c48b45beee",
+    "maya-carrier-react/test/native-app-icon.test.mjs": "d5e68d7f51ce4d18915c1f21806f525e6afff52f74c8bd24c4fdcdee6176719c",
+    "maya-ios-carrier/ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json": "e0c4a2d1b48ac35e73bdd107c9e65c04393b7fc2d155ff556e71d7423a52befb",
+    "maya-ios-carrier/ios/App/App/Assets.xcassets/AppIcon.appiconset/Maya-AppIcon-1024.png": "0ad282fd8d686d39d430f675efdb9fa5bde7b96e370519533ce9ba6711fe68b8",
+    "maya-ios-carrier/tools/app-icon.swift": "e42cbdb7e30e6025aceadf492fd5d71ea9e60f68ad3c1ed17dc0b25b218da6fc"
+  },
+  "icon": {
+    "approvedSource": "maya-carrier-react/brand/companion-v1/maya-logo.png",
+    "sourceSha256": "53d4b9fb9aa48915d89d88b5fc945568afa1aa7f532475c34333b8096bc41600",
+    "outputSha256": "0ad282fd8d686d39d430f675efdb9fa5bde7b96e370519533ce9ba6711fe68b8",
+    "width": 1024,
+    "height": 1024,
+    "opaque": true,
+    "redesigned": false
+  },
+  "carrierTests": {
+    "pass": 200,
+    "fail": 0,
+    "skip": 0
+  },
+  "releaseTests": {
+    "pass": 25,
+    "fail": 0,
+    "skip": 0
+  },
+  "nativeIconTestsIncluded": 7,
+  "nativeCLIRefusalChecks": 10,
+  "sourceDeletesPreserved": 1333,
+  "fullCertification": "INCOMPLETE",
+  "iPhoneInstalled": false,
+  "productionDeploy": false,
+  "grantChanges": 0,
+  "realProviderCalls": 0,
+  "localOutputs": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-completion-20261018",
+  "archivedEvidence": {
+    "schema-comparison.json": "716073d12715ae610ac1c3168989549ddbf2d853131f678b2f68b659e666ea73",
+    "app-parity.txt": "932f2bf680cae5b2c999752783b475051a0a64024444f59f43bf718f33e6fe6b",
+    "SERVER-PRESTATE.json": "55b76903dd162eeeeba8c97c5b368d8c7de1b785b02644d03348534dbbe535dc",
+    "carrier.tap": "5676d9eec75eee36e474c2c691b4da282f9196e308b2e13235bdeaa3380a1b8f",
+    "public-readonly-health.json": "5f782c1a7e8d59179c4990d181f6e1cc9b7a974c58477cae089f2a52c43c2ee5",
+    "APP-INVENTORY.json": "ff2ccda9097e0ad97e41e45506f1408e849a8ac072a4bf2894a18d5caeb10c87",
+    "native-icon-entry-tests.tap": "ca7f9953ebebf90e6119ffab6f4275262c7b000285d77575a7ed2c9884f5af4a",
+    "packaging.tap": "4a197c56f7aa4258e1aab51eb7b289d0d840790a744b4f61c9ef55225f1a912e",
+    "server-restore-existing.json": "142641ad8ab41c35b06c2ea864ba7a1792dd8035ba890d69cdda5280a2ccd17d",
+    "ios-readonly-preflight.json": "3020922809925dfd4da3753086e8b0cb9fd6c1ef8bf20d89a36a2aec64b81f10"
+  },
+  "xcode": {
+    "result": "BUILD SUCCEEDED",
+    "destination": "generic/platform=iOS",
+    "configuration": "Debug",
+    "codeSigningAllowed": false,
+    "phoneInstalled": false
+  },
+  "actualAppParity": {
+    "status": "PASS",
+    "owner": "React AChat",
+    "mode": "verify-app",
+    "files": 8,
+    "apiMode": "development",
+    "apiBase": "https://phone-test.mayaos.ru/api",
+    "profileAuthority": "server only",
+    "nativeVerified": true
+  },
+  "localLogs": {
+    "actool.log": {
+      "sha256": "85a2ac714623eb29e586dd607359664603c3e325ecaadee552e264777e0d7b63",
+      "bytes": 707
+    },
+    "xcodebuild-v2.log": {
+      "sha256": "292f4e4a3ba9a8322841d264093df4bf7b4f9d12f94289b85606125543d9ae6e",
+      "bytes": 160701
+    },
+    "packaging-build-v2.log": {
+      "sha256": "2af6fd458f976ea4232b42d4ee93b6dba8f7a58711ec4ba97fed491bce75b0b5",
+      "bytes": 2288
+    },
+    "packaging-test-v2.log": {
+      "sha256": "4a197c56f7aa4258e1aab51eb7b289d0d840790a744b4f61c9ef55225f1a912e",
+      "bytes": 4574
+    },
+    "phone-sync-v2.log": {
+      "sha256": "5797a05587523792b32a35435baf54ded58f56ee402fd2e7ed8e72252cc2be48",
+      "bytes": 2808
+    },
+    "app-parity-v2.log": {
+      "sha256": "932f2bf680cae5b2c999752783b475051a0a64024444f59f43bf718f33e6fe6b",
+      "bytes": 747
+    },
+    "carrier-full.log": {
+      "sha256": "5676d9eec75eee36e474c2c691b4da282f9196e308b2e13235bdeaa3380a1b8f",
+      "bytes": 42353
+    },
+    "packaging-script-test.log": {
+      "sha256": "5c32f0b4a9f07f261a68009c006488121bde7e05fc5e23bc84ed695409c86cef",
+      "bytes": 5497
+    },
+    "native-icon-entry-tests.tap": {
+      "sha256": "ca7f9953ebebf90e6119ffab6f4275262c7b000285d77575a7ed2c9884f5af4a",
+      "bytes": 2266
+    }
+  }
+}

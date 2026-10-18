@@ -1,0 +1,12 @@
+{
+  "targetCandidate": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "expectedMigrations": 106,
+  "appliedMigrations": 106,
+  "missing": [],
+  "unexpected": [],
+  "checksumMismatch": [],
+  "runningBackendBuildDigest": "1541cea0869f6d1c9288c0e2479eb6ef50cfc3a34f4faebe8c22bdddd34db237",
+  "mode": "read-only",
+  "migrationsApplied": 0,
+  "status": "PASS"
+}

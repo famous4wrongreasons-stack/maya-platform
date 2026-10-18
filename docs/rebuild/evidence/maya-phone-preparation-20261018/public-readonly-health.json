@@ -1,0 +1,31 @@
+[
+  {
+    "url": "https://phone-test.mayaos.ru/",
+    "exitCode": 0,
+    "httpStatus": "200",
+    "responseBytes": 842,
+    "sha256": "66d905e8a8b8d5f2447947d51f42bc1e4644ca9ec15aaee477f9701190df7d09"
+  },
+  {
+    "url": "https://phone-test.mayaos.ru/api/health",
+    "exitCode": 0,
+    "httpStatus": "200",
+    "responseBytes": 177,
+    "sha256": "2a8e6ef82a41041a3d2c85966d2a9d3a1402f25ce3e975ec0b625fc686f2ca06",
+    "health": {
+      "status": "ok",
+      "service": "maya-saas-backend"
+    }
+  },
+  {
+    "url": "https://phone-test.mayaos.ru/api/health/ready",
+    "exitCode": 0,
+    "httpStatus": "200",
+    "responseBytes": 117,
+    "sha256": "24b77a244b27feeb0d38ffd9903b2549bc8540478a3e2e6bd26db6dafa7170db",
+    "health": {
+      "status": "ready",
+      "service": "maya-saas-backend"
+    }
+  }
+]

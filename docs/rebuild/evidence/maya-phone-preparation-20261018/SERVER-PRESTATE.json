@@ -1,0 +1,66 @@
+{
+  "contract": "maya.phone-test-readonly-prestate/1",
+  "observedAt": "2026-10-18T14:00:26.287344+00:00",
+  "target": "45.67.56.4",
+  "purpose": "separate phone-test, not former production host",
+  "database": {
+    "appliedMigrations": 106,
+    "unfinishedMigrations": 0,
+    "globalPlatformOwners": 0,
+    "liveGlobalPlatformSessions": 0,
+    "ownerTenant": 1,
+    "activePersonalLinks": 1,
+    "runtimeEntitlementRows": 0,
+    "runtimeEnabledUnexpired": 0
+  },
+  "expiredWindows": {
+    "catalog-scope.json": {
+      "contract": "maya.phone-catalog-egress/1",
+      "maxCalls": 40,
+      "notBefore": "2026-10-15T06:43:27.299Z",
+      "expiresAt": "2026-10-16T06:43:27.299Z"
+    },
+    "phone-ai-scope.json": {
+      "contract": "maya.phone-owner-ai/1",
+      "candidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+      "notBefore": "2026-10-15T09:43:09.076Z",
+      "expiresAt": "2026-10-16T09:43:09.076Z",
+      "maxCalls": 100
+    },
+    "phone-ai-continuation2.json": {
+      "contract": "maya.phone-ai-operator-continuation/2",
+      "candidate": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+      "expiresAt": "2026-10-16T09:43:09.076Z"
+    }
+  },
+  "backend": [
+    {
+      "name": "maya-phone-staging-backend-1",
+      "image": "maya-phone-backend:7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+      "imageDigest": "sha256:d8f6a5b33529e4a7f2e4503cc7e867de88d259f35236fb38d6b8886fcb5a9f6f",
+      "health": "healthy",
+      "environment": {
+        "NODE_ENV": "production",
+        "MAYA_RELEASE": "7aee28d297cd1d70c2f1cb6ce96740d9fd5948d3",
+        "AI_CORE_PROVIDER": "safe"
+      },
+      "trustConfigurationPresent": {
+        "WIDGET_RELEASE_PRODUCTION_TRUST_JSON": false,
+        "WIDGET_RELEASE_PRODUCTION_TENANTS_JSON": false
+      },
+      "composeFiles": "/srv/maya-phone-staging/compose.phone-telegram-03.json"
+    }
+  ],
+  "ssh": {
+    "ownerAuthorized": true,
+    "existingMacPublicKeyAdded": true,
+    "privateKeyTransferred": false,
+    "begetKeyRetained": true,
+    "macFingerprint": "SHA256:qHONaDgWQLfzQVpzTNfEWsp8Tef1sjI5JxYwsi653c8"
+  },
+  "backups": "root-only on the same server, not downloaded or committed",
+  "runtimeRestarted": false,
+  "deployed": false,
+  "migrationsApplied": 0,
+  "grantChanges": 0
+}

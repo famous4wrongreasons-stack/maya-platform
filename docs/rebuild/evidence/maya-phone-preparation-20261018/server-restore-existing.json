@@ -1,0 +1,41 @@
+{
+  "observedAt": "20261018T140814Z",
+  "target": "45.67.56.4",
+  "backupDirectory": "/srv/maya-phone-backups/20261018T140602Z",
+  "productionChanged": false,
+  "existingServicesRestarted": false,
+  "providerCalls": 0,
+  "grantChanges": 0,
+  "applicationMigrationsApplied": 0,
+  "status": "PASS",
+  "tableCount": 134,
+  "allTableContentsMatch": true,
+  "sourceDatabaseStableDuringRestore": true,
+  "restoreNetwork": "none",
+  "restorePublishedPorts": 0,
+  "sharedDatabaseVolumes": 0,
+  "applicationProcessesStarted": 0,
+  "originalBackendHealthy": true,
+  "immutableImagesReloaded": true,
+  "backups": [
+    {
+      "name": "database.dump",
+      "bytes": 1188496,
+      "sha256": "ad9f01b5f8fd9c97e0f66bd1c491b6e1598ea0e43e9e3d994256b10d687056db",
+      "mode": "0o600"
+    },
+    {
+      "name": "configuration-and-mounts.tar.gz",
+      "bytes": 1365219,
+      "sha256": "e30e803fb4542bec337b0f2faf104099ec0f6f570b2b2491f8c10585e764b4a3",
+      "mode": "0o600"
+    },
+    {
+      "name": "images.tar",
+      "bytes": 389838848,
+      "sha256": "b5b78530fc7b130c35284d9e8614ea9e9ea291ab615c1ed8f98b477ce6773fb0",
+      "mode": "0o600"
+    }
+  ],
+  "temporaryRestoreRemoved": true
+}

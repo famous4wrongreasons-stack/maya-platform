@@ -17,7 +17,7 @@
     "release:verify": "node tools/release.mjs verify",
     "test:telegram-browser": "node test/telegram-popup.browser.mjs",
     "test:telegram-mutations": "node test/telegram-popup.mutations.mjs",
-    "test:release": "node --test test/release.test.mjs",
+    "test:release": "node --test test/release.test.mjs test/native-app-icon.test.mjs",
     "test:companion-browser": "node test/companion.browser.mjs"
   },
   "dependencies": {

@@ -1,0 +1,15 @@
+{
+  "targetFound": true,
+  "devices": [
+    {
+      "identifier": "FF6F8003-99D2-5AED-A4CA-05BAE3877929",
+      "connectionState": "disconnected",
+      "deviceType": "iPhone",
+      "pairingState": "paired"
+    }
+  ],
+  "validSigningIdentityCount": 1,
+  "privateKeyRead": false,
+  "signingPerformed": false,
+  "installed": false
+}

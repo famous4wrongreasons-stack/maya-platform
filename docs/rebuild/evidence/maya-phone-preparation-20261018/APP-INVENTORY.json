@@ -1,0 +1,165 @@
+{
+  "classification": "UNSIGNED_LOCAL_BUILD_NOT_INSTALLED",
+  "files": [
+    {
+      "path": "App",
+      "bytes": 72688,
+      "sha256": "805efa7fec2a294888437822bf5bbf8856ee2ed60da386cb33eda0acebecb910"
+    },
+    {
+      "path": "App.debug.dylib",
+      "bytes": 504400,
+      "sha256": "95216b16303589b1151bccc70b16dd5a81c191935fbffc8724501cc5f6f98130"
+    },
+    {
+      "path": "AppIcon60x60@2x.png",
+      "bytes": 4145,
+      "sha256": "7dc0502607012d82ebc7ebb171e54496313f16355473837aabf5cd063c7e5064"
+    },
+    {
+      "path": "AppIcon76x76@2x~ipad.png",
+      "bytes": 5628,
+      "sha256": "481ab68a1a1b0012411b46848a21e0ce81acf63068d9321ad79a16c41d2a7a81"
+    },
+    {
+      "path": "Assets.car",
+      "bytes": 384936,
+      "sha256": "18b7ec558d6657fcc5173af440fd2fce5e2313a4800de7d04112b972093ab80b"
+    },
+    {
+      "path": "Base.lproj/LaunchScreen.storyboardc/01J-lp-oVM-view-snD-IY-ifK.nib",
+      "bytes": 1278,
+      "sha256": "ab27030fc1dd3f62c41ee7337145789d77d2d5b5c5e619b718bbfd3b78b1622a"
+    },
+    {
+      "path": "Base.lproj/LaunchScreen.storyboardc/Info.plist",
+      "bytes": 258,
+      "sha256": "1f255d5cc53b531e3f29a9406a8df49a958e2bf9443d3e20bd8374f707f7d5c8"
+    },
+    {
+      "path": "Base.lproj/LaunchScreen.storyboardc/UIViewController-01J-lp-oVM.nib",
+      "bytes": 924,
+      "sha256": "10bfccdee8aafcd0569b0a1dab6112e70b8afb0dac03fb910823e5097a880051"
+    },
+    {
+      "path": "Base.lproj/Main.storyboardc/Info.plist",
+      "bytes": 258,
+      "sha256": "3e9bdaa408d1eb6ae5e989b813a8644e0a4a981202c536905de52a7291e69aa4"
+    },
+    {
+      "path": "Base.lproj/Main.storyboardc/UIViewController-BYZ-38-t0r.nib",
+      "bytes": 858,
+      "sha256": "f9d413195ae089725549257dcf3d11af9e6c426a129fc0376b77ba9337a00312"
+    },
+    {
+      "path": "Frameworks/Capacitor.framework/Capacitor",
+      "bytes": 859552,
+      "sha256": "cda8f958f28b4938db478e13b7755499de5d73d5bf060e8c4cb571d9e8b8a93e"
+    },
+    {
+      "path": "Frameworks/Capacitor.framework/Info.plist",
+      "bytes": 762,
+      "sha256": "81ac8ce97bc01c9e0ddb67513a7cb55574b5295e2fd80284cf4681d1aea94b6b"
+    },
+    {
+      "path": "Frameworks/Capacitor.framework/PrivacyInfo.xcprivacy",
+      "bytes": 373,
+      "sha256": "1bac827f49b2b8a5358491b9698203bf191791a6f1ba3a3ace3b1285d52d2d17"
+    },
+    {
+      "path": "Frameworks/Capacitor.framework/native-bridge.js",
+      "bytes": 53118,
+      "sha256": "44ae55c944c91d5ebeb1ca2374e831d7920d1af6464faef8f0001a96252109bc"
+    },
+    {
+      "path": "Frameworks/Cordova.framework/Cordova",
+      "bytes": 110136,
+      "sha256": "18fefb8087fca514871a250fddc7da5ec39c0c0838e847f2d3d9ad28f5ca9077"
+    },
+    {
+      "path": "Frameworks/Cordova.framework/Info.plist",
+      "bytes": 794,
+      "sha256": "3bcea8e01759f45b9a7e2a58563b85a10c7d0df0ce4e227c2901a7380248e966"
+    },
+    {
+      "path": "Frameworks/Cordova.framework/PrivacyInfo.xcprivacy",
+      "bytes": 373,
+      "sha256": "5a9b8fc0cddb10201bb47cc2804b3f004c7251476622d25bfc4eb54ed46e1084"
+    },
+    {
+      "path": "Info.plist",
+      "bytes": 1995,
+      "sha256": "53ab3c3b6dcead601295dba6fee05cb9f9b29486113318496ec0cf7defcc6a47"
+    },
+    {
+      "path": "PkgInfo",
+      "bytes": 8,
+      "sha256": "82502191c9484b04d685374f9879a0066069c49b8acae7a04b01d38d07e8eca0"
+    },
+    {
+      "path": "__preview.dylib",
+      "bytes": 16456,
+      "sha256": "636991606f80c24379078238bdcda941903c54682aef86d29bbe985f106d1c11"
+    },
+    {
+      "path": "capacitor.config.json",
+      "bytes": 425,
+      "sha256": "be330607eb3bd742dd3c217cb969e7b9705ed1e00044d54d7972788e7f08ffbe"
+    },
+    {
+      "path": "config.xml",
+      "bytes": 185,
+      "sha256": "e9dcda493e663c5c4db9e3cb3bd968477a6e90aa8840bcbba40d72ed54b767ce"
+    },
+    {
+      "path": "public/cordova.js",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "public/cordova_plugins.js",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "public/icons/maya-192.png",
+      "bytes": 1970,
+      "sha256": "d09f5fefe6ca52b2662f19610750519c3b010f9f7b51e56dbbff674775aa6551"
+    },
+    {
+      "path": "public/icons/maya-512-maskable.png",
+      "bytes": 4476,
+      "sha256": "455205af03b72a0c48308a803f8f0be69b6b316f60f77f522e126c51b73413be"
+    },
+    {
+      "path": "public/icons/maya-512.png",
+      "bytes": 5951,
+      "sha256": "71b681b04e1b33a707dd4c2c9609f4871501897d682d9418e9d4f15adae2045a"
+    },
+    {
+      "path": "public/icons/maya-apple-180.png",
+      "bytes": 1977,
+      "sha256": "1bb7799ba13a22553551feaa0cd2c52ecfd61dfe6912eee53c5bc661b76a27d1"
+    },
+    {
+      "path": "public/index.html",
+      "bytes": 879,
+      "sha256": "e29fccfd287b070471b6ef068ca3799ca099fc6f96014806a64e97521f88c6d4"
+    },
+    {
+      "path": "public/m/cca5fff4837e72ff/main.js",
+      "bytes": 1810651,
+      "sha256": "cca5fff4837e72ff0dcc2a568cf00af84a2d1f6d72129450e4460730711398cc"
+    },
+    {
+      "path": "public/manifest.webmanifest",
+      "bytes": 670,
+      "sha256": "c77b525fbee351b594185f1e18d47f6d1efe03f55f926a918264e5bf610f8c8e"
+    },
+    {
+      "path": "public/styles.css",
+      "bytes": 1514076,
+      "sha256": "c2c54360fdd398952e7ed92137cd50d1945f5b60d62b3d957e574d17b01a3e29"
+    }
+  ]
+}
