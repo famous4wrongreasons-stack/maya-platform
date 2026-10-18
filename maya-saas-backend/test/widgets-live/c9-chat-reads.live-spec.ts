@@ -30,6 +30,63 @@ type ChatBody = {
   tools_used: Array<{ execution_id: string }>;
 };
 
+function expectCatalogReadMetadata(
+  receipt: unknown,
+  source: { id: string; inputHash: string; completedAt: Date | null },
+) {
+  expect(source.completedAt).toBeInstanceOf(Date);
+  expect(receipt).toStrictEqual({
+    contract: 'maya.c9-conversation-read-receipt/1',
+    sourceType: 'AiToolExecution',
+    executionId: source.id,
+    inputHash: source.inputHash,
+    completedAt: source.completedAt!.toISOString(),
+    capability: 'catalog.services.read',
+    businessQualification: 'SOURCE_DEFINED',
+  });
+}
+
+describe('C9 read receipt metadata assertion regression', () => {
+  const source = {
+    id: 'synthetic-execution-1500',
+    inputHash:
+      '3806d3fddd03d4715009d0ca2b561e58c7ba658631092944a729bbd6d0201815',
+    completedAt: new Date('2026-10-18T20:06:24.989Z'),
+  };
+  const receipt = {
+    contract: 'maya.c9-conversation-read-receipt/1',
+    sourceType: 'AiToolExecution',
+    executionId: source.id,
+    inputHash: source.inputHash,
+    completedAt: source.completedAt.toISOString(),
+    capability: 'catalog.services.read',
+    businessQualification: 'SOURCE_DEFINED',
+  };
+
+  it('accepts price digits in opaque metadata that the old substring assertion rejected', () => {
+    expect(() =>
+      expect(JSON.stringify(receipt)).not.toContain('1500'),
+    ).toThrow();
+    expectCatalogReadMetadata(receipt, source);
+  });
+
+  it.each<[string, Record<string, unknown>]>([
+    ['numeric price', { price: 1500 }],
+    ['text price', { price: '1500' }],
+    ['nested source result', { result: { services: [{ price: 1500 }] } }],
+    ['measurement material', { MeasurementRevision: 'synthetic-revision' }],
+    ['execution substitution', { executionId: 'foreign-execution' }],
+    ['input substitution', { inputHash: 'a'.repeat(64) }],
+    ['completion substitution', { completedAt: '2026-10-18T20:06:25.989Z' }],
+    ['source substitution', { sourceType: 'MeasurementRevision' }],
+    ['capability substitution', { capability: 'appointments.own.list' }],
+  ])('rejects %s even when other metadata is valid', (_name, alteration) => {
+    expect(() =>
+      expectCatalogReadMetadata({ ...receipt, ...alteration }, source),
+    ).toThrow();
+  });
+});
+
 /** Real HTTP, auth, C9, source runtime and PostgreSQL. Only model wording is scripted. */
 describe('C9 conversation reads [HTTP] [PostgreSQL] [scripted model]', () => {
   let db: FixtureContext, http: HttpHarness, fx: Fixtures;
@@ -650,10 +707,19 @@ describe('C9 conversation reads [HTTP] [PostgreSQL] [scripted model]', () => {
       taskKey: 'catalog.services.read',
       kind: 'TOOL_READ',
     });
-    expect(JSON.stringify(receipts[0].resultJson)).not.toContain('1500');
-    expect(JSON.stringify(receipts[0].resultJson)).not.toContain(
-      'MeasurementRevision',
-    );
+    expect(one.body.tools_used).toHaveLength(1);
+    const completedSource = await db.prisma.aiToolExecution.findFirstOrThrow({
+      where: {
+        id: one.body.tools_used[0].execution_id,
+        tenantId: first.tenant.id,
+        actorUserId: first.user.id,
+        toolName: 'catalog.services.read',
+        riskTier: 'read',
+        status: 'completed',
+      },
+      select: { id: true, inputHash: true, completedAt: true },
+    });
+    expectCatalogReadMetadata(receipts[0].resultJson, completedSource);
     expect(
       await db.prisma.measurementRevision.count({
         where: { tenantId: first.tenant.id },

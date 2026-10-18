@@ -1,0 +1,41 @@
+{
+  "contract": "maya.certification-harness-regression/1",
+  "diagnosticBase": "ec8bf07cf4634c2c6b4efb864eb2cefb14c78dbe",
+  "rootCause": {
+    "candidate": "ec8bf07cf4634c2c6b4efb864eb2cefb14c78dbe",
+    "classification": "HARNESS_FALSE_POSITIVE",
+    "originalAssertion": "JSON.stringify(receipt).not.toContain(1500 digits)",
+    "reproduction": "Observed inputHash contains 1500 as an opaque hexadecimal substring; no price or source result exists in receipt. Original assertion deterministically rejects this otherwise valid metadata tuple.",
+    "productDefectProven": false,
+    "productChanges": 0,
+    "source": "src/orchestration/c9.store.ts completedReadReceipt",
+    "observedReceiptSha256": "3d8f90b995ec79df357b5016a643f24ef295f6cc21b34176ce5717f5c0c87a88",
+    "newAssertionRequired": "Exact metadata tuple bound to actual source execution; refuse extra source material and any substituted metadata."
+  },
+  "fix": "Replace raw JSON substring price search with exact metadata equality against the actual tenant/principal-bound completed AiToolExecution. No product behavior changes.",
+  "regression": "Observed hash containing 1500 deterministically fails the former oracle and passes the exact tuple oracle. Nine source-data/metadata substitutions remain refused.",
+  "validation": {
+    "liveHttpPostgresqlTestsPassed": 23,
+    "testAssertionsAdded": 10,
+    "failed": 0,
+    "widgetsTypecheck": "PASS",
+    "isolatedDatabaseStopped": true,
+    "productChanges": 0,
+    "realEffects": 0
+  },
+  "receipts": [
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/certification-ec8bf07c/c9-receipt-diagnosis/observed-synthetic-receipt.json",
+      "sha256": "3d8f90b995ec79df357b5016a643f24ef295f6cc21b34176ce5717f5c0c87a88"
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/certification-ec8bf07c/c9-regression/baselines.json",
+      "sha256": "348f24d7d6f0b4cd85815701fb2b3705158760683f279d45c0ea234d9f4fc828"
+    },
+    {
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/certification-ec8bf07c/c9-regression/tests.json",
+      "sha256": "a9d900fd866ac03c4ad38f2869ab29cafe456dca5908c35dc150cb1f1352bf1e"
+    }
+  ],
+  "certification": "NOT CERTIFIED: full fresh final committed HEAD programme must be rerun; diagnostic results cannot replace it."
+}
