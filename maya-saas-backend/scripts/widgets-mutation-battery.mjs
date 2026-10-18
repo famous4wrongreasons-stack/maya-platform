@@ -474,7 +474,7 @@ const failedTests = (jsonFile, ran) => {
     failed: files.flatMap((file) =>
       file.assertionResults
         .filter((a) => a.status === 'failed')
-        .map((a) => ({ title: a.title, ancestors: a.ancestorTitles ?? [], fullName: a.fullName ?? a.title })),
+        .map((a) => ({ title: a.title, ancestors: a.ancestorTitles ?? [], fullName: a.fullName ?? a.title, duration: a.duration ?? null, failureMessages: a.failureMessages ?? [] })),
     ),
     problems: files
       .filter(
@@ -589,6 +589,10 @@ const controlFor = (set, steps) => {
       exits: Object.fromEntries(Object.entries(result.outcome).map(([k, o]) => [k, o.status])),
       failed: [...result.unitFailed, ...result.liveFailed].map((t) => t.fullName),
       problems: result.problems,
+      // Preserve the actual baseline failure before the next mutant overwrites
+      // Jest's working report. Titles alone cannot distinguish timeout from defect.
+      failure_details: [...result.unitFailed, ...result.liveFailed],
+      failure_tails: Object.fromEntries(Object.entries(result.outcome).filter(([, o]) => o.status !== 0).map(([k, o]) => [k, o.tail])),
     };
   }
   return controls.get(key);
