@@ -1,0 +1,28 @@
+{
+  "contract": "maya.certification-harness-regression/1",
+  "kind": "DIAGNOSTIC_NOT_CERTIFICATION",
+  "failedCandidate": "34ce101ad57773398ecf2e29622a54d3537b37b4",
+  "rootCause": "Chrome creates DevToolsActivePort before writing its content; the old existence-only readiness check consumed an empty file before connecting or opening Maya.",
+  "productDefect": false,
+  "productChanged": false,
+  "timeoutChanged": false,
+  "oldChromeReadinessMilliseconds": 15000,
+  "newChromeReadinessMilliseconds": 15000,
+  "observedFreshFailure": {
+    "relativeOutput": "certification-34ce101a/browser-final-v2/proof/current-react/browser.json",
+    "sha256": "70a688413b6124f4e09e338cd95b19b681df7e5ac752274c4bb68f7a1dd062e3",
+    "browserStepsCompleted": 0,
+    "serverCasesPassed": 6,
+    "serverCasesFailed": 0
+  },
+  "counterfactual": {
+    "oldCodeFragmentSha256": "5609896e8fa5f201911cf79fdc026264964ebe3aac78cd6a9fad26d0dac32d95",
+    "originalEmptyFileFailureReproduced": true,
+    "resultSha256": "218afb9b466bc13424b392b125e5b8e281cbc1ea646c426215151c44e222264a",
+    "fixedRegressionTestsPassed": 9,
+    "fixedLogSha256": "4aa09f5283610380d0600355790b649a6f22e35e6f352d00bf2ad402eda3ee55"
+  },
+  "fix": "Poll a complete bounded numeric port and canonical browser endpoint within the existing deadline. Preserve live-process checks, loopback address, network fence, private profile, cleanup and every application assertion.",
+  "freshFullCertification": "REQUIRED_ON_COMMITTED_FINAL_SHA",
+  "externalEffects": 0
+}

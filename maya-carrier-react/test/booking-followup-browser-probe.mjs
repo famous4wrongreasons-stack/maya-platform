@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { Browser } from '../../maya-chat-shell/test/cdp-verify.mjs';
 import { createDevServer } from '../../maya-chat-shell/dev/serve.mjs';
 import { installGuard, localOrigin } from './ordinary-booking-selector-browser-guard.mjs';
+import { readChromeReadyFile } from './chrome-ready-file.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const prompts = ['Есть время к Артёму завтра на мужскую стрижку?', 'Запиши меня на 17:00', 'Покажи мои записи'];
@@ -130,8 +131,7 @@ async function main() {
     report.chromePid = chrome.pid; save();
     let failed = false; chrome.once('error', () => { failed = true; });
     const portFile = path.join(profile, 'DevToolsActivePort');
-    await until(() => { assert.ok(!failed && chrome.exitCode === null); return fs.existsSync(portFile); }, 'Chrome');
-    const [cdpPort, wsPath] = fs.readFileSync(portFile, 'utf8').trim().split('\n');
+    const [cdpPort, wsPath] = await until(() => { assert.ok(!failed && chrome.exitCode === null); return readChromeReadyFile(portFile); }, 'Chrome');
     assert.match(cdpPort, /^\d+$/); assert.match(wsPath, /^\/devtools\/browser\/[a-f0-9-]+$/);
     browser = new Browser(chrome, profile, `ws://127.0.0.1:${cdpPort}${wsPath}`); await browser.connect();
     page = await browser.newPage(); guard = await installGuard(page, origin, { emails: [input.email], prompts });
