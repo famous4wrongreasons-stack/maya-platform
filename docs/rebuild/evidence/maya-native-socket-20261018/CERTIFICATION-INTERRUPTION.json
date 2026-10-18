@@ -1,0 +1,17 @@
+{
+  "observedAt": "2026-10-18T07:00:04.186495+00:00",
+  "candidate": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "certification": "NOT_ISSUED",
+  "status": "FINAL_RESULT_UNAVAILABLE_EXECUTION_DIRECTORY_ABSENT",
+  "missingExecutionDirectory": "/private/tmp/maya-first-phone-final-6356db18-20261016",
+  "missingManifest": "full-mutations-v6-after-sleep/manifest.json",
+  "lastObservedV6": "running; no final receipt observed",
+  "causeOfDirectoryRemoval": "NOT_ESTABLISHED",
+  "runningMutationProcessesObserved": false,
+  "historicalPartReuse": false,
+  "codePreservedInGit": true,
+  "ownerIntentionalDeletionsRestored": 0,
+  "productionChanged": false,
+  "providerCalls": 0,
+  "next": "Complete isolated native socket-loss proof; certification requires fresh verifiable complete execution before admission."
+}

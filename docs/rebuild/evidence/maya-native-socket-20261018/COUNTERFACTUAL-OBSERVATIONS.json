@@ -1,0 +1,59 @@
+{
+  "contract": "maya.native-provider-socket-proof/1",
+  "status": "FAIL",
+  "candidate": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "provider": "LOOPBACK_HTTP_AND_SYNTHETIC_POSTGRESQL",
+  "adapter": "TEST_COPY_NATIVE_TRANSPORT_CATCH_MUTATED",
+  "fetchMocked": false,
+  "operationOverridden": false,
+  "suppliedUnknownVerdict": false,
+  "providerUniquenessOrIdempotencyGuard": false,
+  "realProviderEffects": 0,
+  "realModelCalls": 0,
+  "releaseCertification": "NOT_ISSUED",
+  "scriptedModelCalls": 2,
+  "selection-450001": {
+    "receipt_outcome": "ACCEPTED",
+    "code": null,
+    "owner_decision": null
+  },
+  "healthy": {
+    "state": "SUCCEEDED",
+    "providerBookings": 1,
+    "executionAttempts": 1,
+    "nativeHttp": true
+  },
+  "selection-450002": {
+    "receipt_outcome": "ACCEPTED",
+    "code": null,
+    "owner_decision": null
+  },
+  "socketLossInitial": {
+    "state": "FAILED",
+    "executionAttemptCount": 1,
+    "attempts": [
+      {
+        "state": "FAILED",
+        "errorClass": "crm_provider_rejected",
+        "outcomeCode": "crm_provider_rejected"
+      }
+    ],
+    "providerBookings": 1
+  },
+  "providerContractFailures": 0,
+  "syntheticCounters": {
+    "healthy": {
+      "posts": 1,
+      "socketLosses": 0,
+      "reconciliations": 0,
+      "reads": 33
+    },
+    "socketLoss": {
+      "posts": 1,
+      "socketLosses": 1,
+      "reconciliations": 0,
+      "reads": 32
+    }
+  },
+  "fetchIdentityUnchanged": true
+}

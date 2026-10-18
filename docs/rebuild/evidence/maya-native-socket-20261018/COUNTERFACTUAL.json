@@ -1,0 +1,86 @@
+{
+  "contract": "maya.native-provider-socket-loss-proof/1",
+  "sourceHead": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "startedAt": "2026-10-18T07:09:52.349Z",
+  "status": "counterfactual-detected",
+  "counterfactual": "definite-outcome",
+  "mutation": {
+    "contract": "TEST_ONLY_NATIVE_UNKNOWN_TO_DEFINITE_FAILURE",
+    "originalSha256": "f4690f664fce56eb6f3fbfd4a1f3648aab26b4b07760c93b136e85d53c8bb4fd",
+    "changedSha256": "085d529fbe2af38d52a3f83264a4baffcbeffbcbdef91daafd3af8d7c8c17e7b"
+  },
+  "runnerSha256": "b442ac1c1941a6b2901f42b6b2ebe3db361869e8b8f4cdafb9356cfc8410f425",
+  "testSha256": "f7fcf877ef20696fdd2ae4c897b3edafd3dd39a3c016be22dd23e5141c978cb6",
+  "relocatedTestSha256": "38f54e06139a971e991a83229d53c7d7f0e452e74995e26fe746102bacb1da8a",
+  "loaderSha256": "133f539339750505ea9b51c172a5ad49fe0d1f660b917973448ace5d991bb8c7",
+  "execution": "NODE_TEST_SINGLE_REALM_WITH_UNCHANGED_APPLICATION_MODULES",
+  "cluster": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-socket-20261018/final-counterfactual/pg",
+  "database": "maya_widget_gate_proof_native_socket_6abfb2338d4c",
+  "port": 65267,
+  "steps": [
+    {
+      "name": "typecheck",
+      "startedAt": "2026-10-18T07:09:52.350Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T07:09:59.385Z"
+    },
+    {
+      "name": "initdb",
+      "startedAt": "2026-10-18T07:09:59.385Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T07:09:59.755Z"
+    },
+    {
+      "name": "pg-start",
+      "startedAt": "2026-10-18T07:09:59.755Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T07:09:59.890Z"
+    },
+    {
+      "name": "createdb",
+      "startedAt": "2026-10-18T07:09:59.891Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T07:09:59.962Z"
+    },
+    {
+      "name": "migrations",
+      "startedAt": "2026-10-18T07:09:59.962Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T07:10:00.888Z"
+    },
+    {
+      "name": "native-socket",
+      "startedAt": "2026-10-18T07:10:00.888Z",
+      "exitCode": 1,
+      "signal": null,
+      "finishedAt": "2026-10-18T07:10:06.445Z"
+    },
+    {
+      "name": "pg-stop",
+      "startedAt": "2026-10-18T07:10:06.446Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T07:10:06.566Z"
+    }
+  ],
+  "network": "OS_LOOPBACK_ONLY",
+  "nativeAdapterOperationsMocked": false,
+  "fetchMocked": false,
+  "realProviderCalls": 0,
+  "ownerDatabaseAccessed": false,
+  "certificate": "NOT_ISSUED",
+  "release_admissible": false,
+  "tests": {
+    "passed": 1,
+    "failed": 1,
+    "skipped": 0
+  },
+  "clusterStopped": true,
+  "sourcesUnchanged": true,
+  "finishedAt": "2026-10-18T07:10:06.700Z"
+}

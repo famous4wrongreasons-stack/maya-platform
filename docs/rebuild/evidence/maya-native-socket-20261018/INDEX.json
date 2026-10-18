@@ -1,0 +1,106 @@
+{
+  "contract": "maya.native-socket-archive/1",
+  "candidate": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "certificate": "NOT_ISSUED",
+  "release_admissible": false,
+  "files": [
+    {
+      "file": "BASELINE.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-socket-20261018/final-baseline/manifest.json",
+      "sha256": "2f4e02af1787e8cbc745461c28c2f87406469e99194f4e0cd29939b9911e2294",
+      "size": 2545
+    },
+    {
+      "file": "BASELINE-OBSERVATIONS.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-socket-20261018/final-baseline/observations.json",
+      "sha256": "a8f6e524fcdb2bf6125106b75c4a72ca9797b5d3263f5ecfdd7d729247f73c27",
+      "size": 1717
+    },
+    {
+      "file": "COUNTERFACTUAL.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-socket-20261018/final-counterfactual/manifest.json",
+      "sha256": "cf63a0eefeaffbe01039f965cd7c3ed25430bec2ca6c3f992df014ef858727cb",
+      "size": 2827
+    },
+    {
+      "file": "COUNTERFACTUAL-OBSERVATIONS.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-socket-20261018/final-counterfactual/observations.json",
+      "sha256": "82bd2deef082b6c048fa0ca3a3b57d78ae610c01534607e52418088ef1fa5423",
+      "size": 1446
+    },
+    {
+      "file": "CERTIFICATION-INTERRUPTION.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-first-phone-current-status-20261018/INTERRUPTION.json",
+      "sha256": "74646c09c0ab2f5cfb65ce61bffcec8a15328eb87fa08eabd3454fa94c460d4d",
+      "size": 811
+    },
+    {
+      "file": "final-baseline/native-socket.log",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-socket-20261018/final-baseline/native-socket.log",
+      "sha256": "0343b09a3c2a95903d4d134acf8661d1f72b6c16848f8566ebc45a5c3d12281d",
+      "size": 1656,
+      "committed": false,
+      "reason": "Full diagnostic log/source inventory remains local; minimal safe observations and manifests are committed."
+    },
+    {
+      "file": "final-baseline/typecheck.log",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-socket-20261018/final-baseline/typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "committed": false,
+      "reason": "Full diagnostic log/source inventory remains local; minimal safe observations and manifests are committed."
+    },
+    {
+      "file": "final-baseline/migrations.log",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-socket-20261018/final-baseline/migrations.log",
+      "sha256": "a404b327269327a42c282c447d33f9084a2d6896f8964b2dadcd892ad5c6a14c",
+      "size": 14900,
+      "committed": false,
+      "reason": "Full diagnostic log/source inventory remains local; minimal safe observations and manifests are committed."
+    },
+    {
+      "file": "final-baseline/source-before.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-socket-20261018/final-baseline/source-before.json",
+      "sha256": "8d5ba889693529befb00e9e46f4d3370cbe2c7f04fe07c425000a695d5b96c14",
+      "size": 377628,
+      "committed": false,
+      "reason": "Full diagnostic log/source inventory remains local; minimal safe observations and manifests are committed."
+    },
+    {
+      "file": "final-counterfactual/native-socket.log",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-socket-20261018/final-counterfactual/native-socket.log",
+      "sha256": "a08c3b5786f6353dd973ffa9bdb25519bbeb68c7cc66c74e8a9fa590386e6f6f",
+      "size": 3086,
+      "committed": false,
+      "reason": "Full diagnostic log/source inventory remains local; minimal safe observations and manifests are committed."
+    },
+    {
+      "file": "final-counterfactual/typecheck.log",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-socket-20261018/final-counterfactual/typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0,
+      "committed": false,
+      "reason": "Full diagnostic log/source inventory remains local; minimal safe observations and manifests are committed."
+    },
+    {
+      "file": "final-counterfactual/migrations.log",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-socket-20261018/final-counterfactual/migrations.log",
+      "sha256": "bb4c3202148f9de14b6e9efe61850f43238c3850b0d8e95d8154052c8f39593f",
+      "size": 14900,
+      "committed": false,
+      "reason": "Full diagnostic log/source inventory remains local; minimal safe observations and manifests are committed."
+    },
+    {
+      "file": "final-counterfactual/source-before.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-socket-20261018/final-counterfactual/source-before.json",
+      "sha256": "8d5ba889693529befb00e9e46f4d3370cbe2c7f04fe07c425000a695d5b96c14",
+      "size": 377628,
+      "committed": false,
+      "reason": "Full diagnostic log/source inventory remains local; minimal safe observations and manifests are committed."
+    }
+  ],
+  "tooling": {
+    "scripts/native-provider-socket-proof.mjs": "b442ac1c1941a6b2901f42b6b2ebe3db361869e8b8f4cdafb9356cfc8410f425",
+    "test/widgets-diagnostics/native-provider-socket-loss.probe-spec.ts": "f7fcf877ef20696fdd2ae4c897b3edafd3dd39a3c016be22dd23e5141c978cb6"
+  }
+}
