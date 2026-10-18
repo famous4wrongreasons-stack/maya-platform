@@ -1,0 +1,96 @@
+{
+  "contract": "maya.native-provider-socket-loss-proof/1",
+  "sourceHead": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "startedAt": "2026-10-18T12:53:48.263Z",
+  "status": "counterfactual-detected",
+  "counterfactual": "proxy-definite-outcome",
+  "lifecycleWireOnly": false,
+  "lifecycleActionEngine": true,
+  "canonicalReleaseAdmission": true,
+  "lifecycleLostResponseActionEngine": true,
+  "mutation": {
+    "contract": "TEST_ONLY_PROXY_LOSS_TO_DEFINITE_FAILURE",
+    "originalSha256": "5c000a72496d2cd1c8879ca124dec3cba0bdb77c93cea81ad386c0b58cf1ab19",
+    "changedSha256": "d8af2ab09f38d4f7bfc0a0f3780f8c4dfe684b7ac181e2b729a06bfd91db585a"
+  },
+  "createEgress": {
+    "original": "/Users/stanislavmosin/Documents/Codex/2026-10-06/task-2/maya-local-crm-setup-20261010/maya-saas-backend/scripts/phone-native-create-egress.mjs",
+    "originalSha256": "5c000a72496d2cd1c8879ca124dec3cba0bdb77c93cea81ad386c0b58cf1ab19",
+    "relocatedSha256": "f418e4dba76243b7a01a36ca3bb2795ae6e68966e7df142707880ffd785f1bf1",
+    "syntheticAdmissionOnly": true
+  },
+  "runnerSha256": "757b496b4d09b6788f11e4f710d0be32916ea15d376154a0fc4137eee9880fb0",
+  "testSha256": "54b33d370e9d9197e81da86eb11f49cb5aa0ade725b78bf008ed6b428dfae1c0",
+  "relocatedTestSha256": "a5a8472fc0c48f554f9eb64c3dbbee3e553ba6a998b0948d19ce0604b0a73a2a",
+  "loaderSha256": "3e3ca60759c979a367542de4ba045a9032088eb20154a44490e0ef907254b153",
+  "execution": "NODE_TEST_SINGLE_REALM_WITH_UNCHANGED_APPLICATION_MODULES",
+  "cluster": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-lifecycle-unknown-20261018/counterfactual/pg",
+  "database": "maya_widget_gate_proof_native_socket_d7275cbb8f6d",
+  "port": 65326,
+  "steps": [
+    {
+      "name": "typecheck",
+      "startedAt": "2026-10-18T12:53:48.264Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T12:53:55.290Z"
+    },
+    {
+      "name": "initdb",
+      "startedAt": "2026-10-18T12:53:55.290Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T12:53:55.661Z"
+    },
+    {
+      "name": "pg-start",
+      "startedAt": "2026-10-18T12:53:55.661Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T12:53:55.787Z"
+    },
+    {
+      "name": "createdb",
+      "startedAt": "2026-10-18T12:53:55.787Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T12:53:55.865Z"
+    },
+    {
+      "name": "migrations",
+      "startedAt": "2026-10-18T12:53:55.865Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T12:53:56.799Z"
+    },
+    {
+      "name": "native-socket",
+      "startedAt": "2026-10-18T12:53:56.799Z",
+      "exitCode": 1,
+      "signal": null,
+      "finishedAt": "2026-10-18T12:54:48.002Z"
+    },
+    {
+      "name": "pg-stop",
+      "startedAt": "2026-10-18T12:54:48.003Z",
+      "exitCode": 0,
+      "signal": null,
+      "finishedAt": "2026-10-18T12:54:48.124Z"
+    }
+  ],
+  "network": "OS_LOOPBACK_ONLY",
+  "nativeAdapterOperationsMocked": false,
+  "fetchMocked": false,
+  "realProviderCalls": 0,
+  "ownerDatabaseAccessed": false,
+  "certificate": "NOT_ISSUED",
+  "release_admissible": false,
+  "tests": {
+    "passed": 5,
+    "failed": 5,
+    "skipped": 0
+  },
+  "clusterStopped": true,
+  "sourcesUnchanged": true,
+  "finishedAt": "2026-10-18T12:54:48.319Z"
+}

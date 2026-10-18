@@ -58,6 +58,20 @@ const HEALTHY = 450001,
   LOSS = 450002;
 const lifecycleAE = process.env.JEST_NATIVE_LIFECYCLE_AE === '1';
 const releaseAdmission = process.env.JEST_NATIVE_RELEASE_ADMISSION === '1';
+const lifecycleLossAE = process.env.JEST_NATIVE_LIFECYCLE_LOSS_AE === '1';
+const lifecycleLossModes = new Map<
+  number,
+  { action: 'reschedule' | 'cancel'; readable: boolean }
+>(
+  lifecycleLossAE
+    ? [
+        [450010, { action: 'reschedule', readable: false }],
+        [450011, { action: 'reschedule', readable: true }],
+        [450012, { action: 'cancel', readable: false }],
+        [450013, { action: 'cancel', readable: true }],
+      ]
+    : [],
+);
 const capability = 'crm.appointment.create.v1';
 const nativeFetch = globalThis.fetch;
 const observations: Record<string, unknown> = {
@@ -111,6 +125,8 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       reads: number;
       puts: number;
       deletes: number;
+      lifecycleReadbacks: number;
+      unavailableReadbacks: number;
     }
   >();
   const releases = new Map<number, Awaited<ReturnType<typeof admitRelease>>>();
@@ -183,7 +199,7 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
           const numbers = route.split('/').filter((part) => /^\d+$/.test(part));
           const company = Number(numbers[0]);
           const source = companies.get(company);
-          assert.ok(source, 'Only the two admitted synthetic companies exist');
+          assert.ok(source, 'Only admitted synthetic companies exist');
           const counter = counts(company);
           const day = source.startsAt.slice(0, 10);
           if (req.method === 'GET') {
@@ -230,7 +246,9 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
               reply([
                 {
                   time:
-                    lifecycleAE && company === HEALTHY && counter.posts
+                    lifecycleAE &&
+                    (company === HEALTHY || lifecycleLossModes.has(company)) &&
+                    counter.posts
                       ? '18:00'
                       : '17:00',
                   seance_length: 1800,
@@ -241,6 +259,15 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
                 (r) => String(r.id) === route.split('/')[2],
               );
               assert.ok(row);
+              const lossMode = lifecycleLossModes.get(company);
+              if (lossMode && counter.puts + counter.deletes > 0) {
+                counter.lifecycleReadbacks++;
+                if (!lossMode.readable) {
+                  counter.unavailableReadbacks++;
+                  reply({ error: 'synthetic_readback_unavailable' }, 503);
+                  return;
+                }
+              }
               reply({
                 id: row.id,
                 company_id: company,
@@ -274,7 +301,7 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
           const payload: unknown = raw ? JSON.parse(raw) : null;
           if (
             lifecycleAE &&
-            company === HEALTHY &&
+            (company === HEALTHY || lifecycleLossModes.has(company)) &&
             ['PUT', 'DELETE'].includes(req.method ?? '')
           ) {
             const row = (await rows(company)).find(
@@ -302,7 +329,6 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
                 [`${day}T18:00:00`, row.id],
               );
               counter.puts++;
-              reply({});
             } else {
               assert.equal(raw, '');
               await ledger.query(
@@ -310,8 +336,13 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
                 [row.id],
               );
               counter.deletes++;
-              reply({});
             }
+            if (lifecycleLossModes.has(company)) {
+              counter.socketLosses++;
+              // PostgreSQL acknowledged this mutation's autocommit before the
+              // actual TCP close. The adapter receives no supplied verdict.
+              req.socket.destroy();
+            } else reply({});
             return;
           }
           if (req.method === 'POST' && route === `book_record/${company}`) {
@@ -416,7 +447,7 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
         );
         const calls = Number(observations.scriptedModelCalls ?? 0) + 1;
         assert.ok(
-          calls <= (releaseAdmission ? 20 : 8),
+          calls <= (lifecycleLossAE ? 32 : releaseAdmission ? 20 : 8),
           'Finite synthetic model interpretation only',
         );
         observations.scriptedModelCalls = calls;
@@ -453,7 +484,12 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       ['revoked', 'allowlist', 'candidate', 'expiry'].every(
         (mode) => object(observations['release-' + mode] ?? {}).passed === true,
       );
-    observations.status = complete && allRefusals ? 'PASS' : 'FAIL';
+    const allLifecycleLosses = [...lifecycleLossModes.keys()].every(
+      (company) =>
+        object(observations['lifecycle-loss-' + company] ?? {}).passed === true,
+    );
+    observations.status =
+      complete && allRefusals && allLifecycleLosses ? 'PASS' : 'FAIL';
     observations.providerContractFailures = errors.length;
     observations.syntheticCounters = {
       healthy: counters.get(HEALTHY) ?? null,
@@ -462,7 +498,11 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
     observations.fetchIdentityUnchanged = globalThis.fetch === nativeFetch;
     observations.createEgressSnapshots = Object.fromEntries(
       [...proxies].map(([company, proxy]) => [
-        company === HEALTHY ? 'healthy' : 'socketLoss',
+        company === HEALTHY
+          ? 'healthy'
+          : company === LOSS
+            ? 'socketLoss'
+            : String(company),
         proxy.snapshot(),
       ]),
     );
@@ -652,6 +692,8 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       reads: 0,
       puts: 0,
       deletes: 0,
+      lifecycleReadbacks: 0,
+      unavailableReadbacks: 0,
     });
     if (process.env.JEST_NATIVE_CREATE_EGRESS) {
       const {
@@ -664,10 +706,12 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       const proxy = nativeCreateEgress({
         scope: {
           contract:
-            lifecycleAE && company === HEALTHY
+            lifecycleAE &&
+            (company === HEALTHY || lifecycleLossModes.has(company))
               ? LIFECYCLE_EGRESS_CONTRACT
               : CREATE_EGRESS_CONTRACT,
-          ...(lifecycleAE && company === HEALTHY
+          ...(lifecycleAE &&
+          (company === HEALTHY || lifecycleLossModes.has(company))
             ? { maxReschedules: 1, maxCancels: 1 }
             : {}),
           candidate: observations.candidate,
@@ -1169,5 +1213,170 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
         },
       );
     }
+  }
+  for (const [company, mode] of lifecycleLossModes) {
+    it(
+      'native ' +
+        mode.action +
+        ' durable commit + socket loss; readback=' +
+        (mode.readable ? 'available' : 'unavailable') +
+        ' [canonical AE/AR1]',
+      async () => {
+        const source = await fixture(company);
+        const preview = await confirmation(source);
+        expect(
+          (await submit(http, source.token, preview, 'COMMIT')).receipt_outcome,
+        ).toBe('ACCEPTED');
+        const appointment = await db.prisma.appointment.findFirstOrThrow({
+          where: { tenantId: source.tenant.id, source: 'external' },
+        });
+        const targetCapability = 'crm.appointment.' + mode.action + '.v1';
+        const key = randomUUID();
+        const invoke = () =>
+          request(http.app.getHttpServer())
+            .post('/api/appointments/' + appointment.id + '/' + mode.action)
+            .set('Authorization', 'Bearer ' + source.token)
+            .set('Idempotency-Key', key)
+            .send(
+              mode.action === 'reschedule'
+                ? { start: source.startsAt.slice(0, 10) + 'T15:00:00.000Z' }
+                : {},
+            );
+        const first = await invoke();
+        const readExecution = () =>
+          db.prisma.actionExecution.findFirstOrThrow({
+            where: { tenantId: source.tenant.id, capability: targetCapability },
+          });
+        const initial = await readExecution();
+        const attempts = await db.prisma.actionAttempt.findMany({
+          where: {
+            tenantId: source.tenant.id,
+            actionExecutionId: initial.id,
+            kind: 'EXECUTION',
+          },
+        });
+        const persisted = await rows(company);
+        const fact = {
+          passed: false,
+          action: mode.action,
+          readbackAvailable: mode.readable,
+          firstHttpStatus: first.status,
+          initialState: initial.state,
+          initialExecutionAttemptCount: initial.executionAttemptCount,
+          initialReconciliationState: initial.reconciliationState,
+          persistedBookings: persisted.length,
+          providerMutationPersisted:
+            persisted.length === 1 &&
+            (mode.action === 'reschedule'
+              ? persisted[0].moved_start ===
+                  source.startsAt.slice(0, 10) + 'T18:00:00' &&
+                persisted[0].cancelled === false
+              : persisted[0].moved_start === null &&
+                persisted[0].cancelled === true),
+          executionAttempts: attempts.map((a) => ({
+            state: a.state,
+            errorClass: a.errorClass,
+            outcomeCode: a.outcomeCode,
+          })),
+          firstProvider: { ...counts(company) },
+          firstLocalStatus: (
+            await db.prisma.appointment.findUniqueOrThrow({
+              where: { id: appointment.id },
+            })
+          ).status,
+        };
+        observations['lifecycle-loss-' + company] = fact;
+        expect(attempts).toHaveLength(1);
+        expect(attempts[0]).toMatchObject({
+          state: 'UNKNOWN',
+          errorClass: 'crm_outcome_unknown',
+          outcomeCode: 'crm_provider_outcome_unknown',
+        });
+        expect(initial.executionAttemptCount).toBe(1);
+        expect(counts(company).socketLosses).toBe(1);
+        expect(persisted).toHaveLength(1);
+        expect(persisted[0]).toMatchObject(
+          mode.action === 'reschedule'
+            ? {
+                moved_start: source.startsAt.slice(0, 10) + 'T18:00:00',
+                cancelled: false,
+              }
+            : { moved_start: null, cancelled: true },
+        );
+        if (mode.readable) {
+          expect(first.status).toBe(201);
+          expect(initial.state).toBe('SUCCEEDED');
+        } else {
+          expect(first.status).toBe(503);
+          expect(object(first.body).error).toMatchObject({
+            code: 'crm_outcome_unknown',
+          });
+          expect(initial.state).toBe('UNKNOWN');
+          expect(fact.firstLocalStatus).toBe('confirmed');
+        }
+        expect(counts(company).lifecycleReadbacks).toBeGreaterThan(0);
+        const normal = await invoke();
+        const concurrent = await Promise.all(Array.from({ length: 6 }, invoke));
+        if (!mode.readable)
+          for (const response of [normal, ...concurrent]) {
+            expect(response.status).toBeGreaterThanOrEqual(400);
+            expect(JSON.stringify(response.body)).not.toContain(
+              'Запись подтверждена.',
+            );
+          }
+        const final = await readExecution();
+        const mirror = await db.prisma.appointment.findUniqueOrThrow({
+          where: { id: appointment.id },
+        });
+        const mutations = {
+          posts: counts(company).posts,
+          puts: counts(company).puts,
+          deletes: counts(company).deletes,
+          socketLosses: counts(company).socketLosses,
+        };
+        expect(mutations).toEqual({
+          posts: 1,
+          puts: Number(mode.action === 'reschedule'),
+          deletes: Number(mode.action === 'cancel'),
+          socketLosses: 1,
+        });
+        expect(
+          await db.prisma.actionExecution.count({
+            where: { tenantId: source.tenant.id, capability: targetCapability },
+          }),
+        ).toBe(1);
+        expect(final.executionAttemptCount).toBe(1);
+        expect(final.state).toBe(mode.readable ? 'SUCCEEDED' : 'UNKNOWN');
+        expect(mirror.status).toBe(
+          mode.readable && mode.action === 'cancel' ? 'canceled' : 'confirmed',
+        );
+        expect(mirror.startAt.toISOString()).toBe(
+          mode.readable && mode.action === 'reschedule'
+            ? source.startsAt.slice(0, 10) + 'T15:00:00.000Z'
+            : new Date(source.startsAt).toISOString(),
+        );
+        // No proxy quota refusal may mask an AE retry. Its only refusal is the
+        // original actual socket loss after a durable provider mutation.
+        expect(proxies.get(company)!.snapshot()).toMatchObject({
+          refused: 1,
+          uncertainTransport: 1,
+          lifecycleUncertain: true,
+        });
+        expect(errors).toEqual([]);
+        Object.assign(fact, {
+          passed: true,
+          finalState: final.state,
+          finalReconciliationState: final.reconciliationState,
+          providerMutations: mutations,
+          finalLocalStatus: mirror.status,
+          finalLocalStart: mirror.startAt.toISOString(),
+          normalRetries: 1,
+          concurrentRetries: 6,
+          proxy: proxies.get(company)!.snapshot(),
+          readbacks: counts(company).lifecycleReadbacks,
+          unavailableReadbacks: counts(company).unavailableReadbacks,
+        });
+      },
+    );
   }
 });

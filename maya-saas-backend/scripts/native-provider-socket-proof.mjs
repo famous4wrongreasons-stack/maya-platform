@@ -20,6 +20,7 @@ const { values } = parseArgs({
     'lifecycle-wire': { type: 'boolean' },
     'lifecycle-ae': { type: 'boolean' },
     'release-admission': { type: 'boolean' },
+    'lifecycle-loss-ae': { type: 'boolean' },
   },
 });
 assert(
@@ -33,12 +34,24 @@ assert(
   !values['lifecycle-ae'] ||
     (values['create-egress'] &&
       !values['lifecycle-wire'] &&
-      (!values.counterfactual || values.counterfactual === 'skip-revoke')),
+      (!values.counterfactual ||
+        values.counterfactual === 'skip-revoke' ||
+        (values['lifecycle-loss-ae'] &&
+          values.counterfactual === 'proxy-definite-outcome'))),
 );
 assert(
   !values['release-admission'] ||
     (values['lifecycle-ae'] &&
-      (!values.counterfactual || values.counterfactual === 'skip-revoke')),
+      (!values.counterfactual ||
+        values.counterfactual === 'skip-revoke' ||
+        (values['lifecycle-loss-ae'] &&
+          values.counterfactual === 'proxy-definite-outcome'))),
+);
+assert(
+  !values['lifecycle-loss-ae'] ||
+    (values['release-admission'] &&
+      (!values.counterfactual ||
+        values.counterfactual === 'proxy-definite-outcome')),
 );
 const candidate = '6356db1875545337e34b6c8888b7ca858bb64361';
 assert.equal(values.run, true, 'Explicit local --run required');
@@ -328,6 +341,9 @@ const environment = {
   JEST_NATIVE_SOCKET_COUNTERFACTUAL: values.counterfactual ?? '',
   ...(proxyModule ? { JEST_NATIVE_CREATE_EGRESS: proxyModule } : {}),
   ...(values['lifecycle-ae'] ? { JEST_NATIVE_LIFECYCLE_AE: '1' } : {}),
+  ...(values['lifecycle-loss-ae']
+    ? { JEST_NATIVE_LIFECYCLE_LOSS_AE: '1' }
+    : {}),
   ...(values['release-admission']
     ? {
         JEST_NATIVE_RELEASE_ADMISSION: '1',
@@ -346,6 +362,7 @@ const receipt = {
   lifecycleWireOnly: Boolean(values['lifecycle-wire']),
   lifecycleActionEngine: Boolean(values['lifecycle-ae']),
   canonicalReleaseAdmission: Boolean(values['release-admission']),
+  lifecycleLostResponseActionEngine: Boolean(values['lifecycle-loss-ae']),
   mutation,
   createEgress: proxyProof,
   runnerSha256: sha(fs.readFileSync(fileURLToPath(import.meta.url))),
@@ -508,7 +525,13 @@ try {
   };
   assert.equal(
     count('tests'),
-    values['release-admission'] ? 6 : values['lifecycle-wire'] ? 3 : 2,
+    values['lifecycle-loss-ae']
+      ? 10
+      : values['release-admission']
+        ? 6
+        : values['lifecycle-wire']
+          ? 3
+          : 2,
     'All healthy/loss cases must execute',
   );
   assert.equal(count('cancelled'), 0);
@@ -560,6 +583,44 @@ try {
       }
     }
   }
+  if (values['lifecycle-loss-ae']) {
+    for (const company of [450010, 450011, 450012, 450013]) {
+      const item = observations['lifecycle-loss-' + company];
+      assert.equal(item.firstProvider.posts, 1);
+      assert.equal(item.firstProvider.puts + item.firstProvider.deletes, 1);
+      assert.equal(item.firstProvider.socketLosses, 1);
+      assert.equal(item.persistedBookings, 1);
+      assert.equal(item.providerMutationPersisted, true);
+      assert.equal(item.initialExecutionAttemptCount, 1);
+      if (values.counterfactual === 'proxy-definite-outcome') {
+        assert.equal(item.passed, false);
+        assert.equal(item.initialState, 'FAILED');
+        assert.equal(item.firstProvider.lifecycleReadbacks, 0);
+        assert.deepEqual(item.executionAttempts, [
+          {
+            state: 'FAILED',
+            errorClass: 'crm_provider_rejected',
+            outcomeCode: 'crm_provider_rejected',
+          },
+        ]);
+        continue;
+      }
+      assert.equal(item.passed, true);
+      assert.equal(item.executionAttempts.length, 1);
+      assert.equal(item.executionAttempts[0].state, 'UNKNOWN');
+      assert.equal(
+        item.finalState,
+        item.readbackAvailable ? 'SUCCEEDED' : 'UNKNOWN',
+      );
+      assert.equal(item.providerMutations.posts, 1);
+      assert.equal(
+        item.providerMutations.puts + item.providerMutations.deletes,
+        1,
+      );
+      assert.equal(item.proxy.refused, 1);
+      assert.equal(item.proxy.uncertainTransport, 1);
+    }
+  }
   if (values.counterfactual === 'skip-revoke') {
     assert.equal(result.exitCode, 1);
     assert.equal(count('fail'), 1);
@@ -581,9 +642,10 @@ try {
     assert.equal(result.exitCode, 1);
     assert.equal(
       count('fail'),
-      1,
+      values['lifecycle-loss-ae'] ? 5 : 1,
       'Counterfactual must fail only loss semantics',
     );
+    if (values['lifecycle-loss-ae']) assert.equal(count('pass'), 5);
     assert.equal(observations.socketLossInitial?.providerBookings, 1);
     assert.equal(observations.socketLossInitial?.state, 'FAILED');
     assert.equal(observations.socketLossInitial?.executionAttemptCount, 1);

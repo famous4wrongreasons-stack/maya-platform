@@ -1,0 +1,453 @@
+{
+  "contract": "maya.native-provider-socket-proof/1",
+  "status": "FAIL",
+  "candidate": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "provider": "LOOPBACK_HTTP_AND_SYNTHETIC_POSTGRESQL",
+  "adapter": "UNMODIFIED_YCLIENTS_ADAPTER",
+  "fetchMocked": false,
+  "operationOverridden": false,
+  "suppliedUnknownVerdict": false,
+  "providerUniquenessOrIdempotencyGuard": false,
+  "realProviderEffects": 0,
+  "realModelCalls": 0,
+  "releaseCertification": "NOT_ISSUED",
+  "releaseAdmission": "CANONICAL_AR1_HTTP_WITH_EPHEMERAL_TEST_SIGNER_AND_ARTIFICIAL_CERTIFICATE",
+  "createEgress": "SYNTHETIC_ADMISSION_LOOPBACK_TRANSPORT",
+  "scriptedModelCalls": 10,
+  "selection-450001": {
+    "receipt_outcome": "ACCEPTED",
+    "code": null,
+    "owner_decision": null
+  },
+  "lifecycleMoveHttp": {
+    "status": 201,
+    "body": "SUCCESS"
+  },
+  "lifecycleCancelHttp": {
+    "status": 201,
+    "body": "SUCCESS"
+  },
+  "lifecycleAE": {
+    "status": "PASS",
+    "sameAppointment": true,
+    "providerCreate": 1,
+    "providerPut": 1,
+    "providerDelete": 1,
+    "canonicalHttp": true,
+    "actionEngine": true,
+    "widgetCreateConfirmation": true,
+    "rescheduleCancelViaHttp": true,
+    "rescheduleCancelWidgetOrPhoneAcceptance": false,
+    "normalAndConcurrentMoveRetries": true,
+    "normalAndConcurrentCancelRetries": true
+  },
+  "healthy": {
+    "state": "SUCCEEDED",
+    "providerBookings": 1,
+    "executionAttempts": 1,
+    "nativeHttp": true
+  },
+  "selection-450002": {
+    "receipt_outcome": "ACCEPTED",
+    "code": null,
+    "owner_decision": null
+  },
+  "socketLossInitial": {
+    "state": "FAILED",
+    "executionAttemptCount": 1,
+    "attempts": [
+      {
+        "state": "FAILED",
+        "errorClass": "crm_provider_rejected",
+        "outcomeCode": "crm_provider_rejected"
+      }
+    ],
+    "providerBookings": 1
+  },
+  "selection-450003": {
+    "receipt_outcome": "ACCEPTED",
+    "code": null,
+    "owner_decision": null
+  },
+  "release-revoked": {
+    "passed": true,
+    "status": 403,
+    "outcome": null,
+    "currentRelease": false,
+    "providerBookings": 0,
+    "providerPosts": 0,
+    "actionExecutions": 0,
+    "appointments": 0,
+    "proxyRefusals": 0
+  },
+  "selection-450004": {
+    "receipt_outcome": "ACCEPTED",
+    "code": null,
+    "owner_decision": null
+  },
+  "release-allowlist": {
+    "passed": true,
+    "status": 403,
+    "outcome": null,
+    "currentRelease": false,
+    "providerBookings": 0,
+    "providerPosts": 0,
+    "actionExecutions": 0,
+    "appointments": 0,
+    "proxyRefusals": 0
+  },
+  "selection-450005": {
+    "receipt_outcome": "ACCEPTED",
+    "code": null,
+    "owner_decision": null
+  },
+  "release-candidate": {
+    "passed": true,
+    "status": 403,
+    "outcome": null,
+    "currentRelease": false,
+    "providerBookings": 0,
+    "providerPosts": 0,
+    "actionExecutions": 0,
+    "appointments": 0,
+    "proxyRefusals": 0
+  },
+  "selection-450006": {
+    "receipt_outcome": "ACCEPTED",
+    "code": null,
+    "owner_decision": null
+  },
+  "release-expiry": {
+    "passed": true,
+    "status": 403,
+    "outcome": null,
+    "currentRelease": false,
+    "providerBookings": 0,
+    "providerPosts": 0,
+    "actionExecutions": 0,
+    "appointments": 0,
+    "proxyRefusals": 0
+  },
+  "selection-450010": {
+    "receipt_outcome": "ACCEPTED",
+    "code": null,
+    "owner_decision": null
+  },
+  "lifecycle-loss-450010": {
+    "passed": false,
+    "action": "reschedule",
+    "readbackAvailable": false,
+    "firstHttpStatus": 500,
+    "initialState": "FAILED",
+    "initialExecutionAttemptCount": 1,
+    "initialReconciliationState": "NOT_REQUIRED",
+    "persistedBookings": 1,
+    "providerMutationPersisted": true,
+    "executionAttempts": [
+      {
+        "state": "FAILED",
+        "errorClass": "crm_provider_rejected",
+        "outcomeCode": "crm_provider_rejected"
+      }
+    ],
+    "firstProvider": {
+      "posts": 1,
+      "socketLosses": 1,
+      "reconciliations": 0,
+      "reads": 37,
+      "puts": 1,
+      "deletes": 0,
+      "lifecycleReadbacks": 0,
+      "unavailableReadbacks": 0
+    },
+    "firstLocalStatus": "confirmed"
+  },
+  "selection-450011": {
+    "receipt_outcome": "ACCEPTED",
+    "code": null,
+    "owner_decision": null
+  },
+  "lifecycle-loss-450011": {
+    "passed": false,
+    "action": "reschedule",
+    "readbackAvailable": true,
+    "firstHttpStatus": 500,
+    "initialState": "FAILED",
+    "initialExecutionAttemptCount": 1,
+    "initialReconciliationState": "NOT_REQUIRED",
+    "persistedBookings": 1,
+    "providerMutationPersisted": true,
+    "executionAttempts": [
+      {
+        "state": "FAILED",
+        "errorClass": "crm_provider_rejected",
+        "outcomeCode": "crm_provider_rejected"
+      }
+    ],
+    "firstProvider": {
+      "posts": 1,
+      "socketLosses": 1,
+      "reconciliations": 0,
+      "reads": 37,
+      "puts": 1,
+      "deletes": 0,
+      "lifecycleReadbacks": 0,
+      "unavailableReadbacks": 0
+    },
+    "firstLocalStatus": "confirmed"
+  },
+  "selection-450012": {
+    "receipt_outcome": "ACCEPTED",
+    "code": null,
+    "owner_decision": null
+  },
+  "lifecycle-loss-450012": {
+    "passed": false,
+    "action": "cancel",
+    "readbackAvailable": false,
+    "firstHttpStatus": 500,
+    "initialState": "FAILED",
+    "initialExecutionAttemptCount": 1,
+    "initialReconciliationState": "NOT_REQUIRED",
+    "persistedBookings": 1,
+    "providerMutationPersisted": true,
+    "executionAttempts": [
+      {
+        "state": "FAILED",
+        "errorClass": "crm_provider_rejected",
+        "outcomeCode": "crm_provider_rejected"
+      }
+    ],
+    "firstProvider": {
+      "posts": 1,
+      "socketLosses": 1,
+      "reconciliations": 0,
+      "reads": 33,
+      "puts": 0,
+      "deletes": 1,
+      "lifecycleReadbacks": 0,
+      "unavailableReadbacks": 0
+    },
+    "firstLocalStatus": "confirmed"
+  },
+  "selection-450013": {
+    "receipt_outcome": "ACCEPTED",
+    "code": null,
+    "owner_decision": null
+  },
+  "lifecycle-loss-450013": {
+    "passed": false,
+    "action": "cancel",
+    "readbackAvailable": true,
+    "firstHttpStatus": 500,
+    "initialState": "FAILED",
+    "initialExecutionAttemptCount": 1,
+    "initialReconciliationState": "NOT_REQUIRED",
+    "persistedBookings": 1,
+    "providerMutationPersisted": true,
+    "executionAttempts": [
+      {
+        "state": "FAILED",
+        "errorClass": "crm_provider_rejected",
+        "outcomeCode": "crm_provider_rejected"
+      }
+    ],
+    "firstProvider": {
+      "posts": 1,
+      "socketLosses": 1,
+      "reconciliations": 0,
+      "reads": 33,
+      "puts": 0,
+      "deletes": 1,
+      "lifecycleReadbacks": 0,
+      "unavailableReadbacks": 0
+    },
+    "firstLocalStatus": "confirmed"
+  },
+  "providerContractFailures": 0,
+  "syntheticCounters": {
+    "healthy": {
+      "posts": 1,
+      "socketLosses": 0,
+      "reconciliations": 0,
+      "reads": 44,
+      "puts": 1,
+      "deletes": 1,
+      "lifecycleReadbacks": 0,
+      "unavailableReadbacks": 0
+    },
+    "socketLoss": {
+      "posts": 1,
+      "socketLosses": 1,
+      "reconciliations": 0,
+      "reads": 32,
+      "puts": 0,
+      "deletes": 0,
+      "lifecycleReadbacks": 0,
+      "unavailableReadbacks": 0
+    }
+  },
+  "fetchIdentityUnchanged": true,
+  "createEgressSnapshots": {
+    "450003": {
+      "contract": "maya.phone-native-create-egress/1",
+      "reads": 32,
+      "creates": 0,
+      "reschedules": 0,
+      "cancels": 0,
+      "completed": 32,
+      "refused": 0,
+      "uncertainTransport": 0,
+      "inFlight": 0,
+      "recordBound": false,
+      "lifecycleUncertain": false,
+      "cancelled": false,
+      "revoked": false,
+      "closed": false
+    },
+    "450004": {
+      "contract": "maya.phone-native-create-egress/1",
+      "reads": 32,
+      "creates": 0,
+      "reschedules": 0,
+      "cancels": 0,
+      "completed": 32,
+      "refused": 0,
+      "uncertainTransport": 0,
+      "inFlight": 0,
+      "recordBound": false,
+      "lifecycleUncertain": false,
+      "cancelled": false,
+      "revoked": false,
+      "closed": false
+    },
+    "450005": {
+      "contract": "maya.phone-native-create-egress/1",
+      "reads": 32,
+      "creates": 0,
+      "reschedules": 0,
+      "cancels": 0,
+      "completed": 32,
+      "refused": 0,
+      "uncertainTransport": 0,
+      "inFlight": 0,
+      "recordBound": false,
+      "lifecycleUncertain": false,
+      "cancelled": false,
+      "revoked": false,
+      "closed": false
+    },
+    "450006": {
+      "contract": "maya.phone-native-create-egress/1",
+      "reads": 32,
+      "creates": 0,
+      "reschedules": 0,
+      "cancels": 0,
+      "completed": 32,
+      "refused": 0,
+      "uncertainTransport": 0,
+      "inFlight": 0,
+      "recordBound": false,
+      "lifecycleUncertain": false,
+      "cancelled": false,
+      "revoked": false,
+      "closed": false
+    },
+    "450010": {
+      "contract": "maya.phone-native-create-egress/2",
+      "reads": 42,
+      "creates": 1,
+      "reschedules": 1,
+      "cancels": 0,
+      "completed": 43,
+      "refused": 1,
+      "uncertainTransport": 1,
+      "inFlight": 0,
+      "recordBound": true,
+      "lifecycleUncertain": true,
+      "cancelled": false,
+      "revoked": false,
+      "closed": false
+    },
+    "450011": {
+      "contract": "maya.phone-native-create-egress/2",
+      "reads": 42,
+      "creates": 1,
+      "reschedules": 1,
+      "cancels": 0,
+      "completed": 43,
+      "refused": 1,
+      "uncertainTransport": 1,
+      "inFlight": 0,
+      "recordBound": true,
+      "lifecycleUncertain": true,
+      "cancelled": false,
+      "revoked": false,
+      "closed": false
+    },
+    "450012": {
+      "contract": "maya.phone-native-create-egress/2",
+      "reads": 38,
+      "creates": 1,
+      "reschedules": 0,
+      "cancels": 1,
+      "completed": 39,
+      "refused": 1,
+      "uncertainTransport": 1,
+      "inFlight": 0,
+      "recordBound": true,
+      "lifecycleUncertain": true,
+      "cancelled": false,
+      "revoked": false,
+      "closed": false
+    },
+    "450013": {
+      "contract": "maya.phone-native-create-egress/2",
+      "reads": 38,
+      "creates": 1,
+      "reschedules": 0,
+      "cancels": 1,
+      "completed": 39,
+      "refused": 1,
+      "uncertainTransport": 1,
+      "inFlight": 0,
+      "recordBound": true,
+      "lifecycleUncertain": true,
+      "cancelled": false,
+      "revoked": false,
+      "closed": false
+    },
+    "healthy": {
+      "contract": "maya.phone-native-create-egress/2",
+      "reads": 49,
+      "creates": 1,
+      "reschedules": 1,
+      "cancels": 1,
+      "completed": 52,
+      "refused": 0,
+      "uncertainTransport": 0,
+      "inFlight": 0,
+      "recordBound": true,
+      "lifecycleUncertain": false,
+      "cancelled": true,
+      "revoked": false,
+      "closed": false
+    },
+    "socketLoss": {
+      "contract": "maya.phone-native-create-egress/1",
+      "reads": 37,
+      "creates": 1,
+      "reschedules": 0,
+      "cancels": 0,
+      "completed": 37,
+      "refused": 1,
+      "uncertainTransport": 1,
+      "inFlight": 0,
+      "recordBound": false,
+      "lifecycleUncertain": false,
+      "cancelled": false,
+      "revoked": false,
+      "closed": false
+    }
+  }
+}
