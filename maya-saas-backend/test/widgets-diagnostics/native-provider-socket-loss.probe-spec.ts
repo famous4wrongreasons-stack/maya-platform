@@ -2,8 +2,9 @@
  * a test-provider PostgreSQL ledger. No fetch/operation override and no supplied
  * UNKNOWN verdict. The exact source candidate is pinned by the external runner. */
 import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import path from 'node:path';
 import { Client as PgClient } from 'pg';
@@ -55,7 +56,9 @@ assert.match(
 const output = process.env.JEST_NATIVE_SOCKET_OUTPUT;
 assert.ok(output, 'Use native-provider-socket-proof.mjs');
 const HEALTHY = 450001,
-  LOSS = 450002;
+  LOSS = 450002,
+  BROWSER = 450020;
+const browserProbe = process.env.JEST_NATIVE_LIFECYCLE_BROWSER;
 const lifecycleAE = process.env.JEST_NATIVE_LIFECYCLE_AE === '1';
 const releaseAdmission = process.env.JEST_NATIVE_RELEASE_ADMISSION === '1';
 const lifecycleLossAE = process.env.JEST_NATIVE_LIFECYCLE_LOSS_AE === '1';
@@ -247,7 +250,9 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
                 {
                   time:
                     lifecycleAE &&
-                    (company === HEALTHY || lifecycleLossModes.has(company)) &&
+                    (company === HEALTHY ||
+                      company === BROWSER ||
+                      lifecycleLossModes.has(company)) &&
                     counter.posts
                       ? '18:00'
                       : '17:00',
@@ -301,7 +306,9 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
           const payload: unknown = raw ? JSON.parse(raw) : null;
           if (
             lifecycleAE &&
-            (company === HEALTHY || lifecycleLossModes.has(company)) &&
+            (company === HEALTHY ||
+              company === BROWSER ||
+              lifecycleLossModes.has(company)) &&
             ['PUT', 'DELETE'].includes(req.method ?? '')
           ) {
             const row = (await rows(company)).find(
@@ -440,14 +447,24 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
             (source) => source.tenant.id === tenantId,
           ),
         );
-        assert.equal(
+        const prompt =
           input.messages.filter((message) => message.role === 'user').at(-1)
-            ?.content,
-          'Хочу записаться',
-        );
+            ?.content ?? '';
+        const browser =
+          browserProbe && companies.get(BROWSER)?.tenant.id === tenantId;
+        const own = browser && prompt === 'Покажи мои записи';
+        const followup = browser && prompt === 'Запиши меня на 17:00';
+        const employee = browser
+          ? /^Есть время к (\[name removed\]@[a-f0-9]{32}_\d+) завтра на мужскую стрижку\?$/.exec(
+              prompt,
+            )?.[1]
+          : undefined;
+        if (browser) expect(own || followup || Boolean(employee)).toBe(true);
+        else expect(prompt).toBe('Хочу записаться');
         const calls = Number(observations.scriptedModelCalls ?? 0) + 1;
         assert.ok(
-          calls <= (lifecycleLossAE ? 32 : releaseAdmission ? 20 : 8),
+          calls <=
+            (lifecycleLossAE || browserProbe ? 32 : releaseAdmission ? 20 : 8),
           'Finite synthetic model interpretation only',
         );
         observations.scriptedModelCalls = calls;
@@ -458,8 +475,24 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
               dialogue_act: 'request',
               tasks: [
                 {
-                  intent: 'booking.prepare_personal',
-                  entities: {},
+                  intent: browser
+                    ? own
+                      ? 'booking.list_own'
+                      : followup
+                        ? 'booking.create_own'
+                        : 'booking.find_availability'
+                    : 'booking.prepare_personal',
+                  entities: browser
+                    ? own
+                      ? {}
+                      : followup
+                        ? { time: '17:00' }
+                        : {
+                            date_or_period: 'tomorrow',
+                            employee,
+                            services: ['мужская стрижка'],
+                          }
+                    : {},
                   confidence: 0.99,
                 },
               ],
@@ -470,7 +503,14 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
           ),
           toolCall: input.toolResults.length
             ? null
-            : { name: 'catalog.services.read', arguments: {} },
+            : {
+                name: browser
+                  ? own
+                    ? 'appointments.own.list'
+                    : 'booking.availability.read'
+                  : 'catalog.services.read',
+                arguments: {},
+              },
           provider: 'openai',
           model: 'SCRIPTED_SYNTHETIC_NATIVE_SOCKET',
           usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
@@ -489,7 +529,13 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
         object(observations['lifecycle-loss-' + company] ?? {}).passed === true,
     );
     observations.status =
-      complete && allRefusals && allLifecycleLosses ? 'PASS' : 'FAIL';
+      complete &&
+      allRefusals &&
+      allLifecycleLosses &&
+      (!browserProbe ||
+        object(observations.browserLifecycle ?? {}).status === 'PASS')
+        ? 'PASS'
+        : 'FAIL';
     observations.providerContractFailures = errors.length;
     observations.syntheticCounters = {
       healthy: counters.get(HEALTHY) ?? null,
@@ -707,11 +753,15 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
         scope: {
           contract:
             lifecycleAE &&
-            (company === HEALTHY || lifecycleLossModes.has(company))
+            (company === HEALTHY ||
+              company === BROWSER ||
+              lifecycleLossModes.has(company))
               ? LIFECYCLE_EGRESS_CONTRACT
               : CREATE_EGRESS_CONTRACT,
           ...(lifecycleAE &&
-          (company === HEALTHY || lifecycleLossModes.has(company))
+          (company === HEALTHY ||
+            company === BROWSER ||
+            lifecycleLossModes.has(company))
             ? { maxReschedules: 1, maxCancels: 1 }
             : {}),
           candidate: observations.candidate,
@@ -1214,6 +1264,264 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       );
     }
   }
+  if (browserProbe)
+    it('current React widget lifecycle uses canonical AR-1 and native bounded transport', async () => {
+      const source = await fixture(BROWSER);
+      const config = http.app.get(ConfigService);
+      config.set('EMAIL_LOGIN_ENABLED', 'true');
+      config.set('EMAIL_AUTH_PROVIDER', 'debug');
+      const stages = [
+        'initial-slots',
+        'selected-17',
+        'create-preview',
+        'create-commit',
+        'own-before-reschedule',
+        'reschedule-preview',
+        'reschedule-commit',
+        'own-before-cancel',
+        'cancel-preview',
+        'cancel-commit',
+        'reload',
+      ];
+      const capabilities = [
+        capability,
+        'crm.appointment.reschedule.v1',
+        'crm.appointment.cancel.v1',
+      ];
+      const checkpoints: Record<string, unknown>[] = [];
+      const result = {
+        status: 'RUNNING',
+        checkpoints,
+        concurrentConsumedIntentRefusals: 0,
+        browserChildClosed: false,
+      };
+      observations.browserLifecycle = result;
+      let appointmentId: string | undefined;
+      await new Promise<void>((resolve, reject) => {
+        const child = spawn(process.execPath, [browserProbe], {
+          stdio: ['ignore', 'ignore', 'pipe', 'ipc'],
+        });
+        let pending = Promise.resolve(),
+          failure: Error | undefined,
+          stderr = '',
+          killTimer: ReturnType<typeof setTimeout> | undefined;
+        const fail = (error: unknown) => {
+          failure ??= error instanceof Error ? error : new Error(String(error));
+          child.kill('SIGTERM');
+          killTimer ??= setTimeout(() => child.kill('SIGKILL'), 5000);
+        };
+        const timer = setTimeout(
+          () => fail(new Error('Bounded native widget browser timeout')),
+          150000,
+        );
+        child.stderr!.on('data', (bytes: Buffer) => {
+          stderr = (stderr + bytes.toString()).slice(-3000);
+        });
+        child.on('message', (raw: unknown) => {
+          pending = pending
+            .then(async () => {
+              const message = raw as {
+                type: string;
+                name: string;
+                receiptOutcome: string | null;
+                selectedStart: string | null;
+                proofSubmission?: Record<string, unknown>;
+              };
+              if (message.type === 'ready') {
+                child.send({
+                  type: 'start',
+                  backendOrigin: await http.listenLoopback(),
+                  output: path.dirname(output!),
+                  email: source.user.email,
+                  start: source.startsAt,
+                  nativeSyntheticYclients: true,
+                });
+                return;
+              }
+              expect(message.type).toBe('checkpoint');
+              expect(message.name).toBe(stages[checkpoints.length]);
+              const index = checkpoints.length;
+              const expected =
+                index < 3 ? 0 : index < 6 ? 1 : index < 9 ? 2 : 3;
+              const executions = await db.prisma.actionExecution.findMany({
+                where: {
+                  tenantId: source.tenant.id,
+                  capability: { in: capabilities },
+                },
+                orderBy: { createdAt: 'asc' },
+              });
+              expect(executions).toHaveLength(expected);
+              expect(executions.map((e) => e.capability)).toEqual(
+                capabilities.slice(0, expected),
+              );
+              for (const execution of executions)
+                expect(execution).toMatchObject({
+                  state: 'SUCCEEDED',
+                  executionAttemptCount: 1,
+                });
+              const appointments = await db.prisma.appointment.findMany({
+                where: { tenantId: source.tenant.id },
+              });
+              const providerRows = await rows(BROWSER);
+              expect(appointments).toHaveLength(index < 3 ? 0 : 1);
+              expect(providerRows).toHaveLength(index < 3 ? 0 : 1);
+              const mutations = {
+                posts: counts(BROWSER).posts,
+                puts: counts(BROWSER).puts,
+                deletes: counts(BROWSER).deletes,
+              };
+              expect(mutations).toEqual({
+                posts: Number(index >= 3),
+                puts: Number(index >= 6),
+                deletes: Number(index >= 9),
+              });
+              if (index >= 3) {
+                const row = appointments[0];
+                appointmentId ??= row.id;
+                expect(row.id).toBe(appointmentId);
+                expect(row.crmExternalId).toBe(String(providerRows[0].id));
+                expect(row.branchId).toBe(source.branchId);
+                expect(row.staffExternalId).toBe('71');
+                expect(row.serviceIds).toEqual(['81']);
+                expect(row.status).toBe(index < 9 ? 'confirmed' : 'canceled');
+                expect(row.startAt.toISOString()).toBe(
+                  index < 6
+                    ? new Date(source.startsAt).toISOString()
+                    : source.startsAt.slice(0, 10) + 'T15:00:00.000Z',
+                );
+                expect(providerRows[0].moved_start).toBe(
+                  index < 6 ? null : source.startsAt.slice(0, 10) + 'T18:00:00',
+                );
+                expect(providerRows[0].cancelled).toBe(index >= 9);
+                const client = await db.prisma.client.findUniqueOrThrow({
+                  where: { id: row.mayaClientId! },
+                });
+                expect(client.userId).toBe(source.user.id);
+              }
+              if (
+                [
+                  'create-preview',
+                  'reschedule-preview',
+                  'cancel-preview',
+                ].includes(message.name)
+              ) {
+                const report = JSON.parse(
+                  readFileSync(
+                    path.join(
+                      path.dirname(output!),
+                      'current-react/browser.json',
+                    ),
+                    'utf8',
+                  ),
+                ) as {
+                  steps: Array<{ name: string; snapshot: { text: string } }>;
+                };
+                const step = report.steps.at(-1)!;
+                expect(step.name).toBe(message.name);
+                const title =
+                  message.name === 'create-preview'
+                    ? 'Проверка записи'
+                    : message.name === 'reschedule-preview'
+                      ? 'Перенос записи'
+                      : 'Отмена записи';
+                // The canonical UI must present the actual service/master and local time
+                // before any corresponding mutation. Labels are not authority.
+                const offset = step.snapshot.text.lastIndexOf(title);
+                expect(offset).toBeGreaterThanOrEqual(0);
+                const card = step.snapshot.text.slice(offset);
+                expect(card).toContain('Мужская стрижка');
+                expect(card).toContain('Артём');
+                expect(card).toContain(
+                  message.name === 'create-preview'
+                    ? '17:00 (Europe/Moscow)'
+                    : '18:00 (Europe/Moscow)',
+                );
+                if (message.name === 'reschedule-preview') {
+                  expect(card).toContain('17:00 (Europe/Moscow)');
+                  expect(message.selectedStart).toBe(
+                    source.startsAt.slice(0, 10) + 'T15:00:00.000Z',
+                  );
+                }
+                expect(card).not.toMatch(/T1[45]:00:00\.000Z/);
+              }
+              if (message.name.endsWith('-commit')) {
+                expect(message.receiptOutcome).toBe('ACCEPTED');
+                expect(message.proofSubmission).toBeDefined();
+                const replays = await Promise.all(
+                  Array.from({ length: 3 }, () =>
+                    http.postIntent(source.token, {
+                      ...message.proofSubmission,
+                      client_nonce: randomUUID(),
+                    }),
+                  ),
+                );
+                for (const replay of replays) {
+                  expect(replay.status).toBe(200);
+                  expect(replay.body).toMatchObject({
+                    outcome: 'expired',
+                    receipt_outcome: null,
+                  });
+                }
+                result.concurrentConsumedIntentRefusals += replays.length;
+                expect(
+                  await db.prisma.actionExecution.count({
+                    where: {
+                      tenantId: source.tenant.id,
+                      capability: { in: capabilities },
+                    },
+                  }),
+                ).toBe(expected);
+              }
+              expect(proxies.get(BROWSER)!.snapshot()).toMatchObject({
+                refused: 0,
+                uncertainTransport: 0,
+              });
+              expect(errors).toEqual([]);
+              checkpoints.push({
+                name: message.name,
+                receiptOutcome: message.receiptOutcome,
+                actionExecutions: expected,
+                providerMutations: mutations,
+                sameAppointment: index >= 3 ? true : 'NOT_CREATED',
+              });
+              child.send({ type: 'continue:' + message.name });
+            })
+            .catch(fail);
+        });
+        child.once('error', fail);
+        child.once('close', (code, signal) => {
+          void pending.finally(() => {
+            clearTimeout(timer);
+            if (killTimer) clearTimeout(killTimer);
+            result.browserChildClosed = true;
+            if (failure) reject(failure);
+            else if (code !== 0 || signal)
+              reject(
+                new Error(
+                  'Native browser child failed: ' +
+                    String(code) +
+                    ' ' +
+                    String(signal) +
+                    ' ' +
+                    stderr,
+                ),
+              );
+            else resolve();
+          });
+        });
+      });
+      expect(checkpoints).toHaveLength(11);
+      expect(result.concurrentConsumedIntentRefusals).toBe(9);
+      Object.assign(result, {
+        status: 'PASS',
+        providerMutations: {
+          posts: counts(BROWSER).posts,
+          puts: counts(BROWSER).puts,
+          deletes: counts(BROWSER).deletes,
+        },
+        proxyRefusals: proxies.get(BROWSER)!.snapshot().refused,
+      });
+    });
   for (const [company, mode] of lifecycleLossModes) {
     it(
       'native ' +

@@ -1,0 +1,329 @@
+{
+  "contract": "maya.native-widget-browser-proof/1",
+  "classification": "LOCAL_SYNTHETIC_DIAGNOSTIC_NOT_RELEASE_CERTIFICATION",
+  "recordedAt": "2026-10-18T13:12:43.430650+00:00",
+  "applicationCandidate": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "profile": "closed-input.no-handoff.no-price-goods@1",
+  "parentToolingCommit": "b9a088a02cf17ea0f285f148e0c2bb9d353ebffc",
+  "sourceHashes": {
+    "runner": {
+      "path": "maya-saas-backend/scripts/native-provider-socket-proof.mjs",
+      "sha256": "0cc2fbfe8a5132278793dfbdea9d9cfac4518e051cc8523432f20bd07800b26a"
+    },
+    "probe": {
+      "path": "maya-saas-backend/test/widgets-diagnostics/native-provider-socket-loss.probe-spec.ts",
+      "sha256": "af8478f8052c977c939ef757cac901c22821479821bac4ebc9d89fcfa17e96a0"
+    },
+    "nativeEgress": {
+      "path": "maya-saas-backend/scripts/phone-native-create-egress.mjs",
+      "sha256": "5c000a72496d2cd1c8879ca124dec3cba0bdb77c93cea81ad386c0b58cf1ab19"
+    }
+  },
+  "freshResults": {
+    "browserCombinedSuite": {
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browserCheckpoints": 11,
+    "canonicalLogins": 2,
+    "chatRequests": 4,
+    "widgetIntents": 6,
+    "concurrentConsumedConfirmationRefusals": 9,
+    "providerMutations": {
+      "posts": 1,
+      "puts": 1,
+      "deletes": 1
+    },
+    "proxyRefusals": 0,
+    "lostResponseRegressionSuite": {
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    "reactBuild": "PASS",
+    "sourceBoundArtifactVerification": "PASS",
+    "networkFence": "EXTERNAL_TEST_NET_TCP_REFUSED_EPERM",
+    "allOwnedClustersStoppedAndRemoved": true,
+    "sourcesUnchanged": true
+  },
+  "failedDiagnosticRuns": [
+    {
+      "run": "diagnostic-01",
+      "status": "failed",
+      "reason": "MISSING_TYPESCRIPT_STANDARD_LIBRARY_IN_OLD_DEPENDENCY_DIRECTORY",
+      "manifestPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/diagnostic-01/manifest.json",
+      "manifestSha256": "e06e5e847fa44f78c81d2983c414bfc9ff03e771e8639ef1f548a89c2d675b2e",
+      "clusterStopped": true,
+      "sourcesUnchanged": true,
+      "countedAsPassingProof": false
+    },
+    {
+      "run": "diagnostic-02",
+      "status": "failed",
+      "reason": "CHROMIUM_NESTED_MACOS_SANDBOX_INITIALIZATION_FAILURE_BEFORE_LOGIN",
+      "manifestPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/diagnostic-02/manifest.json",
+      "manifestSha256": "f333fba9c21bfbbc35b7a8c9ace21cec8493843ea7581102b0d01cb0c1b60aa0",
+      "clusterStopped": true,
+      "sourcesUnchanged": true,
+      "countedAsPassingProof": false
+    }
+  ],
+  "rendererCounterfactual": [
+    {
+      "sourcePath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/chrome-renderer-nested.json",
+      "sha256": "9ffce1d739dd8eeafb36d62c8e46d68f9db43269f68be4e95b68e4cacd22445e",
+      "size": 6005,
+      "exitCode": null,
+      "signal": "SIGTRAP",
+      "rendererEnableSucceeded": false,
+      "sandboxInitializationFailure": true,
+      "sensitiveRawDataCommitted": false
+    },
+    {
+      "sourcePath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/chrome-renderer-outer-fence.json",
+      "sha256": "447eb8f1a3b41de30b7dbb1967a77677ae663246746d1f2fa11f2019cda1f79d",
+      "size": 2598,
+      "exitCode": 0,
+      "signal": null,
+      "rendererEnableSucceeded": true,
+      "sandboxInitializationFailure": false,
+      "sensitiveRawDataCommitted": false
+    }
+  ],
+  "browserIsolationQualification": {
+    "sourceFiles": 493,
+    "dependencyVersions": {
+      "@types/react": "19.2.17",
+      "@types/react-dom": "19.2.3",
+      "csstype": "3.2.3",
+      "esbuild": "0.25.10",
+      "react": "19.2.8",
+      "react-dom": "19.2.8",
+      "scheduler": "0.27.0",
+      "typescript": "5.9.3"
+    },
+    "originalProbeSha256": "e2a3aece66361a7feb6e97ad116053f2335436b893828d7b14b1fd9f5a528f0e",
+    "executedProbeSha256": "2b7f827e6b9e9bcf4144cb3d87eab506c9bbb04ff4616c7f13676479887e50a2",
+    "browserIsolation": "OUTER_OS_LOOPBACK_FENCE_WITHOUT_NESTED_CHROMIUM_SANDBOX",
+    "testOnlyProbeInstrumentation": "ONE_HEADLESS_CHROME_LAUNCH_FLAG",
+    "productPresentationChanged": false,
+    "reportSha256": "e5a48ac6a91b950412ddc090a4fb5486e8a65733d9b183c92e652edf28c7648a"
+  },
+  "coverage": [
+    "canonical debug-email auth",
+    "real React and headless runtime",
+    "canonical backend source/confirmation",
+    "signed synthetic AR-1 HTTP grant/current access",
+    "real native adapter fetch",
+    "bounded transport against loopback PG provider",
+    "single create/move/cancel correlated across UI/local/provider",
+    "immutable consumed-confirmation replay refusal",
+    "chat outcome restored after second login",
+    "UNKNOWN loss/reconciliation regression"
+  ],
+  "syntheticBoundaries": [
+    "model interpretation",
+    "provider destination/data/credentials",
+    "signer/certificate fixtures",
+    "native external-effects admission assertCurrent callback"
+  ],
+  "notProven": [
+    "Chromium own nested sandbox",
+    "live model transport and interpretation",
+    "real YCLIENTS or iPhone acceptance",
+    "UNKNOWN UI recovery",
+    "real external-effects admission wiring",
+    "full V6 mutation corpus/certification"
+  ],
+  "zeroEffects": {
+    "realProviderCalls": 0,
+    "realModelCalls": 0,
+    "ownerDatabaseAccess": 0,
+    "keychainAccess": 0,
+    "begetOrProductionChanges": 0,
+    "iPhoneChanges": 0,
+    "gitPush": 0
+  },
+  "certificateIssued": false,
+  "releaseAdmissible": false,
+  "readyForServerOrPhoneExecution": false,
+  "secretAndPiiReview": {
+    "scope": "EXACT_ARCHIVED_TEXT_ARTIFACTS",
+    "patternScan": "PASS",
+    "fixtureSource": "DISPOSABLE_SYNTHETIC_ONLY_NO_OWNER_DATA_INPUT",
+    "files": [
+      {
+        "artifact": "browser-manifest.json",
+        "patternFindings": 0
+      },
+      {
+        "artifact": "browser-observations.json",
+        "patternFindings": 0
+      },
+      {
+        "artifact": "browser-report.json",
+        "patternFindings": 0
+      },
+      {
+        "artifact": "browser-suite.log",
+        "patternFindings": 0
+      },
+      {
+        "artifact": "react-build.log",
+        "patternFindings": 0
+      },
+      {
+        "artifact": "react-verify.log",
+        "patternFindings": 0
+      },
+      {
+        "artifact": "network-fence.log",
+        "patternFindings": 0
+      },
+      {
+        "artifact": "loss-regression-manifest.json",
+        "patternFindings": 0
+      },
+      {
+        "artifact": "loss-regression-observations.json",
+        "patternFindings": 0
+      },
+      {
+        "artifact": "loss-regression-suite.log",
+        "patternFindings": 0
+      },
+      {
+        "artifact": "cluster-cleanup.json",
+        "patternFindings": 0
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "artifact": "browser-manifest.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/diagnostic-03/manifest.json",
+      "sha256": "8a2ece77cb4cd8289061fe133401621e5d5533b68fd393ac12db582be740b4f7",
+      "size": 4451,
+      "repositoryCopy": "BYTE_IDENTICAL",
+      "dataClass": "SYNTHETIC_TEST_ONLY"
+    },
+    {
+      "artifact": "browser-observations.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/diagnostic-03/observations.json",
+      "sha256": "ccc8d83f370b93bfeb70c1a5ba7a1ba182b8e97ab092a066af48a68d904e9c87",
+      "size": 9938,
+      "repositoryCopy": "BYTE_IDENTICAL",
+      "dataClass": "SYNTHETIC_TEST_ONLY"
+    },
+    {
+      "artifact": "browser-report.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/diagnostic-03/current-react/browser.json",
+      "sha256": "e5a48ac6a91b950412ddc090a4fb5486e8a65733d9b183c92e652edf28c7648a",
+      "size": 66146,
+      "repositoryCopy": "BYTE_IDENTICAL",
+      "dataClass": "SYNTHETIC_TEST_ONLY"
+    },
+    {
+      "artifact": "browser-suite.log",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/diagnostic-03/native-socket.log",
+      "sha256": "232c56dfb2a88a5c90202d9bac77b0dd2a441c667e8cb1851015fa9d79f0127c",
+      "size": 2913,
+      "repositoryCopy": "BYTE_IDENTICAL",
+      "dataClass": "SYNTHETIC_TEST_ONLY"
+    },
+    {
+      "artifact": "react-build.log",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/diagnostic-03/react-web-build.log",
+      "sha256": "011c7eb72f9da6253f3e739ffe31f441e905f274920204a857d588838d06251c",
+      "size": 185,
+      "repositoryCopy": "BYTE_IDENTICAL",
+      "dataClass": "SYNTHETIC_TEST_ONLY"
+    },
+    {
+      "artifact": "react-verify.log",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/diagnostic-03/react-web-verify.log",
+      "sha256": "b157f6c4abd8b4a65c1abe02eae49767b26df9764fa1b954796d5323f8d318cb",
+      "size": 188,
+      "repositoryCopy": "BYTE_IDENTICAL",
+      "dataClass": "SYNTHETIC_TEST_ONLY"
+    },
+    {
+      "artifact": "network-fence.log",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/diagnostic-03/browser-network-fence.log",
+      "sha256": "013b4d2722e1a83a04c09e4b971dd563cfed97292334eabaf49a1ba250c90a32",
+      "size": 30,
+      "repositoryCopy": "BYTE_IDENTICAL",
+      "dataClass": "SYNTHETIC_TEST_ONLY"
+    },
+    {
+      "artifact": "loss-regression-manifest.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/loss-regression/manifest.json",
+      "sha256": "2dd11b8e95f69cc62d38fc6e53f98c18cf209240287af8c19efea660b09096b8",
+      "size": 3129,
+      "repositoryCopy": "BYTE_IDENTICAL",
+      "dataClass": "SYNTHETIC_TEST_ONLY"
+    },
+    {
+      "artifact": "loss-regression-observations.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/loss-regression/observations.json",
+      "sha256": "944218a37daa1aece8c3f695563ed7e37fde70eba30488685e04b8613025097f",
+      "size": 14519,
+      "repositoryCopy": "BYTE_IDENTICAL",
+      "dataClass": "SYNTHETIC_TEST_ONLY"
+    },
+    {
+      "artifact": "loss-regression-suite.log",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/loss-regression/native-socket.log",
+      "sha256": "c3993f8f823f8d58021dcd899a96d5580546eb5d5826b30d0364eca152a1b4a7",
+      "size": 3721,
+      "repositoryCopy": "BYTE_IDENTICAL",
+      "dataClass": "SYNTHETIC_TEST_ONLY"
+    },
+    {
+      "artifact": "cluster-cleanup.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/DISPOSABLE-CLUSTER-CLEANUP.json",
+      "sha256": "6ddc1f088f944479c057e668665581c0e979528435035b46ea88a097c65f09c9",
+      "size": 1805,
+      "repositoryCopy": "BYTE_IDENTICAL",
+      "dataClass": "SYNTHETIC_TEST_ONLY"
+    }
+  ],
+  "localOnlySupportingArtifacts": [
+    {
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/diagnostic-03/source-before.json",
+      "sha256": "443ac4133f286af802c7a0a6fbb7dfae4d5fce6124aadd1c8cd2885fcfaaad89",
+      "size": 443404,
+      "reasonNotCopied": "REPRODUCIBLE_DIAGNOSTIC_SOURCE_INVENTORY_OR_SUPPORTING_LOG_RETAINED_LOCALLY",
+      "relatedCandidate": "6356db1875545337e34b6c8888b7ca858bb64361"
+    },
+    {
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/loss-regression/source-before.json",
+      "sha256": "8d5ba889693529befb00e9e46f4d3370cbe2c7f04fe07c425000a695d5b96c14",
+      "size": 377628,
+      "reasonNotCopied": "REPRODUCIBLE_DIAGNOSTIC_SOURCE_INVENTORY_OR_SUPPORTING_LOG_RETAINED_LOCALLY",
+      "relatedCandidate": "6356db1875545337e34b6c8888b7ca858bb64361"
+    },
+    {
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/chrome-renderer-smoke.mjs",
+      "sha256": "a60b1f60d630a3667572377ce5eac81b76ee996517eaf0ac5b1b92a96b589710",
+      "size": 3116,
+      "reasonNotCopied": "REPRODUCIBLE_DIAGNOSTIC_SOURCE_INVENTORY_OR_SUPPORTING_LOG_RETAINED_LOCALLY",
+      "relatedCandidate": "6356db1875545337e34b6c8888b7ca858bb64361"
+    },
+    {
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/diagnostic-03/migrations.log",
+      "sha256": "76b182362c9550cd5d6e5e348858bf2f1cdc2a316cbdcda3041b8ab46ab1dc69",
+      "size": 14900,
+      "reasonNotCopied": "REPRODUCIBLE_DIAGNOSTIC_SOURCE_INVENTORY_OR_SUPPORTING_LOG_RETAINED_LOCALLY",
+      "relatedCandidate": "6356db1875545337e34b6c8888b7ca858bb64361"
+    },
+    {
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/loss-regression/migrations.log",
+      "sha256": "39df75d1272ba6835d330ac1abdc7333c425b99defed6c7700919de87f75d269",
+      "size": 14900,
+      "reasonNotCopied": "REPRODUCIBLE_DIAGNOSTIC_SOURCE_INVENTORY_OR_SUPPORTING_LOG_RETAINED_LOCALLY",
+      "relatedCandidate": "6356db1875545337e34b6c8888b7ca858bb64361"
+    }
+  ]
+}

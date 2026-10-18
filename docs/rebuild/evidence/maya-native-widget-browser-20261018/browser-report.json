@@ -1,0 +1,1228 @@
+{
+  "contract": "maya.exact-booking-followup-browser/1",
+  "status": "passed-synthetic-booking-lifecycle",
+  "realReactAndAuth": true,
+  "scriptedModel": true,
+  "syntheticInternalCalendar": false,
+  "nativeSyntheticYclients": true,
+  "realModelCalls": 0,
+  "realProviderCalls": 0,
+  "steps": [
+    {
+      "name": "initial-slots",
+      "reply": "Выберите подходящее время. Затем проверьте детали и подтвердите запись.",
+      "envelopeKind": "TIME_SLOT_SELECTOR",
+      "receiptOutcome": null,
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\n☰\nMaya\n\nwidgets-live Development corpus native-socket-450020\n\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 1. Всего: нет данных.\n\nНет данных\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\n\n+\nСообщение для MAYA\n↑\nЧат\nЛента\nИдеи\nЗадачи\nФайлы",
+        "controls": [
+          {
+            "name": "Открыть меню",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "О Maya",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Спросить Maya о расписании на сегодня",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "19 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X3YyOm12ZmJtd3cwOlkyMTJaSFZqWjNvek1EQmpiWGgwWXpsNGJ6Rm1NbXcyYlE6MmM5NDFiNmM5Y2VjODM1M2Q2MTE3NWFlM2Q1YjZmOTFmYTE1YjU4YjEyMzBkOTgzMzk2MmQ5ZTU5ZDI5MzBkMSJ9.f3cf4c3e8edac53cc999342c1d59b8c2983a06cb00218797ca08173897c2a930",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Чат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Лента",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Идеи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Задачи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Файлы",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "selected-17",
+      "reply": "На 2026-10-19 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.",
+      "envelopeKind": "TIME_SLOT_SELECTOR",
+      "receiptOutcome": null,
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\n☰\nMaya\n\nwidgets-live Development corpus native-socket-450020\n\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 1. Всего: нет данных.\n\nНет данных\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-19 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверьте выбранное время\n\nЧасовой пояс: Europe/Moscow\n\nВыбранное время\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 1. Всего: нет данных.\n\nНет данных\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\n\n+\nСообщение для MAYA\n↑\nЧат\nЛента\nИдеи\nЗадачи\nФайлы",
+        "controls": [
+          {
+            "name": "Открыть меню",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "О Maya",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Спросить Maya о расписании на сегодня",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "19 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X3YyOm12ZmJtd3cwOlkyMTJaSFZqWjNvek1EQmpiWGgwWXpsNGJ6Rm1NbXcyYlE6MmM5NDFiNmM5Y2VjODM1M2Q2MTE3NWFlM2Q1YjZmOTFmYTE1YjU4YjEyMzBkOTgzMzk2MmQ5ZTU5ZDI5MzBkMSJ9.f3cf4c3e8edac53cc999342c1d59b8c2983a06cb00218797ca08173897c2a930",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "19 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X3YyOm12ZmJtd3cwOlkyMTJaSFZqWjNvek1EQmpiWGgwWXpsNGJ6Rm1NbXcyYlE6MmM5NDFiNmM5Y2VjODM1M2Q2MTE3NWFlM2Q1YjZmOTFmYTE1YjU4YjEyMzBkOTgzMzk2MmQ5ZTU5ZDI5MzBkMSJ9.f3cf4c3e8edac53cc999342c1d59b8c2983a06cb00218797ca08173897c2a930",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Чат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Лента",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Идеи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Задачи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Файлы",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-preview",
+      "reply": null,
+      "envelopeKind": "BOOKING_CONFIRMATION",
+      "receiptOutcome": "ACCEPTED",
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\n☰\nMaya\n\nwidgets-live Development corpus native-socket-450020\n\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 1. Всего: нет данных.\n\nНет данных\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-19 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nАртём\n30 мин По данным системы записи\n1500 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ЗАПИСЬ\nЗАКРЫТЬ\n\n+\nСообщение для MAYA\n↑\nЧат\nЛента\nИдеи\nЗадачи\nФайлы",
+        "controls": [
+          {
+            "name": "Открыть меню",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "О Maya",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Спросить Maya о расписании на сегодня",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "19 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X3YyOm12ZmJtd3cwOlkyMTJaSFZqWjNvek1EQmpiWGgwWXpsNGJ6Rm1NbXcyYlE6MmM5NDFiNmM5Y2VjODM1M2Q2MTE3NWFlM2Q1YjZmOTFmYTE1YjU4YjEyMzBkOTgzMzk2MmQ5ZTU5ZDI5MzBkMSJ9.f3cf4c3e8edac53cc999342c1d59b8c2983a06cb00218797ca08173897c2a930",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Подтвердить запись",
+            "ref": "intent:i1",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Чат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Лента",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Идеи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Задачи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Файлы",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-commit",
+      "reply": null,
+      "envelopeKind": null,
+      "receiptOutcome": "ACCEPTED",
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\n☰\nMaya\n\nwidgets-live Development corpus native-socket-450020\n\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 1. Всего: нет данных.\n\nНет данных\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-19 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\n\n+\nСообщение для MAYA\n↑\nЧат\nЛента\nИдеи\nЗадачи\nФайлы",
+        "controls": [
+          {
+            "name": "Открыть меню",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "О Maya",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Спросить Maya о расписании на сегодня",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "19 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X3YyOm12ZmJtd3cwOlkyMTJaSFZqWjNvek1EQmpiWGgwWXpsNGJ6Rm1NbXcyYlE6MmM5NDFiNmM5Y2VjODM1M2Q2MTE3NWFlM2Q1YjZmOTFmYTE1YjU4YjEyMzBkOTgzMzk2MmQ5ZTU5ZDI5MzBkMSJ9.f3cf4c3e8edac53cc999342c1d59b8c2983a06cb00218797ca08173897c2a930",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Чат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Лента",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Идеи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Задачи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Файлы",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "own-before-reschedule",
+      "reply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.",
+      "envelopeKind": "SCHEDULE",
+      "receiptOutcome": null,
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\n☰\nMaya\n\nwidgets-live Development corpus native-socket-450020\n\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 1. Всего: нет данных.\n\nНет данных\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-19 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись\n\nМужская стрижка\nПеренос: 2026-10-19T15:00:00.000Z\nЗапланирована\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\n\n+\nСообщение для MAYA\n↑\nЧат\nЛента\nИдеи\nЗадачи\nФайлы",
+        "controls": [
+          {
+            "name": "Открыть меню",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "О Maya",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Спросить Maya о расписании на сегодня",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "19 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X3YyOm12ZmJtd3cwOlkyMTJaSFZqWjNvek1EQmpiWGgwWXpsNGJ6Rm1NbXcyYlE6MmM5NDFiNmM5Y2VjODM1M2Q2MTE3NWFlM2Q1YjZmOTFmYTE1YjU4YjEyMzBkOTgzMzk2MmQ5ZTU5ZDI5MzBkMSJ9.f3cf4c3e8edac53cc999342c1d59b8c2983a06cb00218797ca08173897c2a930",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212ZHVjanIwMDBlaHh0Yzl6bmVwbGg2OSJ9.eb510ccbc206edf507f1df2b9a74c0926ce9d4df29c45f4c3b9be0ca7fea349a",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Чат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Лента",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Идеи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Задачи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Файлы",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "reschedule-preview",
+      "reply": null,
+      "envelopeKind": "BOOKING_CONFIRMATION",
+      "receiptOutcome": "ACCEPTED",
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\n☰\nMaya\n\nwidgets-live Development corpus native-socket-450020\n\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 1. Всего: нет данных.\n\nНет данных\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-19 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись\n\nМужская стрижка\nПеренос: 2026-10-19T15:00:00.000Z\nЗапланирована\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nПеренос записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nАртём\n30 мин По данным системы записи\n1500 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ПЕРЕНОС\nЗАКРЫТЬ\n\n+\nСообщение для MAYA\n↑\nЧат\nЛента\nИдеи\nЗадачи\nФайлы",
+        "controls": [
+          {
+            "name": "Открыть меню",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "О Maya",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Спросить Maya о расписании на сегодня",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "19 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X3YyOm12ZmJtd3cwOlkyMTJaSFZqWjNvek1EQmpiWGgwWXpsNGJ6Rm1NbXcyYlE6MmM5NDFiNmM5Y2VjODM1M2Q2MTE3NWFlM2Q1YjZmOTFmYTE1YjU4YjEyMzBkOTgzMzk2MmQ5ZTU5ZDI5MzBkMSJ9.f3cf4c3e8edac53cc999342c1d59b8c2983a06cb00218797ca08173897c2a930",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212ZHVjanIwMDBlaHh0Yzl6bmVwbGg2OSJ9.eb510ccbc206edf507f1df2b9a74c0926ce9d4df29c45f4c3b9be0ca7fea349a",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Подтвердить перенос",
+            "ref": "intent:i1",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Чат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Лента",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Идеи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Задачи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Файлы",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "reschedule-commit",
+      "reply": null,
+      "envelopeKind": null,
+      "receiptOutcome": "ACCEPTED",
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\n☰\nMaya\n\nwidgets-live Development corpus native-socket-450020\n\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 1. Всего: нет данных.\n\nНет данных\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-19 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись\n\nМужская стрижка\nПеренос: 2026-10-19T15:00:00.000Z\nЗапланирована\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nПеренос записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись перенесена.\n\n+\nСообщение для MAYA\n↑\nЧат\nЛента\nИдеи\nЗадачи\nФайлы",
+        "controls": [
+          {
+            "name": "Открыть меню",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "О Maya",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Спросить Maya о расписании на сегодня",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "19 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X3YyOm12ZmJtd3cwOlkyMTJaSFZqWjNvek1EQmpiWGgwWXpsNGJ6Rm1NbXcyYlE6MmM5NDFiNmM5Y2VjODM1M2Q2MTE3NWFlM2Q1YjZmOTFmYTE1YjU4YjEyMzBkOTgzMzk2MmQ5ZTU5ZDI5MzBkMSJ9.f3cf4c3e8edac53cc999342c1d59b8c2983a06cb00218797ca08173897c2a930",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212ZHVjanIwMDBlaHh0Yzl6bmVwbGg2OSJ9.eb510ccbc206edf507f1df2b9a74c0926ce9d4df29c45f4c3b9be0ca7fea349a",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Чат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Лента",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Идеи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Задачи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Файлы",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "own-before-cancel",
+      "reply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 18:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.",
+      "envelopeKind": "SCHEDULE",
+      "receiptOutcome": null,
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\n☰\nMaya\n\nwidgets-live Development corpus native-socket-450020\n\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 1. Всего: нет данных.\n\nНет данных\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-19 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись\n\nМужская стрижка\nПеренос: 2026-10-19T15:00:00.000Z\nЗапланирована\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nПеренос записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись перенесена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 18:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись\n\nМужская стрижка\nЗапланирована\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\n\n+\nСообщение для MAYA\n↑\nЧат\nЛента\nИдеи\nЗадачи\nФайлы",
+        "controls": [
+          {
+            "name": "Открыть меню",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "О Maya",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Спросить Maya о расписании на сегодня",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "19 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X3YyOm12ZmJtd3cwOlkyMTJaSFZqWjNvek1EQmpiWGgwWXpsNGJ6Rm1NbXcyYlE6MmM5NDFiNmM5Y2VjODM1M2Q2MTE3NWFlM2Q1YjZmOTFmYTE1YjU4YjEyMzBkOTgzMzk2MmQ5ZTU5ZDI5MzBkMSJ9.f3cf4c3e8edac53cc999342c1d59b8c2983a06cb00218797ca08173897c2a930",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212ZHVjanIwMDBlaHh0Yzl6bmVwbGg2OSJ9.eb510ccbc206edf507f1df2b9a74c0926ce9d4df29c45f4c3b9be0ca7fea349a",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212ZHVjanIwMDBlaHh0Yzl6bmVwbGg2OSJ9.eb510ccbc206edf507f1df2b9a74c0926ce9d4df29c45f4c3b9be0ca7fea349a",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Чат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Лента",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Идеи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Задачи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Файлы",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "cancel-preview",
+      "reply": null,
+      "envelopeKind": "BOOKING_CONFIRMATION",
+      "receiptOutcome": "ACCEPTED",
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\n☰\nMaya\n\nwidgets-live Development corpus native-socket-450020\n\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 1. Всего: нет данных.\n\nНет данных\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-19 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись\n\nМужская стрижка\nПеренос: 2026-10-19T15:00:00.000Z\nЗапланирована\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nПеренос записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись перенесена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 18:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись\n\nМужская стрижка\nЗапланирована\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nОтмена записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\nАртём\n30 мин По данным системы записи\n1500 RUB По данным системы записи\n\nПОДТВЕРДИТЬ ОТМЕНУ\nЗАКРЫТЬ\n\n+\nСообщение для MAYA\n↑\nЧат\nЛента\nИдеи\nЗадачи\nФайлы",
+        "controls": [
+          {
+            "name": "Открыть меню",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "О Maya",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Спросить Maya о расписании на сегодня",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "19 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X3YyOm12ZmJtd3cwOlkyMTJaSFZqWjNvek1EQmpiWGgwWXpsNGJ6Rm1NbXcyYlE6MmM5NDFiNmM5Y2VjODM1M2Q2MTE3NWFlM2Q1YjZmOTFmYTE1YjU4YjEyMzBkOTgzMzk2MmQ5ZTU5ZDI5MzBkMSJ9.f3cf4c3e8edac53cc999342c1d59b8c2983a06cb00218797ca08173897c2a930",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212ZHVjanIwMDBlaHh0Yzl6bmVwbGg2OSJ9.eb510ccbc206edf507f1df2b9a74c0926ce9d4df29c45f4c3b9be0ca7fea349a",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212ZHVjanIwMDBlaHh0Yzl6bmVwbGg2OSJ9.eb510ccbc206edf507f1df2b9a74c0926ce9d4df29c45f4c3b9be0ca7fea349a",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Подтвердить отмену",
+            "ref": "intent:i1",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Чат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Лента",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Идеи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Задачи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Файлы",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "cancel-commit",
+      "reply": null,
+      "envelopeKind": null,
+      "receiptOutcome": "ACCEPTED",
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\n☰\nMaya\n\nwidgets-live Development corpus native-socket-450020\n\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВыберите время\n\nЧасовой пояс: Europe/Moscow\n\nПредложенные варианты времени\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) (По данным системы записи) · 30 мин (По данным системы записи) · Нет данных\n\nПоказано вариантов: 1. Всего: нет данных.\n\nНет данных\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\nЗАКРЫТЬ\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-19 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nПроверка записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись\n\nМужская стрижка\nПеренос: 2026-10-19T15:00:00.000Z\nЗапланирована\nПРОВЕРИТЬ ПЕРЕНОС\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nПеренос записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n\n19 окт. 2026 г., 17:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись перенесена.\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 18:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nБлижайшая личная запись\n\nМоя запись\n\nМужская стрижка\nЗапланирована\nЗАПИСАТЬСЯ ДЛЯ СЕБЯ\nЗАКРЫТЬ\nОтмена записи\n\nУслуга\n\nМужская стрижка\n\n19 окт. 2026 г., 18:00 (Europe/Moscow) По данным системы записи\n\nАртём\n\n30 мин По данным системы записи\n\n1500 RUB По данным системы записи\n\nПроверить результат\n\nMAYA:\nЗапись отменена.\n\n+\nСообщение для MAYA\n↑\nЧат\nЛента\nИдеи\nЗадачи\nФайлы",
+        "controls": [
+          {
+            "name": "Открыть меню",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "О Maya",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Спросить Maya о расписании на сегодня",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "19 окт. 2026 г., 17:00 (Europe/Moscow)",
+            "ref": "slot:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoic2xvdCIsIm93bmVyS2luZCI6ImJvb2tpbmdfYXZhaWxhYmlsaXR5Iiwib3duZXJSZWYiOiJzbG90X3YyOm12ZmJtd3cwOlkyMTJaSFZqWjNvek1EQmpiWGgwWXpsNGJ6Rm1NbXcyYlE6MmM5NDFiNmM5Y2VjODM1M2Q2MTE3NWFlM2Q1YjZmOTFmYTE1YjU4YjEyMzBkOTgzMzk2MmQ5ZTU5ZDI5MzBkMSJ9.f3cf4c3e8edac53cc999342c1d59b8c2983a06cb00218797ca08173897c2a930",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212ZHVjanIwMDBlaHh0Yzl6bmVwbGg2OSJ9.eb510ccbc206edf507f1df2b9a74c0926ce9d4df29c45f4c3b9be0ca7fea349a",
+            "disabled": false
+          },
+          {
+            "name": "Проверить перенос",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i4",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Мужская стрижка",
+            "ref": "entry:h_eyJ2ZXJzaW9uIjoxLCJ0ZW5hbnRJZCI6ImNtdmR1Y2d4aTAwY2V4dGM5bmRrN2cxaHciLCJub3VuIjoiYXBwb2ludG1lbnQiLCJvd25lcktpbmQiOiJhcHBvaW50bWVudCIsIm93bmVyUmVmIjoiY212ZHVjanIwMDBlaHh0Yzl6bmVwbGg2OSJ9.eb510ccbc206edf507f1df2b9a74c0926ce9d4df29c45f4c3b9be0ca7fea349a",
+            "disabled": false
+          },
+          {
+            "name": "Записаться для себя",
+            "ref": "intent:i2",
+            "disabled": false
+          },
+          {
+            "name": "Закрыть",
+            "ref": "intent:i3",
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Чат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Лента",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Идеи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Задачи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Файлы",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "reload",
+      "reply": null,
+      "envelopeKind": null,
+      "receiptOutcome": null,
+      "code": null,
+      "snapshot": {
+        "text": "MAYA\n☰\nMaya\n\nwidgets-live Development corpus native-socket-450020\n\nПредыдущая переписка восстановлена. Данные и доступность действий нужно проверить заново.\nВы:\nЕсть время к Артёму завтра на мужскую стрижку?\nMAYA:\nВыберите подходящее время. Затем проверьте детали и подтвердите запись.\nВы:\nЗапиши меня на 17:00\nMAYA:\nНа 2026-10-19 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.\nВы:\nПроверить запись\nВы:\nПодтвердить запись\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nВы:\nПроверить перенос\nВы:\nПодтвердить перенос\nВы:\nПокажи мои записи\nMAYA:\nВ доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 18:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.\nВы:\nПроверить отмену\nВы:\nПодтвердить отмену\nНе все ответы сохранены. Если вы просили выполнить действие, уточните его результат.\nСохранённые результаты недавних действий с записями:\nMAYA:\nЗапись отменена.\nПроверить результат\n\nMAYA:\nЗапись перенесена.\nПроверить результат\n\nMAYA:\nЗапись подтверждена.\nПроверить результат\n\n+\nСообщение для MAYA\n↑\nЧат\nЛента\nИдеи\nЗадачи\nФайлы",
+        "controls": [
+          {
+            "name": "Открыть меню",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "О Maya",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Спросить Maya о расписании на сегодня",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Проверить результат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Товар по фото накладной",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Сказать голосом",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Отправить",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Чат",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Лента",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Идеи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Задачи",
+            "ref": null,
+            "disabled": false
+          },
+          {
+            "name": "Файлы",
+            "ref": null,
+            "disabled": false
+          }
+        ]
+      }
+    }
+  ],
+  "blocked": [],
+  "chromePid": 4075,
+  "lastLoginAt": 1792328955982,
+  "canonicalLogins": 2,
+  "login": "ACTUAL_CANONICAL_DEBUG_EMAIL_SYNTHETIC_CLIENT",
+  "chat": [
+    {
+      "prompt": "Есть время к Артёму завтра на мужскую стрижку?",
+      "actualReply": "Выберите подходящее время. Затем проверьте детали и подтвердите запись.",
+      "requestId": "9d484c53-15bd-442b-aede-4c7bac3eaf62",
+      "responseSha256": "35280cbc1d5acd348c83c0e2a058d88ea2c0fb4b45d110b22ad997c820171d40",
+      "status": 201,
+      "source": "safe_fallback"
+    },
+    {
+      "prompt": "Запиши меня на 17:00",
+      "actualReply": "На 2026-10-19 в 17:00 (Europe/Moscow) найден выбранный вариант. Откройте его, чтобы проверить детали и подтвердить запись. Запись ещё не создана.",
+      "requestId": "c332ec07-e436-4e97-b9e5-3d341835b94f",
+      "responseSha256": "4b0b056796e5ab3fc615745001d6836381e56ee23b63defcc83e6b11f7602b8b",
+      "status": 201,
+      "source": "safe_fallback"
+    },
+    {
+      "prompt": "Покажи мои записи",
+      "actualReply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 17:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.",
+      "requestId": "5ee45a5d-68b2-4497-a520-4e0b500a7bbe",
+      "responseSha256": "b31e30c0d3fc7193f95e3e455a3f1dd269c8c24e0db702f80d8415598509bc02",
+      "status": 201,
+      "source": "safe_fallback"
+    },
+    {
+      "prompt": "Покажи мои записи",
+      "actualReply": "В доступном списке 1 запись. Предстоящих: 1, отменённых: 0.\nБлижайшие записи:\n19.10.2026, 18:00 (Europe/Moscow) — Synthetic authorized branch — Мужская стрижка\nИсточник: ваши записи в MAYA.",
+      "requestId": "890ee535-c93a-4d59-bc93-88f9a760e6f9",
+      "responseSha256": "dfb4ebc6395177d8854fc63c6ab472ced4010af816c3736fce1ebc9b81e603b7",
+      "status": 201,
+      "source": "safe_fallback"
+    }
+  ],
+  "intents": [
+    {
+      "controlName": "19 окт. 2026 г., 17:00 (Europe/Moscow)",
+      "widgetId": "ad36c830-3824-44e8-ac2e-733615683484",
+      "status": 200,
+      "outcome": "ACCEPTED",
+      "code": null,
+      "responseSha256": "060a3541f4f97cc3e1549dcf7afdf21155e8c91efdd11840179aafa17c562c3e",
+      "nextKind": "BOOKING_CONFIRMATION"
+    },
+    {
+      "controlName": "Подтвердить запись",
+      "widgetId": "8b8e4546-0b55-4519-8361-2eabaad2fa61",
+      "status": 200,
+      "outcome": "ACCEPTED",
+      "code": null,
+      "responseSha256": "7ddb208bf7fba046af19fc7e7f4e2aed30655f1fd712fbe626ac9f238a98867d",
+      "nextKind": null
+    },
+    {
+      "controlName": "Проверить перенос",
+      "widgetId": "97c18cec-5cd0-4032-8989-3f9465a15f9d",
+      "status": 200,
+      "outcome": "ACCEPTED",
+      "code": null,
+      "responseSha256": "3e8e2b69daca6c1ffa7d342eefaeb39a55c86f90b2fa14dc9aa79c296dea3d82",
+      "nextKind": "BOOKING_CONFIRMATION"
+    },
+    {
+      "controlName": "Подтвердить перенос",
+      "widgetId": "cda41e5c-a389-457f-8643-73d0e2845c0f",
+      "status": 200,
+      "outcome": "ACCEPTED",
+      "code": null,
+      "responseSha256": "7ddb208bf7fba046af19fc7e7f4e2aed30655f1fd712fbe626ac9f238a98867d",
+      "nextKind": null
+    },
+    {
+      "controlName": "Мужская стрижка",
+      "widgetId": "b13512cf-30f1-4e6a-92ae-9c13a4bd4066",
+      "status": 200,
+      "outcome": "ACCEPTED",
+      "code": null,
+      "responseSha256": "bab5890b1e41c238d79ce216a38ec69b3800d4e6f07f6e2dfa15e5862b37bc35",
+      "nextKind": "BOOKING_CONFIRMATION"
+    },
+    {
+      "controlName": "Подтвердить отмену",
+      "widgetId": "7997c255-905e-4d13-b7aa-cf0df21f0a6a",
+      "status": 200,
+      "outcome": "ACCEPTED",
+      "code": null,
+      "responseSha256": "7ddb208bf7fba046af19fc7e7f4e2aed30655f1fd712fbe626ac9f238a98867d",
+      "nextKind": null
+    }
+  ],
+  "cleanup": {
+    "chromeExited": true,
+    "serverClosed": true
+  }
+}

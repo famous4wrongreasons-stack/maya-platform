@@ -1,0 +1,41 @@
+{
+  "contract": "maya.owned-disposable-cluster-cleanup/1",
+  "at": "2026-10-18T13:12:12.143714+00:00",
+  "scope": "FOUR_EXACT_OWNED_STOPPED_SYNTHETIC_PG16_CLUSTERS",
+  "ownerDatabaseAccessed": false,
+  "evidenceRetained": true,
+  "clusters": [
+    {
+      "run": "diagnostic-01",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/diagnostic-01/pg",
+      "bytesRemoved": 77448668,
+      "pgStatusBefore": 3,
+      "removed": true,
+      "manifestSha256": "e06e5e847fa44f78c81d2983c414bfc9ff03e771e8639ef1f548a89c2d675b2e"
+    },
+    {
+      "run": "diagnostic-02",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/diagnostic-02/pg",
+      "bytesRemoved": 81279257,
+      "pgStatusBefore": 3,
+      "removed": true,
+      "manifestSha256": "f333fba9c21bfbbc35b7a8c9ace21cec8493843ea7581102b0d01cb0c1b60aa0"
+    },
+    {
+      "run": "diagnostic-03",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/diagnostic-03/pg",
+      "bytesRemoved": 81623321,
+      "pgStatusBefore": 3,
+      "removed": true,
+      "manifestSha256": "8a2ece77cb4cd8289061fe133401621e5d5533b68fd393ac12db582be740b4f7"
+    },
+    {
+      "run": "loss-regression",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-widget-browser-20261018/loss-regression/pg",
+      "bytesRemoved": 81801380,
+      "pgStatusBefore": 3,
+      "removed": true,
+      "manifestSha256": "2dd11b8e95f69cc62d38fc6e53f98c18cf209240287af8c19efea660b09096b8"
+    }
+  ]
+}
