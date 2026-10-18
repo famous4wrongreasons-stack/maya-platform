@@ -7,6 +7,8 @@ import path from 'node:path';
 import http from 'node:http';
 import {
   nativeCreateEgress,
+  nativeExecutionEgress,
+  EXECUTION_EGRESS_CONTRACT,
   validateCreateEgressScope,
   CREATE_EGRESS_CONTRACT,
   LIFECYCLE_EGRESS_CONTRACT,
@@ -70,7 +72,20 @@ async function fixture(t, options = {}) {
         : new Response(reply, { headers: { link: '</page2>; rel="next"' } });
     },
   };
-  const app = nativeCreateEgress(config);
+  const awaitedExecution =
+    process.env.MAYA_TEST_NATIVE_EXECUTION === '1' &&
+    config.scope.contract === LIFECYCLE_EGRESS_CONTRACT;
+  if (awaitedExecution) {
+    config.scope.contract = EXECUTION_EGRESS_CONTRACT;
+    config.scope.runId = 'synthetic-lifecycle';
+    config.assertCurrent = async () => {
+      await new Promise((resolve) => setImmediate(resolve));
+      return admitted;
+    };
+  }
+  const app = awaitedExecution
+    ? await nativeExecutionEgress(config)
+    : nativeCreateEgress(config);
   await new Promise((resolve) => app.server.listen(0, '127.0.0.1', resolve));
   t.after(async () => {
     app.close();

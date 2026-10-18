@@ -16,6 +16,8 @@ export const CANDIDATE_LIMITS: Readonly<{
   outputNanoUsdPerToken: number;
   pricingStatus: string;
 }>;
+export const CORE_NATIVE_EXECUTION_PROFILE: 'phone-native-execution-20261018/1';
+export const CORE_NATIVE_EXECUTION_LIMITS: typeof CORE_DIAGNOSTIC_LIMITS;
 export const CORE_UI_PROFILE: 'core-react-diagnostic-20261009/1';
 export const CORE_DIAGNOSTIC_PROFILE: 'core-diagnostic-20261008/1';
 export const CORE_DIAGNOSTIC_LIMITS: typeof CANDIDATE_LIMITS &
@@ -31,6 +33,7 @@ export const CORE_OFFLINE_PROFILE: 'core-offline-48-20261009/1';
 export const CORE_OFFLINE_LIMITS: typeof CORE_DIAGNOSTIC_LIMITS;
 export const CORE_OFFLINE_LIMITS_SHA256: string;
 export type CoreConversationProfileId =
+  | typeof CORE_NATIVE_EXECUTION_PROFILE
   | typeof CORE_DIAGNOSTIC_PROFILE
   | typeof CORE_UI_PROFILE
   | typeof CORE_FOLLOWUP_PROFILE
@@ -47,6 +50,7 @@ type CandidateBudgetOptions = {
   manifestSha256: string;
   candidateCommit: string;
   transport: typeof fetch;
+  priceBounds?: { inputNanoUsdPerToken: number; outputNanoUsdPerToken: number };
 } & (
   | {
       mode: 'OFFLINE_SYNTHETIC_ONLY';
@@ -85,4 +89,5 @@ export function candidateReservation(
   url: Parameters<typeof fetch>[0],
   init: RequestInit,
   profile?: CoreConversationProfileId,
+  priceBounds?: { inputNanoUsdPerToken: number; outputNanoUsdPerToken: number },
 ): Readonly<{ bytes: number; input: number; output: number; nanoUsd: number }>;

@@ -41,9 +41,8 @@ const mutations = [
   },
   {
     name: 'independent-authority',
-    before:
-      "assert(assertCurrent(scope) === true, 'independent_execution_admission');",
-    after: 'assert((assertCurrent(scope), true));',
+    before: 'options.assertCurrent(state.scope) === true,',
+    after: '(options.assertCurrent(state.scope), true),',
     failure: 'scope cannot replace false independent execution admission',
   },
   {

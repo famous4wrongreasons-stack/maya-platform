@@ -6,6 +6,18 @@ on:
 permissions:
   contents: read
 jobs:
+  native-linux-isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Real namespaces and unmodified forwarder, synthetic TLS provider only
+        run: node maya-saas-backend/scripts/phone-native-linux-proof.mjs --run --context default --image node@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 --output "$RUNNER_TEMP/native-linux-isolation"
   release-packaging:
     runs-on: macos-latest
     timeout-minutes: 30
@@ -29,7 +41,7 @@ jobs:
       - name: Refuse retired staging carrier before deployment
         run: node --test scripts/staging-carrier-preflight.test.mjs
         working-directory: maya-saas-backend
-      - run: node --test scripts/widget-release-operator.test.cjs
+      - run: node --test scripts/widget-release-operator.test.cjs scripts/widgets-mutation-report.test.mjs
         working-directory: maya-saas-backend
       - run: npx prisma generate && npm run build
         working-directory: maya-saas-backend
@@ -40,6 +52,20 @@ jobs:
         run: node scripts/phone-catalog-mutations.mjs
         working-directory: maya-saas-backend
       - run: node --test scripts/widget-release-operator.compiled-test.cjs
+        working-directory: maya-saas-backend
+      - name: Native execution signature, replay and legacy transport controls
+        run: node --test scripts/phone-native-execution.test.mjs scripts/phone-native-create-egress.test.mjs scripts/phone-native-run-guard.test.mjs scripts/phone-native-channel.test.mjs scripts/phone-native-packaging.test.mjs
+        working-directory: maya-saas-backend
+      - name: Awaited signed execution uses the complete lifecycle transport corpus
+        run: MAYA_TEST_NATIVE_EXECUTION=1 node --test scripts/phone-native-create-egress.test.mjs
+        working-directory: maya-saas-backend
+      - name: Native execution adversarial mutations with green control
+        run: node scripts/phone-native-execution-mutation.mjs --run "$RUNNER_TEMP/native-execution-mutations"
+        working-directory: maya-saas-backend
+      - name: Install isolated proof database tools
+        run: brew list postgresql@16 >/dev/null 2>&1 || brew install postgresql@16
+      - name: Ordinary compiled AppModule with signed execution and synthetic HTTP model
+        run: node scripts/phone-native-execution-proof-runner.mjs --run --output "$RUNNER_TEMP/native-execution-compiled" --pg-bin "$(brew --prefix postgresql@16)/bin"
         working-directory: maya-saas-backend
       - name: Unsigned local build, no device install or account provisioning
         run: xcodebuild -project maya-ios-carrier/ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -derivedDataPath "$RUNNER_TEMP/maya-ios" CODE_SIGNING_ALLOWED=NO build

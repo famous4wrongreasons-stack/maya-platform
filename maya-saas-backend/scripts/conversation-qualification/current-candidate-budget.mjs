@@ -5,8 +5,10 @@ import fs, { openSync, fsyncSync, closeSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { dirname } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
-export const CORE_OWNER_HISTORY_PROFILE = 'core-owner-personal-history-20261012/1';
-export const isRetainedOwnerProfile = profile => [CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE].includes(profile);
+export const CORE_OWNER_HISTORY_PROFILE =
+  'core-owner-personal-history-20261012/1';
+export const isRetainedOwnerProfile = (profile) =>
+  [CORE_OWNER_READ_PROFILE, CORE_OWNER_HISTORY_PROFILE].includes(profile);
 export const CORE_OWNER_READ_PROFILE = 'core-owner-salon-read-20261011/1';
 
 export const CANDIDATE_LIMITS = Object.freeze({
@@ -44,21 +46,44 @@ export const CORE_DIAGNOSTIC_LIMITS = Object.freeze({
 });
 // Owner-approved, isolated phone staging conversation. Existing diagnostic
 // limits remain byte-for-byte unchanged; this profile issues no product rights.
+export const CORE_NATIVE_EXECUTION_PROFILE =
+  'phone-native-execution-20261018/1';
+export const CORE_NATIVE_EXECUTION_LIMITS = Object.freeze({
+  ...CORE_DIAGNOSTIC_LIMITS,
+  dialogs: 12,
+  turns: 12,
+  durationMs: 1800000,
+});
 export const CORE_PHONE_READ_PROFILE = 'phone-owner-catalog-chat-20261015/1';
 export const CORE_PHONE_READ_LIMITS = Object.freeze({
-  ...CORE_DIAGNOSTIC_LIMITS, dialogs: 100, turns: 100, attempts: 100,
-  inputTokens: 10_240_000, outputTokens: 204_800, durationMs: 86_400_000,
+  ...CORE_DIAGNOSTIC_LIMITS,
+  dialogs: 100,
+  turns: 100,
+  attempts: 100,
+  inputTokens: 10_240_000,
+  outputTokens: 204_800,
+  durationMs: 86_400_000,
 });
 export const CORE_DIAGNOSTIC_LIMITS_SHA256 = createHash('sha256')
   .update(JSON.stringify(CORE_DIAGNOSTIC_LIMITS))
   .digest('hex');
 export const CORE_OWNER_READ_LIMITS = Object.freeze({
-  ...CORE_DIAGNOSTIC_LIMITS, dialogs: 3, turns: 3,
+  ...CORE_DIAGNOSTIC_LIMITS,
+  dialogs: 3,
+  turns: 3,
 });
 export const CORE_OWNER_READ_LIMITS_SHA256 = createHash('sha256')
-  .update(JSON.stringify(CORE_OWNER_READ_LIMITS)).digest('hex');
-export const CORE_OWNER_HISTORY_LIMITS = Object.freeze({ ...CORE_DIAGNOSTIC_LIMITS, dialogs: 2, turns: 2, durationMs: 1800000 });
-export const CORE_OWNER_HISTORY_LIMITS_SHA256 = createHash('sha256').update(JSON.stringify(CORE_OWNER_HISTORY_LIMITS)).digest('hex');
+  .update(JSON.stringify(CORE_OWNER_READ_LIMITS))
+  .digest('hex');
+export const CORE_OWNER_HISTORY_LIMITS = Object.freeze({
+  ...CORE_DIAGNOSTIC_LIMITS,
+  dialogs: 2,
+  turns: 2,
+  durationMs: 1800000,
+});
+export const CORE_OWNER_HISTORY_LIMITS_SHA256 = createHash('sha256')
+  .update(JSON.stringify(CORE_OWNER_HISTORY_LIMITS))
+  .digest('hex');
 export const CORE_FOLLOWUP_PROFILE = 'core-followup-20261009/1';
 export const CORE_FOLLOWUP_LIMITS = Object.freeze({
   ...CORE_DIAGNOSTIC_LIMITS,
@@ -109,6 +134,8 @@ export const CORE_OFFLINE_LIMITS_SHA256 = createHash('sha256')
   .update(JSON.stringify(CORE_OFFLINE_LIMITS))
   .digest('hex');
 function profileLimits(profile) {
+  if (profile === CORE_NATIVE_EXECUTION_PROFILE)
+    return CORE_NATIVE_EXECUTION_LIMITS;
   if (profile === CORE_PHONE_READ_PROFILE) return CORE_PHONE_READ_LIMITS;
   if (profile === CORE_OWNER_HISTORY_PROFILE) return CORE_OWNER_HISTORY_LIMITS;
   if (profile === CORE_OWNER_READ_PROFILE) return CORE_OWNER_READ_LIMITS;
@@ -121,8 +148,22 @@ function profileLimits(profile) {
   throw new Error('candidate_profile_refused');
 }
 const endpoint = 'https://api.deepseek.com/chat/completions';
-export function candidateReservation(url, init, profile) {
+export function candidateReservation(url, init, profile, priceBounds) {
   const limits = profileLimits(profile);
+  if (priceBounds !== undefined) {
+    if (
+      profile !== CORE_NATIVE_EXECUTION_PROFILE ||
+      !priceBounds ||
+      Object.keys(priceBounds).sort().join(',') !==
+        'inputNanoUsdPerToken,outputNanoUsdPerToken' ||
+      !Object.values(priceBounds).every(
+        (v) => Number.isSafeInteger(v) && v > 0 && v <= 1_000_000,
+      )
+    )
+      throw new Error('candidate_price_bounds_refused');
+  }
+  if (profile === CORE_NATIVE_EXECUTION_PROFILE && priceBounds === undefined)
+    throw new Error('candidate_current_price_required');
   if (
     ![endpoint, 'https://api.deepseek.com/v1/chat/completions'].includes(
       String(url),
@@ -186,8 +227,8 @@ export function candidateReservation(url, init, profile) {
     input,
     output,
     nanoUsd:
-      input * limits.inputNanoUsdPerToken +
-      output * limits.outputNanoUsdPerToken,
+      input * (priceBounds ?? limits).inputNanoUsdPerToken +
+      output * (priceBounds ?? limits).outputNanoUsdPerToken,
   });
 }
 
@@ -212,6 +253,7 @@ export class CandidateBudgetGate {
   #profile;
   #limits;
   #admission;
+  #priceBounds;
   #binding;
   constructor({
     ledgerPath,
@@ -223,6 +265,7 @@ export class CandidateBudgetGate {
     assertAdmission,
     now,
     carryForward,
+    priceBounds,
     // Real timers may wake one clock tick early. The margin is waiting only;
     // the absolute six-second admission check below remains authoritative.
     wait,
@@ -234,18 +277,40 @@ export class CandidateBudgetGate {
       throw new Error('candidate_offline_transport_required');
     if (profile === CORE_OFFLINE_PROFILE && mode !== 'OFFLINE_SYNTHETIC_ONLY')
       throw new Error('candidate_profile_offline_only');
+    if (profile === CORE_NATIVE_EXECUTION_PROFILE) {
+      if (
+        !priceBounds ||
+        Object.keys(priceBounds).sort().join(',') !==
+          'inputNanoUsdPerToken,outputNanoUsdPerToken' ||
+        !Object.values(priceBounds).every(
+          (v) => Number.isSafeInteger(v) && v > 0 && v <= 1_000_000,
+        )
+      )
+        throw new Error('candidate_current_price_required');
+      this.#priceBounds = Object.freeze({ ...priceBounds });
+    } else if (priceBounds !== undefined)
+      throw new Error('candidate_price_bounds_refused');
     this.#profile = profile;
     this.#limits = profileLimits(profile);
     if (carryForward !== undefined) {
-      if (profile !== CORE_PHONE_READ_PROFILE ||
-          !/^[a-f0-9]{64}$/.test(carryForward.ledgerSha256 ?? '') ||
-          Object.keys(carryForward).sort().join(',') !== 'attempts,inputTokens,ledgerSha256,outputTokens,reservedNanoUsd' ||
-          !['attempts','inputTokens','outputTokens','reservedNanoUsd'].every(k => Number.isSafeInteger(carryForward[k]) && carryForward[k] >= 0) ||
-          carryForward.attempts > this.#limits.attempts || carryForward.inputTokens > this.#limits.inputTokens ||
-          carryForward.outputTokens > this.#limits.outputTokens || carryForward.reservedNanoUsd > this.#limits.spendNanoUsd)
+      if (
+        profile !== CORE_PHONE_READ_PROFILE ||
+        !/^[a-f0-9]{64}$/.test(carryForward.ledgerSha256 ?? '') ||
+        Object.keys(carryForward).sort().join(',') !==
+          'attempts,inputTokens,ledgerSha256,outputTokens,reservedNanoUsd' ||
+        !['attempts', 'inputTokens', 'outputTokens', 'reservedNanoUsd'].every(
+          (k) => Number.isSafeInteger(carryForward[k]) && carryForward[k] >= 0,
+        ) ||
+        carryForward.attempts > this.#limits.attempts ||
+        carryForward.inputTokens > this.#limits.inputTokens ||
+        carryForward.outputTokens > this.#limits.outputTokens ||
+        carryForward.reservedNanoUsd > this.#limits.spendNanoUsd
+      )
         throw new Error('candidate_carry_forward_refused');
-      this.#dialogs=this.#turns=this.#attempts=carryForward.attempts;
-      this.#input=carryForward.inputTokens;this.#output=carryForward.outputTokens;this.#spend=carryForward.reservedNanoUsd;
+      this.#dialogs = this.#turns = this.#attempts = carryForward.attempts;
+      this.#input = carryForward.inputTokens;
+      this.#output = carryForward.outputTokens;
+      this.#spend = carryForward.reservedNanoUsd;
     }
     if (
       typeof manifestSha256 !== 'string' ||
@@ -264,6 +329,7 @@ export class CandidateBudgetGate {
           CORE_OWNER_READ_PROFILE,
           CORE_OWNER_HISTORY_PROFILE,
           CORE_PHONE_READ_PROFILE,
+          CORE_NATIVE_EXECUTION_PROFILE,
         ].includes(profile) ||
         typeof assertAdmission !== 'function' ||
         now !== undefined ||
@@ -309,9 +375,12 @@ export class CandidateBudgetGate {
                 .digest('hex'),
             }),
         limits: this.#limits,
+        ...(this.#priceBounds ? { priceBounds: this.#priceBounds } : {}),
         startedAt: this.#started,
         paidAuthorized: mode === 'ADMITTED_MODEL_ONLY',
-        ...(carryForward === undefined ? {} : {carryForward: {...carryForward}}),
+        ...(carryForward === undefined
+          ? {}
+          : { carryForward: { ...carryForward } }),
       });
       const fd = openSync(dirname(ledgerPath), 'r');
       try {
@@ -426,7 +495,12 @@ export class CandidateBudgetGate {
     this.#check();
     if (this.#busy) throw new Error('candidate_concurrency_limit');
     if (!this.#activeTurn) throw new Error('candidate_turn_scope');
-    const reservation = candidateReservation(destination, init, this.#profile);
+    const reservation = candidateReservation(
+      destination,
+      init,
+      this.#profile,
+      this.#priceBounds,
+    );
     init.signal?.throwIfAborted();
     this.#busy = true;
     let timer,

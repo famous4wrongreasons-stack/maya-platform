@@ -45,7 +45,67 @@ function checkConfig(env, tenantId, candidateSha, governance = 'independent-revi
     ...(single ? { independentHumanReview: false } : {}), authorityGranted: false, sessionVerified: false };
 }
 
+async function checkNative(argv) {
+  const [, configFile, tenantId, candidateSha, commandFile, operatorId] = argv;
+  assert.equal(argv.length, 6);
+  const env = parse(fs.readFileSync(configFile));
+  const mode =
+    env.WIDGET_RELEASE_ENVIRONMENT === 'staging'
+      ? 'local-staging'
+      : 'production';
+  const result = checkConfig(
+    env,
+    tenantId,
+    candidateSha,
+    'single-operator',
+    mode,
+  );
+  const { ConfigService } = require('@nestjs/config');
+  const {
+    WidgetReleasePolicy,
+  } = require('../dist/src/entitlements/widget-release-policy.service.js');
+  const {
+    fixedProfile,
+  } = require('../dist/src/entitlements/widget-release-profile.contract.js');
+  const { verifyExecutionAttachment, installedExecutorDigest, NATIVE_PROFILE } =
+    await import('./phone-native-execution.mjs');
+  const policy = new WidgetReleasePolicy(new ConfigService(env));
+  const proof = verifyExecutionAttachment(
+    JSON.parse(fs.readFileSync(commandFile, 'utf8')),
+    JSON.parse(
+      env[
+        mode === 'production'
+          ? 'WIDGET_RELEASE_PRODUCTION_TRUST_JSON'
+          : 'WIDGET_RELEASE_STAGING_SINGLE_OPERATOR_TRUST_JSON'
+      ],
+    ),
+    {
+      candidateSha,
+      buildDigest: policy.buildDigest(true),
+      executorDigest: installedExecutorDigest(__dirname),
+      profileId: NATIVE_PROFILE,
+      profileDigest: fixedProfile(NATIVE_PROFILE).digest,
+      environment: policy.environment(),
+      serverOrigin: env.MAYA_NATIVE_SERVER_ORIGIN,
+      pricing: JSON.parse(
+        fs.readFileSync(env.MAYA_NATIVE_PRICING_FILE, 'utf8'),
+      ),
+    },
+  );
+  assert.equal(proof.payload.tenantId, tenantId);
+  assert.equal(proof.payload.operatorId, operatorId);
+  console.log(
+    JSON.stringify({
+      ...result,
+      contract: proof.payload.contract,
+      runId: proof.payload.runId,
+      attachmentDigest: proof.digest,
+      note: 'Offline signature/bindings only. No session, entitlement, grant or execution authority is created. The ordinary runtime must await current canonical admission.',
+    }),
+  );
+}
 function main(argv) {
+  if (argv[0] === 'check-native-execution') return checkNative(argv);
   const [mode, configFile, tenantId, candidateSha, commandFile, operatorId] = argv;
   const staging = mode === 'check-staging-config' || mode === 'check-staging-command';
   const configMode = mode === 'check-config' || mode === 'check-staging-config';
@@ -76,6 +136,6 @@ function main(argv) {
 
 module.exports = { checkConfig, main };
 if (require.main === module) {
-  try { main(process.argv.slice(2)); }
+  try { const result = main(process.argv.slice(2)); if (result?.catch) result.catch(() => { console.error('AR1 NATIVE CHECK REFUSED — no secret values emitted'); process.exitCode = 1; }); }
   catch { console.error('AR1 OPERATOR CHECK REFUSED — no authority, secret values or signature bytes emitted'); process.exitCode = 1; }
 }

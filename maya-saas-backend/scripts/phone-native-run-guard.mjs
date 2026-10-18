@@ -8,6 +8,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   nativeCreateEgress,
+  nativeExecutionEgress,
+  EXECUTION_EGRESS_CONTRACT,
   validateCreateEgressScope,
 } from './phone-native-create-egress.mjs';
 
@@ -100,6 +102,65 @@ export function guardedNativeEgress(options) {
 }
 
 function open(options) {
+  const state = prepare(options);
+  assert.notEqual(state.scope.contract, EXECUTION_EGRESS_CONTRACT);
+  const current = () =>
+    state.check(() => {
+      assert(
+        options.assertCurrent(state.scope) === true,
+        'independent_execution_admission',
+      );
+    });
+  current();
+  state.claim();
+  current();
+  return nativeCreateEgress({
+    scope: state.scope,
+    ledgerPath: state.ledgerPath,
+    assertCurrent: current,
+    nativeFetch: options.nativeFetch,
+    clock: options.clock,
+  });
+}
+
+// Same private files and atomic claim owner. Current asynchronous authority is
+// awaited before claim and at every transport dispatch; no Boolean-cache bridge.
+export async function guardedNativeExecution(options) {
+  let state;
+  try {
+    state = prepare(options);
+    assert.equal(state.scope.contract, EXECUTION_EGRESS_CONTRACT);
+    const current = async () => {
+      try {
+        state.check();
+        assert.equal(
+          await options.assertCurrent(state.scope),
+          true,
+          'independent_execution_admission',
+        );
+        return state.check();
+      } catch {
+        state.poison();
+        throw refused();
+      }
+    };
+    await current();
+    state.claim();
+    await current();
+    return await nativeExecutionEgress({
+      scope: state.scope,
+      ledgerPath: state.ledgerPath,
+      assertCurrent: current,
+      nativeFetch: options.nativeFetch,
+      clock: options.clock,
+    });
+  } catch {
+    state?.poison();
+    throw refused();
+  }
+}
+
+function prepare(options) {
   const allowed = [
     'scopeFile',
     'scopeSha256',
@@ -138,7 +199,10 @@ function open(options) {
   const text = new TextDecoder('utf-8', { fatal: true }).decode(initial.bytes);
   const scope = validateCreateEgressScope(JSON.parse(text), clock());
   assert(text === canonical(scope), 'one_scope_encoding');
-  const runId = scope.executionAuthorizationDigest;
+  const runId =
+    scope.contract === EXECUTION_EGRESS_CONTRACT
+      ? hash('maya.phone-native-execution/1:' + scope.runId)
+      : scope.executionAuthorizationDigest;
   // One stable namespace per independently verified authorization, not a caller
   // chosen ledger or scope digest. Reformatting/renewing scope cannot reset it.
   const claimPath = path.join(ledgerDirectory, runId + '.consumed');
@@ -147,13 +211,13 @@ function open(options) {
   const claimBytes = Buffer.from(
     canonical({
       contract: 'maya.phone-native-run-claim/1',
-      executionAuthorizationDigest: runId,
+      executionAuthorizationDigest: scope.executionAuthorizationDigest,
       scopeSha256,
     }),
   );
   let claimIdentity,
     poisoned = false;
-  const current = () => {
+  const current = (independentCheck = () => {}) => {
     try {
       assert(!poisoned);
       assert(directory(parent, operatorUid) === scopeParentIdentity);
@@ -173,45 +237,99 @@ function open(options) {
       }
       // This existing independent authority check remains mandatory. A scope
       // file, platform role label or claim is never a substitute for it.
-      assert(assertCurrent(scope) === true, 'independent_execution_admission');
+      independentCheck();
       return true;
     } catch {
       poisoned = true; // Restoring files/authority cannot revive this process.
       throw refused();
     }
   };
-  current();
-  let claimFd;
-  try {
-    claimFd = fs.openSync(
-      claimPath,
-      fs.constants.O_WRONLY |
-        fs.constants.O_CREAT |
-        fs.constants.O_EXCL |
-        fs.constants.O_NOFOLLOW,
-      0o600,
-    );
-    fs.writeFileSync(claimFd, claimBytes);
-    fs.fsyncSync(claimFd);
-  } finally {
-    if (claimFd !== undefined) fs.closeSync(claimFd);
-  }
-  // Never undo a claim on any failure, including a crash before ledger creation.
-  const directoryFd = fs.openSync(ledgerDirectory, 'r');
-  try {
-    fs.fsyncSync(directoryFd);
-  } finally {
-    fs.closeSync(directoryFd);
-  }
-  const retainedClaim = readPrivate(claimPath, operatorUid, 1024);
-  assert(retainedClaim.bytes.equals(claimBytes));
-  claimIdentity = retainedClaim.identity;
-  current();
-  return nativeCreateEgress({
+  const claim = () => {
+    current();
+    let claimFd;
+    try {
+      claimFd = fs.openSync(
+        claimPath,
+        fs.constants.O_WRONLY |
+          fs.constants.O_CREAT |
+          fs.constants.O_EXCL |
+          fs.constants.O_NOFOLLOW,
+        0o600,
+      );
+      fs.writeFileSync(claimFd, claimBytes);
+      fs.fsyncSync(claimFd);
+    } finally {
+      if (claimFd !== undefined) fs.closeSync(claimFd);
+    }
+    // Never undo a claim on any failure, including a crash before ledger creation.
+    const directoryFd = fs.openSync(ledgerDirectory, 'r');
+    try {
+      fs.fsyncSync(directoryFd);
+    } finally {
+      fs.closeSync(directoryFd);
+    }
+    const retainedClaim = readPrivate(claimPath, operatorUid, 1024);
+    assert(retainedClaim.bytes.equals(claimBytes));
+    claimIdentity = retainedClaim.identity;
+    current();
+  };
+  return {
     scope,
     ledgerPath,
-    assertCurrent: current,
-    nativeFetch,
-    clock,
-  });
+    claim,
+    check: current,
+    poison() {
+      poisoned = true;
+    },
+  };
+}
+
+// Shared strict file reader for the operator-installed execution attachment,
+// public pricing evidence and session token. Values are never printed/logged.
+export function immutableNativeFile(
+  filename,
+  expectedHash,
+  uid = 0,
+  maxBytes = 16384,
+) {
+  assert(/^[a-f0-9]{64}$/.test(expectedHash));
+  const dir = path.dirname(filename),
+    parentIdentity = directory(dir, uid);
+  const first = readPrivate(filename, uid, maxBytes);
+  assert.equal(hash(first.bytes), expectedHash);
+  return () => {
+    assert.equal(directory(dir, uid), parentIdentity);
+    assertNotRevoked(filename + '.revoked');
+    const fresh = readPrivate(filename, uid, maxBytes);
+    assert.equal(fresh.identity, first.identity);
+    assert.equal(hash(fresh.bytes), expectedHash);
+    return fresh.bytes;
+  };
+}
+
+// Deny-only operation: no certificate/session/allowlist check can prevent a
+// local operator from closing a run after expiry or candidate replacement.
+export function revokeNativeRun(ledgerDirectory, runId, uid = 0) {
+  directory(ledgerDirectory, uid);
+  assert(/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$/.test(runId));
+  const filename = path.join(
+    ledgerDirectory,
+    hash('maya.phone-native-execution/1:' + runId) + '.revoked',
+  );
+  let fd;
+  try {
+    fd = fs.openSync(filename, 'wx', 0o600);
+    fs.writeFileSync(fd, 'revoked\n');
+    fs.fsyncSync(fd);
+  } catch (error) {
+    if (error.code !== 'EEXIST') throw error;
+  } finally {
+    if (fd !== undefined) fs.closeSync(fd);
+  }
+  const dir = fs.openSync(ledgerDirectory, 'r');
+  try {
+    fs.fsyncSync(dir);
+  } finally {
+    fs.closeSync(dir);
+  }
 }

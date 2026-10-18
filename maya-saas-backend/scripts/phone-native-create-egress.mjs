@@ -11,6 +11,12 @@ import { admittedProviderRead } from './local-yclients-read-transport.mjs';
 export const CREATE_EGRESS_CONTRACT = 'maya.phone-native-create-egress/1';
 // Fixed extension for one confirmed created record; V1 stays create-only.
 export const LIFECYCLE_EGRESS_CONTRACT = 'maya.phone-native-create-egress/2';
+// Signed execution binds the installed final candidate; legacy pins stay intact.
+export const EXECUTION_EGRESS_CONTRACT = 'maya.phone-native-create-egress/3';
+const isLifecycle = (scope) =>
+  [LIFECYCLE_EGRESS_CONTRACT, EXECUTION_EGRESS_CONTRACT].includes(
+    scope.contract,
+  );
 export const CREATE_EGRESS_LIMITS = Object.freeze({
   requestBytes: 16384,
   responseBytes: 2097152,
@@ -35,9 +41,10 @@ const refused =
   '{"success":false,"error":"phone_native_create_egress_refused"}';
 
 export function validateCreateEgressScope(input, now = Date.now()) {
-  const lifecycle = input?.contract === LIFECYCLE_EGRESS_CONTRACT;
+  const lifecycle = input && isLifecycle(input);
   keys(input, [
     ...(lifecycle ? ['maxReschedules', 'maxCancels'] : []),
+    ...(input?.contract === EXECUTION_EGRESS_CONTRACT ? ['runId'] : []),
     'contract',
     'candidate',
     'profile',
@@ -51,15 +58,21 @@ export function validateCreateEgressScope(input, now = Date.now()) {
     'maxCreates',
   ]);
   assert(
-    [CREATE_EGRESS_CONTRACT, LIFECYCLE_EGRESS_CONTRACT].includes(
-      input.contract,
-    ),
+    [
+      CREATE_EGRESS_CONTRACT,
+      LIFECYCLE_EGRESS_CONTRACT,
+      EXECUTION_EGRESS_CONTRACT,
+    ].includes(input.contract),
   );
   if (lifecycle) {
     assert.equal(input.maxReschedules, 1);
     assert.equal(input.maxCancels, 1);
   }
-  assert.equal(input.candidate, '6356db1875545337e34b6c8888b7ca858bb64361');
+  if (input.contract === EXECUTION_EGRESS_CONTRACT) {
+    assert.match(input.candidate, /^[a-f0-9]{40}$/);
+    assert.match(input.runId, /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$/);
+  } else
+    assert.equal(input.candidate, '6356db1875545337e34b6c8888b7ca858bb64361');
   assert.equal(input.profile, 'closed-input.no-handoff.no-price-goods@1');
   assert.match(input.tenantId, /^[A-Za-z0-9_-]{1,128}$/);
   assert(id(input.companyId));
@@ -103,10 +116,7 @@ function classify(
     company = scope.companyId;
   assert.equal(raw.split('?')[0], url.pathname, 'normalized_route_refused');
   assert(!url.pathname.includes('%'));
-  if (
-    scope.contract === LIFECYCLE_EGRESS_CONTRACT &&
-    url.pathname.startsWith('/api/v1/record/')
-  ) {
+  if (isLifecycle(scope) && url.pathname.startsWith('/api/v1/record/')) {
     assert(lifecycle.recordId, 'provider_created_record_required');
     assert.equal(
       url.pathname,
@@ -305,24 +315,58 @@ function preservedMove(record, lifecycle) {
   };
 }
 
-export function nativeCreateEgress({
-  scope: input,
-  ledgerPath,
-  assertCurrent,
-  nativeFetch = fetch,
-  clock = Date.now,
-}) {
+export function nativeCreateEgress(options) {
+  assert.notEqual(
+    options.scope?.contract,
+    EXECUTION_EGRESS_CONTRACT,
+    'awaited_execution_required',
+  );
+  return openEgress(options, false);
+}
+
+export async function nativeExecutionEgress(options) {
+  assert.equal(options.scope?.contract, EXECUTION_EGRESS_CONTRACT);
+  const scope = validateCreateEgressScope(
+    options.scope,
+    (options.clock ?? Date.now)(),
+  );
+  assert.equal(
+    await options.assertCurrent(scope),
+    true,
+    'current_execution_admission_required',
+  );
+  const app = openEgress({ ...options, scope }, true);
+  try {
+    await app.check();
+    return app;
+  } catch (error) {
+    app.close();
+    throw error;
+  }
+}
+
+function openEgress(
+  {
+    scope: input,
+    ledgerPath,
+    assertCurrent,
+    nativeFetch = fetch,
+    clock = Date.now,
+  },
+  awaited,
+) {
   assert.equal(
     typeof assertCurrent,
     'function',
     'independent_execution_admission_required',
   );
   const scope = validateCreateEgressScope(input, clock());
-  assert.equal(
-    assertCurrent(scope),
-    true,
-    'current_execution_admission_required',
-  ); // JSON alone is not authority; async callbacks are refused.
+  if (!awaited)
+    assert.equal(
+      assertCurrent(scope),
+      true,
+      'current_execution_admission_required',
+    ); // JSON alone is not authority; async callbacks are refused.
   assert(path.isAbsolute(ledgerPath));
   const parent = fs.lstatSync(path.dirname(ledgerPath));
   assert(
@@ -396,11 +440,21 @@ export function nativeCreateEgress({
         (retained.mode & 0o077) === 0,
       'ledger_replaced',
     );
+    if (awaited)
+      return Promise.resolve()
+        .then(() => assertCurrent(scope))
+        .then((value) => {
+          assert.equal(value, true, 'current_execution_admission_required');
+          assert(!revoked && !closed);
+          validateCreateEgressScope(scope, clock());
+          return true;
+        });
     assert.equal(
       assertCurrent(scope),
       true,
       'current_execution_admission_required',
     );
+    return true;
   };
   const revoke = () => {
     revoked = true;
@@ -433,7 +487,7 @@ export function nativeCreateEgress({
         else res.destroy();
       };
       try {
-        current();
+        await current();
         const rawNames = req.rawHeaders
           .filter((_, i) => i % 2 === 0)
           .map((name) => name.toLowerCase());
@@ -477,22 +531,22 @@ export function nativeCreateEgress({
         const chunks = [];
         let bytes = 0;
         for await (const chunk of req) {
-          current();
+          await current();
           bytes += chunk.length;
           assert(bytes <= CREATE_EGRESS_LIMITS.requestBytes);
           chunks.push(chunk);
         }
-        const body = Buffer.concat(chunks),
-          kind = classify(
-            req.url,
-            req.method,
-            body,
-            scope,
-            createdPhoneDigest,
-            lifecycle,
-            clock(),
-          );
-        current();
+        const body = Buffer.concat(chunks);
+        await current();
+        const kind = classify(
+          req.url,
+          req.method,
+          body,
+          scope,
+          createdPhoneDigest,
+          lifecycle,
+          clock(),
+        );
         assert(counters.inFlight < CREATE_EGRESS_LIMITS.inFlight);
         const budget = {
           create: ['creates', 'maxCreates'],
@@ -531,7 +585,6 @@ export function nativeCreateEgress({
         controller = new AbortController();
         controllers.add(controller);
         res.once('close', () => controller.abort());
-        current();
         const url = 'https://api.yclients.com' + req.url;
         if (kind === 'create') {
           const phone = JSON.parse(body.toString('utf8')).phone;
@@ -562,7 +615,7 @@ export function nativeCreateEgress({
             ),
           ]),
         });
-        current();
+        await current();
         assert(!response.redirected && (!response.url || response.url === url));
         assert(
           (response.status >= 200 && response.status <= 299) ||
@@ -572,7 +625,7 @@ export function nativeCreateEgress({
         const parts = [];
         let size = 0;
         for await (const chunk of response.body ?? []) {
-          current();
+          await current();
           size += chunk.length;
           assert(size <= CREATE_EGRESS_LIMITS.responseBytes);
           parts.push(chunk);
@@ -583,11 +636,7 @@ export function nativeCreateEgress({
         const parsed = emptyCancel
           ? { success: true }
           : JSON.parse(result.toString('utf8'));
-        if (
-          scope.contract === LIFECYCLE_EGRESS_CONTRACT &&
-          response.ok &&
-          parsed.success === true
-        ) {
+        if (isLifecycle(scope) && response.ok && parsed.success === true) {
           if (kind === 'create') {
             assert(Array.isArray(parsed.data) && parsed.data.length === 1);
             const created = parsed.data[0];
@@ -611,7 +660,7 @@ export function nativeCreateEgress({
             if (kind === 'cancel') lifecycle.cancelled = true;
           }
         }
-        current();
+        await current();
         assert(!res.destroyed);
         const headers = {
           'content-type': 'application/json',
