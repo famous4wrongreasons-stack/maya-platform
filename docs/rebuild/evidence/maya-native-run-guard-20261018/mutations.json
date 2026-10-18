@@ -1,0 +1,118 @@
+{
+  "contract": "maya.native-run-guard-mutations/1",
+  "status": "passed",
+  "applicationCandidate": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "runnerSha256": "fb392d9401f79faab9810c2fef7dd4102d438651347dd02c9655d8184273e191",
+  "sources": {
+    "phone-native-run-guard.mjs": "6d5e909e6b2e25f79806ed38212a2301d35ca3cdfc9e142d3c1a3f0f1373ea07",
+    "phone-native-run-guard.test.mjs": "fc7aec8c828f1eeb10a9211b9877155ac6fe4d5c6618b7316c8d4c9293a78028",
+    "phone-native-create-egress.mjs": "5c000a72496d2cd1c8879ca124dec3cba0bdb77c93cea81ad386c0b58cf1ab19",
+    "local-yclients-read-transport.mjs": "23ccec0d12f2953e26e8d28323a624358ee4da8eaa8eadf7f4e073e62b3765a7",
+    "local-yclients-read-profile.mjs": "d3dd8395f4bdaf49e4df343799c51e739ef8373e7ff0d98b041518441c3c0869",
+    "local-yclients-read-status.mjs": "a9cfb00836a9753f66db43b312e036a96722f77caad124a11a95a6e9d6bdb70c"
+  },
+  "network": "OS_LOOPBACK_ONLY",
+  "independentAuthority": "SYNTHETIC",
+  "realEffects": 0,
+  "certificate": "NOT_ISSUED",
+  "releaseAdmissible": false,
+  "runs": [
+    {
+      "name": "baseline",
+      "sourceSha256": "6d5e909e6b2e25f79806ed38212a2301d35ca3cdfc9e142d3c1a3f0f1373ea07",
+      "executedSha256": "e9ea390b894139ccaeabfaf81b8f65bf02c8b67b638936cb84e11279b83bf649",
+      "expectedFailure": null,
+      "exitCode": 0,
+      "signal": null,
+      "tapSha256": "3440ab8fc63c36e8280d03e29c2293b491f9e8a2397f017e753eef0a0c9d3058",
+      "tests": {
+        "pass": 39,
+        "fail": 0,
+        "skip": 0,
+        "cancelled": 0
+      },
+      "status": "passed"
+    },
+    {
+      "name": "claim-overwrite",
+      "sourceSha256": "1b756b901294cbf75a972cbf2aa625c99d1de0c40ea0ad3ac28e4a1a8d37d97d",
+      "executedSha256": "0ea9a22642d84128cdb0e8e1f974f8a0d1a6008fc97b889866dcad2847467093",
+      "expectedFailure": "restart cannot reset budget even after the attempt ledger disappears",
+      "exitCode": 1,
+      "signal": null,
+      "tapSha256": "292e9946c403f78c5ec42da96f3fa8d8c9627b3c701e558656f2b7d1ecb80c86",
+      "tests": {
+        "pass": 36,
+        "fail": 3,
+        "skip": 0,
+        "cancelled": 0
+      },
+      "status": "detected"
+    },
+    {
+      "name": "independent-authority",
+      "sourceSha256": "b53cace7739f78b49009c1cb24297dd495b44ac1fb29cb09d9efe80c382a5729",
+      "executedSha256": "1d0e53c165c12252571b33cb6b8dafc02ebb6fc8888af928b7ad8f58444b735f",
+      "expectedFailure": "scope cannot replace false independent execution admission",
+      "exitCode": 1,
+      "signal": null,
+      "tapSha256": "bf7daa5268aca785f45097ddc2908b142f747b0c5c7bfa5b7492cdbfe79dec06",
+      "tests": {
+        "pass": 32,
+        "fail": 7,
+        "skip": 0,
+        "cancelled": 0
+      },
+      "status": "detected"
+    },
+    {
+      "name": "scope-reread",
+      "sourceSha256": "86cf2a8ac39bfb99543ca1a9f54d18730021f02482297352b3be15a922149a30",
+      "executedSha256": "6962a99650df5f29186e11a523aae82fa6a89b171bd6edec59e5069e1f0348a9",
+      "expectedFailure": "current run refuses scope-change before dispatch",
+      "exitCode": 1,
+      "signal": null,
+      "tapSha256": "0ee2da670095a90e6c04d80b8e17183a9acd85594f768d400105758df58e5e4a",
+      "tests": {
+        "pass": 37,
+        "fail": 2,
+        "skip": 0,
+        "cancelled": 0
+      },
+      "status": "detected"
+    },
+    {
+      "name": "revocation-marker",
+      "sourceSha256": "fd27ca43e6759eafa385610b41ed272ecdbcfb52aa13ae8c229344eb36403ebe",
+      "executedSha256": "1bcc1ef6466b2d5b9d44966f63c77c6c799e4f75cacb48e46974e273b4b86fba",
+      "expectedFailure": "current run refuses marker before dispatch",
+      "exitCode": 1,
+      "signal": null,
+      "tapSha256": "1ba9941ae87021dbf011fc1e31e071942a103f3de962b06bd61fb959eab555b5",
+      "tests": {
+        "pass": 35,
+        "fail": 4,
+        "skip": 0,
+        "cancelled": 0
+      },
+      "status": "detected"
+    },
+    {
+      "name": "poisoned-run",
+      "sourceSha256": "8d8ad024a67f88fb5aa4208078ca64d0c23b3d7dfa45198bc4eacee5548dc26d",
+      "executedSha256": "93bf9a4f0bf1d52b16568479b4dc92d21c49e6223e093847e7866c66b589a7c7",
+      "expectedFailure": "restoring authority cannot revive a poisoned process",
+      "exitCode": 1,
+      "signal": null,
+      "tapSha256": "48b14ed4065d9c10b293470386ac617168a4dc2e6e118274215bfb9ea4f613a4",
+      "tests": {
+        "pass": 38,
+        "fail": 1,
+        "skip": 0,
+        "cancelled": 0
+      },
+      "status": "detected"
+    }
+  ],
+  "detected": 5
+}

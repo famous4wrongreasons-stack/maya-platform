@@ -1,0 +1,24 @@
+{
+  "contract": "maya.owned-disposable-cluster-cleanup/1",
+  "at": "2026-10-18T13:37:52.840912+00:00",
+  "ownerDatabaseAccessed": false,
+  "evidenceRetained": true,
+  "clusters": [
+    {
+      "run": "native-loss",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/native-loss/pg",
+      "bytesRemoved": 81793179,
+      "stoppedBeforeRemoval": true,
+      "removed": true,
+      "manifestSha256": "a4924ec0578a5cc854c702b92f94197766ae01ae2dc6ec4776e60d22d89a1b65"
+    },
+    {
+      "run": "native-browser",
+      "path": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/native-browser/pg",
+      "bytesRemoved": 81565973,
+      "stoppedBeforeRemoval": true,
+      "removed": true,
+      "manifestSha256": "2f5fa29e458e30ceb5df55eecf8da90c6c1f7f819aaf26d6fd5da623e07277b7"
+    }
+  ]
+}

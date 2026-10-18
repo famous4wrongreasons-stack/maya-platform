@@ -23,6 +23,7 @@ const { values } = parseArgs({
     'lifecycle-loss-ae': { type: 'boolean' },
     'lifecycle-browser': { type: 'boolean' },
     'carrier-dependencies': { type: 'string' },
+    'run-guard': { type: 'boolean' },
   },
 });
 assert(
@@ -56,6 +57,10 @@ assert(
         values.counterfactual === 'proxy-definite-outcome')),
 );
 const candidate = '6356db1875545337e34b6c8888b7ca858bb64361';
+assert(
+  !values['run-guard'] || (values['create-egress'] && !values.counterfactual),
+  'Run guard requires the unmutated native transport',
+);
 assert(
   !values['lifecycle-browser'] ||
     (values['release-admission'] &&
@@ -376,6 +381,19 @@ if (proxyModule) {
   });
 }
 fs.writeFileSync(generatedSpec, relocatedSpec);
+const guardModule = values['run-guard']
+  ? path.join(overlay, 'phone-native-run-guard.mjs')
+  : null;
+const guardProof = {};
+if (guardModule) {
+  const original = path.join(tooling, 'scripts/phone-native-run-guard.mjs');
+  fs.copyFileSync(original, guardModule);
+  Object.assign(guardProof, {
+    original,
+    sha256: sha(fs.readFileSync(original)),
+    independentAuthority: 'SYNTHETIC_CALLBACK_NOT_REAL_EXECUTION_ADMISSION',
+  });
+}
 // Node's real fetch and the native adapter must share Error's realm. Jest's VM
 // would manufacture an instanceof mismatch; never wrap that network failure
 // into a test-authored UNKNOWN. Use node:test with ordinary production modules.
@@ -435,6 +453,7 @@ const environment = {
   JEST_NATIVE_SOCKET_OUTPUT: path.join(output, 'observations.json'),
   JEST_NATIVE_SOCKET_COUNTERFACTUAL: values.counterfactual ?? '',
   ...(proxyModule ? { JEST_NATIVE_CREATE_EGRESS: proxyModule } : {}),
+  ...(guardModule ? { JEST_NATIVE_RUN_GUARD: guardModule } : {}),
   ...(values['lifecycle-ae'] ? { JEST_NATIVE_LIFECYCLE_AE: '1' } : {}),
   ...(values['lifecycle-loss-ae']
     ? { JEST_NATIVE_LIFECYCLE_LOSS_AE: '1' }
@@ -462,6 +481,7 @@ const receipt = {
   lifecycleBrowser: browserProof,
   mutation,
   createEgress: proxyProof,
+  nativeRunGuard: guardProof,
   runnerSha256: sha(fs.readFileSync(fileURLToPath(import.meta.url))),
   testSha256: sha(testBytes),
   relocatedTestSha256: sha(fs.readFileSync(generatedSpec)),
@@ -676,6 +696,18 @@ try {
   }
   assert.equal(observations.providerContractFailures, 0);
   assert.equal(observations.fetchIdentityUnchanged, true);
+  if (guardModule) {
+    assert.equal(observations.nativeRunGuard.enabled, true);
+    assert.equal(
+      observations.nativeRunGuard.claimed,
+      Object.keys(observations.createEgressSnapshots).length,
+    );
+    assert.equal(
+      observations.nativeRunGuard.restartRefusals,
+      observations.nativeRunGuard.claimed,
+    );
+    assert(observations.nativeRunGuard.claimed > 0);
+  }
   if (browserProbe) {
     const item = observations.browserLifecycle;
     assert.equal(item?.status, 'PASS');
@@ -844,6 +876,13 @@ try {
         sha(fs.readFileSync(proxyProof.original)),
         proxyProof.originalSha256,
       );
+    if (guardModule) {
+      assert.equal(
+        sha(fs.readFileSync(guardProof.original)),
+        guardProof.sha256,
+      );
+      assert.equal(sha(fs.readFileSync(guardModule)), guardProof.sha256);
+    }
     receipt.sourcesUnchanged = true;
   } catch {
     receipt.sourcesUnchanged = false;

@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
 import path from 'node:path';
 import { Client as PgClient } from 'pg';
@@ -92,6 +92,11 @@ const observations: Record<string, unknown> = {
   providerUniquenessOrIdempotencyGuard: false,
   realProviderEffects: 0,
   realModelCalls: 0,
+  nativeRunGuard: {
+    enabled: Boolean(process.env.JEST_NATIVE_RUN_GUARD),
+    claimed: 0,
+    restartRefusals: 0,
+  },
   releaseCertification: 'NOT_ISSUED',
   releaseAdmission: releaseAdmission
     ? 'CANONICAL_AR1_HTTP_WITH_EPHEMERAL_TEST_SIGNER_AND_ARTIFICIAL_CERTIFICATE'
@@ -749,7 +754,7 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       } = await import(process.env.JEST_NATIVE_CREATE_EGRESS);
       const auth =
         'Bearer SYNTHETIC_NATIVE_SOCKET_PARTNER, User SYNTHETIC_NATIVE_SOCKET_USER';
-      const proxy = nativeCreateEgress({
+      const config = {
         scope: {
           contract:
             lifecycleAE &&
@@ -797,7 +802,40 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
             headers: response.headers,
           });
         },
-      });
+      };
+      let proxy;
+      if (process.env.JEST_NATIVE_RUN_GUARD) {
+        const { guardedNativeEgress } = await import(
+          process.env.JEST_NATIVE_RUN_GUARD
+        );
+        const root = path.join(path.dirname(output!), 'run-guard-' + company);
+        const installed = path.join(root, 'installed'),
+          state = path.join(root, 'state');
+        mkdirSync(root, { mode: 0o700 });
+        mkdirSync(installed, { mode: 0o700 });
+        mkdirSync(state, { mode: 0o700 });
+        const scopeFile = path.join(installed, 'scope.json');
+        const bytes = JSON.stringify(config.scope, null, 2) + '\n';
+        writeFileSync(scopeFile, bytes, { mode: 0o600 });
+        const options = {
+          scopeFile,
+          scopeSha256: createHash('sha256').update(bytes).digest('hex'),
+          ledgerDirectory: state,
+          operatorUid: process.getuid!(),
+          assertCurrent: config.assertCurrent,
+          nativeFetch: config.nativeFetch,
+        };
+        proxy = guardedNativeEgress(options);
+        const guard = observations.nativeRunGuard as {
+          claimed: number;
+          restartRefusals: number;
+        };
+        guard.claimed++;
+        expect(() => guardedNativeEgress(options)).toThrow(
+          'phone_native_run_refused',
+        );
+        guard.restartRefusals++;
+      } else proxy = nativeCreateEgress(config);
       await new Promise<void>((resolve) =>
         proxy.server.listen(0, '127.0.0.1', resolve),
       );

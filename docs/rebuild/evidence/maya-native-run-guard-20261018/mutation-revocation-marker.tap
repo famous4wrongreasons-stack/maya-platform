@@ -1,0 +1,318 @@
+TAP version 13
+# Subtest: owned pinned scope plus independent admission opens the existing transport
+ok 1 - owned pinned scope plus independent admission opens the existing transport
+  ---
+  duration_ms: 31.350333
+  type: 'test'
+  ...
+# Subtest: scope cannot replace missing independent execution admission
+ok 2 - scope cannot replace missing independent execution admission
+  ---
+  duration_ms: 2.511875
+  type: 'test'
+  ...
+# Subtest: scope cannot replace false independent execution admission
+ok 3 - scope cannot replace false independent execution admission
+  ---
+  duration_ms: 0.942417
+  type: 'test'
+  ...
+# Subtest: scope cannot replace undefined independent execution admission
+ok 4 - scope cannot replace undefined independent execution admission
+  ---
+  duration_ms: 0.87525
+  type: 'test'
+  ...
+# Subtest: scope cannot replace async independent execution admission
+ok 5 - scope cannot replace async independent execution admission
+  ---
+  duration_ms: 0.9785
+  type: 'test'
+  ...
+# Subtest: caller-selected ledger path is refused before any claim
+ok 6 - caller-selected ledger path is refused before any claim
+  ---
+  duration_ms: 1.233625
+  type: 'test'
+  ...
+# Subtest: valid scope substitution cannot borrow another execution authority
+ok 7 - valid scope substitution cannot borrow another execution authority
+  ---
+  duration_ms: 2.469583
+  type: 'test'
+  ...
+# Subtest: restart cannot reset budget even after the attempt ledger disappears
+ok 8 - restart cannot reset budget even after the attempt ledger disappears
+  ---
+  duration_ms: 14.310208
+  type: 'test'
+  ...
+# Subtest: changed scope pin cannot reset the same authorization namespace
+ok 9 - changed scope pin cannot reset the same authorization namespace
+  ---
+  duration_ms: 15.935542
+  type: 'test'
+  ...
+# Subtest: failure after claim burns the run without a rollback or restart
+ok 10 - failure after claim burns the run without a rollback or restart
+  ---
+  duration_ms: 9.593375
+  type: 'test'
+  ...
+# Subtest: installation refuses scope-symlink before claiming
+ok 11 - installation refuses scope-symlink before claiming
+  ---
+  duration_ms: 0.93225
+  type: 'test'
+  ...
+# Subtest: installation refuses scope-hardlink before claiming
+ok 12 - installation refuses scope-hardlink before claiming
+  ---
+  duration_ms: 1.351584
+  type: 'test'
+  ...
+# Subtest: installation refuses scope-mode before claiming
+ok 13 - installation refuses scope-mode before claiming
+  ---
+  duration_ms: 0.860875
+  type: 'test'
+  ...
+# Subtest: installation refuses parent-symlink before claiming
+ok 14 - installation refuses parent-symlink before claiming
+  ---
+  duration_ms: 0.916584
+  type: 'test'
+  ...
+# Subtest: installation refuses parent-mode before claiming
+ok 15 - installation refuses parent-mode before claiming
+  ---
+  duration_ms: 1.124125
+  type: 'test'
+  ...
+# Subtest: installation refuses state-symlink before claiming
+ok 16 - installation refuses state-symlink before claiming
+  ---
+  duration_ms: 0.752833
+  type: 'test'
+  ...
+# Subtest: installation refuses state-mode before claiming
+ok 17 - installation refuses state-mode before claiming
+  ---
+  duration_ms: 0.700709
+  type: 'test'
+  ...
+# Subtest: installation refuses wrong-owner before claiming
+ok 18 - installation refuses wrong-owner before claiming
+  ---
+  duration_ms: 0.74775
+  type: 'test'
+  ...
+# Subtest: installation refuses digest before claiming
+ok 19 - installation refuses digest before claiming
+  ---
+  duration_ms: 1.1005
+  type: 'test'
+  ...
+# Subtest: installation refuses duplicate-json before claiming
+ok 20 - installation refuses duplicate-json before claiming
+  ---
+  duration_ms: 0.978167
+  type: 'test'
+  ...
+# Subtest: installation refuses oversize before claiming
+ok 21 - installation refuses oversize before claiming
+  ---
+  duration_ms: 0.735666
+  type: 'test'
+  ...
+# Subtest: installation refuses wildcard-tenant before claiming
+ok 22 - installation refuses wildcard-tenant before claiming
+  ---
+  duration_ms: 0.766125
+  type: 'test'
+  ...
+# Subtest: installation refuses extra-authority before claiming
+ok 23 - installation refuses extra-authority before claiming
+  ---
+  duration_ms: 1.147833
+  type: 'test'
+  ...
+# Subtest: installation refuses expired before claiming
+ok 24 - installation refuses expired before claiming
+  ---
+  duration_ms: 0.954583
+  type: 'test'
+  ...
+# Subtest: installation refuses future before claiming
+ok 25 - installation refuses future before claiming
+  ---
+  duration_ms: 0.684834
+  type: 'test'
+  ...
+# Subtest: current run refuses scope-replace before dispatch
+ok 26 - current run refuses scope-replace before dispatch
+  ---
+  duration_ms: 15.477667
+  type: 'test'
+  ...
+# Subtest: current run refuses scope-change before dispatch
+ok 27 - current run refuses scope-change before dispatch
+  ---
+  duration_ms: 14.563708
+  type: 'test'
+  ...
+# Subtest: current run refuses claim-delete before dispatch
+ok 28 - current run refuses claim-delete before dispatch
+  ---
+  duration_ms: 32.31725
+  type: 'test'
+  ...
+# Subtest: current run refuses claim-replace before dispatch
+ok 29 - current run refuses claim-replace before dispatch
+  ---
+  duration_ms: 15.157333
+  type: 'test'
+  ...
+# Subtest: current run refuses state-replace before dispatch
+ok 30 - current run refuses state-replace before dispatch
+  ---
+  duration_ms: 28.8575
+  type: 'test'
+  ...
+# Subtest: current run refuses marker before dispatch
+not ok 31 - current run refuses marker before dispatch
+  ---
+  duration_ms: 35.308292
+  type: 'test'
+  location: '/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/revocation-marker/phone-native-run-guard.test.mjs:326:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    200 !== 403
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 403
+  actual: 200
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/revocation-marker/phone-native-run-guard.test.mjs:350:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: current run refuses dangling-marker before dispatch
+not ok 32 - current run refuses dangling-marker before dispatch
+  ---
+  duration_ms: 31.742
+  type: 'test'
+  location: '/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/revocation-marker/phone-native-run-guard.test.mjs:326:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    200 !== 403
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 403
+  actual: 200
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/revocation-marker/phone-native-run-guard.test.mjs:350:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: current run refuses expiry before dispatch
+ok 33 - current run refuses expiry before dispatch
+  ---
+  duration_ms: 19.91975
+  type: 'test'
+  ...
+# Subtest: current run refuses authority before dispatch
+ok 34 - current run refuses authority before dispatch
+  ---
+  duration_ms: 15.237459
+  type: 'test'
+  ...
+# Subtest: restoring authority cannot revive a poisoned process
+ok 35 - restoring authority cannot revive a poisoned process
+  ---
+  duration_ms: 16.318708
+  type: 'test'
+  ...
+# Subtest: preexisting revocation including a dangling marker refuses startup
+not ok 36 - preexisting revocation including a dangling marker refuses startup
+  ---
+  duration_ms: 22.616833
+  type: 'test'
+  location: '/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/revocation-marker/phone-native-run-guard.test.mjs:364:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'throws'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/revocation-marker/phone-native-run-guard.test.mjs:367:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: production default refuses a non-root test installation
+ok 37 - production default refuses a non-root test installation
+  ---
+  duration_ms: 1.31725
+  type: 'test'
+  ...
+# Subtest: revocation after provider commit preserves uncertainty instead of a false rejection
+not ok 38 - revocation after provider commit preserves uncertainty instead of a false rejection
+  ---
+  duration_ms: 33.371625
+  type: 'test'
+  location: '/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/revocation-marker/phone-native-run-guard.test.mjs:377:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+
+      {
+    +   body: '{"success":true,"data":[{"id":1,"record_id":123}]}',
+    +   status: 200
+    -   socketLost: true
+      }
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    socketLost: true
+  actual:
+    status: 200
+    body: '{"success":true,"data":[{"id":1,"record_id":123}]}'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/revocation-marker/phone-native-run-guard.test.mjs:410:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: four concurrent processes consume one authorization at most once
+ok 39 - four concurrent processes consume one authorization at most once
+  ---
+  duration_ms: 57.462292
+  type: 'test'
+  ...
+1..39
+# tests 39
+# suites 0
+# pass 35
+# fail 4
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 475.594584

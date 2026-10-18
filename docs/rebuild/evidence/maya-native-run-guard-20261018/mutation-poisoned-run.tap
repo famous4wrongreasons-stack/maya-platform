@@ -1,0 +1,261 @@
+TAP version 13
+# Subtest: owned pinned scope plus independent admission opens the existing transport
+ok 1 - owned pinned scope plus independent admission opens the existing transport
+  ---
+  duration_ms: 32.179209
+  type: 'test'
+  ...
+# Subtest: scope cannot replace missing independent execution admission
+ok 2 - scope cannot replace missing independent execution admission
+  ---
+  duration_ms: 2.58225
+  type: 'test'
+  ...
+# Subtest: scope cannot replace false independent execution admission
+ok 3 - scope cannot replace false independent execution admission
+  ---
+  duration_ms: 0.837083
+  type: 'test'
+  ...
+# Subtest: scope cannot replace undefined independent execution admission
+ok 4 - scope cannot replace undefined independent execution admission
+  ---
+  duration_ms: 0.822542
+  type: 'test'
+  ...
+# Subtest: scope cannot replace async independent execution admission
+ok 5 - scope cannot replace async independent execution admission
+  ---
+  duration_ms: 1.014334
+  type: 'test'
+  ...
+# Subtest: caller-selected ledger path is refused before any claim
+ok 6 - caller-selected ledger path is refused before any claim
+  ---
+  duration_ms: 1.098416
+  type: 'test'
+  ...
+# Subtest: valid scope substitution cannot borrow another execution authority
+ok 7 - valid scope substitution cannot borrow another execution authority
+  ---
+  duration_ms: 1.5855
+  type: 'test'
+  ...
+# Subtest: restart cannot reset budget even after the attempt ledger disappears
+ok 8 - restart cannot reset budget even after the attempt ledger disappears
+  ---
+  duration_ms: 15.558166
+  type: 'test'
+  ...
+# Subtest: changed scope pin cannot reset the same authorization namespace
+ok 9 - changed scope pin cannot reset the same authorization namespace
+  ---
+  duration_ms: 15.803209
+  type: 'test'
+  ...
+# Subtest: failure after claim burns the run without a rollback or restart
+ok 10 - failure after claim burns the run without a rollback or restart
+  ---
+  duration_ms: 6.917042
+  type: 'test'
+  ...
+# Subtest: installation refuses scope-symlink before claiming
+ok 11 - installation refuses scope-symlink before claiming
+  ---
+  duration_ms: 1.101167
+  type: 'test'
+  ...
+# Subtest: installation refuses scope-hardlink before claiming
+ok 12 - installation refuses scope-hardlink before claiming
+  ---
+  duration_ms: 1.29175
+  type: 'test'
+  ...
+# Subtest: installation refuses scope-mode before claiming
+ok 13 - installation refuses scope-mode before claiming
+  ---
+  duration_ms: 0.832417
+  type: 'test'
+  ...
+# Subtest: installation refuses parent-symlink before claiming
+ok 14 - installation refuses parent-symlink before claiming
+  ---
+  duration_ms: 1.087042
+  type: 'test'
+  ...
+# Subtest: installation refuses parent-mode before claiming
+ok 15 - installation refuses parent-mode before claiming
+  ---
+  duration_ms: 0.729125
+  type: 'test'
+  ...
+# Subtest: installation refuses state-symlink before claiming
+ok 16 - installation refuses state-symlink before claiming
+  ---
+  duration_ms: 0.859625
+  type: 'test'
+  ...
+# Subtest: installation refuses state-mode before claiming
+ok 17 - installation refuses state-mode before claiming
+  ---
+  duration_ms: 0.674541
+  type: 'test'
+  ...
+# Subtest: installation refuses wrong-owner before claiming
+ok 18 - installation refuses wrong-owner before claiming
+  ---
+  duration_ms: 0.613958
+  type: 'test'
+  ...
+# Subtest: installation refuses digest before claiming
+ok 19 - installation refuses digest before claiming
+  ---
+  duration_ms: 0.814333
+  type: 'test'
+  ...
+# Subtest: installation refuses duplicate-json before claiming
+ok 20 - installation refuses duplicate-json before claiming
+  ---
+  duration_ms: 0.76475
+  type: 'test'
+  ...
+# Subtest: installation refuses oversize before claiming
+ok 21 - installation refuses oversize before claiming
+  ---
+  duration_ms: 0.809875
+  type: 'test'
+  ...
+# Subtest: installation refuses wildcard-tenant before claiming
+ok 22 - installation refuses wildcard-tenant before claiming
+  ---
+  duration_ms: 0.793084
+  type: 'test'
+  ...
+# Subtest: installation refuses extra-authority before claiming
+ok 23 - installation refuses extra-authority before claiming
+  ---
+  duration_ms: 1.196083
+  type: 'test'
+  ...
+# Subtest: installation refuses expired before claiming
+ok 24 - installation refuses expired before claiming
+  ---
+  duration_ms: 0.666291
+  type: 'test'
+  ...
+# Subtest: installation refuses future before claiming
+ok 25 - installation refuses future before claiming
+  ---
+  duration_ms: 0.728042
+  type: 'test'
+  ...
+# Subtest: current run refuses scope-replace before dispatch
+ok 26 - current run refuses scope-replace before dispatch
+  ---
+  duration_ms: 16.131833
+  type: 'test'
+  ...
+# Subtest: current run refuses scope-change before dispatch
+ok 27 - current run refuses scope-change before dispatch
+  ---
+  duration_ms: 14.513458
+  type: 'test'
+  ...
+# Subtest: current run refuses claim-delete before dispatch
+ok 28 - current run refuses claim-delete before dispatch
+  ---
+  duration_ms: 17.772208
+  type: 'test'
+  ...
+# Subtest: current run refuses claim-replace before dispatch
+ok 29 - current run refuses claim-replace before dispatch
+  ---
+  duration_ms: 17.098083
+  type: 'test'
+  ...
+# Subtest: current run refuses state-replace before dispatch
+ok 30 - current run refuses state-replace before dispatch
+  ---
+  duration_ms: 13.06525
+  type: 'test'
+  ...
+# Subtest: current run refuses marker before dispatch
+ok 31 - current run refuses marker before dispatch
+  ---
+  duration_ms: 15.46425
+  type: 'test'
+  ...
+# Subtest: current run refuses dangling-marker before dispatch
+ok 32 - current run refuses dangling-marker before dispatch
+  ---
+  duration_ms: 17.59575
+  type: 'test'
+  ...
+# Subtest: current run refuses expiry before dispatch
+ok 33 - current run refuses expiry before dispatch
+  ---
+  duration_ms: 16.78275
+  type: 'test'
+  ...
+# Subtest: current run refuses authority before dispatch
+ok 34 - current run refuses authority before dispatch
+  ---
+  duration_ms: 13.491375
+  type: 'test'
+  ...
+# Subtest: restoring authority cannot revive a poisoned process
+not ok 35 - restoring authority cannot revive a poisoned process
+  ---
+  duration_ms: 23.279291
+  type: 'test'
+  location: '/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/poisoned-run/phone-native-run-guard.test.mjs:354:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+
+    200 !== 403
+
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 403
+  actual: 200
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/poisoned-run/phone-native-run-guard.test.mjs:361:10)
+    process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: preexisting revocation including a dangling marker refuses startup
+ok 36 - preexisting revocation including a dangling marker refuses startup
+  ---
+  duration_ms: 1.758042
+  type: 'test'
+  ...
+# Subtest: production default refuses a non-root test installation
+ok 37 - production default refuses a non-root test installation
+  ---
+  duration_ms: 0.850959
+  type: 'test'
+  ...
+# Subtest: revocation after provider commit preserves uncertainty instead of a false rejection
+ok 38 - revocation after provider commit preserves uncertainty instead of a false rejection
+  ---
+  duration_ms: 32.007459
+  type: 'test'
+  ...
+# Subtest: four concurrent processes consume one authorization at most once
+ok 39 - four concurrent processes consume one authorization at most once
+  ---
+  duration_ms: 57.773125
+  type: 'test'
+  ...
+1..39
+# tests 39
+# suites 0
+# pass 38
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 391.142084

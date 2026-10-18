@@ -1,0 +1,441 @@
+{
+  "contract": "maya.native-run-guard-proof/1",
+  "recordedAt": "2026-10-18T13:38:25.843382+00:00",
+  "classification": "LOCAL_SYNTHETIC_DIAGNOSTIC_NOT_RELEASE_CERTIFICATE",
+  "applicationCandidate": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "profile": "closed-input.no-handoff.no-price-goods@1",
+  "parentToolingCommit": "4a5f718464a0e7f065fb64c20c42f7fa1543a35b",
+  "sourceHashes": {
+    "maya-saas-backend/scripts/phone-native-run-guard.mjs": "6d5e909e6b2e25f79806ed38212a2301d35ca3cdfc9e142d3c1a3f0f1373ea07",
+    "maya-saas-backend/scripts/phone-native-run-guard.test.mjs": "fc7aec8c828f1eeb10a9211b9877155ac6fe4d5c6618b7316c8d4c9293a78028",
+    "maya-saas-backend/scripts/phone-native-run-guard-mutation.mjs": "fb392d9401f79faab9810c2fef7dd4102d438651347dd02c9655d8184273e191",
+    "maya-saas-backend/scripts/native-provider-socket-proof.mjs": "7f4fb7bd683b277373cd83dbf515d9559a3b74d2600a2ea9c837f640e7236470",
+    "maya-saas-backend/test/widgets-diagnostics/native-provider-socket-loss.probe-spec.ts": "cb848dc633debba5a89e0b4eafe38f4bcd7786a23cba7d2b139939658052d126",
+    "maya-saas-backend/scripts/phone-native-create-egress.mjs": "5c000a72496d2cd1c8879ca124dec3cba0bdb77c93cea81ad386c0b58cf1ab19"
+  },
+  "freshResults": {
+    "guardUnit": {
+      "pass": 39,
+      "fail": 0,
+      "skip": 0,
+      "cancelled": 0
+    },
+    "targetedMutations": {
+      "detected": 5,
+      "total": 5,
+      "healthyControls": "PASS_IN_EVERY_FINAL_MUTANT"
+    },
+    "existingTransport": {
+      "pass": 90,
+      "fail": 0,
+      "skip": 0
+    },
+    "nativeLossSuite": {
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    "nativeLossClaims": {
+      "enabled": true,
+      "claimed": 10,
+      "restartRefusals": 10
+    },
+    "browserSuite": {
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browserClaims": {
+      "enabled": true,
+      "claimed": 7,
+      "restartRefusals": 7
+    },
+    "browserLifecycle": {
+      "status": "PASS",
+      "checkpoints": [
+        {
+          "name": "initial-slots",
+          "receiptOutcome": null,
+          "actionExecutions": 0,
+          "providerMutations": {
+            "posts": 0,
+            "puts": 0,
+            "deletes": 0
+          },
+          "sameAppointment": "NOT_CREATED"
+        },
+        {
+          "name": "selected-17",
+          "receiptOutcome": null,
+          "actionExecutions": 0,
+          "providerMutations": {
+            "posts": 0,
+            "puts": 0,
+            "deletes": 0
+          },
+          "sameAppointment": "NOT_CREATED"
+        },
+        {
+          "name": "create-preview",
+          "receiptOutcome": "ACCEPTED",
+          "actionExecutions": 0,
+          "providerMutations": {
+            "posts": 0,
+            "puts": 0,
+            "deletes": 0
+          },
+          "sameAppointment": "NOT_CREATED"
+        },
+        {
+          "name": "create-commit",
+          "receiptOutcome": "ACCEPTED",
+          "actionExecutions": 1,
+          "providerMutations": {
+            "posts": 1,
+            "puts": 0,
+            "deletes": 0
+          },
+          "sameAppointment": true
+        },
+        {
+          "name": "own-before-reschedule",
+          "receiptOutcome": null,
+          "actionExecutions": 1,
+          "providerMutations": {
+            "posts": 1,
+            "puts": 0,
+            "deletes": 0
+          },
+          "sameAppointment": true
+        },
+        {
+          "name": "reschedule-preview",
+          "receiptOutcome": "ACCEPTED",
+          "actionExecutions": 1,
+          "providerMutations": {
+            "posts": 1,
+            "puts": 0,
+            "deletes": 0
+          },
+          "sameAppointment": true
+        },
+        {
+          "name": "reschedule-commit",
+          "receiptOutcome": "ACCEPTED",
+          "actionExecutions": 2,
+          "providerMutations": {
+            "posts": 1,
+            "puts": 1,
+            "deletes": 0
+          },
+          "sameAppointment": true
+        },
+        {
+          "name": "own-before-cancel",
+          "receiptOutcome": null,
+          "actionExecutions": 2,
+          "providerMutations": {
+            "posts": 1,
+            "puts": 1,
+            "deletes": 0
+          },
+          "sameAppointment": true
+        },
+        {
+          "name": "cancel-preview",
+          "receiptOutcome": "ACCEPTED",
+          "actionExecutions": 2,
+          "providerMutations": {
+            "posts": 1,
+            "puts": 1,
+            "deletes": 0
+          },
+          "sameAppointment": true
+        },
+        {
+          "name": "cancel-commit",
+          "receiptOutcome": "ACCEPTED",
+          "actionExecutions": 3,
+          "providerMutations": {
+            "posts": 1,
+            "puts": 1,
+            "deletes": 1
+          },
+          "sameAppointment": true
+        },
+        {
+          "name": "reload",
+          "receiptOutcome": null,
+          "actionExecutions": 3,
+          "providerMutations": {
+            "posts": 1,
+            "puts": 1,
+            "deletes": 1
+          },
+          "sameAppointment": true
+        }
+      ],
+      "concurrentConsumedIntentRefusals": 9,
+      "browserChildClosed": true,
+      "providerMutations": {
+        "posts": 1,
+        "puts": 1,
+        "deletes": 1
+      },
+      "proxyRefusals": 0
+    },
+    "reactBuild": "PASS",
+    "artifactVerification": "PASS",
+    "networkFence": "OS_EXTERNAL_TCP_REFUSED_EPERM",
+    "sourcesUnchanged": true,
+    "twoOwnedPgClustersStoppedAndRemoved": true
+  },
+  "authorityBoundary": {
+    "independentExecutionAdmission": "SYNTHETIC_CALLBACK_STILL_REQUIRED",
+    "realAuthorityVerifierImplemented": false,
+    "scopeFileIsAuthority": false,
+    "newReleaseEngine": false,
+    "callerSelectedLedgerAllowed": false,
+    "journalNamespace": "ONE_FIXED_TRUSTED_OPERATOR_DIRECTORY_KEYED_BY_AUTHORIZATION_DIGEST",
+    "operatorUid": "TRUSTED_PROCESS_CONFIGURATION_DEFAULT_ROOT_TESTS_USE_TEST_UID",
+    "privilegedOperatorTamperingPrevented": false,
+    "runningArtifactBinding": "FUTURE_TRUSTED_EXECUTOR_STILL_REQUIRED",
+    "applicationProductFilesChanged": false
+  },
+  "browserIsolationQualification": {
+    "sourceFiles": 493,
+    "dependencyVersions": {
+      "@types/react": "19.2.17",
+      "@types/react-dom": "19.2.3",
+      "csstype": "3.2.3",
+      "esbuild": "0.25.10",
+      "react": "19.2.8",
+      "react-dom": "19.2.8",
+      "scheduler": "0.27.0",
+      "typescript": "5.9.3"
+    },
+    "originalProbeSha256": "e2a3aece66361a7feb6e97ad116053f2335436b893828d7b14b1fd9f5a528f0e",
+    "executedProbeSha256": "2b7f827e6b9e9bcf4144cb3d87eab506c9bbb04ff4616c7f13676479887e50a2",
+    "browserIsolation": "OUTER_OS_LOOPBACK_FENCE_WITHOUT_NESTED_CHROMIUM_SANDBOX",
+    "testOnlyProbeInstrumentation": "ONE_HEADLESS_CHROME_LAUNCH_FLAG",
+    "productPresentationChanged": false,
+    "reportSha256": "b68dca694e1c9f612902f92290051defd4043ff897cc2f487c32be112ddd8a61"
+  },
+  "notProven": [
+    "real external effects admission bridge",
+    "bounded ordinary AiCore transport",
+    "full final certification including interrupted V6 corpus",
+    "actual server configuration/schema/rollback",
+    "real YCLIENTS/model/iPhone acceptance"
+  ],
+  "zeroEffects": {
+    "realProvider": 0,
+    "realModel": 0,
+    "ownerDatabase": 0,
+    "keychain": 0,
+    "begetOrProduction": 0,
+    "phone": 0,
+    "push": 0
+  },
+  "certificateIssued": false,
+  "releaseAdmissible": false,
+  "readyForServerOrPhoneExecution": false,
+  "scopeAndClaimFilesCommitted": false,
+  "secretAndPiiReview": {
+    "scope": "EXACT_ARCHIVED_TEXT",
+    "patternFindings": 0,
+    "origin": "ONLY_DISPOSABLE_SYNTHETIC_DATA_NO_OWNER_DATA_READ"
+  },
+  "artifacts": [
+    {
+      "name": "mutations.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/manifest.json",
+      "sha256": "a8da42fe63686e05155bd9a3ca3e3fd92447ab59f060959aab2491e836fc6060",
+      "size": 4463,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "guard-unit.tap",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/baseline/result.tap",
+      "sha256": "3440ab8fc63c36e8280d03e29c2293b491f9e8a2397f017e753eef0a0c9d3058",
+      "size": 7113,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "transport-regression.tap",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/existing-transport-regression.tap",
+      "sha256": "0d122a9be28ab5cb14d5cd5398af83515b1bb1042d25f9b71823d206d0e77c5c",
+      "size": 18315,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "loss-manifest.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/native-loss/manifest.json",
+      "sha256": "a4924ec0578a5cc854c702b92f94197766ae01ae2dc6ec4776e60d22d89a1b65",
+      "size": 3465,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "loss-observations.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/native-loss/observations.json",
+      "sha256": "2f64fcdc6bd8d2103d1fdc2017ace6d0b9d25e420586d4ea48257c8071c022c5",
+      "size": 14612,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "loss-suite.tap",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/native-loss/native-socket.log",
+      "sha256": "09d8418c4026e02a02cfd17a2f7740595885b6e804d3e357f9a8d28852f77fab",
+      "size": 3725,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "browser-manifest.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/native-browser/manifest.json",
+      "sha256": "2f5fa29e458e30ceb5df55eecf8da90c6c1f7f819aaf26d6fd5da623e07277b7",
+      "size": 4792,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "browser-observations.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/native-browser/observations.json",
+      "sha256": "f68f5d3f2d6b2a14390a4114c376bc3ecdf4d8d67c9e7ff64d3f129fd2600084",
+      "size": 10029,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "browser-report.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/native-browser/current-react/browser.json",
+      "sha256": "b68dca694e1c9f612902f92290051defd4043ff897cc2f487c32be112ddd8a61",
+      "size": 66147,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "browser-suite.tap",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/native-browser/native-socket.log",
+      "sha256": "1b50f449e66b9d56dea02fc62519536e89feb69b9d49976d12fbd2ed6b1e0d89",
+      "size": 2916,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "react-build.txt",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/native-browser/react-web-build.log",
+      "sha256": "561ccdbb118acb82c5d2104c2276a2d3d7ed610cecc8e06df5e73cbea54534a9",
+      "size": 185,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "react-verify.txt",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/native-browser/react-web-verify.log",
+      "sha256": "7b2ec31cf095a782ef45dfcdc7659e3b6f35a08783e38275a2c837be30de86b2",
+      "size": 188,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "network-fence.txt",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/native-browser/browser-network-fence.log",
+      "sha256": "013b4d2722e1a83a04c09e4b971dd563cfed97292334eabaf49a1ba250c90a32",
+      "size": 30,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "cleanup.json",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/DISPOSABLE-CLUSTER-CLEANUP.json",
+      "sha256": "5fc41c242bc4b73347bcaeb4b5d6711fd37d08808530a169fb1a9b67d2c08ee0",
+      "size": 968,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "mutation-claim-overwrite.tap",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/claim-overwrite/result.tap",
+      "sha256": "292e9946c403f78c5ec42da96f3fa8d8c9627b3c701e558656f2b7d1ecb80c86",
+      "size": 10313,
+      "copy": "BYTE_IDENTICAL",
+      "data": "SYNTHETIC_ONLY"
+    },
+    {
+      "name": "mutation-independent-authority.tap",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/independent-authority/result.tap",
+      "sha256": "e16c9b1225fc17491813128bf4ebc71acc6cdd5ede876de882a6f3104e22c5d5",
+      "size": 14400,
+      "copy": "TRAILING_WHITESPACE_REMOVED_ONLY_ORIGINAL_RETAINED_LOCALLY",
+      "data": "SYNTHETIC_ONLY",
+      "originalSha256": "bf7daa5268aca785f45097ddc2908b142f747b0c5c7bfa5b7492cdbfe79dec06",
+      "repositorySize": 14384
+    },
+    {
+      "name": "mutation-scope-reread.tap",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/scope-reread/result.tap",
+      "sha256": "896aa356caa190ac8b1278b5f3444d078463600e7b6439f9861c1b91897534b1",
+      "size": 8929,
+      "copy": "TRAILING_WHITESPACE_REMOVED_ONLY_ORIGINAL_RETAINED_LOCALLY",
+      "data": "SYNTHETIC_ONLY",
+      "originalSha256": "0ee2da670095a90e6c04d80b8e17183a9acd85594f768d400105758df58e5e4a",
+      "repositorySize": 8913
+    },
+    {
+      "name": "mutation-revocation-marker.tap",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/revocation-marker/result.tap",
+      "sha256": "bab5afea594cbe230a5003753e9296d2503e094497209f5b2fa2872c86532000",
+      "size": 11170,
+      "copy": "TRAILING_WHITESPACE_REMOVED_ONLY_ORIGINAL_RETAINED_LOCALLY",
+      "data": "SYNTHETIC_ONLY",
+      "originalSha256": "1ba9941ae87021dbf011fc1e31e071942a103f3de962b06bd61fb959eab555b5",
+      "repositorySize": 11146
+    },
+    {
+      "name": "mutation-poisoned-run.tap",
+      "originalLocalPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final-39/poisoned-run/result.tap",
+      "sha256": "67d92a834d1e1949ce8bd0afe020ecdbfb1f045228334cb45b5cde9a60b3f41b",
+      "size": 8019,
+      "copy": "TRAILING_WHITESPACE_REMOVED_ONLY_ORIGINAL_RETAINED_LOCALLY",
+      "data": "SYNTHETIC_ONLY",
+      "originalSha256": "48b14ed4065d9c10b293470386ac617168a4dc2e6e118274215bfb9ea4f613a4",
+      "repositorySize": 8011
+    }
+  ],
+  "localOnly": [
+    {
+      "sourcePath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations/manifest.json",
+      "sha256": "96cc31e24dd957c100ce652f75a4f043e0c548d537d21eaee4541b3f4320878e",
+      "size": 2791,
+      "reason": "FAILED_MUTATION_QUALIFICATION_CALLBACK_REMOVAL_ALSO_BROKE_HEALTHY_CONTROL",
+      "substitutesForFinalReceipt": false
+    },
+    {
+      "sourcePath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/mutations-final/manifest.json",
+      "sha256": "762f7456d867a0ec74129582987f88261e281d0eba73d71493b50f8a4893cd98",
+      "size": 4463,
+      "reason": "SUPERSEDED_GREEN_38_CASE_SUITE_BEFORE_ADDITIONAL_VALID_SCOPE_SUBSTITUTION_TEST",
+      "substitutesForFinalReceipt": false
+    },
+    {
+      "sourcePath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/native-loss/source-before.json",
+      "sha256": "8d5ba889693529befb00e9e46f4d3370cbe2c7f04fe07c425000a695d5b96c14",
+      "size": 377628,
+      "reason": "FULL_GIT_SOURCE_INVENTORY_RETAINED_LOCALLY",
+      "substitutesForFinalReceipt": false
+    },
+    {
+      "sourcePath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-run-guard-20261018/native-browser/source-before.json",
+      "sha256": "443ac4133f286af802c7a0a6fbb7dfae4d5fce6124aadd1c8cd2885fcfaaad89",
+      "size": 443404,
+      "reason": "FULL_GIT_SOURCE_INVENTORY_RETAINED_LOCALLY",
+      "substitutesForFinalReceipt": false
+    }
+  ]
+}

@@ -1,0 +1,550 @@
+TAP version 13
+# Subtest: scope is exact candidate/profile/company/window and one create only
+ok 1 - scope is exact candidate/profile/company/window and one create only
+  ---
+  duration_ms: 3.845041
+  type: 'test'
+  ...
+# Subtest: configuration alone and async/false admission never open a ledger
+ok 2 - configuration alone and async/false admission never open a ledger
+  ---
+  duration_ms: 1.151375
+  type: 'test'
+  ...
+# Subtest: native create body and genuine provider response pass byte-for-byte, with no extra headers
+ok 3 - native create body and genuine provider response pass byte-for-byte, with no extra headers
+  ---
+  duration_ms: 26.541334
+  type: 'test'
+  ...
+# Subtest: allow exact catalog/one-day availability: /api/v1/book_services/450001
+ok 4 - allow exact catalog/one-day availability: /api/v1/book_services/450001
+  ---
+  duration_ms: 15.160916
+  type: 'test'
+  ...
+# Subtest: allow exact catalog/one-day availability: /api/v1/book_services/450001?staff_id=71
+ok 5 - allow exact catalog/one-day availability: /api/v1/book_services/450001?staff_id=71
+  ---
+  duration_ms: 12.081
+  type: 'test'
+  ...
+# Subtest: allow exact catalog/one-day availability: /api/v1/book_staff/450001
+ok 6 - allow exact catalog/one-day availability: /api/v1/book_staff/450001
+  ---
+  duration_ms: 14.748
+  type: 'test'
+  ...
+# Subtest: allow exact catalog/one-day availability: /api/v1/book_times/450001/71/2026-10-19?date=2026-10-19&service_ids%5B%5D=81
+ok 7 - allow exact catalog/one-day availability: /api/v1/book_times/450001/71/2026-10-19?date=2026-10-19&service_ids%5B%5D=81
+  ---
+  duration_ms: 14.850333
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: POST /api/v1/book_record/450002
+ok 8 - unadmitted route is refused without dispatch: POST /api/v1/book_record/450002
+  ---
+  duration_ms: 9.202458
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: POST /api/v1/records/450001
+ok 9 - unadmitted route is refused without dispatch: POST /api/v1/records/450001
+  ---
+  duration_ms: 7.605209
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: PUT /api/v1/record/450001/123
+ok 10 - unadmitted route is refused without dispatch: PUT /api/v1/record/450001/123
+  ---
+  duration_ms: 6.2735
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: DELETE /api/v1/record/450001/123
+ok 11 - unadmitted route is refused without dispatch: DELETE /api/v1/record/450001/123
+  ---
+  duration_ms: 6.847
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: PATCH /api/v1/company/450001/services/81
+ok 12 - unadmitted route is refused without dispatch: PATCH /api/v1/company/450001/services/81
+  ---
+  duration_ms: 14.101958
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: POST /api/v1/storage_operations/operation/450001
+ok 13 - unadmitted route is refused without dispatch: POST /api/v1/storage_operations/operation/450001
+  ---
+  duration_ms: 16.235083
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: POST /api/v1/handoff
+ok 14 - unadmitted route is refused without dispatch: POST /api/v1/handoff
+  ---
+  duration_ms: 14.973708
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: POST /api/v1/book_record/%34%35%30%30%30%31
+ok 15 - unadmitted route is refused without dispatch: POST /api/v1/book_record/%34%35%30%30%30%31
+  ---
+  duration_ms: 11.9325
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: POST /api/v1/x/../book_record/450001
+ok 16 - unadmitted route is refused without dispatch: POST /api/v1/x/../book_record/450001
+  ---
+  duration_ms: 13.984334
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: POST //evil.invalid/api/v1/book_record/450001
+ok 17 - unadmitted route is refused without dispatch: POST //evil.invalid/api/v1/book_record/450001
+  ---
+  duration_ms: 15.926917
+  type: 'test'
+  ...
+# Subtest: unadmitted route is refused without dispatch: GET /api/v1/records/450001
+ok 18 - unadmitted route is refused without dispatch: GET /api/v1/records/450001
+  ---
+  duration_ms: 15.000708
+  type: 'test'
+  ...
+# Subtest: SMS, email, guest/admin extras, multiple appointments and forged credentials are refused
+ok 19 - SMS, email, guest/admin extras, multiple appointments and forged credentials are refused
+  ---
+  duration_ms: 16.903584
+  type: 'test'
+  ...
+# Subtest: only matching post-create reconciliation contact read is admitted
+ok 20 - only matching post-create reconciliation contact read is admitted
+  ---
+  duration_ms: 31.885042
+  type: 'test'
+  ...
+# Subtest: one durable reservation covers all concurrent creates and all later retries
+ok 21 - one durable reservation covers all concurrent creates and all later retries
+  ---
+  duration_ms: 21.7675
+  type: 'test'
+  ...
+# Subtest: restart cannot reopen an already consumed run ledger
+ok 22 - restart cannot reopen an already consumed run ledger
+  ---
+  duration_ms: 18.918916
+  type: 'test'
+  ...
+# Subtest: ledger removal prevents dispatch
+ok 23 - ledger removal prevents dispatch
+  ---
+  duration_ms: 15.440542
+  type: 'test'
+  ...
+# Subtest: durable reservation failure poisons the run before provider dispatch
+ok 24 - durable reservation failure poisons the run before provider dispatch
+  ---
+  duration_ms: 15.862083
+  type: 'test'
+  ...
+# Subtest: read quota is finite and independent from the single create
+ok 25 - read quota is finite and independent from the single create
+  ---
+  duration_ms: 36.327458
+  type: 'test'
+  ...
+# Subtest: post-dispatch transport is socket loss, never a fabricated definite response
+ok 26 - post-dispatch transport is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 24.483292
+  type: 'test'
+  ...
+# Subtest: post-dispatch partial-body is socket loss, never a fabricated definite response
+ok 27 - post-dispatch partial-body is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 21.815167
+  type: 'test'
+  ...
+# Subtest: post-dispatch invalid-json is socket loss, never a fabricated definite response
+ok 28 - post-dispatch invalid-json is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 23.847542
+  type: 'test'
+  ...
+# Subtest: post-dispatch oversize is socket loss, never a fabricated definite response
+ok 29 - post-dispatch oversize is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 23.950166
+  type: 'test'
+  ...
+# Subtest: post-dispatch redirect is socket loss, never a fabricated definite response
+ok 30 - post-dispatch redirect is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 20.96775
+  type: 'test'
+  ...
+# Subtest: post-dispatch expired is socket loss, never a fabricated definite response
+ok 31 - post-dispatch expired is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 25.609708
+  type: 'test'
+  ...
+# Subtest: post-dispatch revoked is socket loss, never a fabricated definite response
+ok 32 - post-dispatch revoked is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 21.5895
+  type: 'test'
+  ...
+# Subtest: post-dispatch admission-revoked is socket loss, never a fabricated definite response
+ok 33 - post-dispatch admission-revoked is socket loss, never a fabricated definite response
+  ---
+  duration_ms: 23.891375
+  type: 'test'
+  ...
+# Subtest: pre-dispatch expiry or revocation refuses without any provider call
+ok 34 - pre-dispatch expiry or revocation refuses without any provider call
+  ---
+  duration_ms: 44.103875
+  type: 'test'
+  ...
+# Subtest: actual provider rejection status/body are preserved rather than invented
+ok 35 - actual provider rejection status/body are preserved rather than invented
+  ---
+  duration_ms: 19.793459
+  type: 'test'
+  ...
+# Subtest: revocation aborts an in-flight request and burns its create reservation
+ok 36 - revocation aborts an in-flight request and burns its create reservation
+  ---
+  duration_ms: 22.538875
+  type: 'test'
+  ...
+# Subtest: current execution admission is reread before dispatch, with no cached allow
+ok 37 - current execution admission is reread before dispatch, with no cached allow
+  ---
+  duration_ms: 9.087083
+  type: 'test'
+  ...
+# Subtest: duplicate date, widened window and substituted service query are refused
+ok 38 - duplicate date, widened window and substituted service query are refused
+  ---
+  duration_ms: 10.691
+  type: 'test'
+  ...
+# Subtest: V2 scope is fixed; V1 cannot acquire lifecycle budgets
+ok 39 - V2 scope is fixed; V1 cannot acquire lifecycle budgets
+  ---
+  duration_ms: 0.550542
+  type: 'test'
+  ...
+# Subtest: V2 confirmed create → fresh exact read → time-only PUT → DELETE preserves bytes
+ok 40 - V2 confirmed create → fresh exact read → time-only PUT → DELETE preserves bytes
+  ---
+  duration_ms: 32.01375
+  type: 'test'
+  ...
+# Subtest: V2 caller record id cannot replace missing provider create receipt: GET
+ok 41 - V2 caller record id cannot replace missing provider create receipt: GET
+  ---
+  duration_ms: 7.782791
+  type: 'test'
+  ...
+# Subtest: V2 foreign record/company denied after valid create: GET
+ok 42 - V2 foreign record/company denied after valid create: GET
+  ---
+  duration_ms: 21.943083
+  type: 'test'
+  ...
+# Subtest: V2 caller record id cannot replace missing provider create receipt: PUT
+ok 43 - V2 caller record id cannot replace missing provider create receipt: PUT
+  ---
+  duration_ms: 5.901459
+  type: 'test'
+  ...
+# Subtest: V2 foreign record/company denied after valid create: PUT
+ok 44 - V2 foreign record/company denied after valid create: PUT
+  ---
+  duration_ms: 20.252708
+  type: 'test'
+  ...
+# Subtest: V2 caller record id cannot replace missing provider create receipt: DELETE
+ok 45 - V2 caller record id cannot replace missing provider create receipt: DELETE
+  ---
+  duration_ms: 8.585041
+  type: 'test'
+  ...
+# Subtest: V2 foreign record/company denied after valid create: DELETE
+ok 46 - V2 foreign record/company denied after valid create: DELETE
+  ---
+  duration_ms: 22.650625
+  type: 'test'
+  ...
+# Subtest: V2 ambiguous/echo-only receipt never binds a record: [{"id":1}]
+ok 47 - V2 ambiguous/echo-only receipt never binds a record: [{"id":1}]
+  ---
+  duration_ms: 17.530458
+  type: 'test'
+  ...
+# Subtest: V2 ambiguous/echo-only receipt never binds a record: [{"id":1,"record_id":0}]
+ok 48 - V2 ambiguous/echo-only receipt never binds a record: [{"id":1,"record_id":0}]
+  ---
+  duration_ms: 14.762667
+  type: 'test'
+  ...
+# Subtest: V2 ambiguous/echo-only receipt never binds a record: [{"id":2,"record_id":123}]
+ok 49 - V2 ambiguous/echo-only receipt never binds a record: [{"id":2,"record_id":123}]
+  ---
+  duration_ms: 17.138166
+  type: 'test'
+  ...
+# Subtest: V2 ambiguous/echo-only receipt never binds a record: [{"id":1,"record_id":123},{"id":1,"record_id":124}]
+ok 50 - V2 ambiguous/echo-only receipt never binds a record: [{"id":1,"record_id":123},{"id":1,"record_id":124}]
+  ---
+  duration_ms: 11.296708
+  type: 'test'
+  ...
+# Subtest: V2 ambiguous/echo-only receipt never binds a record: {"id":1,"record_id":123}
+ok 51 - V2 ambiguous/echo-only receipt never binds a record: {"id":1,"record_id":123}
+  ---
+  duration_ms: 12.672625
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed price
+ok 52 - V2 time-only move refuses changed price
+  ---
+  duration_ms: 21.520625
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed discount
+ok 53 - V2 time-only move refuses changed discount
+  ---
+  duration_ms: 19.773541
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed original price
+ok 54 - V2 time-only move refuses changed original price
+  ---
+  duration_ms: 32.137125
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed service
+ok 55 - V2 time-only move refuses changed service
+  ---
+  duration_ms: 25.832958
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed staff
+ok 56 - V2 time-only move refuses changed staff
+  ---
+  duration_ms: 20.719583
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed duration
+ok 57 - V2 time-only move refuses changed duration
+  ---
+  duration_ms: 22.413416
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed client
+ok 58 - V2 time-only move refuses changed client
+  ---
+  duration_ms: 16.414542
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed phone
+ok 59 - V2 time-only move refuses changed phone
+  ---
+  duration_ms: 21.561916
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed notes
+ok 60 - V2 time-only move refuses changed notes
+  ---
+  duration_ms: 25.170666
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed attendance
+ok 61 - V2 time-only move refuses changed attendance
+  ---
+  duration_ms: 21.2385
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed SMS
+ok 62 - V2 time-only move refuses changed SMS
+  ---
+  duration_ms: 27.218083
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed busy override
+ok 63 - V2 time-only move refuses changed busy override
+  ---
+  duration_ms: 18.271375
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed extra field
+ok 64 - V2 time-only move refuses changed extra field
+  ---
+  duration_ms: 23.600959
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed invalid day
+ok 65 - V2 time-only move refuses changed invalid day
+  ---
+  duration_ms: 17.621833
+  type: 'test'
+  ...
+# Subtest: V2 time-only move refuses changed offset wire
+ok 66 - V2 time-only move refuses changed offset wire
+  ---
+  duration_ms: 21.156
+  type: 'test'
+  ...
+# Subtest: V2 missing/stale read cannot supply a move
+ok 67 - V2 missing/stale read cannot supply a move
+  ---
+  duration_ms: 28.064833
+  type: 'test'
+  ...
+# Subtest: V2 substituted provider read cannot authorize a move: 12479990000001
+ok 68 - V2 substituted provider read cannot authorize a move: 12479990000001
+  ---
+  duration_ms: 25.888291
+  type: 'test'
+  ...
+# Subtest: V2 substituted provider read cannot authorize a move: 12379990000002
+ok 69 - V2 substituted provider read cannot authorize a move: 12379990000002
+  ---
+  duration_ms: 22.371834
+  type: 'test'
+  ...
+# Subtest: V2 concurrent PUT is dispatched once, later replay refused
+ok 70 - V2 concurrent PUT is dispatched once, later replay refused
+  ---
+  duration_ms: 25.699
+  type: 'test'
+  ...
+# Subtest: V2 PUT response loss stays uncertain and blocks further effects
+ok 71 - V2 PUT response loss stays uncertain and blocks further effects
+  ---
+  duration_ms: 29.21875
+  type: 'test'
+  ...
+# Subtest: V2 concurrent DELETE is dispatched once, later replay refused
+ok 72 - V2 concurrent DELETE is dispatched once, later replay refused
+  ---
+  duration_ms: 25.038834
+  type: 'test'
+  ...
+# Subtest: V2 DELETE response loss stays uncertain and blocks further effects
+ok 73 - V2 DELETE response loss stays uncertain and blocks further effects
+  ---
+  duration_ms: 27.968917
+  type: 'test'
+  ...
+# Subtest: V2 DELETE 204 is a genuine empty native cancellation response
+ok 74 - V2 DELETE 204 is a genuine empty native cancellation response
+  ---
+  duration_ms: 22.610708
+  type: 'test'
+  ...
+# Subtest: V2 deletion request cannot carry a body
+ok 75 - V2 deletion request cannot carry a body
+  ---
+  duration_ms: 22.792792
+  type: 'test'
+  ...
+# Subtest: V2 record read arriving after a move claim cannot restore stale write input
+ok 76 - V2 record read arriving after a move claim cannot restore stale write input
+  ---
+  duration_ms: 29.739041
+  type: 'test'
+  ...
+# Subtest: V2 PUT pre-dispatch expiry refuses without a write
+ok 77 - V2 PUT pre-dispatch expiry refuses without a write
+  ---
+  duration_ms: 23.029
+  type: 'test'
+  ...
+# Subtest: V2 PUT pre-dispatch revocation refuses without a write
+ok 78 - V2 PUT pre-dispatch revocation refuses without a write
+  ---
+  duration_ms: 15.660333
+  type: 'test'
+  ...
+# Subtest: V2 PUT pre-dispatch admission refuses without a write
+ok 79 - V2 PUT pre-dispatch admission refuses without a write
+  ---
+  duration_ms: 20.522583
+  type: 'test'
+  ...
+# Subtest: V2 PUT pre-dispatch credential refuses without a write
+ok 80 - V2 PUT pre-dispatch credential refuses without a write
+  ---
+  duration_ms: 21.624708
+  type: 'test'
+  ...
+# Subtest: V2 PUT post-dispatch expiry is uncertainty, never definite refusal
+ok 81 - V2 PUT post-dispatch expiry is uncertainty, never definite refusal
+  ---
+  duration_ms: 23.519958
+  type: 'test'
+  ...
+# Subtest: V2 PUT post-dispatch revocation is uncertainty, never definite refusal
+ok 82 - V2 PUT post-dispatch revocation is uncertainty, never definite refusal
+  ---
+  duration_ms: 28.776458
+  type: 'test'
+  ...
+# Subtest: V2 DELETE pre-dispatch expiry refuses without a write
+ok 83 - V2 DELETE pre-dispatch expiry refuses without a write
+  ---
+  duration_ms: 18.217
+  type: 'test'
+  ...
+# Subtest: V2 DELETE pre-dispatch revocation refuses without a write
+ok 84 - V2 DELETE pre-dispatch revocation refuses without a write
+  ---
+  duration_ms: 22.2915
+  type: 'test'
+  ...
+# Subtest: V2 DELETE pre-dispatch admission refuses without a write
+ok 85 - V2 DELETE pre-dispatch admission refuses without a write
+  ---
+  duration_ms: 19.957708
+  type: 'test'
+  ...
+# Subtest: V2 DELETE pre-dispatch credential refuses without a write
+ok 86 - V2 DELETE pre-dispatch credential refuses without a write
+  ---
+  duration_ms: 19.12575
+  type: 'test'
+  ...
+# Subtest: V2 DELETE post-dispatch expiry is uncertainty, never definite refusal
+ok 87 - V2 DELETE post-dispatch expiry is uncertainty, never definite refusal
+  ---
+  duration_ms: 29.414292
+  type: 'test'
+  ...
+# Subtest: V2 DELETE post-dispatch revocation is uncertainty, never definite refusal
+ok 88 - V2 DELETE post-dispatch revocation is uncertainty, never definite refusal
+  ---
+  duration_ms: 23.952125
+  type: 'test'
+  ...
+# Subtest: V2 price/goods/HANDOFF endpoints stay unavailable
+ok 89 - V2 price/goods/HANDOFF endpoints stay unavailable
+  ---
+  duration_ms: 24.375875
+  type: 'test'
+  ...
+# Subtest: V2 durable write reservation failure refuses before PUT and revokes
+ok 90 - V2 durable write reservation failure refuses before PUT and revokes
+  ---
+  duration_ms: 18.332208
+  type: 'test'
+  ...
+1..90
+# tests 90
+# suites 0
+# pass 90
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1812.592167
