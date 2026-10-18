@@ -8,6 +8,11 @@ import { createServer, type Server } from 'node:http';
 import path from 'node:path';
 import { Client as PgClient } from 'pg';
 import request from 'supertest';
+import { ConfigService } from '@nestjs/config';
+import { singleOperatorProof } from '../widgets-live/support/widget-single-operator-proof';
+import { firstPhoneCertificate } from '../widgets-live/support/widget-first-phone-proof';
+import { releaseHash } from '../../src/entitlements/widget-release.contract';
+import { WidgetReleaseAccessService } from '../../src/entitlements/widget-release-access.service';
 import {
   CalendarSource,
   CrmProvider,
@@ -52,6 +57,7 @@ assert.ok(output, 'Use native-provider-socket-proof.mjs');
 const HEALTHY = 450001,
   LOSS = 450002;
 const lifecycleAE = process.env.JEST_NATIVE_LIFECYCLE_AE === '1';
+const releaseAdmission = process.env.JEST_NATIVE_RELEASE_ADMISSION === '1';
 const capability = 'crm.appointment.create.v1';
 const nativeFetch = globalThis.fetch;
 const observations: Record<string, unknown> = {
@@ -70,6 +76,9 @@ const observations: Record<string, unknown> = {
   realProviderEffects: 0,
   realModelCalls: 0,
   releaseCertification: 'NOT_ISSUED',
+  releaseAdmission: releaseAdmission
+    ? 'CANONICAL_AR1_HTTP_WITH_EPHEMERAL_TEST_SIGNER_AND_ARTIFICIAL_CERTIFICATE'
+    : 'HISTORICAL_PROOF_FIXTURE',
   createEgress: process.env.JEST_NATIVE_CREATE_EGRESS
     ? 'SYNTHETIC_ADMISSION_LOOPBACK_TRANSPORT'
     : 'NOT_USED',
@@ -104,6 +113,7 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       deletes: number;
     }
   >();
+  const releases = new Map<number, Awaited<ReturnType<typeof admitRelease>>>();
   const errors: string[] = [];
   let complete = false;
   const counts = (company: number) => {
@@ -405,7 +415,10 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
           'Хочу записаться',
         );
         const calls = Number(observations.scriptedModelCalls ?? 0) + 1;
-        assert.ok(calls <= 8, 'Finite synthetic model interpretation only');
+        assert.ok(
+          calls <= (releaseAdmission ? 20 : 8),
+          'Finite synthetic model interpretation only',
+        );
         observations.scriptedModelCalls = calls;
         return Promise.resolve({
           reply: '',
@@ -435,7 +448,12 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
   });
 
   afterAll(async () => {
-    observations.status = complete ? 'PASS' : 'FAIL';
+    const allRefusals =
+      !releaseAdmission ||
+      ['revoked', 'allowlist', 'candidate', 'expiry'].every(
+        (mode) => object(observations['release-' + mode] ?? {}).passed === true,
+      );
+    observations.status = complete && allRefusals ? 'PASS' : 'FAIL';
     observations.providerContractFailures = errors.length;
     observations.syntheticCounters = {
       healthy: counters.get(HEALTHY) ?? null,
@@ -475,14 +493,146 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
     }
   });
 
-  async function fixture(company: number) {
+  async function admitRelease(source: CandidateSource, ttlMs = 600000) {
+    // Remove the synthetic fixture row BEFORE any widget request. Thereafter
+    // only the unchanged canonical HTTP writer can create/change this grant.
+    await db.prisma.tenantEntitlement.deleteMany({
+      where: { tenantId: source.tenant.id, featureKey: 'widgets.runtime' },
+    });
+    const operator = await fx.user(source.tenant, UserRole.PLATFORM_OWNER);
+    await db.prisma.user.update({
+      where: { id: operator.id },
+      data: { tenantId: null },
+    });
+    const login = await request(http.app.getHttpServer())
+      .post('/api/auth/login')
+      .send({ email: operator.email, password: operator.password });
+    expect(login.status).toBe(201);
+    const token = String(object(login.body).access_token);
+    const p = singleOperatorProof(
+      proof.connectionString,
+      source.tenant.id,
+      operator.id,
+    );
+    const cfg = http.app.get(ConfigService);
+    for (const key of [
+      'WIDGET_RELEASE_ENVIRONMENT',
+      'WIDGET_RELEASE_TRUST_JSON',
+      'WIDGET_RELEASE_PRODUCTION_TRUST_JSON',
+      'WIDGET_RELEASE_PRODUCTION_TENANTS_JSON',
+      'NODE_ENV',
+    ])
+      cfg.set(key, p.config.get(key));
+    cfg.set('WIDGET_RELEASE_CANDIDATE_SHA', observations.candidate);
+    const command = p.command();
+    command.certificate = firstPhoneCertificate(command.certificate);
+    command.certificate.candidateSha = String(observations.candidate);
+    const expiresAt = new Date(
+      Math.min(Date.now() + ttlMs, Date.parse(command.certificate.expiresAt)),
+    ).toISOString();
+    command.authorization = p.signOwner({
+      ...command.authorization.payload,
+      candidateSha: command.certificate.candidateSha,
+      profileId: command.certificate.scope,
+      profileDigest: command.certificate.profileDigest,
+      certificateDigest: releaseHash(command.certificate),
+      grantExpiresAt: expiresAt,
+    });
+    const route = '/api/platform/widget-release/' + source.tenant.id;
+    const post = (
+      action: string,
+      body: unknown,
+      bearer = token,
+      target = route,
+    ) =>
+      request(http.app.getHttpServer())
+        .post(target + '/' + action)
+        .set('Authorization', 'Bearer ' + bearer)
+        .send(body as object);
+    const status = () =>
+      request(http.app.getHttpServer())
+        .get(route + '/status')
+        .set('Authorization', 'Bearer ' + token);
+    const current = () =>
+      db.prisma.$transaction((tx) =>
+        http.app.get(WidgetReleaseAccessService).current(source.tenant.id, tx),
+      );
+    expect(await current()).toBeNull();
+    const validation = await post('validate', command);
+    assert.equal(validation.status, 201, JSON.stringify(validation.body));
+    expect(await current()).toBeNull();
+    // Caller JSON, ordinary client authority and foreign-tenant binding cannot grant.
+    const forged = structuredClone(command);
+    forged.authorization.signature = 'A'.repeat(86);
+    expect((await post('grant', forged)).status).toBe(403);
+    expect((await post('grant', command, source.token)).status).toBe(403);
+    const foreign = await fx.tenant(
+      'AR1 foreign synthetic',
+      CalendarSource.INTERNAL,
+    );
+    expect(
+      (
+        await post(
+          'grant',
+          command,
+          token,
+          '/api/platform/widget-release/' + foreign.id,
+        )
+      ).status,
+    ).toBe(403);
+    const granted = await post('grant', command);
+    expect(granted.status).toBe(201);
+    const receipt = object(object(granted.body).receipt);
+    expect(receipt).toMatchObject({
+      governance: 'single-operator',
+      independentHumanReview: false,
+      actorId: operator.id,
+      reviewerId: null,
+      candidateSha: observations.candidate,
+    });
+    expect(await current()).toMatchObject({
+      scope: command.certificate.scope,
+      certificateDigest: releaseHash(command.certificate),
+      profileDigest: command.certificate.profileDigest,
+    });
+    const audit = await db.prisma.auditLog.findUniqueOrThrow({
+      where: { id: String(receipt.auditId) },
+    });
+    expect(object(audit.metadataJson).receipt).toEqual(receipt);
+    expect((await post('grant', command)).body).toMatchObject({
+      replayed: true,
+    });
+    expect(
+      await db.prisma.auditLog.count({
+        where: { action: 'widget.release', entityId: source.tenant.id },
+      }),
+    ).toBe(1);
+    const revoke = async () => {
+      const live = await status();
+      expect(live.status).toBe(200);
+      return post('revoke', {
+        authorization: p.signOwner({
+          ...command.authorization.payload,
+          authorizationId: randomUUID(),
+          operation: 'revoke',
+          expectedVersion: String(object(live.body).version),
+          grantExpiresAt: null,
+        }),
+      });
+    };
+    return { cfg, post, status, current, command, revoke, expiresAt };
+  }
+
+  async function fixture(company: number, ttlMs = 600000) {
+    // Restore fixture construction mode only; release requests below always use
+    // the real production contract on this guarded disposable loopback database.
+    if (releaseAdmission) http.app.get(ConfigService).set('NODE_ENV', 'test');
     const source = await bindCandidateSource(
       db,
       http,
       fx,
       {
-        id:
-          company === HEALTHY ? 'native-socket-healthy' : 'native-socket-loss',
+        id: 'native-socket-' + company,
         role: 'client',
         group: 'booking',
         variant: 'positive',
@@ -492,6 +642,8 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       sources,
     );
     source.company = String(company);
+    if (releaseAdmission)
+      releases.set(company, await admitRelease(source, ttlMs));
     companies.set(company, source);
     counters.set(company, {
       posts: 0,
@@ -522,7 +674,9 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
           profile: 'closed-input.no-handoff.no-price-goods@1',
           tenantId: source.tenant.id,
           companyId: String(company),
-          executionAuthorizationDigest: 'a'.repeat(64),
+          executionAuthorizationDigest: releaseAdmission
+            ? releaseHash(releases.get(company)!.command.authorization)
+            : 'a'.repeat(64),
           credentialDigest: createHash('sha256').update(auth).digest('hex'),
           notBefore: new Date(Date.now() - 1000).toISOString(),
           expiresAt: new Date(Date.now() + 600000).toISOString(),
@@ -570,6 +724,10 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
       owner.email,
       owner.password,
     );
+    if (releaseAdmission) {
+      const r = releases.get(company)!;
+      expect((await r.post('grant', r.command, token)).status).toBe(403);
+    }
     const connect = await request(http.app.getHttpServer())
       .post('/api/integrations/crm/connect')
       .set('Authorization', 'Bearer ' + token)
@@ -918,4 +1076,98 @@ describe('native provider durable POST then actual socket loss [HTTP/PG diagnost
     };
     complete = observations.healthy !== undefined;
   });
+  if (releaseAdmission) {
+    for (const [index, mode] of [
+      'revoked',
+      'allowlist',
+      'candidate',
+      'expiry',
+    ].entries()) {
+      it(
+        'AR-1 ' +
+          mode +
+          ' refuses a real previously minted COMMIT before native dispatch',
+        async () => {
+          const company = 450003 + index;
+          const source = await fixture(
+            company,
+            mode === 'expiry' ? 20000 : 600000,
+          );
+          const r = releases.get(company)!;
+          const preview = await confirmation(source);
+          expect(await r.current()).not.toBeNull();
+          const skipped =
+            mode === 'revoked' &&
+            process.env.JEST_NATIVE_RELEASE_COUNTERFACTUAL === 'skip-revoke';
+          if (mode === 'revoked' && !skipped)
+            expect((await r.revoke()).status).toBe(201);
+          if (mode === 'allowlist')
+            r.cfg.set('WIDGET_RELEASE_PRODUCTION_TENANTS_JSON', '[]');
+          if (mode === 'candidate')
+            r.cfg.set('WIDGET_RELEASE_CANDIDATE_SHA', 'b'.repeat(40));
+          if (mode === 'expiry') {
+            // Real expiry, not a substituted application/DB clock or forged row.
+            await new Promise((resolve) =>
+              setTimeout(
+                resolve,
+                Math.max(0, Date.parse(r.expiresAt) - Date.now() + 40),
+              ),
+            );
+          }
+          const response = await http.postIntent(source.token, {
+            widget_id: preview.widget_id,
+            intent_token: object(
+              list(preview.intents).find((i) => object(i).effect === 'COMMIT'),
+            ).intent_token,
+            inputs: null,
+          });
+          const current = await r.current();
+          const proofRow = {
+            passed: false,
+            status: response.status,
+            outcome: object(response.body).receipt_outcome ?? null,
+            currentRelease: current !== null,
+            providerBookings: (await rows(company)).length,
+            providerPosts: counts(company).posts,
+            actionExecutions: await db.prisma.actionExecution.count({
+              where: { tenantId: source.tenant.id, capability },
+            }),
+            appointments: await db.prisma.appointment.count({
+              where: { tenantId: source.tenant.id },
+            }),
+            proxyRefusals: proxies.get(company)!.snapshot().refused,
+          };
+          observations['release-' + mode] = proofRow;
+          expect(current).toBeNull();
+          expect(
+            response.status === 403 ||
+              (response.status === 200 &&
+                object(response.body).receipt_outcome === 'REFUSED'),
+          ).toBe(true);
+          expect(proofRow).toMatchObject({
+            providerBookings: 0,
+            providerPosts: 0,
+            actionExecutions: 0,
+            appointments: 0,
+            proxyRefusals: 0,
+          });
+          // Rollback is still available with lost allowlist/candidate/expired access.
+          if (mode !== 'revoked') expect((await r.revoke()).status).toBe(201);
+          expect((await r.status()).body).toMatchObject({ enabled: false });
+          // A replayed original grant is only a historical receipt, never reactivation.
+          // Candidate/allowlist checks may refuse that replay outright.
+          if (['revoked', 'expiry'].includes(mode)) {
+            const replay = await r.post('grant', r.command);
+            expect(
+              replay.status === 403 ||
+                (replay.status === 201 &&
+                  object(replay.body).replayed === true),
+            ).toBe(true);
+            expect((await r.status()).body).toMatchObject({ enabled: false });
+          }
+          proofRow.passed = true;
+        },
+      );
+    }
+  }
 });

@@ -19,6 +19,7 @@ const { values } = parseArgs({
     'create-egress': { type: 'boolean' },
     'lifecycle-wire': { type: 'boolean' },
     'lifecycle-ae': { type: 'boolean' },
+    'release-admission': { type: 'boolean' },
   },
 });
 assert(
@@ -32,7 +33,12 @@ assert(
   !values['lifecycle-ae'] ||
     (values['create-egress'] &&
       !values['lifecycle-wire'] &&
-      !values.counterfactual),
+      (!values.counterfactual || values.counterfactual === 'skip-revoke')),
+);
+assert(
+  !values['release-admission'] ||
+    (values['lifecycle-ae'] &&
+      (!values.counterfactual || values.counterfactual === 'skip-revoke')),
 );
 const candidate = '6356db1875545337e34b6c8888b7ca858bb64361';
 assert.equal(values.run, true, 'Explicit local --run required');
@@ -43,13 +49,17 @@ assert(
     !fs.existsSync(values.output),
 );
 assert(
-  [undefined, 'definite-outcome', 'proxy-definite-outcome'].includes(
-    values.counterfactual,
-  ),
+  [
+    undefined,
+    'definite-outcome',
+    'proxy-definite-outcome',
+    'skip-revoke',
+  ].includes(values.counterfactual),
 );
 assert(
   values.counterfactual !== 'proxy-definite-outcome' || values['create-egress'],
 );
+assert(values.counterfactual !== 'skip-revoke' || values['release-admission']);
 const source = fs.realpathSync(values.source),
   output = path.resolve(values.output);
 assert(!output.startsWith(source + path.sep));
@@ -318,6 +328,12 @@ const environment = {
   JEST_NATIVE_SOCKET_COUNTERFACTUAL: values.counterfactual ?? '',
   ...(proxyModule ? { JEST_NATIVE_CREATE_EGRESS: proxyModule } : {}),
   ...(values['lifecycle-ae'] ? { JEST_NATIVE_LIFECYCLE_AE: '1' } : {}),
+  ...(values['release-admission']
+    ? {
+        JEST_NATIVE_RELEASE_ADMISSION: '1',
+        JEST_NATIVE_RELEASE_COUNTERFACTUAL: values.counterfactual ?? '',
+      }
+    : {}),
 };
 const sandbox =
   '(version 1)(allow default)(deny network-outbound)(allow network-outbound (remote ip "localhost:*"))';
@@ -329,6 +345,7 @@ const receipt = {
   counterfactual: values.counterfactual ?? null,
   lifecycleWireOnly: Boolean(values['lifecycle-wire']),
   lifecycleActionEngine: Boolean(values['lifecycle-ae']),
+  canonicalReleaseAdmission: Boolean(values['release-admission']),
   mutation,
   createEgress: proxyProof,
   runnerSha256: sha(fs.readFileSync(fileURLToPath(import.meta.url))),
@@ -491,7 +508,7 @@ try {
   };
   assert.equal(
     count('tests'),
-    values['lifecycle-wire'] ? 3 : 2,
+    values['release-admission'] ? 6 : values['lifecycle-wire'] ? 3 : 2,
     'All healthy/loss cases must execute',
   );
   assert.equal(count('cancelled'), 0);
@@ -521,7 +538,34 @@ try {
   }
   assert.equal(observations.providerContractFailures, 0);
   assert.equal(observations.fetchIdentityUnchanged, true);
-  if (values['lifecycle-wire'] && values.counterfactual) {
+  if (values['release-admission']) {
+    assert.equal(
+      observations.releaseAdmission,
+      'CANONICAL_AR1_HTTP_WITH_EPHEMERAL_TEST_SIGNER_AND_ARTIFICIAL_CERTIFICATE',
+    );
+    for (const mode of ['revoked', 'allowlist', 'candidate', 'expiry']) {
+      const item = observations['release-' + mode];
+      if (mode === 'revoked' && values.counterfactual === 'skip-revoke') {
+        assert.equal(item.passed, false);
+        assert.equal(item.currentRelease, true);
+        assert.equal(item.providerPosts, 1);
+        assert.equal(item.providerBookings, 1);
+        assert.equal(item.actionExecutions, 1);
+      } else {
+        assert.equal(item.passed, true);
+        assert.equal(item.currentRelease, false);
+        assert.equal(item.providerPosts, 0);
+        assert.equal(item.actionExecutions, 0);
+        assert.equal(item.proxyRefusals, 0);
+      }
+    }
+  }
+  if (values.counterfactual === 'skip-revoke') {
+    assert.equal(result.exitCode, 1);
+    assert.equal(count('fail'), 1);
+    assert.equal(count('pass'), 5);
+    receipt.status = 'counterfactual-detected';
+  } else if (values['lifecycle-wire'] && values.counterfactual) {
     assert.equal(result.exitCode, 1);
     assert.equal(count('fail'), 2);
     for (const mode of ['move-loss', 'cancel-loss']) {

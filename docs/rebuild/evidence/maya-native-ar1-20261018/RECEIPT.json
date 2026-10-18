@@ -1,0 +1,188 @@
+{
+  "contract": "maya.native-ar1-integration-proof/1",
+  "status": "LOCAL_PROOFS_PASS_NOT_RELEASE_CERTIFICATION",
+  "parentToolingCommit": "c01bff0d1848a23b0872ec9778cb63fc6d202593",
+  "applicationCandidate": "6356db1875545337e34b6c8888b7ca858bb64361",
+  "profile": "closed-input.no-handoff.no-price-goods@1",
+  "codeSha256": {
+    "maya-saas-backend/scripts/native-provider-socket-proof.mjs": "5d9d86f85d03379c71edfc0e470791f1d25f58e56c6ada791cfcb6ae774de23b",
+    "maya-saas-backend/test/widgets-diagnostics/native-provider-socket-loss.probe-spec.ts": "679db93a9cea866db9945a5c10cf2e41331a1d8f3c28fc1755e5a609cfde4ca8",
+    "maya-saas-backend/scripts/phone-native-create-egress.mjs": "5c000a72496d2cd1c8879ca124dec3cba0bdb77c93cea81ad386c0b58cf1ab19"
+  },
+  "freshResults": {
+    "final": {
+      "status": "passed",
+      "tests": {
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0
+      },
+      "network": "OS_LOOPBACK_ONLY",
+      "sourcesUnchanged": true,
+      "clusterStopped": true
+    },
+    "counterfactual": {
+      "status": "counterfactual-detected",
+      "tests": {
+        "passed": 5,
+        "failed": 1,
+        "skipped": 0
+      },
+      "network": "OS_LOOPBACK_ONLY",
+      "sourcesUnchanged": true,
+      "clusterStopped": true
+    },
+    "legacy-regression": {
+      "status": "passed",
+      "tests": {
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0
+      },
+      "network": "OS_LOOPBACK_ONLY",
+      "sourcesUnchanged": true,
+      "clusterStopped": true
+    }
+  },
+  "artifacts": [
+    {
+      "artifact": "final-manifest.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-ar1-20261018/final/manifest.json",
+      "sha256": "d3029d968ecbb86fab4a5f224f8678cd4a6c9da0fafed5d80402831d6e4761c4",
+      "size": 3036,
+      "committed": true,
+      "containsSensitiveData": false,
+      "basis": "ARTIFICIAL_SIGNER_AND_SYNTHETIC_DATABASE_ONLY"
+    },
+    {
+      "artifact": "final-observations.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-ar1-20261018/final/observations.json",
+      "sha256": "8b51414cab11ecee660581e5e0eb8198203d3ce519353c8123ef9a65d185119e",
+      "size": 4732,
+      "committed": true,
+      "containsSensitiveData": false,
+      "basis": "ARTIFICIAL_SIGNER_AND_SYNTHETIC_DATABASE_ONLY"
+    },
+    {
+      "artifact": "final-native-socket.log",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-ar1-20261018/final/native-socket.log",
+      "sha256": "4bfb7d219de954308944c14d45ef6d78b3977b69012673f7171f3ad6767f6ab4",
+      "size": 2658,
+      "committed": false,
+      "containsSensitiveData": false,
+      "basis": "ARTIFICIAL_SIGNER_AND_SYNTHETIC_DATABASE_ONLY"
+    },
+    {
+      "artifact": "final-source-before.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-ar1-20261018/final/source-before.json",
+      "sha256": "8d5ba889693529befb00e9e46f4d3370cbe2c7f04fe07c425000a695d5b96c14",
+      "size": 377628,
+      "committed": false,
+      "containsSensitiveData": false,
+      "basis": "ARTIFICIAL_SIGNER_AND_SYNTHETIC_DATABASE_ONLY"
+    },
+    {
+      "artifact": "counterfactual-manifest.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-ar1-20261018/counterfactual/manifest.json",
+      "sha256": "ced3674c8cf6064ac37a4716642b16fbc83bee519b826dbacd966afbca3d0af1",
+      "size": 3071,
+      "committed": true,
+      "containsSensitiveData": false,
+      "basis": "ARTIFICIAL_SIGNER_AND_SYNTHETIC_DATABASE_ONLY"
+    },
+    {
+      "artifact": "counterfactual-observations.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-ar1-20261018/counterfactual/observations.json",
+      "sha256": "948f0d7986d40d5c142b686fe01ae810b6a2393bf8c2abd4b2a07387562263c7",
+      "size": 4738,
+      "committed": true,
+      "containsSensitiveData": false,
+      "basis": "ARTIFICIAL_SIGNER_AND_SYNTHETIC_DATABASE_ONLY"
+    },
+    {
+      "artifact": "counterfactual-native-socket.log",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-ar1-20261018/counterfactual/native-socket.log",
+      "sha256": "0a4315ed658af6323f4c8328f1dab3bef58ff8725ebfad0161251754027ffb41",
+      "size": 4145,
+      "committed": false,
+      "containsSensitiveData": false,
+      "basis": "ARTIFICIAL_SIGNER_AND_SYNTHETIC_DATABASE_ONLY"
+    },
+    {
+      "artifact": "counterfactual-source-before.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-ar1-20261018/counterfactual/source-before.json",
+      "sha256": "8d5ba889693529befb00e9e46f4d3370cbe2c7f04fe07c425000a695d5b96c14",
+      "size": 377628,
+      "committed": false,
+      "containsSensitiveData": false,
+      "basis": "ARTIFICIAL_SIGNER_AND_SYNTHETIC_DATABASE_ONLY"
+    },
+    {
+      "artifact": "legacy-regression-manifest.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-ar1-20261018/legacy-regression/manifest.json",
+      "sha256": "45d8b043c0a6f0abbd6e092d8fd80167f1bfd73f462ef7c8651691d6ab8fdc8e",
+      "size": 3049,
+      "committed": true,
+      "containsSensitiveData": false,
+      "basis": "ARTIFICIAL_SIGNER_AND_SYNTHETIC_DATABASE_ONLY"
+    },
+    {
+      "artifact": "legacy-regression-observations.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-ar1-20261018/legacy-regression/observations.json",
+      "sha256": "524a872b26574d5c28e6e452472ce3a6f7e9d2b74057f990d4dec472d3d5f5cc",
+      "size": 3281,
+      "committed": true,
+      "containsSensitiveData": false,
+      "basis": "ARTIFICIAL_SIGNER_AND_SYNTHETIC_DATABASE_ONLY"
+    },
+    {
+      "artifact": "legacy-regression-native-socket.log",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-ar1-20261018/legacy-regression/native-socket.log",
+      "sha256": "937365ae93775f223fc41ba29ae110423cf5b8b6ca66f3875d66bbc565995d5b",
+      "size": 1660,
+      "committed": false,
+      "containsSensitiveData": false,
+      "basis": "ARTIFICIAL_SIGNER_AND_SYNTHETIC_DATABASE_ONLY"
+    },
+    {
+      "artifact": "legacy-regression-source-before.json",
+      "source": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-native-ar1-20261018/legacy-regression/source-before.json",
+      "sha256": "8d5ba889693529befb00e9e46f4d3370cbe2c7f04fe07c425000a695d5b96c14",
+      "size": 377628,
+      "committed": false,
+      "containsSensitiveData": false,
+      "basis": "ARTIFICIAL_SIGNER_AND_SYNTHETIC_DATABASE_ONLY"
+    }
+  ],
+  "qualifications": {
+    "canonicalAR1ProductionContractOnDisposableProofDatabase": true,
+    "ephemeralArtificialSignerAndCertificate": true,
+    "admissionOwnersOverridden": false,
+    "nativeProviderAndActionEngine": true,
+    "fixtureWidgetGrantRemovedBeforeFirstWidgetRequest": true,
+    "realExternalEffectsAdmissionBridge": false,
+    "egressAdmissionCallback": "STILL_EXPLICITLY_SYNTHETIC",
+    "rescheduleCancelWidgetOrIphoneAcceptance": false,
+    "moveCancelUnknownActionEngineReconciliation": "NOT_QUALIFIED_HERE",
+    "fullMutationProgramme": "INCOMPLETE_V6_FINAL_RECEIPT_UNAVAILABLE"
+  },
+  "effects": {
+    "realProviderCalls": 0,
+    "modelCalls": 0,
+    "productionOrBegetChanges": 0,
+    "ownerDatabaseAccess": false,
+    "keychainAccess": false,
+    "iphoneChanges": false,
+    "grantsOutsideDisposableProofDatabase": 0,
+    "migrationsOutsideDisposableProofDatabase": 0
+  },
+  "certification": "NOT_ISSUED",
+  "release_admissible": false,
+  "ownerDeletions": {
+    "count": 1333,
+    "pathsSha256": "2e476be9ddc949e1031ec446c347da5a411a77d349be043d82b1f7f76136897a",
+    "restored": 0,
+    "staged": 0
+  },
+  "gitPush": "NOT_PERFORMED_IN_THIS_UNIT"
+}
