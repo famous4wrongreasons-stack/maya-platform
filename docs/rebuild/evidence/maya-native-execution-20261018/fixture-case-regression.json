@@ -1,0 +1,44 @@
+{
+  "contract": "maya.test-fixture-case-regression/1",
+  "baseCandidate": "e6858a934ded7b0dffac3435e12af0e3709d8a9b",
+  "failure": "Goods-photo test helper referred to kind-APPROVAL.json; Git filename is kind-approval.json. macOS case-insensitive lookup concealed it; Linux refused with ENOENT.",
+  "hostedRuntimeRun": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/39150213943",
+  "before": {
+    "tests": 21,
+    "pass": 15,
+    "fail": 6,
+    "sourceHead": "e6858a934ded7b0dffac3435e12af0e3709d8a9b",
+    "mode": "before",
+    "exit": 1,
+    "archiveSha256": "c4af2b0e2f61bf42b2a5a75482d6fdfd7a3d6782b6a33fc10f99b1288508fc93",
+    "receiptSha256": "e48560ece9432f0016aca77dd1fa01a5df1cac8f0f4fbc6e1db5c3342d56f7fd",
+    "network": "none",
+    "image": "node@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402",
+    "sourceOverlay": {},
+    "productCodeChanges": 0,
+    "assertionsChanged": 0
+  },
+  "after": {
+    "tests": 21,
+    "pass": 21,
+    "fail": 0,
+    "sourceHead": "e6858a934ded7b0dffac3435e12af0e3709d8a9b",
+    "mode": "after",
+    "exit": 0,
+    "archiveSha256": "2cf8a7f3acf6a53e92576d38f98c2ca85a7405d93cebdc8f3470d806033bab16",
+    "receiptSha256": "bf27b624f246abfa1cad841a424d1d3fbe0e891df8cabcd8be8a7236da261d22",
+    "network": "none",
+    "image": "node@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402",
+    "sourceOverlay": {
+      "maya-chat-shell/test/goods-photo-fixtures.mjs": "kind-APPROVAL.json \u2192 kind-approval.json"
+    },
+    "productCodeChanges": 0,
+    "assertionsChanged": 0
+  },
+  "testAssertionsChanged": false,
+  "productCodeChanged": false,
+  "timeoutsChanged": false,
+  "ownerIntentionalDeletionsPreserved": 1333,
+  "certificate": "NOT_ISSUED",
+  "requiredNext": "New committed exact HEAD and fresh full admission; prior same-product receipts do not substitute."
+}

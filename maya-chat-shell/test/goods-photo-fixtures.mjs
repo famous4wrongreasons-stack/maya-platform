@@ -10,7 +10,7 @@ export const search = () => ({ ...turn, user_turn: { ...turn.user_turn }, source
 export const item = () => ({ ...turn, user_turn: { ...turn.user_turn }, source_revision: sourceRevision, contract: 'maya.goods-photo.item/1', result: { contract: 'maya.goods-item.read/2', source: 'external_crm', scope: 'single_catalog_item', as_of: '2026-10-08T10:00:00Z', company_id: '100', currency: 'RUB', currency_source: 'tenant_setting', item_kind: 'physical', item: { id: '22', name: 'Шампунь', article: null, barcode: null, sale_price: '999.00', cost_price: '300.00', unit_cost_price: '123.00', sale_unit_id: '1', sale_unit_label: 'шт', write_off_unit_id: '2', write_off_unit_label: 'мл', unit_ratio: '250.00' }, stock: { status: 'observed', rows: [{ store_id: '3', quantity: '-2.5' }], unit_basis: 'not_provided', exhaustive: false }, limitations: [] } });
 export const proposal = () => ({ goods_id: '22', store_id: '3', quantity: '1.250', unit_id: '1', unit_cost: '12.30', currency: 'RUB', price_kind: 'receipt_purchase_unit', received_at: '2026-10-08T10:00:00+03:00', photo_sha256: photoSha256, source_line: 1, review_version: 1 });
 export const review = () => {
-  const envelope = JSON.parse(fs.readFileSync(new URL('../dev/fixtures/envelopes/h7/invariant/kind-APPROVAL.json', import.meta.url), 'utf8'));
+  const envelope = JSON.parse(fs.readFileSync(new URL('../dev/fixtures/envelopes/h7/invariant/kind-approval.json', import.meta.url), 'utf8'));
   // Actual certified envelope schema. Goods presenter correlates its assistant execution turn,
   // deliberately distinct from the parent user turn. This is a projection fixture, not a seal proof.
   envelope.source.capability = 'inventory.goods.receipt.prepare';
