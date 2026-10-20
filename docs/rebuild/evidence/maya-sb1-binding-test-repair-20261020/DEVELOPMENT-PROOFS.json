@@ -1,0 +1,110 @@
+{
+  "qualification": "PRECOMMIT_DEVELOPMENT_ONLY_NOT_FINAL_CERTIFICATION",
+  "parent": "1e10a38365284791a5e7a8e5ec96c486e8079b05",
+  "changedTest": "maya-saas-backend/src/appointments/client-appointment-create.service.spec.ts",
+  "testSha256": "85f029d23d9aa9e1c7d2035525fc7a9a0652a13410bbc47b96589e23d959a6fa",
+  "mutants": [
+    {
+      "id": "SB1-M01",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-SELECTION"
+      ]
+    },
+    {
+      "id": "SB1-M02",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-SESSION"
+      ]
+    },
+    {
+      "id": "SB1-M03",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-SESSION"
+      ]
+    },
+    {
+      "id": "SB1-M04",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-LINK"
+      ]
+    },
+    {
+      "id": "SB1-M05",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-LINK"
+      ]
+    },
+    {
+      "id": "SB1-M06",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-RECHECK"
+      ]
+    },
+    {
+      "id": "SB1-M07",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-NOSELECT"
+      ]
+    },
+    {
+      "id": "SB1-M08",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-DISPATCH"
+      ]
+    },
+    {
+      "id": "SB1-M09",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-BOUND"
+      ]
+    },
+    {
+      "id": "SB1-M10",
+      "status": "build-killed",
+      "killedBy": [
+        "SB1-CREATE"
+      ]
+    }
+  ],
+  "baselineGreen": true,
+  "externalNetwork": "DENIED",
+  "databaseStarted": false,
+  "productCodeChanged": false,
+  "receipts": [
+    {
+      "localName": "affected-tests.json",
+      "sha256": "5987445a94e08392f9bcb1dda32ee0091219db3cb9d4733cf46dc45bd1f64f85",
+      "bytes": 48865
+    },
+    {
+      "localName": "sb1-mutations.json",
+      "sha256": "3f4df0c9317bd1d08013df391cda3fbe219914d2969e9bc9436df28ee28cba22",
+      "bytes": 12804
+    },
+    {
+      "localName": "restored-tests.json",
+      "sha256": "5d9469272bf6075b2c920f8fd8e782beb3fe097faab4c1ec859ab9a818d17b7e",
+      "bytes": 48865
+    },
+    {
+      "localName": "proof-state.json",
+      "sha256": "8952df07d551c0fe4b4bc0e05886553c3d7c81ca202a88c90c9d391056782566",
+      "bytes": 637
+    }
+  ],
+  "beforeAndRestored": {
+    "passed": 101,
+    "failed": 0,
+    "skipped": 0
+  },
+  "prettier": "PASS"
+}

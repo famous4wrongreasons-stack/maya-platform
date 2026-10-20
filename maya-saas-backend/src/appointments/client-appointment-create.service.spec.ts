@@ -1248,15 +1248,33 @@ describe('SB-1 canonical create with personal context', () => {
   ] as const)('SB1-BOUND refuses a changed selected %s', async (field) => {
     const h = setup();
     const selected = personal();
+    const quote = await ownerRun(h, () =>
+      h.service.quoteForAccount('tenant-1', 'user-1', h.dto, {
+        personalContext: selected,
+      }),
+    );
+    expect(quote.factsHash).toEqual(expect.any(String));
     selected[field] = 'other';
     await expect(
       ownerRun(h, () =>
         h.service.forAccount('tenant-1', 'user-1', h.dto, {
           personalContext: selected,
+          expectedBookingFactsHash: quote.factsHash!,
         }),
       ),
-    ).rejects.toThrow();
+    ).rejects.toMatchObject({
+      response: {
+        message:
+          field === 'tenantId' || field === 'userId'
+            ? 'personal_client_context_mismatch'
+            : 'personal_client_binding_changed',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    });
     expect(h.provider.createAppointment).not.toHaveBeenCalled();
+    expect(h.rows).toHaveLength(0);
+    expect(h.plans).toHaveLength(0);
   });
   it('SB1-DISPATCH rechecks revocation immediately before provider dispatch', async () => {
     const h = setup();
