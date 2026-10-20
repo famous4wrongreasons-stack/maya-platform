@@ -212,9 +212,9 @@ function fixture() {
   });
 }
 
-test('48 batteries, 72 jobs: AR1 fixed first-phone profile covers 559 declarations', () => {
+test('48 batteries, 97 jobs: AR1 fixed first-phone profile covers 559 declarations', () => {
   const p = plan(declared);
-  assert.equal(p.gates.length, 48); assert.equal(p.matrix.include.length, 72);
+  assert.equal(p.gates.length, 48); assert.equal(p.matrix.include.length, 97);
   assert.deepEqual(declared.PU.mutants.map(m => m.id), Array.from({ length: 12 }, (_, i) => `PU-M${i + 1}`));
   assert.deepEqual(declared.SO.mutants.map(m => m.id), Array.from({ length: 9 }, (_, i) => `SO-M${i + 1}`));
   assert.equal(declared.FB.mutants.length, 17);
@@ -253,6 +253,26 @@ test('Gate 8r uses four complete-suite partitions and rejects a missing partitio
     assert.throws(() => assemble(declared, receipts.filter((_, n) => n !== i), head, '8r'));
   }
 });
+
+for (const [gate, count] of [['7', 8], ['H-harness', 4], ['FB', 3], ['AR', 4],
+  ['SB1', 3], ['P-principal', 3], ['PI-contract', 4], ['TURN', 4], ['SV2', 4]]) {
+  test(`${gate} bounded scheduling preserves every declaration and rejects incomplete coverage`, () => {
+    const jobs = plan(declared, gate).matrix.include;
+    assert.deepEqual(jobs.map(j => j.partition), Array.from({ length: count }, (_, i) => `${i + 1}/${count}`));
+    const ids = jobs.flatMap(j => selectPartition(declared[gate].mutants, j.partition).selected.map(m => m.id));
+    assert.equal(new Set(ids).size, declared[gate].mutants.length);
+    assert.deepEqual(ids.slice().sort(), declared[gate].mutants.map(m => m.id).sort());
+    const receipts = fixture().filter(r => r.batteries[0] === `gate${gate}.json`);
+    assert.equal(receipts.length, count);
+    assert.equal(assemble(declared, receipts, head, gate)[0].mutants.length, declared[gate].mutants.length);
+    for (let i = 0; i < count; i++) {
+      assert.throws(() => assemble(declared, receipts.filter((_, n) => n !== i), head, gate));
+    }
+    const stale = structuredClone(receipts);
+    stale[0].partition = gate === '7' ? selectPartition(declared[gate].mutants, '1/4').metadata : null;
+    assert.throws(() => assemble(declared, stale, head, gate), 'the previous partition shape cannot satisfy the new plan');
+  });
+}
 
 test('assembly accepts the mandatory plain live reference of a neutralised-only live battery', () => {
   const receipts = fixture().filter(r => r.batteries[0] === 'gate4.json');
@@ -306,7 +326,8 @@ for (const { gate, id, method, killer } of timelineMutationOwners) test(`${id} c
 });
 
 test('runner dry-run independently executes the same disjoint partition selection', () => {
-  for (const [gate, count] of [['6', 4], ['7', 4], ['9', 4], ['10', 4], ['13', 4], ['P-mint', 4], ['WR', 4]]) {
+  for (const [gate, count] of [['6', 4], ['7', 8], ['9', 4], ['10', 4], ['13', 4], ['P-mint', 4], ['WR', 4],
+    ['H-harness', 4], ['FB', 3], ['AR', 4], ['SB1', 3], ['P-principal', 3], ['PI-contract', 4], ['TURN', 4], ['SV2', 4]]) {
     const seen = [];
     for (let index = 1; index <= count; index++) {
       const child = spawnSync(process.execPath, ['scripts/widgets-mutation-battery.mjs', '--gate', gate, '--partition', `${index}/${count}`, '--dry-run'], { cwd: backend, encoding: 'utf8' });

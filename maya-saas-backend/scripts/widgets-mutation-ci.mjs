@@ -43,7 +43,15 @@ export function plan(declared, requested = '') {
     // Its 29 declarations now use the same four-way scheduling, without shortening any suite.
     // Every job retains its full tests and controls, and assemble() refuses incomplete or overlapping
     // coverage. No assertion, killer, control or declared expectation is reduced.
-    const count = gate === '8r' || gate === '6' || gate === '7' || gate === '9' || gate === '10' || gate === '13' || gate === 'P-mint' || gate === 'WR' ? 4 : 1;
+    // The cca27517 canonical run exhausted the same budget in G7, H-harness, FB, AR,
+    // SB1, P-principal, PI-contract, TURN and SV2. Its exact-source G7 repeat completed
+    // the battery in 178 minutes, but the whole job still timed out in cleanup.
+    // Split declarations only; every new part
+    // still owns the unfiltered suites and all controls required by its mutants.
+    const counts = { '6': 4, '7': 8, '8r': 4, '9': 4, '10': 4, '13': 4,
+      'P-mint': 4, WR: 4, 'H-harness': 4, FB: 3, AR: 4, SB1: 3,
+      'P-principal': 3, 'PI-contract': 4, TURN: 4, SV2: 4 };
+    const count = counts[gate] ?? 1;
     return Array.from({ length: count }, (_, i) => ({ gate, partition: count === 1 ? '' : `${i + 1}/${count}`, slot: count === 1 ? gate : `${gate}-part-${i + 1}-of-${count}` }));
   });
   return { gates, matrix: { include } };
