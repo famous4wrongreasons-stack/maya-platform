@@ -12,6 +12,7 @@ import request from 'supertest';
 import { spawn } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import timers from 'node:timers/promises';
 import { CalendarSource, UserRole } from '../../src/common/domain.enums';
 import {
   TelegramClientBindingService,
@@ -1013,6 +1014,159 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
     expect(register).toHaveBeenCalledTimes(2);
     expect(await f.count()).toBe(1);
   });
+  it('TGR-WAIT lets an in-flight commit settle before retrying the exact CRM card', async () => {
+    const f = await fixture();
+    const identities = http.app.get(ClientIdentityService);
+    const original = identities.registerCrmClient.bind(identities);
+    let settled = false;
+    let settle: ReturnType<typeof setTimeout> | undefined;
+    const register = jest
+      .spyOn(identities, 'registerCrmClient')
+      .mockImplementation((input) => {
+        // Deterministic scheduling oracle; the real commit-contention proof
+        // separately runs unchanged concurrent cases on PostgreSQL.
+        if (!settle) {
+          settle = setTimeout(() => {
+            settled = true;
+          }, 20);
+          return Promise.reject(
+            new Prisma.PrismaClientKnownRequestError('Synthetic conflict', {
+              code: 'P2034',
+              clientVersion: 'synthetic',
+            }),
+          );
+        }
+        expect(settled).toBe(true);
+        return original(input);
+      });
+    try {
+      expect(await f.run()).toEqual({ status: 'linked' });
+      expect(register).toHaveBeenCalledTimes(2);
+      expect(register.mock.calls[1]).toEqual(register.mock.calls[0]);
+      expect(await f.count()).toBe(1);
+    } finally {
+      clearTimeout(settle);
+    }
+  });
+  it('TGR-BOUND persistent serialization conflict stops after five attempts without a link or audit', async () => {
+    const f = await fixture();
+    const register = jest
+      .spyOn(http.app.get(ClientIdentityService), 'registerCrmClient')
+      .mockRejectedValue(
+        new Prisma.PrismaClientKnownRequestError('Synthetic conflict', {
+          code: 'P2034',
+          clientVersion: 'synthetic',
+        }),
+      );
+    expect(await f.run()).toEqual({
+      status: 'unlinked',
+      reason: 'client_binding_unavailable',
+    });
+    expect(register).toHaveBeenCalledTimes(5);
+    expect(await f.count()).toBe(0);
+    expect(
+      await db.prisma.auditLog.count({
+        where: {
+          tenantId: f.tenant.id,
+          action: 'client.telegram_initial_link',
+        },
+      }),
+    ).toBe(0);
+  });
+  it.each(['P2002', 'P2028', 'P2010'])(
+    'TGR-NONRETRY does not retry unrelated registration failure %s',
+    async (code) => {
+      const f = await fixture();
+      const register = jest
+        .spyOn(http.app.get(ClientIdentityService), 'registerCrmClient')
+        .mockRejectedValue(
+          new Prisma.PrismaClientKnownRequestError('Synthetic failure', {
+            code,
+            clientVersion: 'synthetic',
+            meta: { code: '42501' },
+          }),
+        );
+      expect((await f.run()).status).toBe('unlinked');
+      expect(register).toHaveBeenCalledTimes(1);
+      expect(await f.count()).toBe(0);
+    },
+  );
+  it.each(['before-wait', 'after-wait', 'insufficient-time'])(
+    'TGR-DEADLINE preserves the admitted deadline %s',
+    async (mode) => {
+      const f = await fixture();
+      let offset = 0;
+      bindingClockOffset(() => offset);
+      const realWait = timers.setTimeout;
+      const wait = jest
+        .spyOn(timers, 'setTimeout')
+        .mockImplementation(async (delay) => {
+          await realWait(delay);
+          offset = 121_000;
+        });
+      const register = jest
+        .spyOn(http.app.get(ClientIdentityService), 'registerCrmClient')
+        .mockImplementation(() => {
+          if (mode === 'before-wait') offset = 121_000;
+          // Binding clock advances to just before its fixed deadline.
+          if (mode === 'insufficient-time') offset = 119_990;
+          return Promise.reject(
+            new Prisma.PrismaClientKnownRequestError('Synthetic conflict', {
+              code: 'P2034',
+              clientVersion: 'synthetic',
+            }),
+          );
+        });
+      expect(await f.run()).toEqual({
+        status: 'unlinked',
+        reason: 'fresh_telegram_verification_required',
+      });
+      expect(register).toHaveBeenCalledTimes(1);
+      expect(wait).toHaveBeenCalledTimes(mode === 'after-wait' ? 1 : 0);
+      expect(await f.count()).toBe(0);
+    },
+  );
+  it.each(['session-revoked', 'membership-suspended', 'identity-substituted'])(
+    'TGR-AUTH rereads %s after waiting and before another registration',
+    async (mode) => {
+      const f = await fixture();
+      const realWait = timers.setTimeout;
+      jest.spyOn(timers, 'setTimeout').mockImplementation(async (delay) => {
+        await realWait(delay);
+        if (mode === 'session-revoked')
+          await db.prisma.authSession.update({
+            where: { id: f.proof.sessionId },
+            data: { revokedAt: new Date() },
+          });
+        if (mode === 'membership-suspended')
+          await db.prisma.membership.update({
+            where: {
+              userId_tenantId: { userId: f.user.id, tenantId: f.tenant.id },
+            },
+            data: { status: 'suspended' },
+          });
+        if (mode === 'identity-substituted')
+          await db.prisma.authIdentity.updateMany({
+            where: { tenantId: f.tenant.id, userId: f.user.id },
+            data: { phone: '+12025550124' },
+          });
+      });
+      const register = jest
+        .spyOn(http.app.get(ClientIdentityService), 'registerCrmClient')
+        .mockRejectedValue(
+          new Prisma.PrismaClientKnownRequestError('Synthetic conflict', {
+            code: 'P2034',
+            clientVersion: 'synthetic',
+          }),
+        );
+      expect(await f.run()).toEqual({
+        status: 'unlinked',
+        reason: 'current_telegram_login_required',
+      });
+      expect(register).toHaveBeenCalledTimes(1);
+      expect(await f.count()).toBe(0);
+    },
+  );
   it('gives one concurrent callback winner, with one link and one audit', async () => {
     const f = await fixture(),
       login = await signedLogin(f);
@@ -1034,6 +1188,14 @@ describe('Telegram first Client link [HTTP] [PG] [synthetic issuer/source]', () 
         results.every((r) => ['linked', 'already_linked'].includes(r.status)),
       ).toBe(true);
       expect(await f.count()).toBe(1);
+      expect(
+        await db.prisma.auditLog.count({
+          where: {
+            tenantId: f.tenant.id,
+            action: 'client.telegram_initial_link',
+          },
+        }),
+      ).toBe(1);
     },
   );
   it.each([

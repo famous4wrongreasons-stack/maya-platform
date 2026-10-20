@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { createHash } from 'node:crypto';
+import { setTimeout as wait } from 'node:timers/promises';
 import { normalizePhoneE164 } from '../common/phone.util';
 import {
   ClientChannelLinkService,
@@ -157,11 +158,14 @@ export class TelegramClientBindingService {
     const externalId = matches[0].external_id;
     // This is the existing CRM-card registrar, not creation of a person by phone.
     // Registration grants no authority and receives no caller-selected Client id.
-    const registered = await this.registerCard({
-      tenantId: p.tenantId,
-      provider: registry.provider,
-      externalId,
-    });
+    const registered = await this.registerCard(
+      {
+        tenantId: p.tenantId,
+        provider: registry.provider,
+        externalId,
+      },
+      before.admission,
+    );
     if (!registered) throw new BindingPending('client_identity_unresolved');
 
     for (let attempt = 0; ; attempt++) {
@@ -327,17 +331,33 @@ export class TelegramClientBindingService {
     );
   }
 
-  private async registerCard(input: {
-    tenantId: string;
-    provider: string;
-    externalId: string;
-  }) {
+  private async registerCard(
+    input: {
+      tenantId: string;
+      provider: string;
+      externalId: string;
+    },
+    admission: AdmittedTelegramLogin,
+  ) {
     for (let attempt = 0; ; attempt++) {
+      if (attempt > 0)
+        await this.prisma.$transaction((tx) =>
+          this.assertLogin(tx, admission.login, admission),
+        );
       try {
         return await this.identities.registerCrmClient(input);
       } catch (error) {
-        if (attempt < 4 && this.retryable(error)) continue;
-        throw error;
+        if (attempt >= 4 || !this.retryable(error)) throw error;
+        // Immediate retries can all lose before the competing registration
+        // commits. Keep five attempts, with 25/50/100/200 ms outside a DB
+        // transaction; never extend the server-admitted operation deadline.
+        const delayMs = 25 * 2 ** attempt;
+        const { now } = await this.prisma.$transaction((tx) =>
+          this.assertLogin(tx, admission.login, admission),
+        );
+        if (now.getTime() + delayMs >= admission.expiresAt)
+          throw new BindingPending('fresh_telegram_verification_required');
+        await wait(delayMs);
       }
     }
   }

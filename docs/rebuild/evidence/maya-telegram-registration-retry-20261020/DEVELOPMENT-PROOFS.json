@@ -1,0 +1,544 @@
+{
+  "qualification": "DEVELOPMENT_PATCH_PROOF_NOT_FINAL_CERTIFICATION",
+  "parentCandidate": "36555c5579a9f95e3983c8db8f0a5bbab8329947",
+  "sourceHashes": {
+    "maya-saas-backend/src/auth/telegram-client-binding.service.ts": "c9fc10b850ee9573f52632a699b67bfc00c70fd4ea7c0f7f6b18e4b25abd9158",
+    "maya-saas-backend/test/widgets-live/telegram-client-binding.live-spec.ts": "323b15d06b387c3f318bfcab6f4948d53d2c00b65df77d52b89250e244428f5a",
+    "maya-saas-backend/scripts/telegram-client-binding-mutations.mjs": "340fe9ec10b61b7901e174d395ed9b6e2318058706a392a5779b744681e9bd4e"
+  },
+  "receipts": [
+    {
+      "localPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/certification-36555c55/mutation-diagnosis-g13/repair-20261020/fixed-full-flush/manifest.json",
+      "sha256": "0fe20f91f411cffe3c82746673bd88f5b4853a8c4ef881c5e01739a89ec93e24",
+      "result": {
+        "candidate": "36555c5579a9f95e3983c8db8f0a5bbab8329947",
+        "diagnosticOnly": true,
+        "commit_delay_us": 20000,
+        "commit_siblings": 1,
+        "productChanges": "approved retry repair under test",
+        "productSHA256": "c9fc10b850ee9573f52632a699b67bfc00c70fd4ea7c0f7f6b18e4b25abd9158",
+        "realEffects": 0,
+        "steps": [
+          {
+            "name": "initdb",
+            "exit": 0
+          },
+          {
+            "name": "pg-start",
+            "exit": 0
+          },
+          {
+            "name": "createdb",
+            "exit": 0
+          },
+          {
+            "name": "migrations",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-0",
+            "exit": 0
+          },
+          {
+            "name": "pg-stop",
+            "exit": 0
+          }
+        ],
+        "canonicalTestSHA256": "323b15d06b387c3f318bfcab6f4948d53d2c00b65df77d52b89250e244428f5a",
+        "runs": [
+          {
+            "passed": 101,
+            "failed": 0,
+            "skipped": 0,
+            "exit": 0
+          }
+        ],
+        "passed": 101,
+        "failed": 0,
+        "testExit": 0,
+        "status": "repair-proof-complete",
+        "certification": false,
+        "pgStopped": true,
+        "productUnchangedDuringProof": true,
+        "canonicalTestUnchanged": true
+      }
+    },
+    {
+      "localPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/certification-36555c55/mutation-diagnosis-g13/repair-20261020/fixed-stress-flush/manifest.json",
+      "sha256": "78fd2f1dc433779fe7001a84e5b6f6bd815e3fede5f769d38af8e6bfaa10df2e",
+      "result": {
+        "candidate": "36555c5579a9f95e3983c8db8f0a5bbab8329947",
+        "diagnosticOnly": true,
+        "commit_delay_us": 20000,
+        "commit_siblings": 1,
+        "productChanges": "approved retry repair under test",
+        "productSHA256": "c9fc10b850ee9573f52632a699b67bfc00c70fd4ea7c0f7f6b18e4b25abd9158",
+        "realEffects": 0,
+        "steps": [
+          {
+            "name": "initdb",
+            "exit": 0
+          },
+          {
+            "name": "pg-start",
+            "exit": 0
+          },
+          {
+            "name": "createdb",
+            "exit": 0
+          },
+          {
+            "name": "migrations",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-0",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-1",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-2",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-3",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-4",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-5",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-6",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-7",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-8",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-9",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-10",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-11",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-12",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-13",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-14",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-15",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-16",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-17",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-18",
+            "exit": 0
+          },
+          {
+            "name": "concurrency-19",
+            "exit": 0
+          },
+          {
+            "name": "pg-stop",
+            "exit": 0
+          }
+        ],
+        "canonicalTestSHA256": "323b15d06b387c3f318bfcab6f4948d53d2c00b65df77d52b89250e244428f5a",
+        "runs": [
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          },
+          {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 93,
+            "exit": 0
+          }
+        ],
+        "passed": 160,
+        "failed": 0,
+        "testExit": 0,
+        "status": "repair-proof-complete",
+        "certification": false,
+        "pgStopped": true,
+        "productUnchangedDuringProof": true,
+        "canonicalTestUnchanged": true
+      }
+    },
+    {
+      "localPath": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/certification-36555c55/mutation-diagnosis-g13/repair-20261020/targeted-mutations/summary.json",
+      "sha256": "faa99b8a9ea5761467b8bb7e19f0c5840e1e501cd679a9c008ea91d19c32768a",
+      "result": {
+        "qualification": "TARGETED_MUTATIONS_NOT_FULL_RELEASE_CERTIFICATION",
+        "mutations": [
+          {
+            "name": "first-linked-international-phone",
+            "exit": 1,
+            "passed": 0,
+            "failed": 2,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing active business owner with no phone/Telegram: authenticated A23 link, then fresh login creates personal Client without account duplication",
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] existing trial business owner with no phone/Telegram: authenticated A23 link, then fresh login creates personal Client without account duplication"
+            ],
+            "killed": true
+          },
+          {
+            "name": "verified-phone",
+            "exit": 1,
+            "passed": 1,
+            "failed": 3,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (false), including a stored matching phone",
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (true), including a stored matching phone",
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not use an unverified phone claim (1), including a stored matching phone"
+            ],
+            "killed": true
+          },
+          {
+            "name": "unique-client",
+            "exit": 1,
+            "passed": 0,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses non-exact source: duplicate"
+            ],
+            "killed": true
+          },
+          {
+            "name": "current-source",
+            "exit": 1,
+            "passed": 0,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses a source switch during CRM resolution"
+            ],
+            "killed": true
+          },
+          {
+            "name": "current-session",
+            "exit": 1,
+            "passed": 0,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rereads session revocation after CRM resolution"
+            ],
+            "killed": true
+          },
+          {
+            "name": "immutable-revocation",
+            "exit": 1,
+            "passed": 0,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] leaves revoked historical verification byte-identical and denies automatic relink"
+            ],
+            "killed": true
+          },
+          {
+            "name": "atomic-audit",
+            "exit": 1,
+            "passed": 0,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] rolls back the link when its mandatory audit cannot be written"
+            ],
+            "killed": true
+          },
+          {
+            "name": "serialization-retry",
+            "exit": 1,
+            "passed": 0,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] retries a serializable CRM identity registration conflict through the same owner"
+            ],
+            "killed": true
+          },
+          {
+            "name": "registration-wait",
+            "exit": 1,
+            "passed": 0,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] TGR-WAIT lets an in-flight commit settle before retrying the exact CRM card"
+            ],
+            "killed": true
+          },
+          {
+            "name": "registration-attempt-bound",
+            "exit": 1,
+            "passed": 0,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] TGR-BOUND persistent serialization conflict stops after five attempts without a link or audit"
+            ],
+            "killed": true
+          },
+          {
+            "name": "registration-error-class",
+            "exit": 1,
+            "passed": 0,
+            "failed": 3,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] TGR-NONRETRY does not retry unrelated registration failure P2002",
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] TGR-NONRETRY does not retry unrelated registration failure P2028",
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] TGR-NONRETRY does not retry unrelated registration failure P2010"
+            ],
+            "killed": true
+          },
+          {
+            "name": "registration-wait-deadline",
+            "exit": 1,
+            "passed": 2,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] TGR-DEADLINE preserves the admitted deadline insufficient-time"
+            ],
+            "killed": true
+          },
+          {
+            "name": "registration-post-wait-authority",
+            "exit": 1,
+            "passed": 0,
+            "failed": 3,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] TGR-AUTH rereads session-revoked after waiting and before another registration",
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] TGR-AUTH rereads membership-suspended after waiting and before another registration",
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] TGR-AUTH rereads identity-substituted after waiting and before another registration"
+            ],
+            "killed": true
+          },
+          {
+            "name": "optional-profile",
+            "exit": 1,
+            "passed": 0,
+            "failed": 2,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining client role",
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] signed login automatically links exact Client while retaining tenant_owner role"
+            ],
+            "killed": true
+          },
+          {
+            "name": "incoming-expiry",
+            "exit": 1,
+            "passed": 0,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses stale/substituted login: expired-proof"
+            ],
+            "killed": true
+          },
+          {
+            "name": "operation-expiry",
+            "exit": 1,
+            "passed": 0,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] does not extend the original admitted deadline when the flow is prolonged during lookup"
+            ],
+            "killed": true
+          },
+          {
+            "name": "operation-bound",
+            "exit": 1,
+            "passed": 0,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] refuses an admitted operation after its fixed 120-second deadline even if the Telegram token is still valid"
+            ],
+            "killed": true
+          },
+          {
+            "name": "session-deadline",
+            "exit": 1,
+            "passed": 0,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] clips the admitted deadline to the original session limit"
+            ],
+            "killed": true
+          },
+          {
+            "name": "flow-deadline",
+            "exit": 1,
+            "passed": 0,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] clips the admitted deadline to the original flow limit"
+            ],
+            "killed": true
+          },
+          {
+            "name": "freshness-deadline",
+            "exit": 1,
+            "passed": 0,
+            "failed": 1,
+            "names": [
+              "Telegram first Client link [HTTP] [PG] [synthetic issuer/source] clips the admitted deadline to the original signed-issue-freshness limit"
+            ],
+            "killed": true
+          }
+        ],
+        "baseline": {
+          "exit": 0,
+          "passed": 122,
+          "failed": 0,
+          "names": []
+        },
+        "restored": {
+          "exit": 0,
+          "passed": 122,
+          "failed": 0,
+          "names": []
+        }
+      }
+    }
+  ],
+  "externalEffects": 0,
+  "allOwnedProofDatabasesStopped": true
+}
