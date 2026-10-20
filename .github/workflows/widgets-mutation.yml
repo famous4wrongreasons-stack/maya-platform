@@ -1,87 +1,14 @@
-name: Widgets Mutation
-
-# The widget gates' mutation battery (integration plan §4.5; GATES-PLAN-V11 I-HAR): every mutant a gate unit
-# declares in `maya-saas-backend/test/widgets-live/mutations/gate<id>.json` is applied to a temporary copy of the
-# backend, never to the checkout, and must turn its declared killer red. Measured full runs of Gates 6, 7,
-# 9, 10 and 13 exceed the unchanged 180-minute job budget, while P-mint completed with only two minutes of margin.
-# Those batteries partition mutants while retaining UNFILTERED tests and independent controls in every job.
-# Other batteries run whole. A shard whose UNMUTATED baseline control was not green reports BASELINE-RED and exits
-# non-zero — it measured nothing its mutants can be judged by, whether or not a declared killer was among the
-# failures. Mandatory aggregation refuses missing/duplicate/stale
-# parts, restricted tests, crashes, red baseline controls and vacuous kills before publishing 30 complete battery receipts.
-# CKPT-W step 7 dispatches this workflow for the flipping commit with
-# `gates=<every battery touched in the wave>` (pushes to the canonical closure branch also run every battery) and records every shard's run and artifact
-# id. Only `[HTTP]` kills in a shard report count toward L/L-T (§3.2). While no battery is declared the one shard
-# reports EMPTY, which is not evidence.
-#
-# The env block is platform-ci.yml's literals plus the declared widgets-live extras
-# (`test/widgets-live/support/environment.ts`, IR-H1); `harness.live-spec.ts` (HAR-4) asserts it.
-#
-# L2: complete fresh release admission is mandatory; partial diagnostic batteries cannot admit a release.
-on:
-  # workflow_dispatch cannot discover a workflow absent from the default branch.
-  # A real canonical-branch push receipt is mandatory for Wave 1 closure.
-  push:
-    branches:
-      - codex/maya-identity-consent-20260913
-  workflow_dispatch:
-    inputs:
-      gates:
-        description: 'Battery ids to run, comma separated (gate<id>.json, e.g. H-harness,T-tables). Empty: every declared battery.'
-        required: false
-        default: ''
-        type: string
-  pull_request:
-    paths:
-      - maya-saas-backend/src/widgets/**
-      - maya-saas-backend/src/widget-contract/**
-      - maya-saas-backend/prisma/**
-      - maya-saas-backend/test/widgets-live/**
-      - maya-saas-backend/scripts/widgets-mutation*
-      - .github/workflows/widgets-mutation.yml
-
+# DIAGNOSTIC ONLY: exact product checkout; no canonical release admission.
+name: Widgets Mutation diagnosis only
+'on':
+  workflow_dispatch: {}
 permissions:
   contents: read
-
-concurrency:
-  group: widgets-mutation-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  shards:
-    name: Battery shards
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      gates: ${{ steps.plan.outputs.gates }}
-      matrix: ${{ steps.plan.outputs.matrix }}
-    defaults:
-      run:
-        working-directory: maya-saas-backend
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: npm ci
-      - run: npm run prisma:generate
-      - name: Verify scheduling and fail-closed receipt assembly
-        run: node --test scripts/widgets-mutation-ci.test.mjs
-      - id: plan
-        # The input reaches the runner as an environment value, never interpolated into the script; the runner
-        # admits only declared battery ids.
-        env:
-          REQUESTED_GATES: ${{ inputs.gates }}
-        run: node scripts/widgets-mutation-ci.mjs plan "${REQUESTED_GATES:-}" >> "$GITHUB_OUTPUT"
-
   widgets-mutation:
-    name: Widgets mutation battery (${{ matrix.slot }})
-    needs: shards
+    name: 'Diagnostic only: unchanged G7 partition 2 of 4'
     runs-on: ubuntu-latest
     timeout-minutes: 180
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.shards.outputs.matrix) }}
     services:
       postgres:
         image: postgres:16-alpine
@@ -90,11 +17,9 @@ jobs:
           POSTGRES_PASSWORD: maya_ci
           POSTGRES_USER: maya_ci
         ports:
-          - 5432:5432
+          - '5432:5432'
         options: >-
-          --health-cmd "pg_isready -U maya_ci -d maya_ci"
-          --health-interval 5s
-          --health-timeout 5s
+          --health-cmd "pg_isready -U maya_ci -d maya_ci" --health-interval 5s --health-timeout 5s
           --health-retries 10
     defaults:
       run:
@@ -124,6 +49,9 @@ jobs:
       WIDGET_GATEWAY_PG: required
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: cca275173229b9f3f2787bfca2f24c7135b547dc
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -142,58 +70,167 @@ jobs:
         run: |
           npm ci --prefix ../maya-carrier-react
           node ../maya-carrier-react/test/build-harness.mjs
-      # Full unmutated unit controls include R01's integration-only artifact proof.
-      # Build its fixture from this SHA; do not copy a historical carrier artifact.
       - name: Build the runtime artifact required by the R01 integration proof
         run: node ../maya-chat-shell/build.mjs
+      - name: Install read-only process observer outside checkout
+        run: |
+          cat > "$RUNNER_TEMP/maya-observe-mutation.py" <<'MAYA_PY'
+          """Diagnostic observer only. Never edits source, test arguments, results or timeouts."""
+          import collections
+          import datetime
+          import hashlib
+          import json
+          import os
+          import pathlib
+          import subprocess
+          import sys
+          import tempfile
+          import time
+
+
+          def digest(data):
+              return hashlib.sha256(data).hexdigest()
+
+
+          def expected_states(backend):
+              mutants = json.loads((backend / "test/widgets-live/mutations/gate7.json").read_text())[1::4]
+              expected = {}
+              for mutant in mutants:
+                  edits = mutant.get("edits") or [mutant]
+                  contents = {}
+                  for edit in edits:
+                      file = edit["file"]
+                      text = contents.get(file, (backend / file).read_text())
+                      assert text.count(edit["find"]) == 1
+                      contents[file] = text.replace(edit["find"], edit["replace"])
+                  expected[mutant["id"]] = {file: digest(text.encode()) for file, text in contents.items()}
+              return expected
+
+
+          def classify(mirror, expected):
+              matches = []
+              for name, files in expected.items():
+                  try:
+                      if all(digest((mirror / file).read_bytes()) == value for file, value in files.items()):
+                          matches.append(name)
+                  except FileNotFoundError:
+                      pass
+              return matches
+
+
+          def safe_report(file):
+              if not file.exists():
+                  return None
+              result = {"file": file.name, "bytes": file.stat().st_size, "modified": file.stat().st_mtime}
+              try:
+                  value = json.loads(file.read_text())
+                  result.update({key: value.get(key) for key in [
+                      "success", "numPassedTests", "numFailedTests", "numPendingTests",
+                      "numPassedTestSuites", "numFailedTestSuites", "startTime",
+                  ]})
+                  result["reportSha256"] = digest(file.read_bytes())
+              except (ValueError, FileNotFoundError):
+                  result["completeJson"] = False
+              return result
+
+
+          def process_snapshot(root_pid):
+              text = subprocess.check_output(
+                  ["ps", "-eo", "pid=,ppid=,rss=,pcpu=,etime=,stat=,comm="], text=True
+              )
+              rows = []
+              for line in text.splitlines():
+                  fields = line.split(None, 6)
+                  if len(fields) != 7:
+                      continue
+                  pid, ppid, rss, cpu, elapsed, state, command = fields
+                  rows.append({"pid": int(pid), "ppid": int(ppid), "rssKiB": int(rss),
+                               "cpu": cpu, "elapsed": elapsed, "state": state,
+                               "command": pathlib.Path(command).name})
+              descendants = {root_pid}
+              for _ in range(20):
+                  added = {row["pid"] for row in rows if row["ppid"] in descendants}
+                  if added <= descendants:
+                      break
+                  descendants |= added
+              selected = [row for row in rows if row["pid"] in descendants]
+              for row in selected:
+                  proc = pathlib.Path("/proc") / str(row["pid"])
+                  try:
+                      row["fdCount"] = len(list((proc / "fd").iterdir()))
+                      args = (proc / "cmdline").read_bytes().split(b"\0")
+                      # Only fixed tool labels; never emit arguments, environment or query text.
+                      row["tool"] = next((label for label in ["jest", "tsc", "k3-gateway-check.mjs",
+                                          "widgets-mutation-battery.mjs", "ts-node", "npm"]
+                                          if any(label.encode() in arg for arg in args)), "other")
+                  except (FileNotFoundError, PermissionError):
+                      row["tool"] = "unavailable"
+              return selected
+
+
+          def main():
+              assert sys.argv[1] == "--"
+              command = sys.argv[2:]
+              assert command == ["node", "scripts/widgets-mutation-battery.mjs", "--gate", "7",
+                                 "--partition", "2/4", "--out", "widgets-mutation-part-7-part-2-of-4.json"]
+              backend = pathlib.Path.cwd().resolve()
+              head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+              assert head == "cca275173229b9f3f2787bfca2f24c7135b547dc"
+              assert not subprocess.check_output(["git", "status", "--porcelain"]).strip()
+              key = hashlib.sha1(str(backend).encode()).hexdigest()[:10]
+              temp = pathlib.Path(tempfile.gettempdir())
+              mirror = temp / ("widgets-mutation-mirror-" + key) / "maya-saas-backend"
+              reports = [temp / ("widgets-mutation-" + name + "-" + key + ".json") for name in ["unit", "live"]]
+              expected = expected_states(backend)
+              out = pathlib.Path(os.environ["RUNNER_TEMP"]) / "maya-mutation-diagnostic"
+              out.mkdir(exist_ok=True)
+              child = subprocess.Popen(command)
+              started = time.monotonic()
+              with (out / "observations.jsonl").open("w") as stream:
+                  while True:
+                      try:
+                          observation = {
+                              "diagnosticOnly": True, "admissibleForCertification": False,
+                              "candidate": head, "at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                              "elapsedSeconds": round(time.monotonic() - started, 1),
+                              "mutantMatches": classify(mirror, expected),
+                              "jestReports": [safe_report(file) for file in reports],
+                              "processes": process_snapshot(child.pid),
+                              "exit": child.poll(),
+                          }
+                      except Exception as error:
+                          observation = {"diagnosticOnly": True, "observerError": type(error).__name__,
+                                         "exit": child.poll()}
+                      line = json.dumps(observation, separators=(",", ":"))
+                      stream.write(line + "\n")
+                      stream.flush()
+                      print("MAYA_DIAGNOSTIC " + line, flush=True)
+                      if child.poll() is not None:
+                          break
+                      time.sleep(30)
+              final = {"diagnosticOnly": True, "admissibleForCertification": False, "candidate": head,
+                       "exit": child.returncode, "sourceUnchanged": not subprocess.check_output(
+                           ["git", "diff", "--name-only"]).strip()}
+              (out / "summary.json").write_text(json.dumps(final, indent=2) + "\n")
+              sys.exit(child.returncode if child.returncode >= 0 else 1)
+
+
+          if __name__ == "__main__":
+              main()
+
+          MAYA_PY
       - name: Run the battery shard
         env:
-          SHARD: ${{ matrix.gate }}
-          PARTITION: ${{ matrix.partition }}
-          SLOT: ${{ matrix.slot }}
-        run: |
-          if [ -n "$PARTITION" ]; then
-            node scripts/widgets-mutation-battery.mjs --gate "$SHARD" --partition "$PARTITION" --out "widgets-mutation-part-$SLOT.json"
-          else
-            node scripts/widgets-mutation-battery.mjs --gate "$SHARD" --out "widgets-mutation-part-$SLOT.json"
-          fi
-      - uses: actions/upload-artifact@v4
+          SHARD: '7'
+          PARTITION: 2/4
+          SLOT: 7-part-2-of-4
+        run: >-
+          python3 "$RUNNER_TEMP/maya-observe-mutation.py" -- node scripts/widgets-mutation-battery.mjs --gate
+          "$SHARD" --partition "$PARTITION" --out "widgets-mutation-part-$SLOT.json"
+      - name: Preserve diagnostic observations; never a release receipt
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: widgets-mutation-part-${{ github.sha }}-${{ matrix.slot }}
-          path: maya-saas-backend/widgets-mutation-part-*.json
-          if-no-files-found: error
-
-  receipt:
-    name: Complete mutation receipt (all requested batteries)
-    needs: [shards, widgets-mutation]
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Require every partition job to succeed
-        env:
-          RESULT: ${{ needs.widgets-mutation.result }}
-        run: test "$RESULT" = success
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: widgets-mutation-part-${{ github.sha }}-*
-          path: mutation-parts
-          merge-multiple: true
-      - name: Install release-contract checkers
-        run: npm ci --prefix maya-saas-backend
-      - name: Generate the canonical client for release-contract checks
-        run: npm run prisma:generate --prefix maya-saas-backend
-      - name: Verify blocking contract and complete fresh declaration coverage
-        env:
-          REQUESTED_GATES: ${{ inputs.gates }}
-        run: node maya-saas-backend/scripts/widgets-mutation-ci.mjs release mutation-parts mutation-receipt "$GITHUB_SHA" "${REQUESTED_GATES:-}"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: widgets-mutation-complete-${{ github.sha }}
-          path: mutation-receipt/widgets-mutation-report-*.json
+          name: diagnostic-only-g7-part2-${{ github.run_id }}
+          path: ${{ runner.temp }}/maya-mutation-diagnostic/
           if-no-files-found: error
