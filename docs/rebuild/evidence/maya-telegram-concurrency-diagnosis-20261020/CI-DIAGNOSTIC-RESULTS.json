@@ -1,0 +1,199 @@
+{
+  "diagnosticOnly": true,
+  "mutationRun": 39174311201,
+  "liveRun": 39174297390,
+  "diagnosticSha": "517d73b524ca9a29357aecbe9e50a9bd16da81e6",
+  "gate13Mutants": 25,
+  "parts": [
+    {
+      "file": "widgets-mutation-part-13-part-1-of-4.json",
+      "sha256": "c700865514dc52366be7e4eeaca94d4ac22d2eca59b57f88a3c7f0bfc9b40661",
+      "status": "PARTITION-AS-DECLARED",
+      "partition": {
+        "index": 1,
+        "count": 4,
+        "total_mutants": 25,
+        "mutant_ids": [
+          "M13-NAV-1",
+          "M13-2b",
+          "M13-10",
+          "M13-18",
+          "M13-25",
+          "M13-U13C-11",
+          "M13-U13C-G6-REUSE"
+        ]
+      },
+      "baselineControls": {
+        "baseline|live": {
+          "set": null,
+          "steps": [
+            "live"
+          ],
+          "exits": {
+            "live": 0
+          },
+          "failed": [],
+          "problems": [],
+          "failure_details": [],
+          "failure_tails": {}
+        },
+        "baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": [],
+          "failure_details": [],
+          "failure_tails": {}
+        }
+      },
+      "mutants": 7
+    },
+    {
+      "file": "widgets-mutation-part-13-part-2-of-4.json",
+      "sha256": "7a2ca7beceebf4dc298932ba3e5e1d7ab64c419fe6ca4166b80739a182b7166a",
+      "status": "PARTITION-AS-DECLARED",
+      "partition": {
+        "index": 2,
+        "count": 4,
+        "total_mutants": 25,
+        "mutant_ids": [
+          "M13-NAV-2",
+          "M13-3",
+          "M13-12",
+          "M13-20",
+          "M-R324",
+          "M13-U13C-13"
+        ]
+      },
+      "baselineControls": {
+        "baseline|live": {
+          "set": null,
+          "steps": [
+            "live"
+          ],
+          "exits": {
+            "live": 0
+          },
+          "failed": [],
+          "problems": [],
+          "failure_details": [],
+          "failure_tails": {}
+        },
+        "baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": [],
+          "failure_details": [],
+          "failure_tails": {}
+        }
+      },
+      "mutants": 6
+    },
+    {
+      "file": "widgets-mutation-part-13-part-3-of-4.json",
+      "sha256": "7936dafa563b12effbbb62a364eabfff92b4c74075568cb0964e62c0fe88b710",
+      "status": "PARTITION-AS-DECLARED",
+      "partition": {
+        "index": 3,
+        "count": 4,
+        "total_mutants": 25,
+        "mutant_ids": [
+          "M13-1",
+          "M13-3b",
+          "M13-14",
+          "M13-22",
+          "M13-U13C-5",
+          "M13-U13C-16"
+        ]
+      },
+      "baselineControls": {
+        "baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": [],
+          "failure_details": [],
+          "failure_tails": {}
+        }
+      },
+      "mutants": 6
+    },
+    {
+      "file": "widgets-mutation-part-13-part-4-of-4.json",
+      "sha256": "16b80e592a8900b69a6d631764f8c2a3f987205dec8e51bcaa65923be8b16bb0",
+      "status": "PARTITION-AS-DECLARED",
+      "partition": {
+        "index": 4,
+        "count": 4,
+        "total_mutants": 25,
+        "mutant_ids": [
+          "M13-2",
+          "M13-4",
+          "M13-15",
+          "M13-23",
+          "M13-U13C-9",
+          "M13-U13C-21"
+        ]
+      },
+      "baselineControls": {
+        "baseline|unit,typecheck,k3": {
+          "set": null,
+          "steps": [
+            "unit",
+            "typecheck",
+            "k3"
+          ],
+          "exits": {
+            "unit": 0,
+            "typecheck": 0,
+            "k3": 0
+          },
+          "failed": [],
+          "problems": [],
+          "failure_details": [],
+          "failure_tails": {}
+        }
+      },
+      "mutants": 6
+    }
+  ],
+  "ordinaryLive": {
+    "suites": 62,
+    "passed": 735,
+    "failed": 0,
+    "releaseBinaryPassed": 5,
+    "workflow": "success"
+  },
+  "aggregateWorkflow": "failure",
+  "aggregateRefusal": "release requires the complete corpus",
+  "originalFailureReproduced": false,
+  "certified": false
+}

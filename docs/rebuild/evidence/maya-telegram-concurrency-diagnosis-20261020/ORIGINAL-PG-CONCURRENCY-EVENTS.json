@@ -1,0 +1,207 @@
+{
+  "sourceRun": 39165703973,
+  "sourceJob": 117788376868,
+  "sourceLogSHA256": "352e8f572f56bd0731d59cd7f6cdaa19ee62921187d6d9356a01880ae585e17a",
+  "events": [
+    {
+      "sourceLine": 1451,
+      "time": "2026-10-18 21:01:31.577",
+      "pid": 229,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on identification as a pivot, during write.",
+      "statementType": "",
+      "tables": [
+        "Client"
+      ]
+    },
+    {
+      "sourceLine": 1455,
+      "time": "2026-10-18 21:01:31.647",
+      "pid": 227,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on conflict out to pivot 3184, during read.",
+      "statementType": "",
+      "tables": [
+        "ClientChannelLink"
+      ]
+    },
+    {
+      "sourceLine": 1459,
+      "time": "2026-10-18 21:01:31.660",
+      "pid": 229,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on conflict out to pivot 3184, during read.",
+      "statementType": "",
+      "tables": [
+        "ClientChannelLink"
+      ]
+    },
+    {
+      "sourceLine": 1463,
+      "time": "2026-10-18 21:01:31.803",
+      "pid": 229,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on identification as a pivot, during conflict in checking.",
+      "statementType": "",
+      "tables": [
+        "CrmClientLink"
+      ]
+    },
+    {
+      "sourceLine": 1467,
+      "time": "2026-10-18 21:01:31.806",
+      "pid": 227,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on identification as a pivot, during write.",
+      "statementType": "",
+      "tables": [
+        "Client"
+      ]
+    },
+    {
+      "sourceLine": 1471,
+      "time": "2026-10-18 21:01:31.807",
+      "pid": 229,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on identification as a pivot, during write.",
+      "statementType": "",
+      "tables": [
+        "Client"
+      ]
+    },
+    {
+      "sourceLine": 1475,
+      "time": "2026-10-18 21:01:31.811",
+      "pid": 227,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on identification as a pivot, during write.",
+      "statementType": "",
+      "tables": [
+        "Client"
+      ]
+    },
+    {
+      "sourceLine": 1479,
+      "time": "2026-10-18 21:01:31.814",
+      "pid": 229,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on identification as a pivot, during write.",
+      "statementType": "",
+      "tables": [
+        "Client"
+      ]
+    },
+    {
+      "sourceLine": 1483,
+      "time": "2026-10-18 21:01:31.814",
+      "pid": 227,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on identification as a pivot, during write.",
+      "statementType": "",
+      "tables": [
+        "Client"
+      ]
+    },
+    {
+      "sourceLine": 1487,
+      "time": "2026-10-18 21:01:31.818",
+      "pid": 229,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on identification as a pivot, during write.",
+      "statementType": "",
+      "tables": [
+        "Client"
+      ]
+    },
+    {
+      "sourceLine": 1491,
+      "time": "2026-10-18 21:01:31.818",
+      "pid": 227,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on identification as a pivot, during write.",
+      "statementType": "",
+      "tables": [
+        "Client"
+      ]
+    },
+    {
+      "sourceLine": 1495,
+      "time": "2026-10-18 21:01:31.824",
+      "pid": 229,
+      "error": "could not serialize access due to concurrent update",
+      "detail": " Reason code: Canceled on conflict out to pivot 3206, during read.",
+      "statementType": "",
+      "tables": [
+        "CrmClientLink"
+      ]
+    },
+    {
+      "sourceLine": 1497,
+      "time": "2026-10-18 21:01:31.839",
+      "pid": 227,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on conflict out to pivot 3206, during read.",
+      "statementType": "",
+      "tables": [
+        "ClientChannelLink"
+      ]
+    },
+    {
+      "sourceLine": 1501,
+      "time": "2026-10-18 21:01:31.920",
+      "pid": 227,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on identification as a pivot, during conflict out checking.",
+      "statementType": "",
+      "tables": [
+        "Client"
+      ]
+    },
+    {
+      "sourceLine": 1506,
+      "time": "2026-10-18 21:01:31.920",
+      "pid": 229,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on identification as a pivot, during conflict in checking.",
+      "statementType": "",
+      "tables": [
+        "CrmClientLink"
+      ]
+    },
+    {
+      "sourceLine": 1510,
+      "time": "2026-10-18 21:01:31.925",
+      "pid": 227,
+      "error": "could not serialize access due to concurrent update",
+      "detail": " Reason code: Canceled on conflict out to pivot 3223, during read.",
+      "statementType": "",
+      "tables": [
+        "CrmClientLink"
+      ]
+    },
+    {
+      "sourceLine": 1512,
+      "time": "2026-10-18 21:01:31.941",
+      "pid": 229,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on conflict out to pivot 3223, during read.",
+      "statementType": "",
+      "tables": [
+        "ClientChannelLink"
+      ]
+    },
+    {
+      "sourceLine": 1516,
+      "time": "2026-10-18 21:01:31.945",
+      "pid": 227,
+      "error": "could not serialize access due to read/write dependencies among transactions",
+      "detail": " Reason code: Canceled on conflict out to pivot 3223, during read.",
+      "statementType": "",
+      "tables": [
+        "ClientChannelLink"
+      ]
+    }
+  ],
+  "correlationLimit": "Database errors in the original concurrency interval. No per-test request ID was logged; exact assignment to run 2 remains inferential until controlled reproduction.",
+  "valuesExcluded": true
+}

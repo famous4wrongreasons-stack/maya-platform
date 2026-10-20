@@ -1,0 +1,1008 @@
+{
+  "date": "2026-10-20",
+  "candidate": "36555c5579a9f95e3983c8db8f0a5bbab8329947",
+  "classification": "PROVEN_PRODUCT_CONCURRENCY_AVAILABILITY_DEFECT",
+  "cause": "registerCard exhausts five immediate P2034 retries before concurrent winner commits; afterLogin returns unlinked/client_binding_unavailable",
+  "rootCode": "maya-saas-backend/src/auth/telegram-client-binding.service.ts:329",
+  "productCodeChanged": false,
+  "productionEffects": 0,
+  "postgres": "postgres (PostgreSQL) 16.14 (Homebrew)",
+  "commit_delay_microseconds": 20000,
+  "commit_siblings": 1,
+  "injectedDatabaseErrors": false,
+  "authorityConstraintsWeakened": false,
+  "canonicalTestSHA256": "0f348e8cbec73e1d8a856c653874826489427b5592b6b157b2c8d8d4d9dd7e61",
+  "canonicalTestUnmodified": true,
+  "runs": [
+    {
+      "run": "run-12-real-commit-schedule",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 82,
+      "pgStopped": true,
+      "jestSHA256": "a95940915539b71607288031198aba5217361413dbbe0971933cb98f0b6bc215",
+      "postgresLogSHA256": "93d82650d494d35d40e3bd0efe07f3132e131bc759a24a72e745506b6968aee5"
+    },
+    {
+      "run": "run-13-real-sql-schedule",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 82,
+      "pgStopped": true,
+      "jestSHA256": "cedb4fb3408da3dbbd8e2fbbfd0175bba4619a6869fc350c3f66d8c28b7dfea4",
+      "postgresLogSHA256": "50101c6d23fca8a159031ddba2d358cd3ee7f5eb8bb5a730031a58134d1732de"
+    },
+    {
+      "run": "run-14-full-file-commit-schedule",
+      "passed": 92,
+      "failed": 0,
+      "skipped": 0,
+      "pgStopped": true,
+      "jestSHA256": "8cbac59123e905f04a3fba153fab500559004a6f47d5e2f56c2ff14391e34d58",
+      "postgresLogSHA256": "fe542267d0203a21da78d27b635f67195551e103fe10b45cf0b62e0113fb3ab7"
+    },
+    {
+      "run": "run-15-commit-flush",
+      "passed": 81,
+      "failed": 39,
+      "skipped": 82,
+      "pgStopped": true,
+      "jestSHA256": "a369b81953d773fd2a02111d2fcdf9800e1522844560585947cf4e63173b4546",
+      "postgresLogSHA256": "dd0a94f5b2ef00c90f9dedbe466054e4109b6ca54ff33dd39901570f36011a68"
+    },
+    {
+      "run": "run-16-canonical-eight-flush",
+      "passed": 4,
+      "failed": 4,
+      "skipped": 82,
+      "pgStopped": true,
+      "jestSHA256": "a7fe34bb5163c7e0f1c9b3649413e2c89b4f7e7435db90484fdb8ccf87eba974",
+      "postgresLogSHA256": "475df7946016edbf3aae637fd1a37c60db0fec4faabbf5943b13845667009844"
+    },
+    {
+      "run": "run-17-attempt-control",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 82,
+      "pgStopped": true,
+      "jestSHA256": "de3d5a9ef3a90c239c5c500c09063070629cf55c12f716112f0e23bddebc0b03",
+      "postgresLogSHA256": "6381aff185591874c733de1345698e22c002fdd92ec6b0a8de60a61235476dc0"
+    },
+    {
+      "run": "run-18-attempt-flush",
+      "passed": 5,
+      "failed": 3,
+      "skipped": 82,
+      "pgStopped": true,
+      "jestSHA256": "f0b8dfd7217037b3ac0350eea9a59571a3a97968406e261d273480870df61deb",
+      "postgresLogSHA256": "7902ca6b2b80c24926956c9aebf3238bf81fa21f854d53fc0acb942dca594df0"
+    },
+    {
+      "run": "run-19-portable-canonical-flush",
+      "passed": 6,
+      "failed": 2,
+      "skipped": 82,
+      "pgStopped": true,
+      "canonicalTestUnmodified": true,
+      "runner": "reproduce-canonical.py",
+      "jestSHA256": "8731ce45cefaa2bbd6678a27c44897e7183dc07d30fc72cdee00ac87a2fe8c55",
+      "postgresLogSHA256": "a75d7e2a825951ea326d33fe381135c405f197540ed43e43ceff49e6749f7c80"
+    }
+  ],
+  "observedCases": [
+    {
+      "iteration": 1,
+      "results": [
+        {
+          "status": "already_linked"
+        },
+        {
+          "status": "already_linked"
+        },
+        {
+          "status": "linked"
+        }
+      ],
+      "links": 1,
+      "audits": 1,
+      "attempts": [
+        1,
+        2,
+        1
+      ],
+      "events": [
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488768612
+        },
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488768613
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488768616
+        },
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "committed",
+          "at": 1792488768682
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "error",
+          "at": 1792488768685,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 2,
+          "event": "start",
+          "at": 1792488768685
+        },
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "committed",
+          "at": 1792488768688
+        },
+        {
+          "caller": 1,
+          "attempt": 2,
+          "event": "committed",
+          "at": 1792488768689
+        }
+      ]
+    },
+    {
+      "iteration": 2,
+      "results": [
+        {
+          "status": "linked"
+        },
+        {
+          "status": "already_linked"
+        },
+        {
+          "status": "already_linked"
+        }
+      ],
+      "links": 1,
+      "audits": 1,
+      "attempts": [
+        1,
+        2,
+        3
+      ],
+      "events": [
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488768793
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488768794
+        },
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488768795
+        },
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "committed",
+          "at": 1792488768796
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "error",
+          "at": 1792488768797,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 2,
+          "event": "start",
+          "at": 1792488768797
+        },
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "error",
+          "at": 1792488768798,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 2,
+          "attempt": 2,
+          "event": "start",
+          "at": 1792488768798
+        },
+        {
+          "caller": 1,
+          "attempt": 2,
+          "event": "committed",
+          "at": 1792488768801
+        },
+        {
+          "caller": 2,
+          "attempt": 2,
+          "event": "error",
+          "at": 1792488768802,
+          "code": "P2034",
+          "modelName": "CrmClientLink"
+        },
+        {
+          "caller": 2,
+          "attempt": 3,
+          "event": "start",
+          "at": 1792488768802
+        },
+        {
+          "caller": 2,
+          "attempt": 3,
+          "event": "committed",
+          "at": 1792488768803
+        }
+      ]
+    },
+    {
+      "iteration": 3,
+      "results": [
+        {
+          "status": "linked"
+        },
+        {
+          "status": "unlinked",
+          "reason": "client_binding_unavailable"
+        },
+        {
+          "status": "unlinked",
+          "reason": "client_binding_unavailable"
+        }
+      ],
+      "links": 1,
+      "audits": 1,
+      "attempts": [
+        1,
+        5,
+        5
+      ],
+      "events": [
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488768884
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488768886
+        },
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488768886
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "error",
+          "at": 1792488768888,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 2,
+          "event": "start",
+          "at": 1792488768888
+        },
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "error",
+          "at": 1792488768889,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 2,
+          "attempt": 2,
+          "event": "start",
+          "at": 1792488768889
+        },
+        {
+          "caller": 1,
+          "attempt": 2,
+          "event": "error",
+          "at": 1792488768890,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 3,
+          "event": "start",
+          "at": 1792488768890
+        },
+        {
+          "caller": 2,
+          "attempt": 2,
+          "event": "error",
+          "at": 1792488768890,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 2,
+          "attempt": 3,
+          "event": "start",
+          "at": 1792488768890
+        },
+        {
+          "caller": 1,
+          "attempt": 3,
+          "event": "error",
+          "at": 1792488768892,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 4,
+          "event": "start",
+          "at": 1792488768892
+        },
+        {
+          "caller": 2,
+          "attempt": 3,
+          "event": "error",
+          "at": 1792488768892,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 2,
+          "attempt": 4,
+          "event": "start",
+          "at": 1792488768892
+        },
+        {
+          "caller": 1,
+          "attempt": 4,
+          "event": "error",
+          "at": 1792488768894,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 5,
+          "event": "start",
+          "at": 1792488768894
+        },
+        {
+          "caller": 2,
+          "attempt": 4,
+          "event": "error",
+          "at": 1792488768894,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 2,
+          "attempt": 5,
+          "event": "start",
+          "at": 1792488768894
+        },
+        {
+          "caller": 1,
+          "attempt": 5,
+          "event": "error",
+          "at": 1792488768896,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 2,
+          "attempt": 5,
+          "event": "error",
+          "at": 1792488768896,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "committed",
+          "at": 1792488768909
+        }
+      ]
+    },
+    {
+      "iteration": 4,
+      "results": [
+        {
+          "status": "linked"
+        },
+        {
+          "status": "already_linked"
+        },
+        {
+          "status": "already_linked"
+        }
+      ],
+      "links": 1,
+      "audits": 1,
+      "attempts": [
+        1,
+        2,
+        1
+      ],
+      "events": [
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488768982
+        },
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488768984
+        },
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "committed",
+          "at": 1792488768984
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488768984
+        },
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "committed",
+          "at": 1792488768986
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "error",
+          "at": 1792488768987,
+          "code": "P2034",
+          "modelName": "CrmClientLink"
+        },
+        {
+          "caller": 1,
+          "attempt": 2,
+          "event": "start",
+          "at": 1792488768987
+        },
+        {
+          "caller": 1,
+          "attempt": 2,
+          "event": "committed",
+          "at": 1792488768988
+        }
+      ]
+    },
+    {
+      "iteration": 5,
+      "results": [
+        {
+          "status": "already_linked"
+        },
+        {
+          "status": "already_linked"
+        },
+        {
+          "status": "linked"
+        }
+      ],
+      "links": 1,
+      "audits": 1,
+      "attempts": [
+        1,
+        1,
+        1
+      ],
+      "events": [
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488769075
+        },
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488769075
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488769076
+        },
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "committed",
+          "at": 1792488769077
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "committed",
+          "at": 1792488769079
+        },
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "committed",
+          "at": 1792488769079
+        }
+      ]
+    },
+    {
+      "iteration": 6,
+      "results": [
+        {
+          "status": "unlinked",
+          "reason": "client_binding_unavailable"
+        },
+        {
+          "status": "unlinked",
+          "reason": "client_binding_unavailable"
+        },
+        {
+          "status": "linked"
+        }
+      ],
+      "links": 1,
+      "audits": 1,
+      "attempts": [
+        5,
+        5,
+        1
+      ],
+      "events": [
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488769176
+        },
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488769177
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488769177
+        },
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "error",
+          "at": 1792488769179,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 0,
+          "attempt": 2,
+          "event": "start",
+          "at": 1792488769179
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "error",
+          "at": 1792488769179,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 2,
+          "event": "start",
+          "at": 1792488769179
+        },
+        {
+          "caller": 0,
+          "attempt": 2,
+          "event": "error",
+          "at": 1792488769181,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 0,
+          "attempt": 3,
+          "event": "start",
+          "at": 1792488769181
+        },
+        {
+          "caller": 1,
+          "attempt": 2,
+          "event": "error",
+          "at": 1792488769181,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 3,
+          "event": "start",
+          "at": 1792488769181
+        },
+        {
+          "caller": 0,
+          "attempt": 3,
+          "event": "error",
+          "at": 1792488769183,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 0,
+          "attempt": 4,
+          "event": "start",
+          "at": 1792488769183
+        },
+        {
+          "caller": 1,
+          "attempt": 3,
+          "event": "error",
+          "at": 1792488769183,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 4,
+          "event": "start",
+          "at": 1792488769183
+        },
+        {
+          "caller": 1,
+          "attempt": 4,
+          "event": "error",
+          "at": 1792488769186,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 5,
+          "event": "start",
+          "at": 1792488769186
+        },
+        {
+          "caller": 0,
+          "attempt": 4,
+          "event": "error",
+          "at": 1792488769186,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 0,
+          "attempt": 5,
+          "event": "start",
+          "at": 1792488769186
+        },
+        {
+          "caller": 1,
+          "attempt": 5,
+          "event": "error",
+          "at": 1792488769188,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 0,
+          "attempt": 5,
+          "event": "error",
+          "at": 1792488769188,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "committed",
+          "at": 1792488769201
+        }
+      ]
+    },
+    {
+      "iteration": 7,
+      "results": [
+        {
+          "status": "already_linked"
+        },
+        {
+          "status": "already_linked"
+        },
+        {
+          "status": "linked"
+        }
+      ],
+      "links": 1,
+      "audits": 1,
+      "attempts": [
+        1,
+        2,
+        1
+      ],
+      "events": [
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488769272
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488769273
+        },
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488769273
+        },
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "committed",
+          "at": 1792488769275
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "error",
+          "at": 1792488769276,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 2,
+          "event": "start",
+          "at": 1792488769276
+        },
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "committed",
+          "at": 1792488769277
+        },
+        {
+          "caller": 1,
+          "attempt": 2,
+          "event": "committed",
+          "at": 1792488769277
+        }
+      ]
+    },
+    {
+      "iteration": 8,
+      "results": [
+        {
+          "status": "unlinked",
+          "reason": "client_binding_unavailable"
+        },
+        {
+          "status": "unlinked",
+          "reason": "client_binding_unavailable"
+        },
+        {
+          "status": "linked"
+        }
+      ],
+      "links": 1,
+      "audits": 1,
+      "attempts": [
+        5,
+        5,
+        1
+      ],
+      "events": [
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488769360
+        },
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488769360
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "start",
+          "at": 1792488769360
+        },
+        {
+          "caller": 0,
+          "attempt": 1,
+          "event": "error",
+          "at": 1792488769362,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 0,
+          "attempt": 2,
+          "event": "start",
+          "at": 1792488769362
+        },
+        {
+          "caller": 1,
+          "attempt": 1,
+          "event": "error",
+          "at": 1792488769362,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 2,
+          "event": "start",
+          "at": 1792488769362
+        },
+        {
+          "caller": 0,
+          "attempt": 2,
+          "event": "error",
+          "at": 1792488769364,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 0,
+          "attempt": 3,
+          "event": "start",
+          "at": 1792488769364
+        },
+        {
+          "caller": 1,
+          "attempt": 2,
+          "event": "error",
+          "at": 1792488769364,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 3,
+          "event": "start",
+          "at": 1792488769364
+        },
+        {
+          "caller": 0,
+          "attempt": 3,
+          "event": "error",
+          "at": 1792488769366,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 0,
+          "attempt": 4,
+          "event": "start",
+          "at": 1792488769366
+        },
+        {
+          "caller": 1,
+          "attempt": 3,
+          "event": "error",
+          "at": 1792488769366,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 4,
+          "event": "start",
+          "at": 1792488769366
+        },
+        {
+          "caller": 0,
+          "attempt": 4,
+          "event": "error",
+          "at": 1792488769368,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 0,
+          "attempt": 5,
+          "event": "start",
+          "at": 1792488769368
+        },
+        {
+          "caller": 1,
+          "attempt": 4,
+          "event": "error",
+          "at": 1792488769368,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 5,
+          "event": "start",
+          "at": 1792488769368
+        },
+        {
+          "caller": 0,
+          "attempt": 5,
+          "event": "error",
+          "at": 1792488769369,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 1,
+          "attempt": 5,
+          "event": "error",
+          "at": 1792488769369,
+          "code": "P2034",
+          "modelName": "Client"
+        },
+        {
+          "caller": 2,
+          "attempt": 1,
+          "event": "committed",
+          "at": 1792488769383
+        }
+      ]
+    }
+  ],
+  "originalCiCorrelation": "Original 162ms failed assertion and its real PostgreSQL rapid P2034 write-conflict burst match this mechanism. The original unexpected response was not retained; do not claim exact per-request forensic reconstruction.",
+  "certification": "BLOCKED",
+  "nextAction": "STOP before product change; bounded retry/wait repair and fresh certification required",
+  "primaryStatusSHA256": "d422307a0927d4e525333bfc7b4ab370740748e98a053957729c3d1dd2be0646"
+}
