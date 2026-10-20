@@ -1,0 +1,23 @@
+  it.each([
+    'tenantId',
+    'userId',
+    'linkId',
+    'clientId',
+    'verificationEvidenceHash',
+  ] as const)('SB1-BOUND refuses a changed selected %s', async (field) => {
+    const h = setup();
+    const selected = personal();
+    selected[field] = 'other';
+    await expect(
+      ownerRun(h, () =>
+        h.service.forAccount('tenant-1', 'user-1', h.dto, {
+          personalContext: selected,
+        }),
+      ).catch((error: unknown) => {
+        const e = error as { getResponse(): unknown };
+        console.log('SB1_DIAGNOSTIC ' + JSON.stringify({ field, response: e.getResponse() }));
+        throw error;
+      }),
+    ).rejects.toThrow();
+    expect(h.provider.createAppointment).not.toHaveBeenCalled();
+  });

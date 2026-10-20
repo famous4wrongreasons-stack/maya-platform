@@ -1,0 +1,270 @@
+{
+  "candidate": "1e10a38365284791a5e7a8e5ec96c486e8079b05",
+  "profile": "closed-input.no-handoff.no-price-goods@1",
+  "qualification": "DIAGNOSTIC_NOT_CERTIFICATION",
+  "createdAt": "2026-10-20T11:43:54.972318+00:00",
+  "localEvidenceRoot": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/certification-1e10a383",
+  "sourceHashes": [
+    {
+      "path": "maya-saas-backend/src/appointments/client-appointment-create.service.ts",
+      "sha256": "378fc2cd1caa4dc357c51ba89e65230b81f97fd0794dabbae389caaaaae04453"
+    },
+    {
+      "path": "maya-saas-backend/src/appointments/client-appointment-create.service.spec.ts",
+      "sha256": "d20737d6e391f967f8c889a2b843d6ca8425294c59ff5fcc6d4843edbc9b2c07"
+    },
+    {
+      "path": "maya-saas-backend/test/widgets-live/mutations/gateSB1.json",
+      "sha256": "85894e560d6f03c5d7d081c02696f86e14cfeae69d0bb7b3faf560e6ae00ac67"
+    },
+    {
+      "path": "maya-saas-backend/src/auth/telegram-client-binding.service.ts",
+      "sha256": "c9fc10b850ee9573f52632a699b67bfc00c70fd4ea7c0f7f6b18e4b25abd9158"
+    }
+  ],
+  "localReceipts": [
+    {
+      "path": "LOCAL-COMPLETION.json",
+      "sha256": "3bdaa565f6a6d9b50287ce88570c1b1dc11ce4279ca8da4b6d6b0ab43a512dce",
+      "bytes": 728,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "LOCAL-PROGRAMME.json",
+      "sha256": "e919a487567a2b5554584f7fadb5843580b6e1fc798795dfbafe15cf9676b4de",
+      "bytes": 3159,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "harness-duplicate-literals/manifest.json",
+      "sha256": "ec33d63aea8534a3825ddd405da3958cabbd8a1198a671a21cbc4e7c1c01dda2",
+      "bytes": 1345,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "final-collection-state.json",
+      "sha256": "3456e9f8481529fdd81d46fb416498ed1c2d6ac25a55f37f1bd385bcc90f6636",
+      "bytes": 254,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "baselines/baselines.json",
+      "sha256": "aa2eb8d70f7e5d0cc51a0e446c49e77c5e58913317ac4c94eeb9bf32ddec8d4d",
+      "bytes": 16663,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "baselines/backend.json",
+      "sha256": "2289f9070ee0221405f3f1dcf20b1c09a7b802399d33f28570ace4f47ad5e668",
+      "bytes": 5150483,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "baselines/widgets.json",
+      "sha256": "298ac8b1cb740d4bfb7e695e743d8b5b3d08c606c32625255546b2b32f1fc64c",
+      "bytes": 432594,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "runtime-ci-v4/manifest.json",
+      "sha256": "29bea6d24e8e5e31961de75df1e2d0d39ed7ae13cb57c6c024bec0180d4853d7",
+      "bytes": 6794,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "release-gates-final/manifest.json",
+      "sha256": "4ab8ab0424a4fc0f4e5cdc9088cf030fb67379f90b5230620dc02a418610aaca",
+      "bytes": 7003,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "phone-payload/manifest.json",
+      "sha256": "7b211dbd0d42f3417183d97fb44f981b4fbe7a486fc7c9f1c36f1e62922b452f",
+      "bytes": 1355,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "migration-rollback-final-v2/manifest.json",
+      "sha256": "a5f5b1e7fee7daa91ba1f4e820cf6cb8c88186a1eda112f33a79e68e9b5df3f9",
+      "bytes": 2610,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "source-evidence-v4/manifest.json",
+      "sha256": "6387fc31038f1d7150ed6e4a06d25592e3ba35b605b6080de4f33e0b9a2b2a4f",
+      "bytes": 5644,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "staging-local-v4/manifest.json",
+      "sha256": "b33ec88f32196cd03f081b7c559e04e02af36e91e10d0dbd4208846de77b758c",
+      "bytes": 309,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "compiled-journey-v3/manifest.json",
+      "sha256": "fc050003b5867661fa3ad78f8ccdb8a2e18f01342d717089a7ed28d374320c32",
+      "bytes": 3974,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "browser-final-v2/manifest.json",
+      "sha256": "a3730ad09d1737cfabb7bf63af7f16a9fe8dd3843b6432fdd61c268ef26774c2",
+      "bytes": 1122,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "telegram-final-contention/manifest.json",
+      "sha256": "5caacfdd5681a9c9912f7ea4a673827b526b14501d7da1476961ef226150e462",
+      "bytes": 3879,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "telegram-final-mutations/summary.json",
+      "sha256": "faa99b8a9ea5761467b8bb7e19f0c5840e1e501cd679a9c008ea91d19c32768a",
+      "bytes": 7563,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "admission-regressions/manifest.json",
+      "sha256": "d37f624654e8ecaf469ffa93d7f1cc9d0b8cff6fed414c7c08e13f6f8150da36",
+      "bytes": 526,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "image/local-image-parity.json",
+      "sha256": "b246011f7a6f237d85edce780403189ec49d041422f8ac9fec494ae69d14ec84",
+      "bytes": 564,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    },
+    {
+      "path": "SOURCE-CLAUSE-MATRIX.json",
+      "sha256": "e966c3e890411979bd6752c192e9855cb52ea82c3325466976a7eeb3daffc6f3",
+      "bytes": 99488,
+      "published": false,
+      "reason": "Retained local full fresh test receipt; this packet does not grant admission."
+    }
+  ],
+  "rawDiagnosticArtifacts": [
+    {
+      "path": "mutation-diagnosis-sb1/job.log",
+      "sha256": "fcf6ea90ac8fa7ef7f3b9560b7bc4384823366c2a7bf93471726d6fd55ed3d78",
+      "bytes": 127200,
+      "published": false
+    },
+    {
+      "path": "mutation-diagnosis-sb1/baseline-observed.json",
+      "sha256": "b3633f651609bd0957b9f468e40c8792dfb8f0ca7b2f8affdcdedc6f6477e12d",
+      "bytes": 35515,
+      "published": false
+    },
+    {
+      "path": "mutation-diagnosis-sb1/baseline-observed.log",
+      "sha256": "2a746c7f32b731934e123d2a26a8eb021fe8139b7b5b8219c11fd065f71d7cc5",
+      "bytes": 8497,
+      "published": false
+    },
+    {
+      "path": "mutation-diagnosis-sb1/mutant-observed.json",
+      "sha256": "47542fbd8ef877a1bfe5ffaaedf90a7546198b0e15410e157d3db8873c56de46",
+      "bytes": 35515,
+      "published": false
+    },
+    {
+      "path": "mutation-diagnosis-sb1/mutant-observed.log",
+      "sha256": "32ef644610f1fe00044a0dcb9d798290c22b11e7d6cf9df23665e195cfd8b623",
+      "bytes": 8464,
+      "published": false
+    },
+    {
+      "path": "mutation-diagnosis-sb1/restricted-command.json",
+      "sha256": "8b963660a2d578caf8eaa26a55eac72d02c7601b509cf8b84b6c90b551ba9df6",
+      "bytes": 966,
+      "published": false
+    },
+    {
+      "path": "mutation-diagnosis-sb1/restricted-reproduction.log",
+      "sha256": "a40d203f7e692fa8b651b61d367f939b04540d037436359ca1a106bacfed4425",
+      "bytes": 4462,
+      "published": false
+    },
+    {
+      "path": "mutation-diagnosis-sb1/run-after-cancel.json",
+      "sha256": "f2a13db38e8eee5e57e595530697d1b2ab6ab8f0bb4a71aa8ee650eee31598d5",
+      "bytes": 154182,
+      "published": false
+    },
+    {
+      "path": "mutation-diagnosis-sb1/cancellation-intent.json",
+      "sha256": "0c66979250903ebc8b708f5a956f4923c4e33630d4ebcc42ab8d17ef7ccba35f",
+      "bytes": 330,
+      "published": false
+    },
+    {
+      "path": "mutation-diagnosis-sb1/cancel.log",
+      "sha256": "46482a3c7c9b2165f3a78725bb3e5366746d15a3a145ab74ddf546a047638ca3",
+      "bytes": 54,
+      "published": false
+    }
+  ],
+  "packetFiles": [
+    {
+      "name": "CAUSE.json",
+      "sha256": "1301a4cbd5ae2d20efeef20fc10f59ddeea4ca47f332e048bae7f1e7d7c046d6",
+      "bytes": 2754
+    },
+    {
+      "name": "GITHUB-STATE.json",
+      "sha256": "526c20a4e2ccc6054d329afe3b2f7d07593f5eb3ce0241e4ee852d0881b4abb3",
+      "bytes": 2190
+    },
+    {
+      "name": "README.md",
+      "sha256": "586353257807ca35d8b056249a66fba656e9c6c47f5fdaf3b7a242e405149d9f",
+      "bytes": 6899
+    },
+    {
+      "name": "observed-test.patch",
+      "sha256": "836be1e3554f245a2d3fc115a7f436f5e45f17f34b89db2b7963ccd5fbdbb86f",
+      "bytes": 731
+    },
+    {
+      "name": "restricted-reproduction.json",
+      "sha256": "a40d203f7e692fa8b651b61d367f939b04540d037436359ca1a106bacfed4425",
+      "bytes": 4462
+    },
+    {
+      "name": "widgets-mutation-part-SB1.json",
+      "sha256": "7be0d32f1bd3f55bf8ac15d13207345c090417a4b209eedd0cf9a6e9a4b93793",
+      "bytes": 21848
+    }
+  ],
+  "productGuardPresent": true,
+  "productChangedAfterCertificationFailure": false,
+  "canonicalTestsChangedAfterFailure": false,
+  "certificate": "NOT_ISSUED",
+  "readyForRelease": false,
+  "primaryOwnerDeletions": {
+    "count": 1333,
+    "statusSha256": "d422307a0927d4e525333bfc7b4ab370740748e98a053957729c3d1dd2be0646"
+  }
+}

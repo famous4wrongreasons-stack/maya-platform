@@ -1,0 +1,64 @@
+{
+  "candidate": "1e10a38365284791a5e7a8e5ec96c486e8079b05",
+  "runs": [
+    {
+      "databaseId": 39403966541,
+      "headSha": "1e10a38365284791a5e7a8e5ec96c486e8079b05",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "workflowName": "Widgets Mutation",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/39403966541"
+    },
+    {
+      "databaseId": 39403909125,
+      "headSha": "1e10a38365284791a5e7a8e5ec96c486e8079b05",
+      "status": "completed",
+      "conclusion": "success",
+      "workflowName": "Canonical React release packaging",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/39403909125"
+    },
+    {
+      "databaseId": 39403909081,
+      "headSha": "1e10a38365284791a5e7a8e5ec96c486e8079b05",
+      "status": "completed",
+      "conclusion": "success",
+      "workflowName": "MAYA Chat Shell",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/39403909081"
+    },
+    {
+      "databaseId": 39403909221,
+      "headSha": "1e10a38365284791a5e7a8e5ec96c486e8079b05",
+      "status": "completed",
+      "conclusion": "success",
+      "workflowName": "Platform CI",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/39403909221"
+    },
+    {
+      "databaseId": 39403909216,
+      "headSha": "1e10a38365284791a5e7a8e5ec96c486e8079b05",
+      "status": "completed",
+      "conclusion": "success",
+      "workflowName": "Widgets Live",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/39403909216"
+    },
+    {
+      "databaseId": 39403909119,
+      "headSha": "1e10a38365284791a5e7a8e5ec96c486e8079b05",
+      "status": "completed",
+      "conclusion": "success",
+      "workflowName": "Widget Contract",
+      "url": "https://github.com/famous4wrongreasons-stack/maya-platform/actions/runs/39403909119"
+    }
+  ],
+  "failedJobs": [
+    {
+      "name": "Widgets mutation battery (SB1)",
+      "conclusion": "failure"
+    },
+    {
+      "name": "Complete mutation receipt (all requested batteries)",
+      "conclusion": "failure"
+    }
+  ],
+  "certificate": "NOT_ISSUED"
+}

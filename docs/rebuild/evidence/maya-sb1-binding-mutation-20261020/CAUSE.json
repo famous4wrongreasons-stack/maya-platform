@@ -1,0 +1,105 @@
+{
+  "candidate": "1e10a38365284791a5e7a8e5ec96c486e8079b05",
+  "kind": "RESTRICTED_DIAGNOSTIC_NOT_CERTIFICATION",
+  "finding": "The generic throws assertion accepts missing-preview refusal after the removed link-id binding check. Existing production guard remains present.",
+  "productChanged": false,
+  "onlyDiagnosticCopyInstrumented": true,
+  "externalCalls": 0,
+  "runs": [
+    {
+      "phase": "baseline-observed",
+      "exit": 0,
+      "passed": 5,
+      "observations": [
+        {
+          "field": "tenantId",
+          "response": {
+            "message": "personal_client_context_mismatch",
+            "error": "Forbidden",
+            "statusCode": 403
+          }
+        },
+        {
+          "field": "userId",
+          "response": {
+            "message": "personal_client_context_mismatch",
+            "error": "Forbidden",
+            "statusCode": 403
+          }
+        },
+        {
+          "field": "linkId",
+          "response": {
+            "message": "personal_client_binding_changed",
+            "error": "Forbidden",
+            "statusCode": 403
+          }
+        },
+        {
+          "field": "clientId",
+          "response": {
+            "message": "personal_client_binding_changed",
+            "error": "Forbidden",
+            "statusCode": 403
+          }
+        },
+        {
+          "field": "verificationEvidenceHash",
+          "response": {
+            "message": "personal_client_binding_changed",
+            "error": "Forbidden",
+            "statusCode": 403
+          }
+        }
+      ]
+    },
+    {
+      "phase": "mutant-observed",
+      "exit": 0,
+      "passed": 5,
+      "observations": [
+        {
+          "field": "tenantId",
+          "response": {
+            "message": "personal_client_context_mismatch",
+            "error": "Forbidden",
+            "statusCode": 403
+          }
+        },
+        {
+          "field": "userId",
+          "response": {
+            "message": "personal_client_context_mismatch",
+            "error": "Forbidden",
+            "statusCode": 403
+          }
+        },
+        {
+          "field": "linkId",
+          "response": {
+            "error": {
+              "code": "booking_preview_stale"
+            }
+          }
+        },
+        {
+          "field": "clientId",
+          "response": {
+            "message": "personal_client_binding_changed",
+            "error": "Forbidden",
+            "statusCode": 403
+          }
+        },
+        {
+          "field": "verificationEvidenceHash",
+          "response": {
+            "message": "personal_client_binding_changed",
+            "error": "Forbidden",
+            "statusCode": 403
+          }
+        }
+      ]
+    }
+  ],
+  "finishedAt": "2026-10-20T11:39:18.289380+00:00"
+}
