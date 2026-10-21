@@ -19,8 +19,8 @@ jobs:
   platform-backend:
     name: NestJS and Prisma
     runs-on: ubuntu-latest
-    # 9ea9cc57 / job 105933614901 passed in 18m47s: preserve the full suite and
-    # leave hosted-runner margin instead of risking a near-deadline cancellation.
+    # Full tests run in their own fresh database job below. The 30-minute
+    # ceiling and every original static/build/HTTP check remain unchanged.
     timeout-minutes: 30
     services:
       postgres:
@@ -85,7 +85,6 @@ jobs:
       # This does not select a release payload: PWA/iOS packaging remains React AChat.
       - name: Build the runtime artifact required by the R01 integration proof
         run: node ../maya-chat-shell/build.mjs
-      - run: npm test -- --runInBand
       - run: npm run test:e2e -- --runInBand
       # 🔴 Регрессия на дефект приёма фактов (2026-09-20..28): повтор внутри чужой
       # транзакции разворачивал весь проход сверки. Доказать это можно только на
@@ -108,6 +107,66 @@ jobs:
           MAYA_REFERRAL_REWARD_PRESENTATION_KEY: test-referral-reward-presentation-key-for-widgets-live-only
           MAYA_REFERRAL_REWARD_PRESENTATION_KEY_VERSION: widgets-live-test-1
         run: npm run test:http
+
+  platform-backend-tests:
+    name: NestJS full test suite
+    runs-on: ubuntu-latest
+    # Run 39596676660: all 10,015 tests passed in 23m06s, then the combined
+    # job reached 30min during build. Keep the unfiltered suite and same ceiling.
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: maya_ci
+          POSTGRES_PASSWORD: maya_ci
+          POSTGRES_USER: maya_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U maya_ci -d maya_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: maya-saas-backend
+    env:
+      AUTH_RATE_LIMIT_SECRET: test-auth-rate-limit-secret-for-ci-only
+      AUTH_REFRESH_TOKEN_SECRET: test-refresh-token-secret-for-ci-only
+      AUTH_SESSION_METADATA_SECRET: test-session-metadata-secret-for-ci-only
+      CRM_ENCRYPTION_KEY: test-crm-encryption-key-for-ci-only
+      DATABASE_URL: postgresql://maya_ci:maya_ci@127.0.0.1:5432/maya_ci?schema=public
+      JWT_SECRET: test-jwt-signing-secret-for-ci-only
+      NODE_ENV: test
+      PHONE_AUTH_SECRET: test-phone-auth-secret-for-ci-only
+      SEED_DEMO_TENANT_ADMIN_EMAIL: admin@demo-business.local
+      SEED_DEMO_TENANT_ADMIN_PASSWORD: test-demo-tenant-password-for-ci
+      SEED_PLATFORM_OWNER_EMAIL: owner@maya.local
+      SEED_PLATFORM_OWNER_PASSWORD: test-platform-owner-password-for-ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: maya-saas-backend/package-lock.json
+      - name: Install architectural scanner prerequisite
+        run: |
+          if ! command -v rg >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y ripgrep
+          fi
+      - run: npm ci
+      - run: npm run prisma:generate
+      - run: npx prisma validate
+      - run: npx prisma migrate deploy
+      - run: npm run prisma:seed
+      # The unfiltered R01 integration proof consumes this generated runtime fixture.
+      # This does not select a release payload: PWA/iOS packaging remains React AChat.
+      - name: Build the runtime artifact required by the R01 integration proof
+        run: node ../maya-chat-shell/build.mjs
+      - run: npm test -- --runInBand
 
   platform-operator-bootstrap:
     name: First platform operator (isolated database)

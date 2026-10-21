@@ -43,10 +43,11 @@ test('contract registry census preserves historical pins and exact approved good
   const goods = { AE: ['crm.goods.receipt.create.v1'], POLICY: ['crm.goods.receipt.create.v1'], TOOL: ['inventory.goods.receipt.prepare', 'inventory.goods.read'], C9: ['inventory.goods.receipt.prepare', 'inventory.goods.read'] };
   const developmentReads = {
     AE: [], POLICY: [],
-    TOOL: ['inventory.goods.search', 'catalog.service.rename.preview'],
-    C9: ['inventory.goods.search', 'catalog.service.rename.preview'],
+    TOOL: ['inventory.goods.search', 'catalog.service.rename.preview', 'company.customer-facts.read'],
+    C9: ['inventory.goods.search', 'catalog.service.rename.preview', 'company.customer-facts.read'],
   };
-  const keys = Object.fromEntries(Object.entries(baseline).map(([space, count]) => [space, [...Array.from({ length: count }, (_, index) => `historical:${space}:${index}`), pricing[space], ...goods[space], ...developmentReads[space]]]));
+  const staffCreate = { AE: ['crm.staff.quick-create.v1'], POLICY: ['crm.staff.quick-create.v1'], TOOL: ['catalog.staff.create'], C9: ['catalog.staff.create'] };
+  const keys = Object.fromEntries(Object.entries(baseline).map(([space, count]) => [space, [...Array.from({ length: count }, (_, index) => `historical:${space}:${index}`), pricing[space], ...goods[space], ...developmentReads[space], ...staffCreate[space]]]));
   const source = fs.readFileSync(path.join(backend, 'scripts/widget-contract/registry-probe.js'), 'utf8');
   const census = rows => {
     let output = '';
@@ -66,6 +67,15 @@ test('contract registry census preserves historical pins and exact approved good
     return JSON.parse(output);
   };
   assert.deepEqual(census(keys), expected);
+  for (const space of Object.keys(baseline)) {
+    const renamed = structuredClone(keys);
+    renamed[space][renamed[space].indexOf(staffCreate[space][0])] += '.unapproved';
+    assert.deepEqual(census(renamed).current, expected.current);
+    assert.notDeepEqual(census(renamed), expected, 'Same-count staff substitution must fail');
+    const missing = structuredClone(keys);
+    missing[space] = missing[space].filter(value => value !== staffCreate[space][0]);
+    assert.notDeepEqual(census(missing), expected, 'Every exact staff registration is required');
+  }
   for (const space of ['TOOL', 'C9']) {
     for (const key of developmentReads[space]) {
       const renamed = structuredClone(keys);
@@ -111,7 +121,7 @@ test('R01 integration artifact is built before unfiltered backend and mutation c
       'R01 artifact must follow dependency installation and precede unfiltered tests');
   }
   for (const [file, job, consumer] of [
-    ['platform-ci.yml', 'platform-backend', '      - run: npm test -- --runInBand'],
+    ['platform-ci.yml', 'platform-backend-tests', '      - run: npm test -- --runInBand'],
     ['widgets-mutation.yml', 'widgets-mutation', '      - name: Run the battery shard'],
   ]) {
     const workflow = fs.readFileSync(path.resolve(backend, '../.github/workflows', file), 'utf8');
