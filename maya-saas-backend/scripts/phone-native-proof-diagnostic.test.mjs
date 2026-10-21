@@ -34,5 +34,18 @@ assert.equal(hidden.machineCode,null);assert.equal(hidden.machineCodeDisposition
 const server=failure(500,{statusCode:500,error:'Internal Server Error',message:secret});
 server.syntheticServerErrors=[{message:'CrmProviderResponseError: YClients request failed with status 403: '+secret,stack:secret},{message:'Error: phone_native_channel_refused'},{message:secret}];
 const projected=projectAvailability(server,source);assert.deepEqual(projected.serverErrorSignals,[{tag:'provider_response_error',providerHttpStatus:403},{tag:'native_channel_refused'}]);assert(!JSON.stringify(projected).includes(secret));checks.push('server_errors_finite_tags_only');
+// Finite diagnostic extension: preserve every original control above.
+for (const code of ['ai_tool_timeout_unknown', 'ai_tool_previous_execution_failed', 'ai_tool_execution_in_progress', 'ai_tool_input_too_large']) {
+  const input=failure(409,{error:{code},message:secret,token:secret});
+  const exact=projectAvailability(input,source);
+  assert.equal(exact.httpStatus,409);assert.equal(exact.machineCode,code);assert.equal(exact.machineCodeDisposition,'allowlisted');
+  assert.equal(exact.admissibleForCertification,false);assert(!JSON.stringify(exact).includes(secret));checks.push('finite_409_'+code);
+  for (const ctx of [{...source,subjectHead:'0'.repeat(40)},{...source,expectedHead:'0'.repeat(40)},{...source,proofSha256:'0'.repeat(64)}]) {
+    const refused=projectAvailability(input,ctx);assert.equal(refused.httpStatus,null);assert.equal(refused.machineCode,null);assert.equal(refused.reason,'unpinned_subject_or_proof');
+  }
+  checks.push('finite_409_wrong_pins_'+code);
+  const unknown=projectAvailability(failure(409,{error:{code:code+'_'+secret},message:secret}),source);
+  assert.equal(unknown.httpStatus,409);assert.equal(unknown.machineCode,null);assert.equal(unknown.machineCodeDisposition,'not_allowlisted_redacted');assert(!JSON.stringify(unknown).includes(secret));checks.push('finite_409_unknown_suffix_'+code);
+}
 const result={status:'PASS',node:process.version,checks,checksCount:checks.length,syntheticOnly:true,compiledProgrammeRerun:false,runtimeOrAssertionsChanged:false};
 console.log(JSON.stringify(result));

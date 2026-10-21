@@ -14,6 +14,8 @@ const codes = new Set([
   'booking_branch_source_unavailable', 'crm_integration_not_active',
   'service_catalog_source_unavailable', 'phone_native_create_egress_refused',
   'phone_native_channel_refused', 'ai_tool_execution_failed',
+  'ai_tool_timeout_unknown', 'ai_tool_previous_execution_failed',
+  'ai_tool_execution_in_progress', 'ai_tool_input_too_large',
 ]);
 const classes = new Set([
   'Bad Request', 'Unauthorized', 'Forbidden', 'Not Found', 'Conflict',
