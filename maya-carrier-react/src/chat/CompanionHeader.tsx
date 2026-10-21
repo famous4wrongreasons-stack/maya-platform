@@ -53,7 +53,7 @@ export function CompanionHeader({ userName, tenantName, current, openChat, askSc
         <MayaCompanion state={state} event={event} moving={moving} />
         <span className="companion-caption">Maya</span>
       </button>
-      <button type="button" className="companion-circle" aria-label="Спросить Maya о расписании на сегодня" title="Спросить Maya о расписании на сегодня"
+      <button type="button" className="companion-circle" aria-label="Мои записи: записаться, перенести, отменить" title="Мои записи: записаться, перенести, отменить"
         disabled={!scheduleEnabled} onClick={askSchedule}><span className="companion-calendar-icon" aria-hidden="true" /></button>
       <p className="companion-business">{tenantName ?? 'Разговор с Maya'}</p>
     </header>

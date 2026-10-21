@@ -20,9 +20,12 @@ export function OwnAppointmentsSheet({ t }: { readonly t: Tokens }) {
   const [creating, setCreating] = useState(false);
   const locked = v.busy || (creating && create.busy);
   useEffect(() => {
-    if (v.open) { if (!dialog.current?.open) dialog.current?.showModal(); }
+    if (v.open) {
+      if (!dialog.current?.open) dialog.current?.showModal();
+      if (v.entry === 'create') { setCreating(true); personalBooking.openDirect(); }
+    }
     else { dialog.current?.close(); setCreating(false); personalBooking.closeDirect(); }
-  }, [v.open]);
+  }, [v.open, v.entry]);
   const close = () => { if (!locked) { personalBooking.closeDirect(); ownAppointments.close(); } };
   return <dialog ref={dialog} className="companion-menu" aria-label="Мои записи" aria-modal="true"
     style={{ width: 'min(calc(100vw - 24px), 560px)', maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto' }}
