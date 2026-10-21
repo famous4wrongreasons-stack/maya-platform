@@ -436,6 +436,7 @@ describe('K13 — no C10 autonomy', () => {
     const laterReadKeys = [
       'inventory.goods.search',
       'catalog.service.rename.preview',
+      'company.customer-facts.read',
     ];
     expect(
       rows
@@ -444,12 +445,18 @@ describe('K13 — no C10 autonomy', () => {
         .sort(),
     ).toEqual([
       ['catalog.service.rename.preview', 'READ'],
+      ['company.customer-facts.read', 'READ'],
       ['inventory.goods.search', 'READ'],
     ]);
+    expect(
+      rows.filter((c) => c.capabilityKey === 'catalog.staff.create')
+        .map((c) => [c.capabilityKey, c.mode]),
+    ).toEqual([['catalog.staff.create', 'PROPOSE_ONLY']]);
     const beforeGoods = rows.filter(
       (c) =>
         !goodsKeys.includes(c.capabilityKey) &&
-        !laterReadKeys.includes(c.capabilityKey),
+        !laterReadKeys.includes(c.capabilityKey) &&
+        c.capabilityKey !== 'catalog.staff.create',
     );
     expect(beforeGoods).toHaveLength(58);
     expect(beforeGoods.filter((c) => c.mode === 'READ')).toHaveLength(42);
@@ -465,11 +472,11 @@ describe('K13 — no C10 autonomy', () => {
       ['inventory.goods.read', 'READ'],
       ['inventory.goods.receipt.prepare', 'PROPOSE_ONLY'],
     ]);
-    expect(rows).toHaveLength(62);
-    expect(reads).toHaveLength(45);
-    expect(rows.filter((c) => c.mode === 'PROPOSE_ONLY')).toHaveLength(15);
+    expect(rows).toHaveLength(64);
+    expect(reads).toHaveLength(46);
+    expect(rows.filter((c) => c.mode === 'PROPOSE_ONLY')).toHaveLength(16);
     expect(rows.filter((c) => c.mode === 'OWNER_HANDOFF')).toHaveLength(2);
-    expect(openers).toHaveLength(17);
+    expect(openers).toHaveLength(18);
     for (const r of reads)
       expect(isRunOpening({ space: 'C9', key: r.capabilityKey })).toBe(false);
     for (const o of openers)

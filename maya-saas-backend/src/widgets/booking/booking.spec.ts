@@ -221,9 +221,18 @@ describe('Legacy booking owner admits none of the 94 current MONEY keys', () => 
     // These approved capabilities do not widen the separate booking COMMIT allowlist.
     const money = rows().filter(isMoney);
     expect(money).toHaveLength(94);
-    expect(rows()).toHaveLength(228);
+    expect(rows()).toHaveLength(229);
+    const staff = rows().filter(
+      (row) => row.capability === 'crm.staff.quick-create.v1',
+    );
+    expect(staff).toHaveLength(1);
+    expect(isMoney(staff[0])).toBe(false);
     expect(
-      rows().filter((row) => !additions.includes(row.capability)),
+      rows().filter(
+        (row) =>
+          !additions.includes(row.capability) &&
+          row.capability !== 'crm.staff.quick-create.v1',
+      ),
     ).toHaveLength(226);
     expect(
       money.filter((row) => !additions.includes(row.capability)),

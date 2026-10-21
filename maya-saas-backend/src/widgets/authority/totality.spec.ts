@@ -66,21 +66,40 @@ const isServiceRenamePreviewRef = (ref: CapabilityRefLike): boolean =>
   (ref.space === 'C9' || ref.space === 'TOOL') &&
   ref.key === 'catalog.service.rename.preview';
 
+const isStaffCreateRef = (ref: CapabilityRefLike): boolean =>
+  ((ref.space === 'C9' || ref.space === 'TOOL') &&
+    ref.key === 'catalog.staff.create') ||
+  (ref.space === 'AE' && ref.key === 'crm.staff.quick-create.v1');
+const isCustomerFactsRef = (ref: CapabilityRefLike): boolean =>
+  (ref.space === 'C9' || ref.space === 'TOOL') &&
+  ref.key === 'company.customer-facts.read';
+
 const historicalRefs = (): readonly CapabilityRefLike[] =>
   allRefs().filter(
     (ref) =>
       !isPricingRef(ref) &&
       !isGoodsRef(ref) &&
       !isGoodsSearchRef(ref) &&
-      !isServiceRenamePreviewRef(ref),
+      !isServiceRenamePreviewRef(ref) &&
+      !isStaffCreateRef(ref) &&
+      !isCustomerFactsRef(ref),
   );
 
 describe('K4 — the four key spaces, bound to the live registries', () => {
   it('preserves every historical census and adds exactly the three space-qualified pricing refs', () => {
     const c = census();
-    expect(c.C9).toBe(62);
-    expect(c.TOOL).toBe(53);
-    expect(c.AE).toBe(228);
+    expect(c.C9).toBe(64);
+    expect(c.TOOL).toBe(55);
+    expect(c.AE).toBe(229);
+    expect(allRefs().filter(isStaffCreateRef).map(capKey).sort()).toEqual([
+      'AE:crm.staff.quick-create.v1',
+      'C9:catalog.staff.create',
+      'TOOL:catalog.staff.create',
+    ]);
+    expect(allRefs().filter(isCustomerFactsRef).map(capKey).sort()).toEqual([
+      'C9:company.customer-facts.read',
+      'TOOL:company.customer-facts.read',
+    ]);
     for (const [space, count] of [
       ['C9', 57],
       ['TOOL', 48],
@@ -174,7 +193,7 @@ describe('K4 — verificationFloor is TOTAL over all four spaces', () => {
   it('returns a floor on the ladder for every key in every space, with no default branch', () => {
     const refs = allRefs();
     expect(historicalRefs()).toHaveLength(57 + 48 + 226 + CONTROL_KEYS.size);
-    expect(refs).toHaveLength(62 + 53 + 228 + CONTROL_KEYS.size);
+    expect(refs).toHaveLength(64 + 55 + 229 + CONTROL_KEYS.size);
     const offLadder: string[] = [];
     for (const ref of refs) {
       const floor = subjectFloorFor(ref);
@@ -280,6 +299,8 @@ describe('K4 — historical floor repairs, the bounded V1.4 admission, and the u
         c.capabilityKey !== SERVICE_PRICE_TOOL &&
         c.capabilityKey !== 'inventory.goods.search' &&
         c.capabilityKey !== 'catalog.service.rename.preview' &&
+        c.capabilityKey !== 'company.customer-facts.read' &&
+        c.capabilityKey !== 'catalog.staff.create' &&
         !['inventory.goods.read', 'inventory.goods.receipt.prepare'].includes(
           c.capabilityKey,
         ),
@@ -289,7 +310,7 @@ describe('K4 — historical floor repairs, the bounded V1.4 admission, and the u
       return a;
     }, {});
     expect(counts.LOCAL + counts.SOURCE_READ + counts.SOURCE_HANDOFF).toBe(57);
-    expect(C9_CAPABILITIES).toHaveLength(62);
+    expect(C9_CAPABILITIES).toHaveLength(64);
     expect(
       C9_CAPABILITIES.filter((c) => c.capabilityKey === SERVICE_PRICE_TOOL),
     ).toEqual([

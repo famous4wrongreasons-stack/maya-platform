@@ -102,7 +102,8 @@ describe('D4 own consent actual PostgreSQL HTTP', () => {
     const migrations = await db.prisma.$queryRawUnsafe<{ count: bigint }[]>(
       'SELECT count(*) FROM "_prisma_migrations" WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL',
     );
-    expect(Number(migrations[0].count)).toBe(106);
+    // The integrated A22 customer-facts namespace migration is applied as well.
+    expect(Number(migrations[0].count)).toBe(107);
     observations.push({
       case: 'fresh-pg16-all-migrations',
       applied: Number(migrations[0].count),

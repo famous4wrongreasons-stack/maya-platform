@@ -109,10 +109,12 @@ describe('fixed no-handoff certificate threshold', () => {
         }),
     );
     expect(PROFILE_REGISTRY.tuples).toEqual(tuples);
-    // These later READ additions have no approved widget successor admission.
+    // These later additions have no approved successor admission in this fixed profile.
     // Preserve the fixed release profile; development registry growth is not a grant.
     const developmentOnly = [
+      'company.customer-facts.read',
       'catalog.service.rename.preview',
+      'catalog.staff.create',
       'inventory.goods.search',
     ];
     expect(
@@ -123,6 +125,8 @@ describe('fixed no-handoff certificate threshold', () => {
         .sort(),
     ).toEqual([
       ['catalog.service.rename.preview', 'READ'],
+      ['catalog.staff.create', 'PROPOSE_ONLY'],
+      ['company.customer-facts.read', 'READ'],
       ['inventory.goods.search', 'READ'],
     ]);
     for (const key of developmentOnly)

@@ -627,7 +627,7 @@ export class WidgetEmitterService {
       request.composerInput.capability !== STAFF_CREATE_TOOL ||
       source.from !== 'capability_envelope' ||
       source.capability !== STAFF_CREATE_TOOL ||
-      !parseServicePriceApprovalRef(ref) ||
+      !parseStaffCreateApprovalRef(ref) ||
       typeof linkage.revalidate !== 'function' ||
       !Number.isFinite(expiresAt.getTime()) ||
       expiresAt.getTime() <= now.getTime()

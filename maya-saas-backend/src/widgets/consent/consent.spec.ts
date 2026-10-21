@@ -54,13 +54,22 @@ const handoff = (over: Partial<ConsentIntentLike> = {}): ConsentIntentLike => ({
 });
 
 describe('K12 — the widget layer cannot confer consent', () => {
-  it('CONSENT(cap) selects exactly 3 of 228, and IDENTITY(cap) exactly 6', () => {
+  it('CONSENT(cap) selects exactly 3 of 229, and IDENTITY(cap) exactly 6', () => {
     // The contract states both figures. They are re-derived from the live registry rather than
     // transcribed, and both disjuncts matter: the reachable owner today is named by its
     // actionClass, not by any of the eight reserved names, so a name-based check would miss it.
     const rows = aeRows();
-    // The integrated goods receipt adds one AE row, without adding a consent or identity act.
-    expect(rows).toHaveLength(228);
+    // Preserve the 228-row checkpoint and identify the one staff-create addition.
+    const staffCreate = rows.filter(
+      (row) => row.capability === 'crm.staff.quick-create.v1',
+    );
+    expect(
+      rows.filter((row) => row.capability !== 'crm.staff.quick-create.v1'),
+    ).toHaveLength(228);
+    expect(staffCreate).toHaveLength(1);
+    expect(isConsentCapability(staffCreate[0])).toBe(false);
+    expect(isIdentityCapability(staffCreate[0])).toBe(false);
+    expect(rows).toHaveLength(229);
     expect(rows.filter(isConsentCapability)).toHaveLength(3);
     expect(rows.filter(isIdentityCapability)).toHaveLength(6);
   });
@@ -337,10 +346,15 @@ describe('K12 — CONSENT.1 … CONSENT.6', () => {
 
 describe('K12 — both kinds are blocked on capability registration', () => {
   it('no consent, identity or privacy READ key is registered', () => {
-    // Preserve the 52-tool checkpoint, then name the one later READ delta (995a87e3).
+    // Preserve the 52-tool checkpoint and name each later non-sensitive addition.
     expect(
       MAYA_AI_TOOL_CATALOG.filter(
-        (t) => t.name !== 'catalog.service.rename.preview',
+        (t) =>
+          ![
+            'catalog.service.rename.preview',
+            'company.customer-facts.read',
+            'catalog.staff.create',
+          ].includes(t.name),
       ),
     ).toHaveLength(52);
     expect(
@@ -350,7 +364,22 @@ describe('K12 — both kinds are blocked on capability registration', () => {
     ).toEqual([
       expect.objectContaining({ riskTier: 'read', approvalPolicy: 'none' }),
     ]);
-    expect(MAYA_AI_TOOL_CATALOG).toHaveLength(53);
+    expect(
+      MAYA_AI_TOOL_CATALOG.filter(
+        (t) => t.name === 'company.customer-facts.read',
+      ),
+    ).toEqual([
+      expect.objectContaining({ riskTier: 'read', approvalPolicy: 'none' }),
+    ]);
+    expect(
+      MAYA_AI_TOOL_CATALOG.filter((t) => t.name === 'catalog.staff.create'),
+    ).toEqual([
+      expect.objectContaining({
+        riskTier: 'high_write',
+        approvalPolicy: 'actor',
+      }),
+    ]);
+    expect(MAYA_AI_TOOL_CATALOG).toHaveLength(55);
     expect(
       MAYA_AI_TOOL_CATALOG.filter((t: { name: string }) =>
         /consent|identity|privacy/.test(t.name),
