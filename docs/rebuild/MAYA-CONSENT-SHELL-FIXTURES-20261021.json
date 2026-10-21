@@ -1,0 +1,36 @@
+{
+  "contract": "maya.consent-shell-fixture-reconciliation/1",
+  "productChanged": false,
+  "previousProductCommit": "0c43bb123da1e9e9178f67650cc8612c24b303ef",
+  "trigger": "Full integration shell test exposed 3 failures: exact PATHS list, exact transport method list, and selftest fixture PATHS inventories.",
+  "changes": [
+    "net.test.mjs exact path list includes only the new /privacy/consents entry; exact transport list includes only ownConsents.",
+    "Existing single-fetch-site source scan also includes src/net/own-consents.ts.",
+    "The four complete PATHS fixture inventories each add ownConsents: /privacy/consents. Their named refuse/admit rules and probe bodies remain unchanged."
+  ],
+  "verification": {
+    "command": "node --test test/net.test.mjs test/build.selftest.test.mjs test/own-consents.test.mjs",
+    "red": {
+      "tests": 96,
+      "pass": 93,
+      "fail": 3,
+      "skipped": 0,
+      "sha256": "53671a8402519e7fca58b9a086f083de254e17e2d8764eee0fbed2ce5dbcb135"
+    },
+    "green": {
+      "tests": 96,
+      "pass": 96,
+      "fail": 0,
+      "skipped": 0,
+      "sha256": "9e684084ce4bdc77388cf55a66cbaa221ae2347883e31ec90c4cf28edfd43827"
+    },
+    "buildSelfTest": "Includes every named refuse/admit fixture, coverage and 8/8 bypass probes; the selftest nonvacuity, write guard, emitted graph and locale determinism checks also pass.",
+    "logs": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/completion-20261021/consent-shell-fixture-fix"
+  },
+  "history": [
+    "Initial log-redirection command targeted the wrong parent directory and failed before any tests. The empty created directory was removed; corrected command produced red.log. No test outcome was discarded."
+  ],
+  "guardChanges": [],
+  "productionEffects": 0,
+  "certificate": "NOT_ISSUED"
+}

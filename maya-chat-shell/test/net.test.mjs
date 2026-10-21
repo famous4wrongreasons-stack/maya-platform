@@ -331,6 +331,7 @@ test('PATHS holds exactly the approved literals; one fetch call site; API_BASE i
     '/ai/goods/item-read',
     '/ai/goods/receipt-review',
     '/privacy/conversations',
+    '/privacy/consents',
     '/ai/transcribe',
     '/auth/email/start',
     '/auth/email/verify',
@@ -352,7 +353,7 @@ test('PATHS holds exactly the approved literals; one fetch call site; API_BASE i
   const { P1_PATHS } = await import('../build.mjs');
   assert.deepEqual(values, [...P1_PATHS].sort());
 
-  const netSources = ['client.ts', 'session.ts', 'project.ts', 'own-tasks.ts', 'workspace-reads.ts', 'ideas.ts', 'goods-photo.ts', 'onboarding.ts', 'crm-setup.ts', 'personal.ts', 'endpoint.ts'].map((f) => [f, read(`src/net/${f}`)]);
+  const netSources = ['client.ts', 'session.ts', 'project.ts', 'own-consents.ts', 'own-tasks.ts', 'workspace-reads.ts', 'ideas.ts', 'goods-photo.ts', 'onboarding.ts', 'crm-setup.ts', 'personal.ts', 'endpoint.ts'].map((f) => [f, read(`src/net/${f}`)]);
   const fetchCalls = netSources.flatMap(([f, s]) => [...s.matchAll(/\bfetch\s*\(/g)].map(() => f));
   assert.deepEqual(fetchCalls, ['client.ts'], 'exactly one fetch( call, in client.ts');
   assert.equal((src.match(/\/widgets\/intent/g) ?? []).length, 1, 'one approved widget intent literal');
@@ -375,7 +376,7 @@ test('typed methods only: the two widget methods are explicit; no generic reques
   assert.deepEqual(Object.keys(net.onboarding).sort(), ['cancel', 'dispose', 'finish', 'submit', 'subscribe', 'view']);
   assert.deepEqual(Object.keys(net.telegramLink).sort(), ['cancel', 'start', 'subscribe', 'view']);
   assert.deepEqual(Object.keys(net.session).sort(), ['completeTelegram', 'findBusinesses', 'landing', 'onLanding', 'signInPassword', 'signOut', 'startEmail', 'startTelegram', 'subscribe', 'verifyEmail', 'view']);
-  assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'conversation', 'crmSetupActivate', 'crmSetupOperation', 'crmSetupStage', 'crmSetupStatus', 'eraseConversation', 'feed', 'goodsPhotoItem', 'goodsPhotoPreview', 'goodsPhotoReview', 'goodsPhotoSearch', 'ideas', 'markFeedRead', 'ownTasks', 'personalBranches', 'personalCreate', 'personalPreview', 'personalResults', 'personalServices', 'personalSlots', 'personalStaff', 'report', 'reports', 'resolveWidgets', 'taskCommand', 'transcribe', 'widgetIntent']);
+  assert.deepEqual(Object.keys(net.transport).sort(), ['chat', 'conversation', 'crmSetupActivate', 'crmSetupOperation', 'crmSetupStage', 'crmSetupStatus', 'eraseConversation', 'feed', 'goodsPhotoItem', 'goodsPhotoPreview', 'goodsPhotoReview', 'goodsPhotoSearch', 'ideas', 'markFeedRead', 'ownConsents', 'ownTasks', 'personalBranches', 'personalCreate', 'personalPreview', 'personalResults', 'personalServices', 'personalSlots', 'personalStaff', 'report', 'reports', 'resolveWidgets', 'taskCommand', 'transcribe', 'widgetIntent']);
 });
 
 test('widget transport sends only typed bodies and retains only authorized response members', async () => {

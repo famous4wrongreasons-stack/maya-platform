@@ -24,6 +24,7 @@ const PATHS = {
   chat: '/ai/chat',
   conversation: '/ai/conversation',
   historyErasure: '/privacy/conversations',
+  ownConsents: '/privacy/consents',
   transcribe: '/ai/transcribe',
   widgetIntent: '/widgets/intent',
   widgetResolve: '/widgets/resolve',
