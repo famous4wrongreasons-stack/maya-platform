@@ -100,10 +100,54 @@ Retention helper predicates in that fixture deny all claims; the retention
 exception and a full application migration are not qualified by this probe.
 It always stops its owned cluster and retains the proof SQL/result.
 
-Before integration/deployment: apply and verify the migration in the intended
-isolated application database, run actual HTTP/current-carrier publication
-and read/restart proofs, reconcile the changed C9 registry with that candidate's
-admission profile, and perform fresh candidate qualification. Existing signed
+The separate `scripts/customer-facts-http-proof.mjs` now verifies the full
+application path. From `maya-saas-backend/`, run with Node 22:
+
+```sh
+node scripts/customer-facts-http-proof.mjs --run --output=/absolute/new/proof-directory
+```
+
+This macOS proof requires PostgreSQL 16 in the existing Homebrew location,
+Chrome, and the checkout's installed backend/React build dependencies. It
+refuses existing output or backend environment files, creates an owned fresh
+loopback PostgreSQL cluster, applies all 107 real migrations, builds the current
+React carrier and starts the ordinary `AppModule` without replacing providers,
+guards, Prisma, A22, C9 or source owners. Synthetic tenants/users and entitlement
+fixtures are explicitly restricted to its owned proof database. They do not
+constitute signed candidate admission. Only model selection is scripted; an
+outbound-fetch trap and inherited OS network policy deny provider/model effects.
+
+The real HTTP path signs in with passwords, publishes via the existing
+confirmed A22 writer, checks every resulting owner/SUCCEEDED receipt, and reads
+through the actual AI tool and ordinary chat endpoints. Controls cover absent
+public source, private rules only, cross-tenant injection/read, non-owner write,
+exact same-key and C9 deduplication, revision change, real wall-clock expiry of
+the **same revision**, and revoked reader membership. Old direct source reads
+return 409; ordinary C9 chat retains its existing 201 transport envelope with an
+exact blocked reply and non-COMPLETED coordination, without old fact text or
+internal source namespace. This is a source refusal, not a successful answer.
+
+The browser signs in through the actual current React email/debug UI, waits
+for authenticated history readiness, and displays the verified owner-labelled
+fact followed by an expired/blocked answer. Exact DOM text, grounding and
+absence of raw JSON widgets are asserted and screenshots retained. Existing
+historical chat remains history, not current evidence. Chrome uses an ephemeral
+profile, a non-forwarding external proxy and an exact page-request allowlist.
+Its internal macOS sandbox cannot nest inside `sandbox-exec`; the owned browser
+therefore uses `--no-sandbox` **inside the still-inherited OS loopback-only
+network fence**. No real user browser profile or external page is opened.
+
+The driver then really restarts PostgreSQL and starts a new AppModule process.
+Persisted JWT/source/C9 identities still reject stale or revoked access; fresh
+reads/chat return no expired facts. Appointment, marketing delivery and team
+message counts remain zero. The owned cluster is stopped and the temporary
+credential checkpoint removed in cleanup. Output retains exact proof sources,
+hashes, migrations/Jest logs, phase controls and screenshots. The final scoped
+proof passed both stages; this is not paid-model language acceptance, native
+packaging, general retention qualification or the full certification programme.
+
+Before integration/deployment: reconcile the changed C9 registry with that
+candidate's admission profile and perform fresh candidate qualification. Existing signed
 profiles and prior receipts do not admit this new capability. No server feature,
 user database, real owner publication, production signature or phone build is
 changed by this development commit.
