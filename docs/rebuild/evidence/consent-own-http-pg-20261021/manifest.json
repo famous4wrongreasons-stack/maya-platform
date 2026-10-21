@@ -1,0 +1,39 @@
+{
+  "contract": "maya.consent-own-http-pg-proof/1",
+  "status": "passed",
+  "candidateHead": "0c43bb123da1e9e9178f67650cc8612c24b303ef",
+  "sourceHashes": {
+    "scripts/consent-own-http-proof.mjs": "669e197f1dcf7595068f95d7575f9472e95c0afa2014a8354b683ca27bc0da8b",
+    "test/widgets-live/consent-own-read.probe-spec.ts": "ebb0fbed20b044b5e0394a8c05a5336af84a209f951fb57a735814110ef74270",
+    "src/crm/client-consent-read.service.ts": "e49d66c9abd54784151a24cb38d4b8dbf4a73aba90ab4fe570ddb2bb3f3614a8",
+    "src/crm/client-consent-read.controller.ts": "c84dbd9e73c3a540e537061f4bdc326f12927a15fd1bbd98baa47f9c696404de"
+  },
+  "pgVersion": "postgres (PostgreSQL) 16.14 (Homebrew)",
+  "cluster": "/var/folders/qw/q88nsc3s5bqcv2c_bwgm28gh0000gn/T/maya-consent-own-iIivjx/pg",
+  "database": "maya_widget_gate_proof_consent_own_591b0715da7d",
+  "port": 54079,
+  "completed": [
+    "initdb",
+    "pg-start",
+    "createdb",
+    "migrations",
+    "http-proof",
+    "pg-stop"
+  ],
+  "externalEgress": "DENIED_BY_OS",
+  "syntheticFixtureAuthority": [
+    "verified subject link owner",
+    "historical challenge issuer",
+    "canonical security invalidation external approval"
+  ],
+  "applicationGuardsOverridden": false,
+  "productionEffects": 0,
+  "certificate": "NOT_ISSUED",
+  "resources": {
+    "nodeHeapMb": 3072,
+    "pgSharedBuffersMb": 64,
+    "jestWorkers": 1
+  },
+  "currentStage": "pg-stop",
+  "clusterStopped": true
+}

@@ -1,0 +1,126 @@
+{
+  "contract": "maya.consent-own-http-pg-proof-review/1",
+  "status": "PASS_LOCAL_DIAGNOSTIC",
+  "productCommit": "0c43bb123da1e9e9178f67650cc8612c24b303ef",
+  "purpose": "Close the D4 actual PostgreSQL/ordinary AppModule HTTP verification gap without changing product sources, authorities, guards or export availability.",
+  "reproduce": {
+    "cwd": "maya-saas-backend",
+    "command": "node scripts/consent-own-http-proof.mjs --run --output /ABSOLUTE/NEW/OUTPUT",
+    "requirements": [
+      "macOS sandbox-exec",
+      "PostgreSQL16 at /opt/homebrew/opt/postgresql@16/bin",
+      "installed existing backend dependencies",
+      "no .env or .env.local in backend"
+    ],
+    "cluster": "Always fresh owned cluster/free port/guarded synthetic database; stopped on completion or failure. No existing DB is reused."
+  },
+  "evidence": {
+    "manifest": "docs/rebuild/evidence/consent-own-http-pg-20261021/manifest.json",
+    "observations": "docs/rebuild/evidence/consent-own-http-pg-20261021/observations.json",
+    "rawOutput": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/completion-20261021/consent-register-http-proof-03",
+    "files": {
+      "pg-start.log": "66afd0411ccc09366e99fdd99b85f21899c8d2d064f5835126859618802153ad",
+      "jest.json": "fab057da94d0cf888ad842dce78d84e33e528c46f0699531768b8b2ff81c9a11",
+      "http-proof.log": "c3d8c05810c361f99dbe9574b4f74d98e5dcd6347e9303e1f814cad5853c795d",
+      "migrations.log": "702f21969eb52b851466eab1492b89f88861f25032c98958cd65fa4ddd925c94",
+      "pg-stop.log": "ca19178a35ab4153b75b494963b66ce8243e1b94c173107c87b44d09db23652d",
+      "postgres.log": "59c858f760760a086c58c6c46ac21e184b8f76af0fcf342d65860b2736569f34",
+      "observations.json": "4f0a7820e406d46c37f2956a506db0573d60dce4a5d7bb5e598cd0338e0f0ccb",
+      "manifest.json": "5e6210c5b3815a696daf265004a5f77cde94a9ba62e039a84285e307adaa6734",
+      "createdb.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "initdb.log": "614b8898af9e634e03231a7d798279d0fc011763b2539f1016b486ce958c8c42"
+    }
+  },
+  "checks": {
+    "postgres": "postgres (PostgreSQL) 16.14 (Homebrew)",
+    "allMigrationsApplied": 106,
+    "jest": {
+      "suites": 1,
+      "tests": 1,
+      "httpAssertions": 18
+    },
+    "actualReadOnlyResolverCalls": 11,
+    "protectedSourceTables": [
+      "Client",
+      "ClientChannelLink",
+      "ClientLinkChallenge",
+      "CrmClientLink",
+      "ClientConsentFact",
+      "ClientConsentInvalidation",
+      "CustomerProfile",
+      "ActionExecution",
+      "ActionExecutionIdempotencyBinding",
+      "ActionAttempt",
+      "ActionTargetMutation",
+      "ClientBookingConfirmation",
+      "Appointment"
+    ],
+    "all18ReadWindowsSourceSnapshotIdentical": true,
+    "sourceWrites": 0,
+    "rawDurableWrites": 0,
+    "qualificationSourceFactReads": 0,
+    "providerModelOtpFetchCalls": 0,
+    "egress": "OS-denied except loopback/Unix sockets",
+    "nodeSyntax": "PASS",
+    "prettier": "PASS",
+    "focusedTypeCheckedESLint": "PASS"
+  },
+  "authority": {
+    "ordinaryHttp": "Existing bootHttp imports complete AppModule and configureHttpApp; no auth, guard, consent or identity provider override. The sole Prisma override is existing call-through WriteRecorder. Resolve observer queries actual PostgreSQL transaction_read_only, then calls original resolver.",
+    "login": "Actual POST /api/auth/login with synthetic bcrypt password, real AuthSession/JWT and ordinary JWT guard. Existing proof-only loopback login-rate bucket reset is outside read windows.",
+    "subjectLink": "Existing Fixtures.client uses ClientChannelLinkService.link with synthetic verifier authority, never raw link insert.",
+    "consentGrantRevoke": "Existing ClientChannelRuntimeService.submitConsent and canonical record_client_consent source writer; fixture writes outside observed read windows.",
+    "invalidation": "Separate synthetic historical issuer and external approval build fixture through existing ClientLinkChallengeService, canonical recordChannelConsent, and ConsentSecurityInvalidationService. Actual synthetic platform_owner password login + JwtStrategy actor; existing ActionEngineKernel/CanonicalActionIngress used; no raw invalidation insert or DB guard removal. Fixture issuer and external approval are never installed in AppModule.",
+    "expiry": "Persistent ClientChannelLink has no expiry field; current verified subject expiry is actual AuthSession/JWT. Actual expired session rejected 401; revoked persistent verified link rejected 403.",
+    "noWrites": "For each request, SHA256 of complete sorted row contents of every protected source table equals before/after. Recorder also reports zero model writes to them, zero raw durable writes. SET TRANSACTION READ ONLY is the single exact non-durable SET exception; existing recorder remains unchanged. AuthSession login/activity writes are not consent/source mutation."
+  },
+  "cases": [
+    "never-asked",
+    "current-grants",
+    "current-revokes",
+    "foreign-tenant-own-only",
+    "foreign-client-query-refused",
+    "foreign-tenant-query-refused",
+    "same-tenant-unlinked-user-refused",
+    "unauthenticated-refused",
+    "expired-real-session-refused",
+    "revoked-real-session-refused",
+    "revoked-verified-link-refused",
+    "historical-current-grants-before-invalidation",
+    "invalidated-heads-no-resurrection",
+    "export-step-up-closed",
+    "qualification-replay-no-export",
+    "export-subject-injection-refused",
+    "export-fake-step-up-refused",
+    "export-revoked-link-refused"
+  ],
+  "history": [
+    {
+      "attempt": "consent-register-http-proof-01",
+      "status": "PROOF_HARNESS_FAILURE_BEFORE_FIRST_CONSENT_READ",
+      "error": "PostgreSQL 42703: snapshot assumed id on a table with composite key. All 106 migrations applied and AppModule booted.",
+      "correction": "Deterministic full-row JSON snapshot sorting; no source rows omitted.",
+      "resolution": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/completion-20261021/history/consent-http-proof/attempt-01-snapshot-column/RESOLUTION.json",
+      "manifestSha256": "a5afca73fe09c91b69be7f628f086e5989a4a752b58646d827de8a10d7582bf5",
+      "logSha256": "2cd643fb9177930e493391b2ccbb5d10c1428f84243de77e24ee60053bf10fae",
+      "clusterStopped": true
+    },
+    {
+      "attempt": "consent-register-http-proof-02",
+      "status": "PASS_BEFORE_EVIDENCE_TYPE_REFINEMENT",
+      "correction": "Typed HTTP body access resolves 12 ESLint errors/6 warnings; persist source snapshot hash pair. Runtime assertions retained. Final exact-source attempt03 PASS.",
+      "resolution": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/completion-20261021/history/consent-http-proof/attempt-02-evidence-refinement/RESOLUTION.json",
+      "manifestSha256": "876b1333aa8ffcf2d7dad5beee47bc8285f5ac48e2bfc6d793dc9a843b774169",
+      "clusterStopped": true
+    }
+  ],
+  "limits": [
+    "This is a focused synthetic local HTTP/PG diagnostic, not hosted mutation evidence, signed admission, deployment or real customer execution.",
+    "Consent register export remains STEP_UP_UNAVAILABLE; qualification and replay never read source facts or produce an export. No step-up authority invented.",
+    "No assertion that historical production invalidations are approved by synthetic fixture approval.",
+    "All guards/tests/timeouts and candidate product sources remain unchanged. No full-suite rerun.",
+    "Integrated shell manifest rebuild and current-candidate release/evidence checks remain owned by integration."
+  ],
+  "certificate": "NOT_ISSUED",
+  "productionEffects": 0
+}

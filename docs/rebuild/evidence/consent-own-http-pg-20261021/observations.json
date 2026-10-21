@@ -1,0 +1,280 @@
+{
+  "contract": "maya.consent-own-http-pg-proof/1",
+  "observations": [
+    {
+      "case": "fresh-pg16-all-migrations",
+      "applied": 106
+    },
+    {
+      "case": "never-asked",
+      "status": 200,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "2b804f37be7e1e44db9b0da95a7e7aa6ae5f35567d6d73e1d1eafb0f6d470673",
+        "after": "2b804f37be7e1e44db9b0da95a7e7aa6ae5f35567d6d73e1d1eafb0f6d470673"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 1,
+      "advisoryLocks": 2,
+      "factReadCount": 2
+    },
+    {
+      "case": "current-grants",
+      "status": 200,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "3b8a2065f60728a600f8ab4d61333dab908662c06d7ad19f309eb9f944ab0c03",
+        "after": "3b8a2065f60728a600f8ab4d61333dab908662c06d7ad19f309eb9f944ab0c03"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 1,
+      "advisoryLocks": 2,
+      "factReadCount": 4
+    },
+    {
+      "case": "current-revokes",
+      "status": 200,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "de1148bc7dc00b6d1bad3750831d21e9e1663015c33a0525141ba1dc7c8c95cf",
+        "after": "de1148bc7dc00b6d1bad3750831d21e9e1663015c33a0525141ba1dc7c8c95cf"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 1,
+      "advisoryLocks": 2,
+      "factReadCount": 4
+    },
+    {
+      "case": "foreign-tenant-own-only",
+      "status": 200,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "ceee8dcdacae7e078b1294a915616b9665080cf3cef29966a69589dc71f28998",
+        "after": "ceee8dcdacae7e078b1294a915616b9665080cf3cef29966a69589dc71f28998"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 1,
+      "advisoryLocks": 2,
+      "factReadCount": 2
+    },
+    {
+      "case": "foreign-client-query-refused",
+      "status": 400,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "ceee8dcdacae7e078b1294a915616b9665080cf3cef29966a69589dc71f28998",
+        "after": "ceee8dcdacae7e078b1294a915616b9665080cf3cef29966a69589dc71f28998"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 0,
+      "advisoryLocks": 0,
+      "factReadCount": 0
+    },
+    {
+      "case": "foreign-tenant-query-refused",
+      "status": 400,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "ceee8dcdacae7e078b1294a915616b9665080cf3cef29966a69589dc71f28998",
+        "after": "ceee8dcdacae7e078b1294a915616b9665080cf3cef29966a69589dc71f28998"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 0,
+      "advisoryLocks": 0,
+      "factReadCount": 0
+    },
+    {
+      "case": "same-tenant-unlinked-user-refused",
+      "status": 403,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "ceee8dcdacae7e078b1294a915616b9665080cf3cef29966a69589dc71f28998",
+        "after": "ceee8dcdacae7e078b1294a915616b9665080cf3cef29966a69589dc71f28998"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 1,
+      "advisoryLocks": 1,
+      "factReadCount": 0
+    },
+    {
+      "case": "unauthenticated-refused",
+      "status": 401,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "ceee8dcdacae7e078b1294a915616b9665080cf3cef29966a69589dc71f28998",
+        "after": "ceee8dcdacae7e078b1294a915616b9665080cf3cef29966a69589dc71f28998"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 0,
+      "advisoryLocks": 0,
+      "factReadCount": 0
+    },
+    {
+      "case": "expired-real-session-refused",
+      "status": 401,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "54c5c44cfe24c5e28b5042a3360ce0ec2fdebb1d1264dc71fb4d6084e5b0a726",
+        "after": "54c5c44cfe24c5e28b5042a3360ce0ec2fdebb1d1264dc71fb4d6084e5b0a726"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 0,
+      "advisoryLocks": 0,
+      "factReadCount": 0
+    },
+    {
+      "case": "revoked-real-session-refused",
+      "status": 401,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "b3ee05f73003da3c1a848621e8b46dba25cc7f5ea6d84d00bdf1bfa95ee8cfbe",
+        "after": "b3ee05f73003da3c1a848621e8b46dba25cc7f5ea6d84d00bdf1bfa95ee8cfbe"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 0,
+      "advisoryLocks": 0,
+      "factReadCount": 0
+    },
+    {
+      "case": "revoked-verified-link-refused",
+      "status": 403,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "056ad76590b4e31a11ea2d167976c4fdc504aca822f9de710d04c7a29b46f601",
+        "after": "056ad76590b4e31a11ea2d167976c4fdc504aca822f9de710d04c7a29b46f601"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 1,
+      "advisoryLocks": 1,
+      "factReadCount": 0
+    },
+    {
+      "case": "historical-current-grants-before-invalidation",
+      "status": 200,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "ae36b635b6405c8e01a984275692a8c5cb63f024d23a5d1553b46158e4680585",
+        "after": "ae36b635b6405c8e01a984275692a8c5cb63f024d23a5d1553b46158e4680585"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 1,
+      "advisoryLocks": 2,
+      "factReadCount": 4
+    },
+    {
+      "case": "invalidated-heads-no-resurrection",
+      "status": 200,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "973c391851afe9b69504e3af0d3abbb139f205b959c8cd5aec685aca4a196160",
+        "after": "973c391851afe9b69504e3af0d3abbb139f205b959c8cd5aec685aca4a196160"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 1,
+      "advisoryLocks": 2,
+      "factReadCount": 4
+    },
+    {
+      "case": "export-step-up-closed",
+      "status": 201,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "973c391851afe9b69504e3af0d3abbb139f205b959c8cd5aec685aca4a196160",
+        "after": "973c391851afe9b69504e3af0d3abbb139f205b959c8cd5aec685aca4a196160"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 1,
+      "advisoryLocks": 2,
+      "factReadCount": 0
+    },
+    {
+      "case": "qualification-replay-no-export",
+      "status": 201,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "973c391851afe9b69504e3af0d3abbb139f205b959c8cd5aec685aca4a196160",
+        "after": "973c391851afe9b69504e3af0d3abbb139f205b959c8cd5aec685aca4a196160"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 1,
+      "advisoryLocks": 2,
+      "factReadCount": 0
+    },
+    {
+      "case": "export-subject-injection-refused",
+      "status": 400,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "973c391851afe9b69504e3af0d3abbb139f205b959c8cd5aec685aca4a196160",
+        "after": "973c391851afe9b69504e3af0d3abbb139f205b959c8cd5aec685aca4a196160"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 0,
+      "advisoryLocks": 0,
+      "factReadCount": 0
+    },
+    {
+      "case": "export-fake-step-up-refused",
+      "status": 400,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "973c391851afe9b69504e3af0d3abbb139f205b959c8cd5aec685aca4a196160",
+        "after": "973c391851afe9b69504e3af0d3abbb139f205b959c8cd5aec685aca4a196160"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 0,
+      "advisoryLocks": 0,
+      "factReadCount": 0
+    },
+    {
+      "case": "export-revoked-link-refused",
+      "status": 403,
+      "sourceTablesUnchanged": true,
+      "sourceSnapshotHashes": {
+        "before": "973c391851afe9b69504e3af0d3abbb139f205b959c8cd5aec685aca4a196160",
+        "after": "973c391851afe9b69504e3af0d3abbb139f205b959c8cd5aec685aca4a196160"
+      },
+      "sourceWrites": 0,
+      "rawDurableWrites": 0,
+      "readOnlyStatements": 1,
+      "advisoryLocks": 1,
+      "factReadCount": 0
+    }
+  ],
+  "sourceTables": [
+    "Client",
+    "ClientChannelLink",
+    "ClientLinkChallenge",
+    "CrmClientLink",
+    "ClientConsentFact",
+    "ClientConsentInvalidation",
+    "CustomerProfile",
+    "ActionExecution",
+    "ActionExecutionIdempotencyBinding",
+    "ActionAttempt",
+    "ActionTargetMutation",
+    "ClientBookingConfirmation",
+    "Appointment"
+  ],
+  "actualReadOnlyResolverCalls": 11,
+  "unexpectedFetchCalls": 0,
+  "productionEffects": 0,
+  "certificate": "NOT_ISSUED"
+}
