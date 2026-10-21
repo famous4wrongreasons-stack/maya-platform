@@ -23,6 +23,7 @@ import { createOwnTasks } from '../../../maya-chat-shell/src/shell/own-tasks.ts'
 import { createLocalCrmSetup } from '../../../maya-chat-shell/src/shell/local-crm-setup.ts';
 import { createCrmPendingLocation } from './crmPending.ts';
 import { createPersonalBooking } from '../../../maya-chat-shell/src/shell/personal-booking.ts';
+import { createOwnAppointments } from '../../../maya-chat-shell/src/shell/own-appointments.ts';
 import { createNet } from '../../../maya-chat-shell/src/net/session.ts';
 import { createTelegramPopup } from './telegramPopup.ts';
 import { createShellRuntime, type ShellRuntimeDeps } from '../../../maya-chat-shell/src/shell/shell.ts';
@@ -219,6 +220,7 @@ export const ideas = createIdeas({ transport: net.transport, session, shell: run
 export const workspaceReads = createWorkspaceReads({ transport: net.transport, session, shell: runtime.shell, scheduler, newAbort });
 export const ownTasks = createOwnTasks({ transport: net.transport, session, shell: runtime.shell, scheduler, newAbort, newId: () => crypto.randomUUID() });
 export const personalBooking = createPersonalBooking({ transport: net.transport, widgets, session, newAbort });
+export const ownAppointments = createOwnAppointments({ transport: net.transport, session, newAbort, newId: () => crypto.randomUUID() });
 
 /**
  * Deep links append a NOTICE to the timeline, so this must run after the presentation has
@@ -230,6 +232,7 @@ export const dispose = (): void => {
   onboarding.dispose();
   localCrmSetup.dispose();
   personalBooking.dispose();
+  ownAppointments.dispose();
   ownTasks.dispose();
   workspaceReads.dispose();
   ideas.dispose();

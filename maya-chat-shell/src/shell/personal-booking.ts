@@ -1,4 +1,5 @@
-// A request-local personal form, mounted only after the existing bound-detail admission.
+// A request-local personal form. Explicit self-service uses the same authenticated
+// personal-client endpoints; widget entry still requires its bound-detail admission.
 // No writer, session switch, model history, timer, retry or persistent client store.
 import type { PersonalBranch, PersonalChoice, PersonalSlot, PersonalPreview, PersonalResults, PersonalSelection, PersonalTransport, PersonalFailure } from '../net/types.ts';
 import type { SessionPort, WidgetPort } from './ports.ts';
@@ -12,6 +13,7 @@ export interface PersonalBookingView {
   readonly results: PersonalResults | null; readonly notice: string;
 }
 export interface PersonalBookingPort {
+  openDirect(): void; closeDirect(): void;
   view(): PersonalBookingView; subscribe(listener: (v: PersonalBookingView) => void): () => void;
   chooseBranch(id: string): void; chooseService(id: string): void; chooseStaff(id: string): void; date(value: string): void;
   slots(): Promise<void>; preview(index: number): Promise<void>; confirm(): Promise<void>;
@@ -27,11 +29,12 @@ const sameBranchTimezone = (before: readonly PersonalBranch[], after: readonly P
 const message = (failure: PersonalFailure) => failure.reason === 'forbidden' ? 'Личная запись недоступна: подтверждённая связь или доступ изменились.' : failure.reason === 'conflict' ? 'Предложение изменилось. Проверьте записи и выберите время заново.' : failure.reason === 'branch_unavailable' ? 'Источник записи для выбранного филиала недоступен. Проверьте привязку филиала к CRM. Запись не подтверждена.' : failure.reason === 'facts_unavailable' ? 'Цена или длительность услуги пока не подтверждены. Уточните их в салоне перед записью.' : 'Не удалось прочитать актуальные данные. Запись не подтверждена.';
 export function createPersonalBooking(deps: { transport: PersonalTransport; widgets: Pick<WidgetPort, 'view' | 'subscribe'>; session: Pick<SessionPort, 'view' | 'subscribe'>; newAbort: () => AbortController }): PersonalBookingPort {
   let current = empty(), item: string | null = null, serial = 0, abort = deps.newAbort();
+  let direct = false;
   let selection: PersonalSelection | null = null;
   const listeners = new Set<(v: PersonalBookingView) => void>();
   const publish = (patch: Partial<PersonalBookingView>) => { current = { ...current, ...patch }; for (const listener of listeners) listener(current); };
   const active = (version: number) => serial === version && item !== null && !abort.signal.aborted && deps.session.view().signedIn;
-  const reset = () => { serial++; abort.abort(); abort = deps.newAbort(); item = null; selection = null; current = empty(); publish({}); };
+  const reset = () => { direct = false; serial++; abort.abort(); abort = deps.newAbort(); item = null; selection = null; current = empty(); publish({}); };
   const fail = (failure: PersonalFailure) => { selection = null; current = empty(); publish({ phase: 'unavailable', notice: message(failure) }); };
   const open = async () => {
     const version = serial, signal = abort.signal;
@@ -54,6 +57,7 @@ export function createPersonalBooking(deps: { transport: PersonalTransport; widg
     publish({ phase: 'choose', busy: false, branches: branches.value, services: services.value, staff: staff.value, notice: 'Запись для вашего подтверждённого клиентского профиля. Роль в компании не меняется.' });
   };
   const watch = () => {
+    if (direct) { if (!deps.session.view().signedIn) reset(); return; }
     const view = deps.widgets.view().fullscreen;
     const next = deps.session.view().signedIn && view?.phase === 'open' && view.receiver === 'personal_booking' ? view.itemId : null;
     if (item === next) return;
@@ -74,6 +78,8 @@ export function createPersonalBooking(deps: { transport: PersonalTransport; widg
     publish({ phase: 'outcome', busy: false, results: results.value, notice: results.value.hasPending ? uncertain : 'Показаны сохранённые результаты. Новый запрос не отправлялся.' });
   };
   const port: PersonalBookingPort = {
+    openDirect() { if (!deps.session.view().signedIn) return; reset(); direct = true; item = 'explicit-personal-self-service'; void open(); },
+    closeDirect() { if (direct) reset(); },
     view: () => current,
     subscribe(listener) { listeners.add(listener); return () => { listeners.delete(listener); }; },
     chooseBranch(id) { if (editable() && current.branches.some((branch) => branch.id === id)) invalidate({ branchId: id }); },

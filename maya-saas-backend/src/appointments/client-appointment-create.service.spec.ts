@@ -337,16 +337,13 @@ describe('B31 verified Client create initiator and canonical executor', () => {
       externalId: 'canonical-contact',
     });
     Object.assign(h.crm, {
-      getClientRegistry: jest.fn().mockResolvedValue({
-        provider: 'yclients',
-        clients: [
-          {
-            external_id: 'canonical-contact',
-            name: 'Verified guest',
-            phone: '+79990001122',
-          },
-        ],
-      }),
+      getClientBookingIdentity: jest
+        .fn()
+        .mockResolvedValue({
+          external_id: 'canonical-contact',
+          name: 'Verified guest',
+          phone: '+79990001122',
+        }),
     });
     await h.context.runAsPublicTenant('tenant-1', () =>
       h.service.forVerifiedChannel(
@@ -408,21 +405,23 @@ describe('B31 verified Client create initiator and canonical executor', () => {
       ...h.client,
       crmLinks: [{ provider: 'yclients', externalId: 'client-external' }],
     });
-    h.crm.getClientRegistry = jest.fn().mockResolvedValue({
-      provider: 'yclients',
-      clients: [
-        {
-          external_id: 'client-external',
-          name: 'Guest',
-          phone: '+79990001122',
-        },
-        { external_id: 'unrelated', name: 'Other', phone: '+79990003344' },
-      ],
-    });
+    h.crm.getClientBookingIdentity = jest
+      .fn()
+      .mockResolvedValue({
+        external_id: 'client-external',
+        name: 'Guest',
+        phone: '+79990001122',
+      });
+    h.crm.getClientRegistry = jest.fn();
     const result = await h.run({ ...h.dto, clientName: '', clientPhone: '' });
     expect(result.appointment.mayaClientId).toBe('client-1');
     expect(h.plans[0].input.clientName).toBe('Guest');
     expect(h.plans[0].input.clientPhone).toBe('+79990001122');
+    expect(h.crm.getClientBookingIdentity).toHaveBeenCalledWith(
+      'tenant-1',
+      'client-external',
+    );
+    expect(h.crm.getClientRegistry).not.toHaveBeenCalled();
   });
 
   it.each([

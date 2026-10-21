@@ -16,6 +16,10 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PersonalClientContextService } from './personal-client-context.service';
 import { PersonalClientReadService } from './personal-client-read.service';
 import { PersonalCreateAppointmentDto } from './dto/personal-create-appointment.dto';
+import {
+  PersonalAppointmentMoveDto,
+  PersonalAppointmentTargetDto,
+} from './dto/personal-appointment-action.dto';
 
 /** Explicit personal authority on each request. No global mode or role switch. */
 @Controller('personal-client')
@@ -27,6 +31,85 @@ export class PersonalClientController {
     private readonly appointments: AppointmentsService,
     private readonly reads: PersonalClientReadService,
   ) {}
+
+  @Get('appointments/my')
+  async ownAppointments(
+    @CurrentUser() user: AuthenticatedUser,
+    @Headers('x-maya-authority-context') selection: string | undefined,
+  ) {
+    await this.contexts.select(user, selection);
+    return this.appointments.listClientAppointments(
+      user.tenantId!,
+      user.userId,
+    );
+  }
+
+  @Post('appointments/cancel')
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  )
+  async cancel(
+    @CurrentUser() user: AuthenticatedUser,
+    @Headers('x-maya-authority-context') selection: string | undefined,
+    @Body() dto: PersonalAppointmentTargetDto,
+    @Headers('idempotency-key') key?: string,
+  ) {
+    const personalContext = await this.contexts.select(user, selection);
+    return this.appointments.cancelForClient(
+      user.tenantId!,
+      user.userId,
+      dto.appointmentId,
+      {
+        personalContext,
+        ...(key?.trim()
+          ? {
+              callerIdempotency: {
+                scope: 'personal-client.http.cancel',
+                key: key.trim(),
+              },
+            }
+          : {}),
+      },
+    );
+  }
+
+  @Post('appointments/reschedule')
+  @UsePipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  )
+  async reschedule(
+    @CurrentUser() user: AuthenticatedUser,
+    @Headers('x-maya-authority-context') selection: string | undefined,
+    @Body() dto: PersonalAppointmentMoveDto,
+    @Headers('idempotency-key') key?: string,
+  ) {
+    const personalContext = await this.contexts.select(user, selection);
+    return this.appointments.rescheduleForClient(
+      user.tenantId!,
+      user.userId,
+      dto.appointmentId,
+      { start: dto.start },
+      {
+        personalContext,
+        ...(key?.trim()
+          ? {
+              callerIdempotency: {
+                scope: 'personal-client.http.reschedule',
+                key: key.trim(),
+              },
+            }
+          : {}),
+      },
+    );
+  }
 
   @Get('appointments/results')
   results(

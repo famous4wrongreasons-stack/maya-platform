@@ -469,6 +469,17 @@ export type Outcome<T, F> =
 
 // Explicit personal booking: request-local, already verified profile.
 export interface PersonalChoice { readonly id: string; readonly name: string }
+export interface OwnAppointment {
+  readonly id: string; readonly start: string; readonly end: string; readonly status: string;
+  readonly staffId: string; readonly staffName: string; readonly serviceIds: readonly string[];
+  readonly serviceNames: readonly string[]; readonly branchId: string | null;
+  readonly timezone: string | null; readonly updatedAt: string;
+}
+export interface OwnAppointmentsTransport {
+  ownAppointments(signal: AbortSignal): Promise<Outcome<readonly OwnAppointment[], PersonalFailure>>;
+  ownCancel(id: string, key: string, signal: AbortSignal): Promise<Outcome<true, PersonalFailure>>;
+  ownReschedule(id: string, start: string, key: string, signal: AbortSignal): Promise<Outcome<true, PersonalFailure>>;
+}
 export interface PersonalBranch extends PersonalChoice { readonly timezone: string | null }
 
 // Local owner setup: only public connection metadata crosses the network boundary.

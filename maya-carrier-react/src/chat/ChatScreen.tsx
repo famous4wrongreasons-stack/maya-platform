@@ -51,6 +51,8 @@ import { PrivacyPanel } from './PrivacyPanel.tsx';
 import { GoodsPhotoPanel } from './GoodsPhotoPanel.tsx';
 import { GoodsPhotoSheet } from './GoodsPhotoSheet.tsx';
 import { CompanionHeader } from './CompanionHeader.tsx';
+import { OwnAppointmentsSheet } from './OwnAppointmentsSheet.tsx';
+import { ownAppointments } from '../runtime/compose.ts';
 import { CompanionNavigation, type CompanionSection } from './CompanionNavigation.tsx';
 import { VoiceSheet } from './VoiceSheet.tsx';
 import { useCompanion } from '../identity/MayaCompanion.tsx';
@@ -616,6 +618,7 @@ export function ChatScreen({
           openTasks={() => openWorkspace('tasks')}
           openFeed={() => openWorkspace('feed')}
           openLibrary={() => openWorkspace('library')} photoEnabled={view.composer.enabled && !view.inFlight}
+          openOwnAppointments={() => ownAppointments.open()}
           state={mascot.state} event={mascot.event} greet={mascot.greet}
         /> : (
         <div
@@ -1107,6 +1110,7 @@ export function ChatScreen({
           </div>
         </div>
         {navigationVisible ? <CompanionNavigation current={shellView.workspace ?? 'chat'} choose={chooseSection} /> : null}
+        <OwnAppointmentsSheet t={t} />
       </section>
 
       {/* The detail sheet lives beside the conversation, not inside its scroller. */}

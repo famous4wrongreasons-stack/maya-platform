@@ -1,10 +1,38 @@
 // Fixed projections for the existing verified personal-client HTTP contract.
 // No contact, role, link, provider payload or authority token leaves net/.
-import type { PersonalBranch, PersonalChoice, PersonalSlot, PersonalPreview, PersonalResults } from './types.ts';
+import type { PersonalBranch, PersonalChoice, PersonalSlot, PersonalPreview, PersonalResults, OwnAppointment } from './types.ts';
 const object = (v: unknown): Record<string, unknown> | null => v !== null && typeof v === 'object' && !Array.isArray(v) ? v as Record<string, unknown> : null;
 const string = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0 && v.length <= 512;
 const instant = (v: unknown): v is string => string(v) && /T.*(Z|[+-]\d\d:\d\d)$/.test(v) && Number.isFinite(Date.parse(v));
 const amount = (v: unknown): number | null => typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : null;
+export function projectOwnAppointments(raw: unknown): readonly OwnAppointment[] | null {
+  if (!Array.isArray(raw) || raw.length > 1000) return null;
+  const rows: OwnAppointment[] = [];
+  for (const value of raw) {
+    const v = object(value), staff = object(v?.staff), branch = object(v?.branch);
+    if (!v || !string(v.id) || !instant(v.start_at) || !instant(v.end_at) || !instant(v.updated_at) ||
+        !string(v.status) || !string(v.staff_external_id) || !Array.isArray(v.service_ids) ||
+        !v.service_ids.every(string) || !(v.branch_id == null || string(v.branch_id)) ||
+        rows.some(row => row.id === v.id)) return null;
+    const timezone = branch?.timezone ?? v.timezone ?? null;
+    if (!(timezone === null || string(timezone))) return null;
+    if (timezone !== null) { try { new Intl.DateTimeFormat('ru', { timeZone: timezone }); } catch { return null; } }
+    const services = Array.isArray(v.services) ? v.services : [];
+    rows.push({ id: v.id, start: v.start_at, end: v.end_at, updatedAt: v.updated_at, status: v.status,
+      staffId: v.staff_external_id, staffName: string(staff?.name) ? staff.name : 'Мастер',
+      serviceIds: [...v.service_ids] as string[], serviceNames: services.flatMap(s => { const x = object(s); return string(x?.name) ? [x.name] : []; }),
+      branchId: v.branch_id == null ? null : v.branch_id as string, timezone });
+  }
+  return rows;
+}
+export function ownMutationConfirmed(raw: unknown, id: string, start: string | null): boolean {
+  const body = object(raw);
+  if (!body || body.ok !== true) return false;
+  const row = projectOwnAppointments([body.appointment])?.[0];
+  return !!row && row.id === id && (start === null
+    ? ['canceled', 'cancelled'].includes(row.status)
+    : Date.parse(row.start) === Date.parse(start) && !['canceled', 'cancelled'].includes(row.status));
+}
 export function projectPersonalBranches(raw: unknown): readonly PersonalBranch[] | null {
   if (!Array.isArray(raw) || raw.length > 200) return null;
   const out: PersonalBranch[] = [];

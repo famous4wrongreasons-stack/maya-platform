@@ -9,7 +9,8 @@ type ButtonRef = HTMLButtonElement | null;
 type HeaderRef = HTMLElement | null;
 
 /** Local chrome over existing destinations. It invents no route or business permission. */
-export function CompanionHeader({ userName, tenantName, current, openChat, askSchedule, scheduleEnabled, openPrivacy, openPhoto, openTasks, openFeed, openLibrary, openIdeas, photoEnabled, state, event, greet }: {
+export function CompanionHeader({ userName, tenantName, current, openChat, askSchedule, scheduleEnabled, openPrivacy, openPhoto, openTasks, openFeed, openLibrary, openIdeas, openOwnAppointments, photoEnabled, state, event, greet }: {
+  readonly openOwnAppointments: () => void;
   readonly current: CompanionSection | 'privacy' | null; readonly openChat: () => void;
   readonly tenantName: string | null;
   readonly askSchedule: () => void; readonly scheduleEnabled: boolean;
@@ -82,6 +83,7 @@ export function CompanionHeader({ userName, tenantName, current, openChat, askSc
         <span className={'companion-navigation-icon companion-navigation-' + section.key} aria-hidden="true" />{section.label}
       </button>)}
       <p className="companion-menu-section">Инструменты</p>
+      <button type="button" className="companion-menu-row" onClick={() => { setMenu(false); openOwnAppointments(); }}>Мои записи · записаться, перенести, отменить</button>
       <button type="button" className="companion-menu-row" aria-label="Приватность и данные" aria-current={current === 'privacy' ? 'page' : undefined} onClick={() => { setMenu(false); openPrivacy(); }}>Приватность и данные <span aria-hidden="true">↗</span></button>
       <button type="button" className="companion-menu-row" disabled={!photoEnabled} onClick={() => { setMenu(false); openPhoto(); }}>Товар по фото накладной <span aria-hidden="true">+</span></button>
       <button type="button" className="companion-menu-row" aria-haspopup="dialog" onClick={() => { setMenu(false); setSettings(true); }}>Настройки</button>

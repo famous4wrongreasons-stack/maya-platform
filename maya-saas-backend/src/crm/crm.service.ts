@@ -6384,6 +6384,19 @@ export class CrmService {
     return adapter.getClientRegistry({ tenantId: scopedTenantId });
   }
 
+  async getClientBookingIdentity(tenantId: string, externalClientId: string) {
+    const scopedTenantId = this.tenantContext.assertTenantId(tenantId);
+    const adapter = await this.getVisitCapableAdapter(
+      scopedTenantId,
+      'getClientBookingIdentity',
+      'crm_client_booking_identity_not_supported',
+    );
+    return adapter.getClientBookingIdentity({
+      tenantId: scopedTenantId,
+      clientId: externalClientId,
+    });
+  }
+
   async getClientVisitHistory(
     tenantId: string,
     clientId: string,

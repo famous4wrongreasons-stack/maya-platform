@@ -696,6 +696,15 @@ export interface CRMAdapter {
   getClientRegistry?(params: {
     tenantId: string;
   }): Promise<CrmClientRegistrySnapshot>;
+  /** Exact pre-verified CRM link only; contact data stays in deterministic booking. */
+  getClientBookingIdentity?(params: {
+    tenantId: string;
+    clientId: string;
+  }): Promise<{
+    external_id: string;
+    name: string | null;
+    phone: string | null;
+  }>;
   /**
    * История визитов CRM-клиента по id из searchClients.
    * Для AI-досье: имена услуг и даты без телефона/ФИО в ответе адаптера

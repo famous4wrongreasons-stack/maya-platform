@@ -2552,6 +2552,37 @@ export class YclientsCRMAdapter implements CRMAdapter {
    * Любая ошибка страницы прерывает вызов: частичное число хуже честного
    * отказа, потому что MAYA назовёт его точным.
    */
+  async getClientBookingIdentity(params: {
+    tenantId: string;
+    clientId: string;
+  }): Promise<{
+    external_id: string;
+    name: string | null;
+    phone: string | null;
+  }> {
+    if (!/^[1-9]\d{0,19}$/.test(params.clientId))
+      throw new BadRequestException('Verified CRM client id required');
+    const response = await this.request<YclientsClientSearchItem>(
+      `client/${this.getCompanyId()}/${params.clientId}`,
+    );
+    const row = response.data;
+    if (!row || String(row.id) !== params.clientId)
+      throw new ServiceUnavailableException(
+        'Verified CRM client identity unavailable',
+      );
+    return {
+      external_id: params.clientId,
+      name:
+        typeof row.name === 'string' && row.name.trim()
+          ? row.name.trim()
+          : null,
+      phone:
+        typeof row.phone === 'string' && row.phone.trim()
+          ? row.phone.trim()
+          : null,
+    };
+  }
+
   async getClientRegistry(params: {
     tenantId: string;
   }): Promise<CrmClientRegistrySnapshot> {

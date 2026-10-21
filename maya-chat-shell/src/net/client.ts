@@ -10,7 +10,7 @@
 // outcome, and nothing here holds a session: the bearer arrives through an `Authorizer`, which
 // only `session.ts` implements.
 
-import { projectPersonalBranches, projectPersonalChoices, projectPersonalSlots, projectPersonalPreview, projectPersonalResults } from './personal.ts';
+import { projectPersonalBranches, projectPersonalChoices, projectPersonalSlots, projectPersonalPreview, projectPersonalResults, projectOwnAppointments, ownMutationConfirmed } from './personal.ts';
 import { projectFeed, projectReports, projectReport, reportKey, feedKey } from './workspace-reads.ts';
 import { projectIdeas } from './ideas.ts';
 import type { IdeasSnapshot } from './types.ts';
@@ -113,6 +113,9 @@ const PATHS = {
   personalPreview: '/personal-client/appointments/preview',
   personalResults: '/personal-client/appointments/results',
   personalCreate: '/personal-client/appointments',
+  ownAppointments: '/personal-client/appointments/my',
+  ownCancel: '/personal-client/appointments/cancel',
+  ownReschedule: '/personal-client/appointments/reschedule',
   goodsPhotoPreview: '/ai/goods/photo-preview',
   goodsPhotoSearch: '/ai/goods/search',
   goodsPhotoItem: '/ai/goods/item-read',
@@ -138,6 +141,7 @@ type RequestBody =
   | (GoodsPhotoRequestContext & { readonly goods_id: string })
   | (GoodsPhotoRequestContext & { readonly proposal: GoodsPhotoProposal })
   | PersonalSelection
+  | { readonly appointmentId: string; readonly start?: string }
   | CrmSetupBody
   | { readonly expectedVersion: string }
   | EmailStartRequest
@@ -211,12 +215,12 @@ async function exchange(endpoint: Endpoint, body: RequestBody, bearer: string | 
   if (signal !== null) signal.addEventListener('abort', onAbort, { once: true });
   // A `search` term makes this a GET that carries the term in the query string, and a GET sends no
   // body and declares no content type — which also keeps it a simple request, with no preflight.
-  const reading = endpoint === 'ideas' || endpoint === 'feed' || endpoint === 'reports' || endpoint === 'reportSnapshot' || endpoint === 'ownTasks' || endpoint === 'crmSetupStatus' || endpoint === 'crmSetupOperation' || search !== null || endpoint === 'conversation' || endpoint === 'personalBranches' || endpoint === 'personalServices' || endpoint === 'personalStaff' || endpoint === 'personalSlots' || endpoint === 'personalResults';
+  const reading = endpoint === 'ownAppointments' || endpoint === 'ideas' || endpoint === 'feed' || endpoint === 'reports' || endpoint === 'reportSnapshot' || endpoint === 'ownTasks' || endpoint === 'crmSetupStatus' || endpoint === 'crmSetupOperation' || search !== null || endpoint === 'conversation' || endpoint === 'personalBranches' || endpoint === 'personalServices' || endpoint === 'personalStaff' || endpoint === 'personalSlots' || endpoint === 'personalResults';
   const auth: Readonly<Record<string, string>> = bearer === null ? {} : { Authorization: 'Bearer ' + bearer };
-  const personal = endpoint === 'personalPreview' || endpoint === 'personalResults' || endpoint === 'personalCreate';
+  const personal = endpoint === 'ownAppointments' || endpoint === 'ownCancel' || endpoint === 'ownReschedule' || endpoint === 'personalPreview' || endpoint === 'personalResults' || endpoint === 'personalCreate';
   const context = personal ? { 'X-Maya-Authority-Context': 'personal_client' } : {};
   const multipart = endpoint === 'goodsPhotoPreview' && body instanceof FormData;
-  const idempotency = endpoint === 'taskCreate' || endpoint === 'taskComplete' || endpoint === 'crmSetupStage' || endpoint === 'crmSetupActivate' ? { 'Idempotency-Key': idempotencyKey } : {};
+  const idempotency = endpoint === 'ownCancel' || endpoint === 'ownReschedule' || endpoint === 'taskCreate' || endpoint === 'taskComplete' || endpoint === 'crmSetupStage' || endpoint === 'crmSetupActivate' ? { 'Idempotency-Key': idempotencyKey } : {};
   const headers: Readonly<Record<string, string>> = { ...auth, ...context, ...idempotency, ...(reading || multipart ? {} : { 'Content-Type': 'application/json' }) };
   const path = endpoint === 'historyErasure' ? `${PATHS.historyErasure}/${encodeURIComponent(erasureConversationId)}/erasure` : endpoint === 'reportSnapshot' ? `${PATHS.reportSnapshot}${encodeURIComponent(reportRunId)}/snapshot` : endpoint === 'feedRead' ? `${PATHS.feedRead}${encodeURIComponent(feedItemId)}/read` : PATHS[endpoint];
   try {
@@ -559,7 +563,7 @@ const unlessAborted = <T>(work: Promise<T>, signal: AbortSignal): Promise<T | nu
 };
 
 /** 401 → refresh once → retry once (§1.4). A second 401 ends the session; it never loops. */
-async function authorizedExchange(auth: Authorizer, endpoint: 'feedRead' | 'ideas' | 'taskCreate' | 'taskComplete' | 'feed' | 'reports' | 'reportSnapshot' | 'ownTasks' | 'telegramLinkStart' | 'telegramLinkComplete' | 'crmSetupStatus' | 'crmSetupStage' | 'crmSetupActivate' | 'crmSetupOperation' | 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate' | 'goodsPhotoPreview' | 'goodsPhotoSearch' | 'goodsPhotoItem' | 'goodsPhotoReview', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = '', idempotencyKey: string = '', crmLocator: CrmOperationLocator | null = null, reportRunId: string = '', feedItemId: string = ''): Promise<AuthorizedExchange> {
+async function authorizedExchange(auth: Authorizer, endpoint: 'ownAppointments' | 'ownCancel' | 'ownReschedule' | 'feedRead' | 'ideas' | 'taskCreate' | 'taskComplete' | 'feed' | 'reports' | 'reportSnapshot' | 'ownTasks' | 'telegramLinkStart' | 'telegramLinkComplete' | 'crmSetupStatus' | 'crmSetupStage' | 'crmSetupActivate' | 'crmSetupOperation' | 'chat' | 'conversation' | 'historyErasure' | 'transcribe' | 'widgetIntent' | 'widgetResolve' | 'personalBranches' | 'personalServices' | 'personalStaff' | 'personalSlots' | 'personalPreview' | 'personalResults' | 'personalCreate' | 'goodsPhotoPreview' | 'goodsPhotoSearch' | 'goodsPhotoItem' | 'goodsPhotoReview', body: RequestBody, signal: AbortSignal, timeoutMs: number, slots: { date: string; serviceId: string; staffId: string; branchId?: string } | null = null, erasureConversationId: string = '', idempotencyKey: string = '', crmLocator: CrmOperationLocator | null = null, reportRunId: string = '', feedItemId: string = ''): Promise<AuthorizedExchange> {
   const first = await unlessAborted(auth.authorize(), signal);
   if (first === null) return { kind: 'aborted' };
   if (first.kind !== 'bearer') return first;
@@ -818,6 +822,25 @@ export function createTransport(auth: Authorizer, timeouts: Timeouts = { request
         if (value !== null) return { ok: true, value };
       }
       return fail({ reason: 'unavailable' });
+    },
+    async ownAppointments(signal: AbortSignal) { return personalOutcome(await authorizedExchange(auth, 'ownAppointments', {}, signal, timeouts.requestMs), projectOwnAppointments); },
+    async ownCancel(id: string, key: string, signal: AbortSignal): Promise<Outcome<true, PersonalFailure>> {
+      if (!/^[A-Za-z0-9_-]{1,160}$/.test(id) || !crmSetupKey(key)) return fail({ reason: 'unavailable' });
+      const ex = await authorizedExchange(auth, 'ownCancel', { appointmentId: id }, signal, timeouts.requestMs, null, '', key);
+      if (ex.kind === 'response' && isSuccess(ex.status)) {
+        return ownMutationConfirmed(ex.body, id, null) ? { ok: true, value: true } : fail({ reason: 'unknown' });
+      }
+      if (ex.kind !== 'response' || ex.status >= 500 || errorCode(ex.body) === 'crm_outcome_unknown') return fail({ reason: 'unknown' });
+      return personalOutcome(ex, () => true as const);
+    },
+    async ownReschedule(id: string, start: string, key: string, signal: AbortSignal): Promise<Outcome<true, PersonalFailure>> {
+      if (!/^[A-Za-z0-9_-]{1,160}$/.test(id) || !crmSetupKey(key) || !Number.isFinite(Date.parse(start))) return fail({ reason: 'unavailable' });
+      const ex = await authorizedExchange(auth, 'ownReschedule', { appointmentId: id, start }, signal, timeouts.requestMs, null, '', key);
+      if (ex.kind === 'response' && isSuccess(ex.status)) {
+        return ownMutationConfirmed(ex.body, id, start) ? { ok: true, value: true } : fail({ reason: 'unknown' });
+      }
+      if (ex.kind !== 'response' || ex.status >= 500 || errorCode(ex.body) === 'crm_outcome_unknown') return fail({ reason: 'unknown' });
+      return personalOutcome(ex, () => true as const);
     },
     async personalBranches(signal: AbortSignal) { return personalOutcome(await authorizedExchange(auth, 'personalBranches', {}, signal, timeouts.requestMs), projectPersonalBranches); },
     async personalServices(signal: AbortSignal) { return personalOutcome(await authorizedExchange(auth, 'personalServices', {}, signal, timeouts.requestMs), projectPersonalChoices); },

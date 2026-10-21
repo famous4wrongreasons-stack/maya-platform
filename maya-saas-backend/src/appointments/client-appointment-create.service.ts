@@ -378,17 +378,37 @@ export class ClientAppointmentCreateService {
     // Same exact-link contact resolution as the accepted B19 channel creator.
     // No phone matching or Client/account creation is permitted.
     if ((!name || !phone) && client.crmLinks.length) {
-      const registry = await this.crm.getClientRegistry(tenantId);
-      const links = client.crmLinks.filter(
-        (link) => link.provider === registry.provider,
+      const nativeLinks = client.crmLinks.filter((l) =>
+        ['yclients', 'altegio'].includes(l.provider),
       );
-      if (links.length === 1) {
-        const matches = registry.clients.filter(
-          (candidate) => candidate.external_id === links[0].externalId,
+      if (nativeLinks.length) {
+        if (nativeLinks.length !== 1)
+          throw new ForbiddenException(
+            'Verified Client booking identity unavailable',
+          );
+        const exact = await this.crm.getClientBookingIdentity(
+          tenantId,
+          nativeLinks[0].externalId,
         );
-        if (matches.length === 1) {
-          name ||= matches[0].name?.trim() || '';
-          phone ||= matches[0].phone?.trim() || '';
+        if (exact.external_id !== nativeLinks[0].externalId)
+          throw new ForbiddenException(
+            'Verified Client booking identity unavailable',
+          );
+        name ||= exact.name?.trim() || '';
+        phone ||= exact.phone?.trim() || '';
+      } else {
+        const registry = await this.crm.getClientRegistry(tenantId);
+        const links = client.crmLinks.filter(
+          (link) => link.provider === registry.provider,
+        );
+        if (links.length === 1) {
+          const matches = registry.clients.filter(
+            (candidate) => candidate.external_id === links[0].externalId,
+          );
+          if (matches.length === 1) {
+            name ||= matches[0].name?.trim() || '';
+            phone ||= matches[0].phone?.trim() || '';
+          }
         }
       }
     }
