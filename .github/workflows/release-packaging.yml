@@ -1,73 +1,29 @@
-name: Canonical React release packaging
+name: Diagnostic compiled phone proof 961fa
 on:
-  pull_request:
-  push:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  native-linux-isolation:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          # Diagnostic subject is the unchanged committed candidate, never this workflow branch.
-          ref: cca275173229b9f3f2787bfca2f24c7135b547dc
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Real namespaces and unmodified forwarder, synthetic TLS provider only
-        run: node maya-saas-backend/scripts/phone-native-linux-proof.mjs --run --context default --image node@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402 --output "$RUNNER_TEMP/native-linux-isolation"
-  release-packaging:
+  compiled-phone-diagnostic:
+    name: Diagnostic only - unchanged compiled proof 961fa
     runs-on: macos-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-          # Diagnostic subject is the unchanged committed candidate, never this workflow branch.
-          ref: cca275173229b9f3f2787bfca2f24c7135b547dc
+          ref: 961fa196c4b02a8badd2ada94f505f5cb838b78f
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm ci --ignore-scripts --no-audit --no-fund
         working-directory: maya-saas-backend
-      - run: npm ci --ignore-scripts --no-audit --no-fund
-        working-directory: maya-carrier-react
-      - run: npm ci --ignore-scripts --no-audit --no-fund
-        working-directory: maya-ios-carrier
-      - run: npm run sync
-        working-directory: maya-ios-carrier
-      - run: npm test && npm run test:release
-        working-directory: maya-carrier-react
-      - name: Refuse retired staging carrier before deployment
-        run: node --test scripts/staging-carrier-preflight.test.mjs
-        working-directory: maya-saas-backend
-      - run: node --test scripts/widget-release-operator.test.cjs scripts/widgets-mutation-report.test.mjs
-        working-directory: maya-saas-backend
-      - run: npx prisma generate && npm run build
-        working-directory: maya-saas-backend
-      - name: Private phone staging boundaries and Prisma image configuration
-        run: node --test scripts/phone-staging-plan.test.mjs scripts/phone-catalog-egress.test.mjs scripts/phone-owner-bootstrap-plan.test.mjs scripts/phone-catalog-plan.test.mjs
-        working-directory: maya-saas-backend
-      - name: Phone catalogue restriction mutations with green baseline and restored source
-        run: node scripts/phone-catalog-mutations.mjs
-        working-directory: maya-saas-backend
-      - run: node --test scripts/widget-release-operator.compiled-test.cjs
-        working-directory: maya-saas-backend
-      - name: Native execution signature, replay and legacy transport controls
-        run: node --test scripts/phone-native-execution.test.mjs scripts/phone-native-create-egress.test.mjs scripts/phone-native-run-guard.test.mjs scripts/phone-native-channel.test.mjs scripts/phone-native-packaging.test.mjs
-        working-directory: maya-saas-backend
-      - name: Awaited signed execution uses the complete lifecycle transport corpus
-        run: MAYA_TEST_NATIVE_EXECUTION=1 node --test scripts/phone-native-create-egress.test.mjs
-        working-directory: maya-saas-backend
-      - name: Native execution adversarial mutations with green control
-        run: node scripts/phone-native-execution-mutation.mjs --run "$RUNNER_TEMP/native-execution-mutations"
+      - run: npx prisma generate
         working-directory: maya-saas-backend
       - name: Install isolated proof database tools
         run: brew list postgresql@16 >/dev/null 2>&1 || brew install postgresql@16
+      # Same runner, all lifecycle/lost-response checks, original timeout and original synthetic-only isolation.
+      # This partial diagnostic never replaces canonical packaging or authorizes a real booking.
       - name: Ordinary compiled AppModule with signed execution and synthetic HTTP model
         run: node scripts/phone-native-execution-proof-runner.mjs --run --output "$RUNNER_TEMP/native-execution-compiled" --pg-bin "$(brew --prefix postgresql@16)/bin"
         working-directory: maya-saas-backend
@@ -79,7 +35,7 @@ jobs:
           const base = path.join(process.env.RUNNER_TEMP, 'native-execution-compiled');
           const digest = b => crypto.createHash('sha256').update(b).digest('hex');
           const report = { diagnosticOnly: true, admissibleForCertification: false, subjectHead: cp.execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), workflowHead: process.env.GITHUB_SHA, receipts: {} };
-          if (report.subjectHead !== 'cca275173229b9f3f2787bfca2f24c7135b547dc') throw Error('wrong diagnostic subject');
+          if (report.subjectHead !== '961fa196c4b02a8badd2ada94f505f5cb838b78f') throw Error('wrong diagnostic subject');
           for (const rel of ['manifest.json', 'lifecycle/manifest.json', 'lost-response/manifest.json']) {
             const file = path.join(base, rel);
             if (!fs.existsSync(file)) { report.receipts[rel] = { missing: true }; continue; }
@@ -108,10 +64,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: native-execution-diagnostic-safe
+          name: diagnostic-only-compiled-961fa-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/native-execution-diagnostic-safe.json
           if-no-files-found: error
-      - name: Unsigned local build, no device install or account provisioning
-        run: xcodebuild -project maya-ios-carrier/ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -derivedDataPath "$RUNNER_TEMP/maya-ios" CODE_SIGNING_ALLOWED=NO build
-      - name: Verify the actual app bundle, not just the sync input
-        run: node maya-carrier-react/tools/release.mjs verify-app "$RUNNER_TEMP/maya-ios/Build/Products/Debug-iphonesimulator/App.app"
+          retention-days: 14
