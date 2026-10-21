@@ -449,7 +449,8 @@ describe('K13 — no C10 autonomy', () => {
       ['inventory.goods.search', 'READ'],
     ]);
     expect(
-      rows.filter((c) => c.capabilityKey === 'catalog.staff.create')
+      rows
+        .filter((c) => c.capabilityKey === 'catalog.staff.create')
         .map((c) => [c.capabilityKey, c.mode]),
     ).toEqual([['catalog.staff.create', 'PROPOSE_ONLY']]);
     const beforeGoods = rows.filter(
