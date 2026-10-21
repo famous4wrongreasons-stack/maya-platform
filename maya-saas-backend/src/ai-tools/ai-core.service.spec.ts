@@ -5069,6 +5069,94 @@ describe('AiCoreService', () => {
       });
       return mocks;
     }
+    it.each([
+      {
+        scope: 'full_crm_card',
+        amount: 1234,
+        expected: 'Покупки по карточке — 1 234 ₽.',
+        absent: 'Стоимость визитов в прочитанной истории',
+      },
+      {
+        scope: 'full_crm_card',
+        amount: 0,
+        expected: 'Покупки по карточке — 0 ₽.',
+        absent: 'Сумма покупок сейчас не подтверждена',
+      },
+      {
+        scope: 'recent_attended_history_fallback',
+        amount: 1234,
+        expected: 'Стоимость визитов в прочитанной истории — 1 234 ₽.',
+        absent: 'Покупки по карточке',
+      },
+      {
+        scope: 'recent_attended_history_fallback',
+        amount: 0,
+        expected: 'Стоимость визитов в прочитанной истории — 0 ₽.',
+        absent: 'Покупки по карточке',
+      },
+    ])(
+      'keeps dossier spend source $scope and observed amount $amount distinct',
+      async ({ scope, amount, expected, absent }) => {
+        const mocks = fixture({
+          ...selected,
+          total_spent: amount,
+          total_spent_scope: scope,
+        });
+        const answer = await mocks.service.chat(user, {
+          ...dto,
+          messages: [{ role: 'user', content: 'Досье клиента Иван' }],
+        });
+        expect(answer.reply).toContain(expected);
+        expect(answer.reply).not.toContain(absent);
+        if (scope === 'recent_attended_history_fallback') {
+          expect(answer.reply).toContain(
+            'История ограничена последними 30 посещениями',
+          );
+          expect(answer.reply).toContain(
+            'это не сумма всех покупок и не подтверждение оплаты',
+          );
+        }
+        expect(answer).toMatchObject({
+          action: null,
+          grounding: { status: 'verified', domain: 'client_dossier' },
+        });
+        expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      },
+    );
+
+    it.each([
+      { scope: 'unavailable', amount: null },
+      { scope: 'unavailable', amount: 1234 },
+      { scope: undefined, amount: 1234 },
+      { scope: 'unknown_source', amount: 1234 },
+      { scope: 'full_crm_card', amount: Number.NaN },
+      { scope: 'full_crm_card', amount: Number.POSITIVE_INFINITY },
+      { scope: 'recent_attended_history_fallback', amount: -1 },
+      { scope: 'full_crm_card', amount: '1234' },
+    ])(
+      'does not present an unqualified dossier spend as a card total: %j',
+      async ({ scope, amount }) => {
+        const mocks = fixture({
+          ...selected,
+          total_spent: amount,
+          total_spent_scope: scope,
+        });
+        const answer = await mocks.service.chat(user, {
+          ...dto,
+          messages: [{ role: 'user', content: 'Досье клиента Иван' }],
+        });
+        expect(answer.reply).toContain('Сумма покупок сейчас не подтверждена');
+        expect(answer.reply).not.toMatch(
+          /Покупки по карточке|Стоимость визитов в прочитанной истории|NaN|Infinity/,
+        );
+        expect(answer.reply).toContain('По карточке CRM: 7 визитов');
+        expect(answer).toMatchObject({ action: null });
+        expect(mocks.runtime.execute).toHaveBeenCalledTimes(1);
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+      },
+    );
+
     it('clarifies before dossier disclosure, then binds the next explicit query to a fresh read inside the server', async () => {
       const mocks = fixture();
       mocks.runtime.execute

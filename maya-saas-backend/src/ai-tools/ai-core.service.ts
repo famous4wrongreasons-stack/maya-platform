@@ -6542,9 +6542,26 @@ export class AiCoreService {
       );
     }
 
-    if (typeof data.total_spent === 'number') {
+    // The handler distinguishes the CRM card total from a bounded sum of
+    // visit prices. Keep that source distinction in the user-visible reply.
+    const spent = this.optionalMetricNumber(data.total_spent);
+    if (
+      spent !== null &&
+      spent >= 0 &&
+      data.total_spent_scope === 'full_crm_card'
+    ) {
+      parts.push(`Покупки по карточке — ${this.formatMetricNumber(spent)} ₽.`);
+    } else if (
+      spent !== null &&
+      spent >= 0 &&
+      data.total_spent_scope === 'recent_attended_history_fallback'
+    ) {
       parts.push(
-        `Покупки по карточке — ${this.formatMetricNumber(data.total_spent)} ₽.`,
+        `Стоимость визитов в прочитанной истории — ${this.formatMetricNumber(spent)} ₽. История ограничена последними 30 посещениями; это не сумма всех покупок и не подтверждение оплаты.`,
+      );
+    } else {
+      parts.push(
+        'Сумма покупок сейчас не подтверждена: проверенного значения с указанным источником нет.',
       );
     }
     if (data.bonus_status === 'available') {

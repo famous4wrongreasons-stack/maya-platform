@@ -950,6 +950,7 @@ export class AiToolHandlerService {
     const history = historyRead.ok ? historyRead.rows : [];
     const serviceCounter = new Map<string, number>();
     let totalSpent = 0;
+    let historyPricesComplete = historyRead.ok;
     const dates: string[] = [];
     for (const visit of history) {
       for (const name of visit.service_names) {
@@ -957,9 +958,13 @@ export class AiToolHandlerService {
       }
       if (
         typeof visit.total_price === 'number' &&
-        Number.isFinite(visit.total_price)
+        Number.isFinite(visit.total_price) &&
+        visit.total_price >= 0
       ) {
         totalSpent += visit.total_price;
+      } else {
+        // An unread price is not zero and cannot produce a complete subtotal.
+        historyPricesComplete = false;
       }
       if (visit.start.length >= 10) {
         dates.push(visit.start.slice(0, 10));
@@ -1006,7 +1011,8 @@ export class AiToolHandlerService {
     // покупок и не назвать число визитов, и гасить их вместе — терять то, что
     // провайдер сообщил.
     const visitsUnavailable = client.visits_count === null && !historyRead.ok;
-    const spentUnavailable = client.sold_amount === null && !historyRead.ok;
+    const spentUnavailable =
+      client.sold_amount === null && !historyPricesComplete;
     const exactVisits = visitsUnavailable
       ? null
       : (client.visits_count ?? history.length);

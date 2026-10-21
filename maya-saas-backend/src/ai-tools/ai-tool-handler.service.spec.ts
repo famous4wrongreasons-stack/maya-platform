@@ -1210,6 +1210,113 @@ describe('AiToolHandlerService output minimization', () => {
       };
     }
 
+    it.each([
+      { sold: 62150, history: 'read', amount: 62150, scope: 'full_crm_card' },
+      { sold: 0, history: 'read', amount: 0, scope: 'full_crm_card' },
+      {
+        sold: null,
+        history: 'read',
+        amount: 4300,
+        scope: 'recent_attended_history_fallback',
+      },
+      {
+        sold: null,
+        history: 'empty',
+        amount: 0,
+        scope: 'recent_attended_history_fallback',
+      },
+      {
+        sold: null,
+        history: 'partial_prices',
+        amount: null,
+        scope: 'unavailable',
+      },
+      { sold: null, history: 'no_prices', amount: null, scope: 'unavailable' },
+      {
+        sold: null,
+        history: 'negative_price',
+        amount: null,
+        scope: 'unavailable',
+      },
+      {
+        sold: null,
+        history: 'zero_prices',
+        amount: 0,
+        scope: 'recent_attended_history_fallback',
+      },
+      {
+        sold: 62150,
+        history: 'no_prices',
+        amount: 62150,
+        scope: 'full_crm_card',
+      },
+      { sold: null, history: 'failed', amount: null, scope: 'unavailable' },
+      { sold: 62150, history: 'failed', amount: 62150, scope: 'full_crm_card' },
+    ])(
+      'retains the dossier spend source independently of history availability: %j',
+      async ({ sold, history, amount, scope }) => {
+        const f = fixture();
+        f.searchClients.mockResolvedValue([
+          {
+            id: '42',
+            name: 'Иван Петров',
+            phone: '+79991234567',
+            visits_count: 39,
+            sold_amount: sold,
+            last_visit_date: '2026-07-20',
+          },
+        ]);
+        if (history === 'failed')
+          f.getClientVisitHistory.mockRejectedValue(
+            new Error('source unavailable'),
+          );
+        else
+          f.getClientVisitHistory.mockResolvedValue(
+            history === 'empty'
+              ? []
+              : [
+                  {
+                    start: '2026-05-01T10:00:00.000Z',
+                    service_names: ['Стрижка'],
+                    total_price:
+                      history === 'zero_prices'
+                        ? 0
+                        : ['partial_prices', 'no_prices'].includes(history)
+                          ? null
+                          : history === 'negative_price'
+                            ? -1
+                            : 1800,
+                    attendance: 'arrived',
+                  },
+                  {
+                    start: '2026-06-15T10:00:00.000Z',
+                    service_names: ['Стрижка', 'Борода'],
+                    total_price:
+                      history === 'no_prices'
+                        ? null
+                        : history === 'zero_prices'
+                          ? 0
+                          : 2500,
+                    attendance: 'arrived',
+                  },
+                ],
+          );
+        const result = await f.read('Иван');
+        expect(result).toMatchObject({
+          found: true,
+          total_spent: amount,
+          total_spent_scope: scope,
+        });
+        expect(f.getClientVisitHistory).toHaveBeenCalledWith(
+          'tenant-a',
+          '42',
+          30,
+        );
+        expect(f.getClientVisitHistory).toHaveBeenCalledTimes(1);
+        expect(JSON.stringify(result)).not.toMatch(/Иван|79991234567/);
+      },
+    );
+
     it('returns only ambiguity before any history, loyalty or recency read', async () => {
       const f = fixture();
       const result = await f.read('Иван');
