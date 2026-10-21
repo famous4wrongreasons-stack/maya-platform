@@ -6,7 +6,7 @@ permissions:
   contents: read
 jobs:
   widgets-mutation:
-    name: 'Diagnostic only: unchanged G7 partition 2 of 4'
+    name: 'Diagnostic only: unchanged full FP; diagnostic only'
     runs-on: ubuntu-latest
     timeout-minutes: 180
     services:
@@ -50,7 +50,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: cca275173229b9f3f2787bfca2f24c7135b547dc
+          ref: 18fc4314d5b1a24370d426520315bdf63735bbec
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -93,7 +93,7 @@ jobs:
 
 
           def expected_states(backend):
-              mutants = json.loads((backend / "test/widgets-live/mutations/gate7.json").read_text())[1::4]
+              mutants = json.loads((backend / "test/widgets-live/mutations/gateFP.json").read_text())
               expected = {}
               for mutant in mutants:
                   edits = mutant.get("edits") or [mutant]
@@ -171,11 +171,11 @@ jobs:
           def main():
               assert sys.argv[1] == "--"
               command = sys.argv[2:]
-              assert command == ["node", "scripts/widgets-mutation-battery.mjs", "--gate", "7",
-                                 "--partition", "2/4", "--out", "widgets-mutation-part-7-part-2-of-4.json"]
+              assert command == ["node", "scripts/widgets-mutation-battery.mjs", "--gate", "FP",
+                                 "--out", "widgets-mutation-part-FP.json"]
               backend = pathlib.Path.cwd().resolve()
               head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
-              assert head == "cca275173229b9f3f2787bfca2f24c7135b547dc"
+              assert head == "18fc4314d5b1a24370d426520315bdf63735bbec"
               assert not subprocess.check_output(["git", "status", "--porcelain"]).strip()
               key = hashlib.sha1(str(backend).encode()).hexdigest()[:10]
               temp = pathlib.Path(tempfile.gettempdir())
@@ -211,6 +211,9 @@ jobs:
               final = {"diagnosticOnly": True, "admissibleForCertification": False, "candidate": head,
                        "exit": child.returncode, "sourceUnchanged": not subprocess.check_output(
                            ["git", "diff", "--name-only"]).strip()}
+              receipt = backend / "widgets-mutation-part-FP.json"
+              if receipt.exists():
+                  (out / receipt.name).write_bytes(receipt.read_bytes())
               (out / "summary.json").write_text(json.dumps(final, indent=2) + "\n")
               sys.exit(child.returncode if child.returncode >= 0 else 1)
 
@@ -221,16 +224,15 @@ jobs:
           MAYA_PY
       - name: Run the battery shard
         env:
-          SHARD: '7'
-          PARTITION: 2/4
-          SLOT: 7-part-2-of-4
+          SHARD: FP
+          SLOT: FP
         run: >-
           python3 "$RUNNER_TEMP/maya-observe-mutation.py" -- node scripts/widgets-mutation-battery.mjs --gate
-          "$SHARD" --partition "$PARTITION" --out "widgets-mutation-part-$SLOT.json"
+          "$SHARD" --out "widgets-mutation-part-$SLOT.json"
       - name: Preserve diagnostic observations; never a release receipt
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: diagnostic-only-g7-part2-${{ github.run_id }}
+          name: diagnostic-only-fp-${{ github.run_id }}-attempt-${{ github.run_attempt }}
           path: ${{ runner.temp }}/maya-mutation-diagnostic/
           if-no-files-found: error
