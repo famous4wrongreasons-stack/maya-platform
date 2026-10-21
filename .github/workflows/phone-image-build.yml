@@ -1,0 +1,65 @@
+name: Phone image build
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Archive exact committed backend and record source provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "$(git status --porcelain)"
+          mkdir -m 700 -p image/source
+          git rev-parse HEAD > image/candidate
+          git archive HEAD maya-saas-backend | tar -x -C image/source
+          python3 - <<'PY'
+          import hashlib,json,pathlib,subprocess
+          root=pathlib.Path('image/source')
+          rows=[]
+          for line in subprocess.check_output(['git','ls-tree','-r','HEAD','--','maya-saas-backend'],text=True).splitlines():
+              meta,name=line.split('\t');mode,kind,oid=meta.split()
+              assert kind=='blob' and mode in ('100644','100755')
+              data=(root/name).read_bytes()
+              assert hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==oid
+              rows.append({'path':name,'gitBlob':oid,'sha256':hashlib.sha256(data).hexdigest()})
+          pathlib.Path('image/source-inventory.json').write_text(json.dumps(rows,indent=2)+'\n')
+          PY
+      - name: Build unchanged Dockerfile on native Linux
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = x86_64
+          candidate="$(cat image/candidate)"
+          docker build --platform linux/amd64 --label "org.opencontainers.image.revision=$candidate" --iidfile image/image-id -t "maya-phone-backend:$candidate" image/source/maya-saas-backend
+          image_id="$(cat image/image-id)"
+          docker image inspect "$image_id" --format '{{.Id}} {{.Os}} {{.Architecture}}' > image/image-platform.txt
+          test "$(cat image/image-platform.txt)" = "$image_id linux amd64"
+          test "$(docker image inspect "$image_id" --format '{{index .Config.Labels "org.opencontainers.image.revision"}}')" = "$candidate"
+          docker run --rm --pull=never --network=none --read-only --memory=128m --pids-limit=64 --entrypoint=node "$image_id" scripts/prepare-goods-photo-ocr-models.mjs --verify
+          docker save "$image_id" | gzip -1 > image/backend-image.tar.gz
+          sha256sum image/backend-image.tar.gz > image/backend-image.tar.gz.sha256
+          python3 - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('image')
+          (p/'RESULT.json').write_text(json.dumps({'candidate':(p/'candidate').read_text().strip(),'imageId':(p/'image-id').read_text().strip(),'platform':'linux/amd64','dockerfile':'unchanged committed Dockerfile','sourceInventory':'source-inventory.json','deployed':False,'admission':'NOT_ISSUED','providerCalls':0,'modelCalls':0},indent=2)+'\n')
+          PY
+      - name: Upload image and provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: phone-image-${{ github.sha }}-attempt-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
+          path: |
+            image/candidate
+            image/image-id
+            image/image-platform.txt
+            image/source-inventory.json
+            image/RESULT.json
+            image/backend-image.tar.gz
+            image/backend-image.tar.gz.sha256

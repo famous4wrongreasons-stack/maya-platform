@@ -48,9 +48,14 @@ export function plan(declared, requested = '') {
     // the battery in 178 minutes, but the whole job still timed out in cleanup.
     // Split declarations only; every new part
     // still owns the unfiltered suites and all controls required by its mutants.
+    // The later FP diagnostic progressed to FP-M12 before the whole 180-minute job expired.
+    // FP, P-f88, P-discharge and PU now each use three parts. The original timeouts remain
+    // unclassified without final receipts; repartitioning does not establish their outcomes
+    // or explain the other three failures. Every part still needs fresh exact-SHA evidence.
     const counts = { '6': 4, '7': 8, '8r': 4, '9': 4, '10': 4, '13': 4,
       'P-mint': 4, WR: 4, 'H-harness': 4, FB: 3, AR: 4, SB1: 3,
-      'P-principal': 3, 'PI-contract': 4, TURN: 4, SV2: 4 };
+      'P-principal': 3, 'PI-contract': 4, TURN: 4, SV2: 4,
+      FP: 3, 'P-f88': 3, 'P-discharge': 3, PU: 3 };
     const count = counts[gate] ?? 1;
     return Array.from({ length: count }, (_, i) => ({ gate, partition: count === 1 ? '' : `${i + 1}/${count}`, slot: count === 1 ? gate : `${gate}-part-${i + 1}-of-${count}` }));
   });
