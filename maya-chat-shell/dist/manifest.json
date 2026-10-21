@@ -174,7 +174,7 @@
       },
       {
         "path": "src/shell/own-appointments.ts",
-        "sha256": "8e077c3454b5cb5a8dd848ae010bfe3825b7d0bf5304605ed3a93ef2b1564420"
+        "sha256": "713f4313ad36333741af2b90b35fd8d4c4a97d3660f47de9c932b6194c33ee7d"
       },
       {
         "path": "src/shell/own-tasks.ts",
@@ -210,8 +210,8 @@
       }
     ]
   },
-  "bytes": 703697,
-  "digest": "580d40a14bdfc1eb47a0f4dd6054670e7c6fd7bba4e4b77c1e9c102a214d4b2c",
+  "bytes": 703746,
+  "digest": "7a797576e088a5421568a38dc8a04dcf4cb0fe1efa38915482f2f4e46719e37e",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -219,8 +219,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "6e9aa010edb3c6190ce38455cd0911fdffb7e72fa32c4485161069bfe4a21f96",
-    "modulePath": "m/6e9aa010edb3c619/",
+    "digest": "416de4012f7ea4c14e64768c4a3e2fda05fac192115d57e6abac28697686f70b",
+    "modulePath": "m/416de4012f7ea4c1/",
     "files": [
       {
         "path": "entry/main.js",
@@ -404,8 +404,8 @@
       },
       {
         "path": "src/shell/own-appointments.js",
-        "sha256": "9a05f690c904c4f8038e16ce474dd5dd931cd577fe720ee16b23debfdc1af8b9",
-        "bytes": 7419
+        "sha256": "981eb93df207b2dddb27a63289c7552649df84a1fa8c97b2affec330ac1284db",
+        "bytes": 7468
       },
       {
         "path": "src/shell/own-tasks.js",
@@ -463,7 +463,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "b089ce962e8b7fd75d22b208e5d6a9d28b6de5f4ed82cc67853d046767906341",
+      "sha256": "17d62f293945872227cd0dec6a77f2bc498e20aac86bd2d4ab35952cd73dbf53",
       "bytes": 1344
     },
     "assets": [

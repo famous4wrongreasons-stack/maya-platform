@@ -79,7 +79,7 @@ export function createOwnAppointments(deps: {
       const n = epoch; emit({ busy: true, slots: [] });
       const result = await deps.transport.personalSlots(state.date, row.serviceIds.join(','), row.staffId, abort.signal, row.branchId ?? undefined);
       if (!current(n)) return;
-      const slots = result.ok ? result.value.filter(s => s.staffId === row.staffId && s.branchId === row.branchId && Date.parse(s.start) > Date.now()) : [];
+      const slots = result.ok ? result.value.filter(s => s.staffId === row.staffId && s.branchId === row.branchId && Date.parse(s.start) > Date.now() && Date.parse(s.start) !== Date.parse(row.start)) : [];
       emit({ busy: false, slots, notice: result.ok ? slots.length ? 'Выберите новое время.' : 'Свободного времени на эту дату нет.' : failureText(result.failure) });
     },
     choose(index: number) { const slot = Number.isInteger(index) ? state.slots[index] : null; if (!state.busy && state.phase === 'reschedule' && slot) emit({ phase: 'confirm_move', start: slot.start, notice: 'Подтвердите перенос на выбранное время.' }); },

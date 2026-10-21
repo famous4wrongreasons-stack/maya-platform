@@ -14,7 +14,7 @@ function setup() {
     ownAppointments: async () => ok(rows),
     ownCancel: async (id,key) => { writes.push(['cancel',id,key]); if(outcome) return outcome; rows = rows.map(r=>r.id===id?{...r,status:'canceled'}:r); return ok(true); },
     ownReschedule: async (id,start,key) => { writes.push(['move',id,start,key]); if(outcome) return outcome; rows = rows.map(r=>r.id===id?{...r,start}:r); return ok(true); },
-    personalSlots: async () => ok([{start:'2099-10-23T10:00:00Z',staffId:'staff',branchId:'branch'},{start:'2099-10-23T11:00:00Z',staffId:'foreign',branchId:'branch'}]),
+    personalSlots: async () => ok([{start:row.start,staffId:'staff',branchId:'branch'},{start:'2099-10-23T10:00:00Z',staffId:'staff',branchId:'branch'},{start:'2099-10-23T11:00:00Z',staffId:'foreign',branchId:'branch'}]),
   };
   const port=createOwnAppointments({transport,session:{view:()=>({signedIn}),subscribe:l=>{listeners.add(l);return()=>listeners.delete(l);}},newId:()=> '10000000-0000-4000-8000-000000000001',newAbort:()=>new AbortController()});
   return {port,transport,writes,rows:r=>{rows=r;},outcome:x=>{outcome=x;},signOut:()=>{signedIn=false;for(const l of listeners)l({signedIn});}};
