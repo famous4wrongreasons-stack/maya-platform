@@ -63,7 +63,8 @@ describe('the runtime allowlist binding carries confirmation_kind', () => {
       Object.keys(AE_WIDGET_COMMIT_ALLOWLIST).filter(
         (key) =>
           key !== SERVICE_PRICE_CAPABILITY &&
-          key !== 'crm.goods.receipt.create.v1',
+          key !== 'crm.goods.receipt.create.v1' &&
+          key !== 'crm.staff.quick-create.v1',
       ),
     ).toHaveLength(10);
     expect(AE_WIDGET_COMMIT_ALLOWLIST[SERVICE_PRICE_CAPABILITY]).toEqual({
@@ -72,6 +73,13 @@ describe('the runtime allowlist binding carries confirmation_kind', () => {
       min_verification: 'SESSION_VERIFIED',
       requires_ae_approval: false,
       propose: { space: 'C9', key: 'catalog.service.price.update' },
+    });
+    expect(AE_WIDGET_COMMIT_ALLOWLIST['crm.staff.quick-create.v1']).toEqual({
+      confirmation_kind: 'APPROVAL',
+      family: 'settings',
+      min_verification: 'SESSION_VERIFIED',
+      requires_ae_approval: true,
+      propose: { space: 'C9', key: 'catalog.staff.create' },
     });
   });
 

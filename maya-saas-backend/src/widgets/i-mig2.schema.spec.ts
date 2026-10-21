@@ -96,11 +96,27 @@ describe('I-MIG2 migration-2 fold', () => {
           .digest('hex'),
       ).toBe(digest);
     }
+    // D3 extends only the existing A22 namespace constraint. Pin its exact SQL
+    // independently, preserving the historical 99-migration widget baseline.
+    const customerFacts = '20261021170000_a22_customer_facts';
+    expect(dirs.filter((name) => name === customerFacts)).toEqual([
+      customerFacts,
+    ]);
+    expect(
+      createHash('sha256')
+        .update(
+          read(
+            `maya-saas-backend/prisma/migrations/${customerFacts}/migration.sql`,
+          ),
+        )
+        .digest('hex'),
+    ).toBe('38c5435cbcb8faae2130d5c66828f1fd4f8c0933ae98c274ad69460a01dc237b');
     expect(
       dirs.filter(
         (name) =>
           name !== successor &&
           name !== navigation &&
+          name !== customerFacts &&
           !Object.prototype.hasOwnProperty.call(
             publicBookingOwnerMigrations,
             name,

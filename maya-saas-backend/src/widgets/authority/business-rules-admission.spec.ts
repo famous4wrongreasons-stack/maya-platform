@@ -36,6 +36,8 @@ describe('F36b/P10 — owner decision 2026-10-05; no expanded authority or publi
       'inventory.goods.search',
       'catalog.service.rename.preview',
       'inventory.goods.receipt.prepare',
+      'catalog.staff.create',
+      'company.customer-facts.read',
     ];
     expect(
       C9_CAPABILITIES.filter((row) => laterKeys.includes(row.capabilityKey))

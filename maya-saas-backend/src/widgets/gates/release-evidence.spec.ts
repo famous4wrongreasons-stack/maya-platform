@@ -89,10 +89,15 @@ describe('Final release evidence scope', () => {
 it('AR-FR6D-SCOPE pins only the approved price and goods subtypes and retains every other MONEY gap', () => {
   const registry = new ActionCapabilityRegistry();
   const keys = Object.keys(RUNTIME_ALLOWLIST);
+  // D2 adds exactly one non-money staff proposal. Preserve the prior MONEY census.
+  const staffKey = 'crm.staff.quick-create.v1';
+  expect(keys.filter((key) => key === staffKey)).toEqual([staffKey]);
+  expect(MONEY(registry.get(staffKey))).toBe(false);
+  const beforeStaff = keys.filter((key) => key !== staffKey);
   expect(
-    keys.filter((key) => key !== 'crm.goods.receipt.create.v1'),
+    beforeStaff.filter((key) => key !== 'crm.goods.receipt.create.v1'),
   ).toHaveLength(11);
-  expect(keys).toHaveLength(12);
+  expect(beforeStaff).toHaveLength(12);
   const money = Object.keys(RUNTIME_ALLOWLIST).filter((key) =>
     MONEY(registry.get(key)),
   );

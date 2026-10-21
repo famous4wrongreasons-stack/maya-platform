@@ -301,10 +301,10 @@ describe('R01 live artifact and release/recovery protection', () => {
     const shell = resolve(root, '../maya-chat-shell/dist/web');
     const result = edge.verifyShellCandidate(shell);
     // Preserve the original 38-file baseline + 4 personal/privacy modules,
-    // + 5 setup/photo/endpoint and 6 already-owned companion read modules.
+    // + 5 setup/photo/endpoint, 6 companion reads, and 2 own-consent read modules.
     // Provenance: 438909a8 (tasks), ccd38792 (feed/files), e9cd4ad2 (Ideas).
     // No arbitrary extra artifact files become admitted by this exact census.
-    expect(result).toMatchObject({ files: 53, php: 0, icons: 3 });
+    expect(result).toMatchObject({ files: 55, php: 0, icons: 3 });
     const generations = readdirSync(join(shell, 'm'));
     expect(generations).toHaveLength(1);
     expect(generations[0]).toMatch(/^[a-f0-9]{16}$/);
@@ -324,6 +324,8 @@ describe('R01 live artifact and release/recovery protection', () => {
       'shell/workspace-reads.js',
       'net/ideas.js',
       'shell/ideas.js',
+      'net/own-consents.js',
+      'shell/own-consents.js',
     ])
       expect(
         readFileSync(join(shell, 'm', generations[0], 'src', module), 'utf8'),

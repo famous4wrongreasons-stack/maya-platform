@@ -33,7 +33,11 @@ import ts from 'typescript';
 
 import { withoutBookingAuditProfileProjection } from '../presentation-audit.spec-helper.spec';
 
-import { C9_REGISTRY_HASH } from '../../orchestration/c9.registry';
+import {
+  C9_CAPABILITIES,
+  C9_REGISTRY_HASH,
+} from '../../orchestration/c9.registry';
+import { c9Hash } from '../../orchestration/c9.contract';
 import { C9_CAP_BY_KEY } from '../authority/contract-bindings';
 import type { CapabilityRef } from '../../widget-contract/capability-ref';
 import type { WidgetKind } from '../../widget-contract/kinds';
@@ -1289,10 +1293,23 @@ describe('U12b — the projector fences (ARCH-12-1 … ARCH-12-14)', () => {
     // F36b (owner approved 2026-10-05): existing staff read admitted; all other rows unchanged.
     // The registry's reviewed hash. A Gate 12 change never moves it; a unit that legitimately
     // changes the C9 canon moves this line in its own commit, with the reason in the message.
+    // D2 staff creation and D3 public customer facts are separately reviewed additions.
+    // Keep the former registry byte pin, excluding only these two exact rows.
+    const additions = ['catalog.staff.create', 'company.customer-facts.read'];
+    expect(
+      C9_CAPABILITIES.filter((row) => additions.includes(row.capabilityKey))
+        .map((row) => row.capabilityKey)
+        .sort(),
+    ).toEqual(additions);
+    expect(
+      c9Hash(
+        'registry/1',
+        C9_CAPABILITIES.filter((row) => !additions.includes(row.capabilityKey)),
+      ),
+    ).toBe('80c4712157aac6ad89e8fcd68587e2f4ecb016b74315266571c4a114027e715a');
+    // Pin every field of the two additions too; this is not a profile admission.
     expect(C9_REGISTRY_HASH).toBe(
-      // Existing READ additions: goods search (245d3888), rename preview (995a87e3).
-      // No profile admission or new capability is added by this evidence repair.
-      '80c4712157aac6ad89e8fcd68587e2f4ecb016b74315266571c4a114027e715a',
+      '262b1f6905fed6727b1a9daa41c4383724cd21cb4e6315f2e57d5fbbe4077417',
     );
     const contract = parse(
       'action-engine/action-engine.contract.ts',
