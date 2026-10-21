@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import { Injectable } from '@nestjs/common';
 import {
+  ActionApprovalDecision,
   ActionExecutionState,
   ActionPolicyDecision,
   ActionReconciliationState,
@@ -28,6 +29,12 @@ import {
   type ClientActionPrincipal,
 } from './client-action-principal.contract';
 import { CLIENT_BOOKING_INTENT_CONTRACT } from './client-booking-intent.contract';
+
+import {
+  STAFF_CREATE_CAPABILITY,
+  STAFF_CREATE_ORIGIN,
+  normalizeStaffCreateInput,
+} from './staff-create.contract';
 
 export type ActionRuntimePhase = 'prepare' | 'dispatch';
 
@@ -139,6 +146,46 @@ export class ActionEngineRuntimeService {
     private readonly kernel: ActionEngineKernel,
     private readonly canonicalIngress: CanonicalActionIngressService,
   ) {}
+
+  /** Finite YC-ST1 approval bridge. The owner must reread the decided exact
+   * AiApprovalRequest and current authority; the kernel retains REQUIRED policy,
+   * membership, expiry and atomic approval transition checks. No dispatch here. */
+  async approveStaffCreateFromOwner(
+    request: TrustedActionExecutionRequestV1,
+    authorize: () => Promise<void>,
+  ): Promise<ActionExecution> {
+    const input = normalizeStaffCreateInput(request.input);
+    if (
+      request.capability !== STAFF_CREATE_CAPABILITY ||
+      request.source.type !== 'authenticated_request' ||
+      request.source.occurrenceScope !== STAFF_CREATE_ORIGIN ||
+      request.source.sourceRef !== input.approval_id ||
+      !request.source.actorUserId ||
+      typeof authorize !== 'function'
+    )
+      throw new ActionContractError('Exact staff owner approval required');
+    await authorize();
+    const execution = await this.canonicalIngress.createExecution(request);
+    if (
+      execution.tenantId !== request.tenantId ||
+      execution.capability !== STAFF_CREATE_CAPABILITY ||
+      execution.sourceRef !== request.source.sourceRef ||
+      execution.actorUserId !== request.source.actorUserId ||
+      execution.approvalRequirement !== 'REQUIRED'
+    )
+      throw new ActionContractError(
+        'Staff approval execution binding mismatch',
+      );
+    if (execution.state !== ActionExecutionState.PENDING_APPROVAL)
+      return execution;
+    await authorize();
+    return this.kernel.decideApproval({
+      tenantId: request.tenantId,
+      executionId: execution.id,
+      approverUserId: request.source.actorUserId,
+      decision: ActionApprovalDecision.APPROVED,
+    });
+  }
 
   /** B35 admissions have only local database effects. The envelope, approval,
    * attempt and receipt commit together; a lost COMMIT reply re-reads that receipt.

@@ -129,8 +129,10 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
       'owner-ports/personal-schedule.adapter.ts',
       'owner-ports/service-price-approval.adapter.ts',
       'owner-ports/goods-receipt-approval.adapter.ts',
+      'owner-ports/staff-create-approval.adapter.ts',
       'pricing/service-price-approval-trigger.service.ts',
       'inventory/goods-receipt-approval-trigger.service.ts',
+      'staff-create/staff-create-approval-trigger.service.ts',
     ],
   },
   'common/authenticated-user.interface.ts': {
@@ -162,6 +164,31 @@ const NON_WIDGET_MODULES: Readonly<Record<string, Allowed>> = {
       'pricing/service-price-approval.port.ts',
       'inventory/goods-receipt-approval.port.ts',
       'widgets.module.ts',
+    ],
+  },
+  'ai-tools/ai-staff-create-widget-trigger.port.ts': {
+    why: 'YC-ST1 finite pending staff approval hook and immutable snapshot types; no provider operations.',
+    only: [
+      'staff-create/staff-create-approval-trigger.service.ts',
+      'staff-create/staff-create-approval.presenter.ts',
+      'staff-create/staff-create-approval.port.ts',
+      'widgets.module.ts',
+    ],
+  },
+  'action-engine/staff-create.contract.ts': {
+    why: 'YC-ST1 strict descriptor compares the canonical pure input normalizer by identity; no executor.',
+    only: ['staff-create/staff-create-widget.contract.ts'],
+  },
+  'crm/yclients-staff-create.contract.ts': {
+    why: 'YC-ST1 named constants and pure bounded proposal validation; no provider or service access.',
+    only: [
+      'staff-create/staff-create-widget.contract.ts',
+      'staff-create/staff-create-intent-template.registry.ts',
+      'authority/allowlist-startup.assert.ts',
+      'gates/gate7.ts',
+      'emission/emitter.service.ts',
+      'owner-ports/staff-create-approval.adapter.ts',
+      'owner-ports/noun-resolution.owners.provider.ts',
     ],
   },
   'action-engine/goods-receipt.contract.ts': {
@@ -303,6 +330,7 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
       'owner-ports/personal-schedule.adapter.ts',
       'owner-ports/service-price-approval.adapter.ts',
       'owner-ports/goods-receipt-approval.adapter.ts',
+      'owner-ports/staff-create-approval.adapter.ts',
       'owner-ports/schedule-approval.adapter.ts',
     ],
   },
@@ -379,6 +407,7 @@ const OWNER_PORT_MODULES: Readonly<Record<string, Allowed>> = {
       'owner-ports/commit-booking.adapter.ts',
       'owner-ports/service-price-approval.adapter.ts',
       'owner-ports/goods-receipt-approval.adapter.ts',
+      'owner-ports/staff-create-approval.adapter.ts',
     ],
   },
   'ai-tools/ai-tool-policy.module.ts': {
@@ -1355,6 +1384,7 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
     );
     expect(values.get('BOUND_PORT_TOKENS')).toEqual([
       'GOODS_RECEIPT_APPROVAL_OWNER',
+      'STAFF_CREATE_APPROVAL_OWNER',
       'SERVICE_PRICE_APPROVAL_OWNER',
       'SCHEDULE_APPROVAL_OWNER',
       'CHAT_REPLY_CIPHER',
@@ -1413,6 +1443,23 @@ describe('D-6 — the union import-graph test: owners only through the owner-por
           [`${W}/owner-ports/foreign-preview.adapter.ts`]:
             "import { ClientAppointmentReadService } from '../../crm/client-appointment-read.service';\nexport type Owner = ClientAppointmentReadService;\n",
         }),
+      ],
+      [
+        'staff contract imported by an unbound widget consumer',
+        'D6-CLOSED',
+        () => ({
+          [`${W}/owner-ports/foreign-staff.adapter.ts`]:
+            "import { STAFF_CREATE_CAPABILITY } from '../../crm/yclients-staff-create.contract';\nexport const cap = STAFF_CREATE_CAPABILITY;\n",
+        }),
+      ],
+      [
+        'staff presenter imports the executor directly',
+        'D6-SERVICE',
+        () =>
+          prepend(
+            'staff-create/staff-create-approval.presenter.ts',
+            "import { CrmService } from '../../crm/crm.service';\nexport type Bypass = CrmService;",
+          ),
       ],
       [
         'a gate file imports an owner service',

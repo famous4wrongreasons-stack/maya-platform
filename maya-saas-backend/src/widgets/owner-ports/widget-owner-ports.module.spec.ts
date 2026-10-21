@@ -1,3 +1,4 @@
+import { StaffCreateApprovalAdapter } from './staff-create-approval.adapter';
 import { GoodsReceiptApprovalAdapter } from './goods-receipt-approval.adapter';
 import { EncryptionModule } from '../../encryption/encryption.module';
 import { ChatReplyCipherAdapter } from './chat-reply-cipher.adapter';
@@ -154,6 +155,11 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
         provide: DI_TOKENS.GOODS_RECEIPT_APPROVAL_OWNER,
         useExisting: GoodsReceiptApprovalAdapter,
       },
+      StaffCreateApprovalAdapter,
+      {
+        provide: DI_TOKENS.STAFF_CREATE_APPROVAL_OWNER,
+        useExisting: StaffCreateApprovalAdapter,
+      },
       ServicePriceApprovalAdapter,
       CanonicalApprovalAdapter,
       {
@@ -186,6 +192,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
     ]);
     expect(meta(MODULE_METADATA.EXPORTS, WidgetOwnerPortsModule)).toEqual([
       DI_TOKENS.GOODS_RECEIPT_APPROVAL_OWNER,
+      DI_TOKENS.STAFF_CREATE_APPROVAL_OWNER,
       DI_TOKENS.SERVICE_PRICE_APPROVAL_OWNER,
       DI_TOKENS.CHAT_REPLY_CIPHER,
       DI_TOKENS.SCHEDULE_APPROVAL_OWNER,
@@ -238,6 +245,7 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
     // it: that is what keeps "unbound" from drifting into "nobody checked".
     const BOUND: readonly string[] = [
       DI_TOKENS.GOODS_RECEIPT_APPROVAL_OWNER,
+      DI_TOKENS.STAFF_CREATE_APPROVAL_OWNER,
       DI_TOKENS.SERVICE_PRICE_APPROVAL_OWNER,
       DI_TOKENS.CHAT_REPLY_CIPHER,
       DI_TOKENS.SCHEDULE_APPROVAL_OWNER,
@@ -317,6 +325,11 @@ describe('D-6 — the owner-ports boundary carries exactly what is bound; every 
       expect(
         moduleRef.get<unknown>(DI_TOKENS.CANONICAL_READ, { strict: false }),
       ).toBeInstanceOf(CanonicalReadAdapter);
+      expect(
+        moduleRef.get<unknown>(DI_TOKENS.STAFF_CREATE_APPROVAL_OWNER, {
+          strict: false,
+        }),
+      ).toBeInstanceOf(StaffCreateApprovalAdapter);
       for (const token of Object.values(DI_TOKENS).filter(
         (t) => !BOUND.includes(t),
       ))

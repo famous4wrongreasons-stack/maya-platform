@@ -9,7 +9,6 @@ import {
   StaffCreatePreDispatchError,
   type StaffCreateReceipt,
 } from './yclients-staff-create.contract';
-import { ActionApprovalDecision, ActionExecutionState } from '@prisma/client';
 import {
   assertPriceGoodsScope,
   checkPriceGoodsScope,
@@ -77,7 +76,6 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
-  Optional,
   Logger,
   NotFoundException,
   ServiceUnavailableException,
@@ -87,8 +85,6 @@ import {
 import {
   ACTION_EXECUTION_REQUEST_CONTRACT,
   ActionEngineRuntimeService,
-  ActionEngineKernel,
-  CanonicalActionIngressService,
   ActionExecutionTerminalError,
   ActionExecutionUncertainError,
   stableActionJson,
@@ -445,9 +441,6 @@ export class CrmService {
     private readonly clientIdentityService: ClientIdentityService,
     private readonly actionEngineRuntime: ActionEngineRuntimeService,
     private readonly goodsEntitlements?: EntitlementsService,
-    @Optional()
-    private readonly staffCreateIngress?: CanonicalActionIngressService,
-    @Optional() private readonly staffCreateKernel?: ActionEngineKernel,
   ) {}
 
   async discoverCompanies(tenantId: string, dto: DiscoverCrmCompaniesDto) {
@@ -1858,8 +1851,6 @@ export class CrmService {
     idempotencyKey: string,
   ): Promise<Record<string, unknown>> {
     const args = staffCreatePrepared(input);
-    if (!this.staffCreateIngress || !this.staffCreateKernel)
-      staffCreateRefuse('staff_create_canonical_engine_required');
     const approval = await this.prisma.aiApprovalRequest.findUnique({
       where: { tenantId_idempotencyKey: { tenantId, idempotencyKey } },
     });
@@ -1976,16 +1967,12 @@ export class CrmService {
           staffCreateRefuse('staff_create_previous_outcome_unresolved');
         // A genuine REQUIRED AE approval is created and consumed, bound to the already
         // explicitly decided AiApprovalRequest. No caller-authored approval flag exists.
-        let execution = await this.staffCreateIngress!.createExecution(request);
-        if (execution.state === ActionExecutionState.PENDING_APPROVAL) {
-          await authorize(true);
-          execution = await this.staffCreateKernel!.decideApproval({
-            tenantId,
-            executionId: execution.id,
-            approverUserId: userId,
-            decision: ActionApprovalDecision.APPROVED,
-          });
-        }
+        await this.actionEngineRuntime.approveStaffCreateFromOwner(
+          request,
+          async () => {
+            await authorize(true);
+          },
+        );
         return this.actionEngineRuntime.executeWithReceipt(request, {
           prepare: async () => {
             await authorize(true);

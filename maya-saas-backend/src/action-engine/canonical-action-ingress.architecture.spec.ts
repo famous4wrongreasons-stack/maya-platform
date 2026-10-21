@@ -60,7 +60,7 @@ describe('canonical ActionExecution ingress ratchet', () => {
     const runtime = source(join(__dirname, 'action-engine.runtime.ts'));
 
     expect(runtime.match(/canonicalIngress\.createExecution\(/g)).toHaveLength(
-      2,
+      3, // shadow projection, finite staff REQUIRED approval, ordinary execution
     );
     expect(runtime).not.toMatch(/kernel\.create(?:Canonical)?Execution\(/);
     expect(runtime).not.toContain('createExecutionForControlledFixture');

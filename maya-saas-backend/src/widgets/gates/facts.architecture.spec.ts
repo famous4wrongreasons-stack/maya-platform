@@ -179,8 +179,10 @@ const withoutGoodsSnapshotFacts = (unit: SourceUnit): string => {
     'inventory/goods-receipt-approval.presenter.ts',
     'inventory/goods-receipt-terminal.presenter.ts',
     'owner-ports/goods-receipt-approval.adapter.ts',
+    'staff-create/staff-create-approval.presenter.ts',
   ];
   if (!files.includes(unit.file)) return unit.source;
+  if (unit.file === files[3] && unit.slot !== null) return unit.source;
   const sf = parseSource(unit.file, unit.source);
   const spans: { start: number; end: number }[] = [];
   const text = (node: ts.Node | undefined): string =>
@@ -239,10 +241,18 @@ const withoutGoodsSnapshotFacts = (unit: SourceUnit): string => {
   const presenter =
     unit.file === files[0]
       ? functionNamed('goodsReceiptApprovalMintRequest')
-      : undefined;
+      : unit.file === files[3]
+        ? functionNamed('staffCreateApprovalMintRequest')
+        : undefined;
   const snapshot =
     text(presenter?.type) === 'MintRequest'
-      ? parameter(presenter, 'snapshot', 'GoodsReceiptApprovalSnapshot')
+      ? parameter(
+          presenter,
+          'snapshot',
+          unit.file === files[3]
+            ? 'StaffCreateApprovalSnapshot'
+            : 'GoodsReceiptApprovalSnapshot',
+        )
       : undefined;
   const fact = snapshot ? local(presenter, 'fact', 'FactUsed') : undefined;
   const terminal =
@@ -453,11 +463,12 @@ describe('T-ARCH-FACTS — who may produce and who may read each fact', () => {
     }
   });
 
-  it('goods snapshot projections are typed, finite, and never hide an added AdmissionFacts reader', () => {
+  it('finite owner snapshot projections never hide an added AdmissionFacts reader', () => {
     for (const file of [
       'inventory/goods-receipt-approval.presenter.ts',
       'inventory/goods-receipt-terminal.presenter.ts',
       'owner-ports/goods-receipt-approval.adapter.ts',
+      'staff-create/staff-create-approval.presenter.ts',
     ]) {
       const source = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
       expect(factViolations({ slot: null, file, source })).toEqual([]);
@@ -482,6 +493,26 @@ describe('T-ARCH-FACTS — who may produce and who may read each fact', () => {
         ),
       }).length,
     ).toBeGreaterThan(0);
+  });
+
+  it('staff snapshot exemption requires the exact non-gate typed presenter and evidence binding', () => {
+    const file = 'staff-create/staff-create-approval.presenter.ts';
+    const source = fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+    expect(factViolations({ slot: null, file, source })).toEqual([]);
+    for (const changed of [
+      source.replace(
+        'snapshot: StaffCreateApprovalSnapshot',
+        'snapshot: AdmissionFacts',
+      ),
+      source.replace('const fact: FactUsed', 'const fact: AdmissionFacts'),
+      source.replace('facts: [fact]', 'facts: [foreign]'),
+    ])
+      expect(
+        factViolations({ slot: null, file, source: changed }).length,
+      ).toBeGreaterThan(0);
+    expect(factViolations({ slot: '8', file, source }).length).toBeGreaterThan(
+      0,
+    );
   });
 
   it('goods source exemptions follow lexical bindings through captures, never shadowed parameters or locals', () => {

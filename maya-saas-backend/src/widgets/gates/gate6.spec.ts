@@ -445,12 +445,13 @@ describe('Gate 6 — the AE branch [RI] (no AE record may exist on the proof DB 
 
   it('S-B / S-C positive: each allowlisted key is carried PAST (a), (b) and (c) to the held (d)', async () => {
     // Reaching `(d)` is the statement that (a), (b) and (c) admitted, so this is their positive.
-    // Preserve the prior YC-SP1 set; F32b/F74b adds only the exact goods receipt.
+    // Preserve the prior YC-SP1/GR-PC1 set; YC-ST1 adds only exact staff quick-create.
     expect(
       ALLOWLISTED.filter((key) => key !== 'crm.goods.receipt.create.v1'),
-    ).toHaveLength(11);
+    ).toHaveLength(12);
     expect(ALLOWLISTED).toContain('crm.goods.receipt.create.v1');
-    expect(ALLOWLISTED).toHaveLength(12);
+    expect(ALLOWLISTED).toContain('crm.staff.quick-create.v1');
+    expect(ALLOWLISTED).toHaveLength(13);
     for (const key of ALLOWLISTED) {
       const v = await gate6(ae(key));
       expect({ key, detail: detail(v) }).toEqual({
