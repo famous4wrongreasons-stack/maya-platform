@@ -1211,6 +1211,21 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'fail_closed',
   },
   {
+    name: 'company.customer-facts.read',
+    description:
+      'Current explicit owner-published customer facts + revision/validity; absent/expired: none. No public-policy inference from staff rules, user text or brand knowledge; no action/personal-data authority.',
+    inputSchema: EMPTY_OBJECT_SCHEMA,
+    allowedRoles: ALL_INTERACTIVE_TENANT_ROLES,
+    allowedSurfaces: ALL_SURFACES,
+    requiredFeatures: [],
+    riskTier: 'read',
+    approvalPolicy: 'none',
+    idempotency: 'none',
+    timeoutMs: 8000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
     name: 'settings.read',
     description:
       'Read the authenticated team member tenant-scoped MAYA assistant capabilities and finance dashboard preferences. Returns only safe configuration values, available capability descriptions and configured targets; never returns credentials or integration secrets.',

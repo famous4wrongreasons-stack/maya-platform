@@ -1,5 +1,6 @@
 import { UserRole } from '../common/domain.enums';
 import { ConversationIntelligenceService } from './conversation-intelligence.service';
+import { MAYA_CONVERSATION_TAXONOMY } from './conversation-taxonomy';
 
 describe('ConversationIntelligenceService', () => {
   const service = new ConversationIntelligenceService();
@@ -81,8 +82,9 @@ describe('ConversationIntelligenceService', () => {
     // CF5: три legacy marketing/opportunity decision path удалены. Runtime
     // 85 existing intents + A22 + Occupancy + personal catalog + goods item
     // + explicit goods search + the finite owner service rename preview
-    // + the already approved YC-SP1 fixed-RUB approval route.
-    expect(contract.intents).toHaveLength(92);
+    // + the already approved YC-SP1 fixed-RUB approval route
+    // + explicit A22 customer facts, separate from internal staff rules.
+    expect(contract.intents).toHaveLength(93);
     expect(
       contract.intents.find(
         (item) => item.intent === 'services.rename_preview',
@@ -113,10 +115,45 @@ describe('ConversationIntelligenceService', () => {
         'marketing.send_campaign',
       ]),
     );
-    // One approved fixed-price intent adds <1 KB to the prior 60 KB budget.
+    // Keep the existing limit as finite capabilities are registered.
     expect(Buffer.byteLength(encoded, 'utf8')).toBeLessThan(61_000);
     expect(contract.intents[0]).not.toHaveProperty('permission');
     expect(contract.intents[0]).not.toHaveProperty('response_rule');
+    expect(contract.intents[0]).toHaveProperty('readiness_note', null);
+    expect(
+      contract.intents.find((item) => item.intent === 'company.customer_facts'),
+    ).toMatchObject({
+      domain: 'company',
+      action: 'read',
+      allowed_for_role: true,
+      required_slots: [],
+      ready_tools: [],
+    });
+  });
+
+  it('retains required notes and every intent boundary in the planner projection', () => {
+    const availableTools = [
+      ...new Set(
+        MAYA_CONVERSATION_TAXONOMY.flatMap((item) => item.toolCandidates),
+      ),
+    ];
+    for (const role of Object.values(UserRole)) {
+      const contract = service.plannerContract(role, availableTools);
+      expect(contract.intents.map((item) => item.intent)).toEqual(
+        MAYA_CONVERSATION_TAXONOMY.map((item) => item.id),
+      );
+      for (const [index, definition] of MAYA_CONVERSATION_TAXONOMY.entries()) {
+        expect(contract.intents[index]).toMatchObject({
+          readiness: definition.readiness,
+          readiness_note: definition.readinessNote,
+          allowed_for_role: definition.allowedRoles.includes(role),
+          required_slots: definition.requiredSlots,
+          optional_slots: definition.optionalSlots,
+          ready_tools:
+            definition.readiness === 'planned' ? [] : definition.toolCandidates,
+        });
+      }
+    }
   });
 
   it('allows owner catalog preparation without promoting the role or repurposing a denied create', () => {

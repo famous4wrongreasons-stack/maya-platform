@@ -637,6 +637,40 @@ export class AiToolRuntimeService {
       definition.name === 'reviews.list.read' && args.period !== undefined;
     if (internal.reviewCalendarReadScope !== undefined && !exactReview)
       this.executionConflict('review_calendar_query_invalid');
+    if (definition.name === 'company.customer-facts.read') {
+      if (staff) this.executionConflict('customer_facts_source_scope_invalid');
+      const expected = this.canonicalJson(
+        await this.handler.customerFactsReadIdentity(principal),
+      );
+      const revalidate = async () => {
+        await this.assertScopedReadPrincipal(
+          principal,
+          'customer_facts_principal_changed',
+        );
+        await this.policy.assertCanExecute(principal, definition);
+        if (
+          this.canonicalJson(
+            await this.handler.customerFactsReadIdentity(principal),
+          ) !== expected
+        )
+          this.executionConflict('customer_facts_source_changed');
+        await this.assertScopedReadPrincipal(
+          principal,
+          'customer_facts_principal_changed',
+        );
+      };
+      await revalidate();
+      principal.readAuthority = {
+        membershipId: principal.readAuthority?.membershipId ?? null,
+        membershipStatus: principal.readAuthority?.membershipStatus ?? null,
+        branchId: principal.readAuthority?.branchId ?? null,
+        ...principal.readAuthority,
+        sourceScopeHash: createHash('sha256')
+          .update(this.canonicalJson(['maya.customer-facts/1', expected]))
+          .digest('hex'),
+      };
+      return revalidate;
+    }
     if (!exactReview) return staff;
     // This profile is mutually exclusive with every staff/CRM scoped projection.
     if (staff) this.executionConflict('review_calendar_query_invalid');

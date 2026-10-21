@@ -1,6 +1,7 @@
 import { c8Policy } from '../valuation/c8.policy';
 import { c9TenantContext } from '../orchestration/c9.policy';
 import { businessRuleContainsKnownPii } from './business-rule-safety';
+import { customerFactsContent } from './customer-facts.contract';
 import { createHash } from 'node:crypto';
 import { BadRequestException } from '@nestjs/common';
 import { stableActionJson } from '../action-engine/action-engine.identity';
@@ -8,6 +9,7 @@ import { stableActionJson } from '../action-engine/action-engine.identity';
 export const GOVERNED_SETTINGS_CONTRACT = 'maya.governed-settings/1';
 export const TENANT_CONFIGURATION_NAMESPACES = [
   'business_rules',
+  'customer_facts',
   'client_capabilities',
   'staff_ai_provider',
   'c8_valuation',
@@ -72,6 +74,7 @@ export function governedConfigurationContent(
   value: unknown,
   context?: { tenantId: string; actorUserId: string; callerId: string },
 ): Record<string, unknown> {
+  if (namespace === 'customer_facts') return customerFactsContent(value);
   if (namespace === 'c8_valuation') return c8Policy(value);
   if (namespace === 'c9_orchestration') return c9TenantContext(value);
   if (namespace === 'client_capabilities') {

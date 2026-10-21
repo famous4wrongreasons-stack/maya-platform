@@ -427,8 +427,8 @@ describe('Bounded planner stage wire context (no language acceptance)', () => {
       }).toEqual(contract);
       expect(intents.columns).toHaveLength(13);
       expect(intents.rows).toHaveLength(MAYA_CONVERSATION_TAXONOMY.length);
-      // 5f24fcbc adds booking.prepare_personal; retain every current row.
-      expect(intents.rows).toHaveLength(92);
+      // D3 adds explicit customer facts; retain every current row.
+      expect(intents.rows).toHaveLength(93);
       expect(Object.keys(intents.dictionaries)).toEqual([
         'domain',
         'action',

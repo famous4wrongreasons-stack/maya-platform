@@ -236,13 +236,13 @@ export const MAYA_NUMBER_RULES: readonly ConversationNumberNormalizationRule[] =
   ];
 
 export const MAYA_NOISY_INPUT_RULES = [
-  'Correct likely speech-to-text and keyboard errors semantically; never require exact spelling.',
-  'Treat скока, скок and сколько as the same interrogative quantity when context agrees.',
+  'Correct likely speech/keyboard errors semantically; never require exact spelling.',
+  'With matching context, скока/скок/сколько ask the same quantity.',
   'Treat седня and сёдня as сегодня; прош мес as прошлый месяц.',
   'Treat акно as окно, вырчка as выручка, запиши мя as запиши меня.',
-  'Mixed Russian and English business terms such as revenue, booking, staff and CRM retain their domain meaning.',
-  'Punctuation, capitalization and filler words must not change intent.',
-  'Do not repair a person, service or branch name by guessing; resolve it against tool data.',
+  'Mixed Russian/English terms (revenue, booking, staff, CRM) retain domain meaning.',
+  'Punctuation, capitalization and fillers never change intent.',
+  'Never guess repairs to person/service/branch names; resolve against tool data.',
 ] as const;
 
 export const MAYA_ELLIPTICAL_FOLLOW_UPS = [

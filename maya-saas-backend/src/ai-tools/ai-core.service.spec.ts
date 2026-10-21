@@ -45,6 +45,83 @@ describe('AiCoreService', () => {
     messages: [{ role: 'user' as const, content: 'Покажи показатели' }],
   };
 
+  describe('published customer facts in ordinary chat', () => {
+    const tool = 'company.customer-facts.read';
+    const facts = [{ text: 'В зоне ожидания есть питьевая вода.' }];
+    const source = () => ({
+      contract: 'maya.customer-facts/1',
+      audience: 'customer',
+      source: 'tenant_owner_confirmed',
+      status: 'configured',
+      revision: 2,
+      source_revision_id: 'synthetic-public-revision',
+      content_hash: 'a'.repeat(64),
+      effectiveAt: new Date(Date.now() - 60000).toISOString(),
+      expiresAt: new Date(Date.now() + 60000).toISOString(),
+      facts,
+    });
+    it.each(['configured', 'expired', 'staff_only', 'unknown_source'])(
+      'uses a server-quoted reply for %s without sending facts to a second model call',
+      async (kind) => {
+        const mocks = createService([tool]);
+        const result = source();
+        if (kind === 'expired')
+          result.expiresAt = new Date(Date.now() - 1).toISOString();
+        if (kind === 'staff_only') result.audience = 'staff_only';
+        if (kind === 'unknown_source') result.source = 'model';
+        const actor = { ...user, role: UserRole.CLIENT };
+        mocks.model.decide.mockResolvedValue(
+          decision({
+            reply: null,
+            toolCall: { name: tool, arguments: {} },
+            semanticPlan: new ConversationIntelligenceService().validatePlan(
+              {
+                dialogue_act: 'request',
+                tasks: [{ intent: 'company.customer_facts', entities: {} }],
+              },
+              actor.role,
+              [tool],
+            ),
+          }),
+        );
+        mocks.runtime.execute.mockResolvedValue({
+          status: 'completed',
+          execution_id: 'public-read',
+          result,
+        });
+        const answer = await mocks.service.chat(actor, {
+          ...dto,
+          messages: [
+            {
+              role: 'user',
+              content: 'Какие сведения опубликованы для посетителей?',
+            },
+          ],
+        });
+        if (kind === 'configured') {
+          expect(answer.reply).toContain(facts[0].text);
+          expect(answer.reply).toContain(
+            'опубликованные владельцем, редакция 2',
+          );
+        } else {
+          expect(answer.reply).toContain('пока не подтверждены');
+          expect(answer.reply).not.toContain(facts[0].text);
+        }
+        expect(answer.action).toBeNull();
+        expect(mocks.model.decide).toHaveBeenCalledTimes(1);
+        expect(JSON.stringify(mocks.model.decide.mock.calls)).not.toContain(
+          facts[0].text,
+        );
+        expect(mocks.runtime.execute).toHaveBeenCalledWith(
+          expect.anything(),
+          tool,
+          expect.anything(),
+          expect.objectContaining({ suppressWidgetTrigger: true }),
+        );
+      },
+    );
+  });
+
   describe('explicit preparation stop', () => {
     function fixture() {
       const mocks = createService(['appointments.own.reschedule']);

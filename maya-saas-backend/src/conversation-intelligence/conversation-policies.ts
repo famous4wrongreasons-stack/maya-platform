@@ -23,163 +23,158 @@ export const MAYA_CONVERSATION_POLICY_CONTRACT = {
     A: {
       label: 'general_knowledge',
       tool_requirement: 'not_required',
-      behavior:
-        'The model may answer from general knowledge and must not invent tenant facts.',
+      behavior: 'General model knowledge; no invented tenant facts.',
     },
     B: {
       label: 'tenant_context',
       tool_requirement: 'tenant_context',
-      behavior:
-        'Answer only from the sanitized tenant context supplied by the runtime.',
+      behavior: 'Use only runtime-supplied sanitized tenant context.',
     },
     C: {
       label: 'verified_business_data',
       tool_requirement: 'verified_tool',
-      behavior:
-        'A verified tenant-scoped tool result is required before stating business facts.',
+      behavior: 'Business facts require verified tenant-scoped tool results.',
     },
     D: {
       label: 'verified_calculation',
       tool_requirement: 'verified_calculation',
       behavior:
-        'Calculate only from verified inputs and name missing inputs instead of guessing.',
+        'Calculate only from verified inputs; name missing inputs, never guess.',
     },
     E: {
       label: 'external_action',
       tool_requirement: 'confirmed_action',
       behavior:
-        'Preview consequences first and execute only through the runtime approval policy.',
+        'Preview consequences; execution requires runtime approval policy.',
     },
     F: {
       label: 'permission_denied',
       tool_requirement: 'forbidden',
       behavior:
-        'Refuse the protected request without rerouting to another intent or tool.',
+        'Refuse protected requests; no rerouting to other intents or tools.',
     },
   },
   context: [
     {
       id: 'carry_relevant_slots',
-      rule: 'Carry forward only still-relevant confirmed slots from prior turns.',
+      rule: 'Carry only relevant confirmed prior-turn slots.',
     },
     {
       id: 'replace_explicit_corrections',
-      rule: 'An explicit correction replaces the old slot instead of adding a competing value.',
+      rule: 'Explicit corrections replace slots, not add competing values.',
     },
     {
       id: 'suspend_on_topic_switch',
-      rule: 'A topic switch suspends previous action state; returning restores only confirmed slots.',
+      rule: 'Topic switches suspend prior action state; return restores only confirmed slots.',
     },
     {
       id: 'resolve_nearest_compatible_reference',
-      rule: 'Resolve pronouns from the nearest compatible entity and clarify when multiple candidates remain.',
+      rule: 'Resolve pronouns to the nearest compatible entity; clarify multiple candidates.',
     },
   ],
   clarification: [
     {
       id: 'no_questionnaire',
-      rule: 'Do not turn the dialogue into a questionnaire.',
+      rule: 'Never turn dialogue into a questionnaire.',
     },
     {
       id: 'reasonable_low_risk_default',
-      rule: 'Use a reasonable low-risk default only when context makes it unambiguous.',
+      rule: 'Use reasonable low-risk defaults only with unambiguous context.',
     },
     {
       id: 'one_material_question',
-      rule: 'Ask one concise question when ambiguity materially changes data scope or an action.',
+      rule: 'Ask one concise question if ambiguity materially changes data scope or action.',
     },
     {
       id: 'never_guess_tenant_entity',
-      rule: 'Never guess between people, branches, appointments or services with the same name.',
+      rule: 'Never guess among same-named people, branches, appointments or services.',
     },
   ],
   confirmation: [
     {
       id: 'read_analyze_without_confirmation',
-      rule: 'READ and ANALYZE do not need confirmation.',
+      rule: 'READ/ANALYZE: no confirmation.',
     },
     {
       id: 'preview_has_no_side_effect',
-      rule: 'PREVIEW creates no external side effect and is not permission to execute.',
+      rule: 'PREVIEW has no external side effect and grants no execution permission.',
     },
     {
       id: 'runtime_approval_for_mutation',
-      rule: 'WRITE and EXECUTE require the immutable runtime approval policy before a side effect.',
+      rule: 'WRITE/EXECUTE: immutable runtime approval policy before side effects.',
     },
     {
       id: 'confirmation_scope_is_exact',
-      rule: 'Approval applies only to the previewed action, audience, cost and current dialogue state.',
+      rule: 'Approval covers only previewed action, audience, cost and current dialogue state.',
     },
   ],
   risk_levels: {
     low: {
       confirmation: 'not_required',
-      behavior:
-        'Return permitted information without adding confirmation friction.',
+      behavior: 'Return permitted information without extra confirmation.',
     },
     medium: {
       confirmation: 'preview_only',
-      behavior:
-        'Create a draft or preview but do not cause an external side effect.',
+      behavior: 'Draft or preview only; no external side effects.',
     },
     high: {
       confirmation: 'required_before_side_effect',
       behavior:
-        'Show material consequences and require explicit runtime approval immediately before execution.',
+        'Show material consequences; require explicit runtime approval immediately before execution.',
     },
   },
   routing: [
     {
       id: 'canonical_intent_only',
-      rule: 'Every semantic task must use exactly one canonical taxonomy intent.',
+      rule: 'Each task: exactly one canonical taxonomy intent.',
     },
     {
       id: 'permission_before_tool',
-      rule: 'Evaluate tenant membership and role permission before selecting a tool.',
+      rule: 'Check tenant membership and role permission before tool selection.',
     },
     {
       id: 'available_tool_only',
-      rule: 'Select only a ready tool declared by the permitted canonical intent.',
+      rule: 'Select only ready tools declared by the permitted canonical intent.',
     },
     {
       id: 'understood_but_unavailable',
-      rule: 'Keep the canonical intent when its tool is unavailable; do not relabel it as small talk.',
+      rule: 'Keep canonical intent if its tool is unavailable; never relabel as small talk.',
     },
     {
       id: 'compound_dependency_order',
-      rule: 'Execute compound tasks in dependency order and select at most one next tool call.',
+      rule: 'Execute compound tasks in dependency order; select at most one next tool call.',
     },
   ],
   grounding: [
     {
       id: 'class_a_general_reasoning',
-      rule: 'Class A may use general model knowledge.',
+      rule: 'Class A permits general model knowledge.',
     },
     {
       id: 'classes_b_to_e_are_grounded',
-      rule: 'Classes B-E require tenant context, verified tool data, calculation or approved action.',
+      rule: 'Classes B-E need tenant context, verified tool data, calculation or approved action.',
     },
     {
       id: 'class_f_has_no_workaround',
-      rule: 'Class F is permission denied and must not be worked around with another tool.',
+      rule: 'Class F denies permission; no other-tool workaround.',
     },
     {
       id: 'no_absent_business_fact',
-      rule: 'Never infer a tenant business fact that is absent from sanitized verified inputs.',
+      rule: 'Never infer tenant business facts absent from sanitized verified inputs.',
     },
   ],
   privacy: [
     {
       id: 'no_raw_pii_in_model_context',
-      rule: 'Do not send raw phone numbers, email addresses, credentials or direct client identifiers to the model.',
+      rule: 'Never send raw phones, emails, credentials or direct client identifiers to the model.',
     },
     {
       id: 'tenant_scoped_resolution',
-      rule: 'Resolve people and business entities inside the authenticated tenant boundary.',
+      rule: 'Resolve people and business entities within the authenticated tenant.',
     },
     {
       id: 'minimum_necessary_data',
-      rule: 'Expose only the minimum sanitized fields required for the permitted task.',
+      rule: 'Expose only minimum sanitized fields required for the permitted task.',
     },
   ],
 } as const satisfies ConversationPolicyContract;

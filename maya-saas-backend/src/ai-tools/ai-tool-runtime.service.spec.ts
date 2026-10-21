@@ -36,6 +36,127 @@ describe('AiToolRuntimeService', () => {
     membershipStatus: 'active',
   };
 
+  describe('current public customer facts source', () => {
+    function fixture() {
+      const h = createHarness();
+      const member = {
+        id: 'membership-a',
+        tenantId: 'tenant-a',
+        userId: customer.userId,
+        role: customer.role,
+        branchId: null,
+        status: 'active',
+        user: { status: 'active' },
+        tenant: { status: 'active' },
+      };
+      h.membershipFindUnique.mockResolvedValue(member);
+      type Projection = Awaited<
+        ReturnType<AiToolHandlerService['customerFactsReadIdentity']>
+      >;
+      const projection: Projection = {
+        audience: 'customer',
+        source: 'tenant_owner_confirmed',
+        source_revision_id: 'public-revision',
+        effectiveAt: '2026-10-21T00:00:00.000Z',
+        expiresAt: '2026-10-22T00:00:00.000Z',
+        contract: 'maya.customer-facts/1',
+        status: 'configured',
+        revision: 1,
+        content_hash: 'a'.repeat(64),
+        facts: [{ text: 'SYNTHETIC_PUBLIC_FACT' }],
+      };
+      jest
+        .spyOn(h.handler, 'customerFactsReadIdentity')
+        .mockImplementation(() => Promise.resolve(projection));
+      let saved: Record<string, unknown> | null = null;
+      h.executionFindUnique.mockImplementation(() => Promise.resolve(saved));
+      h.executionCreate.mockImplementation((input: unknown) => {
+        saved = { ...record(record(input).data), id: 'public-read' };
+        return Promise.resolve(saved);
+      });
+      h.executionUpdate.mockImplementation((input: unknown) => {
+        saved = { ...saved, ...record(record(input).data) };
+        return Promise.resolve(saved);
+      });
+      h.handlerExecute.mockImplementation(() => Promise.resolve(projection));
+      const run = (replay = false) =>
+        h.tenantContext.runAsSystemTenant('tenant-a', () => {
+          const dto = {
+            surface: 'web' as const,
+            arguments: {},
+            idempotencyKey: IDEMPOTENCY_KEY,
+          };
+          return replay
+            ? h.runtime.replayCompletedRead(
+                customer,
+                'company.customer-facts.read',
+                dto,
+                'public-read',
+                { suppressWidgetTrigger: true },
+              )
+            : h.runtime.execute(customer, 'company.customer-facts.read', dto, {
+                suppressWidgetTrigger: true,
+              });
+        });
+      return {
+        ...h,
+        member,
+        run,
+        change: (value: Partial<Projection>) => {
+          Object.assign(projection, value);
+        },
+      };
+    }
+    it('deduplicates current execution and C9 replay without another tool dispatch', async () => {
+      const h = fixture();
+      await expect(h.run()).resolves.toMatchObject({
+        status: 'completed',
+        replayed: false,
+      });
+      await expect(h.run()).resolves.toMatchObject({
+        status: 'completed',
+        replayed: true,
+      });
+      await expect(h.run(true)).resolves.toMatchObject({
+        status: 'completed',
+        replayed: true,
+      });
+      expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+    });
+    it.each(['new-revision', 'expired', 'withdrawn'])(
+      'cannot return stale public facts after %s on same-key execution or C9 replay',
+      async (change) => {
+        const h = fixture();
+        await h.run();
+        h.change({
+          contract: 'maya.customer-facts/1',
+          revision: change === 'new-revision' ? 2 : 1,
+          status: change,
+          facts: [],
+        });
+        await expect(h.run()).rejects.toBeInstanceOf(ConflictException);
+        await expect(h.run(true)).rejects.toBeInstanceOf(ConflictException);
+        expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+      },
+    );
+    it('current membership revocation closes both replay paths', async () => {
+      const h = fixture();
+      await h.run();
+      h.member.status = 'suspended';
+      await expect(h.run()).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(h.run(true)).rejects.toBeInstanceOf(ForbiddenException);
+      expect(h.handlerExecute).toHaveBeenCalledTimes(1);
+    });
+    it('source changes during execution do not return the old public text', async () => {
+      const h = fixture();
+      h.handlerExecute.mockImplementation(() => {
+        h.change({ status: 'expired', facts: [] });
+        return Promise.resolve({ facts: [{ text: 'STALE_PUBLIC_FACT' }] });
+      });
+      await expect(h.run()).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
   it.each(['fresh-source', 'fresh-name', 'saved-source', 'saved-name'])(
     'rejects a pricing source/name mismatch before mint or same-key return: %s',
     async (mode) => {
@@ -1762,6 +1883,7 @@ function createHarness(
     servicePriceReadIdentity: jest.fn().mockResolvedValue('a'.repeat(64)),
     assertStaffScheduleReadScope: jest.fn().mockResolvedValue(undefined),
     resolveReviewCalendarScope: jest.fn(),
+    customerFactsReadIdentity: jest.fn(),
     availabilityPreferenceCalendar,
     execute: handlerExecute,
     // Доводка аргументов и обогащение карточки — тождественные для всего,

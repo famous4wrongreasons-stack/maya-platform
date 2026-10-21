@@ -508,6 +508,8 @@ export class AiToolHandlerService {
         return this.readSettings(principal);
       case 'business.rules.read':
         return this.readBusinessRules(principal);
+      case 'company.customer-facts.read':
+        return this.readCustomerFacts(principal);
       case 'settings.update':
         return this.updateSettings(principal, args, idempotencyKey);
       case 'tasks.list':
@@ -1400,6 +1402,22 @@ export class AiToolHandlerService {
       audience: 'staff_only',
       rules,
     };
+  }
+
+  /** The same current A22 projection binds fresh reads and receipt replay. */
+  async customerFactsReadIdentity(principal: AiToolPrincipal) {
+    return this.readCustomerFacts(principal);
+  }
+
+  private async readCustomerFacts(principal: AiToolPrincipal) {
+    if (!this.governedSettings)
+      throw new ServiceUnavailableException(
+        'Public customer facts reader unavailable',
+      );
+    return this.governedSettings.readCustomerFacts(
+      principal.tenantId,
+      principal.userId,
+    );
   }
 
   private async readSettings(principal: AiToolPrincipal) {

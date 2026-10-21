@@ -10,6 +10,10 @@ import {
 } from './reviews-calendar-read';
 import { reviewsCalendarReply } from './reviews-presentation';
 import {
+  customerFactsReply,
+  customerFactsPresentation,
+} from '../package5-wave1/customer-facts.contract';
+import {
   employeeServiceTask,
   readEmployeeServices,
   EMPLOYEE_SERVICES_UNAVAILABLE,
@@ -528,6 +532,7 @@ const DATA_TOOL_DOMAINS: Record<string, string> = {
   'catalog.service.rename.preview': 'service_catalog',
   'catalog.staff.read': 'staff_catalog',
   'company.business-hours.read': 'company_profile',
+  'company.customer-facts.read': 'customer_facts',
   'support.integration-status.read': 'integration_status',
   'reviews.list.read': 'reviews',
   'staff.schedule.read': 'staff_schedule',
@@ -581,6 +586,8 @@ const PII_SENSITIVE_TOOLS = new Set([
  * когорт и границы периодов, а свободный пересказ не должен менять цифры.
  */
 const SERVER_COMPOSED_REPLY_TOOLS = new Set([
+  // Published public text is quoted by the server, never fed back as model instructions.
+  'company.customer-facts.read',
   'company.business-hours.read',
   // Stored integration checks must never be paraphrased as a live provider probe.
   'support.integration-status.read',
@@ -3791,64 +3798,74 @@ export class AiCoreService {
           serviceRenamePreview ||
           publicConsultation
         ) {
-          const sourceReply = serviceRenamePreview
-            ? serviceRenameReply(execution.result, execution.stale === true)
-            : goodsRead
-              ? decision.toolCall.name === 'inventory.goods.search'
-                ? goodsSearchReply(execution.result, execution.stale === true)
-                : goodsReadReply(execution.result, execution.stale === true)
-              : publicConsultation
-                ? publicConsultationReply(
-                    execution.result,
-                    activeSemanticPlan!.tasks[0].intent ===
-                      'employees.list_public'
-                      ? 'staff'
-                      : 'salon',
-                    execution.stale === true,
-                  )
-                : personalPreparation
-                  ? this.personalCatalogPreparationReply(execution)
-                  : decision.toolCall.name === 'staff.schedule.own.read'
-                    ? this.deterministicOwnStaffScheduleReply(
+          const sourceReply =
+            decision.toolCall.name === 'company.customer-facts.read'
+              ? customerFactsPresentation(
+                  execution.stale === true ? null : execution.result,
+                )
+              : serviceRenamePreview
+                ? serviceRenameReply(execution.result, execution.stale === true)
+                : goodsRead
+                  ? decision.toolCall.name === 'inventory.goods.search'
+                    ? goodsSearchReply(
                         execution.result,
-                        hardenedArguments.date,
                         execution.stale === true,
                       )
-                    : decision.toolCall.name === 'company.business-hours.read'
-                      ? this.deterministicCompanyProfileReply(
-                          execution.result,
-                          execution.stale === true,
-                        )
-                      : decision.toolCall.name === 'appointments.own.list'
-                        ? this.deterministicOwnAppointmentsReply(
+                    : goodsReadReply(execution.result, execution.stale === true)
+                  : publicConsultation
+                    ? publicConsultationReply(
+                        execution.result,
+                        activeSemanticPlan!.tasks[0].intent ===
+                          'employees.list_public'
+                          ? 'staff'
+                          : 'salon',
+                        execution.stale === true,
+                      )
+                    : personalPreparation
+                      ? this.personalCatalogPreparationReply(execution)
+                      : decision.toolCall.name === 'staff.schedule.own.read'
+                        ? this.deterministicOwnStaffScheduleReply(
                             execution.result,
+                            hardenedArguments.date,
                             execution.stale === true,
-                            personalPeriod,
-                            businessTimezone,
-                            personalReadTask?.entities.status,
                           )
                         : decision.toolCall.name ===
-                            'support.integration-status.read'
-                          ? integrationStatusReply(
+                            'company.business-hours.read'
+                          ? this.deterministicCompanyProfileReply(
                               execution.result,
                               execution.stale === true,
                             )
-                          : decision.toolCall.name === 'tasks.list'
-                            ? ownTasksReply(
+                          : decision.toolCall.name === 'appointments.own.list'
+                            ? this.deterministicOwnAppointmentsReply(
                                 execution.result,
                                 execution.stale === true,
+                                personalPeriod,
+                                businessTimezone,
+                                personalReadTask?.entities.status,
                               )
-                            : decision.toolCall.name === 'clients.dossier.read'
-                              ? this.deterministicClientDossierReply(
+                            : decision.toolCall.name ===
+                                'support.integration-status.read'
+                              ? integrationStatusReply(
                                   execution.result,
                                   execution.stale === true,
                                 )
-                              : reviewsRead
-                                ? reviewsReply(
+                              : decision.toolCall.name === 'tasks.list'
+                                ? ownTasksReply(
                                     execution.result,
                                     execution.stale === true,
                                   )
-                                : null;
+                                : decision.toolCall.name ===
+                                    'clients.dossier.read'
+                                  ? this.deterministicClientDossierReply(
+                                      execution.result,
+                                      execution.stale === true,
+                                    )
+                                  : reviewsRead
+                                    ? reviewsReply(
+                                        execution.result,
+                                        execution.stale === true,
+                                      )
+                                    : null;
           const deterministicReply =
             sourceReply?.status === 'verified' && reschedulePreparation
               ? `${sourceReply.reply}\n\n${reschedulePreparation}`
@@ -4059,10 +4076,12 @@ export class AiCoreService {
     const [user, name, dto] = args;
     // A public profile is prose, not the timed SCHEDULE contract. Its complete
     // server reply retains the source receipt without a raw-JSON widget beside it.
-    const internal =
-      name === 'company.business-hours.read'
-        ? { ...args[3], suppressWidgetTrigger: true }
-        : args[3];
+    const internal = [
+      'company.business-hours.read',
+      'company.customer-facts.read',
+    ].includes(name)
+      ? { ...args[3], suppressWidgetTrigger: true }
+      : args[3];
     const read = () => this.runtime.execute(user, name, dto, internal);
     const capability = C9_CAPABILITIES.find((c) => c.capabilityKey === name);
     // Persisted web ingress currently supplies the canonical age. Other surfaces
@@ -5750,6 +5769,8 @@ export class AiCoreService {
       );
     }
     switch (evidence.name) {
+      case 'company.customer-facts.read':
+        return customerFactsReply(evidence.result);
       case 'tasks.list':
         return ownTasksReply(evidence.result).reply;
       case 'support.integration-status.read':

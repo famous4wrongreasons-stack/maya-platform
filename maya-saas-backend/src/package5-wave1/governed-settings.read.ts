@@ -10,6 +10,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { canonicalUtcTransaction } from '../prisma/canonical-utc-transaction';
 import { TenantContextService } from '../tenancy/tenant-context.service';
 import {
+  CUSTOMER_FACTS_CONTRACT,
+  CUSTOMER_FACTS_NAMESPACE,
+  CUSTOMER_FACTS_SOURCE,
+  customerFactsContent,
+} from './customer-facts.contract';
+import {
   GOVERNED_STAFF_ROLES,
   governedConfigurationContent,
   governedHash,
@@ -178,6 +184,129 @@ export class GovernedSettingsReadService {
           'client_capabilities',
         );
         return current.content?.client_self_visit_history === true;
+      },
+      { readOnly: true },
+    );
+  }
+  /** Separate public projection. This never reads or upgrades business_rules. */
+  async readCustomerFacts(tenantId: string, userId: string) {
+    this.context.assertTenantId(tenantId);
+    return canonicalUtcTransaction(
+      this.prisma,
+      async (tx) => {
+        const member = await tx.membership.findUnique({
+          where: { userId_tenantId: { tenantId, userId } },
+          include: {
+            user: { select: { status: true } },
+            tenant: { select: { status: true } },
+          },
+        });
+        if (
+          !member ||
+          member.tenantId !== tenantId ||
+          member.userId !== userId ||
+          member.status !== 'active' ||
+          member.user.status !== 'active' ||
+          member.tenant.status !== 'active' ||
+          (!GOVERNED_STAFF_ROLES.has(member.role) &&
+            !['client', 'customer'].includes(member.role))
+        )
+          throw new ForbiddenException(
+            'Exact active tenant membership required',
+          );
+        const row = await tx.tenantBusinessConfigurationRevision.findFirst({
+          where: { tenantId, namespace: CUSTOMER_FACTS_NAMESPACE },
+          orderBy: { revision: 'desc' },
+          include: {
+            execution: {
+              select: {
+                id: true,
+                tenantId: true,
+                actorUserId: true,
+                actionClass: true,
+                state: true,
+                dryRun: true,
+                policyDecision: true,
+                reconciliationState: true,
+              },
+            },
+          },
+        });
+        const base = {
+          contract: CUSTOMER_FACTS_CONTRACT,
+          audience: 'customer',
+          source: CUSTOMER_FACTS_SOURCE,
+          revision: row?.revision ?? 0,
+          source_revision_id: row?.id ?? null,
+          content_hash: row?.contentHash ?? null,
+        };
+        if (!row)
+          return {
+            ...base,
+            status: 'not_configured',
+            effectiveAt: null,
+            expiresAt: null,
+            facts: [],
+          };
+        if (
+          row.tenantId !== tenantId ||
+          row.namespace !== CUSTOMER_FACTS_NAMESPACE ||
+          row.contractVersion !== 1 ||
+          !Number.isSafeInteger(row.revision) ||
+          row.revision < 1 ||
+          !row.id ||
+          !row.encryptedContent ||
+          !row.execution ||
+          row.execution.id !== row.actionExecutionId ||
+          row.execution.tenantId !== tenantId ||
+          row.execution.actorUserId !== row.actorUserId ||
+          row.execution.actionClass !==
+            'update_tenant_business_configuration' ||
+          row.execution.state !== 'SUCCEEDED' ||
+          row.execution.dryRun !== false ||
+          row.execution.policyDecision !== 'ALLOW' ||
+          !['NOT_REQUIRED', 'RESOLVED'].includes(
+            row.execution.reconciliationState,
+          )
+        )
+          throw new ServiceUnavailableException(
+            'Public customer source unavailable',
+          );
+        let content: ReturnType<typeof customerFactsContent>;
+        try {
+          content = customerFactsContent(
+            JSON.parse(this.encryption.decrypt(row.encryptedContent)),
+          );
+        } catch {
+          throw new ServiceUnavailableException(
+            'Public customer source unavailable',
+          );
+        }
+        if (
+          governedHash(
+            'maya.tenant-configuration-content/1/customer_facts',
+            content,
+          ) !== row.contentHash
+        )
+          throw new ServiceUnavailableException(
+            'Public customer source hash mismatch',
+          );
+        const now = Date.now();
+        const status =
+          now < Date.parse(content.effectiveAt)
+            ? 'not_effective'
+            : now >= Date.parse(content.expiresAt)
+              ? 'expired'
+              : content.facts.length
+                ? 'configured'
+                : 'not_configured';
+        return {
+          ...base,
+          status,
+          effectiveAt: content.effectiveAt,
+          expiresAt: content.expiresAt,
+          facts: status === 'configured' ? content.facts : [],
+        };
       },
       { readOnly: true },
     );

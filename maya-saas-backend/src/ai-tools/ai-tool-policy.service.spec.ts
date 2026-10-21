@@ -63,11 +63,15 @@ describe('AiToolPolicyService', () => {
       'appointments.own.create',
       'appointments.own.reschedule',
       'company.business-hours.read',
+      'company.customer-facts.read',
     ]);
     expect(tools.some((tool) => tool.name === 'analytics.business.query')).toBe(
       false,
     );
     expect(tools.some((tool) => tool.name === 'booking.upsell.suggest')).toBe(
+      false,
+    );
+    expect(tools.some((tool) => tool.name === 'business.rules.read')).toBe(
       false,
     );
   });

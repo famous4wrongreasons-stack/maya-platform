@@ -133,7 +133,7 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
     intent(
       'booking.list_own',
       'booking',
-      'List own appointments. Use period=past for history or period=last_visit for latest attended visit in task entities_json, not tool arguments. Call appointments.own.list with {}. Only synchronized Maya records under current salon permission.',
+      'List own synchronized Maya appointments under current salon permission. In task entities_json (not tool args), period=past selects history; period=last_visit the latest attended visit. Call appointments.own.list({}).',
       {
         action: 'read',
         dataClass: 'C',
@@ -152,7 +152,7 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
     intent(
       'booking.prepare_personal',
       'booking',
-      'Begin a new personal booking with a public catalog read. An initial book-me request, even with complete preferences, is preparation for every role, never creation or confirmation.',
+      'New personal bookings start with public catalog preparation for every role, even with complete preferences; never creation or confirmation.',
       {
         action: 'read',
         dataClass: 'C',
@@ -182,7 +182,7 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
     intent(
       'booking.create_own',
       'booking',
-      'Create from an existing booking proposal. New requests use booking.prepare_personal. This intent grants no identity, permission or confirmation.',
+      'Create from existing booking proposals. New requests use booking.prepare_personal. Grants no identity, permission or confirmation.',
       {
         action: 'execute',
         dataClass: 'E',
@@ -321,7 +321,7 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
     intent(
       'schedule.review_cancellation_windows',
       'schedule',
-      'Review a saved cancellation Opportunity against current CRM availability and recommend bounded read-only next steps.',
+      'Compare a saved cancellation Opportunity with current CRM availability; recommend bounded read-only next steps.',
       {
         action: 'analyze',
         dataClass: 'D',
@@ -1312,6 +1312,25 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
           'Покажи утверждённые правила салона',
           'Что записано в регламенте для сотрудников?',
         ],
+      },
+    ),
+    intent(
+      'company.customer_facts',
+      'company',
+      'Read explicit public customer facts.',
+      {
+        action: 'read',
+        dataClass: 'C',
+        permission: 'company.public.read',
+        tools: ['company.customer-facts.read'],
+        responseRule:
+          'Quote only the current owner-published customer facts. An absent, expired or unavailable source stays unknown. Never substitute staff-only business rules or infer booking/cancellation/deposit authority.',
+        synonyms: [
+          'информация для клиентов',
+          'правила для посетителей',
+          'условия посещения',
+        ],
+        examples: ['Какие правила опубликованы для клиентов?'],
       },
     ),
     intent('settings.read', 'settings', 'Read available MAYA settings.', {

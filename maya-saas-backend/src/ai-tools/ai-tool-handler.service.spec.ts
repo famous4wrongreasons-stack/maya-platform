@@ -34,6 +34,37 @@ describe('AiToolHandlerService output minimization', () => {
     surface: 'web' as const,
   };
 
+  it('public facts handler and replay witness use only the existing public A22 reader', async () => {
+    const service = createService({});
+    const projection = {
+      contract: 'maya.customer-facts/1',
+      status: 'not_configured',
+      facts: [],
+    };
+    const readCustomerFacts = jest.fn().mockResolvedValue(projection),
+      read = jest.fn();
+    Object.defineProperty(service, 'governedSettings', {
+      value: { readCustomerFacts, read },
+    });
+    await expect(
+      service.execute(
+        'company.customer-facts.read',
+        principal,
+        {},
+        'synthetic-read',
+      ),
+    ).resolves.toEqual(projection);
+    await expect(service.customerFactsReadIdentity(principal)).resolves.toEqual(
+      projection,
+    );
+    expect(readCustomerFacts).toHaveBeenCalledTimes(2);
+    expect(readCustomerFacts).toHaveBeenCalledWith(
+      principal.tenantId,
+      principal.userId,
+    );
+    expect(read).not.toHaveBeenCalled();
+  });
+
   afterEach(() => {
     jest.useRealTimers();
   });
