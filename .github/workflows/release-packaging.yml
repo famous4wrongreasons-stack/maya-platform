@@ -43,6 +43,9 @@ jobs:
         working-directory: maya-saas-backend
       - run: node --test scripts/widget-release-operator.test.cjs scripts/widgets-mutation-report.test.mjs
         working-directory: maya-saas-backend
+      - name: Safe compiled failure projection redaction and source bindings
+        run: node --test scripts/phone-native-proof-diagnostic.test.mjs
+        working-directory: maya-saas-backend
       - run: npx prisma generate && npm run build
         working-directory: maya-saas-backend
       - name: Private phone staging boundaries and Prisma image configuration
@@ -67,6 +70,16 @@ jobs:
       - name: Ordinary compiled AppModule with signed execution and synthetic HTTP model
         run: node scripts/phone-native-execution-proof-runner.mjs --run --output "$RUNNER_TEMP/native-execution-compiled" --pg-bin "$(brew --prefix postgresql@16)/bin"
         working-directory: maya-saas-backend
+      - name: Preserve safe compiled proof diagnostics after success or failure
+        if: always()
+        run: node maya-saas-backend/scripts/phone-native-proof-diagnostic.mjs "$RUNNER_TEMP/native-execution-compiled" "$GITHUB_WORKSPACE/maya-saas-backend/test/widgets-live/support/native-execution-compiled-proof.mjs" "$RUNNER_TEMP/native-compiled-diagnostic-safe.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-compiled-diagnostic-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/native-compiled-diagnostic-safe.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Unsigned local build, no device install or account provisioning
         run: xcodebuild -project maya-ios-carrier/ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -derivedDataPath "$RUNNER_TEMP/maya-ios" CODE_SIGNING_ALLOWED=NO build
       - name: Verify the actual app bundle, not just the sync input
