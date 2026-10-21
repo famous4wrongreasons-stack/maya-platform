@@ -133,7 +133,7 @@ export const MAYA_CONVERSATION_TAXONOMY: readonly ConversationIntentDefinition[]
     intent(
       'booking.list_own',
       'booking',
-      'List own synchronized Maya appointments under current salon permission. In task entities_json (not tool args), period=past selects history; period=last_visit the latest attended visit. Call appointments.own.list({}).',
+      'List own synchronized Maya appointments under current salon permission. In task entities_json (not tool arguments), period=past selects history; period=last_visit the latest attended visit. Call appointments.own.list({}).',
       {
         action: 'read',
         dataClass: 'C',

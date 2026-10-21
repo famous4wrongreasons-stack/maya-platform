@@ -85,6 +85,48 @@ describe('AiToolPolicyService', () => {
   });
 
   it.each([UserRole.CLIENT, UserRole.CUSTOMER])(
+    'allows only public facts without booking for %s and denies internal data execution',
+    async (role) => {
+      const { service, tenantContext } = createService({
+        'ai.consultant': true,
+        'ai.admin': true,
+      });
+      const registry = new AiToolRegistryService();
+      const principal = {
+        tenantId: 'tenant-a',
+        userId: 'customer-a',
+        role,
+        surface: 'native' as const,
+      };
+      await tenantContext.runAsSystemTenant('tenant-a', async () => {
+        const tools = await service.listAllowed(
+          principal.tenantId,
+          principal.userId,
+          role,
+          principal.surface,
+        );
+        expect(tools.map((tool) => tool.name)).toEqual([
+          'company.customer-facts.read',
+        ]);
+        await expect(
+          service.assertCanExecute(
+            principal,
+            registry.get('company.customer-facts.read'),
+          ),
+        ).resolves.toBeUndefined();
+        for (const name of [
+          'analytics.business.query',
+          'business.rules.read',
+        ]) {
+          await expect(
+            service.assertCanExecute(principal, registry.get(name)),
+          ).rejects.toBeInstanceOf(ForbiddenException);
+        }
+      });
+    },
+  );
+
+  it.each([UserRole.CLIENT, UserRole.CUSTOMER])(
     'refuses the staff own schedule to %s at the canonical policy owner',
     async (role) => {
       const { service, tenantContext } = createService({

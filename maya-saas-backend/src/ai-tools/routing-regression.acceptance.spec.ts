@@ -878,10 +878,35 @@ describe('КОРПУС: промах подсказки больше не отк
     expect(harness.approvals).toEqual([]);
   });
 
-  it('без доступного каталога сохраняет отказ до обращения к модели', async () => {
+  it('публичные сведения без booking не открывают клиенту выручку', async () => {
     const harness = createHarness(CLIENT, {
       'ai.admin': true,
       'ai.consultant': true,
+    });
+    const answer = await harness.ask('Какая выручка бизнеса за этот месяц?');
+    expect(answer.reply).toBe(
+      'Этот запрос недоступен для вашей текущей роли или тарифа. MAYA не покажет чужие или закрытые данные.',
+    );
+    expect(answer.grounding).toMatchObject({
+      status: 'blocked',
+      domain: 'business_query',
+    });
+    expect(harness.decide).toHaveBeenCalledTimes(1);
+    const planned = harness.decide.mock.calls[0][0];
+    expect(planned.tools.map((tool) => tool.name)).toEqual([
+      'company.customer-facts.read',
+    ]);
+    expect(planned.requiredToolNames).toEqual([]);
+    expect(planned.toolResults).toEqual([]);
+    expect(harness.executed).toEqual([]);
+    expect(harness.approvals).toEqual([]);
+  });
+
+  it('без доступного каталога сохраняет отказ до обращения к модели', async () => {
+    const harness = createHarness(CLIENT, {
+      'ai.admin': true,
+      // Client's own AI entitlement is disabled; staff AI cannot grant it.
+      'ai.consultant': false,
     });
     const answer = await harness.ask('Какая выручка бизнеса за этот месяц?');
     expect(answer.grounding).toMatchObject({
@@ -890,5 +915,6 @@ describe('КОРПУС: промах подсказки больше не отк
     });
     expect(harness.decide).not.toHaveBeenCalled();
     expect(harness.executed).toEqual([]);
+    expect(harness.approvals).toEqual([]);
   });
 });
