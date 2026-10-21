@@ -89,7 +89,7 @@ jobs:
           const fields = new Set(['date', 'arguments', 'branch_id', 'staff_id', 'service_ids', 'surface']);
           const status = n => Number.isInteger(n) && n >= 100 && n <= 599;
           const frame = /^\s+at file:\/\/[^\r\n]*\/test\/widgets-live\/support\/native-execution-compiled-proof\.mjs:1072:10$/m;
-          
+
           export function projectAvailability(manifest, source) {
             const out = {
               contract: 'maya.native-availability-diagnostic-safe/1',
@@ -158,7 +158,7 @@ jobs:
             }
             return out;
           }
-          
+
           if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
             const [manifestFile, proofFile, outputFile] = process.argv.slice(2);
             if (![manifestFile, proofFile, outputFile].every(p => typeof p === 'string' && path.isAbsolute(p)) || fs.existsSync(outputFile)) throw Error('three absolute paths and a fresh output are required');
@@ -171,7 +171,7 @@ jobs:
             fs.writeFileSync(outputFile, JSON.stringify(report, null, 2)+'\n', {flag:'wx',mode:0o600});
             console.log(JSON.stringify(report));
           }
-          
+
           const proofFile = path.join(process.env.GITHUB_WORKSPACE, 'maya-saas-backend/test/widgets-live/support/native-execution-compiled-proof.mjs');
           const manifestFile = path.join(process.env.RUNNER_TEMP, 'native-execution-compiled/lifecycle/manifest.json');
           const subjectHead = execFileSync('git', ['-C', process.env.GITHUB_WORKSPACE, 'rev-parse', 'HEAD'], {encoding:'utf8'}).trim();
