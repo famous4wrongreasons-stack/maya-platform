@@ -3,26 +3,16 @@ import type { SessionPort } from './ports.ts';
 
 export interface OwnAppointmentsView {
   readonly open: boolean; readonly busy: boolean;
-  readonly entry: 'list' | 'create';
   readonly phase: 'list' | 'cancel' | 'reschedule' | 'confirm_move';
   readonly rows: readonly OwnAppointment[]; readonly selected: OwnAppointment | null;
   readonly date: string; readonly slots: readonly PersonalSlot[]; readonly start: string;
   readonly notice: string; readonly blocked: readonly string[];
 }
-const empty = (): OwnAppointmentsView => ({ open: false, busy: false, entry: 'list', phase: 'list', rows: [], selected: null, date: '', slots: [], start: '', notice: '', blocked: [] });
+const empty = (): OwnAppointmentsView => ({ open: false, busy: false, phase: 'list', rows: [], selected: null, date: '', slots: [], start: '', notice: '', blocked: [] });
 const canceled = (r: OwnAppointment) => ['canceled', 'cancelled'].includes(r.status);
 const same = (a: OwnAppointment, b: OwnAppointment) => a.id === b.id && a.updatedAt === b.updatedAt && a.start === b.start && a.status === b.status;
 const uncertain = 'Ответ не получен. Действие повторно не отправляем. Нажмите «Обновить записи», чтобы проверить результат.';
 const failureText = (f: PersonalFailure) => f.reason === 'forbidden' ? 'Нет доступа к личным записям. Проверьте вход в свой аккаунт.' : f.reason === 'conflict' ? 'Запись или свободное время изменились. Обновите записи и выберите время заново.' : f.reason === 'unknown' ? uncertain : 'Не удалось получить подтверждение. Запись не считаем изменённой.';
-
-/** Explicit local navigation only: no date/identity inference and no booking side effect. */
-export function ownBookingRequest(text: string): 'create' | 'list' | null {
-  if (text.length > 4000) return null;
-  const value = text.normalize('NFKC').toLocaleLowerCase('ru').trim().replace(/\s+/gu, ' ');
-  if (/^(?:пожалуйста[, ]+)?(?:хочу записаться|запиши(?:те)? меня|записаться)(?:[\s.!?,]|$)/u.test(value)) return 'create';
-  if (/^(?:пожалуйста[, ]+)?(?:(?:хочу )?(?:перенести|отменить) (?:мою )?запись|(?:перенеси(?:те)?|отмени(?:те)?) (?:мою )?запись|мои записи)(?:[\s.!?,]|$)/u.test(value)) return 'list';
-  return null;
-}
 
 export function createOwnAppointments(deps: {
   transport: OwnAppointmentsTransport & Pick<PersonalTransport, 'personalSlots'>;
@@ -76,12 +66,7 @@ export function createOwnAppointments(deps: {
   return {
     view: () => state,
     subscribe(l: (v: OwnAppointmentsView) => void) { listeners.add(l); return () => { listeners.delete(l); }; },
-    open() { if (!deps.session.view().signedIn || state.busy) return false; reset(); emit({ open: true }); void refresh(); return true; },
-    openRequest(text: string) {
-      const entry = ownBookingRequest(text);
-      if (!entry || !deps.session.view().signedIn || state.busy) return false;
-      reset(); emit({ open: true, entry: pending.size ? 'list' : entry }); void refresh(); return true;
-    },
+    open() { if (!deps.session.view().signedIn || state.busy) return; reset(); emit({ open: true }); void refresh(); },
     close() { if (!state.busy) reset(); },
     refresh,
     cancel(id: string) { const row = selectable(id); if (row) emit({ phase: 'cancel', selected: row, notice: 'Проверьте запись перед отменой.' }); },

@@ -491,10 +491,6 @@ export function ChatScreen({
     // `in_flight`, `composer_disabled` — decided inside submitUserTurn against state this screen
     // cannot see. Keeping only this check would allow a double-send whenever the snapshot is stale.
     if (!view.composer.enabled || view.inFlight) return;
-    // A direct request opens the existing personal form; it never claims a booking was made.
-    if (ownAppointments.openRequest(text)) {
-      setRefused(null); setDraft(''); composerRef.current?.blur(); return;
-    }
     const outcome = conversation.submitUserTurn(text, { modality: 'typed' });
     // `accepted: true` means QUEUED. Nothing is drawn from it. A refusal is the runtime telling the
     // person why nothing left the device — dropping it on the floor, as this did before, makes a

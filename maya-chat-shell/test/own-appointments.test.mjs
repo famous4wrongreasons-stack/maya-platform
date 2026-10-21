@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createOwnAppointments, ownBookingRequest } from '../src/shell/own-appointments.ts';
+import { createOwnAppointments } from '../src/shell/own-appointments.ts';
 import { createTransport } from '../src/net/client.ts';
 import { projectOwnAppointments, ownMutationConfirmed } from '../src/net/personal.ts';
 const ok = value => ({ ok: true, value });
@@ -58,14 +58,4 @@ test('wire uses only fixed personal routes, explicit context and stable idempote
     assert.match(calls[0].url,/\/personal-client\/appointments\/cancel$/);assert.deepEqual(JSON.parse(calls[0].init.body),{appointmentId:row.id});
     assert.equal(calls[0].init.headers['X-Maya-Authority-Context'],'personal_client');assert.equal(calls[0].init.headers['Idempotency-Key'],'10000000-0000-4000-8000-000000000001');
   } finally {globalThis.fetch=original;}
-});
-
-test('explicit self booking requests navigate to review without chat, AI or mutation; other text stays chat', async()=>{
-  for (const text of ['Хочу записаться','Запиши меня на стрижку к Стасу на завтра','Пожалуйста, запишите меня']) assert.equal(ownBookingRequest(text),'create');
-  for (const text of ['Отмени мою запись','Перенеси запись','Хочу отменить запись','Мои записи']) assert.equal(ownBookingRequest(text),'list');
-  for (const text of ['Не хочу записаться','Как записаться?','Запиши клиента Ивана','Сколько стоит стрижка?','']) assert.equal(ownBookingRequest(text),null);
-  const h=setup();assert.equal(h.port.openRequest('Хочу записаться'),true);await flush();assert.equal(h.port.view().entry,'create');assert.equal(h.writes.length,0);h.port.close();h.signOut();assert.equal(h.port.openRequest('Хочу записаться'),false);assert.equal(h.writes.length,0);h.port.dispose();
-});
-test('unknown appointment outcome prevents direct create shortcut from bypassing review',async()=>{
-  const h=setup();h.outcome({ok:false,failure:{reason:'unknown'}});h.port.open();await flush();h.port.cancel(row.id);await h.port.confirmCancel();h.port.close();assert.equal(h.port.openRequest('Хочу записаться'),true);await flush();assert.equal(h.port.view().entry,'list');assert.deepEqual(h.port.view().blocked,[row.id]);assert.equal(h.writes.length,1);h.port.dispose();
 });
