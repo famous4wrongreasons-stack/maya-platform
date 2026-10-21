@@ -24,24 +24,34 @@ describe('YC-ST1 native adapter boundary (synthetic fetch only)', () => {
     let permission: unknown = permissions,
       receipt: unknown = { id: 7, company_id: 5, ...proposal, position: null };
     let lost = false;
-    globalThis.fetch = jest.fn(async (input, init) => {
-      const url = String(input),
+    const fetchMock: typeof fetch = (input, init) => {
+      const url =
+          typeof input === 'string'
+            ? input
+            : input instanceof URL
+              ? input.href
+              : input.url,
         method = init?.method ?? 'GET';
+      if (init?.body != null && typeof init.body !== 'string')
+        return Promise.reject(new TypeError('synthetic body must be a string'));
       calls.push({
         url,
         method,
-        ...(init?.body ? { body: JSON.parse(String(init.body)) } : {}),
+        ...(init?.body ? { body: JSON.parse(init.body) } : {}),
       });
       if (method === 'POST' && lost)
-        throw new TypeError('synthetic connection lost');
-      return new Response(
-        JSON.stringify({
-          success: true,
-          data: method === 'GET' ? permission : receipt,
-        }),
-        { status: method === 'GET' ? 200 : 201 },
+        return Promise.reject(new TypeError('synthetic connection lost'));
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            success: true,
+            data: method === 'GET' ? permission : receipt,
+          }),
+          { status: method === 'GET' ? 200 : 201 },
+        ),
       );
-    });
+    };
+    globalThis.fetch = jest.fn(fetchMock);
     const adapter = new YclientsCRMAdapter({
       provider: CrmProvider.YCLIENTS,
       apiToken: 'synthetic-user',

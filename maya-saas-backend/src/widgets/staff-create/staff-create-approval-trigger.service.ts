@@ -33,7 +33,6 @@ const resolution = (
   dismiss_widget_id: null,
 });
 const LIVE = ['MINTED', 'DELIVERED', 'LIVE'];
-const STAFF_CREATE_CAPABILITY = 'crm.staff.quick-create.v1';
 
 /** Named YC-ST1-CHAT-1 admission. Authority stays with the canonical approval owner and the one minter. */
 @Injectable()

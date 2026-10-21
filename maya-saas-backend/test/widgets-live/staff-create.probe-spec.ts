@@ -363,27 +363,25 @@ describe('YC-ST1 canonical chat quick-create [HTTP/PG/native synthetic provider]
     const args = JSON.parse(
       db.encryption.decrypt(approval.encryptedArguments),
     ) as Record<string, unknown>;
-    await http.app
-      .get(TenantContextService)
-      .runAsAuthPrincipal(
-        {
-          tenantId: f.tenant.id,
-          userId: f.user.id,
-          role: UserRole.TENANT_OWNER,
-        },
-        async () => {
-          await expect(
-            http.app
-              .get(CrmService)
-              .applyStaffCreate(
-                f.tenant.id,
-                f.user.id,
-                args,
-                approval.idempotencyKey,
-              ),
-          ).rejects.toThrow();
-        },
-      );
+    await http.app.get(TenantContextService).runAsAuthPrincipal(
+      {
+        tenantId: f.tenant.id,
+        userId: f.user.id,
+        role: UserRole.TENANT_OWNER,
+      },
+      async () => {
+        await expect(
+          http.app
+            .get(CrmService)
+            .applyStaffCreate(
+              f.tenant.id,
+              f.user.id,
+              args,
+              approval.idempotencyKey,
+            ),
+        ).rejects.toThrow();
+      },
+    );
     const reconciliation = await db.prisma.actionAttempt.findFirst({
       where: { actionExecutionId: execution.id, kind: 'RECONCILIATION' },
     });
