@@ -1,6 +1,8 @@
 name: Phone image build
 on:
   workflow_dispatch:
+  push:
+    branches: [codex/maya-doc-completion-20261021]
 permissions:
   contents: read
 jobs:
