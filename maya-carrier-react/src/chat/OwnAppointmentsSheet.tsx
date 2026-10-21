@@ -50,7 +50,7 @@ export function OwnAppointmentsSheet({ t }: { readonly t: Tokens }) {
       </div> : v.selected ? <section aria-label="Подтверждение изменения записи">
         <Summary row={v.selected} />
         {v.phase === 'reschedule' ? <>
-          <label>Новая дата (ГГГГ-ММ-ДД)<input type="text" placeholder="ГГГГ-ММ-ДД" maxLength={10} value={v.date} disabled={locked} onChange={e => ownAppointments.date(e.target.value)} style={{ display: 'block', padding: 12, fontSize: 16, width: '100%' }} /></label>
+          <label>Новая дата (ГГГГ-ММ-ДД)<input type="text" placeholder="ГГГГ-ММ-ДД" maxLength={10} value={v.date} disabled={locked} onChange={e => ownAppointments.date(e.target.value)} style={{ display: 'block', padding: 12, fontSize: 16, width: '100%', boxSizing: 'border-box' }} /></label>
           <button type="button" className="companion-menu-row" disabled={locked || !v.date} onClick={() => void ownAppointments.slots()}>Показать свободное время</button>
           {v.slots.map((slot, index) => <button key={slot.start} type="button" className="companion-menu-row" disabled={locked} onClick={() => ownAppointments.choose(index)}>{when(slot.start, v.selected!.timezone)}</button>)}
         </> : v.phase === 'confirm_move' ? <>
