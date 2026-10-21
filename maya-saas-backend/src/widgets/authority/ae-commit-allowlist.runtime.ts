@@ -1,3 +1,4 @@
+import { isStaffQuickCreate } from '../staff-create/staff-create-widget.contract';
 import {
   INVENTORY_RECEIPT_PURCHASE_COST,
   isInventoryReceiptPurchaseCost,
@@ -137,7 +138,9 @@ const admittedPairingRows = AE_PROPOSE_PAIRING.flatMap((pair) => {
     [
       cap.capability,
       Object.freeze({
-        confirmation_kind: confirmationKindFor(family),
+        confirmation_kind: isStaffQuickCreate(cap)
+          ? ('APPROVAL' as const)
+          : confirmationKindFor(family),
         family,
         min_verification: 'SESSION_VERIFIED' as const,
         requires_ae_approval: cap.approvalRequirement === 'REQUIRED',

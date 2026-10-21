@@ -1,3 +1,8 @@
+import {
+  STAFF_CREATE_TOOL,
+  staffCreatePrepared,
+  staffCreateProposal,
+} from '../crm/yclients-staff-create.contract';
 import { goodsSearchQuery } from '../crm/yclients-goods-search';
 import {
   preparedGoods,
@@ -116,6 +121,12 @@ export class AiToolRegistryService {
         }
         return { capability, enabled: args.enabled };
       }
+      case STAFF_CREATE_TOOL:
+        return Object.keys(args).some(
+          (k) => !['name', 'specialization'].includes(k),
+        )
+          ? { ...staffCreatePrepared(args) }
+          : { ...staffCreateProposal(args) };
       case 'catalog.service.price.update': {
         // Only service_id and price_rubles are model-facing. Prepared fields
         // are accepted for encrypted approval replay and always overwritten
@@ -699,6 +710,19 @@ export class AiToolRegistryService {
           source_line: p.source_line,
           photo_sha256: p.photo_sha256,
           review_version: p.review_version,
+        },
+      };
+    }
+    if (toolName === STAFF_CREATE_TOOL) {
+      const prepared = staffCreatePrepared(args);
+      return {
+        summary: `Создать сотрудника «${prepared.name}» со специализацией «${prepared.specialization}» в YCLIENTS, без телефона и учётной записи. Требуется подтверждение.`,
+        payload: {
+          name: prepared.name,
+          specialization: prepared.specialization,
+          company_id: prepared.company_id,
+          account: 'none',
+          source: 'YCLIENTS',
         },
       };
     }

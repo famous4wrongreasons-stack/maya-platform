@@ -88,14 +88,16 @@ describe('P-23 F31 — AE commit classification at EP-REGISTRY-LOAD', () => {
       capabilities.filter(
         (capability) =>
           capability.capability !== SERVICE_PRICE_CAPABILITY &&
-          capability.capability !== 'crm.goods.receipt.create.v1',
+          capability.capability !== 'crm.goods.receipt.create.v1' &&
+          capability.capability !== 'crm.staff.quick-create.v1',
       ),
     ).toHaveLength(226);
     const historicalRows = Object.fromEntries(
       Object.entries(AE_WIDGET_COMMIT_ALLOWLIST).filter(
         ([key]) =>
           key !== SERVICE_PRICE_CAPABILITY &&
-          key !== 'crm.goods.receipt.create.v1',
+          key !== 'crm.goods.receipt.create.v1' &&
+          key !== 'crm.staff.quick-create.v1',
       ),
     );
     expect(Object.keys(historicalRows)).toHaveLength(10);
@@ -106,7 +108,8 @@ describe('P-23 F31 — AE commit classification at EP-REGISTRY-LOAD', () => {
       Object.keys(AE_CAPABILITY_GAP_LEDGER).filter(
         (key) =>
           key !== SERVICE_PRICE_CAPABILITY &&
-          key !== 'crm.goods.receipt.create.v1',
+          key !== 'crm.goods.receipt.create.v1' &&
+          key !== 'crm.staff.quick-create.v1',
       ),
     ).toHaveLength(216);
     expect(allowlistStartupProblems()).toEqual([]);

@@ -1,4 +1,8 @@
 import {
+  STAFF_CREATE_TOOL,
+  bindStaffCreateTurn,
+} from '../crm/yclients-staff-create.contract';
+import {
   carryReviewCalendarPreference,
   requestsReviewCalendar,
   reviewCalendarTask,
@@ -772,6 +776,63 @@ export class AiCoreService {
       this.contextualUserText(sanitized.messages),
       dto.audience ?? null,
     );
+    const staffCreate = bindStaffCreateTurn(this.latestUserText(dto.messages));
+    if (staffCreate) {
+      const turn = this.persistedUserTurns.get(dto);
+      if (
+        clientAudience ||
+        dto.surface !== 'web' ||
+        ![UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER].includes(
+          toolUser.role,
+        ) ||
+        !turn
+      ) {
+        return this.complete(user, dto, brain, sanitized.redacted, [], [], {
+          reply: 'Создание сотрудника доступно владельцу в рабочем чате.',
+          source: 'safe_fallback',
+          action: null,
+        });
+      }
+      const result = await this.runtime.execute(
+        toolUser,
+        STAFF_CREATE_TOOL,
+        {
+          surface: 'web',
+          arguments: staffCreate,
+          idempotencyKey: `staff-create:${turn.turnId}`,
+        },
+        { staffCreateChat: true, widgetTrigger: 'T-2a', userTurn: turn },
+      );
+      const outcome = result as Record<string, unknown>;
+      return this.complete(
+        user,
+        dto,
+        brain,
+        sanitized.redacted,
+        [
+          {
+            name: STAFF_CREATE_TOOL,
+            status: String(outcome.status),
+            execution_id: null,
+            ...(outcome.resolution
+              ? {
+                  resolution: outcome.resolution as Readonly<
+                    Record<string, unknown>
+                  >,
+                }
+              : {}),
+          },
+        ],
+        [],
+        {
+          reply: outcome.resolution
+            ? 'Подготовила карточку сотрудника. Проверь имя и специализацию и подтверди создание.'
+            : 'Карточка подготовлена, но подтверждение недоступно в текущем профиле. Сотрудник не создан.',
+          source: 'safe_fallback',
+          action: null,
+        },
+      );
+    }
     const financialReportRequest = parseExplicitFinancialReportRequest(
       this.latestUserText(dto.messages),
     );
@@ -923,6 +984,7 @@ export class AiCoreService {
     const memoryFacts = await this.memoryFactsForModel(tenantId, user.userId);
     const listed = await this.runtime.listTools(toolUser, dto.surface);
     const tools: AiCoreToolDescriptor[] = listed.tools
+      .filter((tool) => tool.name !== STAFF_CREATE_TOOL)
       .filter((tool) => !clientAudience || !this.isBusinessOnlyTool(tool.name))
       .map((tool) => ({
         name: tool.name,
@@ -8701,6 +8763,7 @@ export class AiCoreService {
     return (
       toolName.startsWith('analytics.') ||
       toolName.startsWith('expenses.') ||
+      toolName === STAFF_CREATE_TOOL ||
       toolName === 'catalog.service.price.update' ||
       toolName === 'catalog.service.rename.preview' ||
       toolName === 'customers.count' ||

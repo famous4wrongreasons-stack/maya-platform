@@ -1,3 +1,4 @@
+import { staffCreateDecision } from '../staff-create/staff-create-intent-template.registry';
 import { goodsReceiptDecision } from '../inventory/goods-receipt-intent-template.registry';
 import { randomBytes } from 'node:crypto';
 
@@ -50,6 +51,11 @@ export interface ServicePriceApprovalLinkage {
   readonly payloadHash: string;
   readonly revalidate: () => Promise<void>;
 }
+export interface StaffCreateApprovalLinkage {
+  readonly approvalId: string;
+  readonly payloadHash: string;
+  readonly revalidate: () => Promise<void>;
+}
 export interface GoodsReceiptApprovalLinkage {
   readonly approvalId: string;
   readonly payloadHash: string;
@@ -85,6 +91,7 @@ export const mintIntentMaterial = (args: {
   readonly issuedAt: Date;
   readonly envelopeExpiresAt: Date;
   readonly slotless: boolean;
+  readonly staffCreateLinkage?: StaffCreateApprovalLinkage | null;
   readonly servicePriceLinkage?: ServicePriceApprovalLinkage | null;
   readonly goodsReceiptLinkage?: GoodsReceiptApprovalLinkage | null;
 }): MintedIntentMaterial => {
@@ -113,11 +120,15 @@ export const mintIntentMaterial = (args: {
   const utteranceTemplate = args.slotless ? row.label : row.utteranceTemplate;
   const template = args.proposal.intent_template_key;
   const goodsDecision = goodsReceiptDecision(template);
-  const priceDecision = servicePriceDecision(template) ?? goodsDecision;
+  const staffDecision = staffCreateDecision(template);
+  const priceDecision =
+    servicePriceDecision(template) ?? goodsDecision ?? staffDecision;
   const linkage =
-    goodsDecision === null
-      ? args.servicePriceLinkage
-      : args.goodsReceiptLinkage;
+    staffDecision !== null
+      ? args.staffCreateLinkage
+      : goodsDecision === null
+        ? args.servicePriceLinkage
+        : args.goodsReceiptLinkage;
   if (priceDecision !== null && !linkage)
     throw new IntentTemplateRefusal('service_price_approval_context_required');
   const intent: WidgetIntent = {
@@ -151,7 +162,9 @@ export const mintIntentMaterial = (args: {
             risk_tier: 'high_write',
             reversible: {
               ...cellTrue(
-                'Для обратного изменения потребуется новое подтверждение',
+                staffDecision !== null
+                  ? 'Создание не отменяется автоматически'
+                  : 'Для обратного изменения потребуется новое подтверждение',
               ),
               value: false,
             },
@@ -160,7 +173,7 @@ export const mintIntentMaterial = (args: {
             requires_readback: false,
             readback_ref: null,
             readback_text: null,
-            idempotency_key: `${goodsDecision === null ? 'service-price' : 'goods-receipt'}:${linkage!.approvalId}:${linkage!.payloadHash}:${priceDecision}`,
+            idempotency_key: `${staffDecision !== null ? 'staff-create' : goodsDecision === null ? 'service-price' : 'goods-receipt'}:${linkage!.approvalId}:${linkage!.payloadHash}:${priceDecision}`,
             approval_policy: 'actor',
           },
     authority_hint: {
@@ -214,6 +227,7 @@ export const intentRecordData = (args: {
   readonly revisionId?: string | null;
   readonly c9Domain?: C9Domain | null;
   readonly bookingLinkage?: BookingConfirmationLinkage | null;
+  readonly staffCreateLinkage?: StaffCreateApprovalLinkage | null;
   readonly servicePriceLinkage?: ServicePriceApprovalLinkage | null;
   readonly goodsReceiptLinkage?: GoodsReceiptApprovalLinkage | null;
 }): Record<string, unknown> => {
@@ -241,11 +255,15 @@ export const intentRecordData = (args: {
     throw new IntentTemplateRefusal('booking_linkage_not_commit');
   const template = args.material.proposal.intent_template_key;
   const goodsDecision = goodsReceiptDecision(template);
-  const priceDecision = servicePriceDecision(template) ?? goodsDecision;
+  const staffDecision = staffCreateDecision(template);
+  const priceDecision =
+    servicePriceDecision(template) ?? goodsDecision ?? staffDecision;
   const linkage =
-    goodsDecision === null
-      ? args.servicePriceLinkage
-      : args.goodsReceiptLinkage;
+    staffDecision !== null
+      ? args.staffCreateLinkage
+      : goodsDecision === null
+        ? args.servicePriceLinkage
+        : args.goodsReceiptLinkage;
   if (priceDecision !== null && (!linkage || intent.effect !== 'COMMIT'))
     throw new IntentTemplateRefusal('service_price_approval_context_required');
   return {

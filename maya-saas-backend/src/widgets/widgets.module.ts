@@ -1,3 +1,5 @@
+import { StaffCreateApprovalTriggerService } from './staff-create/staff-create-approval-trigger.service';
+import { AI_STAFF_CREATE_WIDGET_TRIGGER } from '../ai-tools/ai-staff-create-widget-trigger.port';
 import { AI_GOODS_APPROVAL_WIDGET_TRIGGER } from '../ai-tools/ai-approval-widget-trigger.port';
 import { GoodsReceiptApprovalTriggerService } from './inventory/goods-receipt-approval-trigger.service';
 import { APP_INTERCEPTOR } from '@nestjs/core';
@@ -136,6 +138,11 @@ import { OPERATIONAL_ALERT_WIDGET_TRIGGER } from '../operational-alerts/operatio
     {
       provide: AI_GOODS_APPROVAL_WIDGET_TRIGGER,
       useExisting: GoodsReceiptApprovalTriggerService,
+    },
+    StaffCreateApprovalTriggerService,
+    {
+      provide: AI_STAFF_CREATE_WIDGET_TRIGGER,
+      useExisting: StaffCreateApprovalTriggerService,
     },
     ServicePriceApprovalTriggerService,
     {

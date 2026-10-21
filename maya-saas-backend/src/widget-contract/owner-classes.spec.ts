@@ -322,6 +322,7 @@ describe('U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the ge
           `C9:${SERVICE_PRICE_TOOL}`,
           'AE:crm.goods.receipt.create.v1',
           'C9:inventory.goods.receipt.prepare',
+          'C9:catalog.staff.create',
         ];
       else if (ownerClass === 'SETTINGS_OWNER')
         expected = Object.values(F79_OWNER_CLASS_KEYS)
@@ -347,7 +348,7 @@ describe('U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the ge
     );
   });
 
-  it('YC-SP1 preserves the previous approval owner set and adds only the typed AiApprovalRequest subject', () => {
+  it('YC-SP1/YC-ST1 preserve the approval set with individually pinned typed subjects', () => {
     expect(KIND_OWNER_CLASS.APPROVAL).toBe('CANONICAL_APPROVAL');
     expect(keySet(ownerClassKeys('APPROVAL'))).toEqual(
       [
@@ -358,6 +359,7 @@ describe('U-TAB — §2.4 owner classes, K20 emittable, allowedKinds, and the ge
         `C9:${SERVICE_PRICE_TOOL}`,
         'AE:crm.goods.receipt.create.v1',
         'C9:inventory.goods.receipt.prepare',
+        'C9:catalog.staff.create',
       ].sort(),
     );
     expect([

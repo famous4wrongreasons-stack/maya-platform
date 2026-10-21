@@ -1,0 +1,185 @@
+{
+  "contract": "maya.staff-quick-create.focused-proof/1",
+  "date": "2026-10-21",
+  "baseCandidate": "961fa196c4b02a8badd2ada94f505f5cb838b78f",
+  "branch": "codex/maya-service-staff-d2-20261021",
+  "scope": "Local synthetic implementation qualification only; D2 PARTIAL; not hosted admission or release certification",
+  "sources": {
+    "maya-saas-backend/scripts/staff-create-proof.mjs": "743a7239058ed24d1ffc425875b8be8106d1378fbd0fa2175c05b87198a5f0a6",
+    "maya-saas-backend/src/action-engine/action-engine.policy-registry.ts": "3ff0731f8333b58fcaf1d031bdaa1715c9f4702646577f7cbfe5c64968945f89",
+    "maya-saas-backend/src/action-engine/action-engine.registry.ts": "4d11a8ed2622559e9a409b8dceebb1ea2b1f3b2d7db863349c6a1dd5fc0fedeb",
+    "maya-saas-backend/src/action-engine/staff-create.contract.ts": "fc24437029065000f07b2570e3772ec16aa94fb67d0fbbd3f0da9b76ee057f03",
+    "maya-saas-backend/src/ai-tools/ai-core.service.ts": "73a972c9c36b3d0d834d53cacd5e6855a3e13942c63cc899a5cf953b2014346e",
+    "maya-saas-backend/src/ai-tools/ai-staff-create-widget-trigger.port.ts": "420e53fc8bd5c3114929a1ff7a8f2543b4c79ed69375221bf14502fe60ff976f",
+    "maya-saas-backend/src/ai-tools/ai-tool-handler.service.ts": "41ca7e89eb22fed54332d7b0232b12d7c5e83c39ee3c7722a8500525f770274e",
+    "maya-saas-backend/src/ai-tools/ai-tool-registry.service.ts": "2619a7a56edd73f6df5190bf27adffef480ee4e112c2f58708ac30de5ef83961",
+    "maya-saas-backend/src/ai-tools/ai-tool-runtime.service.ts": "c16c4200c8e26c9b82def77e5de28d6911c509f1f8b630ea8401ea012b70ac81",
+    "maya-saas-backend/src/ai-tools/ai-tool.catalog.ts": "075725e9a71e1d9318f853471cbd8bf5d8b167b55d1b294c4b56096e2d2283c4",
+    "maya-saas-backend/src/crm/adapters/yclients-crm.adapter.ts": "a6753b6e5a8db41192366c929bc75006ee884918d31d08f41dd1685d3f1e7052",
+    "maya-saas-backend/src/crm/adapters/yclients-staff-create.adapter.spec.ts": "7fa8deba5b44b17f81a4c27d164d008e579ca41ba77d593623d63bfea057cc12",
+    "maya-saas-backend/src/crm/crm-adapter.interface.ts": "4baf39e0515a489e7e83579d3d76b64766173be69f769fd1e14691f9024d8689",
+    "maya-saas-backend/src/crm/crm.service.ts": "539fdddee7adebb9c546f7d7b73c3273e1d0e4632973294fcab7d49020be6dc8",
+    "maya-saas-backend/src/crm/yclients-staff-create.contract.spec.ts": "1001674633d5fcd0825114f0ca21288545c238223c933c22d4c52d867f601fa8",
+    "maya-saas-backend/src/crm/yclients-staff-create.contract.ts": "7b8d20f8654254f3e958fa52302703c0f5ecdebf53a1be55b36284cfc72ff9b5",
+    "maya-saas-backend/src/orchestration/c9.registry.ts": "3d1f878e9b8b2d313b4d9ea7287b4d9d0842d8187af213fa5e7c2cdf4c2f93f8",
+    "maya-saas-backend/src/widget-contract/owner-classes.spec.ts": "c703f3e80e63396755e3c0173ee417277e4f5d776d7905ebb8f19888b0152873",
+    "maya-saas-backend/src/widget-contract/owner-classes.ts": "74a542620b693f93c48944d1596b980998f6411d5cf3c01613ea956c7a42e3e1",
+    "maya-saas-backend/src/widgets/authority/ae-commit-allowlist.runtime.ts": "deb57e4bf7cddad1c2670afdd7282c73338cb5d40430795fec2d7949f9e84fe6",
+    "maya-saas-backend/src/widgets/authority/allowlist-startup.assert.spec.ts": "6f3c00867dd31bb1e108d0f8764396a90ce2a2c012a182abf39d1852524a0793",
+    "maya-saas-backend/src/widgets/authority/allowlist-startup.assert.ts": "3db8b53cbbac856ea11514ec857e3d448cf3df7d8626dcca2e41f8b1d1d2578d",
+    "maya-saas-backend/src/widgets/authority/propose-pairing.spec.ts": "c57cffdb4720ab5bd9a27c3220cc35d0d05bb5d5c572ee792758104ddc32592e",
+    "maya-saas-backend/src/widgets/authority/propose-pairing.ts": "4d252a55f88303f905aa3a19a9c99d5237031f2afb82172b87c96f38548d4107",
+    "maya-saas-backend/src/widgets/di-tokens.ts": "7f4edbf9d85376b0da96ae3202a85d66dd3b54e537ef6ddedbba7fc1fc45897c",
+    "maya-saas-backend/src/widgets/emission/emitter.service.ts": "c63a4b51e706117b9b0af6a4b6a887218af836e7412c4cfd211f860342b71a7f",
+    "maya-saas-backend/src/widgets/emission/record-writer.ts": "2af2e66e0e7e88109bbfa5f80073a086cde9906cfadfb634131b48f1f58d2a82",
+    "maya-saas-backend/src/widgets/gates/gate7.pipeline.spec.ts": "8fce1c771465ef7d6d3398ade1f3a3069457ae1b4f72e58d422c598a18471a9a",
+    "maya-saas-backend/src/widgets/gates/gate7.ts": "c7dda95583ea6d2dd5383a08109f5dbff715cc6c0413b94173a4074d8c88314d",
+    "maya-saas-backend/src/widgets/owner-ports/canonical-approval.adapter.ts": "69126e5a1ae6927aa12c4ca8c0c78892cb07d12789e783987df1ce446d225061",
+    "maya-saas-backend/src/widgets/owner-ports/noun-resolution.owners.provider.ts": "3ca8e5f6884b3be6b167a0ca83f47abc160af9c93a99bd2a63d2a7f60b8b1d52",
+    "maya-saas-backend/src/widgets/owner-ports/staff-create-approval.adapter.spec.ts": "851d05c948d704dad909ec23139cbe74667360065a98a67abb132cbf8afe7e86",
+    "maya-saas-backend/src/widgets/owner-ports/staff-create-approval.adapter.ts": "2eb5ceae4ef6e727134d1d2c342575f9acb78534974424cb4a5f1c4fc9a35714",
+    "maya-saas-backend/src/widgets/owner-ports/widget-owner-ports.module.ts": "1ee8463d9f6004f72bb74d1f2c9a6362364c97d102ef59afc6bc46df8e16bc24",
+    "maya-saas-backend/src/widgets/routing/effect-router.ports.ts": "20440dad148bdeac4276ca9d047a9872404f0a773f2c631a27d3b3498b418da3",
+    "maya-saas-backend/src/widgets/routing/effect-router.service.ts": "3a13bfed9016f1b37df5104503032a21e54d2f7a9c4ae1fdaca80785add5ec22",
+    "maya-saas-backend/src/widgets/staff-create/staff-create-admission.spec.ts": "73bb44f20d591881c536c52c290c1db88ce001322f3e906274103c113d86a0ef",
+    "maya-saas-backend/src/widgets/staff-create/staff-create-approval-trigger.service.ts": "c7e2bafb7619f3a8d222763c5d36758b161b78375d5c233894fa94add0027f7b",
+    "maya-saas-backend/src/widgets/staff-create/staff-create-approval.port.ts": "ff71cce9c38153eb91c50e419893640ead4ac8795c678bce5b9173488999a9ac",
+    "maya-saas-backend/src/widgets/staff-create/staff-create-approval.presenter.ts": "f934e64800bed411fae61594c6f16c6ff3cd6f2dee1e561f6ad5e88368123d20",
+    "maya-saas-backend/src/widgets/staff-create/staff-create-intent-template.registry.ts": "122a3e306b81a8da56da030ba1bd41186eb1fd1daaab8eac00416a288b8bc0ad",
+    "maya-saas-backend/src/widgets/staff-create/staff-create-widget.contract.ts": "698d90a2be8f9e189e2532952f24a4693960b73495011e00a8f4294916a60679",
+    "maya-saas-backend/src/widgets/widgets.module.ts": "7f15360f60b5bda33751c604d4909df0d52d6ab054d224b1786a8899ed2c7dc8",
+    "maya-saas-backend/test/widgets-live/staff-create.probe-spec.ts": "fdc298250b764e2c39f3071953a87986631a8aa72d17d4ae316d62b83af51daa"
+  },
+  "sourceListSha256": "ac07b7e151ed78179707a9ae8c01ea32392e44693d61b1837ee2e8186fa99bf9",
+  "unit": {
+    "passed": 421,
+    "failed": 0,
+    "suites": 18,
+    "rawReceiptLocal": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/completion-20261021/d2-focused-unit-final-02.json",
+    "rawReceiptSha256": "db3cccbf242338447cfd2807b43b4e731208757a26cbf4a0500eb77e47f72185"
+  },
+  "httpPostgresNativeProvider": {
+    "passed": 16,
+    "failed": 0,
+    "rawReceiptLocal": "/Users/stanislavmosin/Documents/Codex/2026-09-29/referenced-chatgpt-conversation-this-is-an-2/outputs/maya-phone-final-be58cf41-20261018/completion-20261021/d2-proof-08-final/staff-create-jest.json",
+    "rawReceiptSha256": "7c0852d88cba9d899b3cc2084303d70594af34ad51c1dc6e4eaca531f0c4ca82",
+    "runnerManifestSha256": "c98ceab85fbb95c37a8bda7026c6b5fbe3481a284626022a270d48b619a0505e",
+    "ownedDatabase": "maya_widget_gate_proof_staffcreate_a0660291631c",
+    "loopbackPort": 53208,
+    "clusterStopped": true,
+    "cases": [
+      {
+        "name": "registered chat → exact preview → canonical approval → REQUIRED AE → one native provider receipt; replay refuses",
+        "status": "passed"
+      },
+      {
+        "name": "standalone tool and legacy approval endpoint cannot supply the named chat origin",
+        "status": "passed"
+      },
+      {
+        "name": "cross-tenant token and rejected proposal cause no provider write",
+        "status": "passed"
+      },
+      {
+        "name": "permission revoke after preview refuses; exact source remains mandatory",
+        "status": "passed"
+      },
+      {
+        "name": "native lost response is UNKNOWN; normal plus six concurrent retries never duplicate or announce success",
+        "status": "passed"
+      },
+      {
+        "name": "current expired invalidation after preview cannot create staff",
+        "status": "passed"
+      },
+      {
+        "name": "current membership invalidation after preview cannot create staff",
+        "status": "passed"
+      },
+      {
+        "name": "current source invalidation after preview cannot create staff",
+        "status": "passed"
+      },
+      {
+        "name": "current erased invalidation after preview cannot create staff",
+        "status": "passed"
+      },
+      {
+        "name": "current entitlement invalidation after preview cannot create staff",
+        "status": "passed"
+      },
+      {
+        "name": "current origin invalidation after preview cannot create staff",
+        "status": "passed"
+      },
+      {
+        "name": "current payload invalidation after preview cannot create staff",
+        "status": "passed"
+      },
+      {
+        "name": "current branch invalidation after preview cannot create staff",
+        "status": "passed"
+      },
+      {
+        "name": "six simultaneous canonical decisions create one employee and one action",
+        "status": "passed"
+      },
+      {
+        "name": "non-owner command cannot create an approval or invoke the model",
+        "status": "passed"
+      },
+      {
+        "name": "read-only detail is separately sealed and bound to the same proposal",
+        "status": "passed"
+      }
+    ]
+  },
+  "checks": {
+    "typescriptBuild": "PASS",
+    "typescriptWidgetsLive": "PASS",
+    "gitDiffCheck": "PASS",
+    "plannerIntentCount": 92,
+    "plannerUtf8Bytes": 60953,
+    "plannerDeltaFromBase": 0,
+    "runnerInheritedSecretsRemoved": true,
+    "runnerUnsafeTargetRefusals": 6
+  },
+  "redToGreen": [
+    {
+      "receipt": "d2-proof-01",
+      "failure": "canonical APPROVAL source not yet registered; zero provider POST",
+      "fix": "one exact typed staff C9 source"
+    },
+    {
+      "receipt": "d2-proof-02/03",
+      "failure": "canonical gate7 propose pairing absent; zero provider POST",
+      "fix": "one exact staff proposal/AE pair, retaining former paths"
+    },
+    {
+      "receipt": "d2-proof-04",
+      "failure": "non-owner fixture used invalid audience admin",
+      "fix": "valid owner audience without elevating non-owner membership; test only"
+    },
+    {
+      "receipt": "d2-proof-06",
+      "failure": "reconciliation expected lower-case label, actual canonical enum STILL_UNKNOWN",
+      "fix": "test uses existing canonical uppercase enum; no product change"
+    },
+    {
+      "receipt": "d2-focused-unit-final.json",
+      "failure": "historical closed owner/pairing expectations did not include the newly approved exact row",
+      "fix": "explicit new row appended; historical expectations unchanged; formatting-insensitive typed gate7 assertion"
+    }
+  ],
+  "release": {
+    "certifiedForProfile": false,
+    "fixedPhoneProfileOrCertificateChanged": false,
+    "hostedAdmission": "NOT_PERFORMED",
+    "D2": "PARTIAL",
+    "realProviderWrites": 0,
+    "paidModelCalls": 0,
+    "productionChanges": 0,
+    "grants": 0,
+    "push": false
+  }
+}

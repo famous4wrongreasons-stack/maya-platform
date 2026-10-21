@@ -1,4 +1,10 @@
 import {
+  STAFF_CREATE_APPROVAL_OWNER,
+  parseStaffCreateApprovalRef,
+  type StaffCreateApprovalOwnerPort,
+} from '../staff-create/staff-create-approval.port';
+import { staffCreateApprovalMintRequest } from '../staff-create/staff-create-approval.presenter';
+import {
   GOODS_RECEIPT_APPROVAL_OWNER,
   parseGoodsReceiptApprovalRef,
   type GoodsReceiptApprovalOwnerPort,
@@ -151,6 +157,9 @@ export class EffectRouterService {
     @Optional()
     @Inject(GOODS_RECEIPT_APPROVAL_OWNER)
     private readonly goodsApprovals?: GoodsReceiptApprovalOwnerPort,
+    @Optional()
+    @Inject(STAFF_CREATE_APPROVAL_OWNER)
+    private readonly staffCreateApprovals?: StaffCreateApprovalOwnerPort,
   ) {}
 
   async route(
@@ -337,6 +346,89 @@ export class EffectRouterService {
       }
       // A detail is a separately sealed child of this exact card, not a copy of the parent
       // returned as though it were a child. The canonical owner remains the source of the diff.
+      if (
+        input.record.sourceCapabilitySpace === 'C9' &&
+        input.record.sourceCapabilityKey === 'catalog.staff.create'
+      ) {
+        const approvalRef = resolvedNouns?.values.get('approval');
+        const parsed =
+          typeof approvalRef === 'string'
+            ? parseStaffCreateApprovalRef(approvalRef)
+            : null;
+        const owner = this.staffCreateApprovals;
+        if (
+          input.record.widgetKind !== 'APPROVAL' ||
+          resolvedNouns?.values.size !== 1 ||
+          !parsed ||
+          !approvalRef ||
+          !owner ||
+          !this.emitter.emitStaffCreateDetail ||
+          target.class !== 'detail' ||
+          target.ref !== 'fs.catalogue'
+        )
+          return admitted({
+            receiptOutcome: 'REFUSED',
+            refusalCode: 'effect_not_admissible',
+          });
+        const actor = { tenantId: input.tenantId, userId: ctx.actor.userId };
+        const snapshot = await owner.read(
+          actor,
+          approvalRef,
+          principal.proofHash,
+          true,
+        );
+        const ttlSeconds = Math.floor(
+          (snapshot.expiresAt.getTime() - input.now.getTime()) / 1000,
+        );
+        if (
+          snapshot.id !== parsed.id ||
+          snapshot.payloadHash !== parsed.hash ||
+          snapshot.origin.conversationId !== source.conversationId ||
+          snapshot.origin.principalProofHash !== principal.proofHash ||
+          ttlSeconds <= 0
+        )
+          return admitted({
+            receiptOutcome: 'REFUSED',
+            refusalCode: 'effect_not_admissible',
+          });
+        const request = staffCreateApprovalMintRequest(
+          snapshot,
+          principal,
+          source.turnId,
+          ttlSeconds,
+          input.answeringChannel,
+        );
+        request.composerInput = {
+          ...request.composerInput,
+          correlation_refs: {
+            ...request.composerInput.correlation_refs,
+            parent_id: input.record.widgetId,
+          },
+        };
+        const minted = await this.emitter.emitStaffCreateDetail(
+          request,
+          {
+            approvalId: snapshot.id,
+            payloadHash: snapshot.payloadHash,
+            revalidate: async () => {
+              const current = await owner.read(
+                actor,
+                approvalRef,
+                principal.proofHash,
+                false,
+              );
+              if (
+                current.origin.conversationId !== source.conversationId ||
+                current.payloadHash !== snapshot.payloadHash
+              )
+                throw new Error('staff_create_detail_source_changed');
+            },
+          },
+          input.record.widgetId,
+          input.now,
+        );
+        return admitted({ nextEnvelope: minted.envelope });
+      }
       if (
         input.record.sourceCapabilitySpace === 'C9' &&
         input.record.sourceCapabilityKey === 'catalog.service.price.update'

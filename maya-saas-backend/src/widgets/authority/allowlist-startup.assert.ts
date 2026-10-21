@@ -1,3 +1,8 @@
+import { isStaffQuickCreate } from '../staff-create/staff-create-widget.contract';
+import {
+  STAFF_CREATE_CAPABILITY,
+  STAFF_CREATE_TOOL,
+} from '../../crm/yclients-staff-create.contract';
 import {
   INVENTORY_RECEIPT_PURCHASE_COST,
   isInventoryReceiptPurchaseCost,
@@ -99,6 +104,18 @@ export const allowlistStartupProblems = (
         `AL-3 ${cap.capability}: row propose does not equal traced pairing`,
       );
 
+    if (
+      cap.capability === STAFF_CREATE_CAPABILITY &&
+      (!isStaffQuickCreate(cap) ||
+        row.family !== 'settings' ||
+        row.confirmation_kind !== 'APPROVAL' ||
+        row.requires_ae_approval !== true ||
+        row.propose.space !== 'C9' ||
+        row.propose.key !== STAFF_CREATE_TOOL)
+    )
+      problems.push(
+        `AL-2 ${cap.capability}: staff quick-create typed admission veto`,
+      );
     const cataloguePrice = isCataloguePriceConfiguration(cap);
     if (MONEY(cap) && !cataloguePrice && !isInventoryReceiptPurchaseCost(cap))
       problems.push(`AL-2 ${cap.capability}: MONEY veto`);

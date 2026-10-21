@@ -92,6 +92,8 @@ export const AE_PROPOSE_PAIRING: readonly ProposePairingRow[] = Object.freeze([
   row('b35.confirm', 'communication.bulk-campaign.admit.v2'),
   row('catalog.service.price.update', 'crm.service.fixed-price.update.v1'),
   row('inventory.goods.receipt.prepare', 'crm.goods.receipt.create.v1'),
+  // YC-ST1-CHAT-1: AI runtime → CrmService.applyStaffCreate → REQUIRED AE.
+  row('catalog.staff.create', 'crm.staff.quick-create.v1'),
 ]);
 
 // ── the two indexes ──────────────────────────────────────────────────────────────────────────────

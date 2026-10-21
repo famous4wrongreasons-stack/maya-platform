@@ -98,7 +98,7 @@ describe('P-25 — AE_PROPOSE_PAIRING, the runtime rows of F38', () => {
 
   // ── PAIR-1 ──────────────────────────────────────────────────────────────────────────────────────
 
-  it('PAIR-1 preserves the original thirteen F38 rows and appends only the traced YC-SP1 pair', () => {
+  it('PAIR-1 preserves all historical F38 rows and appends the exact traced YC-ST1 pair', () => {
     expect(norm(CONTRACT)).toContain(
       norm('**F38 — the propose↔AE mapping, traced call site by call site.**'),
     );
@@ -118,7 +118,10 @@ describe('P-25 — AE_PROPOSE_PAIRING, the runtime rows of F38', () => {
       ['catalog.service.price.update', 'crm.service.fixed-price.update.v1'],
       ['inventory.goods.receipt.prepare', 'crm.goods.receipt.create.v1'],
     ]);
-    expect(pairs(AE_PROPOSE_PAIRING)).toEqual(parsed);
+    expect(pairs(AE_PROPOSE_PAIRING)).toEqual([
+      ...parsed,
+      ['catalog.staff.create', 'crm.staff.quick-create.v1'],
+    ]);
   });
 
   it('YC-SP1 has exactly one separately pinned propose/AE pair', () => {

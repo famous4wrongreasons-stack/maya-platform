@@ -1,3 +1,4 @@
+import { staffCreateCapability } from './staff-create.contract';
 import { goodsReceiptCapability } from './goods-receipt.contract';
 import { nativeFeedbackCapabilities } from '../native-feedback/native-feedback.contract';
 import { servicePriceCapability } from './service-price.contract';
@@ -3450,6 +3451,7 @@ function provenCommunicationCapability(input: {
 
 const CAPABILITIES: readonly RegisteredActionCapabilityV1[] = [
   servicePriceCapability,
+  staffCreateCapability,
   goodsReceiptCapability,
   {
     ...provenCommunicationCapability({

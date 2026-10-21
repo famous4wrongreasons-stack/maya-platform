@@ -251,14 +251,18 @@ describe('S-G7-F74a [BUILD] — the additional origin is a closed semantic subty
       'r.approvalOfIntentRef !== null',
       'Object.keys(nouns).length !== 1',
       'pairingForAe(ae.key)',
-      'goodsReceipt ? GOODS_RECEIPT_TOOL : SERVICE_PRICE_TOOL',
     ])
       expect(source).toContain(predicate);
+    expect(source).toMatch(
+      /goodsReceipt\s*\? GOODS_RECEIPT_TOOL\s*: SERVICE_PRICE_TOOL/,
+    );
+    expect(source).toContain('isStaffQuickCreate(cap)');
+    expect(source).toContain('? STAFF_CREATE_TOOL');
     expect(source).toMatch(
       /producingRecordProblem\(\s*commit\s*,\s*loadProducingRecord/,
     );
     expect(source).toMatch(
-      /if \(cataloguePrice \|\| goodsReceipt\)[\s\S]*?else\s*\{\s*const producing = await producingRecordProblem/,
+      /if \(cataloguePrice \|\| goodsReceipt \|\| isStaffQuickCreate\(cap\)\)[\s\S]*?else\s*\{\s*const producing = await producingRecordProblem/,
     );
   });
 });

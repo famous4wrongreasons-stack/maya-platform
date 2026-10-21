@@ -1,3 +1,5 @@
+import { STAFF_CREATE_TOOL } from '../../crm/yclients-staff-create.contract';
+import { isStaffQuickCreate } from '../staff-create/staff-create-widget.contract';
 import { isInventoryReceiptPurchaseCost } from '../inventory/goods-receipt-widget.contract';
 import { GOODS_RECEIPT_TOOL } from '../../crm/goods-receipt.contract';
 // ── Gate 7 — effect admissibility: §3.9 row 7 in full ───────────────────────────────────────────
@@ -312,7 +314,7 @@ export const gate7 = async (
     // only for a non-draft COMMIT.
     // F74a is the typed canonical chat approval branch. The HMAC identity, pending
     // owner hash and durable authenticated chat provenance are re-read at Gate 11.
-    if (cataloguePrice || goodsReceipt) {
+    if (cataloguePrice || goodsReceipt || isStaffQuickCreate(cap)) {
       const nouns = r.frozenNounsJson;
       if (
         r.widgetKind !== 'APPROVAL' ||
@@ -343,13 +345,17 @@ export const gate7 = async (
         'C8b',
         `${ae.key} is BOOKING and is the ae side of no single pairing row`,
       );
-    if (cataloguePrice || goodsReceipt) {
+    if (cataloguePrice || goodsReceipt || isStaffQuickCreate(cap)) {
       const pairing = pairingForAe(ae.key);
       if (
         !pairing ||
         pairing.propose.space !== 'C9' ||
         pairing.propose.key !==
-          (goodsReceipt ? GOODS_RECEIPT_TOOL : SERVICE_PRICE_TOOL)
+          (isStaffQuickCreate(cap)
+            ? STAFF_CREATE_TOOL
+            : goodsReceipt
+              ? GOODS_RECEIPT_TOOL
+              : SERVICE_PRICE_TOOL)
       )
         return unconfirmed('C8b', 'canonical chat approval pairing required');
     }

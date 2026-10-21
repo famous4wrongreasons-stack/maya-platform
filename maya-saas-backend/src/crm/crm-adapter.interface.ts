@@ -1,4 +1,8 @@
 import type {
+  StaffCreateProposal,
+  StaffCreateReceipt,
+} from './yclients-staff-create.contract';
+import type {
   GoodsReceiptContext,
   GoodsReceiptResult,
 } from './goods-receipt.contract';
@@ -544,6 +548,14 @@ export interface CRMAdapter {
     serviceId: string,
     deadlineAt?: number,
   ): Promise<ServicePriceSnapshot>;
+  readStaffCreatePermission?(deadlineAt?: number): Promise<string>;
+  createStaffQuick?(params: {
+    companyId: string;
+    proposal: StaffCreateProposal;
+    expectedPermissionRevision: string;
+    deadlineAt: number;
+    beforeDispatch: () => Promise<void>;
+  }): Promise<StaffCreateReceipt>;
   /** Uncached exact title-preview source. No writer, price-edit grant or approval. */
   readServiceRenameSnapshot?(
     serviceId: string,

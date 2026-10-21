@@ -1,4 +1,21 @@
 import {
+  STAFF_CREATE_TOOL,
+  STAFF_CREATE_CAPABILITY,
+} from '../../crm/yclients-staff-create.contract';
+import {
+  STAFF_CREATE_APPROVAL_NOUN_OWNER,
+  staffCreateApprovalRef,
+  parseStaffCreateApprovalRef,
+} from '../staff-create/staff-create-approval.port';
+import {
+  STAFF_CREATE_APPROVE_TEMPLATE,
+  STAFF_CREATE_REJECT_TEMPLATE,
+  STAFF_CREATE_DETAIL_TEMPLATE,
+  isStaffCreateTemplate,
+  resolveStaffCreateTemplate,
+} from '../staff-create/staff-create-intent-template.registry';
+import type { StaffCreateApprovalLinkage } from './record-writer';
+import {
   GOODS_RECEIPT_CAPABILITY,
   GOODS_RECEIPT_TOOL,
 } from '../../crm/goods-receipt.contract';
@@ -593,6 +610,119 @@ export class WidgetEmitterService {
     return this.emitServicePrice(request, linkage, now, null, parentWidgetId);
   }
 
+  async emitStaffCreateApproval(
+    request: MintRequest,
+    linkage: StaffCreateApprovalLinkage,
+    now = new Date(),
+    supersedesWidgetId: string | null = null,
+    tx?: RequestTx,
+    parentWidgetId: string | null = null,
+  ): Promise<SealedEmission> {
+    const source = request.composerInput.source;
+    const ref = staffCreateApprovalRef(linkage.approvalId, linkage.payloadHash);
+    const expiresAt = new Date(String(request.body.expires_at));
+    if (
+      request.kind !== 'APPROVAL' ||
+      request.composerInput.kind_proposal !== 'APPROVAL' ||
+      request.composerInput.capability !== STAFF_CREATE_TOOL ||
+      source.from !== 'capability_envelope' ||
+      source.capability !== STAFF_CREATE_TOOL ||
+      !parseServicePriceApprovalRef(ref) ||
+      typeof linkage.revalidate !== 'function' ||
+      !Number.isFinite(expiresAt.getTime()) ||
+      expiresAt.getTime() <= now.getTime()
+    )
+      throw new IntentTemplateRefusal('staff_create_approval_source_required');
+    // Spoken COMMIT needs a separate server readback receipt. This lane currently serves rich chat.
+    if (profileFor(request.deliveryChannel)?.tier === 'SPOKEN')
+      throw new IntentTemplateRefusal(
+        'staff_create_spoken_readback_unavailable',
+      );
+    await linkage.revalidate();
+    const handles = this.seals.mintNounHandles([
+      {
+        tenantId: request.tenantId,
+        noun: 'approval',
+        ownerKind: STAFF_CREATE_APPROVAL_NOUN_OWNER,
+        ownerRef: ref,
+      },
+    ]);
+    return this.emitInternal(
+      {
+        ...request,
+        ttlSeconds: Math.ceil((expiresAt.getTime() - now.getTime()) / 1000),
+        body: {
+          ...request.body,
+          approval_ref: linkage.approvalId,
+          approve_intent: 'i1',
+          reject_intent: 'i2',
+          detail_intent: 'i3',
+        },
+        composerInput: {
+          ...request.composerInput,
+          intent_proposals: [
+            {
+              intent_template_key: STAFF_CREATE_APPROVE_TEMPLATE,
+              role: 'primary',
+              capability: { space: 'AE', key: STAFF_CREATE_CAPABILITY },
+              argument_handles: handles,
+            },
+            {
+              intent_template_key: STAFF_CREATE_REJECT_TEMPLATE,
+              role: 'destructive',
+              capability: { space: 'AE', key: STAFF_CREATE_CAPABILITY },
+              argument_handles: handles,
+            },
+            {
+              intent_template_key: STAFF_CREATE_DETAIL_TEMPLATE,
+              role: 'secondary',
+              argument_handles: handles,
+            },
+            {
+              intent_template_key: 'control.dismiss@1',
+              role: 'escape',
+              capability: { space: 'CONTROL', key: 'control.widget.dismiss' },
+            },
+          ],
+        },
+      },
+      now,
+      null,
+      null,
+      supersedesWidgetId,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      tx,
+      linkage,
+      parentWidgetId,
+    );
+  }
+
+  async emitStaffCreateDetail(
+    request: MintRequest,
+    linkage: StaffCreateApprovalLinkage,
+    parentWidgetId: string,
+    now = new Date(),
+  ) {
+    if (request.composerInput.correlation_refs.parent_id !== parentWidgetId)
+      throw new IntentTemplateRefusal('staff_create_detail_parent_required');
+    return this.emitStaffCreateApproval(
+      request,
+      linkage,
+      now,
+      null,
+      undefined,
+      parentWidgetId,
+    );
+  }
+
   private async emitServicePrice(
     request: MintRequest,
     linkage: ServicePriceApprovalEmissionContext,
@@ -866,13 +996,32 @@ export class WidgetEmitterService {
     goodsReceipt: GoodsReceiptApprovalEmissionContext | null = null,
     goodsReceiptParentWidgetId: string | null = null,
     transaction?: RequestTx,
+    staffCreate: StaffCreateApprovalLinkage | null = null,
+    staffCreateParentWidgetId: string | null = null,
   ): Promise<SealedEmission> {
     const input = request.composerInput;
-    if (servicePrice !== null && goodsReceipt !== null)
+    if (
+      [servicePrice, goodsReceipt, staffCreate].filter(
+        (value) => value !== null,
+      ).length > 1
+    )
       throw new IntentTemplateRefusal('mixed_approval_context');
-    const approvalLinkage = servicePrice ?? goodsReceipt;
+    const approvalLinkage = servicePrice ?? goodsReceipt ?? staffCreate;
     const approvalParentWidgetId =
-      servicePriceParentWidgetId ?? goodsReceiptParentWidgetId;
+      servicePriceParentWidgetId ??
+      goodsReceiptParentWidgetId ??
+      staffCreateParentWidgetId;
+    if (
+      (input.capability === STAFF_CREATE_TOOL ||
+        input.intent_proposals.some(
+          (proposal) =>
+            isStaffCreateTemplate(proposal.intent_template_key) ||
+            (proposal.capability?.space === 'AE' &&
+              proposal.capability.key === STAFF_CREATE_CAPABILITY),
+        )) &&
+      staffCreate === null
+    )
+      throw new IntentTemplateRefusal('staff_create_approval_context_required');
     if (
       (input.capability === SERVICE_PRICE_TOOL ||
         input.intent_proposals.some(
@@ -969,6 +1118,23 @@ export class WidgetEmitterService {
         };
       }
 
+      if (isStaffCreateTemplate(proposal.intent_template_key)) {
+        if (staffCreate === null)
+          throw new IntentTemplateRefusal(
+            'staff_create_approval_context_required',
+          );
+        return {
+          proposal,
+          resolved: {
+            kind: 'intent' as const,
+            row: resolveStaffCreateTemplate({
+              proposal,
+              widgetKind: input.kind_proposal,
+              deliveryChannel: request.deliveryChannel,
+            }),
+          },
+        };
+      }
       if (isServicePriceTemplate(proposal.intent_template_key)) {
         if (servicePrice === null)
           throw new IntentTemplateRefusal(
@@ -1081,6 +1247,7 @@ export class WidgetEmitterService {
             issuedAt,
             envelopeExpiresAt: expiresAt,
             slotless: request.piiClass === 'client_identified',
+            staffCreateLinkage: staffCreate,
             servicePriceLinkage: servicePrice,
             goodsReceiptLinkage: goodsReceipt,
           });
@@ -1189,6 +1356,7 @@ export class WidgetEmitterService {
         revisionId: request.runWitness?.revisionId ?? null,
         c9Domain: request.runWitness?.c9Domain ?? null,
         bookingLinkage: booking ?? schedule,
+        staffCreateLinkage: staffCreate,
         servicePriceLinkage: servicePrice,
         goodsReceiptLinkage: goodsReceipt,
       }) as never,
@@ -1239,9 +1407,11 @@ export class WidgetEmitterService {
               where: {
                 capabilitySpace: 'AE',
                 capabilityKey:
-                  goodsReceipt === null
-                    ? SERVICE_PRICE_CAPABILITY
-                    : GOODS_RECEIPT_CAPABILITY,
+                  staffCreate !== null
+                    ? STAFF_CREATE_CAPABILITY
+                    : goodsReceipt === null
+                      ? SERVICE_PRICE_CAPABILITY
+                      : GOODS_RECEIPT_CAPABILITY,
                 confirmationOfKind: 'approval',
                 confirmationOfRef: approvalLinkage.approvalId,
               },

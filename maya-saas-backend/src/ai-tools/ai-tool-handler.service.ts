@@ -1,3 +1,4 @@
+import { STAFF_CREATE_TOOL } from '../crm/yclients-staff-create.contract';
 import {
   staffScheduleReadScope,
   type StaffScheduleReadScope,
@@ -250,6 +251,13 @@ export class AiToolHandlerService {
     switch (toolName) {
       case GOODS_RECEIPT_TOOL:
         return this.crmService.applyGoodsReceipt(
+          principal.tenantId,
+          principal.userId,
+          args,
+          idempotencyKey,
+        );
+      case STAFF_CREATE_TOOL:
+        return this.crmService.applyStaffCreate(
           principal.tenantId,
           principal.userId,
           args,
@@ -2821,6 +2829,12 @@ export class AiToolHandlerService {
         ),
       };
     }
+    if (toolName === STAFF_CREATE_TOOL)
+      return this.crmService.prepareStaffCreate(
+        principal.tenantId,
+        principal.userId,
+        args,
+      );
     if (toolName === 'catalog.service.price.update') {
       return this.crmService.prepareServicePriceChange(
         principal.tenantId,

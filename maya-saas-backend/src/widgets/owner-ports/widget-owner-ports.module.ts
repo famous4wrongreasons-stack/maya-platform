@@ -1,3 +1,5 @@
+import { StaffCreateApprovalAdapter } from './staff-create-approval.adapter';
+import { STAFF_CREATE_APPROVAL_OWNER } from '../di-tokens';
 import { GOODS_RECEIPT_APPROVAL_OWNER } from '../di-tokens';
 import { GoodsReceiptApprovalAdapter } from './goods-receipt-approval.adapter';
 import { EncryptionModule } from '../../encryption/encryption.module';
@@ -123,6 +125,11 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
       provide: GOODS_RECEIPT_APPROVAL_OWNER,
       useExisting: GoodsReceiptApprovalAdapter,
     },
+    StaffCreateApprovalAdapter,
+    {
+      provide: STAFF_CREATE_APPROVAL_OWNER,
+      useExisting: StaffCreateApprovalAdapter,
+    },
     ServicePriceApprovalAdapter,
     CanonicalApprovalAdapter,
     {
@@ -158,6 +165,7 @@ import { BookingSelectorAdapter } from './booking-selector.adapter';
   ],
   exports: [
     GOODS_RECEIPT_APPROVAL_OWNER,
+    STAFF_CREATE_APPROVAL_OWNER,
     SERVICE_PRICE_APPROVAL_OWNER,
     CHAT_REPLY_CIPHER,
     SCHEDULE_APPROVAL_OWNER,

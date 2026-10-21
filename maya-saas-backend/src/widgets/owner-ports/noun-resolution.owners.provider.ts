@@ -1,4 +1,13 @@
 import {
+  STAFF_CREATE_TOOL,
+  STAFF_CREATE_CAPABILITY,
+} from '../../crm/yclients-staff-create.contract';
+import {
+  STAFF_CREATE_APPROVAL_OWNER,
+  STAFF_CREATE_APPROVAL_NOUN_OWNER,
+  type StaffCreateApprovalOwnerPort,
+} from '../staff-create/staff-create-approval.port';
+import {
   GOODS_RECEIPT_CAPABILITY,
   GOODS_RECEIPT_TOOL,
 } from '../../crm/goods-receipt.contract';
@@ -60,6 +69,9 @@ export class NounResolutionOwnersProvider implements NounReadPort {
     @Optional()
     @Inject(GOODS_RECEIPT_APPROVAL_OWNER)
     private readonly goods?: GoodsReceiptApprovalOwnerPort,
+    @Optional()
+    @Inject(STAFF_CREATE_APPROVAL_OWNER)
+    private readonly staffCreate?: StaffCreateApprovalOwnerPort,
   ) {}
 
   async read(
@@ -68,6 +80,13 @@ export class NounResolutionOwnersProvider implements NounReadPort {
   ): Promise<NounReadResult> {
     if (actor.tenantId === null || actor.tenantId !== input.tenantId)
       return { kind: 'policy_deferred' };
+    if (
+      input.capability?.key === STAFF_CREATE_CAPABILITY ||
+      input.capability?.key === STAFF_CREATE_TOOL
+    )
+      return this.staffCreate
+        ? this.staffCreate.readNoun(input, actor)
+        : { kind: 'policy_deferred' };
     if (
       input.capability?.key === GOODS_RECEIPT_CAPABILITY ||
       input.capability?.key === GOODS_RECEIPT_TOOL
@@ -88,6 +107,14 @@ export class NounResolutionOwnersProvider implements NounReadPort {
       input.capability === null && input.frozenNouns.size === 1
         ? input.frozenNouns.get('approval')
         : undefined;
+    if (
+      detailApproval &&
+      openWidgetNounHandle(detailApproval)?.ownerKind ===
+        STAFF_CREATE_APPROVAL_NOUN_OWNER
+    )
+      return this.staffCreate
+        ? this.staffCreate.readNoun(input, actor)
+        : { kind: 'policy_deferred' };
     if (
       detailApproval &&
       openWidgetNounHandle(detailApproval)?.ownerKind ===

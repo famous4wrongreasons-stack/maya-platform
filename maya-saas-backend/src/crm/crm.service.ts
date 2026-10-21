@@ -1,3 +1,15 @@
+import { TimelineStore } from '../widgets/stores/timeline.store';
+import {
+  STAFF_CREATE_TOOL,
+  STAFF_CREATE_CAPABILITY,
+  STAFF_CREATE_ORIGIN,
+  staffCreateProposal,
+  staffCreatePrepared,
+  staffCreateRefuse,
+  StaffCreatePreDispatchError,
+  type StaffCreateReceipt,
+} from './yclients-staff-create.contract';
+import { ActionApprovalDecision, ActionExecutionState } from '@prisma/client';
 import {
   assertPriceGoodsScope,
   checkPriceGoodsScope,
@@ -65,6 +77,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Optional,
   Logger,
   NotFoundException,
   ServiceUnavailableException,
@@ -74,6 +87,8 @@ import {
 import {
   ACTION_EXECUTION_REQUEST_CONTRACT,
   ActionEngineRuntimeService,
+  ActionEngineKernel,
+  CanonicalActionIngressService,
   ActionExecutionTerminalError,
   ActionExecutionUncertainError,
   stableActionJson,
@@ -430,6 +445,9 @@ export class CrmService {
     private readonly clientIdentityService: ClientIdentityService,
     private readonly actionEngineRuntime: ActionEngineRuntimeService,
     private readonly goodsEntitlements?: EntitlementsService,
+    @Optional()
+    private readonly staffCreateIngress?: CanonicalActionIngressService,
+    @Optional() private readonly staffCreateKernel?: ActionEngineKernel,
   ) {}
 
   async discoverCompanies(tenantId: string, dto: DiscoverCrmCompaniesDto) {
@@ -1743,7 +1761,7 @@ export class CrmService {
       throw new ForbiddenException(
         'service_rename_current_unscoped_owner_required',
       );
-    return { revision, companyId };
+    return { revision, companyId, branchId: branch?.id ?? null };
   }
 
   private async serviceRenameContext(tenantId: string, userId: string) {
@@ -1785,6 +1803,242 @@ export class CrmService {
     )
       serviceRenameSourceChanged();
     return serviceRenamePreview(snapshot, title, before.revision);
+  }
+
+  /** Reuse current owner/tenant/integration/branch metadata checks; no rename or price permission is reused. */
+  private async staffCreateContext(tenantId: string, userId: string) {
+    const before = await this.serviceRenameSourceContext(tenantId, userId);
+    const adapter = await this.getAdapterForTenant(tenantId);
+    if (!adapter.readStaffCreatePermission || !adapter.createStaffQuick)
+      staffCreateRefuse('staff_create_provider_unavailable');
+    const after = await this.serviceRenameSourceContext(tenantId, userId);
+    if (!before.branchId || !after.branchId)
+      staffCreateRefuse('staff_create_branch_binding_required');
+    if (before.revision !== after.revision)
+      staffCreateRefuse('staff_create_source_changed');
+    return {
+      adapter,
+      companyId: after.companyId,
+      revision: servicePriceHash({
+        contract: 'maya.staff-create-source/1',
+        source: after.revision,
+      }),
+    };
+  }
+
+  async prepareStaffCreate(
+    tenantId: string,
+    userId: string,
+    input: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
+    const proposal = staffCreateProposal({
+      name: input.name,
+      specialization: input.specialization,
+    });
+    const context = await this.staffCreateContext(tenantId, userId);
+    const permission = await context.adapter.readStaffCreatePermission!();
+    if (
+      (await this.staffCreateContext(tenantId, userId)).revision !==
+      context.revision
+    )
+      staffCreateRefuse('staff_create_source_changed');
+    return {
+      ...proposal,
+      company_id: context.companyId,
+      integration_revision: context.revision,
+      permission_revision: permission,
+      origin: STAFF_CREATE_ORIGIN,
+    };
+  }
+
+  async applyStaffCreate(
+    tenantId: string,
+    userId: string,
+    input: Record<string, unknown>,
+    idempotencyKey: string,
+  ): Promise<Record<string, unknown>> {
+    const args = staffCreatePrepared(input);
+    if (!this.staffCreateIngress || !this.staffCreateKernel)
+      staffCreateRefuse('staff_create_canonical_engine_required');
+    const approval = await this.prisma.aiApprovalRequest.findUnique({
+      where: { tenantId_idempotencyKey: { tenantId, idempotencyKey } },
+    });
+    const authorize = async (dispatch = false) => {
+      const context = await this.staffCreateContext(tenantId, userId);
+      const current =
+        approval &&
+        (await this.prisma.aiApprovalRequest.findUnique({
+          where: { id_tenantId: { id: approval.id, tenantId } },
+        }));
+      if (
+        !current ||
+        current.toolName !== STAFF_CREATE_TOOL ||
+        current.requestedByUserId !== userId ||
+        current.requestedByTenantId !== tenantId ||
+        current.decidedByUserId !== userId ||
+        current.decidedByTenantId !== tenantId ||
+        !current.decidedAt ||
+        current.decidedAt > current.expiresAt ||
+        !['approved', 'executing', 'completed'].includes(current.status) ||
+        (dispatch && current.expiresAt <= new Date()) ||
+        stableActionJson(
+          JSON.parse(
+            this.encryptionService.decrypt(current.encryptedArguments),
+          ),
+        ) !== stableActionJson(args)
+      )
+        throw new ForbiddenException(
+          'staff_create_exact_actor_approval_required',
+        );
+      const origins = await this.prisma.auditLog.findMany({
+        where: {
+          tenantId,
+          userId,
+          action: 'ai.staff_create_chat_approval_bound',
+          entityType: 'AiApprovalRequest',
+          entityId: current.id,
+        },
+        select: { metadataJson: true },
+        take: 2,
+      });
+      const origin = origins[0]?.metadataJson as
+        Record<string, unknown> | undefined;
+      if (
+        origins.length !== 1 ||
+        !origin ||
+        origin.contract !== 'maya.staff-create-chat-approval/1' ||
+        origin.approvalId !== current.id ||
+        origin.payloadHash !== current.payloadHash ||
+        typeof origin.userTurnId !== 'string' ||
+        typeof origin.conversationId !== 'string' ||
+        typeof origin.principalProofHash !== 'string'
+      )
+        throw new ForbiddenException('staff_create_chat_origin_required');
+      if (
+        !(await TimelineStore.readActiveUserTurnIdentity(
+          this.prisma,
+          {
+            id: origin.userTurnId,
+            tenantId,
+            conversationId: origin.conversationId,
+            principalProofHash: origin.principalProofHash,
+          },
+          new Date(),
+        ))
+      )
+        throw new ForbiddenException('staff_create_chat_origin_erased');
+      if (
+        context.revision !== args.integration_revision ||
+        context.companyId !== args.company_id
+      )
+        staffCreateRefuse('staff_create_source_changed');
+      return context;
+    };
+    await authorize();
+    if (!approval)
+      throw new ForbiddenException('staff_create_approval_required');
+    const targetRef = `yclients-staff-create/${args.company_id}/${servicePriceHash({ name: args.name, specialization: args.specialization })}`;
+    const request: TrustedActionExecutionRequestV1 = {
+      contract: ACTION_EXECUTION_REQUEST_CONTRACT,
+      tenantId,
+      capability: STAFF_CREATE_CAPABILITY,
+      source: {
+        type: 'authenticated_request',
+        occurrenceScope: STAFF_CREATE_ORIGIN,
+        sourceRef: approval.id,
+        actorUserId: userId,
+      },
+      targetRef,
+      input: { ...args, approval_id: approval.id },
+      evidenceRefs: [],
+      callerIdempotency: { scope: 'crm-staff-create-v1', key: idempotencyKey },
+    };
+    let deadlineAt = 0;
+    const receipt = await this.prisma.$transaction(
+      async (tx) => {
+        await tx.$executeRaw(
+          Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`${tenantId}:staff-create:${targetRef}`}, 0))`,
+        );
+        await authorize();
+        const unresolved = await tx.actionExecution.findFirst({
+          where: {
+            tenantId,
+            capability: STAFF_CREATE_CAPABILITY,
+            targetRef,
+            sourceRef: { not: approval.id },
+            state: {
+              in: ['PENDING_APPROVAL', 'READY', 'EXECUTING', 'UNKNOWN'],
+            },
+          },
+          select: { id: true },
+        });
+        if (unresolved)
+          staffCreateRefuse('staff_create_previous_outcome_unresolved');
+        // A genuine REQUIRED AE approval is created and consumed, bound to the already
+        // explicitly decided AiApprovalRequest. No caller-authored approval flag exists.
+        let execution = await this.staffCreateIngress!.createExecution(request);
+        if (execution.state === ActionExecutionState.PENDING_APPROVAL) {
+          await authorize(true);
+          execution = await this.staffCreateKernel!.decideApproval({
+            tenantId,
+            executionId: execution.id,
+            approverUserId: userId,
+            decision: ActionApprovalDecision.APPROVED,
+          });
+        }
+        return this.actionEngineRuntime.executeWithReceipt(request, {
+          prepare: async () => {
+            await authorize(true);
+            deadlineAt = Date.now() + 20_000;
+            return {};
+          },
+          dispatch: async () => {
+            const context = await authorize(true);
+            const result = await context.adapter.createStaffQuick!({
+              companyId: args.company_id,
+              proposal: {
+                name: args.name,
+                specialization: args.specialization,
+              },
+              expectedPermissionRevision: args.permission_revision,
+              deadlineAt,
+              beforeDispatch: async () => {
+                await authorize(true);
+              },
+            });
+            return { value: result, safeResult: result };
+          },
+          // There is no provider request id/search receipt. Never infer success or
+          // proven non-execution from a same-name employee, and never redispatch.
+          reconcile: async () => {
+            await authorize();
+            return { outcome: 'STILL_UNKNOWN' };
+          },
+          restore: (result) => result as StaffCreateReceipt,
+          classifyError: (error, phase) => ({
+            kind:
+              phase === 'dispatch' &&
+              !(error instanceof StaffCreatePreDispatchError) &&
+              !(error instanceof ForbiddenException)
+                ? 'unknown'
+                : 'definitive',
+            outcomeCode:
+              phase === 'dispatch' &&
+              !(error instanceof StaffCreatePreDispatchError) &&
+              !(error instanceof ForbiddenException)
+                ? 'staff_create_outcome_unknown'
+                : 'staff_create_predispatch_refused',
+            errorClass:
+              error instanceof Error ? error.constructor.name : 'Error',
+          }),
+        });
+      },
+      { maxWait: 1000, timeout: 120000 },
+    );
+    return {
+      ...receipt.value,
+      action_execution_id: receipt.execution.executionId,
+    };
   }
 
   /** The existing CRM owner binds the company's service to current tenant authority. */

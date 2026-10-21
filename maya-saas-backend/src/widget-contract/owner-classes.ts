@@ -1,3 +1,5 @@
+import { isStaffQuickCreate } from '../widgets/staff-create/staff-create-widget.contract';
+import { STAFF_CREATE_TOOL } from '../crm/yclients-staff-create.contract';
 import { isInventoryReceiptPurchaseCost } from '../widgets/inventory/goods-receipt-widget.contract';
 import { GOODS_RECEIPT_TOOL } from '../crm/goods-receipt.contract';
 // U-TAB (GATES-PLAN-V11 D-5) — §2.4's owner classes, at runtime.
@@ -270,6 +272,9 @@ const resolveRow = (kind: WidgetKind): readonly CapabilityRef[] => {
           isCataloguePriceConfiguration(c) ||
           isInventoryReceiptPurchaseCost(c),
       ).map((c) => internRef('AE', c.capability)),
+      ...(AE_CAPABILITIES.some(isStaffQuickCreate)
+        ? [internRef('C9', STAFF_CREATE_TOOL)]
+        : []),
       ...(AE_CAPABILITIES.some(isInventoryReceiptPurchaseCost)
         ? [internRef('C9', GOODS_RECEIPT_TOOL)]
         : []),

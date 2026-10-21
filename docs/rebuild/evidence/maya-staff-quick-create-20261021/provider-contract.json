@@ -1,0 +1,74 @@
+{
+  "contract": "maya.yclients-staff-quick.source-projection/1",
+  "observedAt": "2026-10-21",
+  "sourceUrl": "https://developers.yclients.com/ru/",
+  "sourceHtmlSha256": "ed57f3e1908597d58e880184d7cea555534d6243837d5648069b114f4326bd36",
+  "operationId": "api.location.staff.create_quick",
+  "method": "POST",
+  "path": "/api/v1/company/{company_id}/staff/quick",
+  "required": [
+    "name",
+    "specialization",
+    "position_id",
+    "phone_number"
+  ],
+  "requestProperties": {
+    "name": {
+      "type": "string"
+    },
+    "specialization": {
+      "type": "string"
+    },
+    "position_id": {
+      "type": "number",
+      "nullable": true
+    },
+    "phone_number": {
+      "type": "string",
+      "nullable": true
+    }
+  },
+  "responseStatus": 201,
+  "responseSchema": "master_with_position",
+  "selectedResponseProperties": {
+    "id": {
+      "type": "number"
+    },
+    "name": {
+      "type": "string"
+    },
+    "company_id": {
+      "type": "number"
+    },
+    "specialization": {
+      "type": "string"
+    },
+    "position": {
+      "type": "object",
+      "nullable": true
+    }
+  },
+  "applicationRestrictions": {
+    "position_id": null,
+    "phone_number": null,
+    "callerProperties": [
+      "name",
+      "specialization"
+    ],
+    "providerRetry": false,
+    "permissionFields": [
+      "settings.settings_master_access",
+      "settings.master_create"
+    ]
+  },
+  "notDocumented": [
+    "provider idempotency key for quick create",
+    "attributable readback after lost response"
+  ],
+  "remainingD2": [
+    "service rename inherited labels",
+    "finite service CRUD contract",
+    "staff partial update preservation and deletion consequences",
+    "service-staff technological-card current source"
+  ]
+}

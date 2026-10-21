@@ -1,3 +1,13 @@
+import {
+  STAFF_CREATE_TOOL,
+  staffCreateProposal,
+} from '../crm/yclients-staff-create.contract';
+import {
+  AI_STAFF_CREATE_WIDGET_TRIGGER,
+  type AiStaffCreateWidgetTriggerPort,
+  type StaffCreateChatOrigin,
+  type StaffCreateApprovalSnapshot,
+} from './ai-staff-create-widget-trigger.port';
 import { PRICE_GOODS_OPERATIONS } from '../entitlements/widget-release-profile.contract';
 import {
   assertPriceGoodsScope,
@@ -163,6 +173,7 @@ export class AiToolRuntimeService {
     toolName: string,
     dto: ExecuteAiToolDto,
     internal: {
+      readonly staffCreateChat?: true;
       readonly suppressWidgetTrigger?: boolean;
       /** The explicit goods review ingress may prepare/read, never resume an approved effect. */
       readonly goodsReviewOnly?: true;
@@ -188,6 +199,34 @@ export class AiToolRuntimeService {
   ) {
     const principal = this.principal(user, dto.surface);
     const definition = this.registry.get(toolName);
+    if (toolName === STAFF_CREATE_TOOL) {
+      if (
+        internal.staffCreateChat !== true ||
+        internal.widgetTrigger !== 'T-2a' ||
+        internal.suppressWidgetTrigger ||
+        !internal.userTurn ||
+        dto.surface !== 'web'
+      )
+        throw new ForbiddenException(
+          'staff_create_canonical_chat_origin_required',
+        );
+      staffCreateProposal(dto.arguments);
+      const trigger = this.moduleRef?.get<AiStaffCreateWidgetTriggerPort>(
+        AI_STAFF_CREATE_WIDGET_TRIGGER,
+        { strict: false },
+      );
+      if (
+        !trigger ||
+        !(await trigger.readStaffCreateUserTurnBinding({
+          tenantId: principal.tenantId,
+          userId: principal.userId,
+          ...internal.userTurn,
+        }))
+      )
+        throw new ForbiddenException(
+          'staff_create_canonical_chat_origin_required',
+        );
+    }
     const priceSource = internal.servicePriceSourceRevision;
     const revalidatePriceSource = async () => {
       if (priceSource === undefined) return;
@@ -271,6 +310,41 @@ export class AiToolRuntimeService {
           internal.goodsReviewOnly === true,
         );
         return this.attachGoodsReceiptApprovalWidget(
+          user,
+          definition,
+          pending,
+          internal,
+        );
+      }
+    }
+    if (toolName === STAFF_CREATE_TOOL && dto.idempotencyKey) {
+      const saved = await this.prisma.aiApprovalRequest.findUnique({
+        where: {
+          tenantId_idempotencyKey: {
+            tenantId: principal.tenantId,
+            idempotencyKey: dto.idempotencyKey,
+          },
+        },
+      });
+      if (saved) {
+        const args = this.registry.validateArguments(
+          toolName,
+          this.parseJson(this.encryption.decrypt(saved.encryptedArguments)),
+        );
+        if (
+          saved.toolName !== toolName ||
+          args.name !== validated.name ||
+          args.specialization !== validated.specialization
+        )
+          this.approvalConflict('ai_approval_idempotency_conflict');
+        const pending = await this.requestApproval(
+          principal,
+          definition,
+          args,
+          this.inputHash(toolName, args, principal),
+          dto.idempotencyKey,
+        );
+        return this.attachStaffCreateApprovalWidget(
           user,
           definition,
           pending,
@@ -365,6 +439,13 @@ export class AiToolRuntimeService {
         idempotencyKey,
         internal.goodsReviewOnly === true,
       );
+      if (definition.name === STAFF_CREATE_TOOL)
+        return this.attachStaffCreateApprovalWidget(
+          user,
+          definition,
+          pending,
+          internal,
+        );
       return definition.name === GOODS_RECEIPT_TOOL
         ? this.attachGoodsReceiptApprovalWidget(
             user,
@@ -912,6 +993,191 @@ export class AiToolRuntimeService {
 
   /** YC-SP1-WIDGET-1: durable owner binding to the actual authenticated chat admission.
    * No widget gesture or ActionExecution identity is manufactured. */
+  private async attachStaffCreateApprovalWidget(
+    actor: AuthenticatedUser,
+    definition: AiToolDefinition,
+    result: unknown,
+    internal: Parameters<AiToolRuntimeService['execute']>[3],
+  ): Promise<unknown> {
+    if (
+      definition.name !== STAFF_CREATE_TOOL ||
+      internal?.suppressWidgetTrigger ||
+      internal?.widgetTrigger !== 'T-2a' ||
+      !internal.userTurn ||
+      !actor.tenantId ||
+      !result ||
+      typeof result !== 'object'
+    )
+      return result;
+    const pending = result as Record<string, unknown>;
+    const approval = pending.approval as
+      { id?: unknown; payload_hash?: unknown } | undefined;
+    if (
+      pending.status !== 'approval_required' ||
+      typeof approval?.id !== 'string' ||
+      typeof approval.payload_hash !== 'string'
+    )
+      return result;
+    let trigger: AiStaffCreateWidgetTriggerPort | undefined;
+    try {
+      trigger = this.moduleRef?.get<AiStaffCreateWidgetTriggerPort>(
+        AI_STAFF_CREATE_WIDGET_TRIGGER,
+        { strict: false },
+      );
+    } catch {
+      return result;
+    }
+    if (!trigger) return result;
+    const id = approval.id,
+      payloadHash = approval.payload_hash;
+    const bound = await this.prisma.$transaction(async (tx) => {
+      await tx.$executeRaw(
+        Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`staff-create-chat-origin:${actor.tenantId}:${id}`}, 0))`,
+      );
+      const existing = await this.auditLog.entityEvents(
+        {
+          tenantId: actor.tenantId!,
+          userId: actor.userId,
+          action: 'ai.staff_create_chat_approval_bound',
+          entityType: 'AiApprovalRequest',
+          entityId: id,
+        },
+        tx,
+      );
+      if (existing.length) return existing.length === 1;
+      // A later retry cannot attach a standalone or unrelated historical approval to a new chat.
+      if (pending.replayed !== false) return false;
+      const binding = await trigger.readStaffCreateUserTurnBinding(
+        {
+          tenantId: actor.tenantId!,
+          userId: actor.userId,
+          turnId: internal.userTurn!.turnId,
+          conversationId: internal.userTurn!.conversationId,
+        },
+        tx,
+      );
+      if (!binding) return false;
+      const origin: StaffCreateChatOrigin = {
+        contract: 'maya.staff-create-chat-approval/1',
+        approvalId: id,
+        payloadHash,
+        userTurnId: internal.userTurn!.turnId,
+        conversationId: internal.userTurn!.conversationId,
+        principalProofHash: binding.principalProofHash,
+      };
+      await this.auditLog.log(
+        {
+          tenantId: actor.tenantId!,
+          userId: actor.userId,
+          action: 'ai.staff_create_chat_approval_bound',
+          entityType: 'AiApprovalRequest',
+          entityId: id,
+          metadata: { ...origin },
+        },
+        tx,
+      );
+      return true;
+    });
+    if (!bound) return result;
+    const resolution = await trigger.afterPendingStaffCreateApproval({
+      actor,
+      approvalId: id,
+      payloadHash,
+      userTurn: internal.userTurn,
+    });
+    return resolution ? { ...pending, resolution } : result;
+  }
+
+  /** Canonical AI approval owner read. The widget sees a bounded snapshot, not encrypted args. */
+  async readStaffCreateWidgetApproval(
+    actor: AuthenticatedUser,
+    approvalId: string,
+    payloadHash: string,
+    revalidateSource = false,
+  ): Promise<StaffCreateApprovalSnapshot> {
+    const row = await this.findApproval(actor, approvalId);
+    const principal = this.principal(actor, this.assertSurface(row.surface));
+    const definition = this.registry.get(STAFF_CREATE_TOOL);
+    if (
+      row.toolName !== STAFF_CREATE_TOOL ||
+      row.surface !== 'web' ||
+      row.requestedByUserId !== actor.userId
+    )
+      throw new ForbiddenException(
+        'Exact owner service price approval required',
+      );
+    await this.policy.assertCanExecute(principal, definition);
+    this.policy.assertCanDecide(definition, row.requestedByUserId, principal);
+    this.assertPayloadHash(row, payloadHash);
+    this.assertPendingApproval(row);
+    if (row.expiresAt.getTime() <= Date.now())
+      this.approvalConflict('ai_approval_expired');
+    const args = this.registry.validateArguments(
+      STAFF_CREATE_TOOL,
+      this.parseJson(this.encryption.decrypt(row.encryptedArguments)),
+    );
+    if (this.inputHash(STAFF_CREATE_TOOL, args, principal) !== payloadHash)
+      this.approvalConflict('ai_approval_payload_mismatch');
+    if (revalidateSource) {
+      const fresh = await this.handler.normalizeArguments(
+        STAFF_CREATE_TOOL,
+        principal,
+        args,
+      );
+      if (this.inputHash(STAFF_CREATE_TOOL, fresh, principal) !== payloadHash)
+        this.approvalConflict('staff_create_proposal_stale');
+    }
+    const events = await this.auditLog.entityEvents({
+      tenantId: principal.tenantId,
+      userId: principal.userId,
+      action: 'ai.staff_create_chat_approval_bound',
+      entityType: 'AiApprovalRequest',
+      entityId: row.id,
+    });
+    const origin = events[0]?.metadataJson as unknown as
+      StaffCreateChatOrigin | undefined;
+    if (
+      events.length !== 1 ||
+      !origin ||
+      origin.contract !== 'maya.staff-create-chat-approval/1' ||
+      origin.approvalId !== row.id ||
+      origin.payloadHash !== row.payloadHash ||
+      typeof origin.userTurnId !== 'string' ||
+      typeof origin.conversationId !== 'string' ||
+      typeof origin.principalProofHash !== 'string'
+    )
+      this.approvalConflict('staff_create_chat_origin_missing');
+    let trigger: AiStaffCreateWidgetTriggerPort | undefined;
+    try {
+      trigger = this.moduleRef?.get<AiStaffCreateWidgetTriggerPort>(
+        AI_STAFF_CREATE_WIDGET_TRIGGER,
+        { strict: false },
+      );
+    } catch {
+      /* Missing presentation proof owner fails closed below. */
+    }
+    if (!trigger) this.approvalConflict('staff_create_chat_origin_missing');
+    const proof = await trigger.readStaffCreateUserTurnBinding({
+      tenantId: principal.tenantId,
+      userId: principal.userId,
+      turnId: origin.userTurnId,
+      conversationId: origin.conversationId,
+      principalProofHash: origin.principalProofHash,
+    });
+    if (!proof) this.approvalConflict('staff_create_chat_origin_missing');
+    return {
+      id: row.id,
+      payloadHash: row.payloadHash,
+      expiresAt: row.expiresAt,
+      createdAt: row.createdAt,
+      summary: row.summary,
+      name: String(args.name),
+      specialization: String(args.specialization),
+      companyId: String(args.company_id),
+      origin,
+    };
+  }
+
   private async attachServicePriceApprovalWidget(
     actor: AuthenticatedUser,
     definition: AiToolDefinition,
@@ -1569,6 +1835,19 @@ export class AiToolRuntimeService {
       this.assertSurface(approval.surface),
     );
     const definition = this.registry.get(approval.toolName);
+    if (approval.toolName === STAFF_CREATE_TOOL) {
+      if (!internal?.admissionGuard)
+        throw new ForbiddenException(
+          'staff_create_canonical_approval_required',
+        );
+      await this.readStaffCreateWidgetApproval(
+        user,
+        approvalId,
+        dto.payloadHash,
+        true,
+      );
+    }
+
     if (approval.toolName === GOODS_RECEIPT_TOOL) {
       await this.policy.assertCanExecute(principal, definition);
       const savedArgs = this.registry.validateArguments(
@@ -2045,6 +2324,21 @@ export class AiToolRuntimeService {
     });
     if (existing) {
       this.assertSameApproval(existing, definition, principal, inputHash);
+      if (definition.name === STAFF_CREATE_TOOL) {
+        if (existing.status === APPROVAL_STATUS.COMPLETED)
+          return this.replayCompletedApproval(existing);
+        if (
+          [APPROVAL_STATUS.APPROVED, APPROVAL_STATUS.EXECUTING].includes(
+            existing.status as never,
+          )
+        )
+          return { status: 'held', replayed: true };
+        if (
+          existing.status !== APPROVAL_STATUS.PENDING ||
+          existing.expiresAt <= new Date()
+        )
+          this.approvalConflict('staff_create_proposal_no_longer_pending');
+      }
       if (definition.name === GOODS_RECEIPT_TOOL)
         return this.projectGoodsApproval(existing, true, goodsReviewOnly);
       if (

@@ -1,3 +1,12 @@
+import {
+  staffCreatePermissions,
+  staffCreateProposal,
+  staffCreateReceipt,
+  staffCreateId,
+  staffCreateRefuse,
+  type StaffCreateProposal,
+  type StaffCreateReceipt,
+} from '../yclients-staff-create.contract';
 import { normalizeCrmBranchBinding } from '../crm-provider-settings';
 import {
   GoodsPreDispatchError,
@@ -876,6 +885,70 @@ export class YclientsCRMAdapter implements CRMAdapter {
       catalog_exhaustive: false,
       services,
     };
+  }
+
+  /** Current documented staff/create permission, never a price or schedule grant. */
+  async readStaffCreatePermission(
+    deadlineAt = Date.now() + 20_000,
+  ): Promise<string> {
+    const companyId = staffCreateId(this.settings.companyId);
+    const timeoutMs = deadlineAt - Date.now();
+    if (timeoutMs <= 0) staffCreateRefuse('staff_create_deadline_elapsed');
+    const response = await this.request<unknown>(
+      `user/permissions/${companyId}`,
+      { method: 'GET', timeoutMs },
+    );
+    if (response.success !== true)
+      staffCreateRefuse('staff_create_unverified_permission');
+    return staffCreatePermissions(response.data);
+  }
+
+  /** One native quick-create POST; account, position and contact binding are explicitly absent. */
+  async createStaffQuick(params: {
+    companyId: string;
+    proposal: StaffCreateProposal;
+    expectedPermissionRevision: string;
+    deadlineAt: number;
+    beforeDispatch: () => Promise<void>;
+  }): Promise<StaffCreateReceipt> {
+    const companyId = staffCreateId(this.settings.companyId);
+    if (companyId !== staffCreateId(params.companyId))
+      staffCreateRefuse('staff_create_company_changed');
+    const proposal = staffCreateProposal(params.proposal);
+    if (
+      (await this.readStaffCreatePermission(params.deadlineAt)) !==
+      params.expectedPermissionRevision
+    )
+      staffCreateRefuse('staff_create_permission_changed');
+    // The existing CRM/AE owner supplies this current principal/source check.
+    await params.beforeDispatch();
+    const timeoutMs = params.deadlineAt - Date.now();
+    if (timeoutMs <= 0) staffCreateRefuse('staff_create_deadline_elapsed');
+    try {
+      const response = await this.request<unknown>(
+        `company/${companyId}/staff/quick`,
+        {
+          method: 'POST',
+          timeoutMs,
+          body: JSON.stringify({
+            ...proposal,
+            position_id: null,
+            phone_number: null,
+          }),
+          preserveGoodsNumbers: true,
+        },
+      );
+      if (response.success !== true)
+        throw new Error('staff_create_unverified_receipt');
+      return staffCreateReceipt(response.data, companyId, proposal);
+    } catch (error) {
+      // No provider idempotency/correlation contract exists for this endpoint.
+      // Even HTTP failure or a matching later name cannot prove non-execution.
+      throw new CrmOutcomeUnknownError(
+        'YCLIENTS staff-create outcome is unknown.',
+        error,
+      );
+    }
   }
 
   /** Title-only preview source; three bounded GETs, no mutation or pricing authority. */

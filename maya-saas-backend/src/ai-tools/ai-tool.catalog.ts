@@ -179,6 +179,29 @@ export const MAYA_AI_TOOL_CATALOG = [
     fallbackPolicy: 'fail_closed',
   },
   {
+    name: 'catalog.staff.create',
+    description:
+      'Prepare one explicitly named YCLIENTS staff card without an account or phone. Exact name and specialization; canonical owner approval required. Deterministic chat ingress only.',
+    inputSchema: {
+      type: 'object',
+      additionalProperties: false,
+      required: ['name', 'specialization'],
+      properties: {
+        name: { type: 'string', minLength: 1, maxLength: 240 },
+        specialization: { type: 'string', minLength: 1, maxLength: 240 },
+      },
+    },
+    allowedRoles: [UserRole.TENANT_OWNER, UserRole.BUSINESS_OWNER],
+    allowedSurfaces: ['web'],
+    requiredFeatures: ['ai.owner', 'crm.integration'],
+    riskTier: 'high_write',
+    approvalPolicy: 'actor',
+    idempotency: 'required',
+    timeoutMs: 20000,
+    retryPolicy: 'none',
+    fallbackPolicy: 'fail_closed',
+  },
+  {
     name: 'catalog.service.price.update',
     description:
       'Prepare an explicitly requested fixed price for one existing YCLIENTS service. First read catalog.services.read to resolve the exact service_id; never invent an ID, current price or requested amount. price_rubles must be the exact fixed price stated by the owner, not a percentage or calculated amount. This only prepares a price diff; the requesting owner must explicitly approve it before any write.',
