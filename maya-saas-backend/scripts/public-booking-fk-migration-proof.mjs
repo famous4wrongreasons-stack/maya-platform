@@ -24,15 +24,40 @@ const targetNames = [
   'PublicBookingQuote_sessionId_tenantId_fkey',
   'PublicBookingAttempt_quoteId_sessionId_tenantId_fkey',
 ];
-const migrationNames = fs
+const allMigrationNames = fs
   .readdirSync(migrations)
   .filter((n) => fs.statSync(path.join(migrations, n)).isDirectory())
   .sort();
+const reviewedTail = [
+  {
+    name: '20261021170000_a22_customer_facts',
+    sha256: '38c5435cbcb8faae2130d5c66828f1fd4f8c0933ae98c274ad69460a01dc237b',
+  },
+];
+const migrationIndex = allMigrationNames.indexOf(migration);
+// Keep the original FK boundary guard on the prefix. Later migrations are
+// admitted only by the separately reviewed exact name-and-checksum tail.
+const migrationNames = allMigrationNames.slice(0, migrationIndex + 1);
 assert.equal(
   migrationNames.at(-1),
   migration,
   'extend this proof explicitly when later migrations exist',
 );
+assert.deepEqual(
+  allMigrationNames.slice(migrationIndex + 1),
+  reviewedTail.map((entry) => entry.name),
+  'extend this proof explicitly when later migrations exist',
+);
+for (const entry of reviewedTail)
+  assert.equal(
+    createHash('sha256')
+      .update(
+        fs.readFileSync(path.join(migrations, entry.name, 'migration.sql')),
+      )
+      .digest('hex'),
+    entry.sha256,
+    'review later migration bytes explicitly before extending the proof',
+  );
 const urls = [
   process.env.DATABASE_URL,
   process.env.PUBLIC_BOOKING_FK_FRESH_DATABASE_URL,
@@ -58,7 +83,7 @@ const note = (name) => {
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 const hashes = () =>
   Object.fromEntries(
-    migrationNames.map((n) => [
+    allMigrationNames.map((n) => [
       n,
       sha(fs.readFileSync(path.join(migrations, n, 'migration.sql'))),
     ]),
@@ -277,10 +302,43 @@ try {
     'upgrade retains all fixture rows, keys, indexes, user triggers and immutable function',
   );
   await behaviour(clients[0], true);
+  // Prove the FK correction against its historical prefix before applying A22.
+  const a22Definition = async (c) => {
+    const definitions = (
+      await c.query(
+        `SELECT pg_get_constraintdef(oid) AS definition
+         FROM pg_constraint
+         WHERE conrelid='"TenantBusinessConfigurationRevision"'::regclass
+         AND conname='R11_config_contract_check'`,
+      )
+    ).rows;
+    assert.equal(definitions.length, 1);
+    return definitions[0].definition;
+  };
+  const a22Before = `CHECK (((namespace = ANY (ARRAY['business_rules'::text, 'client_capabilities'::text, 'staff_ai_provider'::text, 'c8_valuation'::text, 'c9_orchestration'::text])) AND ("contractVersion" = 1) AND (revision > 0) AND ("contentHash" ~ '^[a-f0-9]{64}$'::text) AND (((revision = 1) AND ("previousRevisionId" IS NULL)) OR ((revision > 1) AND ("previousRevisionId" IS NOT NULL)))))`;
+  const a22After = a22Before.replace(
+    "'c9_orchestration'::text]",
+    "'c9_orchestration'::text, 'customer_facts'::text]",
+  );
+  assert.notEqual(a22After, a22Before);
+  assert.equal(await a22Definition(clients[0]), a22Before);
+  for (const entry of reviewedTail)
+    fs.cpSync(
+      path.join(migrations, entry.name),
+      path.join(work, 'migrations', entry.name),
+      { recursive: true },
+    );
+  prisma(urls[0], ['migrate', 'deploy', '--config', config]);
+  assert.equal(await a22Definition(clients[0]), a22After);
+  assert.deepEqual(await metadata(clients[0]), afterMeta);
+  assert.deepEqual(await rows(clients[0]), beforeRows);
+  await behaviour(clients[0], true);
+  note('reviewed A22 tail follows FK correction; only namespace check expands');
   prisma(urls[1], ['migrate', 'deploy']);
   await seed(clients[1]);
   await behaviour(clients[1], true);
   assert.deepEqual(await metadata(clients[1]), afterMeta);
+  assert.equal(await a22Definition(clients[1]), a22After);
   note('clean replay equals upgraded schema');
   for (let i = 0; i < 2; i++) {
     prisma(urls[i], ['migrate', 'deploy']);
@@ -299,7 +357,7 @@ try {
         'SELECT migration_name,checksum,rolled_back_at,finished_at FROM "_prisma_migrations" ORDER BY migration_name',
       )
     ).rows;
-    assert.equal(applied.length, migrationNames.length);
+    assert.equal(applied.length, allMigrationNames.length);
     for (const row of applied) {
       assert.equal(row.checksum, initialHashes[row.migration_name]);
       assert(row.finished_at);
@@ -377,6 +435,13 @@ try {
         encoding: 'utf8',
       }).trim(),
       migrationSha256: initialHashes[migration],
+      reviewedTail,
+      migrationCount: allMigrationNames.length,
+      upgradeOrder: [
+        'historical-prefix',
+        migration,
+        ...reviewedTail.map((entry) => entry.name),
+      ],
       certificate: 'NOT_ISSUED',
       realEffects: 0,
     }),
