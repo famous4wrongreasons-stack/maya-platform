@@ -1,3 +1,5 @@
+import { ClientConsentReadService } from './client-consent-read.service';
+import { ClientConsentReadController } from './client-consent-read.controller';
 import { EntitlementsModule } from '../entitlements/entitlements.module';
 import { AvailabilityCalendarService } from './availability-calendar.service';
 import { ClientReverificationController } from './client-reverification.controller';
@@ -88,6 +90,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     UsersModule,
   ],
   controllers: [
+    ClientConsentReadController,
     ClientReverificationController,
     NativeFeedbackController,
     ConsentSecurityInvalidationController,
@@ -104,6 +107,7 @@ import { TenantContextService } from '../tenancy/tenant-context.service';
     ShadowIngestionController,
   ],
   providers: [
+    ClientConsentReadService,
     {
       provide: AvailabilityCalendarService,
       useFactory: (

@@ -1,3 +1,4 @@
+import { OwnConsentsPanel } from './OwnConsentsPanel.tsx';
 // The canonical MAYA chat screen, over the headless runtime.
 //
 // The M5 carrier originated in app.html:21176-22335. Companion v1 (2026-10-11 owner package)
@@ -20,7 +21,7 @@ import type {
   ConversationView,
   TimelineItemView,
 } from '../../../maya-chat-shell/src/shell/ports.ts';
-import { ideas, workspaceReads, ownTasks, conversation, goodsPhoto, privacy, session, telegramLink, voice, widgets } from '../runtime/compose.ts';
+import { ownConsents, ideas, workspaceReads, ownTasks, conversation, goodsPhoto, privacy, session, telegramLink, voice, widgets } from '../runtime/compose.ts';
 import { usePortView } from '../runtime/useView.ts';
 import { IdeasPanel } from './IdeasPanel.tsx';
 import { WorkspaceReadsPanel } from './WorkspaceReadsPanel.tsx';
@@ -381,6 +382,7 @@ export function ChatScreen({
   }, []);
   const now = useCountdownClock(view);
   const privacyView = usePortView(privacy);
+  const ownConsentsView = usePortView(ownConsents);
   const telegramLinkView = usePortView(telegramLink);
   const goodsPhotoView = usePortView(goodsPhoto);
   const shellView = usePortView(widgets);
@@ -737,6 +739,7 @@ export function ChatScreen({
           {ideasOpen ? <IdeasPanel view={ideasView} port={{ ...ideas, read: key => { ideasReturnScroll.current = laneRef.current?.scrollTop ?? 0; return ideas.read(key); } }} close={() => { ideas.close(); window.requestAnimationFrame(focusComposer); }} /> : readsOpen ? <WorkspaceReadsPanel key={shellView.workspace} view={readsView} port={workspaceReads} close={() => { workspaceReads.close(); window.requestAnimationFrame(focusComposer); }} /> : tasksOpen ? <OwnTasksPanel view={tasksView} port={ownTasks} close={() => { ownTasks.close(); window.requestAnimationFrame(focusComposer); }} /> : privacyOpen ? (
             <>
             <TelegramLinkPanel view={telegramLinkView} t={t} start={() => void telegramLink.start()} cancel={() => telegramLink.cancel()} />
+            <OwnConsentsPanel view={ownConsentsView} t={t} refresh={() => void ownConsents.refresh()} />
             <PrivacyPanel
               view={privacyView}
               t={t}

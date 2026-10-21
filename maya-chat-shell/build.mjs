@@ -231,6 +231,7 @@ export const P1_PATHS = [
   '/ai/chat',
   '/ai/conversation',
   '/privacy/conversations',
+  '/privacy/consents',
   '/ai/transcribe',
   '/mobile/pwa/search',
   '/widgets/intent',

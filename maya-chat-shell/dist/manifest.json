@@ -21,6 +21,7 @@
     "src/net/goods-photo.ts",
     "src/net/ideas.ts",
     "src/net/onboarding.ts",
+    "src/net/own-consents.ts",
     "src/net/own-tasks.ts",
     "src/net/personal.ts",
     "src/net/project.ts",
@@ -40,6 +41,7 @@
     "src/shell/ideas.ts",
     "src/shell/intents.ts",
     "src/shell/local-crm-setup.ts",
+    "src/shell/own-consents.ts",
     "src/shell/own-tasks.ts",
     "src/shell/personal-booking.ts",
     "src/shell/ports.ts",
@@ -77,7 +79,7 @@
       },
       {
         "path": "src/net/client.ts",
-        "sha256": "3a9a721c7099c87ace5078a3a9d3611ed11eeaef1dcd9ad7191f7d11753571bb"
+        "sha256": "edaeb6a63ff89e3c7070f3057fd1fabafc5d8879b5bddea4f9ccc785edffe148"
       },
       {
         "path": "src/net/crm-setup.ts",
@@ -100,6 +102,10 @@
         "sha256": "e2917bec2b5fb7d74d1640a33b60886a2bc6340c753253839537ed360bfb598a"
       },
       {
+        "path": "src/net/own-consents.ts",
+        "sha256": "5486a8c2cb4d52fc41c4e1b185f6cdaf9651a9ee2da2c18d88d83373b7dc52f8"
+      },
+      {
         "path": "src/net/own-tasks.ts",
         "sha256": "72dbf9acdd4adfac2262305a8059fd2207432a824bd102b459ff9c9b167beee2"
       },
@@ -117,7 +123,7 @@
       },
       {
         "path": "src/net/types.ts",
-        "sha256": "46720bb235792bb57d79ebfbd409806642384562c9f8a790f9032a556cd46739"
+        "sha256": "39bd3b47a3aef4ec188a80d942731f1555d91066a2e8ff4281a4600ceff33669"
       },
       {
         "path": "src/net/workspace-reads.ts",
@@ -172,6 +178,10 @@
         "sha256": "c0f53db01c250f60d8c3117f651dc9b2eaa39ba62098239ea7ed5a29788d7a4a"
       },
       {
+        "path": "src/shell/own-consents.ts",
+        "sha256": "9aed41e58a62b2abd1ef55992f7ecfca44323c5cf10465adafaed3a19739b180"
+      },
+      {
         "path": "src/shell/own-tasks.ts",
         "sha256": "929342e2cf994aa1da0bc0bb36683394a1508b10ef044fb99a5c76d199afc1e7"
       },
@@ -205,8 +215,8 @@
       }
     ]
   },
-  "bytes": 690301,
-  "digest": "1485ff5588454aae7a312ee6db667fffd4c92306438f43e35ce0a3ead6b0410f",
+  "bytes": 698449,
+  "digest": "6e7578e9e31457326e3c172c4370e76c4f7bc9d7fd33dfb0ccf2b51e544c6055",
   "toolchain": {
     "typescript": "5.9.3",
     "target": "ES2022",
@@ -214,8 +224,8 @@
     "moduleResolution": "Bundler"
   },
   "web": {
-    "digest": "5fc1f7add52a558f364dafa211bf9de1e5a7b67bc1b78feb95c1625553bda811",
-    "modulePath": "m/5fc1f7add52a558f/",
+    "digest": "3f5283265951d2cbceaec34cb41b55c8c276254d3c7acb92bc4f360ae8b02eb6",
+    "modulePath": "m/3f5283265951d2cb/",
     "files": [
       {
         "path": "entry/main.js",
@@ -274,8 +284,8 @@
       },
       {
         "path": "src/net/client.js",
-        "sha256": "c439680f737607dec0a9f6d697b8d5a4eb5e741d98e2e8d36bbcfe667ebe64d7",
-        "bytes": 45613
+        "sha256": "c0d68effaddd127c4294ab8efa86f4002bc5806179e56aebec358a54c4fc5c79",
+        "bytes": 45924
       },
       {
         "path": "src/net/crm-setup.js",
@@ -301,6 +311,11 @@
         "path": "src/net/onboarding.js",
         "sha256": "266bd8eac2532c6a1f95ede1061e2b3f941fb84c390f3a32c7f663481bb26335",
         "bytes": 4369
+      },
+      {
+        "path": "src/net/own-consents.js",
+        "sha256": "171e1d96a7884d3f3710122881e7468bc10e598647a9cd6ce335d8e7a9636652",
+        "bytes": 2022
       },
       {
         "path": "src/net/own-tasks.js",
@@ -398,6 +413,11 @@
         "bytes": 15520
       },
       {
+        "path": "src/shell/own-consents.js",
+        "sha256": "968451712f2d1b76742e8820cb23a73656e30ec43dd44dfb1320013a8ace2563",
+        "bytes": 3659
+      },
+      {
         "path": "src/shell/own-tasks.js",
         "sha256": "603eab7e56d6a052df7817d29c6ca59a2ba6df7df2943996ad992f885ccacc1a",
         "bytes": 7680
@@ -453,7 +473,7 @@
       "bytes": 29125
     },
     "index": {
-      "sha256": "8f757ccde3c8175f214339871c0c0ef0fe900f0d71bb4d947338e42d16c6016d",
+      "sha256": "5ad4cbc44482602103e3e2fd400b55a21381b39cdc034558282a8fab3a36a378",
       "bytes": 1344
     },
     "assets": [

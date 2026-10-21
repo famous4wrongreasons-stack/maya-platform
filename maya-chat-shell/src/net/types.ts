@@ -606,3 +606,8 @@ export interface TelegramLinkPort {
   start(): Promise<void>;
   cancel(): void;
 }
+
+/** Own-consent terminal display; no raw source identities or export artifact. */
+export interface OwnConsent { readonly kind: 'privacy' | 'marketing'; readonly state: 'GRANTED' | 'NOT_GRANTED' | 'NEVER_ASKED'; readonly invalidated: boolean; readonly recordedAt: string | null; readonly effectiveAt: string | null; }
+export interface OwnConsentsSnapshot { readonly asOf: string; readonly expiresAt: string; readonly consents: readonly OwnConsent[]; readonly registerExport: { readonly available: false; readonly reason: 'STEP_UP_UNAVAILABLE' }; }
+export interface OwnConsentsTransport { ownConsents(signal: AbortSignal): Promise<Outcome<OwnConsentsSnapshot, WorkspaceReadFailure>>; }

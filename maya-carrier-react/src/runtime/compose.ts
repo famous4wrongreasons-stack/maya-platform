@@ -1,3 +1,4 @@
+import { createOwnConsents } from '../../../maya-chat-shell/src/shell/own-consents.ts';
 // The carrier's composition root.
 //
 // This is the React twin of maya-chat-shell/entry/main.ts, and it is deliberately a transcription
@@ -211,6 +212,7 @@ export const onboarding = net.onboarding;
 export const conversation = runtime.conversation;
 export const goodsPhoto = runtime.goodsPhoto;
 export const privacy = runtime.privacy;
+export const ownConsents = createOwnConsents({ transport: net.transport, session, shell: runtime.shell, scheduler, newAbort });
 export const widgets = runtime.widgetPort;
 export const localCrmSetup = createLocalCrmSetup({ enabled: localCrmSetupEnabled, transport: net.transport, session, newAbort, newId: () => crypto.randomUUID(),
   pending: createCrmPendingLocation({ href: () => window.location.href, replace: relative => window.history.replaceState(null, '', relative) }),
@@ -231,6 +233,7 @@ export const dispose = (): void => {
   localCrmSetup.dispose();
   personalBooking.dispose();
   ownTasks.dispose();
+  ownConsents.dispose();
   workspaceReads.dispose();
   ideas.dispose();
   voiceMachine.dispose();

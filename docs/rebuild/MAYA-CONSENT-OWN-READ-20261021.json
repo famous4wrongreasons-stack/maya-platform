@@ -1,0 +1,84 @@
+{
+  "contract": "maya.d4-consent-own-read-checkpoint/1",
+  "base": "961fa196c4b02a8badd2ada94f505f5cb838b78f",
+  "status": "OWN_READ_IMPLEMENTED_EXPORT_AUTHORITY_BLOCKED",
+  "delivered": [
+    "Registered first-party GET /privacy/consents, consumed by the existing Privacy & Data shell route. Exact current subject only; no tenant/client/role selection.",
+    "Live Maya JWT/session and durable verified Client link through ClientChannelRuntimeService.resolve, with source identity/consent locks, merged/unresolved identity refusal, and current ClientConsentFact/effectiveClientConsents projection.",
+    "Privacy and marketing decisions only. NOT_GRANTED deliberately does not distinguish declined/withdrawn/invalidated beyond the explicit invalidated flag; no unsupported source meaning is invented.",
+    "No-store response, at most 300-second freshness bounded by credential/session expiry. UI clears facts on expiry, navigation, sign-out, replacement session and disposal; refresh is explicit.",
+    "POST /privacy/consents/export/qualification accepts exact canonical UTC from/to only and re-resolves own-subject authority. It always returns available=false, STEP_UP_UNAVAILABLE. Caller claims, range reuse, request IDs or ordinary session/role cannot create export authority.",
+    "Source-only register projection reads every own-subject ClientConsentFact in occurredAt [from,to), ordered by occurredAt/createdAt/id with full original source/actor/execution and invalidation provenance. No pagination, cap, current-effective filter or conversation-history dependency. No production transport invokes this projection."
+  ],
+  "authority_map": {
+    "session": "src/crm/client-channel-authenticator.service.ts: authenticate verifies JWT signature, tenant/session/user/membership, revocation and expiry against database clock.",
+    "subject": "src/crm/client-channel-runtime.service.ts: resolve locks channel identity, re-authenticates and requires exactly one active versioned verified ClientChannelLink.",
+    "facts": "src/crm/client-effective-consent.ts: effectiveClientConsents reads the current head before invalidation; an old grant cannot resurrect.",
+    "erasure": "src/widgets/consent/history-erasure.owner.ts remains unchanged. Canonical consent and audit records are not erased.",
+    "read_registration": "src/crm/crm.module.ts registers ClientConsentReadService and ClientConsentReadController; OWN_CONSENT_READ declares exact route/floor/freshness. maya-carrier-react composition registers createOwnConsents in shell.privacy.",
+    "export_fence": "src/widgets/consent/data-subject-acts.ts NEVER_CHAT_ACTUATED, existing ladder/AE allowlist untouched."
+  },
+  "primary_contract_sources": [
+    {
+      "path": "docs/rebuild/MAYA-WIDGET-CONTRACT-V1.md",
+      "lines": [
+        2645,
+        2655,
+        3577,
+        3712,
+        5929,
+        6239,
+        6388,
+        6785
+      ],
+      "basis": "K6/P12 require a registered recent reauthentication event, SESSION floor for own consent body, ARTIFACT.4 forbids invented export artifact, erasure preserves canonical facts, voice/chat cannot actuate export, A-14 requires possession."
+    },
+    {
+      "path": "docs/rebuild/MAYA-CHAT-FIRST-UX-OWNER-DECISIONS.md",
+      "lines": [
+        115,
+        141,
+        211
+      ],
+      "basis": "Privacy & Data landing; register export requires STEP_UP_VERIFIED; arbitrary date range and per-record provenance from receipts, not timeline."
+    },
+    {
+      "path": "docs/rebuild/MAYA-CHAT-FIRST-K1-K16-IMPLEMENTATION-MAPPING.md",
+      "lines": [
+        455,
+        467
+      ],
+      "basis": "K12 consent register projection and complete export exit criteria."
+    }
+  ],
+  "remaining": {
+    "export": "NOT_IMPLEMENTED_OR_ADMITTED. Neither qualification nor source preparation is an authorized register export, artifact, signed admission or release certificate.",
+    "missing_authentication_mechanism": "No registered reauthentication event type or verified issuer in the auth subsystem; authority-resolver still cannot derive STEP_UP_VERIFIED. No device-biometric/passkey/verified-channel possession verification is implemented here.",
+    "contract_required_future_claims": [
+      "A server-recorded reauthentication event bound to this live session (not an HTTP body assertion).",
+      "Successful possession verification through an approved method; no puzzle, transcription or timed memory test.",
+      "Event occurred within an explicitly approved step_up_window_s; that window and issuer protocol are not specified by these contracts."
+    ],
+    "required_export_binding_and_checks": [
+      "Resolve current active tenant/user/session and the exact verified Client subject again at qualification and export ingress.",
+      "Bind verified step-up event to exact session, tenant, subject, capability and canonical range, with expiry and revocation checks; no caller-supplied rank/role promotion.",
+      "Select and document an approved durable single-use/replay design for request identity, source snapshot/hash and download principal; identical retry must not widen range or subject. No schema/token/issuer is invented in this patch.",
+      "Read the full canonical source in one qualified consistent snapshot, preserve all provenance/invalidations, and bind completion/download to that snapshot. The occurredAt range used by preparation is explicit and is not represented as a newly approved full export protocol.",
+      "Keep export outside AI tool execution, chat/voice actuation and generic AE widget commit allowlist; terminal secure-shell handoff only."
+    ],
+    "registration_boundary": "No AI/C9 capability or CONSENT_STATE widget admission is added. The shipped read path is the first-party Privacy & Data surface. Existing capability gap/export limitations remain closed.",
+    "not_run": [
+      "No user database read/write or real PII export",
+      "No grant, OTP, provider effect or send",
+      "No deploy, push, CI, full suite or mutation admission"
+    ]
+  },
+  "verification": {
+    "backend": "17 focused Jest tests: new owner/controller plus existing effective-consent regressions; includes real JWT authenticator + verified-link resolver with synthetic database doubles.",
+    "shell": "22 focused Node tests: own-consents wire/runtime plus existing privacy erasure regressions.",
+    "carrier": "13 focused React presentation tests: own consent panel plus existing Privacy/Telegram panels.",
+    "build": "Headless build gate/typecheck and generated runtime manifest; carrier gate/typecheck; backend typecheck and changed-file lint.",
+    "red_evidence": "completion-20261021/consent-register-evidence/backend-red.log and shell-red.log record missing implementation before GREEN.",
+    "limits": "Synthetic tests only; no deployed/server/phone proof is claimed by this commit."
+  }
+}
